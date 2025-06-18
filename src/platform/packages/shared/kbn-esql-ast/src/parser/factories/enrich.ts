@@ -22,7 +22,7 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
         sourceType: 'policy',
         name: '',
         index: '',
-        cluster: '',
+        prefix: '',
       },
       {
         incomplete: true,
@@ -35,25 +35,25 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
 
   const name = ctx._policyName.text;
   const colonIndex = name.indexOf(':');
-  const withCluster = colonIndex !== -1;
+  const withPrefix = colonIndex !== -1;
   const incomplete = false;
 
   let index: ESQLStringLiteral | undefined;
-  let cluster: ESQLStringLiteral | undefined;
+  let prefix: ESQLStringLiteral | undefined;
 
-  if (withCluster) {
-    const clusterName = name.substring(0, colonIndex);
+  if (withPrefix) {
+    const prefixName = name.substring(0, colonIndex);
     const indexName = name.substring(colonIndex + 1);
 
-    cluster = Builder.expression.literal.string(
-      clusterName,
+    prefix = Builder.expression.literal.string(
+      prefixName,
       {
         unquoted: true,
       },
       {
-        text: clusterName,
+        text: prefixName,
         incomplete: false,
-        location: { min: policyName.start, max: policyName.start + clusterName.length - 1 },
+        location: { min: policyName.start, max: policyName.start + prefixName.length - 1 },
       }
     );
     index = Builder.expression.literal.string(
@@ -65,7 +65,7 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
         text: indexName,
         incomplete: false,
         location: {
-          min: policyName.start + clusterName.length + 1,
+          min: policyName.start + prefixName.length + 1,
           max: policyName.stop,
         },
       }
@@ -89,7 +89,7 @@ const visitPolicyName = (ctx: EnrichCommandContext): ESQLSource => {
       sourceType: 'policy',
       name,
       index,
-      cluster,
+      prefix,
     },
     {
       incomplete,

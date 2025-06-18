@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
@@ -30,7 +31,20 @@ import { CreateRulesetModal } from '../query_rules_sets/create_ruleset_modal';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 
 export const QueryRulesOverview = () => {
-  const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
+  const {
+    data: queryRulesData,
+    isInitialLoading,
+    isError,
+    error,
+    refetch,
+  } = useFetchQueryRulesSets();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [refetch]);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const backgroundProps = css({
     backgroundImage: `url(${queryRulesBackground})`,
@@ -52,17 +66,23 @@ export const QueryRulesOverview = () => {
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesOverviewHeaderButtons">
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  data-test-subj="queryRulesOverviewApiDocumentationLink"
-                  external
-                  target="_blank"
+                <EuiButtonEmpty
+                  data-test-subj="queryRulesetDetailApiReferenceButton"
+                  iconType="documentation"
+                  color="text"
+                  aria-label={i18n.translate(
+                    'xpack.queryRules.queryRulesetDetail.apiReferenceButton',
+                    {
+                      defaultMessage: 'API reference',
+                    }
+                  )}
                   href={docLinks.queryRulesApi}
+                  target="_blank"
                 >
-                  <FormattedMessage
-                    id="xpack.queryRules.queryRulesSetDetail.documentationLink"
-                    defaultMessage="API Documentation"
-                  />
-                </EuiLink>
+                  {i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
+                    defaultMessage: 'API reference',
+                  })}
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton

@@ -42,6 +42,7 @@ describe('initialize fetch', () => {
       api: mockedApi,
       stateManager,
       discoverServices: discoverServiceMock,
+      scopedProfilesManager: discoverServiceMock.profilesManager.createScopedProfilesManager(),
       ...setters,
     });
     await waitOneTick();

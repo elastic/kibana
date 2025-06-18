@@ -215,7 +215,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { transactionIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & { tracesIndexPattern: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview.tsx",
         "deprecated": false,
@@ -249,7 +249,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & { tracesIndexPattern: string; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
         "deprecated": false,

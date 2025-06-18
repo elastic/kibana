@@ -109,17 +109,17 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                 />
                 <EuiSpacer size="m" />
                 <MigrationRulesTable
-                  migrationId={migrationId}
                   refetchData={refetchData}
                   integrations={integrations}
                   isIntegrationsLoading={isIntegrationsLoading}
+                  migrationStats={migrationStats}
                 />
               </>
             )}
             {[
               SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
               SiemMigrationTaskStatus.STOPPED,
-              SiemMigrationTaskStatus.ABORTED,
             ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}

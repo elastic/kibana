@@ -34,12 +34,32 @@ export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailS
     );
     setRules([...newRules]);
   };
+  const addNewRule = (newRuleId: string) => {
+    setRules((prevRules) => [
+      ...prevRules,
+      {
+        rule_id: newRuleId,
+        criteria: [],
+        type: 'pinned',
+        actions: {
+          docs: [],
+        },
+      },
+    ]);
+  };
+
+  const deleteRule = (ruleId: string) => {
+    const newRules = rules.filter((rule) => rule.rule_id !== ruleId);
+    setRules(newRules);
+  };
 
   return {
     queryRuleset,
     rules,
     setNewRules: setRules,
     updateRule,
+    addNewRule,
+    deleteRule,
     isInitialLoading,
     isError,
     error,

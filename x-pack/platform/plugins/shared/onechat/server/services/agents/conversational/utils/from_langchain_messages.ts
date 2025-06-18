@@ -7,11 +7,12 @@
 
 import { BaseMessage, MessageContentComplex, isAIMessage } from '@langchain/core/messages';
 import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
-import { SerializedToolIdentifier } from '@kbn/onechat-common';
+import { StructuredToolIdentifier } from '@kbn/onechat-common';
+import { toolIdFromLangchain } from './tool_provider_to_langchain_tools';
 
 export interface ToolCall {
   toolCallId: string;
-  toolId: SerializedToolIdentifier;
+  toolId: StructuredToolIdentifier;
   args: Record<string, any>;
 }
 
@@ -29,7 +30,7 @@ const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
 
   return {
     toolCallId: toolCall.id,
-    toolId: toolCall.name as SerializedToolIdentifier,
+    toolId: toolIdFromLangchain(toolCall.name),
     args: toolCall.args,
   };
 };

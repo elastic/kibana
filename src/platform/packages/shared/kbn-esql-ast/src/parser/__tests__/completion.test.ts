@@ -8,7 +8,7 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLCommandOption } from '../../types';
+import { ESQLAstCompletionCommand, ESQLCommandOption } from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {
@@ -167,6 +167,37 @@ describe('COMPLETION command', () => {
       expect(errors.length).toBe(1);
     });
 
+    test('just the command keyword', () => {
+      const text = `FROM index | COMPLETION`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(1);
+
+      expect(ast.commands).toHaveLength(2);
+    });
+
+    test('just the command keyword and a prompt', () => {
+      const text = `FROM index | COMPLETION "prompt"`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(1);
+
+      expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args).toHaveLength(2);
+
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.prompt).toMatchObject({
+        type: 'literal',
+        literalType: 'keyword',
+        value: '"prompt"',
+      });
+    });
+
     it('sets incomplete flag on WITH argument if not inferenceId provided', () => {
       const text = `FROM index | COMPLETION prompt WITH `;
       const { ast } = EsqlQuery.fromSrc(text);
@@ -174,6 +205,25 @@ describe('COMPLETION command', () => {
       expect(ast.commands[1].args[1]).toMatchObject({
         type: 'option',
         name: 'with',
+        incomplete: true,
+      });
+    });
+
+    it('marks WITH option as incomplete if not fully typed', () => {
+      const text = `FROM index | COMPLETION prompt WIT`;
+      const { ast } = EsqlQuery.fromSrc(text);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args).toHaveLength(2);
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.inferenceId).toMatchObject({
+        type: 'identifier',
+        name: '',
         incomplete: true,
       });
     });

@@ -8,12 +8,17 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
+
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const find = getService('find');
   const retry = getService('retry');
+  const rulesService = getService('rules');
+  const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const RULE_ENDPOINT = '/api/alerting/rule';
   const INTERNAL_RULE_ENDPOINT = '/internal/alerting/rules';
 
@@ -111,11 +116,23 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       await observability.alerts.common.navigateWithoutFilter();
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esClient.deleteByQuery({
+        index: RULE_ALERT_INDEX_PATTERN,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Feature flag', () => {
@@ -380,6 +397,31 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           );
           await observability.users.restoreDefaultTestUserRole();
         });
+      });
+    });
+
+    describe('Stack alerts consumer', () => {
+      it('should create an ES Query rule and NOT display it when consumer is stackAlerts', async () => {
+        const name = 'ES Query with stackAlerts consumer';
+        await rulesService.api.createRule({
+          name,
+          consumer: 'stackAlerts',
+          ruleTypeId: '.es-query',
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: ['alert-test-data'],
+            timeField: 'date',
+            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+          schedule: { interval: '1m' },
+        });
+
+        await observability.alerts.common.navigateToRulesPage();
+        await testSubjects.missingOrFail('rule-row');
       });
     });
   });

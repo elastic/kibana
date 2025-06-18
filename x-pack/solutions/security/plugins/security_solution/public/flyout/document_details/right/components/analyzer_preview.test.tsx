@@ -89,7 +89,7 @@ describe('<AnalyzerPreview />', () => {
       ...mockContextValue,
       getFieldsData: () => 'ancestors-id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      isPreview: true,
+      isRulePreview: true,
     };
 
     const wrapper = renderAnalyzerPreview(contextValue);

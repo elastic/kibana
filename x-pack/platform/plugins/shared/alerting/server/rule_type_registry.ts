@@ -417,6 +417,12 @@ export class RuleTypeRegistry {
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
   }
+
+  public getAllTypesForCategories(categories: string[]): string[] {
+    return [...this.ruleTypes.values()]
+      .filter((ruleType) => categories.includes(ruleType.category))
+      .map((ruleType) => ruleType.id);
+  }
 }
 
 function normalizedActionVariables(actionVariables: RuleType['actionVariables']) {

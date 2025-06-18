@@ -23,7 +23,7 @@ import {
   ChatCompletionEventType as InferenceChatCompletionEventType,
   ChatCompleteResponse,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
@@ -31,6 +31,7 @@ import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { AnonymizationService } from '../anonymization';
 
 interface ChunkDelta {
   content?: string | undefined;
@@ -188,6 +189,13 @@ describe('Observability AI Assistant client', () => {
       },
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
+      anonymizationService: new AnonymizationService({
+        esClient: {
+          asCurrentUser: currentUserEsClientMock,
+        },
+        anonymizationRules: [],
+        logger: loggerMock,
+      }),
       logger: loggerMock,
       namespace: 'default',
       user: {
@@ -839,8 +847,8 @@ describe('Observability AI Assistant client', () => {
         });
       });
 
-      it('sends the function response back to the llm', () => {
-        expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2);
+      it('sends the function response back to the llm', async () => {
+        await waitFor(() => expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2));
 
         expect(inferenceClientMock.chatComplete.mock.lastCall!).toEqual([
           {
@@ -864,6 +872,11 @@ describe('Observability AI Assistant client', () => {
 
       describe('and the assistant replies without a function request', () => {
         beforeEach(async () => {
+          // 1) wait for the follow-up chatComplete
+          await waitFor(() => expect(inferenceClientMock.chatComplete).toHaveBeenCalledTimes(2));
+
+          // 2) wait until llmSimulator has been initialised
+          await waitFor(() => expect(llmSimulator).toBeDefined());
           await llmSimulator.chunk({ content: 'I am done here' });
           await llmSimulator.next({ content: 'I am done here' });
           await llmSimulator.complete();

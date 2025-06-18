@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useState, Fragment, useMemo, useCallback, useEffect } from 'react';
+import React, { type FC, useState, Fragment, useMemo, useCallback, useRef, useEffect } from 'react';
+import { Global } from '@emotion/react';
 import {
   EuiWrappingPopover,
   EuiListGroup,
@@ -27,17 +28,18 @@ import {
   EuiToolTip,
   type EuiSwitchEvent,
   EuiSwitch,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { ShareMenuProvider, type IShareContext, useShareTabsContext } from '../context';
-import { ExportShareConfig } from '../../types';
+import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
+import { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
-    <ShareMenuProvider {...{ shareContext }}>
+    <ShareProvider {...{ shareContext }}>
       <Fragment>{React.createElement(injectI18n(ExportMenuPopover))}</Fragment>
-    </ShareMenuProvider>
+    </ShareProvider>
   );
 };
 
@@ -101,52 +103,208 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-function ExportMenuPopover({ intl }: ExportMenuProps) {
-  const {
-    onClose,
-    anchorElement,
-    shareMenuItems,
-    isDirty,
-    publicAPIEnabled,
-    objectType,
-    objectTypeAlias,
-    objectTypeMeta,
-  } = useShareTabsContext('integration', 'export');
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
-  const [selectedMenuItemId, setSelectedMenuItemId] = useState<string>();
-  const selectedMenuItem = useMemo<ExportShareConfig | null>(() => {
-    return shareMenuItems.find((item) => item.id === selectedMenuItemId) ?? null;
-  }, [shareMenuItems, selectedMenuItemId]);
+function ManagedFlyout({
+  exportIntegration,
+  intl,
+  isDirty,
+  onCloseFlyout,
+  publicAPIEnabled,
+  shareObjectTypeMeta,
+  shareObjectType,
+  shareObjectTypeAlias,
+}: {
+  exportIntegration: ExportShareConfig;
+  intl: InjectedIntl;
+  isDirty: boolean;
+  onCloseFlyout: () => void;
+  publicAPIEnabled?: boolean;
+  shareObjectType: string;
+  shareObjectTypeAlias?: string;
+  shareObjectTypeMeta: ReturnType<
+    typeof useShareTypeContext<'integration', 'export'>
+  >['objectTypeMeta'];
+}) {
   const [usePrintLayout, setPrintLayout] = useState(false);
-
+  const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
-      await selectedMenuItem?.config.generateAssetExport({
+      await exportIntegration.config.generateAssetExport({
         intl,
         optimizedForPrinting: usePrintLayout,
       });
     } finally {
       setIsCreatingExport(false);
-      onClose?.();
+      onCloseFlyout();
     }
-  }, [intl, onClose, selectedMenuItem?.config, usePrintLayout]);
+  }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
+
+  const DraftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
+
+  return (
+    <React.Fragment>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="share.export.flyoutTitle"
+              defaultMessage="Export {objectType} as {type}"
+              values={{
+                objectType: shareObjectTypeAlias ?? shareObjectType.toLocaleLowerCase(),
+                type: exportIntegration.config.label,
+              }}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiFlexGroup direction="column">
+          <Fragment>
+            {exportIntegration.config.renderLayoutOptionSwitch && (
+              <EuiFlexItem>
+                <LayoutOptionsSwitch
+                  usePrintLayout={usePrintLayout}
+                  printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
+                />
+              </EuiFlexItem>
+            )}
+          </Fragment>
+          <Fragment>
+            {exportIntegration?.config.copyAssetURIConfig && publicAPIEnabled && (
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={
+                    <EuiText size="s">
+                      <h4>{exportIntegration.config.copyAssetURIConfig.headingText}</h4>
+                    </EuiText>
+                  }
+                  fullWidth
+                >
+                  <EuiFlexGroup direction="column">
+                    <EuiFlexItem>
+                      <EuiText size="s" color="subdued">
+                        {exportIntegration.config.copyAssetURIConfig.helpText}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiCodeBlock
+                        data-test-subj="exportAssetValue"
+                        css={{ overflowWrap: 'break-word' }}
+                        language={exportIntegration.config.copyAssetURIConfig.contentType}
+                        isCopyable
+                        copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
+                          defaultMessage: 'Copy export asset value',
+                        })}
+                      >
+                        {exportIntegration.config.copyAssetURIConfig.generateAssetURIValue({
+                          intl,
+                          optimizedForPrinting: usePrintLayout,
+                        })}
+                      </EuiCodeBlock>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+          </Fragment>
+          <Fragment>{exportIntegration.config.generateAssetComponent}</Fragment>
+          <Fragment>
+            {publicAPIEnabled && isDirty && DraftModeCallout && (
+              <EuiFlexItem>{DraftModeCallout}</EuiFlexItem>
+            )}
+          </Fragment>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="exportFlyoutCloseButton" onClick={onCloseFlyout}>
+              <FormattedMessage id="share.export.closeFlyoutButtonLabel" defaultMessage="Close" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={getReport}
+              data-test-subj="generateReportButton"
+              isLoading={isCreatingExport}
+            >
+              {exportIntegration.config.generateExportButtonLabel ?? (
+                <FormattedMessage
+                  id="share.export.generateButtonLabel"
+                  defaultMessage="Export {type}"
+                  values={{ type: exportIntegration.config.label }}
+                />
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </React.Fragment>
+  );
+}
+
+function ExportMenuPopover({ intl }: ExportMenuProps) {
+  const {
+    onClose,
+    anchorElement,
+    shareMenuItems: exportIntegrations,
+    isDirty,
+    publicAPIEnabled,
+    objectType,
+    objectTypeAlias,
+    objectTypeMeta,
+  } = useShareTypeContext('integration', 'export');
+  const { shareMenuItems: exportDerivatives } = useShareTypeContext(
+    'integration',
+    'exportDerivatives'
+  );
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const selectionOptions = useRef({ export: exportIntegrations, exportDerivatives });
+  const [selectedMenuItemMeta, setSelectedMenuItemMeta] = useState<{
+    id: string;
+    group: keyof typeof selectionOptions.current;
+  }>();
+  const selectedMenuItem = useMemo<ExportShareConfig | ExportShareDerivativesConfig | null>(() => {
+    let result: ExportShareConfig | ExportShareDerivativesConfig | null = null;
+
+    if (!selectedMenuItemMeta) {
+      return result;
+    }
+
+    selectionOptions.current[selectedMenuItemMeta.group].forEach((item) => {
+      if (item.id === selectedMenuItemMeta.id) {
+        result = item;
+      }
+    });
+
+    return result;
+  }, [selectedMenuItemMeta]);
+
+  const openFlyout = useCallback((menuItem: ExportShareConfig | ExportShareDerivativesConfig) => {
+    setSelectedMenuItemMeta({ id: menuItem.id, group: menuItem.groupId });
+    setIsFlyoutVisible(true);
+  }, []);
 
   useEffect(() => {
-    // when there is only one share menu item,
+    // when there is only one share menu item, and no export derivatives registered,
     // we want to open the flyout and not the popover
-    if (shareMenuItems.length === 1) {
-      setSelectedMenuItemId(shareMenuItems[0].id);
-      setIsFlyoutVisible(true);
+    if (
+      exportIntegrations.length === 1 &&
+      exportDerivatives.length === 0 &&
+      !selectedMenuItemMeta
+    ) {
+      openFlyout(exportIntegrations[0]);
     }
-  }, [shareMenuItems]);
+  }, [exportIntegrations, exportDerivatives, openFlyout, selectedMenuItemMeta]);
 
   const flyoutOnCloseHandler = useCallback(() => {
-    return shareMenuItems.length === 1 ? onClose() : setIsFlyoutVisible(false);
-  }, [onClose, shareMenuItems.length]);
+    return exportIntegrations.length === 1 && exportDerivatives.length === 0
+      ? onClose()
+      : setIsFlyoutVisible(false);
+  }, [exportDerivatives.length, exportIntegrations.length, onClose]);
 
-  const DraftModeCallout = objectTypeMeta.config?.[selectedMenuItemId!]?.draftModeCallOut;
+  const flyoutRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <Fragment>
@@ -155,10 +313,10 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         data-test-subj="exportPopover"
         button={anchorElement!}
         closePopover={onClose}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
-        <EuiListGroup>
-          {shareMenuItems.map((menuItem) => (
+        <EuiListGroup flush>
+          {exportIntegrations.map((menuItem) => (
             <EuiToolTip
               position="left"
               content={selectedMenuItem?.config.toolTipContent}
@@ -170,14 +328,27 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 label={menuItem.config.label}
                 data-test-subj={`exportMenuItem-${menuItem.config.label}`}
                 isDisabled={menuItem.config.disabled}
-                onClick={() => {
-                  setSelectedMenuItemId(menuItem.id);
-                  setIsFlyoutVisible(true);
-                }}
+                onClick={() => openFlyout(menuItem)}
               />
             </EuiToolTip>
           ))}
         </EuiListGroup>
+        {Boolean(exportDerivatives.length) && (
+          <React.Fragment>
+            <EuiHorizontalRule margin="xs" />
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {exportDerivatives.map((exportDerivative) => {
+                return (
+                  <EuiFlexItem key={exportDerivative.id}>
+                    {exportDerivative.config.label({
+                      openFlyout: openFlyout.bind(null, exportDerivative),
+                    })}
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          </React.Fragment>
+        )}
       </EuiWrappingPopover>
       {isFlyoutVisible && (
         <EuiFlyout
@@ -186,115 +357,43 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           onClose={flyoutOnCloseHandler}
           css={() => ({
             ['--euiFixedHeadersOffset']: 0,
+            isolation: 'isolate', // ensures that tooltips within this flyout render as should
           })}
           ownFocus
           maskProps={{
             headerZindexLocation: 'above',
           }}
+          ref={flyoutRef}
+          {...(selectedMenuItem?.groupId === 'exportDerivatives'
+            ? selectedMenuItem.config.flyoutSizing || {}
+            : {})}
         >
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="share.export.flyoutTitle"
-                  defaultMessage="Export {objectType} as {type}"
-                  values={{
-                    objectType: (objectTypeAlias ?? objectType).toLocaleLowerCase(),
-                    type: selectedMenuItem?.config.label,
-                  }}
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiFlexGroup direction="column">
-              <Fragment>
-                {selectedMenuItem?.config.renderLayoutOptionSwitch && (
-                  <EuiFlexItem>
-                    <LayoutOptionsSwitch
-                      usePrintLayout={usePrintLayout}
-                      printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
-                    />
-                  </EuiFlexItem>
-                )}
-              </Fragment>
-              <Fragment>
-                {selectedMenuItem?.config.copyAssetURIConfig && publicAPIEnabled && (
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={
-                        <EuiText size="s">
-                          <h4>{selectedMenuItem?.config.copyAssetURIConfig.headingText}</h4>
-                        </EuiText>
-                      }
-                      fullWidth
-                    >
-                      <EuiFlexGroup direction="column">
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued">
-                            {selectedMenuItem?.config.copyAssetURIConfig.helpText}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiCodeBlock
-                            data-test-subj="exportAssetValue"
-                            css={{ overflowWrap: 'break-word' }}
-                            language={selectedMenuItem?.config.copyAssetURIConfig.contentType}
-                            isCopyable
-                            copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
-                              defaultMessage: 'Copy export asset value',
-                            })}
-                          >
-                            {selectedMenuItem?.config.copyAssetURIConfig.generateAssetURIValue({
-                              intl,
-                              optimizedForPrinting: usePrintLayout,
-                            })}
-                          </EuiCodeBlock>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                )}
-              </Fragment>
-              <Fragment>{selectedMenuItem?.config.generateAssetComponent}</Fragment>
-              <Fragment>
-                {publicAPIEnabled && isDirty && DraftModeCallout && (
-                  <EuiFlexItem>{DraftModeCallout}</EuiFlexItem>
-                )}
-              </Fragment>
-            </EuiFlexGroup>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="exportFlyoutCloseButton"
-                  onClick={flyoutOnCloseHandler}
-                >
-                  <FormattedMessage
-                    id="share.export.closeFlyoutButtonLabel"
-                    defaultMessage="Close"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={getReport}
-                  data-test-subj="generateReportButton"
-                  isLoading={isCreatingExport}
-                >
-                  {selectedMenuItem?.config.generateExportButtonLabel ?? (
-                    <FormattedMessage
-                      id="share.export.generateButtonLabel"
-                      defaultMessage="Export {type}"
-                      values={{ type: selectedMenuItem?.config.label }}
-                    />
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
+          <Global
+            // @ts-expect-error -- we pass a z-index specifying important so we override the default z-index, so solve a known bug,
+            // where when `headerZindexLocation` is set to `above`, the popover panel z-index is not high enough
+            styles={{
+              '.euiPopover__panel[data-popover-open="true"]': {
+                zIndex: '7000 !important',
+              },
+            }}
+          />
+          {selectedMenuItemMeta!.group === 'export' ? (
+            <ManagedFlyout
+              exportIntegration={selectedMenuItem as ExportShareConfig}
+              shareObjectType={objectType}
+              shareObjectTypeAlias={objectTypeAlias}
+              shareObjectTypeMeta={objectTypeMeta}
+              isDirty={isDirty}
+              publicAPIEnabled={publicAPIEnabled}
+              intl={intl}
+              onCloseFlyout={flyoutOnCloseHandler}
+            />
+          ) : (
+            (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({
+              flyoutRef,
+              closeFlyout: flyoutOnCloseHandler,
+            })
+          )}
         </EuiFlyout>
       )}
     </Fragment>

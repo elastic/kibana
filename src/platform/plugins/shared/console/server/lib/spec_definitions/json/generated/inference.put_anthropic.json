@@ -1,0 +1,26 @@
+{
+  "inference.put_anthropic": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "task_type": [
+        "completion"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{task_type}/{anthropic_inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-anthropic",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

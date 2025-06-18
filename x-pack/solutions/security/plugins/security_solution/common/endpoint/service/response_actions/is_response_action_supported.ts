@@ -155,7 +155,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: true,
-      microsoft_defender_endpoint: false,
+      microsoft_defender_endpoint: true,
     },
   },
 };

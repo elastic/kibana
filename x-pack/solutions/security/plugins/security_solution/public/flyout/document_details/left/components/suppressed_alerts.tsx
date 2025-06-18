@@ -9,6 +9,7 @@ import { get } from 'lodash';
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { css } from '@emotion/react';
 import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -38,9 +39,9 @@ export interface SuppressedAlertsProps {
    */
   alertSuppressionCount: number;
   /**
-   * Indicate whether suppressed alert is shown in alert preview (rule creation)
+   * Indicate whether suppressed alert can be investigated in timeline
    */
-  isPreview: boolean;
+  showInvestigateInTimeline: boolean;
 }
 
 /**
@@ -49,7 +50,7 @@ export interface SuppressedAlertsProps {
 export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
   dataAsNestedObject,
   alertSuppressionCount,
-  isPreview,
+  showInvestigateInTimeline,
 }) => {
   const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
 
@@ -66,7 +67,9 @@ export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
         <EuiFlexItem>
           <EuiBetaBadge
             label={SUPPRESSED_ALERTS_COUNT_TECHNICAL_PREVIEW}
-            style={{ verticalAlign: 'middle' }}
+            css={css`
+              vertical-align: middle;
+            `}
             size="s"
             data-test-subj={SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID}
           />
@@ -75,7 +78,7 @@ export const SuppressedAlerts: React.FC<SuppressedAlertsProps> = ({
     </EuiFlexGroup>
   );
 
-  const headerContent = alertSuppressionCount > 0 && !isPreview && (
+  const headerContent = alertSuppressionCount > 0 && showInvestigateInTimeline && (
     <div
       data-test-subj={`${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`}
     >

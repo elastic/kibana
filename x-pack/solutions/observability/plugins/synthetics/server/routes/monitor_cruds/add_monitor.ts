@@ -122,17 +122,17 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
       return mapSavedObjectToMonitor({ monitor: newMonitor, internal });
-    } catch (getErr) {
-      server.logger.error(getErr);
-      if (getErr instanceof InvalidLocationError || getErr instanceof InvalidScheduleError) {
-        return response.badRequest({ body: { message: getErr.message } });
+    } catch (error) {
+      if (error instanceof InvalidLocationError || error instanceof InvalidScheduleError) {
+        return response.badRequest({ body: { message: error.message } });
       }
-      if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
-        return response.forbidden({ body: getErr });
+      if (SavedObjectsErrorHelpers.isForbiddenError(error)) {
+        return response.forbidden({ body: error });
       }
 
+      server.logger.error('Unable to create synthetics monitor', { error });
       return response.customError({
-        body: { message: getErr.message },
+        body: { message: error.message },
         statusCode: 500,
       });
     }

@@ -173,7 +173,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup>
-                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                <EuiFlexItem css={{ minHeight: 150, minWidth: 160 }} grow={1}>
                   <Threshold
                     chartProps={chartProps}
                     id={`threshold-${index}`}

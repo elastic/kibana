@@ -226,6 +226,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                     }),
                     breadcrumbStatus: 'hidden',
                     children: [
+                      { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
                       { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
                       { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                     ],

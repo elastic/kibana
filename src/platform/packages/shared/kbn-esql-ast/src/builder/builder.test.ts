@@ -118,7 +118,7 @@ describe('source', () => {
     const node = Builder.expression.source.node({
       index: 'my_index',
       sourceType: 'index',
-      cluster: Builder.expression.literal.string('my_cluster', { unquoted: true }),
+      prefix: Builder.expression.literal.string('my_cluster', { unquoted: true }),
     });
     const text = BasicPrettyPrinter.expression(node);
 
@@ -129,7 +129,7 @@ describe('source', () => {
     const node = Builder.expression.source.node({
       index: 'my_index',
       sourceType: 'index',
-      cluster: 'my_cluster',
+      prefix: 'my_cluster',
     });
     const text = BasicPrettyPrinter.expression(node);
 

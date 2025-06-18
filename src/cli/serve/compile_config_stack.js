@@ -33,7 +33,7 @@ export function compileConfigStack({
   devConfig,
   dev,
   serverless,
-  securityProductTier,
+  unknownOptions,
 }) {
   const cliConfigs = configOverrides || [];
   const envConfigs = getEnvConfigs();
@@ -62,7 +62,7 @@ export function compileConfigStack({
   // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
-    const serverlessSecurityTier = securityProductTier || getSecurityTierFromCfg(configs);
+    const serverlessSecurityTier = getServerlessSecurityTier(configs, unknownOptions);
     if (serverlessSecurityTier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
       if (dev && devConfig !== false) {
@@ -75,9 +75,11 @@ export function compileConfigStack({
 
   // Pricing specific tier configs
   const config = getConfigFromFiles(configs.filter(isNotNull));
-  const isPricingTiersEnabled = _.get(config, 'pricing.tiers.enabled', false);
+  const isPricingTiersEnabled =
+    _.get(unknownOptions, 'pricing.tiers.enabled') ?? _.get(config, 'pricing.tiers.enabled', false);
+
   if (isPricingTiersEnabled) {
-    const tier = getServerlessProjectTierFromConfig(config);
+    const tier = getServerlessProjectTierFromConfig(config, unknownOptions);
     if (tier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${tier}.yml`));
       if (dev && devConfig !== false) {
@@ -102,9 +104,16 @@ function getServerlessModeFromCfg(configs) {
 /** @typedef {'search_ai_lake' | 'essentials' | 'complete'} ServerlessSecurityTier */
 /**
  * @param {string[]} configs List of configuration file paths
+ * @param {Record<string, unknown>} unknownOptions
  * @returns {ServerlessSecurityTier|undefined} The serverless security tier in the summed configs
  */
-function getSecurityTierFromCfg(configs) {
+function getServerlessSecurityTier(configs, unknownOptions) {
+  const productTypeOverride = _.get(
+    unknownOptions,
+    'xpack.securitySolutionServerless.productTypes[0].product_tier'
+  );
+  if (productTypeOverride) return productTypeOverride;
+
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
   // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
@@ -118,8 +127,9 @@ function getSecurityTierFromCfg(configs) {
  * @param {string[]} config Configuration object from merged configs
  * @returns {ServerlessProjectTier|undefined} The serverless project tier in the summed configs
  */
-function getServerlessProjectTierFromConfig(config) {
-  const products = _.get(config, 'pricing.tiers.products', []);
+function getServerlessProjectTierFromConfig(config, unknownOptions) {
+  const products =
+    _.get(unknownOptions, 'pricing.tiers.products') ?? _.get(config, 'pricing.tiers.products', []);
 
   // Constraint tier to be the same for
   const uniqueTiers = _.uniqBy(products, 'tier');

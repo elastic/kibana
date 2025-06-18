@@ -10,14 +10,14 @@
 import React, { type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
-import { ShareMenuProvider, useShareContext, type IShareContext } from './context';
+import { ShareProvider, useShareContext, type IShareContext } from './context';
 import { linkTab, embedTab } from './tabs';
 
 export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
-    <ShareMenuProvider {...{ shareContext }}>
+    <ShareProvider {...{ shareContext }}>
       <ShareMenuTabs />
-    </ShareMenuProvider>
+    </ShareProvider>
   );
 };
 

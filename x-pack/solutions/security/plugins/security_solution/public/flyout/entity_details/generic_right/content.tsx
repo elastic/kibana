@@ -24,6 +24,21 @@ import { ExpandableSection } from '../../document_details/right/components/expan
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
+const defaultPinnedFields = [
+  'entity.name',
+  'entity.id',
+  'entity.category',
+  'entity.type',
+  'asset.criticality',
+  'user.name',
+  'user.email',
+  'host.name',
+  'host.os',
+  'cloud.account.id',
+  'cloud.region',
+  'cloud.account.name',
+];
+
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
@@ -107,7 +122,9 @@ export const GenericEntityFlyoutContent = ({
         >
           <FieldsTable
             document={filteredDocument}
+            tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
             euiInMemoryTableProps={{ search: undefined, pagination: undefined }}
+            defaultPinnedFields={defaultPinnedFields}
           />
         </ExpandablePanel>
       </ExpandableSection>

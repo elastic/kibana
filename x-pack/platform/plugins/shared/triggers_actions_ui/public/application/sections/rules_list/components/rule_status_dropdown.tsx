@@ -34,7 +34,8 @@ const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 type DropdownRuleRecord = Pick<
   Rule,
   'enabled' | 'muteAll' | 'isSnoozedUntil' | 'snoozeSchedule' | 'activeSnoozes'
->;
+> &
+  Partial<Pick<Rule, 'ruleTypeId'>>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
@@ -223,7 +224,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         gutterSize={direction === 'row' ? 's' : 'xs'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj={`ruleType_${rule.ruleTypeId}`}>
           {isEditable ? (
             <EuiPopover
               button={editableBadge}

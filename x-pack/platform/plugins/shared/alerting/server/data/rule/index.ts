@@ -25,3 +25,5 @@ export { getDecryptedRuleSo } from './methods/get_decrypted_rule_so';
 export type { GetDecryptedRuleSoParams } from './methods/get_decrypted_rule_so';
 export { bulkDisableRulesSo } from './methods/bulk_disable_rules_so';
 export type { BulkDisableRulesSoParams } from './methods/bulk_disable_rules_so';
+export { bulkGetRulesSo } from './methods/bulk_get_rules_so';
+export type { BulkGetRulesSoParams } from './methods/bulk_get_rules_so';

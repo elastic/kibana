@@ -57,6 +57,7 @@ const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
 const logger = loggerMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClientInternalUser = elasticsearchServiceMock.createElasticsearchClient();
 const runName = 'test-run-name';
 
 const connectors = [
@@ -133,6 +134,7 @@ describe('evaluateAttackDiscovery', () => {
       connectorTimeout,
       datasetName,
       esClient: mockEsClient,
+      esClientInternalUser: mockEsClientInternalUser,
       evaluationId,
       evaluatorConnectorId,
       langSmithApiKey,

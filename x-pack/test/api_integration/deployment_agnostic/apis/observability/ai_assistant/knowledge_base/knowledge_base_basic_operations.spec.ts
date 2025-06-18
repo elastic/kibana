@@ -6,10 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  type KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { clearKnowledgeBase, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
+import {
+  clearKnowledgeBase,
+  getKnowledgeBaseEntriesFromEs,
+  addKnowledgeBaseEntryToEs,
+} from '../utils/knowledge_base';
 import {
   teardownTinyElserModelAndInferenceEndpoint,
   deployTinyElserAndSetupKb,
@@ -44,6 +51,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.body.entries;
   }
 
+  async function saveEntry(knowledgeBaseEntry: { title: string; text: string; id: string }) {
+    const { status } = await observabilityAIAssistantAPIClient.editor({
+      endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+      params: { body: knowledgeBaseEntry },
+    });
+    expect(status).to.be(200);
+  }
+
   describe('Knowledge base: Basic operations', function () {
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
@@ -62,11 +77,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       };
 
       before(async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
-          params: { body: knowledgeBaseEntry },
-        });
-        expect(status).to.be(200);
+        await saveEntry(knowledgeBaseEntry);
       });
 
       it('can retrieve the entry', async () => {
@@ -75,6 +86,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
         expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
+      });
+
+      it('does not retrieve deprecated properties', async () => {
+        await clearKnowledgeBase(es);
+        await addKnowledgeBaseEntryToEs(es, {
+          confidence: 'high' as const,
+          '@timestamp': new Date().toISOString(),
+          role: KnowledgeBaseEntryRole.UserEntry,
+          is_correction: true,
+          public: false,
+          labels: {},
+          ...knowledgeBaseEntry,
+        });
+
+        const hits = await getKnowledgeBaseEntriesFromEs(es);
+        const hitSource = hits[0]._source;
+        expect(hitSource).to.have.property('is_correction');
+        expect(hitSource).to.have.property('confidence');
+
+        const entries = await getEntries();
+        const entry = entries[0];
+        expect(entry).not.to.have.property('confidence');
+        expect(entry).not.to.have.property('is_correction');
+
+        await clearKnowledgeBase(es);
+
+        await saveEntry(knowledgeBaseEntry);
       });
 
       it('generates sparse embeddings', async () => {

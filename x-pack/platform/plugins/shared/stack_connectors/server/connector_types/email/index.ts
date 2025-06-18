@@ -81,6 +81,7 @@ function validateConfig(
 ) {
   const config = configObject;
   const { configurationUtilities } = validatorServices;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
@@ -105,6 +106,21 @@ function validateConfig(
 
     if (config.tenantId == null) {
       throw new Error('[tenantId] is required');
+    }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    if (awsSesConfig.host !== config.host && awsSesConfig.port !== config.port) {
+      throw new Error(
+        '[ses.host]/[ses.port] does not match with the configured AWS SES host/port combination'
+      );
+    }
+    if (awsSesConfig.host !== config.host) {
+      throw new Error('[ses.host] does not match with the configured AWS SES host');
+    }
+    if (awsSesConfig.port !== config.port) {
+      throw new Error('[ses.port] does not match with the configured AWS SES port');
+    }
+    if (awsSesConfig.secure !== config.secure) {
+      throw new Error(`[ses.secure] must be ${awsSesConfig.secure} for AWS SES`);
     }
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // If configured `service` requires custom host/port/secure settings, validate that they are set
@@ -297,6 +313,7 @@ async function executor(
     connectorUsageCollector,
   } = execOptions;
   const connectorTokenClient = services.connectorTokenClient;
+  const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
@@ -348,6 +365,10 @@ async function executor(
     if (config.oauthTokenUrl !== null) {
       transport.oauthTokenUrl = config.oauthTokenUrl;
     }
+  } else if (awsSesConfig && config.service === AdditionalEmailServices.AWS_SES) {
+    transport.host = awsSesConfig.host;
+    transport.port = awsSesConfig.port;
+    transport.secure = awsSesConfig.secure;
   } else if (CUSTOM_HOST_PORT_SERVICES.indexOf(config.service) >= 0) {
     // use configured host/port/secure values
     // already validated service or host/port is not null ...

@@ -67,7 +67,7 @@ export async function createZipFile(entries: ZipEntry[], destination: string): P
 // import them directly due to `tsconfig` limitations in the `kibana/src/` directory.
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) =>
-    yauzl.fromBuffer(buffer, opts, (err?: Error, handle?: yauzl.ZipFile) =>
+    yauzl.fromBuffer(buffer, opts, (err: Error | null, handle?: yauzl.ZipFile) =>
       err ? reject(err) : resolve(handle!)
     )
   );
@@ -78,7 +78,7 @@ function getZipReadStream(
   entry: yauzl.Entry
 ): Promise<NodeJS.ReadableStream> {
   return new Promise((resolve, reject) =>
-    zipfile.openReadStream(entry, (err?: Error, readStream?: NodeJS.ReadableStream) =>
+    zipfile.openReadStream(entry, (err: Error | null, readStream?: NodeJS.ReadableStream) =>
       err ? reject(err) : resolve(readStream!)
     )
   );

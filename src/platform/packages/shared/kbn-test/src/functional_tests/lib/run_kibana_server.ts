@@ -26,6 +26,7 @@ export async function runKibanaServer(options: {
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
   inspect?: boolean;
+  remote?: boolean;
 }) {
   const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
@@ -74,7 +75,7 @@ export async function runKibanaServer(options: {
     kbnFlags = remapPluginPaths(kbnFlags, installDir);
   }
 
-  const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
+  const mainName = (useTaskRunner ? 'kbn-ui' : 'kibana') + (options.remote ? '-remote' : '');
   const promises = [
     // main process
     procs.run(mainName, {
@@ -99,13 +100,14 @@ export async function runKibanaServer(options: {
 
   if (useTaskRunner) {
     const mainUuid = getArgValue(kbnFlags, 'server.uuid');
+    const tasksProcName = 'kbn-tasks' + (options.remote ? '-remote' : '');
 
     // dedicated task runner
     promises.push(
-      procs.run('kbn-tasks', {
+      procs.run(tasksProcName, {
         ...procRunnerOpts,
         writeLogsToPath: options.logsDir
-          ? Path.resolve(options.logsDir, 'kbn-tasks.log')
+          ? Path.resolve(options.logsDir, `${tasksProcName}.log`)
           : undefined,
         args: [
           ...prefixArgs,

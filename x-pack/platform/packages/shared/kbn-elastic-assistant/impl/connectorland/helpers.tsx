@@ -13,6 +13,7 @@ import type {
 
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { PRECONFIGURED_CONNECTOR } from './translations';
+import { AIConnector } from './connector_selector';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
 export enum OpenAiProviderType {
@@ -71,3 +72,9 @@ export const getConnectorTypeTitle = (
 
   return actionType;
 };
+
+export const isElasticManagedLlmConnector = (
+  connector:
+    | { actionTypeId: AIConnector['actionTypeId']; isPreconfigured: AIConnector['isPreconfigured'] }
+    | undefined
+) => connector?.actionTypeId === '.inference' && connector?.isPreconfigured;

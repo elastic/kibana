@@ -9,7 +9,12 @@ import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor, ToolDescriptorMeta, ToolIdentifier } from '@kbn/onechat-common';
+import type {
+  ToolDescriptor,
+  ToolDescriptorMeta,
+  ToolIdentifier,
+  PlainIdToolIdentifier,
+} from '@kbn/onechat-common';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -38,6 +43,25 @@ export interface RegisteredTool<
    * Optional set of metadata for this tool.
    */
   meta?: RegisteredToolMeta;
+}
+
+/**
+ * Tool provider interface, as registered by API consumers.
+ */
+export interface RegisteredToolProvider {
+  /**
+   * Check if a tool is available in the provider.
+   */
+  has(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<boolean>;
+  /**
+   * Retrieve a tool based on its identifier.
+   * If not found,the provider should throw a {@link OnechatToolNotFoundError}
+   */
+  get(options: { toolId: PlainIdToolIdentifier; request: KibanaRequest }): Promise<RegisteredTool>;
+  /**
+   * List all tools present in the provider.
+   */
+  list(options: { request: KibanaRequest }): Promise<RegisteredTool[]>;
 }
 
 /**

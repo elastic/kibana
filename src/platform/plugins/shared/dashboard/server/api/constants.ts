@@ -10,3 +10,4 @@
 export const PUBLIC_API_VERSION = '2023-10-31';
 export const PUBLIC_API_CONTENT_MANAGEMENT_VERSION = 3;
 export const PUBLIC_API_PATH = '/api/dashboards/dashboard';
+export const INTERNAL_API_VERSION = '1';

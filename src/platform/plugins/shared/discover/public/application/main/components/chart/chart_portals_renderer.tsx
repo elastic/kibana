@@ -25,6 +25,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -84,6 +85,9 @@ const UnifiedHistogramGuard = ({
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentScopedProfilesManager = useRuntimeState(
+    currentTabRuntimeState.scopedProfilesManager$
+  );
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
@@ -92,8 +96,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentStateContainer ||
-    !currentDataView ||
-    !currentTabRuntimeState
+    !currentDataView
   ) {
     return null;
   }
@@ -105,10 +108,12 @@ const UnifiedHistogramGuard = ({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <UnifiedHistogramChartWrapper
-              stateContainer={currentStateContainer}
-              panelsToggle={panelsToggle}
-            />
+            <ScopedProfilesManagerProvider scopedProfilesManager={currentScopedProfilesManager}>
+              <UnifiedHistogramChartWrapper
+                stateContainer={currentStateContainer}
+                panelsToggle={panelsToggle}
+              />
+            </ScopedProfilesManagerProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   RouteRepositoryClient,
   ServerRouteRepository,
@@ -15,13 +14,17 @@ import {
 } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
-import { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
+import { HttpFetchQuery, HttpHandler, HttpResponse } from '@kbn/core-http-browser';
 import { omit } from 'lodash';
 
 export function createRepositoryClient<
   TRepository extends ServerRouteRepository,
   TClientOptions extends Record<string, any> = {}
->(core: CoreStart | CoreSetup): RouteRepositoryClient<TRepository, TClientOptions> {
+>(core: {
+  http: {
+    fetch: HttpHandler;
+  };
+}): RouteRepositoryClient<TRepository, TClientOptions> {
   const fetch = (
     endpoint: string,
     params: { path?: Record<string, string>; body?: unknown; query?: HttpFetchQuery } | undefined,
@@ -29,7 +32,8 @@ export function createRepositoryClient<
   ) => {
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
 
-    return core.http[method](pathname, {
+    return core.http.fetch(pathname, {
+      method: method.toUpperCase(),
       ...options,
       body: params && params.body ? JSON.stringify(params.body) : undefined,
       query: params?.query,

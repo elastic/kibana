@@ -113,12 +113,11 @@ export const convertGraphEvents = ({
             const toolCallEvents: ToolCallEvent[] = [];
 
             for (const toolCall of toolCalls) {
-              const structuredToolId = toStructuredToolIdentifier(toolCall.toolId);
-              toolCallIdToIdMap.set(toolCall.toolCallId, structuredToolId);
+              toolCallIdToIdMap.set(toolCall.toolCallId, toolCall.toolId);
               toolCallEvents.push({
                 type: ChatAgentEventType.toolCall,
                 data: {
-                  toolId: structuredToolId,
+                  toolId: toolCall.toolId,
                   toolCallId: toolCall.toolCallId,
                   args: toolCall.args,
                 },

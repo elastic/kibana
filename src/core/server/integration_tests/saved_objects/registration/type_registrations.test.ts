@@ -133,6 +133,7 @@ const previouslyRegisteredTypes = [
   'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',
+  'security:reference-data',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',

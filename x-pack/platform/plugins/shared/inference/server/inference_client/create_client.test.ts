@@ -11,9 +11,9 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('./inference_client');
-jest.mock('./bind_client');
+jest.mock('../../common/inference_client/bind_client');
 import { createInferenceClient } from './inference_client';
-import { bindClient } from './bind_client';
+import { bindClient } from '../../common/inference_client/bind_client';
 
 const bindClientMock = bindClient as jest.MockedFn<typeof bindClient>;
 const createInferenceClientMock = createInferenceClient as jest.MockedFn<

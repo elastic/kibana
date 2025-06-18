@@ -7,7 +7,6 @@
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 
 import { layerTypes } from '../../../common/layer_types';
 import { AnnotationGroups } from '../../types';
@@ -87,7 +86,7 @@ export function convertPersistedState(
   annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[]
 ) {
-  return cloneDeep(injectReferences(state, annotationGroups, references));
+  return structuredClone(injectReferences(state, annotationGroups, references));
 }
 
 export function convertToPersistable(state: XYState) {
@@ -253,7 +252,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
               indexPatternId: annotationGroup.indexPatternId,
-              annotations: cloneDeep(annotationGroup.annotations),
+              annotations: structuredClone(annotationGroup.annotations),
             };
           } else {
             // a linked by-value layer gets settings from visualization state while
@@ -262,7 +261,7 @@ function injectReferences(
               ...commonProps,
               ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
               indexPatternId: getIndexPatternIdFromReferences(persistedLayer.layerId),
-              annotations: cloneDeep(persistedLayer.annotations),
+              annotations: structuredClone(persistedLayer.annotations),
               cachedMetadata: persistedLayer.cachedMetadata,
             };
           }

@@ -85,10 +85,7 @@ export class AddEditMonitorAPI {
       const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
         newMonitorPromise,
         syncErrorsPromise,
-      ]).catch((e) => {
-        server.logger.error(e);
-        throw e;
-      });
+      ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
         const failed = packagePolicyResult.failed.map((f) => f.error);
@@ -116,14 +113,10 @@ export class AddEditMonitorAPI {
         },
       };
     } catch (e) {
-      server.logger.error(
-        `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`
-      );
+      e.message = `${e.message}, monitor name: ${monitorWithNamespace[ConfigKey.NAME]}`;
       await this.revertMonitorIfCreated({
         newMonitorId,
       });
-
-      server.logger.error(e);
 
       throw e;
     }
@@ -234,10 +227,12 @@ export class AddEditMonitorAPI {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
         .catch((error) => {
-          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`);
+          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, {
+            error,
+          });
         });
-    } catch (e) {
-      server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
+    } catch (error) {
+      server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, { error });
     }
   }
 
@@ -253,13 +248,19 @@ export class AddEditMonitorAPI {
           .then(() => {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
-          .catch((e) => {
-            server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+          .catch((error) => {
+            server.logger.error(
+              `Error triggering test for monitor: ${configId}, Error: ${error.message}`,
+              {
+                error,
+              }
+            );
           });
       }
-    } catch (e) {
-      server.logger.info(`Error triggering test for getting started monitor: ${configId}`);
-      server.logger.error(e);
+    } catch (error) {
+      server.logger.error(`Error triggering test for getting started monitor: ${configId}`, {
+        error,
+      });
     }
   };
 
@@ -311,9 +312,14 @@ export class AddEditMonitorAPI {
           monitorIds: [newMonitorId],
         });
       }
-    } catch (e) {
+    } catch (error) {
       // ignore errors here
-      server.logger.error(e);
+      server.logger.error(
+        `Unable to revert monitor with id ${newMonitorId}, Error: ${error.message}`,
+        {
+          error,
+        }
+      );
     }
   }
 }

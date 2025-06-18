@@ -29,7 +29,7 @@
     "patterns": [
       "_data_stream/{name}/_lifecycle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams-put-lifecycle.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-data-lifecycle",
     "availability": {
       "stack": true,
       "serverless": true

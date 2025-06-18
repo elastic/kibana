@@ -127,7 +127,7 @@ describe('WHERE <expression>', () => {
         EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS
       );
       await assertSuggestions(
-        'from a | where textField >= textField/',
+        'from a | where textField >= textFiel/',
         EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS
       );
     });
@@ -285,6 +285,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
 
@@ -296,6 +297,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
     });

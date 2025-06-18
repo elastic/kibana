@@ -162,7 +162,6 @@ describe('TelemetryTracer', () => {
         elasticTools,
         telemetry,
         telemetryParams,
-        totalTools: 9,
       },
       logger
     );
@@ -173,7 +172,6 @@ describe('TelemetryTracer', () => {
     expect(telemetryTracer.elasticTools).toEqual(elasticTools);
     expect(telemetryTracer.telemetry).toBe(telemetry);
     expect(telemetryTracer.telemetryParams).toBe(telemetryParams);
-    expect(telemetryTracer.totalTools).toBe(9);
   });
 
   it('should not log and report event on chain end if parent_run_id exists', async () => {

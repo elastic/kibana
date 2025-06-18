@@ -36,7 +36,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     const { attributes } = await this.deps.soClient.create<PrivilegedMonitoringEngineDescriptor>(
       privilegeMonitoringTypeName,
       {
-        status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING,
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
       },
       { id: this.getSavedObjectId() }
     );
@@ -50,7 +50,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     const update = {
       ...old,
       error: undefined,
-      status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING,
+      status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
       apiKey: '',
     };
     await this.deps.soClient.update<PrivilegedMonitoringEngineDescriptor>(

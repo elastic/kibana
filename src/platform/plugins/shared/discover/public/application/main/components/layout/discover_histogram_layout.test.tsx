@@ -21,8 +21,6 @@ import type {
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
@@ -31,17 +29,12 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import {
-  InternalStateProvider,
-  RuntimeStateProvider,
-  internalStateActions,
-} from '../../state_management/redux';
-import { ChartPortalsRenderer } from '../chart';
+import { internalStateActions } from '../../state_management/redux';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 const mockSearchSessionId = '123';
 
@@ -163,19 +156,14 @@ const mountComponent = async ({
   };
 
   const component = mountWithIntl(
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <InternalStateProvider store={stateContainer.internalState}>
-          <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
-            <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-                <DiscoverHistogramLayout {...props} />
-              </RuntimeStateProvider>
-            </DiscoverMainProvider>
-          </ChartPortalsRenderer>
-        </InternalStateProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    <DiscoverTestProvider
+      services={services}
+      stateContainer={stateContainer}
+      runtimeState={{ currentDataView: dataView, adHocDataViews: [] }}
+      usePortalsRenderer
+    >
+      <DiscoverHistogramLayout {...props} />
+    </DiscoverTestProvider>
   );
 
   // wait for lazy modules

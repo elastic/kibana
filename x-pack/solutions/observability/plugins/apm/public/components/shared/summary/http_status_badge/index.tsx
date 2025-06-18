@@ -20,7 +20,7 @@ export function HttpStatusBadge({ status }: HttpStatusBadgeProps) {
   });
   return (
     <EuiToolTip content={label}>
-      <EuiBadge color={useGetStatusColor(status) || 'default'}>
+      <EuiBadge color={useGetStatusColor(status) || 'default'} data-test-subj="httpStatusBadge">
         <span data-test-subj="apmHttpStatusBadge">
           {status} {statusCodes[status.toString()]}
         </span>

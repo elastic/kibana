@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -19,7 +19,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import type { DocHistoryLocationState } from './locator';
-import { useRootProfile } from '../../context_awareness';
+import { ScopedProfilesManagerProvider, useRootProfile } from '../../context_awareness';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -27,7 +27,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core, getScopedHistory } = useDiscoverServices();
+  const { timefilter, core, profilesManager, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -53,7 +53,7 @@ export const SingleDocRoute = () => {
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
-
+  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
   const rootProfileState = useRootProfile();
 
   if (error) {
@@ -98,8 +98,10 @@ export const SingleDocRoute = () => {
   }
 
   return (
-    <rootProfileState.AppWrapper>
-      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
-    </rootProfileState.AppWrapper>
+    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+      <rootProfileState.AppWrapper>
+        <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
+      </rootProfileState.AppWrapper>
+    </ScopedProfilesManagerProvider>
   );
 };

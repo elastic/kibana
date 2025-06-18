@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { uniqBy } from 'lodash';
 import {
   Walker,
+  lastItem,
+  type ESQLAstCommand,
   type ESQLAstItem,
   type ESQLColumn,
   type ESQLCommandOption,
@@ -17,8 +18,6 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLTimeInterval,
-  type ESQLAstCommand,
-  lastItem,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -27,26 +26,26 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
+import { uniqBy } from 'lodash';
 
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
-import { collectUserDefinedColumns } from './user_defined_columns';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
-import { getTestFunctions } from './test_functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import type { FieldType } from '../definitions/types';
 import {
+  ArrayType,
   CommandDefinition,
-  FunctionParameter,
   FunctionDefinition,
+  FunctionDefinitionTypes,
+  FunctionParameter,
   FunctionParameterType,
   FunctionReturnType,
-  ArrayType,
   SupportedDataType,
-  FunctionDefinitionTypes,
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import type {
@@ -54,12 +53,11 @@ import type {
   ESQLUserDefinedColumn,
   ReferenceMaps,
 } from '../validation/types';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK } from './constants';
 import { removeMarkerArgFromArgsList } from './context';
-import type { ReasonTypes, ESQLCallbacks } from './types';
-import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
-import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
-
-import type { EditorContext } from '../autocomplete/types';
+import { getTestFunctions } from './test_functions';
+import type { ESQLCallbacks, ReasonTypes } from './types';
+import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -112,30 +110,6 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
   Boolean(location && location.min <= position && location.max >= position);
-
-function isMathFunction(query: string) {
-  const queryTrimmed = query.trimEnd();
-  // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
-  // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
-  const [opString] = queryTrimmed.split(' ').reverse();
-  // compare last char for all math functions
-  // limit only to 2 chars operators
-  const fns = operatorsDefinitions.filter(({ name }) => name.length < 3).map(({ name }) => name);
-  const tokenMatch = fns.some((op) => opString === op);
-  // there's a match, that's good
-  if (tokenMatch) {
-    return true;
-  }
-  // either there's no match or it is the case where field/function and op are not spaced out
-  // e.g "field+" or "fn()+"
-  // so try to extract the last char and compare it with the single char math functions
-  const singleCharFns = fns.filter((name) => name.length === 1);
-  return singleCharFns.some((c) => c === opString[opString.length - 1]);
-}
-
-export function isComma(char: string) {
-  return char === ',';
-}
 
 export function isSourceCommand({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
@@ -416,7 +390,7 @@ export function getAllArrayTypes(
         types.push(hit?.type || 'unsupported');
       }
       if (subArg.type === 'timeInterval') {
-        types.push('time_literal');
+        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -494,7 +468,7 @@ export function checkFunctionArgMatchesDefinition(
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg.unit);
+    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -720,94 +694,6 @@ export const isParametrized = (node: ESQLProperNode): boolean => Walker.params(n
 export const noCaseCompare = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 /**
- * This function returns a list of closing brackets that can be appended to 
- * a partial query to make it valid.
-
-* locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param text
- * @returns
- */
-export function getBracketsToClose(text: string) {
-  const stack = [];
-  const pairs: Record<string, string> = { '"""': '"""', '/*': '*/', '(': ')', '[': ']', '"': '"' };
-  const pairsReversed: Record<string, string> = {
-    '"""': '"""',
-    '*/': '/*',
-    ')': '(',
-    ']': '[',
-    '"': '"',
-  };
-
-  for (let i = 0; i < text.length; i++) {
-    for (const openBracket in pairs) {
-      if (!Object.hasOwn(pairs, openBracket)) {
-        continue;
-      }
-
-      const substr = text.slice(i, i + openBracket.length);
-      if (pairsReversed[substr] && pairsReversed[substr] === stack[stack.length - 1]) {
-        stack.pop();
-        break;
-      } else if (substr === openBracket) {
-        stack.push(substr);
-        break;
-      }
-    }
-  }
-  return stack.reverse().map((bracket) => pairs[bracket]);
-}
-
-/**
- * This function counts the number of unclosed parentheses
- * @param text
- */
-export function countUnclosedParens(text: string) {
-  let unclosedCount = 0;
-  for (let i = 0; i < text.length; i++) {
-    if (text[i] === ')' && unclosedCount > 0) {
-      unclosedCount--;
-    } else if (text[i] === '(') {
-      unclosedCount++;
-    }
-  }
-  return unclosedCount;
-}
-
-/**
- * This function attempts to correct the syntax of a partial query to make it valid.
- *
- * This is important because a syntactically-invalid query will not generate a good AST.
- *
- * @param _query
- * @param context
- * @returns
- */
-export function correctQuerySyntax(_query: string, context: EditorContext) {
-  let query = _query;
-  // check if all brackets are closed, otherwise close them
-  const bracketsToAppend = getBracketsToClose(query);
-  const unclosedRoundBracketCount = bracketsToAppend.filter((bracket) => bracket === ')').length;
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    // monaco.editor.CompletionTriggerKind['Invoke'] === 0
-    (context.triggerKind === 0 && unclosedRoundBracketCount === 0) ||
-    isMathFunction(query) ||
-    /,\s+$/.test(query)
-  ) {
-    query += EDITOR_MARKER;
-  }
-
-  query += bracketsToAppend.join('');
-
-  return query;
-}
-
-/**
  * Gets the signatures of a function that match the number of arguments
  * provided in the AST.
  */
@@ -874,7 +760,7 @@ export function getExpressionType(
   }
 
   if (isTimeIntervalItem(root)) {
-    return 'time_literal';
+    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json

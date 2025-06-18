@@ -350,12 +350,24 @@ Used to execute an arbitrary transformation function.
 *Usage example:*
 
 ```ts
-let change: SavedObjectsModelUnsafeTransformChange = {
+// Please define your transform function on a separate const.
+// Use explicit types for the generic arguments, as shown below.
+// This will reduce the chances of introducing bugs.
+const transformFn: SavedObjectModelUnsafeTransformFn<BeforeType, AfterType> = (
+  doc: SavedObjectModelTransformationDoc<BeforeType>
+) => {
+  const attributes: AfterType = {
+    ...doc.attributes,
+    someAddedField: 'defaultValue',
+  };
+
+  return { document: { ...doc, attributes } };
+};
+
+// this is how you would specify a change in the changes: []
+const change: SavedObjectsModelUnsafeTransformChange = {
   type: 'unsafe_transform',
-  transformFn: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
-  },
+  transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
 };
 ```
 
@@ -1111,7 +1123,3 @@ Which is why, when using this option, the API consumer needs to make sure that *
 #### Using `bulkUpdate` for fields with large `json` blobs [_using_bulkupdate_for_fields_with_large_json_blobs]
 
 The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents. These update operations are done in-memory, and cause memory constraint issues when updating many objects with large `json` blobs stored in some fields. As such, we recommend against using `bulkUpdate` for savedObjects that: - use arrays (as these tend to be large objects) - store large `json` blobs in some fields
-
-
-
-

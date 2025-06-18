@@ -255,10 +255,15 @@ describe('saved search embeddable', () => {
     });
 
     it('should resolve data source profile when fetching', async () => {
+      const scopedProfilesManager =
+        discoverServiceMock.profilesManager.createScopedProfilesManager();
       const resolveDataSourceProfileSpy = jest.spyOn(
-        discoverServiceMock.profilesManager,
+        scopedProfilesManager,
         'resolveDataSourceProfile'
       );
+      jest
+        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
+        .mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
         initialState: { rawState: {} }, // runtimeState passed via mocked deserializeState

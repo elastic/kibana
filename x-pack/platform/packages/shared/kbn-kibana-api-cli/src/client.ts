@@ -99,15 +99,18 @@ export class KibanaClient {
       auth: null,
     };
 
+    const body = init?.body ? JSON.stringify(init?.body) : undefined;
+
     const response = await fetch(format(urlOptions), {
       ...init,
       headers: {
+        ['content-type']: 'application/json',
         ...getInternalKibanaHeaders(),
         Authorization: `Basic ${Buffer.from(formattedBaseUrl.auth!).toString('base64')}`,
         ...init?.headers,
       },
       signal: combineSignal(this.options.signal, init?.signal),
-      body: init?.body ? JSON.stringify(init?.body) : undefined,
+      body,
     });
 
     if (init?.asRawResponse) {

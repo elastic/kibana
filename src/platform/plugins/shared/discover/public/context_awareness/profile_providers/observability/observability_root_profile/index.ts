@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createObservabilityRootProfileProvider } from './profile';
+import type { ProfileProviderServices } from '../../profile_provider_services';
+import { createObservabilityRootProfileProvider } from './profile';
+import { createObservabilityRootProfileProviderWithAttributesTab } from './sub_profiles/observability_root_profile_with_attributes_tab';
+
+export const createObservabilityRootProfileProviders = (
+  providerServices: ProfileProviderServices
+) => {
+  const observabilityRootProfileProvider = createObservabilityRootProfileProvider(providerServices);
+
+  return [
+    createObservabilityRootProfileProviderWithAttributesTab(observabilityRootProfileProvider),
+    observabilityRootProfileProvider,
+  ];
+};

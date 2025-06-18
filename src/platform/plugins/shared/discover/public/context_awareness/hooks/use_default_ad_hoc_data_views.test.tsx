@@ -12,10 +12,10 @@ import { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { internalStateActions } from '../../application/main/state_management/redux';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { omit } from 'lodash';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 
 const clearInstanceCache = jest.spyOn(discoverServiceMock.dataViews, 'clearInstanceCache');
 const createDataView = jest
@@ -53,7 +53,7 @@ const renderDefaultAdHocDataViewsHook = () => {
   const { result, unmount } = renderHook(useDefaultAdHocDataViews, {
     initialProps: { internalState: stateContainer.internalState },
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+      <DiscoverTestProvider services={discoverServiceMock}>{children}</DiscoverTestProvider>
     ),
   });
   return {

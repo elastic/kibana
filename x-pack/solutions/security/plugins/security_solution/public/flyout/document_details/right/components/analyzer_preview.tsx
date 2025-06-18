@@ -40,10 +40,10 @@ export const AnalyzerPreview: React.FC = () => {
     getFieldsData,
     scopeId,
     eventId,
-    isPreview,
+    isRulePreview,
   } = useDocumentDetailsContext();
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
-  const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
+  const documentId = isRulePreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,7 +16,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useDataView } from '../../hooks/use_data_view';
 import type { ContextHistoryLocationState } from './services/locator';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useRootProfile } from '../../context_awareness';
+import { ScopedProfilesManagerProvider, useRootProfile } from '../../context_awareness';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -24,7 +24,8 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const scopedHistory = useDiscoverServices().getScopedHistory<ContextHistoryLocationState>();
+  const { profilesManager, getScopedHistory } = useDiscoverServices();
+  const scopedHistory = getScopedHistory<ContextHistoryLocationState>();
   const locationState = useMemo(
     () => scopedHistory?.location.state as ContextHistoryLocationState | undefined,
     [scopedHistory?.location.state]
@@ -49,6 +50,7 @@ export function ContextAppRoute() {
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
   const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
+  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
   const rootProfileState = useRootProfile();
 
   if (error) {
@@ -78,8 +80,10 @@ export function ContextAppRoute() {
   }
 
   return (
-    <rootProfileState.AppWrapper>
-      <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
-    </rootProfileState.AppWrapper>
+    <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+      <rootProfileState.AppWrapper>
+        <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
+      </rootProfileState.AppWrapper>
+    </ScopedProfilesManagerProvider>
   );
 }

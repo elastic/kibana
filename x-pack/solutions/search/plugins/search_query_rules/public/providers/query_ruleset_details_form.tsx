@@ -24,7 +24,7 @@ export const QueryRulesetDetailsForm: React.FC<
       ruleId: '',
       criteria: [],
       type: 'pinned',
-      actions: { docs: [] },
+      actions: { docs: [], ids: [] },
     },
   });
 

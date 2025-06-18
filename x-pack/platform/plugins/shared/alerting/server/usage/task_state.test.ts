@@ -667,10 +667,20 @@ describe('telemetry task state', () => {
         count_rules_executions_timeouts_by_type_per_day: { '.index-threshold': 30 },
         count_rules_executions_timeouts_per_day: 31,
         count_rules_muted: 32,
-        count_rules_muted_by_type: {},
+        count_rules_muted_by_type: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          observability__rules__custom_threshold: 5,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          slo__rules__burnRate: 4,
+        },
         count_rules_namespaces: 33,
         count_rules_snoozed: 34,
-        count_rules_snoozed_by_type: {},
+        count_rules_snoozed_by_type: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          observability__rules__custom_threshold: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          slo__rules__burnRate: 1,
+        },
         count_rules_with_muted_alerts: 35,
         count_rules_with_tags: 36,
         count_rules_with_linked_dashboards: 10,

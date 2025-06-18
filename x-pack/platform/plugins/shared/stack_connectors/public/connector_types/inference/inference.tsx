@@ -112,5 +112,6 @@ export function getConnectorType(): InferenceConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
+    actionReadOnlyExtraComponent: lazy(() => import('./usage_cost_message')),
   };
 }

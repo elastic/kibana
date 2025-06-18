@@ -9,7 +9,6 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
@@ -19,12 +18,12 @@ import { TopNavMenu } from '@kbn/navigation-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -89,13 +88,13 @@ function getProps(
 const mockUseKibana = useKibana as jest.Mock;
 const getTestComponent = (props: DiscoverTopNavProps) =>
   mountWithIntl(
-    <DiscoverMainProvider value={props.stateContainer}>
-      <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-        <QueryClientProvider client={new QueryClient()}>
-          <DiscoverTopNav {...props} />
-        </QueryClientProvider>
-      </RuntimeStateProvider>
-    </DiscoverMainProvider>
+    <DiscoverTestProvider
+      services={mockDiscoverService}
+      stateContainer={props.stateContainer}
+      runtimeState={{ currentDataView: dataViewMock, adHocDataViews: [] }}
+    >
+      <DiscoverTopNav {...props} />
+    </DiscoverTestProvider>
   );
 
 describe('Discover topnav component', () => {

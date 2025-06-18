@@ -11,11 +11,9 @@
         "label": "createRepositoryClient",
         "description": [],
         "signature": [
-          "(core: ",
-          "CoreStart",
-          " | ",
-          "CoreSetup",
-          "<{}, unknown>) => ",
+          "(core: { http: { fetch: ",
+          "HttpHandler",
+          "; }; }) => ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -32,20 +30,31 @@
           {
             "parentPluginId": "@kbn/server-route-repository-client",
             "id": "def-public.createRepositoryClient.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "core",
             "description": [],
-            "signature": [
-              "CoreStart",
-              " | ",
-              "CoreSetup",
-              "<{}, unknown>"
-            ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/server-route-repository-client",
+                "id": "def-public.createRepositoryClient.$1.http",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "{ fetch: ",
+                  "HttpHandler",
+                  "; }"
+                ],
+                "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

@@ -66,7 +66,13 @@ export const edotSDKSettings: RawSettingDefinition[] = [
       { text: 'fatal', value: 'fatal' },
       { text: 'off', value: 'off' },
     ],
-    includeAgents: ['opentelemetry/java/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/python/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/dotnet/elastic',
+    ],
   },
   {
     key: 'send_traces',

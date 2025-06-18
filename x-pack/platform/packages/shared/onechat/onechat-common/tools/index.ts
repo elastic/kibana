@@ -12,7 +12,7 @@ export {
   type SerializedToolIdentifier,
   type StructuredToolIdentifier,
   type ToolIdentifier,
-  ToolSourceType,
+  type ToolProviderId,
   isSerializedToolIdentifier,
   isStructuredToolIdentifier,
   isPlainToolIdentifier,
@@ -20,5 +20,6 @@ export {
   toSerializedToolIdentifier,
   createBuiltinToolId,
   toolDescriptorToIdentifier,
-  builtinSourceId,
+  builtinToolProviderId,
+  unknownToolProviderId,
 } from './tools';

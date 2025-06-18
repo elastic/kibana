@@ -991,6 +991,11 @@
     "updated",
     "version"
   ],
+  "security:reference-data": [
+    "id",
+    "owner",
+    "type"
+  ],
   "siem-detection-engine-rule-actions": [
     "actions",
     "actions.actionRef",

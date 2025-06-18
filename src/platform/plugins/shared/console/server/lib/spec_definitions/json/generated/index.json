@@ -7,6 +7,7 @@
       "pretty": "__flag__",
       "if_primary_term": "",
       "if_seq_no": "",
+      "include_source_on_error": "__flag__",
       "op_type": [
         "index",
         "create"
@@ -45,7 +46,7 @@
       "{index}/_doc/{id}",
       "{index}/_doc"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-create",
     "availability": {
       "stack": true,
       "serverless": true

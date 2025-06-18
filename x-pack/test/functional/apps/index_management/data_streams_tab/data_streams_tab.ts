@@ -17,12 +17,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  enum INDEX_MODE {
-    STANDARD = 'Standard',
-    LOGSDB = 'LogsDB',
-    TIME_SERIES = 'Time series',
-  }
-
   const TEST_DS_NAME_1 = 'test-ds-1';
   const TEST_DS_NAME_2 = 'test-ds-2';
   const TEST_DATA_STREAM_NAMES = [TEST_DS_NAME_1, TEST_DS_NAME_2];
@@ -97,48 +91,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.exists('dataStreamDetailPanel')).to.be(true);
       // Close flyout
       await testSubjects.click('closeDetailsButton');
-    });
-
-    describe('shows the correct index mode in the details flyout', function () {
-      it('standard index mode', async () => {
-        // Open details flyout of existing data stream - it has standard index mode
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
-        // Check that index mode detail exists and its label is "Standard"
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
-        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('Standard');
-        // Close flyout
-        await testSubjects.click('closeDetailsButton');
-      });
-
-      it('logsdb index mode', async () => {
-        // Create an index template with a logsdb index mode
-        await es.indices.putIndexTemplate({
-          name: `logsdb_index_template`,
-          index_patterns: ['test-logsdb'],
-          data_stream: {},
-          template: {
-            settings: { mode: 'logsdb' },
-          },
-        });
-        // Create a data stream matching the index pattern of the index template above
-        await es.indices.createDataStream({
-          name: 'test-logsdb',
-        });
-        await browser.refresh();
-        // Open details flyout of data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink('test-logsdb');
-        // Check that index mode detail exists and its label is "LogsDB"
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
-        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be('LogsDB');
-        // Close flyout
-        await testSubjects.click('closeDetailsButton');
-        // Delete data stream and index template
-        await es.indices.deleteDataStream({ name: 'test-logsdb' });
-        await es.indices.deleteIndexTemplate({
-          name: `logsdb_index_template`,
-        });
-        await testSubjects.click('reloadButton');
-      });
     });
 
     describe('data retention modal', function () {
@@ -231,169 +183,51 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Modify data streams index mode', () => {
-      const TEST_DS_NAME = 'test-ds';
-      const setIndexModeTemplate = async (settings: object) => {
-        await es.indices.putIndexTemplate({
-          name: `index_template_${TEST_DS_NAME}`,
-          index_patterns: [TEST_DS_NAME],
-          data_stream: {},
-          template: {
-            settings,
-          },
-        });
-        await es.indices.createDataStream({
-          name: TEST_DS_NAME,
-        });
-        await testSubjects.click('reloadButton');
-      };
+    describe('configure failure store modal', function () {
+      it('allows to configure failure store from details panel', async () => {
+        // Open details flyout
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
+        // Open the configure failure store dialog
+        await testSubjects.click('manageDataStreamButton');
+        await testSubjects.click('configureFailureStoreButton');
 
-      const verifyIndexModeIsOrigin = async (indexModeName: string) => {
-        // Open details flyout of data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
-        // Check that index mode detail exists and its label is origin
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
-        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
-        // Close flyout
-        await testSubjects.click('closeDetailsButton');
-        // Navigate to the templates tab
-        await pageObjects.indexManagement.changeTabs('templatesTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        // Edit template
-        await pageObjects.indexManagement.clickIndexTemplateNameLink(
-          `index_template_${TEST_DS_NAME}`
-        );
-        await testSubjects.click('manageTemplateButton');
-        await testSubjects.click('editIndexTemplateButton');
+        // Verify modal is open
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
 
-        // Verify index mode is origin
-        expect(await testSubjects.getVisibleText('indexModeField')).to.be(indexModeName);
-      };
+        // Enable failure store
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
 
-      const changeIndexMode = async (indexModeSelector: string) => {
-        // Modify index mode
-        await testSubjects.click('indexModeField');
-        await testSubjects.click(indexModeSelector);
-      };
+        // Submit the form
+        await testSubjects.click('saveButton');
 
-      const verifyModeHasBeenChanged = async (indexModeName: string) => {
-        expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
-
-        // Click update template
-        await pageObjects.indexManagement.clickNextButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Verify index mode and close detail tab
-        expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
-        await testSubjects.click('closeDetailsButton');
-
-        // Perform rollover so that index mode of data stream is updated
-        await es.indices.rollover({
-          alias: TEST_DS_NAME,
-        });
-
-        // Navigate to the data streams tab
-        await pageObjects.indexManagement.changeTabs('data_streamsTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        // Open data stream
-        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
-        // Check that index mode detail exists and its label is destination index mode
-        expect(await testSubjects.exists('indexModeDetail')).to.be(true);
-        expect(await testSubjects.getVisibleText('indexModeDetail')).to.be(indexModeName);
-        // Close flyout
-        await testSubjects.click('closeDetailsButton');
-      };
-
-      afterEach(async () => {
-        await log.debug('Cleaning up created data stream');
-
-        try {
-          await es.indices.deleteDataStream({ name: TEST_DS_NAME });
-          await es.indices.deleteIndexTemplate({
-            name: `index_template_${TEST_DS_NAME}`,
-          });
-        } catch (e) {
-          log.debug('Error deleting test data stream');
-          throw e;
-        }
+        // Expect to see a success toast
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
+        // Clear up toasts for next test
+        await toasts.dismissAll();
       });
 
-      it('allows to upgrade data stream from standard to logsdb index mode', async () => {
-        await setIndexModeTemplate({
-          mode: 'standard',
-        });
-        await verifyIndexModeIsOrigin(INDEX_MODE.STANDARD);
+      it('allows to disable failure store from details panel', async () => {
+        // Open details flyout
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
+        // Open the configure failure store dialog
+        await testSubjects.click('manageDataStreamButton');
+        await testSubjects.click('configureFailureStoreButton');
 
-        await changeIndexMode('index_mode_logsdb');
-        // Navigate to the last step of the wizard
-        await testSubjects.click('formWizardStep-5');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        // Verify modal is open
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
 
-        await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
-      });
+        // Disable failure store (toggle off if it's on)
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
 
-      it('allows to downgrade data stream from logsdb to standard index mode', async () => {
-        await setIndexModeTemplate({
-          mode: 'logsdb',
-        });
-        await verifyIndexModeIsOrigin(INDEX_MODE.LOGSDB);
+        // Submit the form
+        await testSubjects.click('saveButton');
 
-        await changeIndexMode('index_mode_standard');
-        // Navigate to the last step of the wizard
-        await testSubjects.click('formWizardStep-5');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        await verifyModeHasBeenChanged(INDEX_MODE.STANDARD);
-      });
-
-      // Fails because of https://github.com/elastic/elasticsearch/issues/126473
-      it.skip('allows to upgrade data stream from time series to logsdb index mode', async () => {
-        await setIndexModeTemplate({
-          mode: 'time_series',
-          routing_path: 'test',
-        });
-        await verifyIndexModeIsOrigin(INDEX_MODE.TIME_SERIES);
-
-        await changeIndexMode('index_mode_logsdb');
-
-        await testSubjects.click('formWizardStep-2');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        // Modify Index settings
-        await testSubjects.setValue('kibanaCodeEditor', '{}', {
-          clearWithKeyboard: true,
-        });
-        // Navigate to the last step of the wizard
-        await testSubjects.click('formWizardStep-5');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        await verifyModeHasBeenChanged(INDEX_MODE.LOGSDB);
-      });
-
-      // Fails because of https://github.com/elastic/elasticsearch/issues/126473
-      it.skip('allows to downgrade data stream from logsdb to time series index mode', async () => {
-        await setIndexModeTemplate({
-          mode: 'logsdb',
-        });
-        await verifyIndexModeIsOrigin(INDEX_MODE.LOGSDB);
-
-        await changeIndexMode('index_mode_time_series');
-
-        await testSubjects.click('formWizardStep-2');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        // Modify Index settings
-        await testSubjects.setValue(
-          'kibanaCodeEditor',
-          JSON.stringify({ index: { mode: 'time_series', routing_path: 'test' } }),
-          {
-            clearWithKeyboard: true,
-          }
-        );
-        // Navigate to the last step of the wizard
-        await testSubjects.click('formWizardStep-5');
-        await pageObjects.header.waitUntilLoadingHasFinished();
-
-        await verifyModeHasBeenChanged(INDEX_MODE.TIME_SERIES);
+        // Expect to see a success toast
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Failure store disabled');
+        // Clear up toasts for next test
+        await toasts.dismissAll();
       });
     });
   });

@@ -8,10 +8,12 @@
 import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
+import { openKnowledgeBasePageByEntryId } from './navigation_helpers';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<KnowledgeBaseEntryContentReference>;
@@ -19,16 +21,21 @@ interface Props {
 
 export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
-
+  const { assistantAvailability } = useAssistantContext();
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${contentReferenceNode.contentReference.knowledgeBaseEntryId}`,
-        openInNewTab: true,
-      });
+      return openKnowledgeBasePageByEntryId(
+        navigateToApp,
+        contentReferenceNode.contentReference.knowledgeBaseEntryId,
+        assistantAvailability.hasSearchAILakeConfigurations
+      );
     },
-    [navigateToApp, contentReferenceNode]
+    [
+      assistantAvailability.hasSearchAILakeConfigurations,
+      navigateToApp,
+      contentReferenceNode.contentReference.knowledgeBaseEntryId,
+    ]
   );
 
   return (
@@ -36,7 +43,7 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({ contentReferenceN
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="KnowledgeBaseEntryReference"
     >
-      <EuiLink onClick={onClick}>
+      <EuiLink onClick={onClick} data-test-subj="knowledgeBaseEntryReferenceLink">
         {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${contentReferenceNode.contentReference.knowledgeBaseEntryName}`}
       </EuiLink>
     </PopoverReference>

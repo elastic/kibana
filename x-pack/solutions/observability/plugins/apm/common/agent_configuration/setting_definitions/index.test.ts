@@ -203,6 +203,30 @@ describe('filterByAgent', () => {
       );
     });
 
+    it('opentelemetry/nodejs/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/nodejs/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/python/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/python/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/php/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/php/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
+    it('opentelemetry/dotnet/elastic', () => {
+      expect(getSettingKeysForAgent('opentelemetry/dotnet/elastic')).toEqual(
+        expect.arrayContaining(['logging_level'])
+      );
+    });
+
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual(
         expect.arrayContaining(['transaction_max_spans', 'transaction_sample_rate'])

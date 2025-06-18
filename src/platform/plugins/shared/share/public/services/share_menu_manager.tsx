@@ -71,6 +71,7 @@ export class ShareMenuManager {
       allowShortUrl,
       objectId,
       objectType,
+      objectTypeAlias,
       objectTypeMeta,
       sharingData,
       menuItems,
@@ -101,6 +102,7 @@ export class ShareMenuManager {
         shareContext: {
           objectId,
           objectType,
+          objectTypeAlias,
           objectTypeMeta,
           anchorElement,
           publicAPIEnabled,

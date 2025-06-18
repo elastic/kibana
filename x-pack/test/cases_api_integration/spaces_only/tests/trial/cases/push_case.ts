@@ -8,8 +8,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type http from 'http';
 import expect from '@kbn/expect';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import { nullUser } from '../../../../common/lib/mock';
 import {

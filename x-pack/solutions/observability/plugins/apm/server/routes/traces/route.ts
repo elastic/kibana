@@ -31,6 +31,8 @@ import { getTraceItems } from './get_trace_items';
 import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
+import { getUnifiedTraceItems } from './get_unified_trace_items';
+import { getUnifiedTraceErrors } from './get_unified_trace_errors';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -134,19 +136,21 @@ const focusedTraceRoute = createApmServerRoute({
     summary: { services: number; traceEvents: number; errors: number };
   }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { params, config, logger } = resources;
+    const { params, config } = resources;
     const { traceId, docId } = params.path;
     const { start, end } = params.query;
 
+    const unifiedTraceErrors = await getUnifiedTraceErrors({ apmEventClient, traceId, start, end });
+
     const [traceItems, traceSummaryCount] = await Promise.all([
-      getTraceItems({
-        traceId,
-        config,
+      getUnifiedTraceItems({
         apmEventClient,
+        traceId,
         start,
         end,
         maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        logger,
+        config,
+        unifiedTraceErrors,
       }),
       getTraceSummaryCount({ apmEventClient, start, end, traceId }),
     ]);
@@ -155,7 +159,7 @@ const focusedTraceRoute = createApmServerRoute({
 
     return {
       traceItems: focusedTraceItems,
-      summary: { ...traceSummaryCount, errors: traceItems.errorDocs.length },
+      summary: { ...traceSummaryCount, errors: unifiedTraceErrors.totalErrors },
     };
   },
 });

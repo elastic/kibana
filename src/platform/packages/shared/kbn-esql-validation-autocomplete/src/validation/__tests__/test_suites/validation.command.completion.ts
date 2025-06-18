@@ -183,10 +183,6 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
       });
     });
 
-    describe('...WITH <inferenceId>', () => {
-      test.todo('valid inferenceId'); // When the fetching of inferenceIds is implemented
-    });
-
     describe('...(AS <targetField>)', () => {
       describe('if no provided, the default targetField is `completion`', () => {
         test('completion field is not available before COMPLETION command', async () => {

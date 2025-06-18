@@ -242,7 +242,7 @@ export function RuleDetailsPage() {
       }}
     >
       <HeaderMenu />
-      <EuiFlexGroup wrap gutterSize="m">
+      <EuiFlexGroup wrap gutterSize="m" data-test-subj={`ruleType_${rule.ruleTypeId}`}>
         <EuiFlexItem css={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
