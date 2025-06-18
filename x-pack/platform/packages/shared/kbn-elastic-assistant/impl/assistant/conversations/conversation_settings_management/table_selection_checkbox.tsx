@@ -20,7 +20,6 @@ export const PageSelectionCheckbox = ({
   excludedIds,
   handlePageChecked,
   handlePageUnchecked,
-  isDeleteAll,
   isExcludedMode,
   totalItemCount,
 }: {
@@ -29,7 +28,6 @@ export const PageSelectionCheckbox = ({
   excludedIds: string[];
   handlePageChecked: HandlePageChecked;
   handlePageUnchecked: HandlePageUnchecked;
-  isDeleteAll: boolean;
   isExcludedMode: boolean;
   totalItemCount: number;
 }) => {
@@ -80,7 +78,6 @@ export const InputCheckbox = ({
   isExcludedMode,
   handleRowChecked,
   handleRowUnChecked,
-  isDeleteAll,
   totalItemCount,
 }: {
   conversation: ConversationTableItem;
@@ -89,7 +86,6 @@ export const InputCheckbox = ({
   isExcludedMode: boolean;
   handleRowChecked: HandleRowChecked;
   handleRowUnChecked: HandleRowUnChecked;
-  isDeleteAll: boolean;
   totalItemCount: number;
 }) => {
   const [checked, setChecked] = useState(

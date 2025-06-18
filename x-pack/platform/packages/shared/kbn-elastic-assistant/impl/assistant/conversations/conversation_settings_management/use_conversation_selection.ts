@@ -42,18 +42,34 @@ export const useConversationSelection = () => {
       totalItemCount: number;
     }) => {
       const conversationOptionsIds = conversationOptions.map((item) => item.id);
+      const deletedConversationsIds = deletedConversations.map((item) => item.id);
       if (isExcludedMode) {
         const newExcludedIds = excludedIds.filter((item) => !conversationOptionsIds.includes(item));
         setExcludedIds(newExcludedIds);
+        setTotalSelectedConversations(
+          (prev) => prev + conversationOptionsIds.filter((id) => excludedIds.includes(id)).length
+        );
       } else {
-        const newDeletedConversations = [...deletedConversations, ...conversationOptions];
+        const newDeletedConversations = conversationOptions.reduce(
+          (acc, curr) => {
+            if (!deletedConversationsIds.includes(curr.id)) {
+              acc.push(curr);
+            }
+            return acc;
+          },
+          [...deletedConversations]
+        );
         setDeletedConversations(newDeletedConversations);
+        setTotalSelectedConversations(
+          (prev) =>
+            prev +
+            conversationOptionsIds.filter((id) => !deletedConversationsIds.includes(id)).length
+        );
         if (newDeletedConversations.length === totalItemCount) {
           setIsDeleteAll(true);
           setIsExcludedMode(true);
         }
       }
-      setTotalSelectedConversations((prev) => prev + conversationOptionsIds.length);
     },
     [deletedConversations, excludedIds, isExcludedMode]
   );

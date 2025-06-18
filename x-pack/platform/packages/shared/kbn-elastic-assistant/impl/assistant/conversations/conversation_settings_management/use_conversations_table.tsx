@@ -45,7 +45,6 @@ interface GetColumnsParams {
   handlePageUnchecked: HandlePageUnchecked;
   handleRowChecked: HandleRowChecked;
   handleRowUnChecked: HandleRowUnChecked;
-  isDeleteAll: boolean;
   isDeleteEnabled: (conversation: ConversationTableItem) => boolean;
   isEditEnabled: (conversation: ConversationTableItem) => boolean;
   isExcludedMode: boolean;
@@ -65,7 +64,6 @@ export const useConversationsTable = () => {
       handlePageUnchecked,
       handleRowChecked,
       handleRowUnChecked,
-      isDeleteAll,
       isDeleteEnabled,
       isEditEnabled,
       isExcludedMode,
@@ -78,7 +76,6 @@ export const useConversationsTable = () => {
           field: '',
           name: (
             <PageSelectionCheckbox
-              isDeleteAll={isDeleteAll}
               conversationOptions={conversationOptions}
               deletedConversationsIds={deletedConversationsIds}
               excludedIds={excludedIds}
@@ -96,7 +93,6 @@ export const useConversationsTable = () => {
               isExcludedMode={isExcludedMode}
               handleRowChecked={handleRowChecked}
               handleRowUnChecked={handleRowUnChecked}
-              isDeleteAll={isDeleteAll}
               totalItemCount={totalItemCount}
             />
           ),

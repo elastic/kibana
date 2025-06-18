@@ -220,16 +220,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [closeEditFlyout, onConversationDeleted, openConfirmModal, setDeletedConversations]
   );
 
-  const onBulkDeleteActionClicked = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      onConversationsBulkDeleted(deletedConversationsIds);
+  const onBulkDeleteActionClicked = useCallback(() => {
+    onConversationsBulkDeleted(deletedConversationsIds);
 
-      closeEditFlyout();
-      openConfirmModal();
-    },
-    [closeEditFlyout, deletedConversationsIds, onConversationsBulkDeleted, openConfirmModal]
-  );
+    closeEditFlyout();
+    openConfirmModal();
+  }, [closeEditFlyout, deletedConversationsIds, onConversationsBulkDeleted, openConfirmModal]);
 
   const onDeleteConfirmed = useCallback(() => {
     if (Object.keys(conversationsSettingsBulkActions).length === 0) {
@@ -283,7 +279,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         handlePageUnchecked,
         handleRowChecked,
         handleRowUnChecked,
-        isDeleteAll,
         isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
         isExcludedMode,

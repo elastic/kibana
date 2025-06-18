@@ -30,6 +30,14 @@ const ToolbarComponent: React.FC<Props> = ({
     handleSelectAll(totalConversations);
   }, [handleSelectAll, totalConversations]);
 
+  const onDeleteClicked = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      onConversationsBulkDeleted();
+    },
+    [onConversationsBulkDeleted]
+  );
+
   if (totalConversations === 0) {
     return null;
   }
@@ -70,7 +78,7 @@ const ToolbarComponent: React.FC<Props> = ({
       )}
       {isAnySelected && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" onClick={onConversationsBulkDeleted}>
+          <EuiButtonEmpty size="xs" onClick={onDeleteClicked}>
             {i18n.DELETE_SELECTED_CONVERSATIONS}
           </EuiButtonEmpty>
         </EuiFlexItem>

@@ -41,12 +41,24 @@ describe('useConversationSelection', () => {
     expect(result.current.selectionState.totalSelectedConversations).toBe(totalItemCount);
   });
 
-  it('should handle deleting all conversations on the current page', () => {
+  it('should handle selecting all conversations on the current page', () => {
     const { result } = renderHook(() => useConversationSelection());
     const conversationOptions = [
       { id: '1', title: 'Conversation 1' },
       { id: '2', title: 'Conversation 2' },
     ] as ConversationTableItem[];
+
+    act(() => {
+      result.current.selectionActions.handleRowChecked({
+        selectedItem: conversationOptions[0],
+        totalItemCount: 2,
+      });
+    });
+
+    expect(result.current.selectionState.deletedConversations).toEqual([conversationOptions[0]]);
+    expect(result.current.selectionState.totalSelectedConversations).toBe(1);
+    expect(result.current.selectionState.isDeleteAll).toBe(false);
+
     act(() => {
       result.current.selectionActions.handlePageChecked({
         conversationOptions,
@@ -55,7 +67,9 @@ describe('useConversationSelection', () => {
     });
     expect(result.current.selectionState.deletedConversations).toEqual(conversationOptions);
     expect(result.current.selectionState.totalSelectedConversations).toBe(2);
+    expect(result.current.selectionState.isDeleteAll).toBe(true);
   });
+
   it('should handle page unselected', () => {
     const { result } = renderHook(() => useConversationSelection());
     const conversationOptions = [
