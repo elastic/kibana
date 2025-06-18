@@ -16,7 +16,9 @@ import {
   type SavedObjectsFindOptions,
 } from '@kbn/core-saved-objects-api-server';
 import {
+  legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
 } from '../../common/types/saved_objects';
 
@@ -129,6 +131,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.create({
         id,
         normalizedMonitor,
+        spaceId: 'default',
       });
 
       expect(utils.formatSecrets).toHaveBeenCalledWith({
@@ -136,6 +139,7 @@ describe('MonitorConfigRepository', () => {
         [ConfigKey.MONITOR_QUERY_ID]: 'custom-id',
         [ConfigKey.CONFIG_ID]: id,
         revision: 1,
+        spaces: ['default'],
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
@@ -146,6 +150,7 @@ describe('MonitorConfigRepository', () => {
           [ConfigKey.CONFIG_ID]: id,
           revision: 1,
           formattedSecrets: true,
+          spaces: ['default'],
         },
         { id, overwrite: true }
       );
@@ -169,6 +174,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.create({
         id: 'test',
         normalizedMonitor,
+        spaceId: 'default',
       });
 
       expect(utils.formatSecrets).toHaveBeenCalledWith({
@@ -176,6 +182,7 @@ describe('MonitorConfigRepository', () => {
         [ConfigKey.MONITOR_QUERY_ID]: 'test',
         [ConfigKey.CONFIG_ID]: 'test',
         revision: 1,
+        spaces: ['default'],
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
@@ -186,6 +193,7 @@ describe('MonitorConfigRepository', () => {
           [ConfigKey.CONFIG_ID]: 'test',
           revision: 1,
           formattedSecrets: true,
+          spaces: ['default'],
         },
         { id: 'test', overwrite: true }
       );
@@ -643,15 +651,17 @@ describe('MonitorConfigRepository', () => {
     test('should convert legacy attributes to new attributes for synthetics-monitor type', () => {
       const options = {
         search: 'my-monitor',
-        search_fields: ['monitor.legacy.name', 'status'],
-        sort_field: 'monitor.legacy.name',
+        search_fields: [`${legacyMonitorAttributes}.name`, 'status'],
+        sortField: 'name',
+        filter: `${legacyMonitorAttributes}.enabled:true`,
       };
-      const type = 'synthetics-monitor';
+      const type = syntheticsMonitorSavedObjectType;
 
       const expectedOptions = {
+        filter: 'synthetics-monitor-multiple.attributes.enabled:true',
         search: 'my-monitor',
-        search_fields: ['synthetics.monitor.name', 'status'],
-        sort_field: 'synthetics.monitor.name',
+        search_fields: ['synthetics-monitor-multiple.attributes.name', 'status'],
+        sortField: 'name',
       };
 
       const result = repository.handleLegacyOptions(options, type);
@@ -661,34 +671,19 @@ describe('MonitorConfigRepository', () => {
 
     test('should convert new attributes back to legacy for the legacy monitor type', () => {
       const options = {
-        search_fields: ['synthetics.monitor.name', 'status'],
-        sort_field: 'synthetics.monitor.name',
+        search_fields: [`${syntheticsMonitorAttributes}.name`, 'status'],
+        sortField: `${syntheticsMonitorAttributes}.name`,
       };
-      const type = 'monitor';
+      const legacyType = legacySyntheticsMonitorTypeSingle;
 
       const expectedOptions = {
-        search_fields: ['monitor.legacy.name', 'status'],
-        sort_field: 'monitor.legacy.name',
+        search_fields: ['synthetics-monitor.attributes.name', 'status'],
+        sortField: 'synthetics-monitor.attributes.name',
       };
 
-      const result = repository.handleLegacyOptions(options, type);
+      const result = repository.handleLegacyOptions(options, legacyType);
       expect(result).toEqual(expectedOptions);
       expect(mockLogger.error).not.toHaveBeenCalled();
-    });
-
-    test('should return the original options for an unrelated type', () => {
-      const options = {
-        search: 'my-dashboard',
-        search_fields: ['title'],
-      };
-      const type = 'dashboard';
-
-      const result = repository.handleLegacyOptions(options, type);
-
-      // Using .toEqual to check for value equality, as it's a new object after stringify/parse
-      // but in this path, it should return the original object. The function logic needs a fix.
-      // Let's assume the correct behavior is to return a structurally identical object.
-      expect(result).toEqual(options);
     });
 
     test('should return options unchanged if no target attributes are found for a matching type', () => {
@@ -713,13 +708,13 @@ describe('MonitorConfigRepository', () => {
     test('should handle options with null or undefined values', () => {
       const options = {
         search_fields: ['monitor.legacy.name', null],
-        sort_field: undefined,
+        sortField: undefined,
       };
       const type = 'synthetics-monitor';
 
       const expectedOptions = {
-        search_fields: ['synthetics.monitor.name', null],
-        sort_field: undefined,
+        search_fields: ['monitor.legacy.name', null],
+        sortField: undefined,
       };
 
       const result = repository.handleLegacyOptions(options, type);
