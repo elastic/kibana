@@ -12,7 +12,7 @@ import type { Reference } from '@kbn/content-management-utils';
 
 export type EmbeddableTransforms<StoredState, State> = {
   schema?: Type<State>;
-  transformOut?: (state: StoredState, references?: SavedObjectReference[]) => State;
+  transformOut?: (state: StoredState, references?: Reference[]) => State;
   transformIn?: (state: State) => {
     state: StoredState;
     references?: Reference[];
