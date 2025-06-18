@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   EuiCard,
   EuiFlexGrid,
@@ -23,9 +23,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { IndexSelectorModal } from './select_index_modal';
 import { IntegrationCards } from './integrations_cards';
+import { UploadPrivilegedUsersModal } from './file_uploader/upload_privileged_users_modal';
 
-export const AddDataSourcePanel = () => {
+interface AddDataSourcePanelProps {
+  onComplete: (userCount: number) => void;
+}
+
+export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
   const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
+
+  const [isImportFileModalVisible, setShowImportFileModal] = useState(false);
+  const closeImportFileModal = () => setShowImportFileModal(false);
+  const showImportFileModal = () => setShowImportFileModal(true);
 
   return (
     <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
@@ -118,10 +127,13 @@ export const AddDataSourcePanel = () => {
                 defaultMessage="Import a list of privileged users from a CSV, TXT, or TSV file"
               />
             }
-            onClick={() => {}}
+            onClick={showImportFileModal}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {isImportFileModalVisible && (
+        <UploadPrivilegedUsersModal onClose={closeImportFileModal} onImport={onComplete} />
+      )}
     </EuiPanel>
   );
 };
