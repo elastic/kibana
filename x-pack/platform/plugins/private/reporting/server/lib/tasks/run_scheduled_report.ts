@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, SavedObject } from '@kbn/core/server';
-import { numberToDuration } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
@@ -169,10 +168,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
   }
 
   public getTaskDefinition() {
-    // round up from ms to the nearest second
-    const queueTimeout =
-      Math.ceil(numberToDuration(this.opts.config.queue.timeout).asSeconds()) + 's';
-    const maxConcurrency = this.opts.config.queue.pollEnabled ? 1 : 0;
+    const queueTimeout = this.getQueueTimeout();
+    const maxConcurrency = this.getMaxConcurrency();
 
     return {
       type: SCHEDULED_REPORTING_EXECUTE_TYPE,

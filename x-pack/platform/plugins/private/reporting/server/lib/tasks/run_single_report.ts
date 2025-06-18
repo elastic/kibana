@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
-import { QueueTimeoutError, ReportingError, numberToDuration } from '@kbn/reporting-common';
+import { QueueTimeoutError, ReportingError } from '@kbn/reporting-common';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
 import { REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
@@ -129,10 +129,8 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   protected async notify(): Promise<void> {}
 
   public getTaskDefinition() {
-    // round up from ms to the nearest second
-    const queueTimeout =
-      Math.ceil(numberToDuration(this.opts.config.queue.timeout).asSeconds()) + 's';
-    const maxConcurrency = this.opts.config.queue.pollEnabled ? 1 : 0;
+    const queueTimeout = this.getQueueTimeout();
+    const maxConcurrency = this.getMaxConcurrency();
     const maxAttempts = this.getMaxAttempts();
 
     return {

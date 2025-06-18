@@ -105,7 +105,7 @@ const savedObjects: Array<SavedObject<ScheduledReportType>> = [
           to: ['user@elastic.co'],
         },
       },
-      title: '[Logs] Web Traffic',
+      title: 'Another cool dashboard',
       payload:
         '{"browserTimezone":"America/New_York","layout":{"dimensions":{"height":2220,"width":1364},"id":"preserve_layout"},"objectType":"dashboard","title":"[Logs] Web Traffic","version":"9.1.0","locatorParams":[{"id":"DASHBOARD_APP_LOCATOR","params":{"dashboardId":"edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b","preserveSavedFilters":true,"timeRange":{"from":"now-7d/d","to":"now"},"useHash":false,"viewMode":"view"}}],"isDeprecated":false}',
       schedule: {
@@ -266,9 +266,14 @@ describe('scheduledQueryFactory', () => {
           type: ['access'],
         },
         kibana: {
-          saved_object: { id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca', type: 'scheduled_report' },
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+            name: '[Logs] Web Traffic',
+          },
         },
-        message: 'User has accessed scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+        message:
+          'User has accessed scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
       });
 
       expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
@@ -279,9 +284,14 @@ describe('scheduledQueryFactory', () => {
           type: ['access'],
         },
         kibana: {
-          saved_object: { id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4', type: 'scheduled_report' },
+          saved_object: {
+            id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
+            type: 'scheduled_report',
+            name: 'Another cool dashboard',
+          },
         },
-        message: 'User has accessed scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4]',
+        message:
+          'User has accessed scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
 
       expect(result).toEqual({
@@ -325,7 +335,7 @@ describe('scheduledQueryFactory', () => {
             },
             payload: jsonPayload,
             space_id: 'a-space',
-            title: '[Logs] Web Traffic',
+            title: 'Another cool dashboard',
             schedule: {
               rrule: {
                 freq: 1,
@@ -479,7 +489,7 @@ describe('scheduledQueryFactory', () => {
               },
             },
             payload: jsonPayload,
-            title: '[Logs] Web Traffic',
+            title: 'Another cool dashboard',
             schedule: {
               rrule: {
                 freq: 1,
@@ -561,12 +571,12 @@ describe('scheduledQueryFactory', () => {
         kibana: {
           saved_object: {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            name: '[Logs] Web Traffic',
+            name: 'Another cool dashboard',
             type: 'scheduled_report',
           },
         },
         message:
-          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
 
       expect(result).toEqual({
@@ -668,10 +678,11 @@ describe('scheduledQueryFactory', () => {
           saved_object: {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
             type: 'scheduled_report',
+            name: 'Another cool dashboard',
           },
         },
         message:
-          'Failed attempt to disable scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4]',
+          'Failed attempt to disable scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
     });
 
@@ -741,12 +752,12 @@ describe('scheduledQueryFactory', () => {
         kibana: {
           saved_object: {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            name: '[Logs] Web Traffic',
+            name: 'Another cool dashboard',
             type: 'scheduled_report',
           },
         },
         message:
-          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
 
       expect(result).toEqual({
@@ -880,12 +891,12 @@ describe('scheduledQueryFactory', () => {
         kibana: {
           saved_object: {
             id: '2da1cb75-04c7-4202-a9f0-f8bcce63b0f4',
-            name: '[Logs] Web Traffic',
+            name: 'Another cool dashboard',
             type: 'scheduled_report',
           },
         },
         message:
-          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=[Logs] Web Traffic]',
+          'User is disabling scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
 
       expect(result).toEqual({
@@ -1112,7 +1123,7 @@ describe('transformResponse', () => {
             },
           },
           payload: jsonPayload,
-          title: '[Logs] Web Traffic',
+          title: 'Another cool dashboard',
           schedule: {
             rrule: {
               freq: 1,
@@ -1228,7 +1239,7 @@ describe('transformResponse', () => {
             },
           },
           payload: jsonPayload,
-          title: '[Logs] Web Traffic',
+          title: 'Another cool dashboard',
           schedule: {
             rrule: {
               freq: 1,
@@ -1296,7 +1307,7 @@ describe('transformResponse', () => {
             },
           },
           payload: jsonPayload,
-          title: '[Logs] Web Traffic',
+          title: 'Another cool dashboard',
           schedule: {
             rrule: {
               freq: 1,
@@ -1351,7 +1362,7 @@ describe('transformResponse', () => {
             },
           },
           payload: jsonPayload,
-          title: '[Logs] Web Traffic',
+          title: 'Another cool dashboard',
           schedule: {
             rrule: {
               freq: 1,

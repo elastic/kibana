@@ -159,19 +159,23 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           return getEmptyApiResponse(page, size);
         }
 
-        const scheduledReportIds = response?.saved_objects.map((so) => so.id);
+        const scheduledReportIdsAndName = response?.saved_objects.map((so) => ({
+          id: so.id,
+          name: so.attributes.title,
+        }));
 
-        if (!scheduledReportIds || scheduledReportIds.length === 0) {
+        if (!scheduledReportIdsAndName || scheduledReportIdsAndName.length === 0) {
           return getEmptyApiResponse(page, size);
         }
 
-        scheduledReportIds.forEach((id) =>
+        scheduledReportIdsAndName.forEach(({ id, name }) =>
           auditLogger.log(
             scheduledReportAuditEvent({
               action: ScheduledReportAuditAction.LIST,
               savedObject: {
                 type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
                 id,
+                name,
               },
             })
           )
@@ -189,7 +193,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                 filter: [
                   {
                     terms: {
-                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportIds,
+                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportIdsAndName.map(({ id }) => id),
                     },
                   },
                 ],
@@ -257,6 +261,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                   savedObject: {
                     type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
                     id: so.id,
+                    name: so?.attributes?.title,
                   },
                   error: new Error(`Not found.`),
                 })
@@ -306,6 +311,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                   savedObject: {
                     type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
                     id: so.id,
+                    name: so?.attributes?.title,
                   },
                   error: new Error(so.error.message),
                 })

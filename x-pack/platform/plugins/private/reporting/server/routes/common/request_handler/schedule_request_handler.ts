@@ -136,7 +136,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     auditLogger.log(
       scheduledReportAuditEvent({
         action: ScheduledReportAuditAction.SCHEDULE,
-        savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id: reportId, name },
+        savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id: reportId, name: job.title },
         outcome: 'unknown',
       })
     );
@@ -239,7 +239,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       auditLogger.log(
         scheduledReportAuditEvent({
           action: ScheduledReportAuditAction.SCHEDULE,
-          savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id },
+          savedObject: { type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE, id, name: jobParams.title },
           error: err,
         })
       );

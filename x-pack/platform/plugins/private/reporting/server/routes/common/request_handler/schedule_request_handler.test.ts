@@ -201,8 +201,10 @@ describe('Handle request to schedule', () => {
           outcome: 'unknown',
           type: ['creation'],
         },
-        kibana: { saved_object: { id: 'mock-report-id', name: 'PDF', type: 'scheduled_report' } },
-        message: 'User is creating scheduled report [id=mock-report-id] [name=PDF]',
+        kibana: {
+          saved_object: { id: 'mock-report-id', name: 'cool_title', type: 'scheduled_report' },
+        },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=cool_title]',
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
@@ -294,8 +296,10 @@ describe('Handle request to schedule', () => {
           outcome: 'unknown',
           type: ['creation'],
         },
-        kibana: { saved_object: { id: 'mock-report-id', name: 'PDF', type: 'scheduled_report' } },
-        message: 'User is creating scheduled report [id=mock-report-id] [name=PDF]',
+        kibana: {
+          saved_object: { id: 'mock-report-id', name: 'cool_title', type: 'scheduled_report' },
+        },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=cool_title]',
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
@@ -777,9 +781,10 @@ describe('Handle request to schedule', () => {
           saved_object: {
             id: 'mock-report-id',
             type: 'scheduled_report',
+            name: 'cool_title',
           },
         },
-        message: 'Failed attempt to create scheduled report [id=mock-report-id]',
+        message: 'Failed attempt to create scheduled report [id=mock-report-id] [name=cool_title]',
       });
     });
   });

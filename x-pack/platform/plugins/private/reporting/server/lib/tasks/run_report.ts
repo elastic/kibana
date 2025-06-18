@@ -18,6 +18,7 @@ import {
   MissingAuthenticationError,
   ReportingError,
   durationToNumber,
+  numberToDuration,
 } from '@kbn/reporting-common';
 import type {
   ExecutionError,
@@ -192,6 +193,15 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected getJobContentExtension(jobType: string) {
     const exportType = this.exportTypesRegistry.getByJobType(jobType);
     return exportType.jobContentExtension;
+  }
+
+  protected getMaxConcurrency() {
+    return this.opts.config.queue.pollEnabled ? 1 : 0;
+  }
+
+  protected getQueueTimeout() {
+    // round up from ms to the nearest second
+    return Math.ceil(numberToDuration(this.opts.config.queue.timeout).asSeconds()) + 's';
   }
 
   protected async failJob(
