@@ -16,25 +16,25 @@ import { Footer } from './footer/footer';
 export const SearchHomepageBody = () => (
   <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
     <EuiFlexGroup gutterSize="l" direction="column">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <ConnectToElasticsearch />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <AlternateSolutions />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <DiveDeeperWithElasticsearch />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <Footer />
       </EuiFlexItem>
     </EuiFlexGroup>

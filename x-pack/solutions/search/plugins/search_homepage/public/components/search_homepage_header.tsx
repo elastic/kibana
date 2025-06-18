@@ -7,11 +7,15 @@
 import React from 'react';
 import {
   EuiPageTemplate,
-  EuiImage,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   useEuiTheme,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  EuiSpacer,
+  EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -19,23 +23,41 @@ import searchHomePageLight from '../assets/search_homepage_light.svg';
 import searchHomePageDark from '../assets/search_homepage_dark.svg';
 
 export const SearchHomepageHeader: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { colorMode } = useEuiTheme();
-
   return (
-    <EuiPageTemplate.Header
+    <EuiPageTemplate.Section
       data-test-subj="search-homepage-header"
-      pageTitle={i18n.translate('xpack.searchHomepage.pageTitle', {
-        defaultMessage: 'Your vector database just got faster',
-      })}
-      description={
-        <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.searchHomepage.description', {
-              defaultMessage:
-                'Elasticsearch and Lucene now offer “Better binary quantization”, delivering ~95% memory reduction while maintaining high ranking quality.',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+      paddingSize="none"
+      color="subdued"
+    >
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="stretch"
+        style={{
+          paddingLeft: euiTheme.size.xxxl,
+          paddingRight: euiTheme.size.xxxl,
+        }}
+      >
+        <EuiFlexItem style={{ alignSelf: 'center' }}>
+          <EuiPanel color="transparent" paddingSize="xl">
+            <EuiTitle size="l">
+              <h1>
+                {i18n.translate('xpack.searchHomepage.pageTitle', {
+                  defaultMessage: 'Your vector database just got faster',
+                })}
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText grow={false}>
+              <p>
+                {i18n.translate('xpack.searchHomepage.description', {
+                  defaultMessage:
+                    'Elasticsearch and Lucene now offer “Better binary quantization”, delivering ~95% memory reduction while maintaining high ranking quality.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="xl" />
             <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -74,16 +96,13 @@ export const SearchHomepageHeader: React.FC = () => {
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      rightSideItems={[
-        <EuiImage
-          size="xl"
-          src={colorMode === 'LIGHT' ? searchHomePageLight : searchHomePageDark}
-          alt=""
-        />,
-      ]}
-    />
+          </EuiPanel>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiImage src={colorMode === 'LIGHT' ? searchHomePageLight : searchHomePageDark} alt="" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageTemplate.Section>
   );
 };
