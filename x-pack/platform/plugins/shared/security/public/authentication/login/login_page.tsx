@@ -31,7 +31,7 @@ import type {
   NotificationsStart,
 } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { fullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
+import { kbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -155,7 +155,7 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form" css={fullScreenGraphicsMixinStyles}>
+      <div className="loginWelcome login-form" css={kbnFullScreenBgCss}>
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
             <span className="loginWelcome__logo" style={logoStyle}>

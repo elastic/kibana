@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 // The `--kbnAppHeadersOffset` CSS variable is automatically updated by
 // styles/rendering/_base.scss, based on whether the Kibana chrome has a
 // header banner, app menu, and is visible or hidden
-export const kibanaFullBodyHeightCss = (additionalOffset = '0px') =>
+export const kbnFullBodyHeightCss = (additionalOffset = '0px') =>
   css({
     height: `calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset})`,
   });

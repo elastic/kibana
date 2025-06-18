@@ -25,7 +25,7 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
@@ -275,12 +275,12 @@ export const renderSpaceSelectorApp = (
 
 // portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners
 const BackgroundPortal = React.memo(function BackgroundPortal() {
-  const fullScreenGraphicsMixinStyles = useFullScreenGraphicsMixinStyles();
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
   return (
     <EuiPortal>
       <div
         className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-        css={fullScreenGraphicsMixinStyles}
+        css={kbnFullScreenBgCss}
         role="presentation"
       />
     </EuiPortal>

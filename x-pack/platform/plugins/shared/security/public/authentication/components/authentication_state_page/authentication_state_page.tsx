@@ -11,7 +11,7 @@ import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 
 interface Props {
   className?: string;
@@ -20,13 +20,10 @@ interface Props {
 }
 
 export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => {
-  const fullScreenGraphicsMixinStyles = useFullScreenGraphicsMixinStyles();
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
 
   return (
-    <div
-      className={`secAuthenticationStatePage ${props.className || ''}`}
-      css={fullScreenGraphicsMixinStyles}
-    >
+    <div className={`secAuthenticationStatePage ${props.className || ''}`} css={kbnFullScreenBgCss}>
       <header className="secAuthenticationStatePage__header">
         <div className="secAuthenticationStatePage__content eui-textCenter">
           <EuiSpacer size="xxl" />

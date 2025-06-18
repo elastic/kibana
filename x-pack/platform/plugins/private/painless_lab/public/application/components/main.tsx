@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +42,7 @@ const mainStyles = {
     // (they're both the same height, hence the x2)
     const bodyOffset = `(${bottomBarHeight} * 2)`;
 
-    return kibanaFullBodyHeightCss(bodyOffset);
+    return kbnFullBodyHeightCss(bodyOffset);
   },
 };
 

@@ -17,7 +17,7 @@ import bg_top_branded_dark from './images/bg_top_branded_dark.svg';
 import bg_bottom_branded from './images/bg_bottom_branded.svg';
 import bg_bottom_branded_dark from './images/bg_bottom_branded_dark.svg';
 
-export const fullScreenGraphicsMixinStyles = ({ euiTheme, colorMode }: UseEuiTheme) => {
+export const kbnFullScreenBgCss = ({ euiTheme, colorMode }: UseEuiTheme) => {
   const lightOrDarkTheme = (lightSvg: string, darkSvg: any) => {
     return colorMode === COLOR_MODES_STANDARD.light ? lightSvg : darkSvg;
   };
@@ -69,8 +69,8 @@ export const fullScreenGraphicsMixinStyles = ({ euiTheme, colorMode }: UseEuiThe
   });
 };
 
-export const useFullScreenGraphicsMixinStyles = () => {
+export const useKbnFullScreenBgCss = () => {
   const euiTheme = useEuiTheme();
-  const styles = useMemo(() => fullScreenGraphicsMixinStyles(euiTheme), [euiTheme]);
+  const styles = useMemo(() => kbnFullScreenBgCss(euiTheme), [euiTheme]);
   return styles;
 };
