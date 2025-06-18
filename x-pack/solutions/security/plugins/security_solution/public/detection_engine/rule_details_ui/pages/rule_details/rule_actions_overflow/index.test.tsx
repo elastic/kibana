@@ -326,7 +326,9 @@ describe('RuleActionsOverflow', () => {
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      expect(getByTestId('rules-details-menu-panel')).toHaveTextContent('Revert rule');
+      expect(getByTestId('rules-details-menu-panel')).toHaveTextContent(
+        'Revert to Elastic version'
+      );
 
       fireEvent.click(getByTestId('rules-details-revert-rule'));
       // Popover is not shown

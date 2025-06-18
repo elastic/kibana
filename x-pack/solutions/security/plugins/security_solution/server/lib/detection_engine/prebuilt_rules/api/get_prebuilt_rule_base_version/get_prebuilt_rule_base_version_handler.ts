@@ -90,6 +90,12 @@ const formatDiffResponse = (
   const baseRule: RuleResponse = {
     ...convertPrebuiltRuleAssetToRuleResponse(baseVersion),
     id: installedCurrentVersion.id,
+    // Set all fields to the original Elastic version values
+    created_at: installedCurrentVersion.created_at,
+    created_by: installedCurrentVersion.created_by,
+    updated_at: installedCurrentVersion.created_at,
+    updated_by: installedCurrentVersion.created_by,
+    revision: 0,
   };
 
   return {

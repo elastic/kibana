@@ -13,7 +13,6 @@ import type { BulkActionReversionSkipResult } from '../../../../../../common/api
 import {
   type RevertPrebuiltRulesRequest,
   type RevertPrebuiltRulesResponseBody,
-  BulkRevertSkipReasonEnum,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -28,6 +27,7 @@ import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { mergeAndUpdatePrebuiltRules } from '../../logic/rule_objects/merge_and_update_prebuilt_rules';
 import { getConcurrencyErrors } from './get_concurrrency_errors';
+import { filterRulesToRevert } from './filter_rules_to_revert';
 
 const MAX_RULES_TO_REVERT = 1;
 
@@ -48,6 +48,9 @@ export const revertPrebuiltRuleHandler = async (
 
     const concurrencySet = { [id]: { revision, version } };
 
+    const updated: RuleResponse[] = [];
+    const errors: BulkActionError[] = [];
+
     const fetchRulesOutcome = await fetchRulesByQueryOrIds({
       rulesClient,
       query: undefined,
@@ -55,12 +58,11 @@ export const revertPrebuiltRuleHandler = async (
       maxRules: MAX_RULES_TO_REVERT,
     });
 
-    const rulesToRevert = fetchRulesOutcome.results.map(({ result }) =>
+    const formattedRules = fetchRulesOutcome.results.map(({ result }) =>
       convertAlertingRuleToRuleResponse(result)
     );
-    const errors: BulkActionError[] = [...fetchRulesOutcome.errors];
-    const updated: RuleResponse[] = [];
-    const skipped: BulkActionReversionSkipResult[] = [];
+    const { rulesToRevert, skipped } = filterRulesToRevert(formattedRules);
+    errors.push(...fetchRulesOutcome.errors);
 
     const baseRules = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
     const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], baseRules); // We use base versions as target param as we are reverting rules
@@ -68,7 +70,6 @@ export const revertPrebuiltRuleHandler = async (
 
     rulesToRevert.forEach((rule) => {
       const ruleVersions = ruleVersionsMap.get(rule.rule_id);
-
       const currentVersion = ruleVersions?.current;
       const baseVersion = ruleVersions?.target;
 
@@ -97,20 +98,6 @@ export const revertPrebuiltRuleHandler = async (
       );
       if (concurrencyErrors.length) {
         errors.push(...concurrencyErrors);
-        return;
-      }
-
-      if (rule.rule_source.type !== 'external') {
-        skipped.push({
-          id: rule.id,
-          skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_PREBUILT,
-        });
-        return;
-      } else if (rule.rule_source.type === 'external' && rule.rule_source.is_customized === false) {
-        skipped.push({
-          id: rule.id,
-          skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_CUSTOMIZED,
-        });
         return;
       }
 
@@ -148,7 +135,7 @@ export const revertPrebuiltRuleHandler = async (
   }
 };
 
-// Similar to `buildBulkResponse` in /bulk_actions_response.ts but the RevertPrebuiltRulesResponseBody has a slightly different return body
+// Similar to `buildBulkResponse` in /bulk_actions_response.ts but the `RevertPrebuiltRulesResponseBody` type has a slightly different return body
 // If we extend the revert route this can be folded into the existing buildBuleResponse function
 const buildRuleReversionResponse = (
   response: KibanaResponseFactory,

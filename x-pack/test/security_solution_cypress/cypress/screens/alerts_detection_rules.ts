@@ -134,6 +134,11 @@ export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-ru
 
 export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-manual-rule-run"]';
 
+export const RULE_DETAILS_REVERT_RULE_BTN = '[data-test-subj="rules-details-revert-rule"]';
+
+export const RULE_DETAILS_REVERT_RULE_TOOLTIP =
+  '[data-test-subj="rules-details-revert-rule-tooltip"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
