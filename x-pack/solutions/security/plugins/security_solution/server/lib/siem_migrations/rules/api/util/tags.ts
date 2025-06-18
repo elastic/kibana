@@ -7,12 +7,12 @@
 
 import type { StoredRuleMigration } from '../../types';
 
-const vendorTagMap: Record<StoredRuleMigration['original_rule']['vendor'], string> = {
-  splunk: 'Migrated from SPL',
+const vendorCodeMap: Record<StoredRuleMigration['original_rule']['vendor'], string> = {
+  splunk: 'SPL',
 };
 
 export const getTagsByVendor = (
   vendor: StoredRuleMigration['original_rule']['vendor']
 ): string[] => {
-  return [vendorTagMap[vendor]];
+  return [`Migrated from ${vendorCodeMap[vendor]}`];
 };
