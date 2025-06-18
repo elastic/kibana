@@ -37916,9 +37916,35 @@ Object {
     },
     "isRuleSeverity": Object {
       "flags": Object {
+        "default": null,
         "error": [Function],
+        "presence": "optional",
       },
-      "type": "boolean",
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "flags": Object {
+              "default": false,
+              "error": [Function],
+              "presence": "optional",
+            },
+            "type": "boolean",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              null,
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
     },
     "severity": Object {
       "flags": Object {

@@ -61,6 +61,7 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
     expect(getByTestId('tagsInput')).toBeInTheDocument();
     expect(getByTestId('severitySelectInput')).toBeInTheDocument();
+    expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
     expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
     expect(getByTestId('typeInput')).toBeInTheDocument();
     expect(getByTestId('sourceInput')).toBeInTheDocument();
@@ -68,5 +69,6 @@ describe('TheHiveParamsFields renders', () => {
 
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
+    expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
   });
 });

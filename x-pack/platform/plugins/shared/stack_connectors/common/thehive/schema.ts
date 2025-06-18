@@ -55,7 +55,7 @@ export const ExecutorSubActionCreateAlertParamsSchema = schema.object({
   source: schema.string(),
   sourceRef: schema.string(),
   severity: schema.nullable(schema.number({ defaultValue: TheHiveSeverity.MEDIUM })),
-  isRuleSeverity: schema.boolean(),
+  isRuleSeverity: schema.nullable(schema.boolean({ defaultValue: false })),
   tlp: schema.nullable(schema.number({ defaultValue: TheHiveTLP.AMBER })),
   tags: schema.nullable(schema.arrayOf(schema.string())),
   body: schema.nullable(schema.string()),

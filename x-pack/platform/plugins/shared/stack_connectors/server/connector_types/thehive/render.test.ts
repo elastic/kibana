@@ -19,7 +19,7 @@ const params = {
     source: 'source',
     sourceRef: '{{alert.uuid}}',
     tlp: 2,
-    severity: 3,
+    severity: 1,
     isRuleSeverity: true,
     body: '{"observables":[{"datatype":"url","data":"{{url}}"}],"tags":["test"]}',
   },
@@ -45,6 +45,26 @@ describe('TheHive - renderParameterTemplates', () => {
       tlp: 2,
       severity: 3,
       isRuleSeverity: true,
+      body: `{"observables":[{"datatype":"url","data":"${variables.url}"}],"tags":["test"]}`,
+    });
+  });
+
+  it('should not use rule severity if isRuleSeverity is false', () => {
+    const paramswithoutRuleSeverity = {
+      ...params,
+      subActionParams: { ...params.subActionParams, isRuleSeverity: false },
+    };
+    const result = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
+
+    expect(result.subActionParams).toEqual({
+      title: 'title',
+      description: 'description',
+      type: 'type',
+      source: 'source',
+      sourceRef: variables.alert.uuid,
+      tlp: 2,
+      severity: 1,
+      isRuleSeverity: false,
       body: `{"observables":[{"datatype":"url","data":"${variables.url}"}],"tags":["test"]}`,
     });
   });
