@@ -2815,13 +2815,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return 500 error if some rules do not exist', async () => {
-        const existantRules = Object.keys(generatedGapEvents);
-        const nonExistantRule = 'non-existant-rule';
+        const existentRules = Object.keys(generatedGapEvents);
+        const nonExistentRule = 'non-existent-rule';
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
             query: {},
             body: {
-              ids: [...existantRules, nonExistantRule],
+              ids: [...existentRules, nonExistentRule],
               action: BulkActionTypeEnum.fill_gaps,
               [BulkActionTypeEnum.fill_gaps]: {
                 start_date: backfillStart.toISOString(),
@@ -2834,8 +2834,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.attributes.summary).toEqual({
           failed: 1,
           skipped: 0,
-          succeeded: existantRules.length,
-          total: existantRules.length + 1,
+          succeeded: existentRules.length,
+          total: existentRules.length + 1,
         });
 
         expect(body.attributes.errors).toHaveLength(1);
@@ -2844,7 +2844,7 @@ export default ({ getService }: FtrProviderContext): void => {
           status_code: 500,
           rules: [
             {
-              id: nonExistantRule,
+              id: nonExistentRule,
             },
           ],
         });
