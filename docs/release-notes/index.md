@@ -51,9 +51,9 @@ For the Elastic Observability 9.0.3 release information, refer to [Elastic Obser
 For the Elastic Security 9.0.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
-* Ensures that the {{bedrock}} connector uses the configured action proxy URL [#224130]({{kib-pull}}224130).
+* Ensures that the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
+* Ensures that the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
 * Allows you to still add additional fields if your ingest pipeline is empty [#222775]({{kib-pull}}222775).
-* Fixes OpenAI connector does not use the action proxy configuration for all subactions [#219617]({{kib-pull}}219617).
 * Resolves multiple issues in the Watcher UI that were introduced in 8.18.0, 8.18.1, 9.0.0, and 9.1.0. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected [#223898]({{kib-pull}}223898).
 
 ## 9.0.2 [kibana-9.0.2-release-notes]
