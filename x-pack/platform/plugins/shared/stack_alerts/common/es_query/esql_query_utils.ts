@@ -8,7 +8,7 @@
 import { entries, findLastIndex, intersection, isNil } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
-import type { ESQLCommandOption } from '@kbn/esql-ast';
+import type { ESQLAstItem, ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem } from '@kbn/esql-validation-autocomplete';
 import { ActionGroupId } from './constants';
@@ -248,8 +248,8 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
   return astCommands.reduce((updatedFields, command) => {
     for (const renameArg of command.args) {
-      if (isOptionItem(renameArg) && renameArg.name === 'as') {
-        const [original, renamed] = renameArg.args;
+      if (isOptionItem(renameArg) && (renameArg.name === 'as' || renameArg.name === '=')) {
+        const { original, renamed } = getArgsFromRenameFunction(renameArg);
         if (isColumnItem(original) && isColumnItem(renamed)) {
           updatedFields = updatedFields.map((field) =>
             field === original.name ? renamed.name : field
@@ -294,4 +294,25 @@ const getColumnsForPreview = (
     cols.push({ id: c.name, actions: false });
   }
   return cols;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLCommandOption
+): { original: ESQLAstItem; renamed: ESQLAstItem } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0],
+      renamed: renameFunction.args[1],
+    };
+  }
+
+  return {
+    original: renameFunction.args[1],
+    renamed: renameFunction.args[0],
+  };
 };
