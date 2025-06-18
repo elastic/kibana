@@ -24,11 +24,20 @@ const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
+  const esqlQuery = getAnomaliesDetectedEsqlQuery('default', undefined, undefined, timerange);
   const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Anomalies Detected',
     label: 'Anomalies Detected',
-    esqlQuery: getAnomaliesDetectedEsqlQuery('default', undefined, undefined, timerange),
+    esqlQuery,
   });
+
+  // // Handle data source mismatch: Disable "Open in Lens" for ML data sources
+  // // to prevent "Cannot read properties of undefined (reading 'map')" errors
+  // // when ML indices may not be available or accessible
+  // const disableLensActions = shouldDisableLensActions(esqlQuery);
+  // const allowedActions: VisualizationContextMenuActions[] = disableLensActions
+  //   ? [VisualizationContextMenuActions.inspect] // Only allow inspect action for ML data sources
+  //   : [VisualizationContextMenuActions.inspect, VisualizationContextMenuActions.openInLens]; // Allow all actions for other data sources
 
   return (
     <EuiFlexItem grow={false}>
@@ -49,6 +58,7 @@ export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
           width="auto"
           height={LENS_VISUALIZATION_HEIGHT}
           disableOnClickFilter
+          // withActions={allowedActions}
           inspectTitle={
             <FormattedMessage
               id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"

@@ -12,63 +12,94 @@ interface KeyInsightsPanelParams {
   label: string;
   esqlQuery: string;
   dataViewId?: string; // Optional data view override for ESQL queries
+  dataViewTitle?: string; // Optional data view title override
 }
 
 export const createKeyInsightsPanelLensAttributes = ({
   title,
   label,
   esqlQuery,
-  dataViewId,
-}: KeyInsightsPanelParams): LensAttributes => ({
-  title,
-  description: '',
-  visualizationType: 'lnsMetric',
-  state: {
-    visualization: {
-      layerId: 'layer1',
-      layerType: 'data',
-      metricAccessor: 'count',
-    },
-    query: {
-      query: esqlQuery,
-      language: 'esql',
-    },
-    filters: [],
-    datasourceStates: {
-      textBased: {
-        layers: {
-          layer1: {
-            columns: [
-              {
-                columnId: 'count',
-                fieldName: 'COUNT(*)',
-                label,
-                customLabel: true,
-                params: {
-                  format: {
-                    id: 'number',
-                    params: {
-                      decimals: 0,
-                      compact: false,
-                    },
-                  },
-                },
-              },
-            ],
-            query: {
-              esql: esqlQuery,
-            },
-          },
-        },
-      },
-    },
-    adHocDataViews: {
+  dataViewId = 'default-dataview',
+  dataViewTitle = 'logs-*',
+}: KeyInsightsPanelParams): LensAttributes => {
+  // Determine appropriate data view based on the query
+  const isMLQuery = esqlQuery.includes('.ml-anomalies');
+  const isAlertsQuery = esqlQuery.includes('.alerts-');
+
+  let adHocDataView;
+  if (isMLQuery) {
+    adHocDataView = {
       'ml-anomalies-dataview': {
         id: 'ml-anomalies-dataview',
         title: '.ml-anomalies-*',
         timeFieldName: '@timestamp',
+        allowNoIndex: true, // Allow queries even if ML indices don't exist
       },
+    };
+  } else if (isAlertsQuery) {
+    adHocDataView = {
+      'alerts-dataview': {
+        id: 'alerts-dataview',
+        title: '.alerts-*',
+        timeFieldName: '@timestamp',
+      },
+    };
+  } else {
+    // Default for logs data
+    adHocDataView = {
+      'logs-dataview': {
+        id: 'logs-dataview',
+        title: dataViewTitle,
+        timeFieldName: '@timestamp',
+      },
+    };
+  }
+
+  return {
+    title,
+    description: '',
+    visualizationType: 'lnsMetric',
+    state: {
+      visualization: {
+        layerId: 'layer1',
+        layerType: 'data',
+        metricAccessor: 'count',
+      },
+      query: {
+        query: esqlQuery,
+        language: 'esql',
+      },
+      filters: [],
+      datasourceStates: {
+        textBased: {
+          layers: {
+            layer1: {
+              columns: [
+                {
+                  columnId: 'count',
+                  fieldName: 'COUNT(*)',
+                  label,
+                  customLabel: true,
+                  params: {
+                    format: {
+                      id: 'number',
+                      params: {
+                        decimals: 0,
+                        compact: false,
+                      },
+                    },
+                  },
+                },
+              ],
+              query: {
+                esql: esqlQuery,
+              },
+            },
+          },
+        },
+      },
+      adHocDataViews: adHocDataView,
     },
-  },
-  references: [],
-});
+    references: [],
+  };
+};
