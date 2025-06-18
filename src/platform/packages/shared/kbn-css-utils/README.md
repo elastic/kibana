@@ -8,7 +8,7 @@ This package includes reusable styling helpers designed to support styling with 
 
 - `useMemoCss`: React hook to memoize Emotion styles.
 - `kbnFullBodyHeightCss`: Utility for full-body-height layout styling.
-- `kbnFullScreenBgCss`: Full-screen background styling helper, previously implemented as an SCSS mixin.
+- `kbnFullScreenBgCss`: Full-screen graphics styling helper, used in various login page.
 
 ## 📌 Usage
 
