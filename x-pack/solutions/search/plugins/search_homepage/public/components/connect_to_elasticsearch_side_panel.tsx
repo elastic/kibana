@@ -84,7 +84,7 @@ export const ConnectToElasticsearchSidePanel = () => {
             <EuiTitle size="xs">
               <span>
                 {i18n.translate('xpack.searchHomepage.connectToElasticsearch.needAdviceTitle', {
-                  defaultMessage: 'Need advice? Engage a Customer Engineer.',
+                  defaultMessage: 'Need help with Serverless? Engage a Customer Engineer.',
                 })}
               </span>
             </EuiTitle>
@@ -95,7 +95,7 @@ export const ConnectToElasticsearchSidePanel = () => {
                 'xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription',
                 {
                   defaultMessage:
-                    'Get expert advice on best practices, performance, upgrade paths and efficiency. ',
+                    'Get in touch with us for help getting started with best practices on data ingest, performance, and/or cost efficiency in your Serverless projects!',
                 }
               )}
             </EuiText>
