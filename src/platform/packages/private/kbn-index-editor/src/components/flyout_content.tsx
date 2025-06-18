@@ -16,12 +16,14 @@ import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { FlyoutFooter } from './flyout_footer';
+import { RowColumnCreator } from './row_column_creator';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
   props: EditLookupIndexContentContext;
 }
 
+// Does this need to be lazy loaded? flyout is already lazy loaded //HD
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
@@ -52,6 +54,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          <RowColumnCreator columns={dataViewColumns} />
           <CellActionsProvider
             getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
           >
