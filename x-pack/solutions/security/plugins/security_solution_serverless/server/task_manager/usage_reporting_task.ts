@@ -37,9 +37,6 @@ export class SecurityUsageReportingTask {
   private readonly logger: Logger;
   private readonly config: ServerlessSecurityConfig;
   private readonly usageReportingService: UsageReportingService;
-  private readonly backfillConfig: BackfillConfig = {
-    enabled: false,
-  };
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -66,8 +63,6 @@ export class SecurityUsageReportingTask {
       if (backfillConfig.enabled && !backfillConfig.maxRecords) {
         throw new Error('maxRecords is required when backfill is enabled');
       }
-
-      this.backfillConfig = backfillConfig;
     }
 
     try {
