@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ChatAgentEventType, ChatEventType } from '@kbn/onechat-common';
+import { ChatAgentEventType, ChatEventType, Conversation } from '@kbn/onechat-common';
+import { useQueryClient } from '@tanstack/react-query';
+import { produce } from 'immer';
+import { useCallback, useMemo, useState } from 'react';
 import type { ConversationCreatedEvent, ProgressionEvent } from '../../../common/chat_events';
-import type { ChatError } from '../../../common/errors';
 import {
-  type ConversationEvent,
-  createUserMessage,
   createAssistantMessage,
-  createToolResult,
   createToolCall,
+  createToolResult,
+  type ConversationEvent,
 } from '../../../common/conversation_events';
-import { useOneChatServices } from './use_onechat_service';
+import type { ChatError } from '../../../common/errors';
+import { queryKeys } from '../query_keys';
 import { useKibana } from './use_kibana';
+import { useOneChatServices } from './use_onechat_service';
 
 interface UseChatProps {
   conversationId: string | undefined;
@@ -45,6 +47,49 @@ export const useChat = ({
   const [pendingMessages, setPendingMessages] = useState<ConversationEvent[]>([]);
   const [progressionEvents, setProgressionEvents] = useState<ProgressionEvent[]>([]);
   const [status, setStatus] = useState<ChatStatus>('ready');
+  const queryClient = useQueryClient();
+
+  const conversationQueryKey = useMemo(
+    () => queryKeys.conversations.byId(conversationId ?? 'new'),
+    [conversationId]
+  );
+
+  const invalidateConversation = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: conversationQueryKey,
+    });
+  }, [queryClient, conversationQueryKey]);
+
+  const addConversation = useCallback(
+    ({ userMessage }: { userMessage: string }) => {
+      queryClient.setQueryData<Conversation>(
+        conversationQueryKey,
+        produce((draft) => {
+          draft?.rounds?.push({
+            userInput: { message: userMessage },
+            assistantResponse: { message: '' },
+            steps: [],
+          });
+        })
+      );
+    },
+    [conversationQueryKey, queryClient]
+  );
+
+  const updateConversation = useCallback(
+    ({ assistantMessage }: { assistantMessage: string }) => {
+      queryClient.setQueryData<Conversation>(
+        conversationQueryKey,
+        produce((draft) => {
+          const round = draft?.rounds?.at(-1);
+          if (round) {
+            round.assistantResponse.message = assistantMessage;
+          }
+        })
+      );
+    },
+    [conversationQueryKey, queryClient]
+  );
 
   const sendMessage = useCallback(
     (nextMessage: string) => {
@@ -52,11 +97,8 @@ export const useChat = ({
         return;
       }
 
+      addConversation({ userMessage: nextMessage });
       setStatus('loading');
-      setConversationEvents((prevEvents) => [
-        ...prevEvents,
-        createUserMessage({ content: nextMessage }),
-      ]);
 
       const events$ = chatService.chat({
         nextMessage,
@@ -80,21 +122,14 @@ export const useChat = ({
           // chunk received, we append it to the chunk buffer
           if (event.type === ChatAgentEventType.messageChunk) {
             concatenatedChunks += event.data.textChunk;
-            setPendingMessages(getAllStreamMessages());
-            setProgressionEvents([]);
+            updateConversation({ assistantMessage: concatenatedChunks });
           }
 
           // full message received - we purge the chunk buffer
           // and insert the received message into the temporary list
           if (event.type === ChatAgentEventType.messageComplete) {
             concatenatedChunks = '';
-            streamMessages.push(
-              createAssistantMessage({
-                content: event.data.messageContent,
-                id: event.data.messageId,
-              })
-            );
-            setPendingMessages(getAllStreamMessages());
+            updateConversation({ assistantMessage: event.data.messageContent });
           }
           if (event.type === ChatAgentEventType.toolCall) {
             const { toolCallId, toolId, args } = event.data;
@@ -123,12 +158,14 @@ export const useChat = ({
           }
         },
         complete: () => {
+          invalidateConversation();
           setPendingMessages([]);
           setProgressionEvents([]);
           setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setStatus('ready');
         },
         error: (err) => {
+          invalidateConversation();
           setPendingMessages([]);
           setProgressionEvents([]);
           setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
@@ -153,6 +190,9 @@ export const useChat = ({
       connectorId,
       onConversationUpdate,
       onError,
+      invalidateConversation,
+      addConversation,
+      updateConversation,
     ]
   );
 

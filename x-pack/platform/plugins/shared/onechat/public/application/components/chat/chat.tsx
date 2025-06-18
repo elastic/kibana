@@ -77,7 +77,7 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId, onConversat
     [sendMessage, setStickToBottom]
   );
 
-  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
+  if (!conversationId && conversationEvents.length === 0) {
     return <ChatNewConversationPrompt onSubmit={onSubmit} />;
   }
 
@@ -86,12 +86,10 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId, onConversat
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
           <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            {conversation && (
-              <ChatConversation
-                conversation={conversation}
-                conversationEvents={conversationEvents}
-              />
-            )}
+            <ChatConversation
+              conversationRounds={conversation?.rounds ?? []}
+              conversationEvents={conversationEvents}
+            />
           </EuiPanel>
         </div>
       </EuiFlexItem>

@@ -18,7 +18,7 @@ export const useConversation = ({ conversationId }: { conversationId: string | u
       if (conversationId) {
         return conversationsService.get({ conversationId });
       }
-      return undefined;
+      return null;
     },
   });
 
