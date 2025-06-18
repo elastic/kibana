@@ -99,7 +99,7 @@ describe('Stack frame metadata operations', () => {
 describe('getFrameSymbolStatus', () => {
   it('returns partially symbolized when metadata has executable name but no source name and source line', () => {
     expect(getFrameSymbolStatus({ sourceFilename: '', sourceLine: 0, exeFileName: 'foo' })).toEqual(
-      FrameSymbolStatus.PARTIALLY_SYMBOLYZED
+      FrameSymbolStatus.PARTIALLY_SYMBOLIZED
     );
   });
   it('returns not symbolized when metadata has no source name and source line and executable name', () => {
