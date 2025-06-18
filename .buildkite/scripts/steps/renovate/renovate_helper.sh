@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+echo --- Called Renovate Helper
 exit 0
 
 source .buildkite/scripts/common/util.sh
