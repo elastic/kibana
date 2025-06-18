@@ -62,21 +62,22 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     actionIdsFields,
     appendAction: appendNewAction,
     control,
-    documentCount,
-    dragEndHandle,
     criteria,
     criteriaCount,
+    documentCount,
+    dragEndHandle,
+    formState,
     handleAddCriteria,
     handleSave,
     indexNames,
     isAlways,
     isFlyoutDirty,
     isIdRule,
+    onDeleteDocument,
+    onIdSelectorChange,
     onIndexSelectorChange,
     pinType,
     remove,
-    onIdSelectorChange,
-    onDeleteDocument,
     setCriteriaCalloutActive,
     setIsAlways,
     setIsFlyoutDirty,
@@ -281,23 +282,27 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               )}
               {shouldShowMetadataEditor && (
                 <>
-                  {criteria.map((field, index) => (
-                    <React.Fragment key={field.id}>
-                      <QueryRuleMetadataEditor
-                        criteria={field}
-                        key={field.id}
-                        onChange={(newCriteria) => {
-                          setIsFlyoutDirty(true);
-                          update(index, newCriteria);
-                        }}
-                        onRemove={() => {
-                          setIsFlyoutDirty(true);
-                          remove(index);
-                        }}
-                      />
-                      <EuiSpacer size="m" />
-                    </React.Fragment>
-                  ))}
+                  {criteria.map((field, index) => {
+                    const error = formState.errors?.criteria?.[index];
+                    return (
+                      <React.Fragment key={field.id}>
+                        <QueryRuleMetadataEditor
+                          criteria={field}
+                          key={field.id}
+                          onChange={(newCriteria) => {
+                            setIsFlyoutDirty(true);
+                            update(index, newCriteria);
+                          }}
+                          onRemove={() => {
+                            setIsFlyoutDirty(true);
+                            remove(index);
+                          }}
+                          error={error}
+                        />
+                        <EuiSpacer size="m" />
+                      </React.Fragment>
+                    );
+                  })}
 
                   <EuiButton
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton"
