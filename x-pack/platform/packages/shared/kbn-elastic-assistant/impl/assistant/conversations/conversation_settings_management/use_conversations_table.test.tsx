@@ -39,7 +39,6 @@ describe('useConversationsTable', () => {
       handlePageUnchecked: jest.fn(),
       handleRowChecked: jest.fn(),
       handleRowUnChecked: jest.fn(),
-      isDeleteAll: false,
       isDeleteEnabled: jest.fn(),
       isEditEnabled: jest.fn(),
       isExcludedMode: false,
