@@ -6,6 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import type { OrphanResponseActionsMetadata } from '../../lib/reference_data';
+import { REF_DATA_KEYS } from '../../lib/reference_data';
 import { errorHandler } from '../error_handler';
 import { ORPHAN_ACTIONS_SPACE_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -22,14 +24,20 @@ export const getReadOrphanActionsSpaceHandler = (
   const logger = endpointService.createLogger('ReadOrphanActionsSpaceHandler');
 
   return async (context, req, res) => {
+    logger.debug(`Retrieving current orphan response actions space id`);
+
     try {
       if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
         throw new NotFoundError(`Space awareness feature is disabled`);
       }
 
+      const orphanSpaceRefData = await endpointService
+        .getReferenceDataClient()
+        .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace);
+
       return res.ok({
         body: {
-          data: { spaceId: 'tbd....' },
+          data: { spaceId: orphanSpaceRefData.metadata.spaceId },
         },
       });
     } catch (error) {
