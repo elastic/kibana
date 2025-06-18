@@ -26,7 +26,6 @@ import type {
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { monaco } from '@kbn/monaco';
-import { getArgsFromRenameFunction } from '@kbn/stack-alerts-plugin/common/es_query/esql_query_utils';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -341,4 +340,25 @@ export const getCategorizeColumns = (esql: string): string[] => {
     }
   });
   return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
 };

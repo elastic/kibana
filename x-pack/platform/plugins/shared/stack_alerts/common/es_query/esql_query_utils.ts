@@ -8,9 +8,10 @@
 import { entries, findLastIndex, intersection, isNil } from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
-import type { ESQLColumn, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
+import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem, isFunctionItem } from '@kbn/esql-validation-autocomplete';
+import { getArgsFromRenameFunction } from '@kbn/esql-utils';
 import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
@@ -294,25 +295,4 @@ const getColumnsForPreview = (
     cols.push({ id: c.name, actions: false });
   }
   return cols;
-};
-
-/**
- * Extracts the original and renamed columns from a rename function.
- * RENAME original AS renamed Vs RENAME renamed = original
- * @param renameFunction
- */
-export const getArgsFromRenameFunction = (
-  renameFunction: ESQLFunction
-): { original: ESQLColumn; renamed: ESQLColumn } => {
-  if (renameFunction.name === 'as') {
-    return {
-      original: renameFunction.args[0] as ESQLColumn,
-      renamed: renameFunction.args[1] as ESQLColumn,
-    };
-  }
-
-  return {
-    original: renameFunction.args[1] as ESQLColumn,
-    renamed: renameFunction.args[0] as ESQLColumn,
-  };
 };
