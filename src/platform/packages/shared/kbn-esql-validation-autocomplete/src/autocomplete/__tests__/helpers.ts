@@ -313,9 +313,10 @@ export function createCustomCallbackMocks(
       if (queryString.includes('logs*')) {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
         };
       }
-      return { recommendedQueries: [] };
+      return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
   };
@@ -345,6 +346,12 @@ export type AssertSuggestionsFn = (
   query: string,
   expected: Array<string | PartialSuggestionWithText>,
   opts?: SuggestOptions
+) => Promise<void>;
+
+export type AssertSuggestionOrderFn = (
+  query: string,
+  fieldName: string,
+  order: string
 ) => Promise<void>;
 
 export type SuggestFn = (
@@ -396,10 +403,25 @@ export const setup = async (caret = '/') => {
     }
   };
 
+  const assertSuggestionsOrder: AssertSuggestionOrderFn = async (query, fieldName, order) => {
+    try {
+      const result = await suggest(query);
+      const resultField = result.find((s) => s.text === fieldName);
+      expect(resultField).toBeDefined();
+      expect(resultField?.sortText).toBeDefined();
+      expect(resultField?.sortText).toEqual(order);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
+    }
+  };
+
   return {
     callbacks,
     suggest,
     assertSuggestions,
+    assertSuggestionsOrder,
   };
 };
 

@@ -105,6 +105,20 @@ export const editorExtensions = {
       query: 'from logs* | STATS count(*) by host',
     },
   ],
+  recommendedFields: [
+    {
+      name: 'host.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'user.name',
+      pattern: 'logs*',
+    },
+    {
+      name: 'kubernetes.something.something',
+      pattern: 'logs*',
+    },
+  ],
 };
 
 export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
@@ -150,9 +164,10 @@ export function getCallbackMocks(): ESQLCallbacks {
       if (queryString.includes('logs*')) {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
+          recommendedFields: editorExtensions.recommendedFields,
         };
       }
-      return { recommendedQueries: [] };
+      return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
   };
