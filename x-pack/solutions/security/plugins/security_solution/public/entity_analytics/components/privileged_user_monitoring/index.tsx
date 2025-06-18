@@ -12,7 +12,7 @@ import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { KeyInsightsPanel } from './components/key_insights_panel';
 
 const timerange = {
-  from: 'now-24h',
+  from: 'now-90d',
   to: 'now',
 };
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';

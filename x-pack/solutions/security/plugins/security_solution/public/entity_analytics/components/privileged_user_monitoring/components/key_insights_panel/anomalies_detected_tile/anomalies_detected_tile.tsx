@@ -45,14 +45,14 @@ export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
         `}
       >
         <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={true}
-          applyPageAndTabsFilters={true}
+          applyGlobalQueriesAndFilters={false}
+          applyPageAndTabsFilters={false}
+          esql={getAnomaliesDetectedEsqlQuery('default')}
           lensAttributes={anomaliesDetectedLensAttributes}
           id="privileged-user-monitoring-anomalies-detected"
           timerange={timerange}
           width="auto"
           height={LENS_VISUALIZATION_HEIGHT}
-          disableOnClickFilter
           inspectTitle={
             <FormattedMessage
               id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"

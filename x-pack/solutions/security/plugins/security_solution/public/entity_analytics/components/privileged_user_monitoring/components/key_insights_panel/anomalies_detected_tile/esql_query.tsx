@@ -7,8 +7,13 @@
 
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
 
-export const getAnomaliesDetectedEsqlQuery = (namespace: string) => {
-  return `FROM logs-*
+export const getAnomaliesDetectedEsqlQuery = (
+  namespace: string,
+  jobIds?: string[],
+  userNames?: string[]
+) => {
+  return `FROM .ml-anomalies-shared
+    | WHERE record_score IS NOT NULL AND record_score > 0 AND user.name IS NOT NULL
     ${getPrivilegedMonitorUsersJoin(namespace)}
     | STATS COUNT(*)`;
 };

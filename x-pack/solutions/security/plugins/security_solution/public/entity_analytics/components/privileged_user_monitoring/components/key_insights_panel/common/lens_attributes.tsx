@@ -11,12 +11,14 @@ interface KeyInsightsPanelParams {
   title: string;
   label: string;
   esqlQuery: string;
+  dataViewId?: string; // Optional data view override for ESQL queries
 }
 
 export const createKeyInsightsPanelLensAttributes = ({
   title,
   label,
   esqlQuery,
+  dataViewId,
 }: KeyInsightsPanelParams): LensAttributes => ({
   title,
   description: '',
@@ -26,14 +28,10 @@ export const createKeyInsightsPanelLensAttributes = ({
       layerId: 'layer1',
       layerType: 'data',
       metricAccessor: 'count',
-      trendlineLayerId: 'layer2',
-      trendlineLayerType: 'metricTrendline',
-      trendlineTimeAccessor: '@timestamp',
-      trendlineMetricAccessor: 'count_trend',
     },
     query: {
-      query: esqlQuery,
-      language: 'esql',
+      query: '',
+      language: 'kuery',
     },
     filters: [],
     datasourceStates: {
@@ -60,6 +58,7 @@ export const createKeyInsightsPanelLensAttributes = ({
                 },
               },
             ],
+            columnOrder: ['count'],
             query: {
               esql: esqlQuery,
             },
@@ -67,6 +66,23 @@ export const createKeyInsightsPanelLensAttributes = ({
         },
       },
     },
+    adHocDataViews: {
+      'ml-anomalies-dataview': {
+        id: 'ml-anomalies-dataview',
+        title: '.ml-anomalies-*',
+        timeFieldName: '@timestamp',
+        fields: {},
+        allowNoIndex: false,
+      },
+    },
   },
-  references: [],
+  references: dataViewId
+    ? [
+        {
+          id: dataViewId,
+          name: 'textBasedDataView',
+          type: 'index-pattern',
+        },
+      ]
+    : [],
 });

@@ -24,7 +24,7 @@ const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const AuthenticationsTile: React.FC<Props> = ({ timerange }) => {
-  const lensAttributes = createKeyInsightsPanelLensAttributes({
+  const authenticationsTileLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Authentications',
     label: 'Authentications',
     esqlQuery: getAuthenticationsEsqlCount('default'),
@@ -43,16 +43,16 @@ export const AuthenticationsTile: React.FC<Props> = ({ timerange }) => {
         <VisualizationEmbeddable
           applyGlobalQueriesAndFilters={true}
           applyPageAndTabsFilters={true}
-          lensAttributes={lensAttributes}
-          id="privileged-user-monitoring-anomalies-detected"
+          lensAttributes={authenticationsTileLensAttributes}
+          id="privileged-user-monitoring-authentications"
           timerange={timerange}
           width="auto"
           height={LENS_VISUALIZATION_HEIGHT}
           disableOnClickFilter
           inspectTitle={
             <FormattedMessage
-              id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"
-              defaultMessage="Anomalies detected"
+              id="xpack.securitySolution.privmon.authentications.inspectTitle"
+              defaultMessage="Authentications"
             />
           }
         />
