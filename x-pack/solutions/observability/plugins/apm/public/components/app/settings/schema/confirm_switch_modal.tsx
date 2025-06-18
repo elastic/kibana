@@ -60,7 +60,7 @@ export function ConfirmSwitchModal({ onConfirm, onCancel, unsupportedConfigs }: 
           defaultMessage: `Switching to Elastic Agent is an irreversible action`,
         })}
         color="warning"
-        iconiconType="question"
+        iconType="question"
       >
         <p>
           {i18n.translate('xpack.apm.settings.schema.confirm.irreversibleWarning.message', {

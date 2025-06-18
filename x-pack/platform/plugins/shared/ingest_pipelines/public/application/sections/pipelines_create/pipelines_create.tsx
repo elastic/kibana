@@ -109,7 +109,7 @@ export const PipelinesCreate: React.FunctionComponent<RouteComponentProps & Prop
             flush="right"
             href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
-            iconiconType="question"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

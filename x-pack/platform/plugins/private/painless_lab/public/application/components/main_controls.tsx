@@ -91,7 +91,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
                 button={
                   <EuiButtonEmpty
                     size="s"
-                    iconiconType="question"
+                    iconType="question"
                     iconSide="left"
                     color="text"
                     onClick={() => setIsHelpOpen(!isHelpOpen)}

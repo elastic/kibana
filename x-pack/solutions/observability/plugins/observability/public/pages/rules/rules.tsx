@@ -140,7 +140,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}
-      iconiconType="question"
+      iconType="question"
       target="_blank"
     >
       <FormattedMessage

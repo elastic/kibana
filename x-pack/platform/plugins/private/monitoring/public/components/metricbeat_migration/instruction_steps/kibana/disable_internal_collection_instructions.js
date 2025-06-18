@@ -26,7 +26,7 @@ export function getKibanaInstructionsForDisablingInternalCollection(product, met
             }
           )}
           color="warning"
-          iconiconType="question"
+          iconType="question"
         >
           <EuiText>
             <p>

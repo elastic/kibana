@@ -156,7 +156,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
       <EuiPanel paddingSize="none">
         <EuiCallOut
           color="warning"
-          iconiconType="question"
+          iconType="question"
           title={i18n.translate('xpack.graph.noDataSourceNotificationMessageTitle', {
             defaultMessage: 'No data source',
           })}

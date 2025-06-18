@@ -24,7 +24,7 @@ export const AutoFollowPatternPageTitle = ({ title }) => (
           flush="right"
           href={documentationLinks.apis.createAutoFollowPattern}
           target="_blank"
-          iconiconType="question"
+          iconType="question"
           data-test-subj="docsButton"
         >
           <FormattedMessage

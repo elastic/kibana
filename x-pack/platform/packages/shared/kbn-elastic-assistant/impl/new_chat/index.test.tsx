@@ -72,7 +72,7 @@ describe('NewChat', () => {
   });
 
   it('renders custom icons', () => {
-    render(<NewChat {...defaultProps} iconiconType="question" />);
+    render(<NewChat {...defaultProps} iconType="question" />);
 
     const newChatButton = screen.getByTestId('newChat');
 

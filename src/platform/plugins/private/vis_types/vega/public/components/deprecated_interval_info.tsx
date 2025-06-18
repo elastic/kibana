@@ -35,7 +35,7 @@ export const DeprecatedHistogramIntervalInfo = () => (
         }}
       />
     }
-    iconiconType="question"
+    iconType="question"
   />
 );
 

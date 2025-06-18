@@ -116,7 +116,7 @@ export const ShareModeControl = (props: Props) => {
       <EuiFlexItem grow={false}>
         <EuiCallOut
           size="s"
-          iconiconType="question"
+          iconType="question"
           title={
             <FormattedMessage
               id="xpack.spaces.shareToSpace.privilegeWarningTitle"

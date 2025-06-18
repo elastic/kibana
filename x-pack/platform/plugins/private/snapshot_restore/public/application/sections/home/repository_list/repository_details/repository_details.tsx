@@ -224,7 +224,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               flush="right"
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
-              iconiconType="question"
+              iconType="question"
               data-test-subj="documentationLink"
             >
               <FormattedMessage

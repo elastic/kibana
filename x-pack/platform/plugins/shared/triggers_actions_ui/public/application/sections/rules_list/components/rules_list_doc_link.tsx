@@ -17,7 +17,7 @@ export const RulesListDocLink = () => {
     <EuiButtonEmpty
       href={docLinks.links.alerting.guide}
       target="_blank"
-      iconiconType="question"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

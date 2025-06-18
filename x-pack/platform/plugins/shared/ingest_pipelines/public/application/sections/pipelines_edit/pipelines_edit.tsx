@@ -169,7 +169,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
             flush="right"
             href={services.documentation.getCreatePipelineUrl()}
             target="_blank"
-            iconiconType="question"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

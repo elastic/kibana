@@ -278,7 +278,7 @@ export class Flyout extends Component {
         <Fragment>
           <EuiCallOut
             color="warning"
-            iconiconType="question"
+            iconType="question"
             title={i18n.translate(
               'xpack.monitoring.metricbeatMigration.flyout.noClusterUuidTitle',
               {

@@ -117,7 +117,7 @@ export const ManagedUser = ({
                   data-test-subj="managedUser-no-data"
                   title={i18n.NO_MANAGED_DATA_TITLE}
                   color="warning"
-                  iconiconType="question"
+                  iconType="question"
                 >
                   <p>{i18n.NO_MANAGED_DATA_TEXT}</p>
                 </EuiCallOut>

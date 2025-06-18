@@ -40,7 +40,7 @@ export const DeprecatedPrompt = () => {
             href={documentationLinks.fleet.datastreamsDownsampling}
             target="_blank"
             fill
-            iconiconType="question"
+            iconType="question"
             data-test-subj="rollupDeprecatedPromptDocsLink"
           >
             <FormattedMessage

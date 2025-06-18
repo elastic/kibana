@@ -226,7 +226,7 @@ export const TransformManagement: FC = () => {
     <EuiButtonEmpty
       href={esTransform}
       target="_blank"
-      iconiconType="question"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

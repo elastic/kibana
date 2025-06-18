@@ -12,7 +12,7 @@ import { PIPELINE_LIST } from './constants';
 
 export function AlertCallOut(props) {
   return (
-    <EuiCallOut title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE} color="warning" iconiconType="question">
+    <EuiCallOut title={PIPELINE_LIST.INFO_ALERTS.CALL_OUT_TITLE} color="warning" iconType="question">
       <p>
         <FormattedMessage
           id="xpack.logstash.alertCallOut.howToSeeAdditionalPipelinesDescription"

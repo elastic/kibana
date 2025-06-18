@@ -19,7 +19,7 @@ interface Props {
 
 const ExpiredBanner: React.FunctionComponent<Props> = (props) => (
   <EuiCallOut
-    iconiconType="question"
+    iconType="question"
     color="warning"
     data-test-subj="licenseExpiredBanner"
     title={

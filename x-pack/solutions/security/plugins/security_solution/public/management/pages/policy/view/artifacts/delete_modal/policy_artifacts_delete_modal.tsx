@@ -74,7 +74,7 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
         isLoading={isUpdateArtifactLoading}
         data-test-subj={'remove-from-policy-dialog'}
       >
-        <EuiCallOut color="warning" iconiconType="question">
+        <EuiCallOut color="warning" iconType="question">
           <p>{labels.deleteModalImpactInfo}</p>
         </EuiCallOut>
 

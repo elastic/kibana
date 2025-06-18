@@ -243,7 +243,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         docsLink={
           <EuiButtonEmpty
             target="_blank"
-            iconiconType="question"
+            iconType="question"
             iconSide="left"
             size="xs"
             color="primary"

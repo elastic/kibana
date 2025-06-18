@@ -149,7 +149,7 @@ const RequiredFieldsList = ({
         <EuiCallOut
           title={i18n.REQUIRED_FIELDS_GENERAL_WARNING_TITLE}
           color="warning"
-          iconiconType="question"
+          iconType="question"
           data-test-subj="requiredFieldsGeneralWarning"
         >
           <p>

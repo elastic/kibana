@@ -102,7 +102,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     <EuiButtonEmpty
       href={esTransform}
       target="_blank"
-      iconiconType="question"
+      iconType="question"
       data-test-subj="documentationLink"
     >
       <FormattedMessage

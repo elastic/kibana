@@ -538,7 +538,7 @@ EOF`}
         <>
           <EuiCallOut
             color="warning"
-            iconiconType="question"
+            iconType="question"
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"

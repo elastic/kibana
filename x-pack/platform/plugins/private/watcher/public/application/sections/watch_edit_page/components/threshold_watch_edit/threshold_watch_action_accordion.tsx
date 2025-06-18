@@ -196,7 +196,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                       }
                     )}
                     color="warning"
-                    iconiconType="question"
+                    iconType="question"
                   >
                     <EuiText>
                       <p>

@@ -568,7 +568,7 @@ export const WatchListPage = () => {
           <EuiButtonEmpty
             href={watcherGettingStartedUrl}
             target="_blank"
-            iconiconType="question"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

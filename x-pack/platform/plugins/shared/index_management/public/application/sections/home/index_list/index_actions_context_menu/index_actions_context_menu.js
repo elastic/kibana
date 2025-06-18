@@ -347,7 +347,7 @@ export class IndexActionsContextMenu extends Component {
             }
           )}
           color="warning"
-          iconiconType="question"
+          iconType="question"
         >
           <p>
             <FormattedMessage

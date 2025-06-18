@@ -429,7 +429,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                 />
               }
               color="warning"
-              iconiconType="question"
+              iconType="question"
               data-test-subj="indexPatternsWarning"
             >
               <p data-test-subj="indexPatternsWarningDescription">
