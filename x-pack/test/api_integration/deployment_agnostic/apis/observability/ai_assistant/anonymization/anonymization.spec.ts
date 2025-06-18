@@ -9,7 +9,7 @@ import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugi
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { clearConversations } from '../utils/conversation';

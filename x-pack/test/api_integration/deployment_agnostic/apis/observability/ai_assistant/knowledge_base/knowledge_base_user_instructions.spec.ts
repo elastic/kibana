@@ -16,7 +16,7 @@ import { clearKnowledgeBase } from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../utils/create_llm_proxy';
 import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 import {
   deployTinyElserAndSetupKb,
