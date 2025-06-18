@@ -13,11 +13,42 @@ import {
   ALERT_RULE_UUID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
+import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
-  getRelevantRuleFieldsMap,
-  getRuleQueryIndexMap,
   isSuggestedDashboardsValidRuleTypeId,
+  SuggestedDashboardsValidRuleTypeIds,
 } from './helpers';
+
+// TS will make sure that if we add a new supported rule type id we had the corresponding function to get the relevant rule fields
+const getRelevantRuleFieldsMap: Record<
+  SuggestedDashboardsValidRuleTypeIds,
+  (ruleParams: { [key: string]: unknown }) => Set<string>
+> = {
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (customThresholdParams) => {
+    const relevantFields = new Set<string>();
+    const metrics = (customThresholdParams as CustomThresholdParams).criteria[0].metrics;
+    metrics.forEach((metric) => {
+      relevantFields.add(metric.field);
+    });
+    return relevantFields;
+  },
+};
+
+const getRuleQueryIndexMap: Record<
+  SuggestedDashboardsValidRuleTypeIds,
+  (ruleParams: { [key: string]: unknown }) => string | null
+> = {
+  [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID]: (customThresholdParams) => {
+    const {
+      searchConfiguration: { index },
+    } = customThresholdParams as CustomThresholdParams;
+    if (typeof index === 'object') return (index as DataViewSpec)?.id || null;
+    if (typeof index === 'string') return index;
+    return null;
+  },
+};
 
 export class AlertData {
   constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
