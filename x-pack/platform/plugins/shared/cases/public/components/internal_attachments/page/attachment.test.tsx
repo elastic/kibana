@@ -56,7 +56,7 @@ describe('getPageAttachmentType', () => {
       const linkType = getPageAttachmentType();
       const event = linkType.getAttachmentViewObject(attachmentViewProps).event;
 
-      expect(event).toBe('added page');
+      expect(event).toBe('added a page');
     });
 
     it('renders the timelineAvatar correctly', () => {
