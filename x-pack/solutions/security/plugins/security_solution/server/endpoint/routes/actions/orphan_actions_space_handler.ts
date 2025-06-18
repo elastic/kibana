@@ -20,6 +20,10 @@ import type {
 } from '../../../types';
 import { NotFoundError } from '../../errors';
 
+/**
+ * GET API handler
+ * @param endpointService
+ */
 export const getReadOrphanActionsSpaceHandler = (
   endpointService: EndpointAppContextService
 ): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
@@ -48,6 +52,10 @@ export const getReadOrphanActionsSpaceHandler = (
   };
 };
 
+/**
+ * Update handler
+ * @param endpointService
+ */
 export const getUpdateOrphanActionsSpaceHandler = (
   endpointService: EndpointAppContextService
 ): RequestHandler<

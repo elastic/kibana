@@ -75,6 +75,10 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
               REF_DATA_KEY_INITIAL_VALUE[refDataKey]() as ReferenceDataSavedObject<TMeta>
             );
           }
+
+          throw new EndpointError(
+            `Definition for reference data key [${refDataKey}] not defined. Unable to created it.`
+          );
         }
 
         throw wrapErrorIfNeeded(err, `Failed to retrieve reference data item [${refDataKey}]`);
@@ -109,6 +113,12 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
 
     logger.debug(`Deleting reference data [${refDataKey}]`);
 
-    await soClient.delete(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey).catch(catchAndWrapError);
+    await soClient.delete(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey).catch((error) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return;
+      }
+
+      throw wrapErrorIfNeeded(error);
+    });
   }
 }
