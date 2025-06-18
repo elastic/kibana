@@ -13,8 +13,8 @@ import classNames from 'classnames';
 
 import useRafState from 'react-use/lib/useRafState';
 import { UseEuiTheme, euiShadow, euiShadowFlat } from '@elastic/eui';
-import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { css } from '@emotion/react';
+import { EmotionStyles, useMemoCss } from '../use_memo_css';
 import { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {

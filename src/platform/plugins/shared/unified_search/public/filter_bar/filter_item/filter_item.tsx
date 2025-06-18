@@ -14,7 +14,6 @@ import {
   EuiPopoverProps,
   UseEuiTheme,
   euiShadowMedium,
-  useEuiTheme,
 } from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n-react';
 import {
@@ -25,14 +24,7 @@ import {
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, {
-  MouseEvent,
-  useState,
-  useEffect,
-  HTMLAttributes,
-  useMemo,
-  useCallback,
-} from 'react';
+import React, { MouseEvent, useState, useEffect, HTMLAttributes, useCallback } from 'react';
 import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
@@ -97,21 +89,6 @@ function FilterItemComponent(props: FilterItemProps) {
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
   }, [onCloseFilterPopover]);
-
-  const euiTheme = useEuiTheme();
-
-  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
-  const popoverDragAndDropStyle = useMemo(
-    () =>
-      css`
-        // Always needed for popover with drag & drop in them
-        transform: none !important;
-        transition: none !important;
-        filter: none !important;
-        ${euiShadowMedium(euiTheme)}
-      `,
-    [euiTheme]
-  );
 
   useEffect(() => {
     if (isPopoverOpen) {
@@ -378,7 +355,7 @@ function FilterItemComponent(props: FilterItemProps) {
     button: <FilterView {...filterViewProps} />,
     panelPaddingSize: 'none',
     panelProps: {
-      css: popoverDragAndDropStyle,
+      css: styles.popoverDragAndDrop,
     },
   };
 
@@ -391,7 +368,7 @@ function FilterItemComponent(props: FilterItemProps) {
       ) : (
         <EuiContextMenuPanel
           items={[
-            <div css={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }} key="filter-editor">
+            <div css={styles.filterItemEditorContainer} key="filter-editor">
               <FilterEditor
                 filter={filter}
                 indexPatterns={indexPatterns}
@@ -417,6 +394,20 @@ function FilterItemComponent(props: FilterItemProps) {
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
 
 const filterItemStyles = {
+  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
+  popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
+    css`
+      // Always needed for popover with drag & drop in them
+      transform: none !important;
+      transition: none !important;
+      filter: none !important;
+      ${euiShadowMedium(euiThemeContext)}
+    `,
+  filterItemEditorContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: FILTER_EDITOR_WIDTH,
+      maxWidth: '100%',
+    }),
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({
       lineHeight: euiTheme.size.base,
@@ -467,9 +458,6 @@ const filterItemStyles = {
           width: euiTheme.size.xs,
           backgroundColor: euiTheme.colors.mediumShade,
         },
-      },
-      '.globalFilterItem__editorForm': {
-        padding: euiTheme.size.m,
       },
     }),
 };
