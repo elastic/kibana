@@ -407,7 +407,7 @@ describe('autocomplete', () => {
     ]);
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS ', '= ']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
