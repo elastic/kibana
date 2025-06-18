@@ -8,6 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import { getComplianceDashboardSchema } from '../../../common/schemas/stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import type {
@@ -16,7 +17,7 @@ import type {
   GetComplianceDashboardRequest,
   ComplianceDashboardDataV2,
 } from '../../../common/types_old';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
@@ -88,7 +89,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const esClient = cspContext.esClient.asCurrentUser;
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 
@@ -162,7 +163,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 
