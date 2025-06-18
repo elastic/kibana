@@ -18,6 +18,7 @@ const DETECTION_PAGE_FILTER_GROUP_WRAPPER = '.filter-group__wrapper';
 const DETECTION_PAGE_FILTERS_LOADING = '.securityPageWrapper .controlFrame--controlLoading';
 const DETECTION_PAGE_FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
+const ALERTS_URL = '/app/security/alerts';
 
 const refreshPage = () => {
   cy.get(REFRESH_BUTTON).click({ force: true });

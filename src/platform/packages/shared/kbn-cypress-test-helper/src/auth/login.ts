@@ -55,11 +55,21 @@ export const login: CyLoginTask = (
     // MKI QA Cloud Serverless
     return cy
       .task('getSessionCookie', user)
-      .then((result: { username: string; password: string; cookie: string }) => {
-        username = result.username;
-        password = result.password;
+      .then((result) => {
+        const {
+          username: u,
+          password: p,
+          cookie,
+        } = result as {
+          username: string;
+          password: string;
+          cookie: string;
+        };
+
+        username = u;
+        password = p;
         // Set cookie asynchronously
-        return cy.setCookie('sid', result.cookie as string, {
+        return cy.setCookie('sid', cookie, {
           // "hostOnly: true" sets the cookie without a domain.
           // This makes cookie available only for the current host (not subdomains).
           // It's needed to match the Serverless backend behavior where cookies are set without a domain.
@@ -83,14 +93,17 @@ export const login: CyLoginTask = (
         return { username, password };
       });
   } else if (user) {
-    return cy
-      .task('loadUserAndRole', { name: user })
-      .then((loadedUser: { username: string; password: string }) => {
-        username = loadedUser.username;
-        password = loadedUser.password;
+    return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
+      const { username: u, password: p } = loadedUser as {
+        username: string;
+        password: string;
+      };
 
-        return sendApiLoginRequest(username, password);
-      });
+      username = u;
+      password = p;
+
+      return sendApiLoginRequest(username, password);
+    });
   } else {
     return sendApiLoginRequest(username, password);
   }
@@ -101,11 +114,14 @@ login.with = (username: string, password: string): ReturnType<typeof sendApiLogi
 };
 
 login.withCustomRole = (role: Role): ReturnType<typeof sendApiLoginRequest> => {
-  return cy
-    .task('createUserAndRole', { role })
-    .then(({ username, password }: { username: string; password: string }) => {
-      return sendApiLoginRequest(username, password);
-    });
+  return cy.task('createUserAndRole', { role }).then((result) => {
+    const { username, password } = result as {
+      username: string;
+      password: string;
+    };
+
+    return sendApiLoginRequest(username, password);
+  });
 };
 
 /**
