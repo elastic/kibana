@@ -8,7 +8,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ResolveIndexResponse } from '@kbn/esql-types';
+import { type ResolveIndexResponse, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 type SolutionId = 'es' | 'oblt' | 'security';
@@ -37,7 +37,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
+      path: `${REGISTRY_EXTENSIONS_ROUTE}{solutionId}/{query}`,
       security: {
         authz: {
           enabled: false,

@@ -31,6 +31,10 @@ export interface MappedSchemaField extends BaseSchemaField {
 export interface UnmappedSchemaField extends BaseSchemaField {
   status: 'unmapped';
   type?: SchemaFieldType;
+  /**
+   * Elasticsearch-level type of the field - only available for fields of classic streams that are not mapped through streams but from the underlying index.
+   */
+  esType?: string;
   additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
@@ -47,6 +51,7 @@ export interface SchemaEditorProps {
   withControls?: boolean;
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
+  withToolbar?: boolean;
 }
 
 export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {

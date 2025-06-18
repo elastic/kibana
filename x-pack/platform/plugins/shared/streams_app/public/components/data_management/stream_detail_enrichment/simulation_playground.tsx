@@ -15,7 +15,6 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
   useSimulatorSelector,
@@ -47,7 +46,6 @@ export const SimulationPlayground = () => {
   );
 
   const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
-  const canViewDetectedFields = Streams.WiredStream.GetResponse.is(definition);
 
   return (
     <>
@@ -59,28 +57,26 @@ export const SimulationPlayground = () => {
               { defaultMessage: 'Data preview' }
             )}
           </EuiTab>
-          {canViewDetectedFields && (
-            <EuiTab
-              isSelected={isViewingDetectedFields}
-              onClick={viewSimulationDetectedFields}
-              append={
-                detectedFields.length > 0 ? (
-                  <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
-                ) : undefined
-              }
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                { defaultMessage: 'Detected fields' }
-              )}
-            </EuiTab>
-          )}
+          <EuiTab
+            isSelected={isViewingDetectedFields}
+            onClick={viewSimulationDetectedFields}
+            append={
+              detectedFields.length > 0 ? (
+                <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+              ) : undefined
+            }
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+              { defaultMessage: 'Detected fields' }
+            )}
+          </EuiTab>
         </EuiTabs>
         {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && canViewDetectedFields && (
+      {isViewingDetectedFields && (
         <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
       )}
     </>
