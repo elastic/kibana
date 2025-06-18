@@ -50,10 +50,6 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
 
-jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
-  outputs: { agentless: {} as any },
-} as any);
-
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as jest.Mock<
   ReturnType<typeof listEnrollmentApiKeys>
 >;
@@ -97,6 +93,9 @@ describe('Agentless Agent service', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
     (axios as jest.MockedFunction<typeof axios>).mockReset();
+    jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
+      outputs: { agentless: {} as any },
+    } as any);
     jest.clearAllMocks();
   });
 
