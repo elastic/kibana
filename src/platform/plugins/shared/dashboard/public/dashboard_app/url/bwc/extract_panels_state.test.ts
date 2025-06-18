@@ -30,22 +30,21 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
-            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+      expect(dashboardState.panels).toEqual([
+        {
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+          title: 'Custom title',
+          panelConfig: {
             timeRange: {
               from: 'now-7d/d',
               to: 'now',
             },
-            title: 'Custom title',
           },
+          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           gridData: {},
           type: 'map',
-          panelRefName: undefined,
-          version: undefined,
         },
-      });
+      ]);
     });
   });
 
@@ -68,22 +67,21 @@ describe('extractPanelsState', () => {
           },
         ],
       });
-      expect(dashboardState.panels).toEqual({
-        ['c505cc42-fbde-451d-8720-302dc78d7e0d']: {
-          explicitInput: {
-            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+      expect(dashboardState.panels).toEqual([
+        {
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+          title: 'Custom title',
+          panelConfig: {
             timeRange: {
               from: 'now-7d/d',
               to: 'now',
             },
-            title: 'Custom title',
           },
+          panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           gridData: {},
           type: 'map',
-          panelRefName: undefined,
-          version: undefined,
         },
-      });
+      ]);
     });
   });
 

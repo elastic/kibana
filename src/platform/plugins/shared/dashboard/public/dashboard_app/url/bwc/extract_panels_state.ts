@@ -8,12 +8,9 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
-
-type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -37,7 +34,7 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
+export function extractPanelsState(state: { [key: string]: unknown }): { panels?: DashboardState['panels'] } {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -61,5 +58,5 @@ export function extractPanelsState(state: { [key: string]: unknown }): Partial<P
     return panel;
   });
 
-  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
+  return { panels: standardizedPanels };
 }
