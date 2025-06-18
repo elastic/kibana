@@ -67,20 +67,7 @@ export function Wrapper({
               values: { streamId },
             })}
             <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && (
-                <EuiToolTip
-                  position="top"
-                  title={i18n.translate('xpack.streams.badges.classic.title', {
-                    defaultMessage: 'Classic Stream',
-                  })}
-                  content={i18n.translate('xpack.streams.badges.classic.description', {
-                    defaultMessage:
-                      'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
-                  })}
-                >
-                  <ClassicStreamBadge />
-                </EuiToolTip>
-              )}
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <EuiToolTip
                 position="top"
                 title={i18n.translate('xpack.streams.badges.lifecycle.title', {
