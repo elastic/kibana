@@ -20,7 +20,6 @@ import {
 } from '@kbn/discover-utils';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import { onSaveSearch } from './on_save_search';
@@ -109,9 +108,8 @@ export const useTopNavLinks = ({
 
       if (
         services.triggersActionsUi &&
-        services.capabilities.management?.insightsAndAlerting?.triggersActions &&
         !defaultMenu?.alertsItem?.disabled &&
-        discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)
+        discoverParams.authorizedRuleTypeIds.length
       ) {
         const alertsAppMenuItem = getAlertsAppMenuItem({
           discoverParams,
