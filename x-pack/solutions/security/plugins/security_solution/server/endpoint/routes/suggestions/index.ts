@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import type { RequestHandler, Logger } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -27,11 +27,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
-import { combineIndexWithNamespaces } from '../../../utils/index_name_parser';
-
-export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
-  return endpointAppContext.logFactory.get('suggestions');
-};
+import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
 
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
@@ -74,7 +70,7 @@ export const getEndpointSuggestionsRequestHandler = (
   SecuritySolutionRequestHandlerContext
 > => {
   return async (context, request, response) => {
-    const logger = getLogger(endpointContext);
+    const logger = endpointContext.logFactory.get('suggestions');
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
 
@@ -92,11 +88,19 @@ export const getEndpointSuggestionsRequestHandler = (
             .getInternalFleetServices(spaceId)
             .getIntegrationNamespaces(['endpoint']);
 
-          const indexPattern = combineIndexWithNamespaces(
-            eventsIndexPattern,
-            integrationNamespaces,
-            'endpoint'
-          );
+          const namespaces = integrationNamespaces.endpoint;
+          if (!namespaces || !namespaces.length) {
+            logger.error('Failed to retrieve current space index patterns');
+            return response.badRequest({
+              body: 'Failed to retrieve current space index patterns',
+            });
+          }
+
+          const indexPattern = namespaces
+            .map((namespace) =>
+              buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+            )
+            .join(',');
 
           if (indexPattern) {
             logger.debug(`Index pattern to be used: ${indexPattern}`);

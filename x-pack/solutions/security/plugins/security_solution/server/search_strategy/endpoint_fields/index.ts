@@ -23,7 +23,7 @@ import type {
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { parseRequest } from './parse_request';
-import { combineIndexWithNamespaces } from '../../utils/index_name_parser';
+import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
 /**
  * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts
@@ -72,10 +72,16 @@ export const requestEndpointFieldsSearch = async (
       .getInternalFleetServices(spaceId)
       .getIntegrationNamespaces(['endpoint']);
 
-    parsedRequest = {
-      ...parsedRequest,
-      indices: [combineIndexWithNamespaces(eventsIndexPattern, integrationNamespaces, 'endpoint')],
-    };
+    const namespaces = integrationNamespaces.endpoint;
+    if (namespaces && namespaces.length > 0) {
+      const combinedPatterns = namespaces.map((namespace) =>
+        buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+      );
+      parsedRequest = {
+        ...parsedRequest,
+        indices: [combinedPatterns.join(',')],
+      };
+    }
   }
 
   const { canWriteEventFilters, canReadEndpointList } = await context.getEndpointAuthz(
