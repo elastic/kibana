@@ -87,6 +87,7 @@ import { createTelemetryConfigProviderMock } from '../../common/telemetry_config
 import { FleetPackagePolicyGenerator } from '../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../common/endpoint/service/response_actions/constants';
 import { pick } from 'lodash';
+import { ENDPOINT_ACTIONS_INDEX } from '../../common/endpoint/constants';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -1339,7 +1340,7 @@ describe('Fleet integrations', () => {
         expect(endpointServicesMock.getInternalEsClient().updateByQuery).toHaveBeenCalledWith({
           conflicts: 'proceed',
           ignore_unavailable: true,
-          index: '.logs-endpoint.actions-default',
+          index: ENDPOINT_ACTIONS_INDEX,
           query: {
             bool: {
               filter: {
