@@ -96,12 +96,13 @@ export const createRestorableStateProvider = <TState extends object>() => {
   // TODO: Better typings for all of this, maybe steal more from React?
   const useRestorableState = <TKey extends keyof TState>(
     key: TKey,
-    initialValue: TState[TKey] | (() => TState[TKey])
+    initialValue: TState[TKey] | (() => TState[TKey]),
+    shouldIgnoredRestoredValue?: (restoredValue: TState[TKey]) => boolean
   ) => {
     const { initialState, onInitialStateChange } = useContext(context);
     const [value, _setValue] = useState(() => {
       // TODO: What if initialState[key] should initialize to undefined?
-      if (initialState?.[key] !== undefined) {
+      if (initialState?.[key] !== undefined && !shouldIgnoredRestoredValue?.(initialState[key])) {
         return initialState[key];
       }
       if (typeof initialValue === 'function') {

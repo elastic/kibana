@@ -18,12 +18,16 @@ import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './field
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
-import { useRestorableState, useRestorableRef } from '../../restorable_state';
+import {
+  useRestorableState,
+  useRestorableRef,
+  type UnifiedFieldListRestorableState,
+} from '../../restorable_state';
 
 const PAGINATION_SIZE = 50;
 export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
 
-type InitiallyOpenSections = Record<string, boolean>;
+type InitiallyOpenSections = UnifiedFieldListRestorableState['accordionState'];
 
 function getDisplayedFieldsLength<T extends FieldListItem>(
   fieldGroups: FieldListGroups<T>,
@@ -75,18 +79,26 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       `${localStorageKeyPrefix ? localStorageKeyPrefix + '.' : ''}${LOCAL_STORAGE_KEY_SECTIONS}`,
       {}
     );
-  const [accordionState, setAccordionState] = useState<InitiallyOpenSections>(() =>
-    Object.fromEntries(
-      fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => {
-        const storedInitiallyOpen = localStorageKeyPrefix
-          ? storedInitiallyOpenSections?.[key]
-          : null; // from localStorage
-        return [
-          key,
-          typeof storedInitiallyOpen === 'boolean' ? storedInitiallyOpen : isInitiallyOpen,
-        ];
-      })
-    )
+  const [accordionState, setAccordionState] = useRestorableState(
+    'accordionState',
+    () =>
+      Object.fromEntries(
+        fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => {
+          const storedInitiallyOpen = localStorageKeyPrefix
+            ? storedInitiallyOpenSections?.[key]
+            : null; // from localStorage
+          return [
+            key,
+            typeof storedInitiallyOpen === 'boolean' ? storedInitiallyOpen : isInitiallyOpen,
+          ];
+        })
+      ),
+    (restoredAccordionState) => {
+      return (
+        fieldGroupsToShow.length !== Object.keys(restoredAccordionState).length ||
+        fieldGroupsToShow.some(([key]) => !(key in restoredAccordionState))
+      );
+    }
   );
 
   useEffect(() => {

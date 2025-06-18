@@ -27,6 +27,10 @@ export interface UnifiedFieldListRestorableState {
    * Scroll position of the field list
    */
   scrollPosition: number;
+  /**
+   * Which sections of the field list are expanded
+   */
+  accordionState: Record<string, boolean>;
 }
 
 export const { withRestorableState, useRestorableState, useRestorableRef } =
