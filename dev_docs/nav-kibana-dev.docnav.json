@@ -47,6 +47,9 @@
           "id": "kibStyleGuide"
         },
         {
+          "id": "kibHttpApiIaaCGuidelines"
+        },
+        {
           "id": "ktRFCProcess"
         },
         {
@@ -650,14 +653,6 @@
         },
         {
           "id": "kibDevDocsOpsTest"
-        }
-      ]
-    },
-    {
-      "label": "HTTP API guidelines",
-      "items": [
-        {
-          "id": "kibHttpApiIaaCGuidelines"
         }
       ]
     }
