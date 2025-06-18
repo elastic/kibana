@@ -26,6 +26,7 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   UnifiedDataTableProps,
+  UnifiedDataTableRestorableState,
   UseColumnsProps,
 } from '@kbn/unified-data-table';
 import {
@@ -401,6 +402,11 @@ function DiscoverDocumentsComponent({
 
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
   const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: UnifiedDataTableRestorableState) =>
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
+    [dispatch, setDataGridUiState]
+  );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -483,9 +489,7 @@ function DiscoverDocumentsComponent({
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             initialState={dataGridUiState}
-            onInitialStateChange={(newDataGridUiState) =>
-              dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }))
-            }
+            onInitialStateChange={onInitialStateChange}
           />
         </CellActionsProvider>
       </div>
