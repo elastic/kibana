@@ -111,20 +111,22 @@ export const createRestorableStateProvider = <TState extends object>() => {
       return initialValue;
     });
     const stableSetValue = useLatest<Dispatch<SetStateAction<TState[TKey]>>>((newValue) => {
-      const nextValue =
-        typeof newValue === 'function'
-          ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(value)
-          : newValue;
+      _setValue((prevValue) => {
+        const nextValue =
+          typeof newValue === 'function'
+            ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
+            : newValue;
 
-      if (nextValue === value) {
-        return;
-      }
+        setTimeout(() => {
+          // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
+          // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
+          onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
+        }, 0);
 
-      _setValue(nextValue);
-      // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
-      // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
-      onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
+        return nextValue;
+      });
     });
+
     const [setValue] = useState(
       (): typeof stableSetValue.current => (newValue) => stableSetValue.current(newValue)
     );
