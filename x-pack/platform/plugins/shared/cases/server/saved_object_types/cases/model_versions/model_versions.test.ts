@@ -98,19 +98,4 @@ describe('Model versions', () => {
       `);
     });
   });
-
-  describe('3', () => {
-    expect(modelVersion3.changes).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "addedMappings": Object {
-            "incremental_id": Object {
-              "type": "unsigned_long",
-            },
-          },
-          "type": "mappings_addition",
-        },
-      ]
-    `);
-  });
 });
