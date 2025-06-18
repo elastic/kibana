@@ -13,5 +13,15 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/es",
+    "@kbn/security-plugin",
+    "@kbn/tooling-log",
+    "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/dev-cli-runner",
+    "@kbn/core-status-common",
+    "@kbn/dev-utils",
+    "@kbn/spaces-plugin",
+  ]
 }
