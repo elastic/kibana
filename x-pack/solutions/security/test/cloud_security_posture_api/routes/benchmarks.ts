@@ -8,10 +8,8 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import {
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -31,7 +29,10 @@ export default function (providerContext: FtrProviderContext) {
   const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
-  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const findingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     let cspBenchmarkRules: CspBenchmarkRule[] = [];

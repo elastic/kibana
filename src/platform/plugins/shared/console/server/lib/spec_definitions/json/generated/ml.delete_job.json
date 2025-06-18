@@ -15,7 +15,7 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-delete-job.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-delete-job",
     "availability": {
       "stack": true,
       "serverless": true
