@@ -190,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'unusedUrlsCleanupTask',
       ]);
     });
   });
