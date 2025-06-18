@@ -105,7 +105,7 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-
+    // create default index source for privilege monitoring
     const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
       type: 'index',
       managed: true,
@@ -357,21 +357,20 @@ export class PrivilegeMonitoringDataClient {
   }
 
   private async removeStaleIndexUsers(currentUsernames: Set<string>) {
-    const existingDocs: MonitoredUserDoc[] = await this.listUsers('source: "index_sync"');
-
+    const existingDocs: MonitoredUserDoc[] = await this.listUsers('labels.sources: "index_sync"');
     const staleUserIds: string[] = [];
 
     for (const doc of existingDocs) {
-      const username = doc.user?.name;
-      if (doc.id && username && !currentUsernames.has(username)) {
+      if (doc.user?.name && !currentUsernames.has(doc.user.name) && doc.id) {
+        this.log(
+          'debug',
+          `User ${doc.user.name} (ID: ${doc.id}) is stale and will be removed from index_sync`
+        );
         staleUserIds.push(doc.id);
       }
     }
 
-    for (const id of staleUserIds) {
-      await this.deleteUser(id);
-    }
-
-    this.log('info', `Removed ${staleUserIds.length} stale users from index_sync`);
+    await Promise.all(staleUserIds.map((id) => this.deleteUser(id))); 
+    this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 }

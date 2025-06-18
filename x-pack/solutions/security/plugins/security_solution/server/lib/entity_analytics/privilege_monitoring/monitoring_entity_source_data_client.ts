@@ -32,8 +32,6 @@ export class MonitoringEntitySourceDataClient {
     input: MonitoringEntitySourceDescriptor
   ): Promise<MonitoringEntitySourceResponse> {
     const descriptor = await this.monitoringEntitySourceClient.create({
-      type: input.type,
-      name: input.name,
       ...input,
     });
     this.log('debug', 'Initializing MonitoringEntitySourceDataClient Saved Object');
@@ -50,7 +48,7 @@ export class MonitoringEntitySourceDataClient {
 
     const sanitizedUpdate = {
       ...update,
-      matchers: update.matchers?.map((matcher: { fields: any; values: any; }) => ({ // TODO: refine types
+      matchers: update.matchers?.map((matcher: { fields: string[]; values: string[] }) => ({
         fields: matcher.fields ?? [],
         values: matcher.values ?? [],
       })),
