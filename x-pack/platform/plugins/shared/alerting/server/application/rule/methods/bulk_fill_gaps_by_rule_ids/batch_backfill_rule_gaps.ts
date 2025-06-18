@@ -28,7 +28,7 @@ export const batchBackfillRuleGaps = async (
   context: RulesClientContext,
   { rule, range, maxGapCountPerRule }: BatchBackfillRuleGapsParams
 ): Promise<BatchBackfillScheduleRuleGapsResult> => {
-  const logger = context.logger;
+  const logger = context.logger.get('gaps');
   const { start, end } = range;
   let resultError: BulkGapFillError | undefined;
   let hasBeenBackfilled = false;

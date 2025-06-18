@@ -37,6 +37,8 @@ jest.mock('../../../backfill/methods/schedule', () => {
 
 describe('batchBackfillRuleGaps', () => {
   const context = rulesClientContextMock.create();
+  const currentLogger = context.logger;
+  (context.logger.get as jest.Mock).mockImplementation(() => currentLogger);
   const rule = { id: 'some-rule-id', name: 'some-rule-name' };
   const backfillingDateRange = {
     start: '2025-05-09T09:15:09.457Z',
@@ -91,7 +93,7 @@ describe('batchBackfillRuleGaps', () => {
     it('should trigger the batch fetching of the gaps of the rule correctly', () => {
       expect(processAllGapsInTimeRangeMock).toHaveBeenCalledTimes(1);
       expect(processAllGapsInTimeRangeMock).toHaveBeenCalledWith({
-        logger: context.logger,
+        logger: context.logger.get('gaps'),
         options: {
           maxFetchedGaps: 1000,
         },
