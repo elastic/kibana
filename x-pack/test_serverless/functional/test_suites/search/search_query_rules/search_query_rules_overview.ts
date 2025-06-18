@@ -75,13 +75,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
     describe('Creating a query ruleset from an empty deployment', () => {
-      after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
-      });
       it('is Empty State page loaded successfully', async () => {
         await pageObjects.searchQueryRules.QueryRulesEmptyPromptPage.expectQueryRulesEmptyPromptPageComponentsToExist();
       });
@@ -97,22 +90,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
       });
-    });
-    describe('Adding a new ruleset in a non-empty deployment', () => {
-      before(async () => {
-        await createTestRuleset('my-test-ruleset');
-      });
       after(async () => {
         try {
           await deleteTestRuleset('my-test-ruleset');
         } catch (error) {
           // Ignore errors if ruleset doesn't exist or cannot be deleted
         }
-        try {
-          await deleteTestRuleset('my-test-ruleset-2');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
+      });
+    });
+    describe('Adding a new ruleset in a non-empty deployment', () => {
+      before(async () => {
+        await createTestRuleset('my-test-ruleset');
       });
       it('should be able to create a new ruleset on top of an existing one', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -127,17 +115,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
       });
-    });
-    describe('Deleting a query ruleset from the ruleset details page', () => {
-      before(async () => {
-        await createTestRuleset('my-test-ruleset');
-      });
       after(async () => {
         try {
           await deleteTestRuleset('my-test-ruleset');
         } catch (error) {
           // Ignore errors if ruleset doesn't exist or cannot be deleted
         }
+        try {
+          await deleteTestRuleset('my-test-ruleset-2');
+        } catch (error) {
+          // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
+      });
+    });
+    describe('Deleting a query ruleset from the ruleset details page', () => {
+      before(async () => {
+        await createTestRuleset('my-test-ruleset');
       });
       it('should be able to delete an existing ruleset and render the empty state', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
@@ -147,6 +140,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickAcknowledgeButton();
         await pageObjects.searchQueryRules.QueryRulesDeleteRulesetModal.clickConfirmDeleteModal();
         await pageObjects.searchQueryRules.QueryRulesEmptyPromptPage.expectQueryRulesEmptyPromptPageComponentsToExist();
+      });
+      after(async () => {
+        try {
+          await deleteTestRuleset('my-test-ruleset');
+        } catch (error) {
+          // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
       });
     });
     describe('Deleting a query ruleset from the ruleset management page', () => {
@@ -164,13 +164,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
       });
-      after(async () => {
-        try {
-          await deleteTestRuleset('my-test-ruleset');
-        } catch (error) {
-          // Ignore errors if ruleset doesn't exist or cannot be deleted
-        }
-      });
       it('should edit the document id and the criteria field', async () => {
         await pageObjects.searchQueryRules.QueryRulesManagementPage.expectQueryRulesTableToExist();
         await pageObjects.searchQueryRules.QueryRulesManagementPage.clickRuleset('my-test-ruleset');
@@ -185,6 +178,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadata(0, 'my_query_field');
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
+      });
+      after(async () => {
+        try {
+          await deleteTestRuleset('my-test-ruleset');
+        } catch (error) {
+          // Ignore errors if ruleset doesn't exist or cannot be deleted
+        }
       });
     });
   });
