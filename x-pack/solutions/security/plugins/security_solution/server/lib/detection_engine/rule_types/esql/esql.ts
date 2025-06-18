@@ -132,7 +132,6 @@ export const esqlExecutor = async ({
           excludedDocumentIds: excludedDocuments.map(({ id }) => id),
           ruleExecutionTimeout,
         });
-        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
         const esqlQueryString = {
           drop_null_columns: true,
