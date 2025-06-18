@@ -74,10 +74,7 @@ export const getSerializedState = ({
   let { panels } = dashboardState;
   let prefixedPanelReferences = panelReferences;
   if (generateNewIds) {
-    const { newPanels, newPanelReferences } = generateNewPanelIds(
-      panels,
-      panelReferences
-    );
+    const { newPanels, newPanelReferences } = generateNewPanelIds(panels, panelReferences);
     panels = newPanels;
     prefixedPanelReferences = newPanelReferences;
     //

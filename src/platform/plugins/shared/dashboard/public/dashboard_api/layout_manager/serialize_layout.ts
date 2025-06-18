@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState, prefixReferencesFromPanel } from "../../../common";
-import { DashboardChildState, DashboardLayout } from './types';
-import { DashboardSection } from '../../../server';
 import { omit } from 'lodash';
+import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
+import type { DashboardChildState, DashboardLayout } from './types';
+import type { DashboardSection } from '../../../server';
 
-export function serializeLayout(layout: DashboardLayout, childState: DashboardChildState): Pick<DashboardState, 'panels' | 'references'> {
+export function serializeLayout(
+  layout: DashboardLayout,
+  childState: DashboardChildState
+): Pick<DashboardState, 'panels' | 'references'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
     sections[sectionId] = { ...sectionState, panels: [] };
@@ -22,9 +25,7 @@ export function serializeLayout(layout: DashboardLayout, childState: DashboardCh
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { gridData, type }]) => {
     const panelConfig = childState[panelId]?.rawState ?? {};
-    references.push(
-      ...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? [])
-    );
+    references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
     // TODO move savedObjectRef extraction into embeddable implemenations
     const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
     let panelRefName: string | undefined;
@@ -48,7 +49,7 @@ export function serializeLayout(layout: DashboardLayout, childState: DashboardCh
       ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelRefName !== undefined && { panelRefName }),
-    }
+    };
 
     if (sectionId) {
       sections[sectionId].panels.push(panelState);
@@ -59,6 +60,6 @@ export function serializeLayout(layout: DashboardLayout, childState: DashboardCh
 
   return {
     panels: [...panels, ...Object.values(sections)],
-    references
+    references,
   };
-};
+}

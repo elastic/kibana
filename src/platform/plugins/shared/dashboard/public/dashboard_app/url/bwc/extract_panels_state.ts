@@ -34,7 +34,9 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export function extractPanelsState(state: { [key: string]: unknown }): { panels?: DashboardState['panels'] } {
+export function extractPanelsState(state: { [key: string]: unknown }): {
+  panels?: DashboardState['panels'];
+} {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {

@@ -38,7 +38,7 @@ describe('layout manager', () => {
       gridData: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
       type: 'testPanelType',
       panelConfig: { title: 'Panel One' },
-      panelIndex: PANEL_ONE_ID
+      panelIndex: PANEL_ONE_ID,
     },
   ];
 
@@ -97,12 +97,7 @@ describe('layout manager', () => {
 
   describe('serializeLayout', () => {
     test('should serialize the latest state of all panels', () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panels,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
 
       layoutManager.internalApi.registerChildApi(childApi);
       layoutManager.internalApi.setChildState(PANEL_ONE_ID, {
@@ -115,18 +110,13 @@ describe('layout manager', () => {
           type: 'testPanelType',
           panelConfig: {},
           panelIndex: 'panelOne',
-          title: 'Updated Panel One'
+          title: 'Updated Panel One',
         },
       ]);
     });
 
     test('should serialize the latest state of all panels when a child API is unavailable', () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panels,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
       expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(undefined);
 
       // serializing should still work without an API present, returning the last known state of the panel
@@ -154,12 +144,7 @@ describe('layout manager', () => {
     };
 
     test('should add duplicated panel to layout', async () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panels,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
       layoutManager.internalApi.registerChildApi(childApiToDuplicate);
 
       await layoutManager.api.duplicatePanel('panelOne');
@@ -184,12 +169,7 @@ describe('layout manager', () => {
     });
 
     test('should clone by reference embeddable as by value', async () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panels,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
       layoutManager.internalApi.registerChildApi({
         ...childApiToDuplicate,
         checkForDuplicateTitle: jest.fn(),
@@ -214,12 +194,7 @@ describe('layout manager', () => {
     });
 
     test('should give a correct title to the clone of a clone', async () => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panels,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.internalApi.registerChildApi({
         ...childApiToDuplicate,

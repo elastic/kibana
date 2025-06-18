@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardPanel } from '../../server';
 
 import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
-
 
 dataService.search.searchSource.create = jest.fn().mockResolvedValue({
   setField: jest.fn(),

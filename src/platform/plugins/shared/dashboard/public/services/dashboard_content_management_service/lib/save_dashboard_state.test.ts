@@ -10,7 +10,7 @@
 import { getSampleDashboardState } from '../../../mocks';
 import { contentManagementService, coreServices, dataService } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
-import { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import { DashboardPanel } from '../../../../server';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -112,7 +112,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooFour',
-        panels: [{ type: 'boop' } as DashboardPanel ],
+        panels: [{ type: 'boop' } as DashboardPanel],
       },
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
@@ -140,7 +140,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: [{ type: 'boop' } as DashboardPanel ],
+        panels: [{ type: 'boop' } as DashboardPanel],
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },

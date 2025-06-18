@@ -168,8 +168,8 @@ export function getMockPanelsWithSections() {
           panelConfig: { title: 'panel Three' },
           panelIndex: '3',
           type: 'testPanelType',
-        }
-      ]
+        },
+      ],
     },
     {
       title: 'Section Two',
@@ -184,9 +184,9 @@ export function getMockPanelsWithSections() {
           panelConfig: { title: 'panel Four' },
           panelIndex: '4',
           type: 'testPanelType',
-        }
-      ]
-    }
+        },
+      ],
+    },
   ];
 }
 

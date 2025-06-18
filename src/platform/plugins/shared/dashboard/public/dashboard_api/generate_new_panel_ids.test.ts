@@ -18,88 +18,96 @@ jest.mock('uuid', () => {
 
 describe('generateNewPanelIds', () => {
   test('should generate new ids for panels', () => {
-    const { newPanels, newPanelReferences } = generateNewPanelIds([
-      {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-        panelConfig: { title: 'panel One' },
-        panelIndex: '1',
-        type: 'testPanelType',
-      }
-    ],
-    [
-      {
-        type: 'refType',
-        id: 'ref1',
-        name: '1:panel_1',
-      }
-    ]);
+    const { newPanels, newPanelReferences } = generateNewPanelIds(
+      [
+        {
+          gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          panelConfig: { title: 'panel One' },
+          panelIndex: '1',
+          type: 'testPanelType',
+        },
+      ],
+      [
+        {
+          type: 'refType',
+          id: 'ref1',
+          name: '1:panel_1',
+        },
+      ]
+    );
 
-    expect(newPanels).toEqual([{
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '100' },
-      panelConfig: { title: 'panel One' },
-      panelIndex: '100',
-      type: 'testPanelType',
-    }]);
+    expect(newPanels).toEqual([
+      {
+        gridData: { x: 0, y: 0, w: 6, h: 6, i: '100' },
+        panelConfig: { title: 'panel One' },
+        panelIndex: '100',
+        type: 'testPanelType',
+      },
+    ]);
 
     expect(newPanelReferences).toEqual([
       {
         type: 'refType',
         id: 'ref1',
         name: '100:panel_1',
-      }
+      },
     ]);
   });
 
   test('should generate new ids for panels with sections', () => {
-    const { newPanels, newPanelReferences } = generateNewPanelIds([
+    const { newPanels, newPanelReferences } = generateNewPanelIds(
+      [
+        {
+          title: 'Section One',
+          collapsed: true,
+          gridData: {
+            y: 6,
+            i: 'section1',
+          },
+          panels: [
+            {
+              gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+              panelConfig: { title: 'panel One' },
+              panelIndex: '1',
+              type: 'testPanelType',
+            },
+          ],
+        },
+      ],
+      [
+        {
+          type: 'refType',
+          id: 'ref1',
+          name: '1:panel_1',
+        },
+      ]
+    );
+
+    expect(newPanels).toEqual([
       {
         title: 'Section One',
         collapsed: true,
         gridData: {
           y: 6,
-          i: 'section1',
+          i: '101',
         },
         panels: [
           {
-            gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+            gridData: { x: 0, y: 0, w: 6, h: 6, i: '102' },
             panelConfig: { title: 'panel One' },
-            panelIndex: '1',
+            panelIndex: '102',
             type: 'testPanelType',
-          }
-        ]
+          },
+        ],
       },
-    ],
-    [
-      {
-        type: 'refType',
-        id: 'ref1',
-        name: '1:panel_1',
-      }
     ]);
-
-    expect(newPanels).toEqual([{
-      title: 'Section One',
-      collapsed: true,
-      gridData: {
-        y: 6,
-        i: '101',
-      },
-      panels: [
-        {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '102' },
-          panelConfig: { title: 'panel One' },
-          panelIndex: '102',
-          type: 'testPanelType',
-        }
-      ]
-    }]);
 
     expect(newPanelReferences).toEqual([
       {
         type: 'refType',
         id: 'ref1',
         name: '102:panel_1',
-      }
+      },
     ]);
   });
 });

@@ -13,11 +13,8 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 
-import type {
-  DashboardAttributes,
-  DashboardOptions,
-} from '../server/content_management';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
+import type { DashboardAttributes, DashboardOptions } from '../server/content_management';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;

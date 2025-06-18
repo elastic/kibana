@@ -12,10 +12,7 @@ import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../common';
+import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -115,10 +112,7 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const {
-      panels,
-      references: panelReferences,
-    } = layoutManager.internalApi.serializeLayout();
+    const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {

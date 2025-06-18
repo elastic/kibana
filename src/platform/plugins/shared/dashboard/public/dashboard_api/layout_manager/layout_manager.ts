@@ -32,6 +32,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
+import type { DashboardPanel } from '../../../server';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
@@ -47,7 +48,6 @@ import type { initializeTrackPanel } from '../track_panel';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -319,24 +319,11 @@ export function initializeLayoutManager(
       ): Observable<{ panels?: DashboardState['panels'] }> => {
         return layout$.pipe(
           debounceTime(100),
-          combineLatestWith(
-            lastSavedState$.pipe(
-              map((lastSaved) => lastSaved.panels)
-            )
-          ),
+          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => lastSaved.panels))),
           map(([currentLayout, lastSavedPanels]) => {
             const lastSavedLayout = deserializeLayout(lastSavedPanels, getReferences).layout;
-            if (
-              !areLayoutsEqual(
-                lastSavedLayout,
-                currentLayout
-              )
-            ) {
-              logStateDiff(
-                'dashboard layout',
-                lastSavedLayout,
-                currentLayout
-              );
+            if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
+              logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
               return { panels: serializeLayout(currentLayout, currentChildState).panels };
             }
             return {};

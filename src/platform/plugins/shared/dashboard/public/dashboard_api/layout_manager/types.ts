@@ -15,14 +15,14 @@ export interface DashboardChildren {
   [uuid: string]: DefaultEmbeddableApi;
 }
 
-export type DashboardLayoutPanel = {
+export interface DashboardLayoutPanel {
   gridData: DashboardPanel['gridData'] & { sectionId?: string };
   type: DashboardPanel['type'];
-};
+}
 
 export interface DashboardLayout {
   panels: {
-    [uuid: string]: DashboardLayoutPanel
+    [uuid: string]: DashboardLayoutPanel;
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
 }

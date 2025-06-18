@@ -25,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import type { DashboardPanel } from '../../server';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializeLayoutManager } from './layout_manager/layout_manager';
 import { initializeSettingsManager } from './settings_manager';
@@ -36,7 +37,6 @@ import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
 } from './control_group_manager';
-import { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 const DEBOUNCE_TIME = 100;
 
@@ -159,16 +159,16 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    const panel = lastSavedDashboardState.panels.find((panel) => {
+    const targetPanel = lastSavedDashboardState.panels.find((panel) => {
       return (panel as DashboardPanel).panelIndex === childId;
     });
 
-    return panel
+    return targetPanel
       ? {
-          rawState: (panel as DashboardPanel).panelConfig ?? {},
+          rawState: (targetPanel as DashboardPanel).panelConfig ?? {},
           references: getReferences(childId),
         }
-        : undefined;
+      : undefined;
   };
 
   return {

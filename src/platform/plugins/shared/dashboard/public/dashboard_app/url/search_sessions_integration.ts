@@ -81,7 +81,10 @@ function getLocatorParams({
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
   const panels = savedObjectId
-    ? dashboardInternalApi.serializeLayout() as Pick<DashboardLocatorParams, 'panels' | 'references'>
+    ? (dashboardInternalApi.serializeLayout() as Pick<
+        DashboardLocatorParams,
+        'panels' | 'references'
+      >)
     : undefined;
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',

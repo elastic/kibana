@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -11,7 +10,12 @@
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanel } from '../../server';
-import { DashboardState, getReferencesForPanelId, isDashboardSection, prefixReferencesFromPanel } from '../../common';
+import {
+  DashboardState,
+  getReferencesForPanelId,
+  isDashboardSection,
+  prefixReferencesFromPanel,
+} from '../../common';
 
 export function generateNewPanelIds(panels: DashboardState['panels'], references?: Reference[]) {
   const newPanels: DashboardState['panels'] = [];
@@ -20,12 +24,11 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
   function generateNewPanelId(panel: DashboardPanel) {
     const newPanelId = v4();
     const oldPanelId = panel.panelIndex ?? panel.gridData.i;
-    const panelReferences = oldPanelId && references ? getReferencesForPanelId(oldPanelId, references) : [];
-    
-    newPanelReferences.push(
-      ...prefixReferencesFromPanel(newPanelId, panelReferences)
-    );
-    
+    const panelReferences =
+      oldPanelId && references ? getReferencesForPanelId(oldPanelId, references) : [];
+
+    newPanelReferences.push(...prefixReferencesFromPanel(newPanelId, panelReferences));
+
     return {
       ...panel,
       panelIndex: newPanelId,
@@ -42,11 +45,11 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
         gridData: { ...section.gridData, i: newSectionId },
         panels: section.panels.map((panelInSection) => {
           return generateNewPanelId(panelInSection as DashboardPanel);
-        })
+        }),
       });
     } else {
       newPanels.push(generateNewPanelId(panel));
     }
   }
   return { newPanels, newPanelReferences };
-};
+}

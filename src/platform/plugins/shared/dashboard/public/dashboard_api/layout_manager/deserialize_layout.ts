@@ -9,11 +9,14 @@
 
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { type DashboardState, isDashboardSection } from "../../../common";
-import type { DashboardPanel } from "../../../server";
-import type { DashboardChildState, DashboardLayout } from "./types";
+import { type DashboardState, isDashboardSection } from '../../../common';
+import type { DashboardPanel } from '../../../server';
+import type { DashboardChildState, DashboardLayout } from './types';
 
-export function deserializeLayout(panels: DashboardState['panels'], getReferences: (id: string) => Reference[]) {
+export function deserializeLayout(
+  panels: DashboardState['panels'],
+  getReferences: (id: string) => Reference[]
+) {
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
@@ -27,7 +30,7 @@ export function deserializeLayout(panels: DashboardState['panels'], getReference
       gridData: {
         ...panel.gridData,
         ...(sectionId && { sectionId }),
-        i: panelId
+        i: panelId,
       },
     };
     childState[panelId] = {

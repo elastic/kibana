@@ -115,7 +115,7 @@ describe('DashboardGrid', () => {
 
     test('removes panel when removed from container', async () => {
       const { dashboardApi, component } = await createAndMountDashboardGrid({
-        panels: getMockPanels()
+        panels: getMockPanels(),
       });
 
       // remove panel
@@ -129,7 +129,7 @@ describe('DashboardGrid', () => {
 
     test('renders expanded panel', async () => {
       const { dashboardApi, component } = await createAndMountDashboardGrid({
-        panels: getMockPanels()
+        panels: getMockPanels(),
       });
 
       // maximize panel
@@ -156,7 +156,7 @@ describe('DashboardGrid', () => {
 
     test('renders focused panel', async () => {
       const { dashboardApi, component } = await createAndMountDashboardGrid({
-        panels: getMockPanels()
+        panels: getMockPanels(),
       });
       const overlayMock = {
         onClose: new Promise<void>((resolve) => {
@@ -214,11 +214,11 @@ describe('DashboardGrid', () => {
       expect(newSection).toEqual({
         gridData: {
           i: '54321',
-          y: 14
+          y: 14,
         },
         title: 'New collapsible section',
-        collapsed: false
-     });
+        collapsed: false,
+      });
       expect(screen.getByText(newSection.title)).toBeInTheDocument();
       expect(screen.getByTestId(`kbnGridSectionHeader-54321`).classList).not.toContain(
         'kbnGridSectionHeader--collapsed'
@@ -247,9 +247,9 @@ describe('DashboardGrid', () => {
             title: 'Empty section',
             collapsed: false,
             gridData: { i: 'emptySection', y: 8 },
-            panels: []
-          }
-        ]
+            panels: [],
+          },
+        ],
       });
 
       // can delete empty section
