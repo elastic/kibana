@@ -285,7 +285,7 @@
       "enabled": true
     },
     {
-      "groupName": "Enzyme dependencies",
+      "groupName": "enzyme",
       "matchDepNames": [
         "@wojtekmaj/enzyme-adapter-react-17",
         "enzyme",
@@ -450,7 +450,7 @@
       "enabled": true
     },
     {
-      "groupName": "styled-components dependencies",
+      "groupName": "styled-components",
       "matchDepNames": [
         "styled-components",
         "@types/styled-components"
@@ -492,7 +492,7 @@
       "enabled": true
     },
     {
-      "groupName": "React dependencies",
+      "groupName": "react",
       "matchDepNames": [
         "prop-types",
         "react",
@@ -551,7 +551,7 @@
       "enabled": true
     },
     {
-      "groupName": "react-router dependencies",
+      "groupName": "react-router",
       "matchDepNames": [
         "react-router",
         "react-router-config",

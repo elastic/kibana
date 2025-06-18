@@ -25,6 +25,10 @@ export function ruleFilter(rule: RenovatePackageRule) {
     'bazel', // Per operations team. This is slated for removal, and does not make sense to track.
     'typescript', // These updates are always handled manually
     'webpack', // While we are in the middle of a webpack upgrade. TODO: Remove this once we are done.
+    'enzyme', // Per sharedux team. This is deprecated and in process of removal.
+    'styled-components', // Per sharedux team. This is deprecated and in process of removal.
+    'react', // Per sharedux team. Always handled manually, and not covered by renovate.
+    'react-router', // Per sharedux team. Always handled manually, and not covered by renovate.
   ];
   return (
     // Only include rules that are enabled or explicitly allowed to be disabled
