@@ -285,16 +285,6 @@ export function getFormBasedDatasource({
     },
 
     getPersistableState(state: FormBasedPrivateState) {
-      Object.keys(state.layers).forEach((layerId) => {
-        const layer = state.layers[layerId];
-        Object.keys(layer.columns).forEach((columnId) => {
-          const column = layer.columns[columnId];
-          if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
-            // ensure that the secondary fields are always sorted
-            column.params.secondaryFields = [...(column.params.secondaryFields || [])].sort();
-          }
-        });
-      });
       return extractReferences(state);
     },
 
