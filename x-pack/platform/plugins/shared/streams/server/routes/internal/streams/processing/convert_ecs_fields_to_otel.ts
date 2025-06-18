@@ -181,6 +181,52 @@ const OTLP_FIELDS: Record<string, string> = {
 };
 
 /**
+ * The set of ECS (Elastic Common Schema) field names that are mapped to OpenTelemetry resource attributes, as defined by the OpenTelemetry Semantic Conventions.
+ *
+ * See https://github.com/elastic/elasticsearch/blob/main/modules/ingest-otel/src/main/java/org/elasticsearch/ingest/otel/EcsOTelResourceAttributes.java
+ */
+const RESOURCE_FIELDS: string[] = [
+  'agent.type',
+  'agent.build.original',
+  'agent.name',
+  'agent.id',
+  'agent.ephemeral_id',
+  'agent.version',
+  'container.image.tag',
+  'device.model.identifier',
+  'container.image.hash.all',
+  'service.node.name',
+  'process.pid',
+  'device.id',
+  'host.mac',
+  'host.type',
+  'container.id',
+  'cloud.availability_zone',
+  'host.ip',
+  'container.name',
+  'container.image.name',
+  'device.model.name',
+  'host.name',
+  'host.id',
+  'process.executable',
+  'user_agent.original',
+  'service.environment',
+  'cloud.region',
+  'service.name',
+  'faas.name',
+  'device.manufacturer',
+  'process.args',
+  'host.architecture',
+  'cloud.provider',
+  'container.runtime',
+  'service.version',
+  'cloud.service.name',
+  'cloud.account.id',
+  'process.command_line',
+  'faas.version',
+];
+
+/**
  * Maps ECS field to corresponding OTel semantic convention attribute.
  *
  * See https://www.elastic.co/docs/reference/ecs/ecs-otel-alignment-details for full reference.
@@ -192,16 +238,17 @@ export function getOtelFieldName(ecsFieldName: string): string {
   if (ecsFieldName === 'message') {
     return `body.text`; // Special case for `message` field which should be stored as `body.text` instead of `body` (SemConv).
   }
-  if (MATCH_FIELDS.includes(ecsFieldName)) {
-    return `attributes.${ecsFieldName}`; // Match fields are stored as is under `attributes.${field}`.
-  }
-  if (EQUIVALENT_FIELDS[ecsFieldName]) {
-    return `attributes.${EQUIVALENT_FIELDS[ecsFieldName]}`; // Equivalent fields are mapped to their SemConv counterparts and stored under `attributes.${field}`.
-  }
   if (OTLP_FIELDS[ecsFieldName]) {
     return `${OTLP_FIELDS[ecsFieldName]}`; // OTLP fields are mapped to their OTLP counterparts and stored in the root of the document.
   }
-  return `attributes.${ecsFieldName}`; // All other fields (unknown/conflict) are stored as custom attributes.
+  const prefix = RESOURCE_FIELDS.includes(ecsFieldName) ? `resource.attributes` : `attributes`; // Resource fields are stored under `resource.attributes`, all other fields under `attributes`.
+  if (MATCH_FIELDS.includes(ecsFieldName)) {
+    return `${prefix}.${ecsFieldName}`; // Match fields are kept as is
+  }
+  if (EQUIVALENT_FIELDS[ecsFieldName]) {
+    return `${prefix}.${EQUIVALENT_FIELDS[ecsFieldName]}`; // Equivalent fields are mapped to their SemConv counterparts
+  }
+  return `${prefix}.${ecsFieldName}`; // All other fields (unknown/conflict) are stored as custom attributes.
 }
 
 /**

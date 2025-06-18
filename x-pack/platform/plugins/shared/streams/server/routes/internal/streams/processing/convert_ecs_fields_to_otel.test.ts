@@ -21,7 +21,7 @@ describe('getOtelFieldName', () => {
   });
 
   it('maps equivalent fields with attributes prefix', () => {
-    expect(getOtelFieldName('cloud.service.name')).toBe('attributes.cloud.platform');
+    expect(getOtelFieldName('error.message')).toBe('attributes.exception.message');
   });
 
   it('maps OTLP fields without attributes prefix', () => {
@@ -30,6 +30,27 @@ describe('getOtelFieldName', () => {
 
   it('maps unknown fields with attributes prefix', () => {
     expect(getOtelFieldName('custom.field.name')).toBe('attributes.custom.field.name');
+  });
+
+  it('maps resource fields directly with resource.attributes prefix', () => {
+    expect(getOtelFieldName('agent.type')).toBe('resource.attributes.agent.type');
+    expect(getOtelFieldName('cloud.availability_zone')).toBe(
+      'resource.attributes.cloud.availability_zone'
+    );
+    expect(getOtelFieldName('host.name')).toBe('resource.attributes.host.name');
+  });
+
+  it('maps equivalent resource fields with resource.attributes prefix', () => {
+    expect(getOtelFieldName('cloud.service.name')).toBe('resource.attributes.cloud.platform');
+    expect(getOtelFieldName('container.image.hash.all')).toBe(
+      'resource.attributes.container.image.repo_digests'
+    );
+  });
+
+  it('handles resource fields not in MATCH_FIELDS or EQUIVALENT_FIELDS', () => {
+    expect(getOtelFieldName('agent.build.original')).toBe(
+      'resource.attributes.agent.build.original'
+    );
   });
 });
 
@@ -41,8 +62,8 @@ describe('convertEcsFieldsToOtel', () => {
   });
 
   it('replaces equivalent fields in Grok patterns', () => {
-    expect(convertEcsFieldsToOtel('%{SYNTAX:cloud.service.name}')).toBe(
-      '%{SYNTAX:attributes.cloud.platform}'
+    expect(convertEcsFieldsToOtel('%{SYNTAX:error.message}')).toBe(
+      '%{SYNTAX:attributes.exception.message}'
     );
   });
 
@@ -63,6 +84,33 @@ describe('convertEcsFieldsToOtel', () => {
   it('handles complex patterns with type', () => {
     expect(convertEcsFieldsToOtel('%{SYNTAX:client.address:TYPE}')).toBe(
       '%{SYNTAX:attributes.client.address:TYPE}'
+    );
+  });
+
+  it('replaces resource fields in Grok patterns with resource.attributes prefix', () => {
+    expect(convertEcsFieldsToOtel('%{SYNTAX:agent.type}')).toBe(
+      '%{SYNTAX:resource.attributes.agent.type}'
+    );
+    expect(convertEcsFieldsToOtel('%{SYNTAX:cloud.availability_zone}')).toBe(
+      '%{SYNTAX:resource.attributes.cloud.availability_zone}'
+    );
+  });
+
+  it('replaces equivalent resource fields in Grok patterns with resource.attributes prefix', () => {
+    expect(convertEcsFieldsToOtel('%{SYNTAX:cloud.service.name}')).toBe(
+      '%{SYNTAX:resource.attributes.cloud.platform}'
+    );
+    expect(convertEcsFieldsToOtel('%{SYNTAX:container.image.hash.all}')).toBe(
+      '%{SYNTAX:resource.attributes.container.image.repo_digests}'
+    );
+  });
+
+  it('handles complex patterns with resource fields and type', () => {
+    expect(convertEcsFieldsToOtel('%{SYNTAX:agent.type:TYPE}')).toBe(
+      '%{SYNTAX:resource.attributes.agent.type:TYPE}'
+    );
+    expect(convertEcsFieldsToOtel('%{SYNTAX:cloud.availability_zone:TYPE}')).toBe(
+      '%{SYNTAX:resource.attributes.cloud.availability_zone:TYPE}'
     );
   });
 });
