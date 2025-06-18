@@ -169,6 +169,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const contentLength = parseInt(res.get('content-length'), 10);
         expect(contentLength >= 20620 && contentLength <= 20622).to.be(true); // contentLength can be between 20620 and 20622
+
+        const jobId = await PageObjects.reporting.getReportJobId(60000);
+        const reportInfo = await PageObjects.reporting.getReportInfo(jobId);
+
+        // verify "completed" status (no warnings)
+        expect(reportInfo).to.have.property('status', 'completed');
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {
@@ -342,6 +348,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `);
 
         expect(res.get('content-length')).to.be('1498');
+
+        const jobId = await PageObjects.reporting.getReportJobId(60000);
+        const reportInfo = await PageObjects.reporting.getReportInfo(jobId);
+
+        // verify "completed" status (no warnings)
+        expect(reportInfo).to.have.property('status', 'completed');
       });
     });
   });
