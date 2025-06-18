@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -53,6 +53,18 @@ export function Wrapper({
     <>
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
