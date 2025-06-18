@@ -104,7 +104,7 @@ export function StreamsTreeTable({
   }, []);
 
   const sortedRoots = React.useMemo(() => {
-    return [...enrichedTree].sort((a, b) => {
+    const compare = (a: EnrichedStreamTree, b: EnrichedStreamTree) => {
       const av = a[sortField];
       const bv = b[sortField];
       if (typeof av === 'string' && typeof bv === 'string') {
@@ -114,7 +114,17 @@ export function StreamsTreeTable({
         return sortDirection === 'asc' ? av - bv : bv - av;
       }
       return 0;
-    });
+    };
+
+    const shouldSortChildren = sortField === 'nameSortKey' || sortField === 'retentionMs';
+    const sortChildren = (node: EnrichedStreamTree): EnrichedStreamTree => {
+      const children = shouldSortChildren
+        ? [...node.children].sort(compare).map(sortChildren)
+        : node.children.map(sortChildren);
+      return { ...node, children };
+    };
+
+    return [...enrichedTree].sort(compare).map(sortChildren);
   }, [enrichedTree, sortField, sortDirection]);
 
   const items = React.useMemo(() => {
