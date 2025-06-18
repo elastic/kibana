@@ -74,36 +74,9 @@ export function StreamsTreeTable({
     return asTrees(streams ?? []).map(enrich);
   }, [streams]);
 
-  const flattenTree = useCallback((roots: EnrichedStreamTree[]): TableRow[] => {
-    const result: TableRow[] = [];
-    const walk = (node: EnrichedStreamTree, level: number, rootRow: TableRow) => {
-      node.children.forEach((child) => {
-        const childRow: TableRow = {
-          ...child,
-          level,
-          rootNameSortKey: rootRow.rootNameSortKey,
-          rootDocumentsCount: rootRow.rootDocumentsCount,
-          rootRetentionMs: rootRow.rootRetentionMs,
-        };
-        result.push(childRow);
-        walk(child, level + 1, rootRow);
-      });
-    };
-    roots.forEach((root) => {
-      const rootRow: TableRow = {
-        ...root,
-        level: 0,
-        rootNameSortKey: root.nameSortKey,
-        rootDocumentsCount: root.documentsCount,
-        rootRetentionMs: root.retentionMs,
-      };
-      result.push(rootRow);
-      walk(root, 1, rootRow);
-    });
-    return result;
-  }, []);
+  const items = React.useMemo(() => {
+    if (!enrichedTree.length) return [];
 
-  const sortedRoots = React.useMemo(() => {
     const compare = (a: EnrichedStreamTree, b: EnrichedStreamTree) => {
       const av = a[sortField];
       const bv = b[sortField];
@@ -117,19 +90,32 @@ export function StreamsTreeTable({
     };
 
     const shouldSortChildren = sortField === 'nameSortKey' || sortField === 'retentionMs';
-    const sortChildren = (node: EnrichedStreamTree): EnrichedStreamTree => {
-      const children = shouldSortChildren
-        ? [...node.children].sort(compare).map(sortChildren)
-        : node.children.map(sortChildren);
-      return { ...node, children };
+
+    const result: TableRow[] = [];
+
+    const pushNode = (
+      node: EnrichedStreamTree,
+      level: number,
+      rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
+    ) => {
+      result.push({ ...node, level, ...rootMeta });
+
+      const children = shouldSortChildren ? [...node.children].sort(compare) : node.children;
+      children.forEach((child) => pushNode(child, level + 1, rootMeta));
     };
 
-    return [...enrichedTree].sort(compare).map(sortChildren);
+    [...enrichedTree].sort(compare).forEach((root) => {
+      const rootMeta = {
+        rootNameSortKey: root.nameSortKey,
+        rootDocumentsCount: root.documentsCount,
+        rootRetentionMs: root.retentionMs,
+      } as const;
+      pushNode(root, 0, rootMeta);
+    });
+
+    return result;
   }, [enrichedTree, sortField, sortDirection]);
 
-  const items = React.useMemo(() => {
-    return flattenTree(sortedRoots);
-  }, [sortedRoots, flattenTree]);
   const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
     if (sort && (sort.field === 'nameSortKey' || sort.field === 'retentionMs')) {
       setSortField(sort.field as SortableField);
