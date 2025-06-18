@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockDashboardPanels } from '../mocks';
+import { getMockLayoutPanels, getMockLayoutPanelsWithSections } from '../mocks';
 import { placeClonePanel } from './place_clone_panel_strategy';
 
 describe('Clone panel placement strategies', () => {
@@ -26,8 +26,8 @@ describe('Clone panel placement strategies', () => {
       placeBesideId: '1',
     });
     expect(newPanelPlacement).toEqual({
-      x: 6, // placed right beside the other panel
-      y: 0,
+      x: 0, // placed right beside the other panel
+      y: 6,
       w: 6,
       h: 6,
     });
@@ -35,7 +35,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('panel collision at desired clone location', () => {
-    const { panels } = getMockDashboardPanels();
+    const panels = getMockLayoutPanels();
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,
@@ -43,8 +43,8 @@ describe('Clone panel placement strategies', () => {
       placeBesideId: '1',
     });
     expect(newPanelPlacement).toEqual({
-      x: 0,
-      y: 6, // instead of being placed beside the cloned panel, it is placed right below
+      x: 6,
+      y: 0, // instead of being placed beside the cloned panel, it is placed right below
       w: 6,
       h: 6,
     });
@@ -52,8 +52,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('ignores panels in other sections', () => {
-    const { panels } = getMockDashboardPanels(true);
-
+    const panels = getMockLayoutPanelsWithSections();
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,

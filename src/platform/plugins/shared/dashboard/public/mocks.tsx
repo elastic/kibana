@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
 import { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
+import { deserializeLayout } from './dashboard_api/layout_manager/deserialize_layout';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -147,6 +148,10 @@ export function getMockPanels() {
   ];
 }
 
+export function getMockLayoutPanels() {
+  return deserializeLayout(getMockPanels(), () => []).layout.panels;
+}
+
 export function getMockPanelsWithSections() {
   return [
     ...getMockPanels(),
@@ -183,4 +188,8 @@ export function getMockPanelsWithSections() {
       ]
     }
   ];
+}
+
+export function getMockLayoutPanelsWithSections() {
+  return deserializeLayout(getMockPanelsWithSections(), () => []).layout.panels;
 }
