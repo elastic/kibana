@@ -17,6 +17,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -32,6 +33,8 @@ import {
   formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -54,8 +57,11 @@ export function RetentionMetadata({
   isLoadingStats: boolean;
   statsError?: Error;
 }) {
-  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
+  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
+
+  const dateFormatter = useDateFormatter();
+
   const lifecycle = definition.effective_lifecycle;
 
   const contextualMenu =
@@ -74,17 +80,17 @@ export function RetentionMetadata({
                 : undefined
             }
           >
-            <EuiButton
+            <EuiButtonEmpty
               data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
               size="s"
-              fullWidth
               onClick={toggleMenu}
               disabled={!definition.privileges.lifecycle}
+              iconType="pencil"
             >
               {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
                 defaultMessage: 'Edit data retention',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiToolTip>
         }
         isOpen={isMenuOpen}
@@ -153,7 +159,7 @@ export function RetentionMetadata({
           defaultMessage: 'Retention period',
         })}
         value={
-          <EuiFlexGroup responsive={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
@@ -167,9 +173,9 @@ export function RetentionMetadata({
                     })}
               </EuiBadge>
             </EuiFlexItem>
+            {contextualMenu}
           </EuiFlexGroup>
         }
-        button={contextualMenu}
         dataTestSubj="streamsAppRetentionMetadataRetentionPeriod"
       />
       <EuiHorizontalRule margin="s" />
@@ -182,6 +188,26 @@ export function RetentionMetadata({
             {ilmLink ? <EuiFlexItem grow={false}>{ilmLink}</EuiFlexItem> : null}
             <EuiFlexItem grow={false}>{lifecycleOrigin}</EuiFlexItem>
           </EuiFlexGroup>
+        }
+      />
+      <EuiHorizontalRule margin="s" />
+      <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.lastUupdated', {
+          defaultMessage: 'Last updated',
+        })}
+        value={
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="lastUpdated"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              dateFormatter.convert(stats.lastActivity)
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
       <EuiHorizontalRule margin="s" />
@@ -210,26 +236,6 @@ export function RetentionMetadata({
           </PrivilegesWarningIconWrapper>
         }
       />
-      <EuiHorizontalRule margin="s" />
-      <MetadataRow
-        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
-          defaultMessage: 'Total doc count',
-        })}
-        value={
-          <PrivilegesWarningIconWrapper
-            hasPrivileges={definition.privileges.monitor}
-            title="totalDocCount"
-          >
-            {statsError ? (
-              '-'
-            ) : isLoadingStats || !stats ? (
-              <EuiLoadingSpinner size="s" />
-            ) : (
-              formatNumber(stats.totalDocs, '0,0')
-            )}
-          </PrivilegesWarningIconWrapper>
-        }
-      />
     </EuiPanel>
   );
 }
@@ -238,18 +244,16 @@ function MetadataRow({
   metadata,
   value,
   tip,
-  button,
   dataTestSubj,
 }: {
   metadata: string;
   value: ReactNode;
   tip?: string;
-  button?: ReactNode;
   dataTestSubj?: string;
 }) {
   return (
     <EuiFlexGroup
-      alignItems="center"
+      alignItems="flexEnd"
       gutterSize="xl"
       responsive={false}
       data-test-subj={dataTestSubj}
@@ -267,8 +271,13 @@ function MetadataRow({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={4}>{value}</EuiFlexItem>
-      <EuiFlexItem grow={1}>{button}</EuiFlexItem>
+      <EuiFlexItem grow={5}>{value}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+const useDateFormatter = () => {
+  const { fieldFormats } = useKibana().dependencies.start;
+
+  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE]);
+};
