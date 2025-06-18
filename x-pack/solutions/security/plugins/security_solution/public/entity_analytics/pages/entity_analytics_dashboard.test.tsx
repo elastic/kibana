@@ -120,14 +120,14 @@ describe('EntityAnalyticsPage', () => {
     expect(screen.getByText('Entity analytics')).toBeInTheDocument();
   });
 
-  it('renders Entity analytics title when isOverview is true', () => {
+  it('renders Entity analytics title', () => {
     render(
       <MemoryRouter>
-        <EntityAnalyticsPage isOverview />
+        <EntityAnalyticsPage />
       </MemoryRouter>,
       { wrapper: TestProviders }
     );
-    expect(screen.getByText('Entity Analytics overview')).toBeInTheDocument();
+    expect(screen.getByText('Entity analytics')).toBeInTheDocument();
   });
 
   it('renders loading spinner when sourcerer is loading', () => {
@@ -223,28 +223,5 @@ describe('EntityAnalyticsPage', () => {
 
     expect(screen.getByTestId('entityAnalyticsRiskScores-host')).toBeInTheDocument();
     expect(screen.queryByTestId('entityAnalyticsRiskScores-user')).not.toBeInTheDocument();
-  });
-
-  it('does not render anomalies section for entity analytics Overview page', async () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
-    render(
-      <MemoryRouter>
-        <EntityAnalyticsPage isOverview />
-      </MemoryRouter>,
-      { wrapper: TestProviders }
-    );
-
-    const emptyPromptButton = screen.getByTestId('emptyPrompt');
-    fireEvent.click(emptyPromptButton);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('entityAnalyticsPage')).toBeInTheDocument();
-      expect(screen.queryByTestId('entityAnalyticsAnomalies')).not.toBeInTheDocument();
-    });
   });
 });
