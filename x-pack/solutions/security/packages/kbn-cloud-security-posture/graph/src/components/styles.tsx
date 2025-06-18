@@ -34,9 +34,9 @@ const StyleEuiIcon = styled(EuiIcon)`
   transform: translate(-50%, -50%);
 `;
 
-type RoundedEuiIconProps = EuiIconProps & EuiColorProps;
+type PopoverListItemIconProps = EuiIconProps & EuiColorProps;
 
-const RoundedEuiIcon = ({ color, ...rest }: RoundedEuiIconProps) => (
+const PopoverListItemIcon = ({ color, ...rest }: PopoverListItemIconProps) => (
   <IconContainer color={color}>
     <StyleEuiIcon color={color} {...rest} />
   </IconContainer>
@@ -49,7 +49,7 @@ export const ExpandPopoverListItem = (
   return (
     <EuiListGroupItem
       {...rest}
-      icon={iconType ? <RoundedEuiIcon color="text" type={iconType} size="m" /> : undefined}
+      icon={iconType ? <PopoverListItemIcon color="text" type={iconType} size="m" /> : undefined}
       label={<EuiText>{label}</EuiText>}
       onClick={onClick}
     />
