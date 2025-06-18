@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 
 export type { ClientConfigType } from './types';
 export { Job } from './job';

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -36,6 +36,7 @@ export async function mountManagementSection({
   apiClient,
   params,
   actionsService,
+  notificationsService,
 }: {
   coreStart: CoreStart;
   license$: LicensingPluginStart['license$'];
@@ -45,6 +46,7 @@ export async function mountManagementSection({
   apiClient: ReportingAPIClient;
   params: ManagementAppMountParams;
   actionsService: ActionsPublicPluginSetup;
+  notificationsService: NotificationsStart;
 }) {
   const services: KibanaContext = {
     http: coreStart.http,
@@ -55,6 +57,7 @@ export async function mountManagementSection({
     data: dataService,
     share: shareService,
     actions: actionsService,
+    notifications: notificationsService,
   };
 
   render(

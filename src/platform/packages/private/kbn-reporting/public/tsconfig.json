@@ -27,5 +27,6 @@
     "@kbn/home-plugin",
     "@kbn/management-plugin",
     "@kbn/ui-actions-plugin",
+    "@kbn/actions-plugin",
   ]
 }

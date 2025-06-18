@@ -58,6 +58,9 @@
     "@kbn/notifications-plugin",
     "@kbn/spaces-utils",
     "@kbn/logging-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/core-mount-utils-browser-internal",
   ],
   "exclude": [
     "target/**/*",

@@ -175,6 +175,7 @@ export class ReportingPublicPlugin
           apiClient,
           params,
           actionsService: actionsSetup,
+          notificationsService: coreStart.notifications,
         });
 
         return () => {
