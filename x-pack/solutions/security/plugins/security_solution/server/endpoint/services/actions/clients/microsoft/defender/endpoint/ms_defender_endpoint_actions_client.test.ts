@@ -870,7 +870,7 @@ describe('MS Defender response actions client', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
             completed_at: expect.any(String),
             data: { command: 'isolate' },
             input_type: 'microsoft_defender_endpoint',
@@ -905,7 +905,7 @@ describe('MS Defender response actions client', () => {
           const expectedResult: LogsEndpointActionResponse = {
             '@timestamp': expect.any(String),
             EndpointActions: {
-              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
               completed_at: expect.any(String),
               data: { command: 'isolate' },
               input_type: 'microsoft_defender_endpoint',
@@ -990,7 +990,7 @@ describe('MS Defender response actions client', () => {
         expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
           '@timestamp': expect.any(String),
           EndpointActions: {
-            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
             completed_at: expect.any(String),
             data: { command: 'runscript' },
             input_type: 'microsoft_defender_endpoint',
@@ -1029,7 +1029,7 @@ describe('MS Defender response actions client', () => {
           const expectedResult: LogsEndpointActionResponse = {
             '@timestamp': expect.any(String),
             EndpointActions: {
-              action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              action_id: '1d6e6796-b0af-496f-92b0-25fcb06db499',
               completed_at: expect.any(String),
               data: { command: 'runscript' },
               input_type: 'microsoft_defender_endpoint',
