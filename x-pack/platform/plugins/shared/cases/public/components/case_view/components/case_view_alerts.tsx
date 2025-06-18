@@ -84,7 +84,9 @@ export const CaseViewAlerts = ({
         consumers={alertData?.featureIds}
         query={alertIdsQuery}
         showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
-        onLoaded={onAlertsTableLoaded}
+        onLoaded={({ alerts }) => {
+          onAlertsTableLoaded?.(alerts);
+        }}
         // Only provide the services to the default alerts table.
         // Spreading from object to avoid incorrectly overriding
         // services to `undefined` in custom solution tables

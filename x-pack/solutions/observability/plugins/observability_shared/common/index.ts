@@ -13,6 +13,8 @@ export const sloFeatureId = 'slo';
 
 // SLO alerts table in slo detail page
 export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
+
 // Emebeddable SLO alerts table
 export const SLO_ALERTS_TABLE_CONFIG_ID = `${AlertConsumers.SLO}-embeddable-alerts-table`;
 

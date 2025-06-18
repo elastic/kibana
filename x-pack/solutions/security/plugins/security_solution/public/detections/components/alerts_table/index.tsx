@@ -448,7 +448,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               columns={finalColumns}
               browserFields={finalBrowserFields}
               onUpdate={onUpdate}
-              onLoaded={onLoad}
+              onLoaded={({ alerts }) => onLoad(alerts)}
               additionalContext={additionalContext}
               height={alertTableHeight}
               initialPageSize={50}

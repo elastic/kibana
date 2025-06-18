@@ -94,6 +94,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
   unsafe: {
@@ -188,6 +189,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -228,7 +230,9 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
+    this.telemetry = new TelemetryService();
+  }
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -238,6 +242,7 @@ export class Plugin
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
+    this.telemetry.setup(coreSetup.analytics);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
@@ -269,7 +274,12 @@ export class Plugin
         kibanaVersion,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        telemetryClient: this.telemetry.start(coreStart.analytics),
+        plugins: {
+          ...pluginsStart,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        },
         usageCollection: pluginsSetup.usageCollection,
         isServerless: !!pluginsStart.serverless,
       });

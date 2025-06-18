@@ -10,6 +10,7 @@ import React from 'react';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';
 import { useBuildRelatedAlertsQuery } from '../../hooks/related_alerts/use_build_related_alerts_query';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
@@ -48,14 +49,12 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
-
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
   const esQuery = useBuildRelatedAlertsQuery({ alert });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
-  const services = useKibana().services;
+  const { services } = useKibana();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -64,6 +63,9 @@ export function RelatedAlertsTable({ alertData }: Props) {
         id={RELATED_ALERTS_TABLE_ID}
         query={esQuery}
         columns={columns}
+        onLoaded={({ totalAlertsCount }) => {
+          services.telemetryClient.reportRelatedAlertsLoaded(totalAlertsCount);
+        }}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         minScore={1.5}
         trackScores={true}
