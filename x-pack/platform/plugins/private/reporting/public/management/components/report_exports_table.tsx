@@ -9,6 +9,7 @@ import { Component, Fragment, default as React } from 'react';
 import { Subscription } from 'rxjs';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -327,14 +328,31 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         },
       },
       {
-        field: 'exportType',
+        field: 'scheduled_report_id',
         width: tableColumnWidths.exportType,
         name: i18n.translate('xpack.reporting.exports.tableColumns.exportType', {
           defaultMessage: 'Export type',
         }),
-        render: (_scheduledReportId: string, job) => (
-          <div data-test-subj="reportJobExportType">{job.getExportType()}</div>
-        ),
+        render: (_scheduledReportId: string) => {
+          const exportType = _scheduledReportId
+            ? i18n.translate('reporting.jobExportType.scheduled', {
+                defaultMessage: 'Scheduled',
+              })
+            : i18n.translate('reporting.jobExportType.single', {
+                defaultMessage: 'Single',
+              });
+
+          return (
+            <EuiBadge data-test-subj={`reportExportType-${exportType}`} color="hollow">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip type={_scheduledReportId ? 'calendar' : 'download'} size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{exportType}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          );
+        },
         mobileOptions: {
           show: false,
         },

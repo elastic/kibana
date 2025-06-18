@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
-import { type ListScheduledReportApiJSON } from '../../../server/types';
+import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
 import { ListingPropsInternal } from '..';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
@@ -54,9 +54,9 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
     toasts,
   });
 
-  const tableColumns: Array<EuiBasicTableColumn<ListScheduledReportApiJSON>> = [
+  const tableColumns: Array<EuiBasicTableColumn<ScheduledReportApiJSON>> = [
     {
-      field: 'object_type',
+      field: 'payload.objectType',
       name: i18n.translate('xpack.reporting.schedules.tableColumns.typeTitle', {
         defaultMessage: 'Type',
       }),
@@ -76,7 +76,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Title',
       }),
       width: '20%',
-      render: (_title: string, item: ListScheduledReportApiJSON) => (
+      render: (_title: string, item: ScheduledReportApiJSON) => (
         <EuiLink data-test-subj={`reportTitle`} onClick={() => {}}>
           {_title}
         </EuiLink>
@@ -92,7 +92,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Status',
       }),
       width: '10%',
-      render: (_status: string, item: ListScheduledReportApiJSON) => {
+      render: (_status: string, item: ScheduledReportApiJSON) => {
         return (
           <EuiHealth
             color={item.enabled ? 'primary' : 'subdued'}
@@ -115,7 +115,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Schedule',
       }),
       width: '15%',
-      render: (_schedule: ListScheduledReportApiJSON['schedule']) => (
+      render: (_schedule: ScheduledReportApiJSON['schedule']) => (
         <ReportScheduleIndicator schedule={_schedule} />
       ),
     },
@@ -195,17 +195,18 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',
           icon: 'dashboardApp',
-          // available: (job) => job.canLinkToKibanaApp,
-          onClick: (item) => {
-            const searchParams = stringify({ id: item.id });
+          available: (item) => Boolean((item.payload as BaseParamsV2)?.locatorParams),
+          onClick: async (item) => {
+            const searchParams = stringify({ scheduledReportId: item.id });
 
             const path = buildKibanaPath({
               basePath: http.basePath.serverBasePath,
-              // spaceId: job.spaceId,
+              spaceId: item.payload?.spaceId,
               appPath: REPORTING_REDIRECT_APP,
             });
 
             const href = `${path}?${searchParams}`;
+
             window.open(href, '_blank');
             window.focus();
           },

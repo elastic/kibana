@@ -7,8 +7,7 @@
 
 import { Frequency } from '@kbn/rrule';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { ListScheduledReportApiJSON } from '../../server/types';
+import { BaseParamsV2, ReportApiJSON, ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
@@ -176,7 +175,7 @@ export const mockJobs: ReportApiJSON[] = [
   }),
 ];
 
-export const mockScheduledReports: ListScheduledReportApiJSON[] = [
+export const mockScheduledReports: ScheduledReportApiJSON[] = [
   {
     created_at: '2025-06-10T12:41:45.136Z',
     created_by: 'Foo Bar',
@@ -185,12 +184,37 @@ export const mockScheduledReports: ListScheduledReportApiJSON[] = [
     jobtype: 'printable_pdf_v2',
     last_run: '2025-05-10T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
-    object_type: 'dashboard',
     schedule: {
       rrule: { freq: Frequency.WEEKLY, tzid: 'UTC', interval: 1 },
     },
     title: 'Scheduled report 1',
-    notification: {},
+    space_id: 'default',
+    payload: {
+      browserTimezone: 'UTC',
+      title: 'test PDF allowed',
+      layout: {
+        id: 'preserve_layout',
+      },
+      objectType: 'dashboard',
+      version: '7.14.0',
+      locatorParams: [
+        {
+          id: 'canvas',
+          version: '7.14.0',
+          params: {
+            dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+            preserveSavedFilters: 'true',
+            timeRange: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            useHash: 'false',
+            viewMode: 'view',
+          },
+        },
+      ],
+      isDeprecated: false,
+    } as BaseParamsV2,
   },
   {
     created_at: '2025-06-16T12:41:45.136Z',
@@ -200,7 +224,7 @@ export const mockScheduledReports: ListScheduledReportApiJSON[] = [
     jobtype: 'printable_pdf_v2',
     last_run: '2025-06-16T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
-    object_type: 'discover',
+    space_id: 'default',
     schedule: {
       rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 },
     },
@@ -215,7 +239,7 @@ export const mockScheduledReports: ListScheduledReportApiJSON[] = [
     jobtype: 'printable_pdf_v2',
     last_run: '2025-06-16T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
-    object_type: 'discover',
+    space_id: 'space-a',
     schedule: {
       rrule: { freq: Frequency.MONTHLY, tzid: 'UTC', interval: 2 },
     },
