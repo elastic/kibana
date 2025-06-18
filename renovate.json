@@ -742,7 +742,6 @@
         "remark-gfm",
         "rehype-raw",
         "rehype-sanitize",
-        "hast-util-sanitize",
         "yaml",
         "@types/js-search"
       ],
