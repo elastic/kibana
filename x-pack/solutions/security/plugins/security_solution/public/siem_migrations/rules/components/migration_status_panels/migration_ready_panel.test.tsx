@@ -13,22 +13,12 @@ import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
+jest.mock('../../../../common/lib/kibana/use_kibana');
+
 jest.mock('../data_input_flyout/context', () => ({
   useRuleMigrationDataInputContext: () => ({
     openFlyout: jest.fn(),
   }),
-}));
-
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          telemetry: jest.fn(),
-        },
-      },
-    },
-  })),
 }));
 
 jest.mock('../../service/hooks/use_start_migration');

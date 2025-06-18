@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useStartMigration } from '../../service/hooks/use_start_migration';

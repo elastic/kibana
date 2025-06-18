@@ -61,7 +61,11 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty isLoading={isStopping} onClick={onStopMigration}>
+            <EuiButtonEmpty
+              isLoading={isStopping}
+              onClick={onStopMigration}
+              data-test-subj="stopMigrationButton"
+            >
               {isStopping
                 ? i18n.RULE_MIGRATION_STOPPING_TRANSLATION_BUTTON
                 : i18n.RULE_MIGRATION_STOP_TRANSLATION_BUTTON}
@@ -74,13 +78,13 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
             <EuiIcon size="m" type={AssistantIcon} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PanelText size="s" subdued>
+            <PanelText size="s" subdued data-test-subj="ruleMigrationDescription">
               {preparing ? i18n.RULE_MIGRATION_PREPARING : i18n.RULE_MIGRATION_TRANSLATING}
             </PanelText>
           </EuiFlexItem>
           {!isStopping && (
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="s" />
+              <EuiLoadingSpinner size="s" data-test-subj="ruleMigrationSpinner" />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -91,6 +95,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
               valueText={`${Math.floor(progressValue)}%`}
               max={100}
               color={tint(euiTheme.colors.success, 0.25)}
+              data-test-subj="ruleMigrationProgressBar"
             />
             <EuiSpacer size="xs" />
             <RuleMigrationsReadMore />
