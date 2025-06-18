@@ -14,5 +14,8 @@ const vendorCodeMap: Record<StoredRuleMigration['original_rule']['vendor'], stri
 export const getTagsByVendor = (
   vendor: StoredRuleMigration['original_rule']['vendor']
 ): string[] => {
+  if (!(vendor in vendorCodeMap)) {
+    throw new Error(`Unsupported vendor for tagging rules: ${vendor}`);
+  }
   return [`Migrated from ${vendorCodeMap[vendor]}`];
 };
