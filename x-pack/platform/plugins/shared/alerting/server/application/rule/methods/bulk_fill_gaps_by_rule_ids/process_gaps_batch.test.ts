@@ -130,7 +130,7 @@ describe('processGapsBatch', () => {
       createGap([range('2025-05-09T09:15:09.457Z', '2025-05-11T09:15:09.457Z')]),
       createGap([range('2025-05-11T09:15:09.457Z', '2025-05-17T09:15:09.457Z')]),
     ];
-    const clappedGapsBatch = [
+    const clampedGapsBatch = [
       createGap([range(backfillingRange.start, '2025-05-11T09:15:09.457Z')]),
       createGap([range('2025-05-11T09:15:09.457Z', backfillingRange.end)]),
     ];
@@ -146,7 +146,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
-            ranges: clappedGapsBatch.flatMap(getGapScheduleRange),
+            ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
         ],
         gapsBatchOutsideOfRange
