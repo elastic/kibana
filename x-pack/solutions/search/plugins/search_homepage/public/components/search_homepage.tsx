@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiHorizontalRule, EuiPageTemplate } from '@elastic/eui';
 
 import { useKibana } from '../hooks/use_kibana';
 import { SearchHomepageBody } from './search_homepage_body';
@@ -25,6 +25,7 @@ export const SearchHomepagePage = () => {
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="search-homepage" grow={false}>
       <SearchHomepageHeader />
+      <EuiHorizontalRule margin="none" />
       <SearchHomepageBody />
       {embeddableConsole}
     </EuiPageTemplate>

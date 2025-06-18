@@ -6,25 +6,28 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 
 export const Footer: React.FC = () => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-    <EuiFlexItem grow={false}>
-      <EuiLink href={docLinks.elasticCommunity} data-test-subj="elasticCommunityLink">
-        {i18n.translate('xpack.searchHomepage.footer.elasticCommunity', {
-          defaultMessage: 'Connect with the Elastic Community',
-        })}
-      </EuiLink>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiLink href={docLinks.kibanaFeedback} data-test-subj="giveFeedbackLink">
-        {i18n.translate('xpack.searchHomepage.footer.giveFeedback', {
-          defaultMessage: 'Give feedback',
-        })}
-      </EuiLink>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <>
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+      <EuiFlexItem>
+        <EuiLink href={docLinks.elasticCommunity} data-test-subj="elasticCommunityLink">
+          {i18n.translate('xpack.searchHomepage.footer.elasticCommunity', {
+            defaultMessage: 'Connect with the Elastic Community',
+          })}
+        </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiLink href={docLinks.kibanaFeedback} data-test-subj="giveFeedbackLink">
+          {i18n.translate('xpack.searchHomepage.footer.giveFeedback', {
+            defaultMessage: 'Give feedback',
+          })}
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="l" />
+  </>
 );
