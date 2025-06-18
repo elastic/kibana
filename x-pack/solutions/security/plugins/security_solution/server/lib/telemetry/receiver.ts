@@ -55,6 +55,7 @@ import type {
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -763,7 +764,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
    */
   public async fetchResponseActionsRules(executeFrom: string, executeTo: string) {
     const query: SearchRequest = {
-      index: `${this.getAlertsIndex()}*`,
+      index: `${this.getIndexForType?.(RULE_SAVED_OBJECT_TYPE)}`,
       ignore_unavailable: true,
       size: 0, // no query results required - only aggregation quantity
       from: 0,
@@ -772,30 +773,36 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           must: [
             {
               term: {
-                'kibana.alert.rule.immutable': false,
+                type: 'alert',
               },
             },
             {
               term: {
-                'kibana.alert.rule.enabled': true,
+                'alert.params.immutable': {
+                  value: false,
+                },
+              },
+            },
+            {
+              term: {
+                'alert.enabled': {
+                  value: true,
+                },
               },
             },
             {
               terms: {
-                'kibana.alert.rule.consumer': ['siem', 'securitySolution'],
+                'alert.consumer': ['siem', 'securitySolution'],
               },
             },
             {
               terms: {
-                'kibana.alert.rule.parameters.response_actions.action_type_id': [
-                  '.endpoint',
-                  '.osquery',
-                ],
+                'alert.params.responseActions.actionTypeId': ['.endpoint', '.osquery'],
               },
             },
             {
               range: {
-                'kibana.alert.rule.updated_at': {
+                'alert.updatedAt': {
                   gte: executeFrom,
                   lte: executeTo,
                 },
@@ -806,7 +813,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
       sort: [
         {
-          'kibana.alert.rule.updated_at': {
+          'alert.updatedAt': {
             order: 'desc',
           },
         },
@@ -814,14 +821,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       aggs: {
         actionTypes: {
           terms: {
-            field: 'kibana.alert.rule.parameters.response_actions.action_type_id',
-          },
-          aggs: {
-            rulesInfo: {
-              terms: {
-                field: 'kibana.alert.rule.uuid',
-              },
-            },
+            field: 'alert.params.responseActions.actionTypeId',
           },
         },
       },

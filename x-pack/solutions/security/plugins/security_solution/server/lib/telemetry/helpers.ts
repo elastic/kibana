@@ -251,29 +251,17 @@ export const responseActionsCustomRuleTelemetryData = (
     cluster_uuid: clusterInfo.cluster_uuid,
     cluster_name: clusterInfo.cluster_name,
     license_id: licenseInfo?.uid,
-    response_actions: {
-      endpoint: {
-        ids: [],
-        count: 0,
-      },
-      osquery: {
-        ids: [],
-        count: 0,
-      },
+    response_actions_rules: {
+      endpoint: 0,
+      osquery: 0,
     },
   };
 
   return {
     ...baseTelemetryData,
-    response_actions: {
-      endpoint: {
-        ids: responseActionsRules.endpoint,
-        count: responseActionsRules.endpoint.length,
-      },
-      osquery: {
-        ids: responseActionsRules.osquery,
-        count: responseActionsRules.osquery.length,
-      },
+    response_actions_rules: {
+      endpoint: responseActionsRules.endpoint,
+      osquery: responseActionsRules.osquery,
     },
   };
 };

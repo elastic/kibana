@@ -80,9 +80,9 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
           aggregations as unknown as ResponseActionsRuleResponseAggregations
         ).actionTypes.buckets.reduce<ResponseActionRules>((acc, agg) => {
           if (agg.key === '.endpoint') {
-            acc.endpoint = agg.rulesInfo.buckets.map((rule) => rule.key);
+            acc.endpoint = agg.doc_count;
           } else if (agg.key === '.osquery') {
-            acc.osquery = agg.rulesInfo.buckets.map((rule) => rule.key);
+            acc.osquery = agg.doc_count;
           }
           return acc;
         }, {} as ResponseActionRules);
@@ -90,8 +90,8 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         const shouldNotProcessTelemetry =
           responseActionRules.endpoint === undefined ||
           responseActionRules.osquery === undefined ||
-          responseActionRules.endpoint.length === 0 ||
-          responseActionRules.osquery.length === 0;
+          responseActionRules.endpoint === 0 ||
+          responseActionRules.osquery === 0;
 
         if (shouldNotProcessTelemetry) {
           log.debug('no new custom response action rules found');
@@ -112,13 +112,13 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelEndpointPrefix),
           counterType: 'response_actions_rules_count',
-          incrementBy: responseActionsRulesTelemetryData.response_actions.endpoint.count,
+          incrementBy: responseActionsRulesTelemetryData.response_actions_rules.endpoint,
         });
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelOsqueryPrefix),
           counterType: 'response_actions_rules_count',
-          incrementBy: responseActionsRulesTelemetryData.response_actions.osquery.count,
+          incrementBy: responseActionsRulesTelemetryData.response_actions_rules.osquery,
         });
 
         const documents = cloneDeep(Object.values(responseActionsRulesTelemetryData));
@@ -134,9 +134,10 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
 
         await taskMetricsService.end(trace);
 
-        const totalCount = Object.values(responseActionsRulesTelemetryData.response_actions)
-          .map((r) => r.count)
-          .reduce((a, b) => a + b, 0);
+        const totalCount = Object.values(
+          responseActionsRulesTelemetryData.response_actions_rules
+        ).reduce((acc, count) => acc + count, 0);
+
         log.l('Response actions rules telemetry task executed', {
           totalCount,
         });
