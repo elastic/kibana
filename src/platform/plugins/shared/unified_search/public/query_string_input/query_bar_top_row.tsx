@@ -279,6 +279,7 @@ export const QueryBarTopRow = React.memo(
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
+    const aggregateQueryRef = useRef<AggregateQuery | undefined>(undefined);
     queryRef.current = props.query;
 
     const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -383,6 +384,14 @@ export const QueryBarTopRow = React.memo(
         });
       },
       [propsOnChange]
+    );
+
+    const onTextLangQueryChange = useCallback(
+      (query: AggregateQuery) => {
+        aggregateQueryRef.current = query;
+        props.onTextLangQueryChange(query);
+      },
+      [props]
     );
 
     const onChangeQueryInputFocus = useCallback((isFocused: boolean) => {
@@ -715,7 +724,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem
           grow={!shouldShowDatePickerAsBadge()}
-          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+          css={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
         >
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterButtonGroup}
@@ -736,17 +745,18 @@ export const QueryBarTopRow = React.memo(
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
-            query={props.query}
-            onTextLangQueryChange={props.onTextLangQueryChange}
+            query={aggregateQueryRef.current || props.query}
+            onTextLangQueryChange={onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
-            onTextLangQuerySubmit={async () =>
+            onTextLangQuerySubmit={async () => {
+              aggregateQueryRef.current = queryRef.current as AggregateQuery;
               onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
-              })
-            }
+              });
+            }}
             isDisabled={props.isDisabled}
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
