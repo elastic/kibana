@@ -2240,7 +2240,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts).toHaveLength(1);
       });
 
-      it('should handle shard failures and include warning in logs for query that is aggregating', async () => {
+      it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(),
           query: `from packetbeat-* | stats _count=count(non_existing) by @timestamp`,
