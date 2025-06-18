@@ -8,11 +8,11 @@
 import React from 'react';
 import { ControlBar, ControlBarDependencies, ControlBarProps } from '../shared/control_bar';
 
-export type LogCategoriesControlBarProps = ControlBarProps;
+export type LogEventsControlBarProps = ControlBarProps;
 
-export type LogCategoriesControlBarDependencies = ControlBarDependencies;
+export type LogEventsControlBarDependencies = ControlBarDependencies;
 
-export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = React.memo(
+export const LogEventsControlBar: React.FC<LogEventsControlBarProps> = React.memo(
   ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
     return (
       <ControlBar

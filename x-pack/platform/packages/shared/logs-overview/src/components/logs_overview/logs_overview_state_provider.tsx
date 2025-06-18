@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { createActorContext } from '@xstate5/react';
 import { assign, setup } from 'xstate5';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   LogsSourceConfiguration,
   ResolvedIndexNameLogsSourceConfiguration,
@@ -24,7 +24,7 @@ export const logsOverviewStateMachine = setup({
             status: 'resolved';
             value: ResolvedIndexNameLogsSourceConfiguration;
           };
-      mlCapabilities?: { status: 'unresolved' } | MlCapabilities;
+      mlCapabilities: { status: 'unresolved' } | MlCapabilities;
       error?: Error;
     },
     input: {} as {
@@ -50,13 +50,19 @@ export const logsOverviewStateMachine = setup({
         params.error instanceof Error ? params.error : new Error(String(params.error)),
     }),
   },
+  guards: {
+    isMlAvailable: ({ context }) => context.mlCapabilities?.status === 'available',
+  },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2VYHkBuYBO2AlmAO4DKALgIYVgCyVAxgBaEB2YAdO4RYVckIAvdlE5oMZVAFc8jLnjipkRNlADEEVB25tsqANYKlKsABl0sKbPkBtAAwBdRKAAOqWL0LaXIAB6IACwAnABsnACMgfahoQDsgRHBgXEAzIEANCAAnohx9gBMnAX2qfYJwakFoQAcEQCsAL6NWRJYuATE5NS0DCzsXDx8AsKi4pbWcsawyqoa+HioeJyuyDQAZksAtpyKM6YWkjJTDs5IIO6efD7nAQjJwZxxETU1MfVx9fX2EXFZuQgaoFApE4mF0vUaqkasFKs1WpYcPgiKRKDR6ExWDohvxBCI1JwtsgAMJUVxUABGhEEfDg4yoEFEmm0gz0hi4aAZdBJZMp1K8cFOvkuXhuoDugRq4Q+dVCyQioUCtSi-0QqWCNSeITC9m+9QKBXSgXhIDaSM6qJ6GP62LYXhG+LERNJ5KpNOIsHpjLU6gWSxWawomzwO05EG5Lr57sFTmFHlFbF8dweTxeb1CHy+Pz+OUQ9WiT2q+p+9UViQKJrNHRR3XRfSxXHWVGpkAAKqgAJJ24Z4sDqABKAFEOwA5DutjsAQTMHYAWoOhecRddE7c8wVVYCIpxtbD6hECt8DcaWqbEdWumjepiBrp7XimVodLAreMMOaa1frQ27z3RmpFzceMVyTRBgjBVNXliX40iSDdcwQSV7ELDMSgaMsD2aU82FQCA4F8KtkUvK16wGOMrm8VdxUQABaAocwBGj6k4WFWLY9jUkrc8iMtOsb1te9-ygciE1AhACgiTcDVSLVYXyQ99ziKUmlPQiLVra8bVZQTHTfKxjnkESQLXBA5U3UIoieUpyg1coM2CCtVO49Sv1IgS-10tpJnkXYTDmIzKLEiJfk3Z4QXicFEjKZJIS498L14zSfxxB0xi8gzplmSAArFfw8no4pvhidICkCCTgVCg1OAij45X1dCTwReKeI079bxSh8CWdXk3QFeAl2AwKTLMhDUmC4ptQzaFCh+XU4vaFrXP47SPLGbrXX5WlPTDUQcqovKEGChignGg0MySfJ0hqJTGrPZqXJI5bf1xITCR5Dbo221AGWygaKNyu58k1UJD11Qp0lSeTN0SR4zqVQ9SrlGpqnmj9iL4rTOCbFsIHbLsdLAPagt+ZiSjGpSIlSSEJOCTdSxky7Cgkz5ggVRymoWh6MeS7sXqEX6gP+-a7gPQ9CvsGIIlKfdS3ggEUlhos0NLYFMKwoA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBsD2VYHkBuYBO2AlmAO4DKALgIYVgCyVAxgBaEB2YAdO4RYVckIAvdlADEEVB06xqtTmgw58RUpRr0mraTz4DhogNoAGALqJQAB1SxehKRZAAPRAEZXAZmOcA7AA4AVlcAnw8fADYAFj8AJnCAGhAAT0Q4mM4PV2MYgIBOD3CAvyjIgF9SxMUsXAJicjlNFnYuXX5BETYoBXRYMlQAVzxGLjw4VGQiTokpFrZsVABrEbGJsAAZHr7B4ZNzJBBrWz4HfZcEQtzOSIDwsONMuPDYxJSEAJifDNzIyI8-SP8P1+5UqPWUtTUDQYTR0bDs+g6XSqWyGy1g40m4nweFQeE4lmQNAAZriALacUbo1YbDAonZmRyHOwnUBnAJhK65PzGXJ5cK5Yw+EIvRB+AqcYLhcLGSLS6XXXIgkBVcGqeoaaHaWbw9qiTik5AAYSolioACNCII+HBulQIKJprD5ktbRA6EaTebLXY4LtGTZmWxHGdXPlOHEbpFclFIyFIiK3h8vr8-NGYtd2T4lSqamr1LRNc1uHC9LrOvqPaaLVbiLBXQ7sbj8YSKCS8OS0Hb3caq97rbA-fsmccg6dEB4Yq4JblvgEAtFpX8EslReLJYUPAr8lFs2Dc3V840tZwiVRLZAACqoACSJbawjAYgASgBRa8AOWvF+vAEE1teAC0X0HKwAxHYNRRiDxOBCCdIkndwfHcVwE15KcYigvxXECMUciw3clH3SENS0ItYGYVASFEGkX1wNgKFgMQyAACUwAB1AB9NZMAAcQ4w0fwvF8eMwJ9rxfMgQIOMD7FHVk3ACYw-E4cJXCFHwgTFd4-ATMJwgyDwbnCfw503JSCOqFQDyhUjpHIyjqPQY1aCgXFayY1jOO4viXwANRfd8L0khkhxkllnDcVwYmU7kfnuJDclcDNdIiAybi0oIoj8PxygqEA2FQCA4EcHMrOIgtbLAf0jlkiCEAAWg+BMkuUnwI3cec-FCDScry0qIXVCqYW1UsDE6arAzqycEyg-SMMKYxVPTYycgs1VrJI4bix1MakU2AZUQm8CxzeTdOG+QU8lCKJFo8XSoN8OJokUmUYhnOc1qIwajyLVoET1ZEDuGCkVkxI7apOop0guoVcmuyJboTSJ3HDJ7eQ+Qp4PCT6yu+wtYR2xFulpIG0QxSBwfCs5+TmiIpSw-IfAiGIEw3Th7jiDwLqgt7XBxgbD3xkb7yJg0ey9GtitCmqqcQfl7ugtqFu+B4fl60FCNxwXKu20bRcrCWfTrTt7XG6XJpOxCkZR+agjh+5okBfm8xsra-rLLoxc9asjddCnzeO+SEB59nwnTfwMNhrCAlZ9l2YnW5uYnRLnY2obj1Pc8ICvW9CaqgOIaD+doLyNTsuiuHgnjFcEG+S44b+eDvklGVU-Kn67IoqjOhouiGMpuSIoQTxsnOzcuUnJTtOr144m8LDsijIIPiS0I27xnX7O7qAaWcsBXLwWsB7qqKut8Vww40tSEI8O6a8U6GpRlNSoylTJctKIA */
   id: 'logsOverviewStateMachine',
   context: ({ input: { logsSource } }) => ({
     logsSource: {
       status: 'unresolved',
       value: logsSource,
+    },
+    mlCapabilities: {
+      status: 'unresolved',
     },
     error: undefined,
   }),
@@ -145,7 +151,7 @@ export const logsOverviewStateMachine = setup({
 
       type: 'parallel',
 
-      onDone: 'initialized',
+      onDone: 'showingLogEvents',
     },
 
     failedToInitialize: {
@@ -156,7 +162,20 @@ export const logsOverviewStateMachine = setup({
       },
     },
 
-    initialized: {},
+    showingLogEvents: {
+      on: {
+        SHOW_LOG_CATEGORIES: {
+          target: 'showingLogCategories',
+          guard: 'isMlAvailable',
+        },
+      },
+    },
+
+    showingLogCategories: {
+      on: {
+        SHOW_LOG_EVENTS: 'showingLogEvents',
+      },
+    },
   },
 });
 

@@ -6,30 +6,38 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ISearchGeneric } from '@kbn/search-types';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { useMachine } from '@xstate5/react';
 import React, { useCallback } from 'react';
 import {
+  CategorizeLogsServiceContext,
   categorizeLogsService,
   createCategorizeLogsServiceImplementations,
 } from '../../services/categorize_logs_service';
 import {
+  CategoryDetailsServiceContext,
   categoryDetailsService,
   createCategoryDetailsServiceImplementations,
 } from '../../services/category_details_service';
 import { LogCategory } from '../../types';
 import { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import {
+  LogCategoriesControlBar,
+  LogCategoriesControlBarDependencies,
+  LogCategoriesControlBarProps,
+} from './log_categories_control_bar';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
 import {
   LogCategoriesResultContent,
   LogCategoriesResultContentDependencies,
+  LogCategoriesResultContentProps,
 } from './log_categories_result_content';
 
-export interface LogCategoriesProps {
+export type LogCategoriesProps = LogCategoriesContentProps & {
   dependencies: LogCategoriesDependencies;
-  documentFilters?: QueryDslQueryContainer[];
+  documentFilters: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   // The time range could be made optional if we want to support an internal
   // time range picker
@@ -37,103 +45,144 @@ export interface LogCategoriesProps {
     start: string;
     end: string;
   };
-}
+};
 
-export type LogCategoriesDependencies = LogCategoriesResultContentDependencies & {
+export type LogCategoriesDependencies = LogCategoriesContentDependencies & {
   search: ISearchGeneric;
 };
 
-export const LogCategories: React.FC<LogCategoriesProps> = ({
-  dependencies,
-  documentFilters = [],
-  logsSource,
-  timeRange,
-}) => {
-  const [categorizeLogsServiceState, sendToCategorizeLogsService] = useMachine(
-    categorizeLogsService.provide(
-      createCategorizeLogsServiceImplementations({ search: dependencies.search })
-    ),
-    {
-      inspect: consoleInspector,
-      input: {
-        index: logsSource.indexName,
-        startTimestamp: timeRange.start,
-        endTimestamp: timeRange.end,
-        timeField: logsSource.timestampField,
-        messageField: logsSource.messageField,
-        documentFilters,
-      },
-    }
-  );
-
-  const [categoryDetailsServiceState, sendToCategoryDetailsService] = useMachine(
-    categoryDetailsService.provide(
-      createCategoryDetailsServiceImplementations({ search: dependencies.search })
-    ),
-    {
-      inspect: consoleInspector,
-      input: {
-        index: logsSource.indexName,
-        startTimestamp: timeRange.start,
-        endTimestamp: timeRange.end,
-        timeField: logsSource.timestampField,
-        messageField: logsSource.messageField,
-        additionalFilters: documentFilters,
-        dataView: logsSource.dataView,
-      },
-    }
-  );
-
-  const cancelOperation = useCallback(() => {
-    sendToCategorizeLogsService({
-      type: 'cancel',
-    });
-  }, [sendToCategorizeLogsService]);
-
-  const closeFlyout = useCallback(() => {
-    sendToCategoryDetailsService({
-      type: 'setExpandedCategory',
-      category: null,
-      rowIndex: null,
-    });
-  }, [sendToCategoryDetailsService]);
-
-  const openFlyout = useCallback(
-    (category: LogCategory | null, rowIndex: number | null) => {
-      sendToCategoryDetailsService({
-        type: 'setExpandedCategory',
-        category,
-        rowIndex,
-      });
-    },
-    [sendToCategoryDetailsService]
-  );
-
-  if (categorizeLogsServiceState.matches('done')) {
+export const LogCategories = React.memo<LogCategoriesProps>(
+  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
     return (
-      <LogCategoriesResultContent
-        dependencies={dependencies}
-        documentFilters={documentFilters}
-        logCategories={categorizeLogsServiceState.context.categories}
-        logsSource={logsSource}
-        timeRange={timeRange}
-        categoryDetailsServiceState={categoryDetailsServiceState}
-        onCloseFlyout={closeFlyout}
-        onOpenFlyout={openFlyout}
-      />
+      <CategorizeLogsServiceContext.Provider
+        logic={categorizeLogsService.provide(
+          createCategorizeLogsServiceImplementations({ search: dependencies.search })
+        )}
+        options={{
+          inspect: consoleInspector,
+          input: {
+            index: logsSource.indexName,
+            startTimestamp: timeRange.start,
+            endTimestamp: timeRange.end,
+            timeField: logsSource.timestampField,
+            messageField: logsSource.messageField,
+            documentFilters,
+          },
+        }}
+      >
+        <CategoryDetailsServiceContext.Provider
+          logic={categoryDetailsService.provide(
+            createCategoryDetailsServiceImplementations({ search: dependencies.search })
+          )}
+          options={{
+            inspect: consoleInspector,
+            input: {
+              index: logsSource.indexName,
+              startTimestamp: timeRange.start,
+              endTimestamp: timeRange.end,
+              timeField: logsSource.timestampField,
+              messageField: logsSource.messageField,
+              additionalFilters: documentFilters,
+              dataView: logsSource.dataView,
+            },
+          }}
+        >
+          <LogCategoriesContent
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={logsSource}
+            timeRange={timeRange}
+            grouping={grouping}
+            onChangeGrouping={onChangeGrouping}
+          />
+        </CategoryDetailsServiceContext.Provider>
+      </CategorizeLogsServiceContext.Provider>
     );
-  } else if (categorizeLogsServiceState.matches('failed')) {
-    return <LogCategoriesErrorContent error={categorizeLogsServiceState.context.error} />;
-  } else if (categorizeLogsServiceState.matches('countingDocuments')) {
-    return <LogCategoriesLoadingContent onCancel={cancelOperation} stage="counting" />;
-  } else if (
-    categorizeLogsServiceState.matches('fetchingSampledCategories') ||
-    categorizeLogsServiceState.matches('fetchingRemainingCategories')
-  ) {
-    return <LogCategoriesLoadingContent onCancel={cancelOperation} stage="categorizing" />;
-  } else {
-    return null;
   }
-};
+);
+
+export type LogCategoriesContentProps = LogCategoriesControlBarProps &
+  Omit<
+    LogCategoriesResultContentProps,
+    'categoryDetailsServiceState' | 'onCloseFlyout' | 'onOpenFlyout' | 'logCategories'
+  > & {
+    dependencies: LogCategoriesContentDependencies;
+  };
+
+export type LogCategoriesContentDependencies = LogCategoriesControlBarDependencies &
+  LogCategoriesResultContentDependencies;
+
+export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
+  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
+    const categorizeLogsServiceActorRef = CategorizeLogsServiceContext.useActorRef();
+    const categorizeLogsServiceState = CategorizeLogsServiceContext.useSelector(identity);
+
+    const categoryDetailsServiceActorRef = CategoryDetailsServiceContext.useActorRef();
+    const categoryDetailsServiceState = CategoryDetailsServiceContext.useSelector(identity);
+
+    const cancelOperation = useCallback(() => {
+      categorizeLogsServiceActorRef.send({
+        type: 'cancel',
+      });
+    }, [categorizeLogsServiceActorRef]);
+
+    const closeFlyout = useCallback(() => {
+      categoryDetailsServiceActorRef.send({
+        type: 'setExpandedCategory',
+        category: null,
+        rowIndex: null,
+      });
+    }, [categoryDetailsServiceActorRef]);
+
+    const openFlyout = useCallback(
+      (category: LogCategory | null, rowIndex: number | null) => {
+        categoryDetailsServiceActorRef.send({
+          type: 'setExpandedCategory',
+          category,
+          rowIndex,
+        });
+      },
+      [categoryDetailsServiceActorRef]
+    );
+
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <LogCategoriesControlBar
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={logsSource}
+            timeRange={timeRange}
+            grouping={grouping}
+            onChangeGrouping={onChangeGrouping}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          {categorizeLogsServiceState.matches('done') ? (
+            <LogCategoriesResultContent
+              dependencies={dependencies}
+              documentFilters={documentFilters}
+              logCategories={categorizeLogsServiceState.context.categories}
+              logsSource={logsSource}
+              timeRange={timeRange}
+              categoryDetailsServiceState={categoryDetailsServiceState}
+              onCloseFlyout={closeFlyout}
+              onOpenFlyout={openFlyout}
+            />
+          ) : categorizeLogsServiceState.matches('failed') ? (
+            <LogCategoriesErrorContent error={categorizeLogsServiceState.context.error} />
+          ) : categorizeLogsServiceState.matches('countingDocuments') ? (
+            <LogCategoriesLoadingContent onCancel={cancelOperation} stage="counting" />
+          ) : categorizeLogsServiceState.matches('fetchingSampledCategories') ||
+            categorizeLogsServiceState.matches('fetchingRemainingCategories') ? (
+            <LogCategoriesLoadingContent onCancel={cancelOperation} stage="categorizing" />
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 const consoleInspector = createConsoleInspector();
+
+const identity = <T extends any>(value: T): T => value;

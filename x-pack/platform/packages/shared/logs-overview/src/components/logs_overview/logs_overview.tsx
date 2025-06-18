@@ -7,7 +7,7 @@
 
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { type MlPluginStart } from '@kbn/ml-plugin/public';
@@ -17,18 +17,15 @@ import { LogCategories, LogCategoriesDependencies } from '../log_categories';
 import { LogsOverviewErrorContent } from './logs_overview_error_content';
 import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overview_state_provider';
+import { LogEvents, LogEventsDependencies } from '../log_events';
+import { Grouping } from '../shared/grouping_selector';
 
-export interface LogsOverviewProps {
+export type LogsOverviewProps = LogsOverviewContentProps & {
   dependencies: LogsOverviewDependencies;
-  documentFilters?: QueryDslQueryContainer[];
   logsSource?: LogsSourceConfiguration;
-  timeRange: {
-    start: string;
-    end: string;
-  };
-}
+};
 
-export type LogsOverviewDependencies = LogCategoriesDependencies & {
+export type LogsOverviewDependencies = LogsOverviewContentDependencies & {
   logsDataAccess: LogsDataAccessPluginStart;
   dataViews: DataViewsContract;
   mlApi: MlPluginStart['mlApi'];
@@ -73,31 +70,64 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
 
 export interface LogsOverviewContentProps {
   dependencies: LogsOverviewDependencies;
-  documentFilters?: QueryDslQueryContainer[];
+  documentFilters: QueryDslQueryContainer[];
   timeRange: {
     start: string;
     end: string;
   };
 }
 
+export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEventsDependencies;
+
 export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
   ({ dependencies, documentFilters, timeRange }) => {
-    const state = LogsOverviewStateContext.useSelector(identity);
+    const logsOverviewStateActorRef = LogsOverviewStateContext.useActorRef();
 
-    if (state.matches('initializing')) {
+    const logsOverviewState = LogsOverviewStateContext.useSelector(identity);
+    const grouping = LogsOverviewStateContext.useSelector<Grouping>((currentState) =>
+      currentState.matches('showingLogCategories') ? 'categories' : 'none'
+    );
+
+    const changeGrouping = useCallback(
+      (newGrouping: Grouping) => {
+        if (newGrouping === 'categories') {
+          logsOverviewStateActorRef.send({ type: 'SHOW_LOG_CATEGORIES' });
+        } else if (newGrouping === 'none') {
+          logsOverviewStateActorRef.send({ type: 'SHOW_LOG_EVENTS' });
+        }
+      },
+      [logsOverviewStateActorRef]
+    );
+
+    if (logsOverviewState.matches('initializing')) {
       return <LogsOverviewLoadingContent />;
-    } else if (state.matches('failedToInitialize')) {
-      return <LogsOverviewErrorContent error={state.context.error} />;
-    } else if (state.matches('initialized')) {
-      if (state.context.logsSource.status === 'unresolved') {
+    } else if (logsOverviewState.matches('failedToInitialize')) {
+      return <LogsOverviewErrorContent error={logsOverviewState.context.error} />;
+    } else {
+      if (logsOverviewState.context.logsSource.status === 'unresolved') {
         return <LogsOverviewErrorContent error={new Error('Logs source is unresolved')} />;
-      } else {
+      }
+
+      if (logsOverviewState.matches('showingLogCategories')) {
         return (
           <LogCategories
             dependencies={dependencies}
             documentFilters={documentFilters}
-            logsSource={state.context.logsSource.value}
+            logsSource={logsOverviewState.context.logsSource.value}
             timeRange={timeRange}
+            grouping={grouping}
+            onChangeGrouping={changeGrouping}
+          />
+        );
+      } else if (logsOverviewState.matches('showingLogEvents')) {
+        return (
+          <LogEvents
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={logsOverviewState.context.logsSource.value}
+            timeRange={timeRange}
+            grouping={grouping}
+            onChangeGrouping={changeGrouping}
           />
         );
       }

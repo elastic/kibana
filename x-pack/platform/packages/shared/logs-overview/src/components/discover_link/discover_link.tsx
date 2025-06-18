@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -89,14 +89,14 @@ export const DiscoverLink = React.memo(
     });
 
     return (
-      <EuiButton
+      <EuiButtonEmpty
         {...discoverLinkProps}
         color="primary"
         iconType="discoverApp"
         data-test-subj="logsExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
-      </EuiButton>
+      </EuiButtonEmpty>
     );
   }
 );

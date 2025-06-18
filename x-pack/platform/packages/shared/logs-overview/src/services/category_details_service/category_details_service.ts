@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createActorContext } from '@xstate5/react';
 import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { LogCategory } from '../../types';
 import { CategoryDetailsServiceDependencies, LogCategoryDetailsParams } from './types';
@@ -62,6 +63,8 @@ export const categoryDetailsService = setup({
   },
   output: ({ context }) => ({}),
 });
+
+export const CategoryDetailsServiceContext = createActorContext(categoryDetailsService);
 
 export const createCategoryDetailsServiceImplementations = ({
   search,
