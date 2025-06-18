@@ -37,6 +37,7 @@ import type { AutoAbortedChatFunction } from '../../types';
 import { createServerSideFunctionResponseError } from '../../util/create_server_side_function_response_error';
 import { catchFunctionNotFoundError } from './catch_function_not_found_error';
 import { extractMessages } from './extract_messages';
+import { AnonymizationService } from '../../anonymization';
 
 const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
@@ -163,6 +164,7 @@ export function continueConversation({
   disableFunctions,
   connectorId,
   simulateFunctionCalling,
+  anonymizationService,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -175,6 +177,7 @@ export function continueConversation({
   disableFunctions: boolean;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  anonymizationService: AnonymizationService;
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -207,6 +210,7 @@ export function continueConversation({
     }
 
     const functionCallName = lastMessage?.function_call?.name;
+    const functionCallArgs = lastMessage?.function_call?.arguments;
 
     if (!functionCallName) {
       // reply from the LLM without a function request,
@@ -270,7 +274,7 @@ export function continueConversation({
 
     return executeFunctionAndCatchError({
       name: functionCallName,
-      args: lastMessage.function_call!.arguments,
+      args: anonymizationService.unhashFunctionArguments(functionCallArgs),
       chat,
       functionClient,
       messages: initialMessages,
@@ -305,6 +309,7 @@ export function continueConversation({
               disableFunctions,
               connectorId,
               simulateFunctionCalling,
+              anonymizationService,
             });
           })
         )
