@@ -8,7 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -160,9 +160,19 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors, allowSavingQueries } = props;
+    const { useDefaultBehaviors, allowSavingQueries, onQueryChange } = props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
+    const queryEdited = useRef('');
+    const onQueryChanged = useCallback(
+      (query) => {
+        queryEdited.current = query.query || '';
+        if (onQueryChange) {
+          onQueryChange(query);
+        }
+      },
+      [onQueryChange]
+    );
 
     useEffect(() => {
       onQuerySubmitRef.current = props.onQuerySubmit;
@@ -195,6 +205,7 @@ export function createSearchBar({
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
       if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      queryEdited.current = '';
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -244,7 +255,7 @@ export function createSearchBar({
             isLoading={props.isLoading}
             onCancel={props.onCancel}
             filters={filters}
-            query={query}
+            query={queryEdited.current || query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled
@@ -253,7 +264,7 @@ export function createSearchBar({
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
-            onQueryChange={props.onQueryChange}
+            onQueryChange={onQueryChanged}
             onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}

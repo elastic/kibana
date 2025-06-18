@@ -224,7 +224,7 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
-  console.log({ actualQuery });
+  console.log('DiscoverTop query in use', actualQuery);
 
   return (
     <>

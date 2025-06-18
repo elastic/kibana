@@ -340,7 +340,6 @@ export const QueryBarTopRow = React.memo(
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
-
         propsOnSubmit({ query, dateRange });
       },
       [timeHistory, propsOnSubmit]
@@ -731,7 +730,6 @@ export const QueryBarTopRow = React.memo(
       if (adHocDataview && typeof adHocDataview !== 'string') {
         detectedTimestamp = adHocDataview?.timeFieldName;
       }
-      console.log('query', props.query);
       return (
         isQueryLangSelected &&
         props.query &&
@@ -742,12 +740,12 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
-            onTextLangQuerySubmit={async () =>
-              onSubmit({
+            onTextLangQuerySubmit={async () => {
+              return onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
-              })
-            }
+              });
+            }}
             isDisabled={props.isDisabled}
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"

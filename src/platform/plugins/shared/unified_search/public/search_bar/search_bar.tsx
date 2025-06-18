@@ -179,6 +179,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     nextProps: SearchBarProps,
     prevState: State<AggregateQuery | Query>
   ) {
+    console.log('getDerivedStateFromProps',{ nextProps })
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
     }
