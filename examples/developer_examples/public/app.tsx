@@ -23,9 +23,7 @@ import {
   EuiLink,
   EuiButtonIcon,
 } from '@elastic/eui';
-import {
-  AppMountParameters,
-} from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { RenderingService } from '@kbn/core-rendering-browser';
 import { ExampleDefinition } from './types';
 
