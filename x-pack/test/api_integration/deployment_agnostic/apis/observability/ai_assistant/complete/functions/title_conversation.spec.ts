@@ -15,7 +15,7 @@ import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../utils/create_llm_proxy';
 import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 

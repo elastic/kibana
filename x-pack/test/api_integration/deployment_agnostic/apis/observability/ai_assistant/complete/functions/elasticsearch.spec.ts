@@ -13,7 +13,7 @@ import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plu
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,

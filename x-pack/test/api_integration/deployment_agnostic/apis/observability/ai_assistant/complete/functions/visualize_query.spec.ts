@@ -11,7 +11,7 @@ import { VisualizeESQLUserIntention } from '@kbn/observability-ai-assistant-plug
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,

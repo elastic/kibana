@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {

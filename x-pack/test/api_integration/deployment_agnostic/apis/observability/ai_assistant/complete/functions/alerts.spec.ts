@@ -14,7 +14,7 @@ import { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search
 import {
   LlmProxy,
   createLlmProxy,
-} from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+} from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,
