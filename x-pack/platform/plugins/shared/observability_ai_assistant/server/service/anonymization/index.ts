@@ -146,27 +146,23 @@ export class AnonymizationService {
       (rule) => rule.type === 'regex' && rule.enabled
     ) as RegexAnonymizationRule[];
 
+    const nerEntities: DetectedEntity[] = [];
+
     // Only run NER if we have NER rules enabled
-    let nerEntities: DetectedEntity[] = [];
     if (nerRules.length > 0) {
-      const chunks = chunkText(content);
-      const acceptedEntitiesByClass = new Map<string, DetectedEntity[]>();
+      let workingText = content;
 
       for (const rule of nerRules) {
         const modelId = rule.modelId ?? NER_MODEL_ID;
-        const entities = await this.detectNamedEntitiesForModel({ modelId, chunks });
+        const chunks = chunkText(workingText);
+        const detected = await this.detectNamedEntitiesForModel({ modelId, chunks });
 
-        for (const entity of entities) {
-          // if an earlier rule already produced this entity class, skip
-          if (acceptedEntitiesByClass.has(entity.class_name)) continue;
-
-          const list = acceptedEntitiesByClass.get(entity.class_name) ?? [];
-          list.push(entity);
-          acceptedEntitiesByClass.set(entity.class_name, list);
+        if (detected.length) {
+          nerEntities.push(...detected);
+          // redact already-found entities so subsequent models cannot see them
+          workingText = redactEntities(workingText, detected);
         }
       }
-
-      nerEntities = [...acceptedEntitiesByClass.values()].flat();
     }
 
     // Detect entities using regex patterns
