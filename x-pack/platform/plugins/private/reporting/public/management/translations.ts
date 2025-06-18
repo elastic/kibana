@@ -171,7 +171,7 @@ export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailRecipientsHint',
   {
     defaultMessage:
-      "On the scheduled date, we'll also email the report to the addresses you specify below.",
+      "On the scheduled date, we'll also email the report to the addresses you specify here.",
   }
 );
 
