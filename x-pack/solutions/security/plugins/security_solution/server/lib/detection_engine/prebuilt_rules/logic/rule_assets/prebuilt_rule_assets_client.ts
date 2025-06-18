@@ -79,7 +79,7 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds: string[] = []): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds?: string[]): Promise<RuleVersionSpecifier[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
         if (ruleIds && ruleIds.length === 0) {
           return [];
