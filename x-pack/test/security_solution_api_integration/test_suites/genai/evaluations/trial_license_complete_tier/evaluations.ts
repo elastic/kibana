@@ -63,9 +63,8 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
-      const isPromptMode = process.env.IS_PROMPT === 'true';
       // if run is to test prompt changes, uninstall prompt integration to default to local prompts
-      if (isPromptMode) {
+      if (process.env.IS_SECURITY_AI_PROMPT_TEST === 'true') {
         // delete integration prompt saved objects
         const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
         await supertest.delete(route).set('kbn-xsrf', 'foo');
