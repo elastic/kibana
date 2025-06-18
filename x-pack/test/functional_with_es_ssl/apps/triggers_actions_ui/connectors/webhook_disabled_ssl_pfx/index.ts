@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Connectors', function () {
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./opsgenie'));
-    loadTestFile(require.resolve('./tines'));
-    loadTestFile(require.resolve('./slack'));
+  describe('Webhook - disabled ssl pfx', function () {
     loadTestFile(require.resolve('./webhook'));
   });
 };
