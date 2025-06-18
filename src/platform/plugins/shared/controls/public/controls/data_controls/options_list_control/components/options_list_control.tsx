@@ -70,6 +70,23 @@ const optionListControlStyles = {
       borderStartStartRadius: '0 !important',
     },
   }),
+  /* additional custom overrides due to unexpected component usage;
+    open issue: https://github.com/elastic/eui-private/issues/270 */
+  filterGroup: css`
+    /* prevents duplicate border due to nested filterGroup */
+    &::after {
+      display: none;
+    }
+
+    .euiFilterButton__wrapper {
+      padding: 0;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  `,
 };
 
 export const OptionsListControl = ({
@@ -215,6 +232,7 @@ export const OptionsListControl = ({
       fullWidth
       compressed={isCompressed(componentApi)}
       className={controlPanelClassName}
+      css={optionListControlStyles.filterGroup}
     >
       <EuiInputPopover
         id={popoverId}

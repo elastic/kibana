@@ -180,6 +180,7 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
+        "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -2214,7 +2215,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
-      "recreateWhen": "never",
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -4324,7 +4325,10 @@
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/sdk-trace-node",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-undici"
       ],
       "reviewers": [
         "team:stack-monitoring",
