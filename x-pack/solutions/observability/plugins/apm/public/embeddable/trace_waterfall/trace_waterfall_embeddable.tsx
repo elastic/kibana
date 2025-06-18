@@ -58,6 +58,7 @@ export function TraceWaterfallEmbeddable({
           onClick={(id) => onNodeClick?.(id)}
           scrollElement={scrollElement}
           getRelatedErrorsHref={getRelatedErrorsHref}
+          isEmbeddable={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

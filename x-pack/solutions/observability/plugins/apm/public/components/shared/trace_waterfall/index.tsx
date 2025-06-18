@@ -27,6 +27,7 @@ export interface Props {
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable?: boolean;
 }
 
 export function TraceWaterfall({
@@ -37,6 +38,7 @@ export function TraceWaterfall({
   onErrorClick,
   scrollElement,
   getRelatedErrorsHref,
+  isEmbeddable = false,
 }: Props) {
   return (
     <TraceWaterfallContextProvider
@@ -47,6 +49,7 @@ export function TraceWaterfall({
       onErrorClick={onErrorClick}
       scrollElement={scrollElement}
       getRelatedErrorsHref={getRelatedErrorsHref}
+      isEmbeddable={isEmbeddable}
     >
       <TraceWaterfallComponent />
     </TraceWaterfallContextProvider>
@@ -59,6 +62,7 @@ function TraceWaterfallComponent() {
     duration,
     rootItem,
     margin: { left, right },
+    isEmbeddable,
   } = useTraceWaterfallContext();
 
   if (!rootItem) {
@@ -71,7 +75,7 @@ function TraceWaterfallComponent() {
         css={css`
           display: flex;
           position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
+          top: ${isEmbeddable ? '0px' : 'var(--euiFixedHeadersOffset, 0)'};
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: ${euiTheme.border.thin};

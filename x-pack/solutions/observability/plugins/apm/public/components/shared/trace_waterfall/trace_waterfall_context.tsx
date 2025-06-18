@@ -25,6 +25,7 @@ interface TraceWaterfallContextProps {
   highlightedTraceId?: string;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -34,6 +35,7 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   margin: { left: 0, right: 0 },
   traceWaterfallMap: {},
   showAccordion: true,
+  isEmbeddable: false,
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -48,6 +50,7 @@ export function TraceWaterfallContextProvider({
   onErrorClick,
   scrollElement,
   getRelatedErrorsHref,
+  isEmbeddable,
 }: {
   children: React.ReactNode;
   traceItems: TraceItem[];
@@ -57,6 +60,7 @@ export function TraceWaterfallContextProvider({
   onErrorClick?: OnErrorClick;
   scrollElement?: Element;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
+  isEmbeddable: boolean;
 }) {
   const { duration, traceWaterfall, maxDepth, rootItem } = useTraceWaterfall({
     traceItems,
@@ -81,6 +85,7 @@ export function TraceWaterfallContextProvider({
         highlightedTraceId,
         scrollElement,
         getRelatedErrorsHref,
+        isEmbeddable,
       }}
     >
       {children}
