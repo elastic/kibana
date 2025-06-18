@@ -17,7 +17,6 @@ import type {
   SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
   UsageRecord,
-  BackfillConfig,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
 import type { UsageReportingService } from '../common/services/usage_reporting_service';
