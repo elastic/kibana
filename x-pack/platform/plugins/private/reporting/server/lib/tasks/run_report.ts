@@ -93,7 +93,7 @@ export interface PrepareJobResults {
   jobId: string;
   report?: SavedReport;
   task?: ReportTaskParams;
-  reportSO?: SavedObject<ScheduledReportType>;
+  scheduledReport?: SavedObject<ScheduledReportType>;
 }
 
 type ReportTaskParamsType = Record<string, any>;
@@ -136,7 +136,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     taskInstance: ConcreteTaskInstance,
     output: TaskRunResult,
     byteSize: number,
-    reportSO?: SavedObject<ScheduledReportType>,
+    scheduledReport?: SavedObject<ScheduledReportType>,
     spaceId?: string
   ): Promise<void>;
 
@@ -481,7 +481,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
             jobId: jId,
             report: preparedReport,
             task,
-            reportSO,
+            scheduledReport,
           } = await this.prepareJob(taskInstance);
           jobId = jId;
           report = preparedReport;
@@ -578,7 +578,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 taskInstance,
                 output,
                 byteSize,
-                reportSO,
+                scheduledReport,
                 task.payload.spaceId
               );
             }

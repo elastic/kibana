@@ -22,7 +22,7 @@ test('ScheduledReport should return correctly formatted outputs', () => {
     kibanaId: 'instance-uuid',
     kibanaName: 'kibana',
     queueTimeout: 120000,
-    reportSO: {
+    scheduledReport: {
       id: 'report-so-id-111',
       attributes: {
         createdAt: new Date().toISOString(),
@@ -124,7 +124,7 @@ test('ScheduledReport should throw an error if report payload is malformed', () 
       kibanaId: 'instance-uuid',
       kibanaName: 'kibana',
       queueTimeout: 120000,
-      reportSO: {
+      scheduledReport: {
         id: 'report-so-id-111',
         attributes: {
           createdAt: new Date().toISOString(),
@@ -143,11 +143,11 @@ test('ScheduledReport should throw an error if report payload is malformed', () 
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
-    `"Unable to parse payload from scheduled report saved object: SyntaxError: Unexpected token 'a', \\"abc\\" is not valid JSON"`
+    `"Unable to parse payload from scheduled_report saved object: SyntaxError: Unexpected token 'a', \\"abc\\" is not valid JSON"`
   );
 });
 
-test('ScheduledReport should throw an error if report saved object is missing ID', () => {
+test('ScheduledReport should throw an error if scheduled_report saved object is missing ID', () => {
   const createInstance = () => {
     return new ScheduledReport({
       runAt: new Date('2023-10-01T00:00:00Z'),
@@ -155,7 +155,7 @@ test('ScheduledReport should throw an error if report saved object is missing ID
       kibanaName: 'kibana',
       queueTimeout: 120000,
       // @ts-expect-error - missing id
-      reportSO: {
+      scheduledReport: {
         attributes: {
           createdAt: new Date().toISOString(),
           createdBy: 'test-user',
@@ -173,6 +173,6 @@ test('ScheduledReport should throw an error if report saved object is missing ID
     });
   };
   expect(createInstance).toThrowErrorMatchingInlineSnapshot(
-    `"Invalid scheduled report saved object - no id"`
+    `"Invalid scheduled_report saved object - no id"`
   );
 });

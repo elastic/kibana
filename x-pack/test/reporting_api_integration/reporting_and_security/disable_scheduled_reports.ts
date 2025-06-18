@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await reportingAPI.deleteScheduledReportSOs(scheduledReportIds);
+      await reportingAPI.deleteScheduledReports(scheduledReportIds);
       await reportingAPI.deleteTasks(scheduledReportIds);
     });
 
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(res).to.eql({ scheduled_report_ids: [reportId], errors: [], total: 1 });
 
-      const soResult = await reportingAPI.getScheduledReportSO(reportId);
+      const soResult = await reportingAPI.getScheduledReports(reportId);
       expect(soResult.body._source.scheduled_report.enabled).to.eql(false);
       const taskResult = await reportingAPI.getTask(reportId);
       expect(taskResult.body._source?.task.enabled).to.eql(false);
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         total: 1,
       });
 
-      const soResult = await reportingAPI.getScheduledReportSO(reportId);
+      const soResult = await reportingAPI.getScheduledReports(reportId);
       expect(soResult.body._source.scheduled_report.enabled).to.eql(true);
       const taskResult = await reportingAPI.getTask(reportId);
       expect(taskResult.body._source?.task.enabled).to.eql(true);
@@ -154,9 +154,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(res).to.eql({ scheduled_report_ids: [report1Id, report2Id], errors: [], total: 2 });
 
-      const soResult1 = await reportingAPI.getScheduledReportSO(report1Id);
+      const soResult1 = await reportingAPI.getScheduledReports(report1Id);
       expect(soResult1.body._source.scheduled_report.enabled).to.eql(false);
-      const soResult2 = await reportingAPI.getScheduledReportSO(report2Id);
+      const soResult2 = await reportingAPI.getScheduledReports(report2Id);
       expect(soResult2.body._source.scheduled_report.enabled).to.eql(false);
       const taskResult1 = await reportingAPI.getTask(report1Id);
       expect(taskResult1.body._source?.task.enabled).to.eql(false);

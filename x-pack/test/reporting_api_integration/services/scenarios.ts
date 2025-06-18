@@ -398,13 +398,13 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .expect(200);
   };
 
-  const getScheduledReportSO = async (id: string) => {
+  const getScheduledReports = async (id: string) => {
     return await esSupertest.get(
       `/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`
     );
   };
 
-  const deleteScheduledReportSOs = async (ids: string[]) => {
+  const deleteScheduledReports = async (ids: string[]) => {
     return await Promise.all(
       ids.map((id) =>
         esSupertest.delete(`/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`)
@@ -457,8 +457,8 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
     getJobErrorCode,
-    getScheduledReportSO,
-    deleteScheduledReportSOs,
+    getScheduledReports,
+    deleteScheduledReports,
     getTask,
     deleteTasks,
     listScheduledReports,

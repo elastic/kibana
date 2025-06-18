@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await reportingAPI.deleteScheduledReportSOs(scheduledReportIds);
+      await reportingAPI.deleteScheduledReports(scheduledReportIds);
       await reportingAPI.deleteTasks(scheduledReportTaskIds);
     });
 
@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(res.status).to.eql(200);
 
-        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
         scheduledReportIds.push(res.body.job.id);
@@ -260,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(res.status).to.eql(200);
 
-        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
         scheduledReportIds.push(res.body.job.id);
@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(res.status).to.eql(200);
 
-        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
         scheduledReportIds.push(res.body.job.id);
@@ -351,7 +351,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(res.status).to.eql(200);
 
-        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
         expect(soResult.status).to.eql(200);
         expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
         scheduledReportIds.push(res.body.job.id);

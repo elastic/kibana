@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await reportingAPI.deleteScheduledReportSOs(scheduledReportIds);
+      await reportingAPI.deleteScheduledReports(scheduledReportIds);
       await reportingAPI.deleteTasks(scheduledReportIds);
     });
 

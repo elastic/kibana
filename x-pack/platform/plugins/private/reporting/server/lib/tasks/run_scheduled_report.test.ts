@@ -83,7 +83,7 @@ const payload = {
   version: '8.0.0',
 };
 
-const reportSO: SavedObject<ScheduledReportType> = {
+const scheduledReport: SavedObject<ScheduledReportType> = {
   id: 'report-so-id',
   attributes: {
     createdAt: new Date().toISOString(),
@@ -154,7 +154,7 @@ describe('Run Scheduled Report Task', () => {
   beforeEach(async () => {
     logger = loggingSystemMock.createLogger();
     soClient.get = jest.fn().mockImplementation(async () => {
-      return reportSO;
+      return scheduledReport;
     });
     reportStore = await mockReporting.getStore();
     reportStore.addReport = jest.fn().mockImplementation(async () => {
@@ -480,7 +480,7 @@ describe('Run Scheduled Report Task', () => {
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, scheduledReport, 'default');
       expect(soClient.get).not.toHaveBeenCalled();
       expect(emailNotificationService.notify).toHaveBeenCalledWith({
         contentType: 'application/pdf',
@@ -503,7 +503,7 @@ describe('Run Scheduled Report Task', () => {
       });
     });
 
-    it("gets the report SO if it's not defined", async () => {
+    it("gets the scheduled_report saved object if it's not defined", async () => {
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -558,7 +558,7 @@ describe('Run Scheduled Report Task', () => {
       };
       const byteSize = 2097152; // 2MB
       const output = { content_type: 'application/pdf' };
-      const noNotification = { ...reportSO, notification: undefined };
+      const noNotification = { ...scheduledReport, notification: undefined };
 
       // @ts-expect-error
       await task.notify(savedReport, taskInstance, output, byteSize, noNotification, 'default');
@@ -583,7 +583,7 @@ describe('Run Scheduled Report Task', () => {
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, scheduledReport, 'default');
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
@@ -614,7 +614,7 @@ describe('Run Scheduled Report Task', () => {
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, scheduledReport, 'default');
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
@@ -648,7 +648,7 @@ describe('Run Scheduled Report Task', () => {
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, scheduledReport, 'default');
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(emailNotificationService.notify).toHaveBeenCalledWith({
@@ -699,7 +699,7 @@ describe('Run Scheduled Report Task', () => {
       const output = { content_type: 'application/pdf' };
 
       // @ts-expect-error
-      await task.notify(savedReport, taskInstance, output, byteSize, reportSO, 'default');
+      await task.notify(savedReport, taskInstance, output, byteSize, scheduledReport, 'default');
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();

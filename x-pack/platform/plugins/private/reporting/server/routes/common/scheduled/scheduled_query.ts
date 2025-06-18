@@ -159,13 +159,13 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           return getEmptyApiResponse(page, size);
         }
 
-        const scheduledReportSoIds = response?.saved_objects.map((so) => so.id);
+        const scheduledReportIds = response?.saved_objects.map((so) => so.id);
 
-        if (!scheduledReportSoIds || scheduledReportSoIds.length === 0) {
+        if (!scheduledReportIds || scheduledReportIds.length === 0) {
           return getEmptyApiResponse(page, size);
         }
 
-        scheduledReportSoIds.forEach((id) =>
+        scheduledReportIds.forEach((id) =>
           auditLogger.log(
             scheduledReportAuditEvent({
               action: ScheduledReportAuditAction.LIST,
@@ -189,7 +189,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
                 filter: [
                   {
                     terms: {
-                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+                      [SCHEDULED_REPORT_ID_FIELD]: scheduledReportIds,
                     },
                   },
                 ],
@@ -322,7 +322,7 @@ export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQu
           };
         }
 
-        // it's possible that the scheduled report saved object was disabled but
+        // it's possible that the scheduled_report saved object was disabled but
         // task disabling failed so add the list of already disabled IDs
         // task manager filters out disabled tasks so this will not cause extra load
         taskIdsToDisable = taskIdsToDisable.concat([...disabledScheduledReportIds]);

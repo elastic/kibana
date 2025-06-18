@@ -18,41 +18,41 @@ interface ConstructorOpts {
   kibanaId: string;
   kibanaName: string;
   queueTimeout: number;
-  reportSO: SavedObject<ScheduledReportType>;
+  scheduledReport: SavedObject<ScheduledReportType>;
 }
 
 export class ScheduledReport extends Report {
   /*
-   * Create a report from a scheduled report saved object
+   * Create a report from a scheduled_report saved object
    */
   constructor(opts: ConstructorOpts) {
-    const { kibanaId, kibanaName, runAt, reportSO, queueTimeout } = opts;
+    const { kibanaId, kibanaName, runAt, scheduledReport, queueTimeout } = opts;
     const now = moment.utc();
     const startTime = now.toISOString();
     const expirationTime = now.add(queueTimeout).toISOString();
 
     let payload: BasePayload;
     try {
-      payload = JSON.parse(reportSO.attributes.payload);
+      payload = JSON.parse(scheduledReport.attributes.payload);
     } catch (e) {
-      throw new Error(`Unable to parse payload from scheduled report saved object: ${e}`);
+      throw new Error(`Unable to parse payload from scheduled_report saved object: ${e}`);
     }
 
     payload.forceNow = runAt.toISOString();
-    payload.title = `${reportSO.attributes.title} [${runAt.toISOString()}]`;
+    payload.title = `${scheduledReport.attributes.title} [${runAt.toISOString()}]`;
 
-    if (!reportSO.id) {
-      throw new Error(`Invalid scheduled report saved object - no id`);
+    if (!scheduledReport.id) {
+      throw new Error(`Invalid scheduled_report saved object - no id`);
     }
 
     super(
       {
-        migration_version: reportSO.attributes.migrationVersion,
-        jobtype: reportSO.attributes.jobType,
+        migration_version: scheduledReport.attributes.migrationVersion,
+        jobtype: scheduledReport.attributes.jobType,
         created_at: runAt.toISOString(),
-        created_by: reportSO.attributes.createdBy as string | false,
+        created_by: scheduledReport.attributes.createdBy as string | false,
         payload,
-        meta: reportSO.attributes.meta,
+        meta: scheduledReport.attributes.meta,
         status: JOB_STATUS.PROCESSING,
         attempts: 1,
         process_expiration: expirationTime,
@@ -61,7 +61,7 @@ export class ScheduledReport extends Report {
         max_attempts: 1,
         started_at: startTime,
         timeout: queueTimeout,
-        scheduled_report_id: reportSO.id,
+        scheduled_report_id: scheduledReport.id,
       },
       { queue_time_ms: [now.diff(moment.utc(runAt), 'milliseconds')] }
     );

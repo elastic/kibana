@@ -38,22 +38,22 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
 
     let report: SavedReport | undefined;
     let jobId: string;
-    let reportSO: SavedObject<ScheduledReportType> | undefined;
+    let scheduledReport: SavedObject<ScheduledReportType> | undefined;
     const task = scheduledReportTaskParams as ScheduledReportTaskParams;
-    const reportSoId = task.id;
+    const scheduledReportId = task.id;
     const reportSpaceId = task.spaceId || DEFAULT_SPACE_ID;
 
     try {
-      if (!reportSoId) {
+      if (!scheduledReportId) {
         throw new Error(
-          `Invalid scheduled report saved object data provided in scheduled task! - No saved object with id "${reportSoId}"`
+          `Invalid scheduled_report saved object data provided in scheduled task! - No saved object with id "${scheduledReportId}"`
         );
       }
 
       const internalSoClient = await this.opts.reporting.getInternalSoClient();
-      reportSO = await internalSoClient.get<ScheduledReportType>(
+      scheduledReport = await internalSoClient.get<ScheduledReportType>(
         SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-        reportSoId,
+        scheduledReportId,
         { namespace: reportSpaceId }
       );
 
@@ -66,7 +66,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           kibanaId: this.kibanaId!,
           kibanaName: this.kibanaName!,
           queueTimeout: this.queueTimeout,
-          reportSO,
+          scheduledReport,
         })
       );
 
@@ -76,7 +76,11 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       }
     } catch (failedToClaim) {
       // error claiming report - log the error
-      errorLogger(this.logger, `Error in running scheduled report ${reportSoId}`, failedToClaim);
+      errorLogger(
+        this.logger,
+        `Error in running scheduled report ${scheduledReportId}`,
+        failedToClaim
+      );
     }
 
     return {
@@ -84,7 +88,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
       jobId: jobId!,
       report,
       task: report?.toReportTaskJSON(),
-      reportSO,
+      scheduledReport,
     };
   }
 
@@ -97,22 +101,22 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     taskInstance: ConcreteTaskInstance,
     output: TaskRunResult,
     byteSize: number,
-    reportSO?: SavedObject<ScheduledReportType>,
+    scheduledReport?: SavedObject<ScheduledReportType>,
     spaceId?: string
   ): Promise<void> {
     try {
       const { runAt, params } = taskInstance;
       const task = params as ScheduledReportTaskParams;
-      if (!reportSO) {
+      if (!scheduledReport) {
         const internalSoClient = await this.opts.reporting.getInternalSoClient();
-        reportSO = await internalSoClient.get<ScheduledReportType>(
+        scheduledReport = await internalSoClient.get<ScheduledReportType>(
           SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
           task.id,
           { namespace: spaceId }
         );
       }
 
-      const { notification } = reportSO.attributes;
+      const { notification } = scheduledReport.attributes;
       if (notification && notification.email) {
         if (byteSize > MAX_ATTACHMENT_SIZE) {
           throw new Error('The report is larger than the 10MB limit.');
@@ -122,7 +126,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
         }
 
         const email = notification.email;
-        const title = reportSO.attributes.title;
+        const title = scheduledReport.attributes.title;
         const extension = this.getJobContentExtension(report.jobtype);
 
         await this.emailNotificationService.notify({
@@ -132,8 +136,8 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           filename: `${title}-${runAt.toISOString()}.${extension}`,
           contentType: output.content_type,
           relatedObject: {
-            id: reportSO.id,
-            type: reportSO.type,
+            id: scheduledReport.id,
+            type: scheduledReport.type,
             namespace: spaceId,
           },
           emailParams: {

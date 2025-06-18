@@ -152,7 +152,7 @@ describe('Handle request to schedule', () => {
   });
 
   describe('enqueueJob', () => {
-    test('creates a scheduled report saved object and schedules task', async () => {
+    test('creates a scheduled_report saved object and schedules task', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
         jobParams: mockJobParams,
@@ -238,7 +238,7 @@ describe('Handle request to schedule', () => {
       });
     });
 
-    test('creates a scheduled report saved object with notification', async () => {
+    test('creates a scheduled_report saved object with notification', async () => {
       const report = await requestHandler.enqueueJob({
         exportTypeId: 'printablePdfV2',
         jobParams: mockJobParams,

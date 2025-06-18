@@ -172,7 +172,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       schedule: schedule!,
     };
 
-    // Create a scheduled report saved object
+    // Create a scheduled_report saved object
     const report = await soClient.create<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       attributes,
