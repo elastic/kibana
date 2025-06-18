@@ -28,10 +28,9 @@ import type { FieldPreview, PreviewState } from '../types';
 import { PreviewListItem } from './field_list_item';
 import type { PreviewListItemProps } from './field_list_item';
 import { useStateSelector } from '../../../state_utils';
-import './field_list.scss';
 import { getPositionAfterToggling } from './get_item_position';
 
-const ITEM_HEIGHT = 40;
+export const ITEM_HEIGHT = 40;
 const SHOW_MORE_HEIGHT = 40;
 const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
 
@@ -199,7 +198,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
 
   const renderToggleFieldsButton = () =>
     totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
-      <div className="indexPatternFieldEditor__previewFieldList__showMore">
+      <div css={styles.showMore}>
         <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
           {showAllFields
             ? i18n.translate('indexPatternFieldEditor.fieldPreview.showLessFieldsButtonLabel', {
@@ -244,7 +243,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   }
 
   return (
-    <div className="indexPatternFieldEditor__previewFieldList">
+    <div className="indexPatternFieldEditor__previewFieldList" css={styles.previewFieldList}>
       {isEmptySearchResultVisible ? (
         renderEmptyResult()
       ) : (
@@ -272,4 +271,15 @@ const componentStyles = {
     css({
       fontWeight: euiTheme.font.weight.medium,
     }),
+  previewFieldList: css({
+    position: 'relative',
+  }),
+  showMore: css({
+    position: 'absolute',
+    width: '100%',
+    height: SHOW_MORE_HEIGHT,
+    bottom: -SHOW_MORE_HEIGHT,
+    display: 'flex',
+    alignItems: 'flex-end',
+  }),
 };
