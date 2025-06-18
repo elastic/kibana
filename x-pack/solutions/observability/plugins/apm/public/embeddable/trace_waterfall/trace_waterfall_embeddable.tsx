@@ -6,8 +6,6 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useWaterfallFetcher } from '../../components/app/transaction_details/use_waterfall_fetcher';
-import { Waterfall } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall';
 import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
 import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
@@ -41,13 +39,6 @@ export function TraceWaterfallEmbeddable({
 
   const legends = getServiceLegends(data?.traceItems || []);
 
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId: entryTransactionId,
-    start: rangeFrom,
-    end: rangeTo,
-  });
-
   if (isPending(status)) {
     return <Loading />;
   }
@@ -66,14 +57,6 @@ export function TraceWaterfallEmbeddable({
           traceItems={data?.traceItems!}
           onClick={(id) => onNodeClick?.(id)}
           scrollElement={scrollElement}
-          getRelatedErrorsHref={getRelatedErrorsHref}
-        />
-        <Waterfall
-          showCriticalPath={false}
-          waterfall={waterfallFetchResult.waterfall}
-          displayLimit={displayLimit}
-          onNodeClick={(node) => onNodeClick?.(node.id)}
-          isEmbeddable
           getRelatedErrorsHref={getRelatedErrorsHref}
         />
       </EuiFlexItem>

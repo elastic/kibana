@@ -142,6 +142,9 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     const { params, config } = resources;
     const { traceId } = params.path;
     const { start, end } = params.query;
+
+    const unifiedTraceErrors = await getUnifiedTraceErrors({ apmEventClient, traceId, start, end });
+
     const [traceItems] = await Promise.all([
       getUnifiedTraceItems({
         apmEventClient,
@@ -150,6 +153,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
         end,
         maxTraceItemsFromUrlParam: params.query.maxTraceItems,
         config,
+        unifiedTraceErrors,
       }),
     ]);
     return {
