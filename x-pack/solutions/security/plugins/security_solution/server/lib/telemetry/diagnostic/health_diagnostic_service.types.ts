@@ -11,8 +11,6 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { ITelemetryReceiver } from '../receiver';
-import type { CdnConfig } from '../artifact';
 
 export type Action = 'mask' | 'keep';
 export type Stats = Record<string, unknown>;
@@ -25,7 +23,6 @@ export interface HealthDiagnosticServiceStart {
   taskManager: TaskManagerStartContract;
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
-  receiver: ITelemetryReceiver;
 }
 
 export interface HealthDiagnosticQuery {
@@ -42,8 +39,6 @@ export interface HealthDiagnosticService {
   runHealthDiagnosticQueries(
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]>;
-  // TODO: remove before merge, for testing purposes
-  updateCdnUrl(cdn: CdnConfig): Promise<void>;
 }
 
 export interface HealthDiagnosticQuery {

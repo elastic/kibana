@@ -108,7 +108,7 @@ import type {
 } from './plugin_contract';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
-import { artifactService } from './lib/telemetry/artifact';
+import { type CdnConfig, artifactService } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import {
@@ -749,7 +749,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       )
       .catch(() => {});
 
-    artifactService.start(this.telemetryReceiver).catch(() => {});
+    if (this.config.cdnUrl && this.config.publicKey) {
+      const cdnConfig: CdnConfig = {
+        url: this.config.cdnUrl,
+        pubKey: this.config.publicKey,
+      };
+      this.logger.info('Starting artifact service with custom CDN config');
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
+    } else {
+      this.logger.info('Starting artifact service with default CDN config');
+      artifactService.start(this.telemetryReceiver).catch(() => {});
+    }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
 

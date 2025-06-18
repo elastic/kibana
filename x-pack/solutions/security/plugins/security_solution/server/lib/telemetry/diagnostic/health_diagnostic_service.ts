@@ -33,9 +33,8 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
-import { Artifact, type CdnConfig } from '../artifact';
+import { artifactService } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
-import type { ITelemetryReceiver } from '../receiver';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
@@ -49,8 +48,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly logger: Logger;
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
-  private artifactService: Artifact;
-  private receiver?: ITelemetryReceiver;
 
   // TODO: allow external configuration
   private readonly circuitBreakersConfig = {
@@ -59,7 +56,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       validationIntervalMs: 200,
     },
     timeout: {
-      timeoutMillis: 10,
+      timeoutMillis: 180,
       validationIntervalMs: 50,
     },
     eventLoopUtilization: {
@@ -71,7 +68,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   constructor(logger: Logger) {
     const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
     this.logger = newTelemetryLogger(logger.get('health-diagnostic'), mdc);
-    this.artifactService = new Artifact();
   }
 
   public setup(setup: HealthDiagnosticServiceSetup) {
@@ -85,12 +81,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
-    this.receiver = start.receiver;
 
-    await Promise.all([
-      this.artifactService.start(start.receiver),
-      this.scheduleTask(start.taskManager),
-    ]);
+    await this.scheduleTask(start.taskManager);
   }
 
   public async runHealthDiagnosticQueries(
@@ -184,14 +176,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     return statistics;
   }
 
-  public async updateCdnUrl(cdn: CdnConfig): Promise<void> {
-    if (this.receiver === undefined) {
-      this.logger.warn('Receiver is not started');
-      return;
-    }
-    await this.artifactService.start(this.receiver, cdn);
-  }
-
   private registerTask(taskManager: TaskManagerSetupContract) {
     this.logger.debug('About to register task');
 
@@ -280,7 +264,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
     try {
-      const artifact = await this.artifactService.getArtifact(QUERY_ARTIFACT_ID);
+      const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
     } catch (err) {
       this.logger.warn('Error getting health diagnostic queries', {

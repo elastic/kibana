@@ -18,46 +18,6 @@ export const registerTestHealthDiagnosticRoute = (
 
   router.post(
     {
-      path: '/api/update-health-diagnostic-cdn-url',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'endpoint to test the new feature, to be delete before merging',
-        },
-      },
-      options: {
-        tags: ['api'],
-        access: 'public',
-        summary: 'Update health diagnostic task cdn url (for testing purposes)',
-      },
-      validate: {
-        body: schema.object({
-          url: schema.string(),
-          pubKey: schema.string(),
-        }),
-      },
-    },
-    async (_, request, response) => {
-      const { url, pubKey } = request.body;
-
-      log.info('Updating health diagnostic task cdn url', { url } as LogMeta);
-
-      await healthDiagnostic.updateCdnUrl({
-        url,
-        pubKey,
-      });
-
-      return response.ok({
-        body: {
-          message: 'CDN URL updated',
-          url,
-        },
-      });
-    }
-  );
-
-  router.post(
-    {
       path: '/api/trigger-health-diagnostic-task',
       security: {
         authz: {
