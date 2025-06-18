@@ -24,14 +24,19 @@ jest.mock('./tasks/privilege_monitoring_task', () => {
   };
 });
 
-jest.mock('./saved_object/privilege_monitoring', () => {
+jest.mock('./saved_objects', () => {
   return {
+    MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
+      findByIndex: jest.fn().mockResolvedValue([]),
+      create: jest.fn(),
+    })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
       init: jest.fn().mockResolvedValue({ status: 'success' }),
       update: jest.fn(),
     })),
   };
 });
+
 describe('Privilege Monitoring Data Client', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -66,7 +71,7 @@ describe('Privilege Monitoring Data Client', () => {
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
       expect(mockStartPrivilegeMonitoringTask).toHaveBeenCalled();
-      expect(loggerMock.debug).toHaveBeenCalledTimes(1);
+      expect(loggerMock.debug).toHaveBeenCalledTimes(3);
       expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual(mockDescriptor);
     });
@@ -135,6 +140,111 @@ describe('Privilege Monitoring Data Client', () => {
 
     it('should handle errors during audit logging', async () => {
       // TODO: implement once we have more auditing
+    });
+  });
+
+  describe('syncAllIndexUsers', () => {
+    it('should sync users from all index sources and remove stale users', async () => {
+      const mockMonitoringSOSources = [
+        {
+          type: 'index',
+          name: 'Test User2',
+          managed: true,
+          indexPattern: 'test-index-2',
+          enabled: true,
+          matchers: [{ fields: ['user.role'], values: ['admin'] }],
+          filter: {},
+        },
+        {
+          type: 'index',
+          name: 'Test User1',
+          managed: true,
+          indexPattern: 'test-index-1',
+          enabled: true,
+          matchers: [{ fields: ['user.role'], values: ['admin'] }],
+          filter: {},
+        },
+        {
+          type: 'index',
+          managed: true,
+          indexPattern: 'entity_analytics.privileged_monitoring',
+          name: 'default-monitoring-index',
+        },
+      ];
+
+      // Create the mock function first
+      const findByIndexMock = jest.fn().mockResolvedValue(mockMonitoringSOSources);
+
+      // Set up the property with all needed methods
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: {
+          init: jest.fn().mockResolvedValue({ status: 'success' }),
+          update: jest.fn(),
+          findByIndex: findByIndexMock,
+        },
+      });
+
+      dataClient.createUsersFromIndexSource = jest
+        .fn()
+        .mockResolvedValueOnce(['Test User1'])
+        .mockResolvedValueOnce(['Test User2'])
+        .mockResolvedValueOnce(['admin']);
+      dataClient.removeStaleIndexUsers = jest.fn();
+
+      await dataClient.syncAllIndexUsers();
+
+      expect(findByIndexMock).toHaveBeenCalled();
+      expect(dataClient.createUsersFromIndexSource).toHaveBeenCalledWith('test-index-1', undefined);
+      expect(dataClient.createUsersFromIndexSource).toHaveBeenCalledWith('test-index-2', undefined);
+      expect(dataClient.createUsersFromIndexSource).toHaveBeenCalledWith(
+        'entity_analytics.privileged_monitoring',
+        undefined
+      );
+      expect(dataClient.removeStaleIndexUsers).toHaveBeenCalledWith(
+        new Set(['Test User1', 'Test User2', 'admin'])
+      );
+    });
+
+    it('should handle errors syncing users from index source', async () => {
+      // Arrange: mock index sources
+      const mockLog = jest.fn();
+      dataClient.listUsers = jest.fn().mockResolvedValue([]);
+      const mockSources = [
+        {
+          type: 'index',
+          name: 'Test User',
+          managed: true,
+          indexPattern: 'test-index-',
+          enabled: true,
+          matchers: [{ fields: ['user.role'], values: ['admin'] }],
+          filter: {},
+        },
+      ];
+
+      // Create the mock function for findByIndex
+      const findByIndexMock = jest.fn().mockResolvedValue(mockSources);
+
+      // Set up the property with all needed methods
+      Object.defineProperty(dataClient, 'monitoringIndexSourceClient', {
+        value: {
+          init: jest.fn().mockResolvedValue({ status: 'success' }),
+          update: jest.fn(),
+          findByIndex: findByIndexMock,
+        },
+      });
+
+      // Mock createUsersFromIndexSource to throw
+      const error = new Error('something went wrong');
+      dataClient.createUsersFromIndexSource = jest.fn().mockRejectedValue(error);
+
+      await dataClient.syncAllIndexUsers();
+
+      expect(mockLog).toHaveBeenCalledWith(
+        'error',
+        expect.stringContaining(
+          'Failed to sync users from index test-index-: Error: something went wrong'
+        )
+      );
     });
   });
 });

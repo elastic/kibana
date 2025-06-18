@@ -110,7 +110,7 @@ export class PrivilegeMonitoringDataClient {
       type: 'index',
       managed: true,
       indexPattern: defaultMonitoringUsersIndex,
-      name: 'defaultName', // TODO: double check what default name should be
+      name: 'default-monitoring-index',
     });
     this.log(
       'debug',
@@ -138,14 +138,8 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
-      // get all monitoring index sources of type 'index
-      const indexSources: MonitoringEntitySourceDescriptor[] =
-        await this.monitoringIndexSourceClient.findByIndex();
-      this.log(
-        'debug',
-        `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
-      );
-      await this.syncAllIndexUsers(indexSources);
+      // sync all index users from monitoring sources
+      await this.syncAllIndexUsers();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -319,13 +313,22 @@ export class PrivilegeMonitoringDataClient {
 
   // --- Privileged User Sync Orchestration ---
   // These methods coordinate syncing users from monitoring sources.
-  public async syncAllIndexUsers(indexSources: MonitoringEntitySourceDescriptor[]) {
+  public async syncAllIndexUsers() {
+    // get all monitoring index sources of type 'index
+    const indexSources: MonitoringEntitySourceDescriptor[] =
+      await this.monitoringIndexSourceClient.findByIndex();
+    this.log(
+      'debug',
+      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
+    );
+    // get usernames from each index source
     const allUserNames = new Set<string>();
     for (const source of indexSources) {
       const index = source.indexPattern ?? '';
       const kuery =
         typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
       try {
+        // store / sync usernames in internal privileged users index
         const usernames = await this.createUsersFromIndexSource(index, kuery);
         usernames.forEach((username) => allUserNames.add(username));
       } catch (error) {
@@ -356,7 +359,7 @@ export class PrivilegeMonitoringDataClient {
     return usernames;
   }
 
-  private async removeStaleIndexUsers(currentUsernames: Set<string>) {
+  public async removeStaleIndexUsers(currentUsernames: Set<string>) {
     const existingDocs: MonitoredUserDoc[] = await this.listUsers('labels.sources: "index_sync"');
     const staleUserIds: string[] = [];
 
@@ -370,7 +373,7 @@ export class PrivilegeMonitoringDataClient {
       }
     }
 
-    await Promise.all(staleUserIds.map((id) => this.deleteUser(id))); 
+    await Promise.all(staleUserIds.map((id) => this.deleteUser(id)));
     this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 }
