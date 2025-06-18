@@ -52,7 +52,14 @@ export async function deleteAll(
 
     await attachmentService.bulkDelete({
       attachmentIds: comments.saved_objects.map((so) => so.id),
-      refresh: false,
+      refresh: true,
+    });
+
+    await updateCaseAttachmentStats({
+      caseService: clientArgs.services.caseService,
+      attachmentService: clientArgs.services.attachmentService,
+      caseId: caseID,
+      user,
     });
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
@@ -115,7 +122,14 @@ export async function deleteComment(
 
     await attachmentService.bulkDelete({
       attachmentIds: [attachmentID],
-      refresh: false,
+      refresh: true,
+    });
+
+    await updateCaseAttachmentStats({
+      caseService: clientArgs.services.caseService,
+      attachmentService: clientArgs.services.attachmentService,
+      caseId: caseID,
+      user,
     });
 
     // we only want to store the fields related to the original request of the attachment, not fields like
@@ -162,4 +176,43 @@ const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlerts
 
   const alerts = getAlertInfoFromComments(alertAttachments);
   await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+};
+
+interface UpdateCaseAttachmentStats {
+  caseService: CasesClientArgs['services']['caseService'];
+  attachmentService: CasesClientArgs['services']['attachmentService'];
+  caseId: string;
+  user: CasesClientArgs['user'];
+}
+
+const updateCaseAttachmentStats = async ({
+  caseService,
+  attachmentService,
+  caseId,
+  user,
+}: UpdateCaseAttachmentStats) => {
+  const originalCase = await caseService.getCase({
+    id: caseId,
+  });
+
+  const date = new Date().toISOString();
+
+  const attachmentStats = await attachmentService.getter.getCaseAttatchmentStats({
+    caseIds: [caseId],
+  });
+
+  const totalComments = attachmentStats.get(caseId)?.userComments ?? 0;
+  const totalAlerts = attachmentStats.get(caseId)?.alerts ?? 0;
+
+  await caseService.patchCase({
+    originalCase,
+    caseId,
+    updatedAttributes: {
+      updated_at: date,
+      updated_by: user,
+      total_comments: totalComments,
+      total_alerts: totalAlerts,
+    },
+    refresh: false,
+  });
 };

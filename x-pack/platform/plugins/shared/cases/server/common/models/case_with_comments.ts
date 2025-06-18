@@ -12,7 +12,6 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { groupBy } from 'lodash';
 import type {
   AlertAttachmentPayload,
   AttachmentAttributes,
@@ -45,7 +44,6 @@ import {
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
-import type { AttachmentSavedObjectTransformed } from '../types/attachments';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & AttachmentRequest>;
@@ -148,14 +146,11 @@ export class CaseCommentModel {
 
   private async partialUpdateCaseWithAttachmentDataSkipRefresh({
     date,
-    newlyCreatedAttachments = [],
   }: {
     date: string;
-    newlyCreatedAttachments?: AttachmentSavedObjectTransformed[];
   }): Promise<CaseCommentModel> {
     return this.partialUpdateCaseWithAttachmentData({
       date,
-      newlyCreatedAttachments,
       refresh: false,
     });
   }
@@ -163,14 +158,12 @@ export class CaseCommentModel {
   private async partialUpdateCaseWithAttachmentData({
     date,
     refresh,
-    newlyCreatedAttachments = [],
   }: {
     date: string;
     refresh: RefreshSetting;
-    newlyCreatedAttachments?: AttachmentSavedObjectTransformed[];
   }): Promise<CaseCommentModel> {
     try {
-      const { totalComments, totalAlerts } = await this.getAttachmentStats(newlyCreatedAttachments);
+      const { totalComments, totalAlerts } = await this.getAttachmentStats();
 
       const updatedCase = await this.params.services.caseService.patchCase({
         originalCase: this.caseInfo,
@@ -201,28 +194,18 @@ export class CaseCommentModel {
     }
   }
 
-  private async getAttachmentStats(
-    newlyCreatedAttachments: AttachmentSavedObjectTransformed[] = []
-  ) {
+  private async getAttachmentStats() {
     const attachmentStats =
       await this.params.services.attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [this.caseInfo.id],
       });
 
-    const groupedAttachments = groupBy(
-      newlyCreatedAttachments,
-      (attachment) => attachment.attributes.type
-    );
-
-    const newlyCreatedAlerts = groupedAttachments[AttachmentType.alert] ?? [];
-    const newlyCreatedComments = groupedAttachments[AttachmentType.user] ?? [];
-
     const totalComments = attachmentStats.get(this.caseInfo.id)?.userComments ?? 0;
     const totalAlerts = attachmentStats.get(this.caseInfo.id)?.alerts ?? 0;
 
     return {
-      totalComments: totalComments + newlyCreatedComments.length,
-      totalAlerts: totalAlerts + newlyCreatedAlerts.length,
+      totalComments,
+      totalAlerts,
     };
   }
 
@@ -284,12 +267,11 @@ export class CaseCommentModel {
         }),
         references,
         id,
-        refresh: false,
+        refresh: true,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
         date: createdDate,
-        newlyCreatedAttachments: [comment],
       });
 
       await Promise.all([
@@ -546,12 +528,11 @@ export class CaseCommentModel {
             id,
           };
         }),
-        refresh: false,
+        refresh: true,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
         date: new Date().toISOString(),
-        newlyCreatedAttachments: newlyCreatedAttachments.saved_objects,
       });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(

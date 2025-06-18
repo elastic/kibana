@@ -95,9 +95,7 @@ export function transformAttributesToESModel(caseAttributes: CaseTransformedAttr
 };
 
 export function transformAttributesToESModel(
-  caseAttributes:
-    | Partial<CaseTransformedAttributes>
-    | Partial<CaseTransformedAttributesWithAttachmentStats>
+  caseAttributes: Partial<CaseTransformedAttributesWithAttachmentStats>
 ): {
   attributes: Partial<CasePersistedAttributes>;
   referenceHandler: ConnectorReferenceHandler;

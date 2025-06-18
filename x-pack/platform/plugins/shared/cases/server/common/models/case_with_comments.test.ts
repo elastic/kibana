@@ -86,7 +86,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -137,7 +137,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -190,7 +190,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -245,7 +245,7 @@ describe('CaseCommentModel', () => {
                   "type": "cases",
                 },
               ],
-              "refresh": false,
+              "refresh": true,
             },
           ],
         ]
@@ -296,13 +296,12 @@ describe('CaseCommentModel', () => {
       // user comment
       clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[0]);
 
-      // the case has 1 user comment and 2 alert comments
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map([
           [
             'mock-id-1',
             {
-              userComments: 1,
+              userComments: 2,
               alerts: 2,
             },
           ],
@@ -317,9 +316,7 @@ describe('CaseCommentModel', () => {
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
-      // 1 newly created comment plus the existing 1 user comment
       expect(args.updatedAttributes.total_comments).toEqual(2);
-      // no new alets created
       expect(args.updatedAttributes.total_alerts).toEqual(2);
     });
 
@@ -327,14 +324,13 @@ describe('CaseCommentModel', () => {
       // alert comment
       clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[3]);
 
-      // the case has 1 user comment and 2 alert comments
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map([
           [
             'mock-id-1',
             {
               userComments: 1,
-              alerts: 2,
+              alerts: 3,
             },
           ],
         ])
@@ -348,9 +344,7 @@ describe('CaseCommentModel', () => {
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
-      // 1 newly created alerts plus the existing 2 alerts
       expect(args.updatedAttributes.total_alerts).toEqual(3);
-      // no new comments created
       expect(args.updatedAttributes.total_comments).toEqual(1);
     });
 
@@ -679,20 +673,18 @@ describe('CaseCommentModel', () => {
         saved_objects: mockCaseComments,
       });
 
-      // the case has 1 user comment and 2 alert comments
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map([
           [
             'mock-id-1',
             {
-              userComments: 1,
-              alerts: 2,
+              userComments: 4,
+              alerts: 5,
             },
           ],
         ])
       );
 
-      // 3 user comments and 3 alert comments
       await model.bulkCreate({
         attachments: [
           {
@@ -724,10 +716,7 @@ describe('CaseCommentModel', () => {
 
       const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
-      // 3 newly created alerts plus the existing 2 alerts
       expect(args.updatedAttributes.total_alerts).toEqual(5);
-
-      // 3 newly created comments plus the existing 1 user comment
       expect(args.updatedAttributes.total_comments).toEqual(4);
     });
 
