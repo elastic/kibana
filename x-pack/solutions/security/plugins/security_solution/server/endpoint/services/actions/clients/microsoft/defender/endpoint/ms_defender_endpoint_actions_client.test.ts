@@ -955,7 +955,7 @@ describe('MS Defender response actions client', () => {
         applyEsClientSearchMock({
           esClientMock: clientConstructorOptionsMock.esClient,
           index: ENDPOINT_ACTIONS_INDEX,
-          response:actionRequestsSearchResponse,
+          response: actionRequestsSearchResponse,
           pitUsage: true,
         });
 
