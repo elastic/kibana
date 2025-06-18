@@ -49,12 +49,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
 
       ruleHelper = new SyntheticsRuleHelper(getService, supertestEditorWithApiKey, adminRoleAuthc);
-      await server.savedObjects.cleanStandardList();
       await ruleHelper.createIndexAction();
-      await esClient.deleteByQuery({
-        index: SYNTHETICS_RULE_ALERT_INDEX,
-        query: { match_all: {} },
-      });
       await supertestAdminWithCookieHeader
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .expect(200);
@@ -73,15 +68,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
       });
+      await server.savedObjects.clean({ types: ['rule'] });
     });
 
     describe('Alert on no data', () => {
       let ruleId = '';
       let monitor: any;
-
-      before(async () => {
-        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
-      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
