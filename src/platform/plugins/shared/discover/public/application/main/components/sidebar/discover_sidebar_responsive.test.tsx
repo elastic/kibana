@@ -35,8 +35,8 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
-import { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
+import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import { internalStateActions } from '../../state_management/redux';
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
