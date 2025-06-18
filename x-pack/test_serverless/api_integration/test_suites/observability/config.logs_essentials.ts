@@ -19,7 +19,11 @@ export default createTestConfig({
   services: { ...apmServices, ...datasetQualityServices },
 
   // include settings from elasticsearch controller
-  esServerArgs: ['xpack.ml.dfa.enabled=false'],
+  esServerArgs: [
+    'xpack.ml.dfa.enabled=false',
+    'serverless.project_type=observability',
+    'serverless.observability.tier=logs_essentials',
+  ],
   kbnServerArgs: [
     // defined in MKI control plane
     '--xpack.uptime.service.manifestUrl=mockDevUrl',

@@ -16,7 +16,11 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
 
   // include settings from elasticsearch controller
-  esServerArgs: ['xpack.ml.dfa.enabled=false'],
+  esServerArgs: [
+    'xpack.ml.dfa.enabled=false',
+    'serverless.project_type=observability',
+    'serverless.observability.tier=logs_essentials',
+  ],
   kbnServerArgs: [
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
