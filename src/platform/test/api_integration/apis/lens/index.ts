@@ -10,7 +10,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('lens - nick', () => {
+  describe('lens', () => {
     loadTestFile(require.resolve('./visualizations/create'));
     loadTestFile(require.resolve('./visualizations/get'));
     loadTestFile(require.resolve('./visualizations/update'));
