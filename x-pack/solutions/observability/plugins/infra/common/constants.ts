@@ -52,6 +52,10 @@ export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';
 
+// OTel hostmetricsreceiver
+export const EVENT_DATASET = 'event.dataset';
+export const OTEL_RECEIVER_DATASET_VALUE = 'hostmetricsreceiver.otel';
+
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
 

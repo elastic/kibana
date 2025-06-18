@@ -28,6 +28,7 @@ import {
   diskSpaceAvailability,
   diskUsage,
   diskUsageAverage,
+  diskUsageAverageOTel,
   diskWriteThroughput,
 } from './disk';
 
@@ -59,6 +60,7 @@ export const formulas = {
   diskSpaceAvailable,
   diskUsage,
   diskUsageAverage,
+  diskUsageAverageOTel,
   hostCount,
   logRate,
   normalizedLoad1m,
