@@ -322,7 +322,7 @@ export const RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT = i18n.translate(
   'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
   {
     defaultMessage:
-      'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
+      'Save time by creating an investigation guide that shares step-by-step guidelines or links to helpful resources for investigating alerts. When alerts are created, you can find the investigation guide on the alerts' details page.',
   }
 );
 
