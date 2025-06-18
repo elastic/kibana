@@ -10,3 +10,4 @@ export const UI_SETTINGS = {
 };
 
 export type { CanvasAppLocator, CanvasAppLocatorParams } from './locator';
+export { CANVAS_APP_LOCATOR } from './locator';
