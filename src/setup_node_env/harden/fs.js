@@ -9,15 +9,15 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const singlePath = new Set([
+const singlePath = [
   'writeFile',
   'writeFileSync',
   'appendFile',
   'appendFileSync',
   'createWriteStream',
-]);
+];
 
-const dualPath = new Set(['copyFile', 'copyFileSync']);
+const dualPath = ['copyFile', 'copyFileSync'];
 
 const { REPO_ROOT } = require('@kbn/repo-info');
 
@@ -54,16 +54,20 @@ const getRealTmpPath = () => {
   return realTmpPath;
 };
 
+const realTmpPath = getRealTmpPath();
+
 const devOrCIPaths = [
-  REPO_ROOT,
   tmpdir(),
-  getRealTmpPath(),
+  realTmpPath,
   join(homedir(), '.kibanaSecuritySolutionCliTools'),
   'target',
   '/target',
   '/opt/buildkite-agent',
   '/output',
   'cache-test',
+  join(REPO_ROOT, 'target'),
+  join(REPO_ROOT, 'x-pack'),
+  join(REPO_ROOT, 'scripts'),
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
@@ -114,7 +118,7 @@ const isMockFsActive = () => {
     // This is the most reliable way to detect mock-fs
     // It checks the internal binding that mock-fs modifies
     const realBinding = process.binding('fs');
-    return !!realBinding._mockedBinding;
+    return Boolean(realBinding._mockedBinding);
   } catch (e) {
     // If process.binding is not available (it's deprecated), fallback to other methods
     return false;
@@ -126,7 +130,7 @@ const patchFs = (fs) => {
     get(target, prop) {
       const isSyncMethod = typeof prop === 'string' && prop.endsWith('Sync');
 
-      if (isSyncMethod && singlePath.has(prop)) {
+      if (isSyncMethod && singlePath.includes(prop)) {
         return (userPath, ...args) => {
           if (isMockFsActive()) {
             // Use the original createWriteStream function directly to avoid infinite recursion.
@@ -142,7 +146,7 @@ const patchFs = (fs) => {
         };
       }
 
-      if (isSyncMethod && dualPath.has(prop)) {
+      if (isSyncMethod && dualPath.includes(prop)) {
         return (userSrc, userDest, ...args) => {
           if (isMockFsActive()) {
             // Use the original function directly to avoid infinite recursion.
@@ -159,7 +163,7 @@ const patchFs = (fs) => {
         };
       }
 
-      if (singlePath.has(prop) && typeof target[prop] === 'function') {
+      if (singlePath.includes(prop) && typeof target[prop] === 'function') {
         return (userPath, data, options, cb) => {
           if (isMockFsActive()) {
             // Use the original function directly to avoid infinite recursion.
@@ -185,7 +189,7 @@ const patchFs = (fs) => {
         };
       }
 
-      if (dualPath.has(prop) && typeof target[prop] === 'function') {
+      if (dualPath.includes(prop) && typeof target[prop] === 'function') {
         return (userSrc, userDest, data, options, cb) => {
           if (isMockFsActive()) {
             return realMethods[prop](userSrc, userDest, data, options, cb);
