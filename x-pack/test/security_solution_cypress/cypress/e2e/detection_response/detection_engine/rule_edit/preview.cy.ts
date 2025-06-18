@@ -22,6 +22,7 @@ import {
   submitRulePreview,
   toggleLoggedRequestsAccordion,
   toggleLoggedRequestsItemAccordion,
+  toggleLoggedRequestsPageAccordion,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 
@@ -53,6 +54,7 @@ describe(
 
         toggleLoggedRequestsAccordion();
         toggleLoggedRequestsItemAccordion();
+        toggleLoggedRequestsPageAccordion();
 
         cy.get(PREVIEW_LOGGED_REQUEST_DESCRIPTION)
           .first()

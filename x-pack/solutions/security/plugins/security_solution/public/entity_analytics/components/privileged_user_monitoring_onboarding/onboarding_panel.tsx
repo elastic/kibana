@@ -28,7 +28,13 @@ const VIDEO_TITLE = i18n.translate(
   }
 );
 
-export const PrivilegedUserMonitoringOnboardingPanel = () => {
+interface PrivilegedUserMonitoringOnboardingPanelProps {
+  onComplete: (userCount: number) => void;
+}
+
+export const PrivilegedUserMonitoringOnboardingPanel = ({
+  onComplete,
+}: PrivilegedUserMonitoringOnboardingPanelProps) => {
   return (
     <EuiPanel paddingSize="none">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
@@ -112,7 +118,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      <AddDataSourcePanel />
+      <AddDataSourcePanel onComplete={onComplete} />
     </EuiPanel>
   );
 };

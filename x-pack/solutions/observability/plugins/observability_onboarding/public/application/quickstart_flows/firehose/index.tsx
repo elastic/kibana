@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
@@ -35,6 +36,7 @@ import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_da
 import { ExistingDataCallout } from './existing_data_callout';
 import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { usePricingFeature } from '../shared/use_pricing_feature';
 
 const OPTIONS = [
   {
@@ -73,6 +75,9 @@ export function FirehosePanel() {
   const { data, status, error, refetch } = useFirehoseFlow();
   const { data: populatedAWSIndexList } = usePopulatedAWSIndexList();
   const { onPageReady } = usePerformanceContext();
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   useEffect(() => {
     if (data) {
@@ -161,7 +166,17 @@ export function FirehosePanel() {
       ),
     },
     {
-      title: 'Create a Firehose delivery stream to ingest CloudWatch logs and metrics',
+      title: metricsOnboardingEnabled
+        ? i18n.translate('xpack.observability_onboarding.firehosePanel.createDeliveryStreamTitle', {
+            defaultMessage:
+              'Create a Firehose delivery stream to ingest CloudWatch logs and metrics',
+          })
+        : i18n.translate(
+            'xpack.observability_onboarding.logsEssential.firehosePanel.createDeliveryStreamTitle',
+            {
+              defaultMessage: 'Create a Firehose delivery stream to ingest CloudWatch logs',
+            }
+          ),
       children: (
         <>
           {status !== FETCH_STATUS.SUCCESS && (
@@ -195,6 +210,7 @@ export function FirehosePanel() {
                   encodedApiKey={data.apiKeyEncoded}
                   elasticsearchUrl={data.elasticsearchUrl}
                   isPrimaryAction={!isMonitoringData}
+                  metricsEnabled={metricsOnboardingEnabled}
                 />
               )}
 
@@ -204,6 +220,7 @@ export function FirehosePanel() {
                   encodedApiKey={data.apiKeyEncoded}
                   elasticsearchUrl={data.elasticsearchUrl}
                   isCopyPrimaryAction={!isMonitoringData}
+                  metricsEnabled={metricsOnboardingEnabled}
                 />
               )}
             </>

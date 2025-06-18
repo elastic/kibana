@@ -18,7 +18,6 @@ import {
   listUsersRoute,
   updateUserRoute,
   uploadUsersCSVRoute,
-  uploadUsersJSONRoute,
 } from './users';
 
 import { padInstallRoute } from './privileged_access_detection/pad_install';
@@ -40,6 +39,5 @@ export const registerPrivilegeMonitoringRoutes = ({
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
-  uploadUsersCSVRoute(router, logger);
-  uploadUsersJSONRoute(router, logger);
+  uploadUsersCSVRoute(router, logger, config);
 };
