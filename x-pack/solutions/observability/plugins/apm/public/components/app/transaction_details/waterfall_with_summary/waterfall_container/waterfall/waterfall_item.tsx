@@ -351,7 +351,6 @@ function EmbeddableRelatedErrors({
 
   if (errorCount > 0 && getRelatedErrorsHref) {
     return (
-      // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
         iconType="arrowRight"
