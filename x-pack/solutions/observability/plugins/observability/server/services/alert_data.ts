@@ -6,16 +6,18 @@
  */
 
 import { omit } from 'lodash';
-import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
+import {
+  getRelevantRuleFieldsMap,
+  getRuleQueryIndexMap,
+  isSuggestedDashboardsValidRuleTypeId,
+} from './helpers';
 
 export class AlertData {
   constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
@@ -30,21 +32,14 @@ export class AlertData {
 
   getRelevantRuleFields(): Set<string> {
     const ruleParameters = this.getRuleParameters();
-    const relevantFields = new Set<string>();
     if (!ruleParameters) {
       throw new Error('No rule parameters found');
     }
-    switch (this.getRuleTypeId()) {
-      case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
-        const metrics = customThresholdParams.criteria[0].metrics;
-        metrics.forEach((metric) => {
-          relevantFields.add(metric.field);
-        });
-        return relevantFields;
-      default:
-        return relevantFields;
-    }
+    const ruleTypeId = this.getRuleTypeId();
+
+    return isSuggestedDashboardsValidRuleTypeId(ruleTypeId)
+      ? getRelevantRuleFieldsMap[ruleTypeId](ruleParameters)
+      : new Set<string>();
   }
 
   getRelevantAADFields(): string[] {
@@ -74,17 +69,10 @@ export class AlertData {
     if (!ruleParameters) {
       throw new Error('No rule parameters found');
     }
-    switch (ruleTypeId) {
-      case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
-        if (typeof customThresholdParams.searchConfiguration.index === 'object')
-          return (customThresholdParams.searchConfiguration.index as DataViewSpec)?.id || null;
-        if (typeof customThresholdParams.searchConfiguration.index === 'string')
-          return customThresholdParams.searchConfiguration.index;
-        return null;
-      default:
-        return null;
-    }
+
+    return isSuggestedDashboardsValidRuleTypeId(ruleTypeId)
+      ? getRuleQueryIndexMap[ruleTypeId](ruleParameters)
+      : null;
   }
 
   getRuleTypeId(): string | undefined {
