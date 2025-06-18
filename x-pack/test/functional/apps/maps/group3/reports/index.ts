@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard reporting: creates a map report', () => {
     // helper function to check the difference between the new image and the baseline
     const measurePngDifference = async (fileName: string) => {
-      const url = await reporting.getReportURL(60000);
+      const url = await reporting.getReportURL();
       const reportData = await reporting.getRawReportData(url ?? '');
 
       const sessionReportPath = await reporting.writeSessionReport(

@@ -98,24 +98,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.info(`Indexed ${res.items.length} test data docs into ${index}.`);
   };
 
-  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
+  const getReport = async () => {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await exports.clickExportTopNavButton();
-    await reporting.clickGenerateReportButton();
-
-    const url = await reporting.getReportURL(timeout);
-    const res = await reporting.getResponse(url ?? '');
+    const url = await getReportPostUrl();
+    const res = await reporting.getResponse(url ?? '', 'post');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+    await exports.closeExportFlyout();
     return res;
   };
 
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
     const clipboardValue = decodeURIComponent(await browser.getClipboardValue());
@@ -241,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
+        const { text: csvFile } = await getReport();
         expect(csvFile.length).to.be(4845684);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();

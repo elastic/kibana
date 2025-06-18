@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await reporting.selectExportItem('PDF');
       await reporting.clickGenerateReportButton();
       await lens.closeExportFlyout();
-      const url = await reporting.getReportURL(60000);
+      const url = await reporting.getReportURL();
       expect(url).to.be.ok();
     });
 
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await lens.clickPopoverItem(type);
           await reporting.clickGenerateReportButton();
 
-          const url = await reporting.getReportURL(60000);
+          const url = await reporting.getReportURL();
 
           expect(url).to.be.ok();
           if (await testSubjects.exists('toastCloseButton')) {
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it(`should produce a valid URL for reporting`, async () => {
           await lens.clickPopoverItem(type);
           await reporting.clickGenerateReportButton();
-          await reporting.getReportURL(60000);
+          await reporting.getReportURL();
           if (await testSubjects.exists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
           }
