@@ -76,7 +76,7 @@ describe('NewChat', () => {
 
     const newChatButton = screen.getByTestId('newChat');
 
-    expect(newChatButton.querySelector('[data-euiicon-iconType="question"]')).toBeInTheDocument();
+    expect(newChatButton.querySelector('[data-euiicon-type="question"]')).toBeInTheDocument();
   });
 
   it('does NOT render an icon when iconType is null', () => {
