@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { AuthorizeObject } from '@kbn/core/packages/saved-objects/server/src/extensions/security';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { CheckSavedObjectsPrivileges } from '@kbn/security-plugin-types-server';
 
@@ -30,40 +30,41 @@ export class AccessControlService {
     this.checkPrivilegesFunc = checkPrivilegesFunc;
   }
 
-  async canModifyAccess(type: string, object: AuthorizeObject): Promise<boolean> {
+  async canModifyAccess({
+    type,
+    object,
+  }: {
+    type: string;
+    object?: AuthorizeObject | null;
+  }): Promise<boolean> {
     // check if type supports access control
     const typeSupportsAccessControl = (await this.getTypeRegistryFunc())?.supportsAccessControl(
       type
     );
-    if (!typeSupportsAccessControl) {
-      return true; // No access control restrictions for this type
-    }
-
-    // Check if object has access control metadata && if access mode is read only
     const accessControl = object?.accessControl;
-    if (accessControl?.accessMode !== 'read_only') {
+    const currentUser = this.getCurrentUserFunc();
+    if (!typeSupportsAccessControl || !accessControl || !currentUser) {
       return true;
     }
 
-    const currentUser = this.getCurrentUserFunc();
-    if (!currentUser) {
-      return false;
+    if (accessControl.accessMode !== 'read_only') {
+      return true;
     }
 
     // Check if user is owner - allow if owner
-    if (accessControl?.owner === currentUser.username) {
+    if (accessControl.owner === currentUser.username) {
       return true;
     }
 
     // Check for the specific privilege
-    const { hasAllRequested, privileges } = await this.checkPrivilegesFunc(
+    const { hasAllRequested } = await this.checkPrivilegesFunc(
       'saved_object/dashboard:manageOwnership',
       []
     );
-    console.log({ hasAllRequested, privileges });
+    if (hasAllRequested) {
+      return true;
+    }
 
-    // Check if user has the specific privilege needed to manage ownership
-    // Look through kibana privileges to find our specific privilege
     return false;
   }
 }

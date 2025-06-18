@@ -69,7 +69,7 @@ export interface AuthorizeObject {
   id: string;
   /** The name of the object */
   name?: string;
-
+  /** Access control information for the object */
   accessControl?: SavedObjectAccessControl;
 }
 
