@@ -82,9 +82,6 @@ export const simulationMachine = setup({
     storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
       previewColumnsOrder: params.columns,
     })),
-    deriveSamplingCondition: assign(({ context }) => ({
-      samplingCondition: composeSamplingCondition(context.processors),
-    })),
     deriveDetectedSchemaFields: assign(({ context }) => ({
       detectedSchemaFields: context.simulation
         ? getSchemaFieldsFromSimulation(
@@ -107,7 +104,6 @@ export const simulationMachine = setup({
       explicitlyDisabledPreviewColumns: [],
       previewColumnsOrder: [],
       simulation: undefined,
-      detectedSchemaFields: [],
       previewDocsFilter: 'outcome_filter_all',
     }),
     resetProcessors: assign({ processors: [] }),

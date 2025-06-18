@@ -16,10 +16,9 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
