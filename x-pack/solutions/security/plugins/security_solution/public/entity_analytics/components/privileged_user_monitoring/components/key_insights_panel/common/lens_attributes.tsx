@@ -30,14 +30,11 @@ export const createKeyInsightsPanelLensAttributes = ({
       metricAccessor: 'count',
     },
     query: {
-      query: '',
-      language: 'kuery',
+      query: esqlQuery,
+      language: 'esql',
     },
     filters: [],
     datasourceStates: {
-      formBased: {
-        layers: {},
-      },
       textBased: {
         layers: {
           layer1: {
@@ -58,7 +55,6 @@ export const createKeyInsightsPanelLensAttributes = ({
                 },
               },
             ],
-            columnOrder: ['count'],
             query: {
               esql: esqlQuery,
             },
@@ -71,18 +67,8 @@ export const createKeyInsightsPanelLensAttributes = ({
         id: 'ml-anomalies-dataview',
         title: '.ml-anomalies-*',
         timeFieldName: '@timestamp',
-        fields: {},
-        allowNoIndex: false,
       },
     },
   },
-  references: dataViewId
-    ? [
-        {
-          id: dataViewId,
-          name: 'textBasedDataView',
-          type: 'index-pattern',
-        },
-      ]
-    : [],
+  references: [],
 });

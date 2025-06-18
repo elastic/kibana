@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
+import { VisualizationContextMenuActions } from '../../../../../../common/components/visualization_actions/types';
 import { getAnomaliesDetectedEsqlQuery } from './esql_query';
 
 interface Props {
@@ -49,6 +50,12 @@ export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
           applyPageAndTabsFilters={false}
           esql={getAnomaliesDetectedEsqlQuery('default')}
           lensAttributes={anomaliesDetectedLensAttributes}
+          withActions={[
+            VisualizationContextMenuActions.inspect,
+            VisualizationContextMenuActions.addToNewCase,
+            VisualizationContextMenuActions.addToExistingCase,
+            VisualizationContextMenuActions.saveToLibrary,
+          ]}
           id="privileged-user-monitoring-anomalies-detected"
           timerange={timerange}
           width="auto"
