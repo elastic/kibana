@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 import { StickyProperties } from '.';
-import { shallow } from 'enzyme';
 import { USER_ID, URL_FULL } from '../../../../common/es_fields/apm';
 import { mockMoment } from '../../../utils/test_helpers';
+import { renderWithTheme } from '../../../utils/test_helpers';
 
 describe('StickyProperties', () => {
-  beforeEach(mockMoment);
+  beforeEach(() => {
+    mockMoment();
+  });
 
-  it('should render entire component', () => {
+  it('should render properties with different types of values', () => {
     const stickyProperties = [
       {
         fieldName: URL_FULL,
@@ -39,43 +42,45 @@ describe('StickyProperties', () => {
       },
     ];
 
-    const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />);
+    renderWithTheme(<StickyProperties stickyProperties={stickyProperties} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('URL')).toBeInTheDocument();
+    expect(screen.getByText('https://www.elastic.co/test')).toBeInTheDocument();
+    expect(screen.getByText('Request method')).toBeInTheDocument();
+    expect(screen.getByText('GET')).toBeInTheDocument();
+    expect(screen.getByText('Handled')).toBeInTheDocument();
+    expect(screen.getByText('true')).toBeInTheDocument();
+    expect(screen.getByText('User ID')).toBeInTheDocument();
+    expect(screen.getByText('1337')).toBeInTheDocument();
   });
 
-  describe('values', () => {
-    it('should render numbers', () => {
-      const stickyProperties = [
-        {
-          label: 'My Number',
-          fieldName: 'myNumber',
-          val: '1337',
-        },
-      ];
+  it('should render numeric values correctly', () => {
+    const stickyProperties = [
+      {
+        label: 'My Number',
+        fieldName: 'myNumber',
+        val: '1337',
+      },
+    ];
 
-      const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />)
-        .find('PropertyValue')
-        .dive()
-        .text();
+    renderWithTheme(<StickyProperties stickyProperties={stickyProperties} />);
 
-      expect(wrapper).toEqual('1337');
-    });
+    expect(screen.getByText('My Number')).toBeInTheDocument();
+    expect(screen.getByText('1337')).toBeInTheDocument();
+  });
 
-    it('should render nested components', () => {
-      const stickyProperties = [
-        {
-          label: 'My Component',
-          fieldName: 'myComponent',
-          val: <h1>My header</h1>,
-        },
-      ];
+  it('should render nested components', () => {
+    const stickyProperties = [
+      {
+        label: 'My Component',
+        fieldName: 'myComponent',
+        val: <h1>My header</h1>,
+      },
+    ];
 
-      const wrapper = shallow(<StickyProperties stickyProperties={stickyProperties} />)
-        .find('PropertyValue')
-        .html();
+    renderWithTheme(<StickyProperties stickyProperties={stickyProperties} />);
 
-      expect(wrapper).toContain(`<h1>My header</h1>`);
-    });
+    expect(screen.getByText('My Component')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My header');
   });
 });
