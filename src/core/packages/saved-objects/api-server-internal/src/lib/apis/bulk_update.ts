@@ -150,10 +150,6 @@ export const performBulkUpdate = async <T>(
     };
   }
 
-  // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
-  // The object namespace string, if defined, will supersede the operation's namespace ID.
-  const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
