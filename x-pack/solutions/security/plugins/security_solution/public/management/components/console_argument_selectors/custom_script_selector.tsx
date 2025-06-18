@@ -74,11 +74,15 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
 
     const { data = [], isLoading: isLoadingScripts } = useGetCustomScripts(agentType);
     const scriptsOptions: SelectableOption[] = useMemo(() => {
-      return data.map((script: CustomScript) => ({
-        label: script.name,
-        description: script.description,
-      }));
-    }, [data]);
+      return data.map((script: CustomScript) => {
+        const isChecked = script.name === value;
+        return {
+          label: script.name,
+          description: script.description,
+          checked: isChecked ? 'on' : undefined,
+        };
+      });
+    }, [data, value]);
 
     // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
     // This is a workaround to ensure the popover is not shown until the input is focused
@@ -127,12 +131,20 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
     }, [state.isPopoverOpen, dispatch]);
 
     const handleScriptSelection = useCallback(
-      (options: EuiSelectableOption[]) => {
-        const selected = options.find((option: EuiSelectableOption) => option.checked === 'on');
-        if (selected) {
+      (newOptions: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
+        if (changedOption.checked === 'on') {
           onChange({
-            value: selected.label,
-            valueText: selected.label,
+            value: changedOption.label,
+            valueText: changedOption.label,
+            store: {
+              ...state,
+              isPopoverOpen: false,
+            },
+          });
+        } else {
+          onChange({
+            value: '',
+            valueText: '',
             store: {
               ...state,
               isPopoverOpen: false,
@@ -173,8 +185,8 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
             renderOption={renderOption}
             singleSelection
             searchProps={{
+              placeholder: valueText || INITIAL_DISPLAY_LABEL,
               autoFocus: true,
-              defaultValue: value,
               onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
                 // Only stop propagation for typing keys, not for navigation keys - otherwise input lose focus
                 if (!['Enter', 'ArrowUp', 'ArrowDown', 'Escape'].includes(event.key)) {
@@ -184,7 +196,7 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
             }}
             listProps={{
               rowHeight: 60,
-              showIcons: false,
+              showIcons: true,
               textWrap: 'truncate',
             }}
           >

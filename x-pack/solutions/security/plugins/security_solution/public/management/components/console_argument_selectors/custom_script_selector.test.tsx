@@ -196,7 +196,7 @@ describe('CustomScriptSelector', () => {
     expect(screen.getByText('Test script 2')).toBeInTheDocument();
   });
 
-  test('displays the selected script name in the search box', async () => {
+  test('shows placeholder text in the search box when no search is performed', async () => {
     const SelectorComponent = CustomScriptSelector('endpoint');
     await renderAndWaitForComponent(
       <SelectorComponent
@@ -208,7 +208,7 @@ describe('CustomScriptSelector', () => {
     );
 
     const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
-    expect(searchbox).toHaveValue('Script 1');
+    expect(searchbox).toHaveAttribute('placeholder', 'Script 1');
   });
 
   test('filters script options as the user types in the search box', async () => {
@@ -224,13 +224,9 @@ describe('CustomScriptSelector', () => {
 
     const searchbox = screen.getByRole('searchbox', { name: 'Filter options' });
 
-    // Verify initial value is set correctly
-    expect(searchbox).toHaveValue('Script 1');
-
     // Change the search text to filter for only "Script 2"
     fireEvent.change(searchbox, { target: { value: 'Script 2' } });
 
-    // Script 1 should no longer be visible, only Script 2
     await waitFor(() => {
       expect(screen.queryByText('Test script 1')).not.toBeInTheDocument();
       expect(screen.getByText('Test script 2')).toBeInTheDocument();
