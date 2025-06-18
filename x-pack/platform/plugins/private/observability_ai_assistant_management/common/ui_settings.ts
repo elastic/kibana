@@ -106,13 +106,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
-        defaultMessage: `List of anonymization rules.
+        defaultMessage: `List of anonymization rules
           <ul>
             <li><strong>type:</strong> "ner" or "regex"</li>
-            <li><strong>entityClass:</strong> (regex type only) eg: email, url, ip</li>
+            <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
             <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
+            <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
-            <li><strong>modelId:</strong> (ner type only) ID of the NER (named entity recognition) model to use</li>
           </ul>`,
         values: {
           ul: (chunks) => `<ul>${chunks}</ul>`,
