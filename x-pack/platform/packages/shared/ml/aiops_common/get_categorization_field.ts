@@ -34,7 +34,7 @@ export function getCategorizationDataViewField(dataView: DataView): {
   }
 
   return {
-    messageField: null,
+    messageField: dataViewFields[0] ?? null,
     dataViewFields,
   };
 }
