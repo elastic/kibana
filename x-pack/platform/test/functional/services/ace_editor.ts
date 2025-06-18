@@ -17,7 +17,7 @@ export function AceEditorProvider({ getService }: FtrProviderContext) {
   const BKSP_KEY = '\uE003';
 
   return new (class AceEditorService {
-    async setValue(testSubjectSelector, value) {
+    async setValue(testSubjectSelector: string, value: string | string[]) {
       await retry.try(async () => {
         const container = await testSubjects.find(testSubjectSelector);
         await container.click();
@@ -30,7 +30,7 @@ export function AceEditorProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    async getValue(testSubjectSelector) {
+    async getValue(testSubjectSelector: string) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const lines = await editor.findAllByClassName('ace_line');
@@ -39,7 +39,7 @@ export function AceEditorProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    async hasParseErrors(testSubjectSelector) {
+    async hasParseErrors(testSubjectSelector: string) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const errors = await editor.findAllByClassName('ace_error');

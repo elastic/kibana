@@ -25,7 +25,7 @@ export function UserMenuProvider({ getService }: FtrProviderContext) {
 
     async logoutLinkExists() {
       if (!(await testSubjects.exists('userMenuButton'))) {
-        return;
+        return false;
       }
 
       await this._ensureMenuOpen();

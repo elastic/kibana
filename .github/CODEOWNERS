@@ -2017,7 +2017,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/plugin_functional/snapshots/baseline/hardening @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
 /src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
-/x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
+# /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/platform/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/space_selector_page.ts @elastic/kibana-security

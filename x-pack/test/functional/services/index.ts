@@ -50,12 +50,12 @@ import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
-import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/funcional/services/ace_editor';
+import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/ace_editor';
 import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
-import { UserMenuProvider } from './user_menu';
+import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
@@ -67,7 +67,6 @@ import { CasesServiceProvider } from './cases';
 import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
-import { SampleDataServiceProvider } from './sample_data';
 import { DataStreamProvider } from './data_stream';
 import { SloUiServiceProvider } from './slo';
 // define the name and providers for services that should be
@@ -112,7 +111,7 @@ export const services = {
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
-  // aceEditor: AceEditorProvider,
+  aceEditor: AceEditorProvider,
   canvasElement: CanvasElementProvider,
   grokDebugger: GrokDebuggerProvider,
   userMenu: UserMenuProvider,
@@ -124,12 +123,10 @@ export const services = {
   reporting: ReportingFunctionalProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
-  // compareImages: CompareImagesProvider,
   actions: ActionsServiceProvider,
   rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
-  sampleData: SampleDataServiceProvider,
   dataStreams: DataStreamProvider,
   slo: kibanaXPackApiIntegrationServices.slo,
   dataViewApi: kibanaXPackApiIntegrationServices.dataViewApi,
