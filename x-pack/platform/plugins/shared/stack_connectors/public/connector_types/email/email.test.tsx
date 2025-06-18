@@ -8,7 +8,7 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getEmailServices } from './email';
+import { emailServices, getEmailServices } from './email';
 import {
   ValidatedEmail,
   InvalidEmailReason,
@@ -17,6 +17,7 @@ import {
 } from '@kbn/actions-plugin/common';
 import { experimentalFeaturesMock } from '../../mocks';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
 
 const CONNECTOR_TYPE_ID = '.email';
 let connectorTypeModel: ConnectorTypeModel;
@@ -72,6 +73,31 @@ describe('getEmailServices', () => {
   test('should not return elastic cloud service if isCloudEnabled is false', () => {
     const services = getEmailServices(false, ['*']);
     expect(services.find((service) => service.value === 'elastic_cloud')).toBeFalsy();
+  });
+
+  test('should return all services if enabledEmailsServices is *', () => {
+    const services = getEmailServices(true, ['*']);
+    expect(services).toEqual(emailServices);
+  });
+
+  test('should return only specified services if enabledEmailsServices is not empty', () => {
+    const services = getEmailServices(true, [
+      serviceParamValueToKbnSettingMap.gmail,
+      serviceParamValueToKbnSettingMap.outlook365,
+    ]);
+
+    expect(services).toEqual([
+      {
+        kbnSettingValue: 'google-mail',
+        text: 'Gmail',
+        value: 'gmail',
+      },
+      {
+        kbnSettingValue: 'microsoft-outlook',
+        text: 'Outlook',
+        value: 'outlook365',
+      },
+    ]);
   });
 });
 

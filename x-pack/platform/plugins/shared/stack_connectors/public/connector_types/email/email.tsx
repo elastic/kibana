@@ -18,7 +18,7 @@ import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
 import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
-const emailServices: Array<EuiSelectOption & { kbnSettingValue: string }> = [
+export const emailServices: Array<EuiSelectOption & { kbnSettingValue: string }> = [
   {
     text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
       defaultMessage: 'Gmail',
@@ -68,7 +68,7 @@ export function getEmailServices(isCloudEnabled: boolean, enabledEmailsServices:
     ? emailServices
     : emailServices.filter((service) => service.value !== 'elastic_cloud');
 
-  if (enabledEmailsServices.length === 0 || enabledEmailsServices.includes('*')) {
+  if (enabledEmailsServices.includes('*')) {
     return allEmailServices;
   }
 
