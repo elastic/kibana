@@ -94,7 +94,7 @@ describe('#resolve()', () => {
         "type": "ignore",
       }
     `);
-    
+
     expect(resolver.resolve('@elastic/eui/src/components/foo', FIXTURES_DIR))
       .toMatchInlineSnapshot(`
       Object {
