@@ -34,26 +34,28 @@ export const ConnectToElasticsearch = () => {
   const { data } = useGetApiKeys();
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup gutterSize="xl">
+      <EuiFlexItem grow={3}>
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiTitle size="m">
-                  <span>
+                  <h2>
                     {i18n.translate('xpack.searchHomepage.connectToElasticsearch.title', {
                       defaultMessage: 'Connect to Elasticsearch',
                     })}
-                  </span>
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  {i18n.translate('xpack.searchHomepage.connectToElasticsearch.description', {
-                    defaultMessage:
-                      'Set up your connection to Elasticsearch to start searching and analyzing your data.',
-                  })}
+              <EuiFlexItem>
+                <EuiText grow={false} color="subdued">
+                  <p>
+                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.description', {
+                      defaultMessage:
+                        'Set up your connection to Elasticsearch to start searching and analyzing your data.',
+                    })}
+                  </p>
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -160,7 +162,7 @@ export const ConnectToElasticsearch = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <ConnectToElasticsearchSidePanel />
       </EuiFlexItem>
     </EuiFlexGroup>

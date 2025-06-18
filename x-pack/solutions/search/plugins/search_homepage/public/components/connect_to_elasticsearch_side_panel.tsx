@@ -5,16 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import {
-  EuiSplitPanel,
-  EuiCard,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
@@ -26,9 +17,11 @@ export const ConnectToElasticsearchSidePanel = () => {
   const { http } = useKibana().services;
 
   return (
-    <EuiSplitPanel.Outer hasShadow={false} color="subdued">
-      <EuiSplitPanel.Inner>
+    <EuiPanel color="subdued">
+      <EuiFlexGroup gutterSize="m" direction="column">
         <EuiCard
+          display="plain"
+          hasBorder
           textAlign="left"
           titleSize="xs"
           title={i18n.translate('xpack.searchHomepage.connectToElasticsearch.uploadFileTitle', {
@@ -52,9 +45,9 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner>
         <EuiCard
+          display="plain"
+          hasBorder
           textAlign="left"
           titleSize="xs"
           title={
@@ -77,30 +70,24 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <span>
-                {i18n.translate('xpack.searchHomepage.connectToElasticsearch.needAdviceTitle', {
-                  defaultMessage: 'Need help with Serverless? Engage a Customer Engineer.',
-                })}
-              </span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription',
-                {
-                  defaultMessage:
-                    'Get in touch with us for help getting started with best practices on data ingest, performance, and/or cost efficiency in your Serverless projects!',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <EuiCard
+          display="transparent"
+          textAlign="left"
+          titleSize="xs"
+          title={
+            <FormattedMessage
+              id="xpack.searchHomepage.connectToElasticsearch.needAdviceTitle"
+              defaultMessage="Need help with Serverless? Engage a Customer Engineer."
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription"
+              defaultMessage="Get in touch with us for help getting started with best practices on data ingest, per
+formance, and/or cost efficiency in your Serverless projects!"
+            />
+          }
+          footer={
             <EuiLink
               href={docLinks.customerEngineerRequestForm}
               data-test-subj="customerEngineerRequestFormLink"
@@ -112,9 +99,9 @@ export const ConnectToElasticsearchSidePanel = () => {
                 }
               )}
             </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+          }
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
