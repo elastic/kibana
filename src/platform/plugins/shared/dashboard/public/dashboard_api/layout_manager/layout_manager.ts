@@ -29,7 +29,6 @@ import {
   apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
-  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 

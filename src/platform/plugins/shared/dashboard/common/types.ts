@@ -16,8 +16,6 @@ import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type {
   DashboardAttributes,
   DashboardOptions,
-  DashboardPanel,
-  DashboardSection,
 } from '../server/content_management';
 import { ControlGroupSerializedState } from '@kbn/controls-plugin/common';
 
@@ -62,10 +60,8 @@ export interface DashboardState extends DashboardSettings {
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'sections'> & {
+  DashboardState & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
-
-    panels: Array<DashboardPanel | DashboardSection>;
 
     references?: DashboardState['references'] & SerializableRecord;
 
