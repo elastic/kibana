@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
