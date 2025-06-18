@@ -6,10 +6,6 @@
  */
 
 import type {
-  RuleCreateProps,
-  RuleResponse,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
-import type {
   AgentPolicy,
   CreatePackagePolicyResponse,
   PackagePolicy,
@@ -23,6 +19,64 @@ import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
 import { ServerlessRoleName } from '../support/roles';
+
+
+// Minimal type definitions to avoid direct import from security-solution
+interface RuleCreateProps {
+  type: string;
+  index: string[];
+  filters: Array<{
+    meta: {
+      type: string;
+      disabled: boolean;
+      negate: boolean;
+      alias: null | string;
+      key: string;
+      value: string;
+    };
+    query: Record<string, unknown>;
+    $state: {
+      store: string;
+    };
+  }>;
+  language: string;
+  query: string;
+  author: string[];
+  false_positives: string[];
+  references: string[];
+  risk_score: number;
+  risk_score_mapping: unknown[];
+  severity: string;
+  severity_mapping: unknown[];
+  threat: unknown[];
+  name: string;
+  description: string;
+  tags: string[];
+  license: string;
+  interval: string;
+  from: string;
+  to: string;
+  meta: {
+    from: string;
+    kibana_siem_app_url: string;
+  };
+  actions: unknown[];
+  enabled: boolean;
+  throttle: string;
+  note?: string;
+  response_actions?: Array<{
+    params: {
+      query: string;
+      ecs_mapping?: Record<string, unknown>;
+    };
+    action_type_id: string;
+  }>;
+}
+
+interface RuleResponse extends RuleCreateProps {
+  id: string;
+  [key: string]: unknown;
+}
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
@@ -240,26 +294,26 @@ export const loadRule = (includeResponseActions = false) => {
       note: '!{osquery{"query":"SELECT * FROM os_version where name=\'{{host.os.name}}\';","label":"Get processes","ecs_mapping":{"host.os.platform":{"field":"platform"}}}}\n\n!{osquery{"query":"select * from users;","label":"Get users"}}',
       ...(includeResponseActions
         ? {
-            response_actions: [
-              {
-                params: {
-                  query: "SELECT * FROM os_version where name='{{host.os.name}}';",
-                  ecs_mapping: {
-                    'host.os.platform': {
-                      field: 'platform',
-                    },
+          response_actions: [
+            {
+              params: {
+                query: "SELECT * FROM os_version where name='{{host.os.name}}';",
+                ecs_mapping: {
+                  'host.os.platform': {
+                    field: 'platform',
                   },
                 },
-                action_type_id: '.osquery',
               },
-              {
-                params: {
-                  query: 'select * from users;',
-                },
-                action_type_id: '.osquery',
+              action_type_id: '.osquery',
+            },
+            {
+              params: {
+                query: 'select * from users;',
               },
-            ],
-          }
+              action_type_id: '.osquery',
+            },
+          ],
+        }
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
