@@ -216,12 +216,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: `from kibana-alerting-test-data | drop ${columnsToDrop} | limit 0`,
+        esqlQuery: `from .kibana-alerting-test-data | drop ${columnsToDrop} | limit 0`,
         groupBy: 'row',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: `from kibana-alerting-test-data | drop ${columnsToDrop}`,
+        esqlQuery: `from .kibana-alerting-test-data | drop ${columnsToDrop}`,
         groupBy: 'row',
       });
 
