@@ -190,110 +190,114 @@ const deleteLatestMisconfigurationIndex = () => {
       'ELASTICSEARCH_URL'
     )}/${CDR_MOCK_THIRD_PARTY_MISCONFIGURATION_LATEST_INDEX}`,
   });
-  return;
 };
 
-describe('Alert Host details expandable flyout', { tags: ['@ess', '@serverless'] }, () => {
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    login();
-    createRule(getNewRule());
-    visit(ALERTS_URL);
-    waitForAlertsToPopulate();
-  });
-
-  context('Host name - Has misconfiguration findings', () => {
+// slip on serverless uppon this ticket is resolved: https://github.com/elastic/security-team/issues/12819
+describe(
+  'Alert Host details expandable flyout',
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  () => {
     beforeEach(() => {
-      putIndexMapping();
-      createMockMisconfigurationFinding(true, 'host.name');
-      cy.reload();
-      expandFirstAlertHostFlyout();
+      deleteAlertsAndRules();
+      login();
+      createRule(getNewRule());
+      visit(ALERTS_URL);
+      waitForAlertsToPopulate();
     });
 
-    afterEach(() => {
-      /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
-      deleteLatestMisconfigurationIndex();
-    });
-
-    it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-      cy.log('check if Misconfiguration preview title shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-    });
-
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      clickMisconfigurationTitle();
-      cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
-      cy.get(CSP_INSIGHT_TABLE).should('be.visible');
-    });
-  });
-
-  context(
-    'Host name - Has misconfiguration findings but host name is not the same as alert host name',
-    () => {
+    context('Host name - Has misconfiguration findings', () => {
       beforeEach(() => {
         putIndexMapping();
-        createMockMisconfigurationFinding(false, 'host.name');
+        createMockMisconfigurationFinding(true, 'host.name');
         cy.reload();
         expandFirstAlertHostFlyout();
       });
 
       afterEach(() => {
+        /* Deleting data stream even though we don't create it because data stream is automatically created when Cloud security API is used  */
         deleteLatestMisconfigurationIndex();
       });
 
       it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-        expandFirstAlertHostFlyout();
-
-        cy.log('check if Misconfiguration preview title is not shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        cy.log('check if Misconfiguration preview title shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
       });
-    }
-  );
 
-  context('User name - Has misconfiguration findings', () => {
-    beforeEach(() => {
-      putIndexMapping();
-      createMockMisconfigurationFinding(true, 'user.name');
-      cy.reload();
-      expandFirstAlertUserFlyout();
+      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+        clickMisconfigurationTitle();
+        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TABLE).should('be.visible');
+      });
     });
 
-    afterEach(() => {
-      deleteLatestMisconfigurationIndex();
-    });
+    context(
+      'Host name - Has misconfiguration findings but host name is not the same as alert host name',
+      () => {
+        beforeEach(() => {
+          putIndexMapping();
+          createMockMisconfigurationFinding(false, 'host.name');
+          cy.reload();
+          expandFirstAlertHostFlyout();
+        });
 
-    it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
-      cy.log('check if Misconfiguration preview title shown');
-      cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
-    });
+        afterEach(() => {
+          deleteLatestMisconfigurationIndex();
+        });
 
-    it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
-      clickMisconfigurationTitle();
-      cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
-      cy.get(CSP_INSIGHT_TABLE).should('be.visible');
-    });
-  });
+        it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+          expandFirstAlertHostFlyout();
 
-  context(
-    'User name - Has misconfiguration findings but host name is not the same as alert host name',
-    () => {
+          cy.log('check if Misconfiguration preview title is not shown');
+          cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        });
+      }
+    );
+
+    context('User name - Has misconfiguration findings', () => {
       beforeEach(() => {
         putIndexMapping();
-        createMockMisconfigurationFinding(false, 'user.name');
+        createMockMisconfigurationFinding(true, 'user.name');
         cy.reload();
-        expandFirstAlertHostFlyout();
-      });
-
-      afterEach(() => {
-        deleteLatestMisconfigurationIndex();
-      });
-
-      it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
         expandFirstAlertUserFlyout();
-
-        cy.log('check if Misconfiguration preview title is not shown');
-        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
       });
-    }
-  );
-});
+
+      afterEach(() => {
+        deleteLatestMisconfigurationIndex();
+      });
+
+      it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+        cy.log('check if Misconfiguration preview title shown');
+        cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('be.visible');
+      });
+
+      it('should display insight tabs and findings table upon clicking on misconfiguration accordion', () => {
+        clickMisconfigurationTitle();
+        cy.get(CSP_INSIGHT_TAB_TITLE).should('be.visible');
+        cy.get(CSP_INSIGHT_TABLE).should('be.visible');
+      });
+    });
+
+    context(
+      'User name - Has misconfiguration findings but host name is not the same as alert host name',
+      () => {
+        beforeEach(() => {
+          putIndexMapping();
+          createMockMisconfigurationFinding(false, 'user.name');
+          cy.reload();
+          expandFirstAlertHostFlyout();
+        });
+
+        afterEach(() => {
+          deleteLatestMisconfigurationIndex();
+        });
+
+        it('should display Misconfiguration preview under Insights Entities when it has Misconfiguration Findings', () => {
+          expandFirstAlertUserFlyout();
+
+          cy.log('check if Misconfiguration preview title is not shown');
+          cy.get(CSP_INSIGHT_MISCONFIGURATION_TITLE).should('not.exist');
+        });
+      }
+    );
+  }
+);
