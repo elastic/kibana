@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema, type TypeOf } from '@kbn/config-schema';
+
 const TestFileFtrConfigSchema = schema.object(
   {
     license: schema.maybe(schema.string()),

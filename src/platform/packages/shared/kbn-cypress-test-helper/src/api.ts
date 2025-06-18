@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const API_AUTH = Object.freeze({
+  user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
+});
+
 export const COMMON_API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress',
   'x-elastic-internal-origin': 'security-solution',

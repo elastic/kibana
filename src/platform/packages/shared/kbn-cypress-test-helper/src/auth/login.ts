@@ -55,7 +55,7 @@ export const login: CyLoginTask = (
     // MKI QA Cloud Serverless
     return cy
       .task('getSessionCookie', user)
-      .then((result) => {
+      .then((result: { username: string; password: string; cookie: string }) => {
         username = result.username;
         password = result.password;
         // Set cookie asynchronously
@@ -83,12 +83,14 @@ export const login: CyLoginTask = (
         return { username, password };
       });
   } else if (user) {
-    return cy.task('loadUserAndRole', { name: user }).then((loadedUser) => {
-      username = loadedUser.username;
-      password = loadedUser.password;
+    return cy
+      .task('loadUserAndRole', { name: user })
+      .then((loadedUser: { username: string; password: string }) => {
+        username = loadedUser.username;
+        password = loadedUser.password;
 
-      return sendApiLoginRequest(username, password);
-    });
+        return sendApiLoginRequest(username, password);
+      });
   } else {
     return sendApiLoginRequest(username, password);
   }
@@ -99,9 +101,11 @@ login.with = (username: string, password: string): ReturnType<typeof sendApiLogi
 };
 
 login.withCustomRole = (role: Role): ReturnType<typeof sendApiLoginRequest> => {
-  return cy.task('createUserAndRole', { role }).then(({ username, password }) => {
-    return sendApiLoginRequest(username, password);
-  });
+  return cy
+    .task('createUserAndRole', { role })
+    .then(({ username, password }: { username: string; password: string }) => {
+      return sendApiLoginRequest(username, password);
+    });
 };
 
 /**

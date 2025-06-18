@@ -14,10 +14,30 @@ const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoadin
 const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 const EMPTY_ALERT_TABLE = '[data-test-subj="alertsTableEmptyState"]';
 const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
+const DETECTION_PAGE_FILTER_GROUP_WRAPPER = '.filter-group__wrapper';
+const DETECTION_PAGE_FILTERS_LOADING = '.securityPageWrapper .controlFrame--controlLoading';
+const DETECTION_PAGE_FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
+const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
 
 const refreshPage = () => {
   cy.get(REFRESH_BUTTON).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+};
+
+const waitForPageFilters = () => {
+  cy.log('Waiting for Page Filters');
+  cy.url().then((urlString) => {
+    const url = new URL(urlString);
+    if (url.pathname.endsWith(ALERTS_URL)) {
+      // since these are only valid on the alert page
+      cy.get(DETECTION_PAGE_FILTER_GROUP_WRAPPER).should('exist');
+      cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
+      cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
+      cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
+    } else {
+      cy.log('Skipping Page Filters Wait');
+    }
+  });
 };
 
 const waitForAlerts = () => {
