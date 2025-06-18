@@ -26,8 +26,8 @@ describe('Clone panel placement strategies', () => {
       placeBesideId: '1',
     });
     expect(newPanelPlacement).toEqual({
-      x: 0, // placed right beside the other panel
-      y: 6,
+      x: 6, // placed right beside the other panel
+      y: 0,
       w: 6,
       h: 6,
     });
@@ -43,8 +43,8 @@ describe('Clone panel placement strategies', () => {
       placeBesideId: '1',
     });
     expect(newPanelPlacement).toEqual({
-      x: 6,
-      y: 0, // instead of being placed beside the cloned panel, it is placed right below
+      x: 0,
+      y: 6, // instead of being placed beside the cloned panel, it is placed right below
       w: 6,
       h: 6,
     });
