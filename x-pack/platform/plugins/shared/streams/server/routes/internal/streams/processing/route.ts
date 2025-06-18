@@ -12,11 +12,7 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import {
-  STREAMS_API_PRIVILEGES,
-  STREAMS_TIERED_AI_FEATURE,
-  STREAMS_TIERED_ML_FEATURE,
-} from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
