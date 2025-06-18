@@ -2011,14 +2011,6 @@
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/platform/plugins/shared/dashboard/common/bwc/types.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
