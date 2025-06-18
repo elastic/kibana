@@ -27,8 +27,6 @@ import {
   EuiTextArea,
   EuiSwitch,
   EuiFlexItem,
-  EuiListGroupItem,
-  EuiListGroup,
   EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,7 +74,6 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
     enrollment_token: '',
     settings: {},
   });
-
   useEffect(() => {
     const validateForm = () => {
       if (formContent.uri && formContent.enrollment_token && validClusterURL) {
@@ -167,7 +164,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
           {protectedAndFleetAgents.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiPanel color="warning">
+              <EuiPanel color="warning" data-test-subj="migrateAgentFlyoutAlertPanel">
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem>
                     <EuiText>
@@ -190,17 +187,17 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                     <EuiButtonEmpty onClick={() => {}}>
                       <FormattedMessage
                         id="xpack.fleet.agentList.migrateAgentFlyout.warningAccordion"
-                        defaultMessage="View Agents"
+                        defaultMessage="View Hosts"
                       />
                     </EuiButtonEmpty>
                   }
                   initialIsOpen={false}
                 >
-                  <EuiListGroup>
+                  <ul>
                     {protectedAndFleetAgents.map((agent) => (
-                      <EuiListGroupItem key={agent.id} label={agent.id} />
+                      <li key={agent.id}>{agent.local_metadata?.host?.hostname}</li>
                     ))}
-                  </EuiListGroup>
+                  </ul>
                 </EuiAccordion>
               </EuiPanel>
             </>
@@ -573,22 +570,32 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                         {agents.length === 1 && (
                           <EuiFlexItem>
                             <EuiSwitch
+                              data-test-subj="migrateAgentFlyoutReplaceTokenButton"
                               label={
                                 <FormattedMessage
                                   id="xpack.fleet.agentList.migrateAgentFlyout.replaceTokenLabel"
                                   defaultMessage="Replace Token"
                                 />
                               }
-                              checked={formContent.settings?.replace_token ?? false}
-                              onChange={(e) =>
-                                setFormContent({
-                                  ...formContent,
-                                  settings: {
-                                    ...formContent.settings,
-                                    replace_token: e.target.checked,
-                                  },
-                                })
+                              checked={
+                                agents.length === 1
+                                  ? (
+                                      formContent.settings as MigrateSingleAgentRequest['body']['settings']
+                                    )?.replace_token ?? false
+                                  : false
                               }
+                              onChange={(e) => {
+                                // Only allow setting replace_token when migrating a single agent
+                                if ('id' in formContent) {
+                                  setFormContent({
+                                    ...formContent,
+                                    settings: {
+                                      ...formContent.settings,
+                                      replace_token: e.target.checked,
+                                    },
+                                  });
+                                }
+                              }}
                             />
                           </EuiFlexItem>
                         )}

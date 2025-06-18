@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
@@ -69,7 +71,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const licenseService = useLicense();
   const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
-
+  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -124,24 +126,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
-      },
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-          data-test-subj="agentBulkActionsBulkMigrate"
-          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="cluster" size="m" />,
-      disabled: !authz.fleet.allAgents,
-      onClick: (event: any) => {
-        setIsMenuOpen(false);
-        onBulkMigrateClicked(selectedAgents);
       },
     },
     {
@@ -268,7 +252,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       },
     },
   ];
-
+  if (agentMigrationsEnabled) {
+    menuItems.push({
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+          data-test-subj="agentBulkActionsBulkMigrate"
+          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="cluster" size="m" />,
+      disabled: !authz.fleet.allAgents || !agentMigrationsEnabled,
+      onClick: (event: any) => {
+        setIsMenuOpen(false);
+        onBulkMigrateClicked(selectedAgents);
+      },
+    });
+  }
   const panels = [
     {
       id: 0,
