@@ -23,6 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { getAutoDetectCommand } from './get_auto_detect_command';
 import { DASHBOARDS, useOnboardingFlow } from './use_onboarding_flow';
 import { ProgressIndicator } from '../shared/progress_indicator';
@@ -35,6 +36,7 @@ import { FeedbackButtons } from '../shared/feedback_buttons';
 import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { SupportedIntegrationsList } from './supported_integrations_list';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
+import { usePricingFeature } from '../shared/use_pricing_feature';
 
 export const AutoDetectPanel: FunctionComponent = () => {
   useFlowBreadcrumb({
@@ -50,6 +52,10 @@ export const AutoDetectPanel: FunctionComponent = () => {
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingContextValue>();
+
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   useEffect(() => {
     if (data) {
@@ -89,12 +95,19 @@ export const AutoDetectPanel: FunctionComponent = () => {
               <>
                 <EuiText>
                   <p>
-                    {i18n.translate(
-                      'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
-                      {
-                        defaultMessage: "We'll scan your host for logs and metrics, including:",
-                      }
-                    )}
+                    {metricsOnboardingEnabled
+                      ? i18n.translate(
+                          'xpack.observability_onboarding.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs and metrics, including:",
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.observability_onboarding.logsEssential.autoDetectPanel.p.wellScanYourHostLabel',
+                          {
+                            defaultMessage: "We'll scan your host for logs, including:",
+                          }
+                        )}
                   </p>
                 </EuiText>
                 <EuiSpacer size="s" />
