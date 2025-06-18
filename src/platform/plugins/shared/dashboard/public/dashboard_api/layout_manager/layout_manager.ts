@@ -309,14 +309,12 @@ export function initializeLayoutManager(
     });
   };
 
-  const serializeCurrentLayout = () => serializeLayout(layout$.value, currentChildState);
-
   return {
     internalApi: {
       getSerializedStateForPanel: (uuid: string) => currentChildState[uuid],
       layout$,
       reset: resetLayout,
-      serializeLayout: serializeCurrentLayout,
+      serializeLayout: () => serializeLayout(layout$.value, currentChildState),
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardState['panels'] }> => {
@@ -335,14 +333,12 @@ export function initializeLayoutManager(
                 currentLayout
               )
             ) {
-              if (shouldLogStateDiff()) {
-                logStateDiff(
-                  'dashboard layout',
-                  lastSavedLayout,
-                  currentLayout
-                );
-              }
-              return currentLayout;
+              logStateDiff(
+                'dashboard layout',
+                lastSavedLayout,
+                currentLayout
+              );
+              return { panels: serializeLayout(currentLayout, currentChildState).panels };
             }
             return {};
           })
