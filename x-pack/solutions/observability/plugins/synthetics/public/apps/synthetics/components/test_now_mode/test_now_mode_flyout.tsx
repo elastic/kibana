@@ -17,7 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
-import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ServiceLocationErrors, SyntheticsMonitor } from '../../../../../common/runtime_types';
@@ -65,7 +65,7 @@ export function TestNowModeFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <KibanaErrorBoundary>
+        <KibanaSectionErrorBoundary sectionName="xpack.synthetics.monitorManagement.testNowFlyout.body">
           {isPushing && (
             <EuiCallOut color="primary">
               {PushingLabel} <EuiLoadingSpinner />
@@ -82,7 +82,7 @@ export function TestNowModeFlyout({
           ) : (
             !isPushing && <LoadingState />
           )}
-        </KibanaErrorBoundary>
+        </KibanaSectionErrorBoundary>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
@@ -97,7 +97,7 @@ export function TestNowModeFlyout({
     </EuiFlyout>
   );
 
-  return <>{(testRun || inProgress) && <KibanaErrorBoundary>{flyout}</KibanaErrorBoundary>}</>;
+  return testRun || inProgress ? flyout : null;
 }
 
 const TEST_RESULT = i18n.translate('xpack.synthetics.monitorManagement.testResult', {
