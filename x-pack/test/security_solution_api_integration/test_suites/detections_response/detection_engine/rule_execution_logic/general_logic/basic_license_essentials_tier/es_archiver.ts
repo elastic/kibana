@@ -24,6 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
         );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       });
 
       describe('assertions on inserted documents', () => {
