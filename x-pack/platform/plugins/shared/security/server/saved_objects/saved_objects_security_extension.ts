@@ -311,7 +311,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly errors: SavedObjectsClient['errors'];
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   private readonly getCurrentUserFunc: () => AuthenticatedUser | null;
-  private readonly getTypeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
   private readonly actionMap: Map<
     SecurityAction,
     { authzAction?: string; auditAction?: AuditAction }
@@ -331,7 +330,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.getTypeRegistryFunc = getTypeRegistry;
     this.accessControlService = new AccessControlService({
       getCurrentUser,
       getTypeRegistry,
@@ -794,17 +792,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
-  private async typeSupportsAccessControl(type: string): Promise<boolean> {
-    return (await this.getTypeRegistryFunc()).supportsAccessControl(type);
-  }
-
   private async internalAuthorizeUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
   ): Promise<CheckAuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
-    // const accessControlService = new AccessControlService(getCurrentUser);
 
     const action =
       options?.forceBulkAction || objects.length > 1
@@ -817,6 +810,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
 
     for (const obj of objects) {
+      if (!this.accessControlService.canModifyAccess({ type: obj.type, object: obj })) {
+        continue; // Skip objects that cannot be modified
+      }
       const {
         type,
         objectNamespace: objectNamespace,
