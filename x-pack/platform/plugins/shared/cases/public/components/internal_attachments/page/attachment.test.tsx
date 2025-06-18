@@ -29,7 +29,7 @@ describe('getPageAttachmentType', () => {
         imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
       },
       renderComponentId: 'PageAttachmentChildren',
-      screenContext: 'This is a sample screen context for testing purposes.',
+      screenContext: null,
     },
     attachmentId: 'test',
     caseData: { title: 'Test Case', id: 'case-id' },

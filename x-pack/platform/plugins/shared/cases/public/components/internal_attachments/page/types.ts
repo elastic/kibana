@@ -33,5 +33,5 @@ export interface PageAttachmentPersistedState extends PersistableStateAttachment
    * Optional screen context for the page. A plain text description that
    * can be provided to an LLM to generate a summary or perform analysis
    */
-  screenContext: string | null;
+  screenContext: Array<{ screenDescription: string }> | null;
 }

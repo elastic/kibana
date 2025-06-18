@@ -19,7 +19,7 @@ describe('GoToAction', () => {
         actionLabel: 'Go to Discover',
         iconType: 'discoverApp',
       },
-      screenContext: 'This is a sample screen context for testing purposes.',
+      screenContext: null,
       snapshot: {
         imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
       },
@@ -44,7 +44,7 @@ describe('GoToAction', () => {
       },
       iconType: 'discoverApp',
       type: 'discoverSession',
-      screenContext: 'This is a sample screen context for testing purposes.',
+      screenContext: null,
       snapshot: {
         imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA...',
       },

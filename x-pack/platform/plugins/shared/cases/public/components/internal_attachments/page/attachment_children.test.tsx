@@ -19,7 +19,7 @@ describe('PageAttachmentChildren', () => {
       label: 'Sample Dashboard',
       iconType: 'link',
     },
-    screenContext: 'This is a sample screen context for testing purposes.',
+    screenContext: null,
   };
 
   it('renders the link with correct label and href', () => {
