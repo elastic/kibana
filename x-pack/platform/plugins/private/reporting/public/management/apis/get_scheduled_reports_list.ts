@@ -7,7 +7,7 @@
 
 import { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { type ListScheduledReportApiJSON } from '../../../server/types';
+import { type ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 
 export interface Pagination {
   index: number;
@@ -26,7 +26,7 @@ export const getScheduledReportsList = async ({
   page: number;
   size: number;
   total: number;
-  data: ListScheduledReportApiJSON[];
+  data: ScheduledReportApiJSON[];
 }> => {
   const query: HttpFetchQuery = { page: index, size };
 
@@ -34,7 +34,7 @@ export const getScheduledReportsList = async ({
     page: number;
     per_page: number;
     total: number;
-    data: ListScheduledReportApiJSON[];
+    data: ScheduledReportApiJSON[];
   }>(INTERNAL_ROUTES.SCHEDULED.LIST, {
     query,
   });
