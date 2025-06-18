@@ -20,7 +20,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { APP_ID, APP_NAME } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
@@ -46,10 +46,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     application: { capabilities },
     uiActions,
     upselling,
-    cases,
   } = services;
-  const CasesContext = cases.ui.getCasesContext();
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   const darkMode = useDarkMode();
 
@@ -62,25 +59,19 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
               <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                 <ManageUserInfo>
                   <NavigationProvider core={services}>
-                    <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                    <ReactQueryClientProvider>
                       <CellActionsProvider
                         getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
                       >
                         <UpsellingProvider upsellingService={upselling}>
                           <DiscoverInTimelineContextProvider>
                             <AssistantProvider>
-                              {/*
-                                keep third party context such as CasesContext outside of ReactQueryClientProvider
-                                otherwise there is a risk of them overriding security solutions's queryClient
-                              */}
-                              <ReactQueryClientProvider>
-                                <PageRouter history={history}>{children}</PageRouter>
-                              </ReactQueryClientProvider>
+                              <PageRouter history={history}>{children}</PageRouter>
                             </AssistantProvider>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>
                       </CellActionsProvider>
-                    </CasesContext>
+                    </ReactQueryClientProvider>
                   </NavigationProvider>
                 </ManageUserInfo>
               </UserPrivilegesProvider>

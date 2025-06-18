@@ -11,7 +11,9 @@ import React, { memo, useEffect } from 'react';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 
+import { APP_ID } from '../../common/constants';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
+import { useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { NotFoundPage } from './404';
@@ -23,6 +25,9 @@ interface RouterProps {
 }
 
 const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
+  const { cases } = useKibana().services;
+  const CasesContext = cases.ui.getCasesContext();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -41,7 +46,9 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history }) => {
         <RouteCapture>
           <Routes>
             <Route path="/">
-              <HomePage>{children}</HomePage>
+              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                <HomePage>{children}</HomePage>
+              </CasesContext>
             </Route>
             <Route>
               <NotFoundPage />
