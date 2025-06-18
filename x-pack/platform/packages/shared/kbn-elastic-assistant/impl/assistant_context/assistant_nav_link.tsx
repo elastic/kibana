@@ -51,7 +51,7 @@ export const AssistantNavLink: FC = () => {
     <EuiToolTip content={TOOLTIP_CONTENT}>
       <EuiButtonBasicOrEmpty
         onClick={showOverlay}
-        color="success"
+        color="primary"
         size="s"
         data-test-subj="assistantNavLink"
       >

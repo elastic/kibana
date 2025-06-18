@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-/* import { waitFor, renderHook } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock, type HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createConversations } from './provider';
+import { createConversations } from './create_conversation';
 import { coreMock } from '@kbn/core/public/mocks';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-jest.mock('./use_assistant_availability');
-
-jest.mock('@kbn/elastic-assistant/impl/assistant/api');
-jest.mock('../common/hooks/use_license', () => ({
-  useLicense: () => ({
-    isEnterprise: () => true,
-  }),
-  licenseService: {
-    isEnterprise: () => true,
-  },
-}));
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants');
 let http: HttpSetupMock = coreMock.createSetup().http;
 export const mockConnectors = [
@@ -200,4 +189,4 @@ describe('createConversations', () => {
     expect(createdConversations[1].apiConfig.actionTypeId).toEqual('.gen-ai');
   });
 });
- */
+

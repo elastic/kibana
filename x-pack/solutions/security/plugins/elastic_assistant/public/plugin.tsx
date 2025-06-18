@@ -7,7 +7,7 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,13 +30,12 @@ export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPubli
 
 export class ElasticAssistantPublicPlugin
   implements
-    Plugin<
-      ElasticAssistantPublicPluginSetup,
-      ElasticAssistantPublicPluginStart,
-      ElasticAssistantPublicPluginSetupDependencies,
-      ElasticAssistantPublicPluginStartDependencies
-    >
-{
+  Plugin<
+    ElasticAssistantPublicPluginSetup,
+    ElasticAssistantPublicPluginStart,
+    ElasticAssistantPublicPluginSetupDependencies,
+    ElasticAssistantPublicPluginStartDependencies
+  > {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
 
@@ -96,10 +95,10 @@ export class ElasticAssistantPublicPlugin
             <ReactQueryClientProvider>
               <AssistantSpaceIdProvider>
                 <AssistantProvider>
-                  <>
+                  <Suspense fallback={null}>
                     <AssistantNavLink />
                     <AssistantOverlay />
-                  </>
+                  </Suspense>
                 </AssistantProvider>
               </AssistantSpaceIdProvider>
             </ReactQueryClientProvider>
