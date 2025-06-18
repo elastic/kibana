@@ -44,7 +44,7 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
-      {!hasFailureStore && canUserReadFailureStore && (
+      {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore && (
         <div style={{ marginBottom: 16 }}>
           <EuiCallOut
             color="warning"

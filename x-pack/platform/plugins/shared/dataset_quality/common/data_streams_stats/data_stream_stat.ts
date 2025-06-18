@@ -58,7 +58,7 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
-      hasFailureStore: dataStreamStat.hasFailureStore ?? false,
+      hasFailureStore: dataStreamStat.hasFailureStore,
       type,
       name: dataset,
       title: dataset,

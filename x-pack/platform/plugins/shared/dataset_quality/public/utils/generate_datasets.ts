@@ -74,7 +74,10 @@ export function generateDatasets(
     {}
   );
 
-  const datasetsWithFailureStore = new Set(failedDocStats.map(({ dataset }) => dataset));
+  const datasetsWithFailureStore = new Set(
+    dataStreamStats.filter(({ hasFailureStore }) => hasFailureStore).map(({ name }) => name)
+  );
+
   const degradedMap: Record<
     DataStreamDocsStat['dataset'],
     {
