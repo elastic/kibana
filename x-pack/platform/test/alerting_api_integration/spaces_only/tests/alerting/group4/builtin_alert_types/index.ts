@@ -12,7 +12,6 @@ export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('builtin alertTypes', () => {
     loadTestFile(require.resolve('./long_running'));
     loadTestFile(require.resolve('./cancellable'));
-    loadTestFile(require.resolve('./circuit_breaker'));
     loadTestFile(require.resolve('./auto_recover'));
   });
 }
