@@ -35,7 +35,6 @@ import { asyncForEach } from '@kbn/std';
 
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
-import { prefixReferencesFromPanel } from '../../common';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import { getPanelPlacementSetting } from '../../panel_placement/get_panel_placement_settings';
@@ -46,9 +45,10 @@ import { coreServices, usageCollectionService } from '../../services/kibana_serv
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import { areLayoutsEqual } from './are_layouts_equal';
 import type { initializeTrackPanel } from '../track_panel';
-import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from '../types';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
+import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
+import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -117,7 +117,7 @@ export function initializeLayoutManager(
         ...layout$.value,
         panels: {
           ...layout$.value.panels,
-          [uuid]: { gridData: { ...gridData, i: uuid }, type } as DashboardPanel,
+          [uuid]: { gridData: { ...gridData, i: uuid }, type },
         },
       };
     }
@@ -134,7 +134,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type } as DashboardPanel,
+        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type },
       },
     };
   };
@@ -145,7 +145,7 @@ export function initializeLayoutManager(
   if (incomingEmbeddable) {
     const { serializedState, size, type } = incomingEmbeddable;
     const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardPanel | undefined = layout$.value.panels[uuid];
+    const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
     const sameType = existingPanel?.type === type;
 
     const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
@@ -161,7 +161,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...layout$.value.panels,
-        [uuid]: { gridData, type } as DashboardPanel,
+        [uuid]: { gridData, type },
       },
     });
     trackPanel.setScrollToPanelId(uuid);
@@ -391,7 +391,6 @@ export function initializeLayoutManager(
         const sections = { ...currentLayout.sections };
         const newId = v4();
         sections[newId] = {
-          id: newId,
           gridData: { i: newId, y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',

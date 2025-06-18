@@ -7,15 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DashboardPanel, DashboardSection } from '../../../server';
+
+export interface DashboardChildren {
+  [uuid: string]: DefaultEmbeddableApi;
+}
+
+export type DashboardLayoutPanel = {
+  gridData: DashboardPanel['gridData'] & { sectionId?: string };
+  type: DashboardPanel['type'];
+};
 
 export interface DashboardLayout {
   panels: {
-    [uuid: string]: {
-      gridData: DashboardPanel['gridData'] & { sectionId?: string };
-      type: DashboardPanel['type'];
-    };
+    [uuid: string]: DashboardLayoutPanel
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
 }

@@ -61,10 +61,6 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
-export interface DashboardChildren {
-  [uuid: string]: DefaultEmbeddableApi;
-}
-
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState>;
 
