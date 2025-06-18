@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const RULE_MIGRATION_READY_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.ready.description', {
-    defaultMessage: 'Migration of {totalRules} rules is created and ready to be start.',
+    defaultMessage: 'Migration of {totalRules} rules is created and ready to start.',
     values: { totalRules },
   });
 

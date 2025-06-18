@@ -196,12 +196,11 @@ export class RuleMigrationTaskRunner {
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
 
-      migrationTaskTelemetry.failure(error);
-
       if (error instanceof AbortError) {
+        migrationTaskTelemetry.aborted(error);
         this.logger.info('Abort signal received, stopping migration');
-        return;
       } else {
+        migrationTaskTelemetry.failure(error);
         throw new Error(`Error processing migration: ${error}`);
       }
     } finally {

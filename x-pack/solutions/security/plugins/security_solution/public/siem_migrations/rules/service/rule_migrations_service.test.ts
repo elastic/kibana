@@ -33,7 +33,7 @@ import type { StartPluginsDependencies } from '../../../types';
 import { getMissingCapabilities } from './capabilities';
 import * as i18n from './translations';
 import {
-  REQUEST_POLLING_INTERVAL_SECONDS,
+  TASK_STATS_POLLING_SLEEP_SECONDS,
   SiemRulesMigrationsService,
 } from './rule_migrations_service';
 import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -243,8 +243,21 @@ describe('SiemRulesMigrationsService', () => {
       } as TraceOptions);
       mockStartRuleMigrationAPI.mockResolvedValue({ started: true });
 
+      // Simulate multiple responses to mimic polling behavior
+      let statsCalls = 0;
+      mockGetRuleMigrationStats.mockImplementation(async () => {
+        statsCalls++;
+        if (statsCalls < 2) {
+          return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.READY };
+        }
+        return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.RUNNING };
+      });
+
       // Spy on startPolling to ensure it is called after starting the migration
       const startPollingSpy = jest.spyOn(service, 'startPolling');
+      // @ts-ignore (spying on a private method)
+      const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
+
       const result = await service.startRuleMigration(
         'mig-1',
         SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED
@@ -260,6 +273,8 @@ describe('SiemRulesMigrationsService', () => {
         langSmithOptions: { project_name: 'proj', api_key: 'key' },
       });
       expect(startPollingSpy).toHaveBeenCalled();
+      expect(stopMigrationPollingSpy).toHaveBeenCalled();
+      expect(mockGetRuleMigrationStats).toHaveBeenCalledTimes(statsCalls);
       expect(result).toEqual({ started: true });
     });
   });
@@ -286,7 +301,6 @@ describe('SiemRulesMigrationsService', () => {
         return { ...defaultMigrationStats, status: SiemMigrationTaskStatus.FINISHED };
       });
 
-      // Spy on startPolling to ensure it is called after starting the migration
       // @ts-ignore (spying on a private method)
       const stopMigrationPollingSpy = jest.spyOn(service, 'migrationTaskPollingUntil');
 
@@ -346,7 +360,7 @@ describe('SiemRulesMigrationsService', () => {
       await Promise.resolve();
 
       // Fast-forward the timer by the polling interval
-      jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+      jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
       // Resolve the timeout promise
       await Promise.resolve();
       // Resolve the second getRuleMigrationsStats promise
@@ -388,7 +402,7 @@ describe('SiemRulesMigrationsService', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -418,7 +432,7 @@ describe('SiemRulesMigrationsService', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -456,7 +470,7 @@ describe('SiemRulesMigrationsService', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 
@@ -494,7 +508,7 @@ describe('SiemRulesMigrationsService', () => {
         await Promise.resolve();
 
         // Fast-forward the timer by the polling interval
-        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        jest.advanceTimersByTime(TASK_STATS_POLLING_SLEEP_SECONDS * 1000);
         // Resolve the timeout promise
         await Promise.resolve();
 

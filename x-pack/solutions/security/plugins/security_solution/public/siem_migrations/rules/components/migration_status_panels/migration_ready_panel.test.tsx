@@ -166,7 +166,7 @@ describe('MigrationReadyPanel', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created and ready to be start. You can also upload the missing macros & lookups for more accurate results.'
+          'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.'
         );
       });
     });
