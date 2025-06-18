@@ -130,6 +130,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('Deleting a query ruleset from the ruleset details page', () => {
       before(async () => {
+        await createTestRuleset('my-test-ruleset');
+      });
+      after(async () => {
         try {
           await deleteTestRuleset('my-test-ruleset');
         } catch (error) {
