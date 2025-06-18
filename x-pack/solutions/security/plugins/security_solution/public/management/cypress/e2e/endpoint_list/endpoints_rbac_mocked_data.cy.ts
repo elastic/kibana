@@ -13,19 +13,22 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
+import { SIEM_VERSIONS, type SiemVersion } from '../../common/constants';
 
-describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
+describe('Endpoints page RBAC', { tags: ['@ess'] }, () => {
   type Privilege = 'all' | 'read' | 'none';
   const PRIVILEGES: Privilege[] = ['none', 'read', 'all'];
 
   const loginWithCustomRole: (privileges: {
-    integrationsPrivilege?: Privilege;
-    fleetPrivilege?: Privilege;
-    endpointPolicyManagementPrivilege?: Privilege;
+    integrationsPrivilege: Privilege;
+    fleetPrivilege: Privilege;
+    endpointPolicyManagementPrivilege: Privilege;
+    siemVersion: SiemVersion;
   }) => void = ({
-    integrationsPrivilege = 'none',
-    fleetPrivilege = 'none',
-    endpointPolicyManagementPrivilege = 'none',
+    integrationsPrivilege,
+    fleetPrivilege,
+    endpointPolicyManagementPrivilege,
+    siemVersion,
   }) => {
     const base = getT1Analyst();
 
@@ -35,9 +38,8 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
         {
           ...base.kibana[0],
           feature: {
-            ...base.kibana[0].feature,
-            [SECURITY_FEATURE_ID]: [
-              ...base.kibana[0].feature[SECURITY_FEATURE_ID],
+            [siemVersion]: [
+              'all',
               `endpoint_list_all`,
               `policy_management_${endpointPolicyManagementPrivilege}`,
             ],
@@ -51,151 +53,158 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
     login.withCustomRole({ name: 'customRole', ...customRole });
   };
 
-  beforeEach(() => {
-    login();
+  it('latest siem version should be in version list', () => {
+    expect(SIEM_VERSIONS.at(-1)).to.equal(SECURITY_FEATURE_ID);
   });
 
-  describe('neither Defend policy nor hosts are present', () => {
-    for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
-      describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
-        for (const fleetPrivilege of PRIVILEGES) {
-          for (const integrationsPrivilege of PRIVILEGES) {
-            const shouldAllowOnboarding =
-              fleetPrivilege === 'all' && integrationsPrivilege === 'all';
+  for (const siemVersion of SIEM_VERSIONS) {
+    describe(siemVersion, () => {
+      describe('neither Defend policy nor hosts are present', () => {
+        for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
+          describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
+            for (const fleetPrivilege of PRIVILEGES) {
+              for (const integrationsPrivilege of PRIVILEGES) {
+                const shouldAllowOnboarding =
+                  fleetPrivilege === 'all' && integrationsPrivilege === 'all';
 
-            it(`should show onboarding screen ${
-              shouldAllowOnboarding ? 'with' : 'without'
-            } 'Add Elastic Defend' button with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
-              loginWithCustomRole({
-                endpointPolicyManagementPrivilege,
-                fleetPrivilege,
-                integrationsPrivilege,
-              });
+                it(`should show onboarding screen ${
+                  shouldAllowOnboarding ? 'with' : 'without'
+                } 'Add Elastic Defend' button with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
+                  loginWithCustomRole({
+                    endpointPolicyManagementPrivilege,
+                    fleetPrivilege,
+                    integrationsPrivilege,
+                    siemVersion,
+                  });
 
-              loadPage(APP_ENDPOINTS_PATH);
+                  loadPage(APP_ENDPOINTS_PATH);
 
-              cy.getByTestSubj('policyOnboardingInstructions').should('exist');
-              if (shouldAllowOnboarding) {
-                cy.getByTestSubj('onboardingStartButton').should('exist');
-              } else {
-                cy.getByTestSubj('onboardingStartButton').should('not.exist');
+                  cy.getByTestSubj('policyOnboardingInstructions').should('exist');
+                  if (shouldAllowOnboarding) {
+                    cy.getByTestSubj('onboardingStartButton').should('exist');
+                  } else {
+                    cy.getByTestSubj('onboardingStartButton').should('not.exist');
+                  }
+                });
               }
-            });
-          }
+            }
+          });
         }
       });
-    }
-  });
 
-  describe('Defend policy is present, but no hosts', () => {
-    let loadedPolicyData: IndexedFleetEndpointPolicyResponse;
+      describe('Defend policy is present, but no hosts', () => {
+        let loadedPolicyData: IndexedFleetEndpointPolicyResponse;
 
-    before(() => {
-      cy.task(
-        'indexFleetEndpointPolicy',
-        { policyName: 'tests-serverless' },
-        { timeout: 5 * 60 * 1000 }
-      ).then((res) => {
-        const response = res as IndexedFleetEndpointPolicyResponse;
-        loadedPolicyData = response;
-      });
-    });
-
-    after(() => {
-      if (loadedPolicyData) {
-        cy.task('deleteIndexedFleetEndpointPolicies', loadedPolicyData);
-      }
-    });
-
-    for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
-      describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
-        for (const fleetPrivilege of PRIVILEGES) {
-          for (const integrationsPrivilege of PRIVILEGES) {
-            const shouldShowOnboardingSteps =
-              (fleetPrivilege === 'all' && integrationsPrivilege === 'read') ||
-              (fleetPrivilege === 'all' && integrationsPrivilege === 'all');
-
-            it(`should ${
-              shouldShowOnboardingSteps ? '' : ' NOT '
-            } show onboarding steps with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
-              loginWithCustomRole({
-                endpointPolicyManagementPrivilege,
-                fleetPrivilege,
-                integrationsPrivilege,
-              });
-
-              loadPage(APP_ENDPOINTS_PATH);
-
-              if (shouldShowOnboardingSteps) {
-                cy.getByTestSubj('emptyHostsTable').should('exist');
-                cy.getByTestSubj('onboardingSteps').should('exist');
-              } else {
-                // without correct privileges, fall back to empty policy table note showing that Fleet privilege is required
-                cy.getByTestSubj('emptyPolicyTable').should('exist');
-                cy.getByTestSubj('onboardingStartButton').should('not.exist');
-              }
-            });
-          }
-        }
-      });
-    }
-  });
-
-  describe('some hosts are enrolled', () => {
-    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
-
-    before(() => {
-      indexEndpointHosts({ count: 1 }).then((indexEndpoints) => {
-        endpointData = indexEndpoints;
-      });
-    });
-
-    after(() => {
-      if (endpointData) {
-        endpointData.cleanup();
-        // @ts-expect-error ignore setting to undefined
-        endpointData = undefined;
-      }
-    });
-
-    beforeEach(() => {
-      // if there is a request towards this API, it should return 200
-      cy.intercept(PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN, (req) => {
-        req.on('response', (res) => {
-          expect(res.statusCode).to.equal(200);
+        before(() => {
+          cy.task(
+            'indexFleetEndpointPolicy',
+            { policyName: 'tests-serverless' },
+            { timeout: 5 * 60 * 1000 }
+          ).then((res) => {
+            const response = res as IndexedFleetEndpointPolicyResponse;
+            loadedPolicyData = response;
+          });
         });
-      });
-    });
 
-    for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
-      describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
-        for (const fleetPrivilege of PRIVILEGES) {
-          for (const integrationsPrivilege of PRIVILEGES) {
-            const shouldProvidePolicyLink = endpointPolicyManagementPrivilege !== 'none';
-
-            it(`should show Endpoint list ${
-              shouldProvidePolicyLink ? 'with' : 'without'
-            } link to Endpoint Policy with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
-              loginWithCustomRole({
-                endpointPolicyManagementPrivilege,
-                fleetPrivilege,
-                integrationsPrivilege,
-              });
-
-              loadPage(APP_ENDPOINTS_PATH);
-
-              cy.getByTestSubj('policyNameCellLink').should('exist');
-              cy.getByTestSubj('policyNameCellLink').within(() => {
-                if (shouldProvidePolicyLink) {
-                  cy.get('a').should('have.attr', 'href');
-                } else {
-                  cy.get('a').should('not.exist');
-                }
-              });
-            });
+        after(() => {
+          if (loadedPolicyData) {
+            cy.task('deleteIndexedFleetEndpointPolicies', loadedPolicyData);
           }
+        });
+
+        for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
+          describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
+            for (const fleetPrivilege of PRIVILEGES) {
+              for (const integrationsPrivilege of PRIVILEGES) {
+                const shouldShowOnboardingSteps =
+                  (fleetPrivilege === 'all' && integrationsPrivilege === 'read') ||
+                  (fleetPrivilege === 'all' && integrationsPrivilege === 'all');
+
+                it(`should ${
+                  shouldShowOnboardingSteps ? '' : ' NOT '
+                } show onboarding steps with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
+                  loginWithCustomRole({
+                    endpointPolicyManagementPrivilege,
+                    fleetPrivilege,
+                    integrationsPrivilege,
+                    siemVersion,
+                  });
+
+                  loadPage(APP_ENDPOINTS_PATH);
+
+                  if (shouldShowOnboardingSteps) {
+                    cy.getByTestSubj('emptyHostsTable').should('exist');
+                    cy.getByTestSubj('onboardingSteps').should('exist');
+                  } else {
+                    // without correct privileges, fall back to empty policy table note showing that Fleet privilege is required
+                    cy.getByTestSubj('emptyPolicyTable').should('exist');
+                    cy.getByTestSubj('onboardingStartButton').should('not.exist');
+                  }
+                });
+              }
+            }
+          });
         }
       });
-    }
-  });
+
+      describe('some hosts are enrolled', () => {
+        let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+
+        before(() => {
+          indexEndpointHosts({ count: 1 }).then((indexEndpoints) => {
+            endpointData = indexEndpoints;
+          });
+        });
+
+        after(() => {
+          if (endpointData) {
+            endpointData.cleanup();
+            // @ts-expect-error ignore setting to undefined
+            endpointData = undefined;
+          }
+        });
+
+        beforeEach(() => {
+          // if there is a request towards this API, it should return 200
+          cy.intercept(PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN, (req) => {
+            req.on('response', (res) => {
+              expect(res.statusCode).to.equal(200);
+            });
+          });
+        });
+
+        for (const endpointPolicyManagementPrivilege of PRIVILEGES) {
+          describe(`endpoint policy management privilege is ${endpointPolicyManagementPrivilege}`, () => {
+            for (const fleetPrivilege of PRIVILEGES) {
+              for (const integrationsPrivilege of PRIVILEGES) {
+                const shouldProvidePolicyLink = endpointPolicyManagementPrivilege !== 'none';
+
+                it(`should show Endpoint list ${
+                  shouldProvidePolicyLink ? 'with' : 'without'
+                } link to Endpoint Policy with fleet:${fleetPrivilege} and integrations:${integrationsPrivilege}`, () => {
+                  loginWithCustomRole({
+                    endpointPolicyManagementPrivilege,
+                    fleetPrivilege,
+                    integrationsPrivilege,
+                    siemVersion,
+                  });
+
+                  loadPage(APP_ENDPOINTS_PATH);
+
+                  cy.getByTestSubj('policyNameCellLink').should('exist');
+                  cy.getByTestSubj('policyNameCellLink').within(() => {
+                    if (shouldProvidePolicyLink) {
+                      cy.get('a').should('have.attr', 'href');
+                    } else {
+                      cy.get('a').should('not.exist');
+                    }
+                  });
+                });
+              }
+            }
+          });
+        }
+      });
+    });
+  }
 });
