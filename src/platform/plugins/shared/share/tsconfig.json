@@ -29,7 +29,6 @@
     "@kbn/core-rendering-browser",
     "@kbn/task-manager-plugin",
     "@kbn/logging",
-    "@kbn/licensing-plugin",
     "@kbn/core-rendering-browser",
     "@kbn/std",
     "@kbn/core-logging-server-mocks",
