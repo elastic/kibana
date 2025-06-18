@@ -188,7 +188,6 @@ export interface InferenceChunk {
 
 export interface NerAnonymizationRule {
   type: 'ner';
-  entityClass: 'PER' | 'ORG' | 'LOC';
   enabled: boolean;
   modelId?: string;
 }
