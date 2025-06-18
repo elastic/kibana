@@ -258,6 +258,32 @@ describe('config validation', () => {
     expect(result.email?.domain_allowlist).toEqual(['a.com', 'b.c.com', 'd.e.f.com']);
   });
 
+  test('validates xpack.actions.webhook', () => {
+    const config: Record<string, unknown> = {};
+    let result = configSchema.validate(config);
+    expect(result.webhook === undefined);
+
+    config.webhook = {};
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: {} };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: { pfx: {} } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+
+    config.webhook = { ssl: { pfx: { enabled: false } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(false);
+
+    config.webhook = { ssl: { pfx: { enabled: true } } };
+    result = configSchema.validate(config);
+    expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+  });
+
   describe('email.services.ses', () => {
     const config: Record<string, unknown> = {};
     test('validates no email config at all', () => {
