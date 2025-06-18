@@ -279,7 +279,6 @@ export const QueryBarTopRow = React.memo(
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
-    const aggregateQueryRef = useRef<AggregateQuery | undefined>(undefined);
     queryRef.current = props.query;
 
     const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -388,7 +387,7 @@ export const QueryBarTopRow = React.memo(
 
     const onTextLangQueryChange = useCallback(
       (query: AggregateQuery) => {
-        aggregateQueryRef.current = query;
+        queryRef.current = query as QT;
         props.onTextLangQueryChange(query);
       },
       [props]
@@ -745,13 +744,12 @@ export const QueryBarTopRow = React.memo(
         props.query &&
         isOfAggregateQueryType(props.query) && (
           <ESQLLangEditor
-            query={aggregateQueryRef.current || props.query}
+            query={props.query}
             onTextLangQueryChange={onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
             onTextLangQuerySubmit={async () => {
-              aggregateQueryRef.current = queryRef.current as AggregateQuery;
               onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
