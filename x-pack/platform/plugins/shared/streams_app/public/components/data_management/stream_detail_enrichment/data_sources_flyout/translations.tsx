@@ -73,11 +73,11 @@ export const DATA_SOURCES_I18N = {
     delete: {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.title',
-        { defaultMessage: 'Delete data source?' }
+        { defaultMessage: 'Remove sample data source?' }
       ),
       message: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.message',
-        { defaultMessage: 'Deleted data sources will be lost and you will have to recreate it.' }
+        { defaultMessage: 'Removed sample data source will need to be reconfigured.' }
       ),
       cancelButtonText: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.dataSourceCard.delete.cancelButtonText',
@@ -127,7 +127,7 @@ export const DATA_SOURCES_I18N = {
     ),
     callout: i18n.translate('xpack.streams.enrichment.dataSources.customSamples.callout', {
       defaultMessage:
-        'The custom samples data source cannot be persisted. It will be lost when you leave this page.',
+        'The custom samples will not be persisted. They will be lost when you leave the processing page.',
     }),
     label: i18n.translate(
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.label',
@@ -138,7 +138,13 @@ export const DATA_SOURCES_I18N = {
         id="xpack.streams.streamDetailView.managementTab.enrichment.dataSourcesFlyout.customSamples.helpText"
         defaultMessage="Use JSON format: {code}"
         values={{
-          code: <EuiCode>{JSON.stringify([{ foo: 'bar', foo2: 'baz' }])}</EuiCode>,
+          code: (
+            <EuiCode>
+              {JSON.stringify([
+                { '@timestamp': '2025-06-17T12:00:00Z', message: 'Sample log message' },
+              ])}
+            </EuiCode>
+          ),
         }}
       />
     ),
