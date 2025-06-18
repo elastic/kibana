@@ -7,7 +7,7 @@
 
 import React, { type ReactNode, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiCode, EuiCommentList } from '@elastic/eui';
+import { EuiCode, EuiCommentList, useEuiTheme } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { omit } from 'lodash';
 import {
@@ -20,12 +20,12 @@ import {
   aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AnonymizationRule } from '@kbn/observability-ai-assistant-plugin/common';
-import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
 import { useKibana } from '../hooks/use_kibana';
 import { ElasticLlmConversationCallout } from './elastic_llm_conversation_callout';
+import { KnowledgeBaseReindexingCallout } from '../knowledge_base/knowledge_base_reindexing_callout';
 
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
@@ -53,7 +53,6 @@ export interface ChatTimelineItem
 export interface ChatTimelineProps {
   conversationId?: string;
   messages: Message[];
-  knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;
@@ -61,6 +60,7 @@ export interface ChatTimelineProps {
   isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showElasticLlmCalloutInChat: boolean;
+  showKnowledgeBaseReIndexingCallout: boolean;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -103,14 +103,9 @@ function highlightContent(
   }
   return parts;
 }
+
 const euiCommentListClassName = css`
   padding-bottom: 32px;
-`;
-
-const stickyElasticLlmCalloutContainerClassName = css`
-  position: sticky;
-  top: 0;
-  z-index: 1;
 `;
 
 export function ChatTimeline({
@@ -122,6 +117,7 @@ export function ChatTimeline({
   isConversationOwnedByCurrentUser,
   isArchived,
   showElasticLlmCalloutInChat,
+  showKnowledgeBaseReIndexingCallout,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -136,7 +132,11 @@ export function ChatTimeline({
 
   const { anonymizationEnabled } = useMemo(() => {
     try {
-      const rules = uiSettings?.get<AnonymizationRule[]>(aiAssistantAnonymizationRules);
+      // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
+      let rules = uiSettings?.get<AnonymizationRule[] | string>(aiAssistantAnonymizationRules);
+      if (typeof rules === 'string') {
+        rules = JSON.parse(rules);
+      }
       return {
         anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
       };
@@ -144,6 +144,17 @@ export function ChatTimeline({
       return { anonymizationEnabled: false };
     }
   }, [uiSettings]);
+  const { euiTheme } = useEuiTheme();
+
+  const stickyCalloutContainerClassName = css`
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: ${euiTheme.colors.backgroundBasePlain};
+    &:empty {
+      display: none;
+    }
+  `;
 
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
@@ -198,11 +209,10 @@ export function ChatTimeline({
 
   return (
     <EuiCommentList className={euiCommentListClassName}>
-      {showElasticLlmCalloutInChat ? (
-        <div className={stickyElasticLlmCalloutContainerClassName}>
-          <ElasticLlmConversationCallout />
-        </div>
-      ) : null}
+      <div className={stickyCalloutContainerClassName}>
+        {showKnowledgeBaseReIndexingCallout ? <KnowledgeBaseReindexingCallout /> : null}
+        {showElasticLlmCalloutInChat ? <ElasticLlmConversationCallout /> : null}
+      </div>
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems
