@@ -13,7 +13,7 @@ import {
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { InfiniteData, QueryObserverResult } from '@tanstack/react-query';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { AIConnector } from '../../../connectorland/connector_selector';

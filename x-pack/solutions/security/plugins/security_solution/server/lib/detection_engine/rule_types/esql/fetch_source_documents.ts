@@ -28,6 +28,7 @@ interface FetchSourceDocumentsArgs {
   results: Array<Record<string, string | null>>;
   loggedRequests?: RulePreviewLoggedRequest[];
   hasLoggedRequestsReachedLimit: boolean;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
 }
 /**
  * fetches source documents by list of their ids
@@ -41,7 +42,8 @@ export const fetchSourceDocuments = async ({
   index,
   loggedRequests,
   hasLoggedRequestsReachedLimit,
-}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
+  runtimeMappings,
+}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
       acc.push(doc._id);
@@ -69,6 +71,7 @@ export const fetchSourceDocuments = async ({
     _source: true,
     fields: ['*'],
     size: ids.length,
+    runtime_mappings: runtimeMappings,
   };
   const ignoreUnavailable = true;
 

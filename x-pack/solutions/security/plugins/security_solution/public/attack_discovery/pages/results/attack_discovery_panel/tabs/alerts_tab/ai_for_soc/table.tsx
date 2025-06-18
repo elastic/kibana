@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
   ALERT_TABLE_CONSUMERS,
+  CASES_CONFIGURATION,
   columns,
+  EuiDataGridStyleWrapper,
   GRID_STYLE,
   ROW_HEIGHTS_OPTIONS,
   RULE_TYPE_IDS,
@@ -25,6 +28,7 @@ import { getDataViewStateFromIndexFields } from '../../../../../../../common/con
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { CellValue } from '../../../../../../../detections/components/alert_summary/table/render_cell';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import { useAdditionalBulkActions } from '../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions';
 
 export interface TableProps {
   /**
@@ -64,10 +68,11 @@ export interface TableProps {
  */
 export const Table = memo(({ dataView, id, packages, query, ruleResponse }: TableProps) => {
   const {
-    services: { application, data, fieldFormats, http, licensing, notifications, settings },
+    services: { application, cases, data, fieldFormats, http, licensing, notifications, settings },
   } = useKibana();
   const services = useMemo(
     () => ({
+      cases,
       data,
       http,
       notifications,
@@ -76,7 +81,7 @@ export const Table = memo(({ dataView, id, packages, query, ruleResponse }: Tabl
       licensing,
       settings,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings]
+    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
@@ -94,23 +99,35 @@ export const Table = memo(({ dataView, id, packages, query, ruleResponse }: Tabl
     [packages, ruleResponse]
   );
 
+  const refetchRef = useRef<AlertsTableImperativeApi>(null);
+  const refetch = useCallback(() => {
+    refetchRef.current?.refresh();
+  }, []);
+
+  const bulkActions = useAdditionalBulkActions({ refetch });
+
   return (
-    <AlertsTable
-      actionsColumnWidth={ACTION_COLUMN_WIDTH}
-      additionalContext={additionalContext}
-      browserFields={browserFields}
-      columns={columns}
-      consumers={ALERT_TABLE_CONSUMERS}
-      gridStyle={GRID_STYLE}
-      id={id}
-      query={query}
-      renderActionsCell={ActionsCell}
-      renderCellValue={CellValue}
-      rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
-      ruleTypeIds={RULE_TYPE_IDS}
-      services={services}
-      toolbarVisibility={TOOLBAR_VISIBILITY}
-    />
+    <EuiDataGridStyleWrapper>
+      <AlertsTable
+        actionsColumnWidth={ACTION_COLUMN_WIDTH}
+        additionalBulkActions={bulkActions}
+        additionalContext={additionalContext}
+        browserFields={browserFields}
+        casesConfiguration={CASES_CONFIGURATION}
+        columns={columns}
+        consumers={ALERT_TABLE_CONSUMERS}
+        gridStyle={GRID_STYLE}
+        id={id}
+        query={query}
+        ref={refetchRef}
+        renderActionsCell={ActionsCell}
+        renderCellValue={CellValue}
+        rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        ruleTypeIds={RULE_TYPE_IDS}
+        services={services}
+        toolbarVisibility={TOOLBAR_VISIBILITY}
+      />
+    </EuiDataGridStyleWrapper>
   );
 });
 

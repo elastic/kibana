@@ -78,7 +78,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
   step('Should filter monitors by type', async () => {
     await page.getByRole('button', { name: 'Type All' }).click();
-    await page.getByTestId('comboBoxInput').click();
+    await page.getByTestId('monitorTypeField').click();
     await page.getByRole('option', { name: 'http' }).click();
     await page.getByTestId('ruleDefinition').getByRole('button', { name: 'Type http' }).click();
     await expect(page.getByTestId('syntheticsStatusRuleVizMonitorQueryIDsButton')).toHaveText(

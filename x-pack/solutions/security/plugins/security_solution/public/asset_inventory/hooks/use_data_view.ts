@@ -13,18 +13,27 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
  * TODO: use @kbn/cloud-security-posture/src/hooks/use_data_view once
  * Asset Inventory is ready to create data views per space
  */
-export const useDataView = (indexPattern: string) => {
+export const useDataView = (indexPattern?: string) => {
   const {
     data: { dataViews },
   } = useKibana<{ data: DataPublicPluginStart }>().services;
 
-  return useQuery(['useDataView', indexPattern], async () => {
-    const [dataView] = await dataViews.find(indexPattern);
+  return useQuery(
+    ['useDataView', indexPattern],
+    async () => {
+      if (!indexPattern) {
+        throw new Error('Index pattern is required');
+      }
+      const [dataView] = await dataViews.find(indexPattern);
 
-    if (!dataView) {
-      throw new Error(`Data view not found [${indexPattern}]`);
+      if (!dataView) {
+        throw new Error(`Data view not found [${indexPattern}]`);
+      }
+
+      return dataView;
+    },
+    {
+      enabled: !!indexPattern,
     }
-
-    return dataView;
-  });
+  );
 };

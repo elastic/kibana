@@ -516,7 +516,7 @@ describe('Transaction error rate alert', () => {
         transactionType: 'type-foo',
         triggerValue: '10',
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED_type-foo',
       payload: {

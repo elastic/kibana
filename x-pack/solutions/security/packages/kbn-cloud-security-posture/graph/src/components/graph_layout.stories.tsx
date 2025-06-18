@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import type { StoryFn, StoryObj } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
@@ -19,14 +19,35 @@ import type {
 } from '.';
 import { Graph } from '.';
 
-export default {
+const meta: Meta<typeof Graph> = {
+  component: Graph,
+  render: ({ nodes, edges, interactive }: GraphData) => {
+    return (
+      <ThemeProvider theme={{ darkMode: false }}>
+        <Graph
+          css={css`
+            height: 100%;
+            width: 100%;
+          `}
+          nodes={nodes}
+          edges={edges}
+          interactive={interactive}
+        />
+      </ThemeProvider>
+    );
+  },
   title: 'Components/Graph Components/Graph Layout',
-  description: 'CDR - Graph visualization',
   argTypes: {
-    interactive: { control: { control: 'boolean' }, defaultValue: true },
+    interactive: { control: { type: 'boolean' } },
+  },
+  args: {
+    interactive: true,
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
+
+export default meta;
+type Story = StoryObj<typeof Graph>;
 
 interface GraphData {
   nodes: NodeViewModel[];
@@ -162,26 +183,9 @@ const extractEdges = (
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
-const Template: StoryFn<GraphData> = ({ nodes, edges, interactive }: GraphData) => {
-  return (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <Graph
-        css={css`
-          height: 100%;
-          width: 100%;
-        `}
-        nodes={nodes}
-        edges={edges}
-        interactive={interactive ?? true}
-      />
-    </ThemeProvider>
-  );
-};
-
-export const SimpleAPIMock: StoryObj<GraphData> = {
-  render: Template,
-
+export const SimpleAPIMock: Story = {
   args: {
+    interactive: false,
     nodes: [
       {
         id: 'admin@example.com',
@@ -229,10 +233,9 @@ export const SimpleAPIMock: StoryObj<GraphData> = {
   },
 };
 
-export const GroupWithWarningAPIMock: StoryObj<GraphData> = {
-  render: Template,
-
+export const GroupWithWarningAPIMock: Story = {
   args: {
+    ...meta.args,
     nodes: [
       {
         id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
@@ -451,18 +454,16 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
-export const LargeGraph: StoryObj<GraphData> = {
-  render: Template,
-
+export const LargeGraph: Story = {
   args: {
+    ...meta.args,
     ...extractEdges(baseGraph),
   },
 };
 
-export const GraphLabelOverlayCases: StoryObj<GraphData> = {
-  render: Template,
-
+export const GraphLabelOverlayCases: Story = {
   args: {
+    ...meta.args,
     ...extractEdges([
       ...baseGraph,
       {
@@ -492,10 +493,9 @@ export const GraphLabelOverlayCases: StoryObj<GraphData> = {
   },
 };
 
-export const GraphStackedEdgeCases: StoryObj<GraphData> = {
-  render: Template,
-
+export const GraphStackedEdgeCases: Story = {
   args: {
+    ...meta.args,
     ...extractEdges([
       ...baseGraph,
       {
@@ -518,10 +518,9 @@ export const GraphStackedEdgeCases: StoryObj<GraphData> = {
   },
 };
 
-export const GraphLargeStackedEdgeCases: StoryObj<GraphData> = {
-  render: Template,
-
+export const GraphLargeStackedEdgeCases: Story = {
   args: {
+    ...meta.args,
     ...extractEdges([
       ...baseGraph,
       ...Array(10)

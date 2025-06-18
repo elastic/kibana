@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { isFinite } from 'lodash';
 import numeral from '@elastic/numeral';
-import { Maybe } from '../../typings';
+import type { Maybe } from '@kbn/apm-types-shared';
 
 export const NOT_AVAILABLE_LABEL = i18n.translate(
   'apmUiShared.formatters.numeric.notAvailableLabel',

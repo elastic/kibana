@@ -20,13 +20,13 @@ import {
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
 } from './helpers';
-import type { ESQLRealField, ESQLPolicy } from './types';
+import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks || commands.length < 1) {
     return new Map();
   }
@@ -78,7 +78,7 @@ export async function retrievePoliciesFields(
   commands: ESQLCommand[],
   policies: Map<string, ESQLPolicy>,
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks) {
     return new Map();
   }
@@ -103,7 +103,7 @@ export async function retrieveFieldsFromStringSources(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
-): Promise<Map<string, ESQLRealField>> {
+): Promise<Map<string, ESQLFieldWithMetadata>> {
   if (!callbacks) {
     return new Map();
   }

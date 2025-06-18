@@ -60,10 +60,6 @@ import type {
 } from '../typeahead/suggestions_component';
 import './query_bar.scss';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
-const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
-
 export const strings = {
   getNeedsUpdatingLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
@@ -88,11 +84,6 @@ export const strings = {
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
-    }),
-  getRunQueryShortcutLabel: () =>
-    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.shortcutLabel', {
-      defaultMessage: `(shortcut {textBasedRunShortcut})`,
-      values: { textBasedRunShortcut },
     }),
   getRunButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
@@ -571,19 +562,11 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const buttonLabelRefresh = Boolean(isQueryLangSelected)
-        ? `${strings.getRunQueryLabel()} ${strings.getRunQueryShortcutLabel()}`
-        : strings.getRefreshQueryLabel();
-      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
-      const tooltipText = Boolean(isQueryLangSelected)
-        ? textBasedRunShortcut
-        : strings.getRefreshQueryLabel();
-      const buttonLabelRun = textBasedRunShortcut;
-
       const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
-      const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
-
-      const isDirtyButtonLabel = Boolean(isQueryLangSelected)
+      const labelDirty = Boolean(isQueryLangSelected)
+        ? strings.getRunQueryLabel()
+        : strings.getNeedsUpdatingLabel();
+      const buttonLabelDirty = Boolean(isQueryLangSelected)
         ? strings.getRunButtonLabel()
         : strings.getUpdateButtonLabel();
 
@@ -596,7 +579,7 @@ export const QueryBarTopRow = React.memo(
             <EuiSuperUpdateButton
               iconType={props.isDirty ? iconDirty : 'refresh'}
               iconOnly={submitButtonIconOnly}
-              aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
+              aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
               isDisabled={isDateRangeInvalid || props.isDisabled}
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
@@ -606,12 +589,12 @@ export const QueryBarTopRow = React.memo(
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
               toolTipProps={{
-                content: props.isDirty ? tooltipDirty : tooltipText,
+                content: props.isDirty ? labelDirty : strings.getRefreshQueryLabel(),
                 delay: 'long',
                 position: 'bottom',
               }}
             >
-              {props.isDirty ? isDirtyButtonLabel : strings.getRefreshButtonLabel()}
+              {props.isDirty ? buttonLabelDirty : strings.getRefreshButtonLabel()}
             </EuiSuperUpdateButton>
           )}
         </EuiFlexItem>
@@ -658,7 +641,10 @@ export const QueryBarTopRow = React.memo(
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               filtersForSuggestions={props.filtersForSuggestions}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              buttonProps={{
+                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                display: 'empty',
+              }}
               isDisabled={props.isDisabled}
               suggestionsAbstraction={props.suggestionsAbstraction}
             />

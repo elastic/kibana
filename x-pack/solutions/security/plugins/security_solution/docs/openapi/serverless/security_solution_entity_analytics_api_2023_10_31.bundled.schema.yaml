@@ -335,6 +335,175 @@ paths:
       summary: Health check on Privilege Monitoring
       tags:
         - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users:
+    post:
+      operationId: CreatePrivMonUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserName'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoredUserDoc'
+          description: User created successfully
+      summary: Create a new monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
+      operationId: BulkUploadUsersCSV
+      requestBody:
+        content:
+          text/csv:
+            schema:
+              type: string
+        description: CSV file containing users to upsert
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upserted_count:
+                    type: integer
+          description: Successful response
+      summary: Upsert multiple monitored users via CSV upload
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/_json:
+    post:
+      operationId: BulkUploadUsersJSON
+      requestBody:
+        content:
+          text/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  items:
+                    type: object
+                    properties:
+                      is_monitored:
+                        type: boolean
+                      user_name:
+                        type: string
+                  type: array
+        description: JSON file containing users to upsert
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upserted_count:
+                    type: integer
+          description: Successful response
+      summary: Upsert multiple monitored users via JSON upload
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/{id}:
+    delete:
+      operationId: DeletePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  aknowledged:
+                    description: Indicates if the deletion was successful
+                    type: boolean
+                  message:
+                    description: >-
+                      A message providing additional information about the
+                      deletion status
+                    type: string
+                required:
+                  - success
+          description: User deleted successfully
+      summary: Delete a monitored user
+      tags:
+        - Security Entity Analytics API
+    get:
+      operationId: GetPrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoredUserDoc'
+          description: User details retrieved
+      summary: Retrieve a monitored user by ID
+      tags:
+        - Security Entity Analytics API
+    put:
+      operationId: UpdatePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoredUserDoc'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoredUserDoc'
+          description: User updated successfully
+      summary: Update a monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/list:
+    get:
+      operationId: ListPrivMonUsers
+      parameters:
+        - description: KQL query to filter the list of monitored users
+          in: query
+          name: kql
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MonitoredUserDoc'
+                type: array
+          description: List of monitored users
+      summary: List all monitored users
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -947,6 +1116,20 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - asset
+        entity:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            id:
+              type: string
+          required:
+            - id
         host:
           type: object
           properties:
@@ -1420,6 +1603,65 @@ components:
       type: string
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
+    MonitoredUserDoc:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    type: string
+                  value:
+                    type: string
+              type: array
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        id:
+          type: string
+        labels:
+          type: object
+          properties:
+            monitoring:
+              type: object
+              properties:
+                privileged_users:
+                  enum:
+                    - monitored
+                    - deleted
+                  type: string
+            source_indices:
+              items:
+                type: string
+              type: array
+            source_integrations:
+              items:
+                type: string
+              type: array
+            sources:
+              items:
+                enum:
+                  - csv
+                  - index_sync
+                  - api
+              type: array
+        user:
+          type: object
+          properties:
+            name:
+              type: string
     MonitoringEngineDescriptor:
       type: object
       properties:
@@ -1670,6 +1912,15 @@ components:
       required:
         - user
         - entity
+    UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              description: The name of the user.
+              type: string
   securitySchemes:
     BasicAuth:
       scheme: basic

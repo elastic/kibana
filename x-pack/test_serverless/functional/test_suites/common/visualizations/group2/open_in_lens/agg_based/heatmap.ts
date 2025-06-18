@@ -65,14 +65,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           key: '1,322 - 1,717.5',
           name: '1,322 - 1,717.5',
         },
-        { color: '#86CB66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
+        { color: '#86cb66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
         {
-          color: '#FEFEBD',
+          color: '#fefebd',
           key: '2,113 - 2,508.5',
           name: '2,113 - 2,508.5',
         },
         {
-          color: '#F88D52',
+          color: '#f88d52',
           key: '2,508.5 - 2,904',
           name: '2,508.5 - 2,904',
         },
@@ -104,11 +104,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       expect(debugState.legend!.items).to.eql([
         { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
-        { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4CB15D' },
-        { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#B7E075' },
-        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#FEFEBD' },
-        { key: '2,376.667 - 2,640.333', name: '2,376.667 - 2,640.333', color: '#FDBF6F' },
-        { key: '2,640.333 - 2,904', name: '2,640.333 - 2,904', color: '#EA5839' },
+        { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4cb15d' },
+        { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#b7e075' },
+        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#fefebd' },
+        { key: '2,376.667 - 2,640.333', name: '2,376.667 - 2,640.333', color: '#fdbf6f' },
+        { key: '2,640.333 - 2,904', name: '2,640.333 - 2,904', color: '#ea5839' },
       ]);
     });
 
@@ -128,27 +128,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           name: '0 - 100',
         },
         {
-          color: '#65BC62',
+          color: '#65bc62',
           key: '100 - 200',
           name: '100 - 200',
         },
         {
-          color: '#D8EF8C',
+          color: '#d8ef8c',
           key: '200 - 300',
           name: '200 - 300',
         },
         {
-          color: '#FEDF8B',
+          color: '#fedf8b',
           key: '300 - 400',
           name: '300 - 400',
         },
         {
-          color: '#F36D43',
+          color: '#f36d43',
           key: '400 - 500',
           name: '400 - 500',
         },
         {
-          color: '#A50026',
+          color: '#a50026',
           key: '500 - 600',
           name: '500 - 600',
         },

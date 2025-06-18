@@ -33,6 +33,7 @@ export interface DataStreamMetadata {
 
   indicesRequiringUpgradeDocsSize: number;
   indicesRequiringUpgradeDocsCount: number;
+  oldestIncompatibleDocTimestamp?: number;
 }
 
 export interface DataStreamReindexStatusResponse {

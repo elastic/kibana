@@ -56,14 +56,24 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     {
       field: 'status',
       sortable: true,
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_STATUS_LABEL} tooltipContent="" />,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_STATUS_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_STATUS_LABEL_TOOLTIP}
+        />
+      ),
       render: (value: GapStatus) => getStatusLabel(value),
       width: '10%',
     },
     {
       field: '@timestamp',
       sortable: true,
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_EVENT_TIME_LABEL} tooltipContent="" />,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_EVENT_TIME_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_EVENT_TIME_LABEL_TOOLTIP}
+        />
+      ),
       render: (value: Gap['@timestamp']) => (
         <FormattedDate value={value} fieldName={'@timestamp'} />
       ),
@@ -72,7 +82,10 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     {
       field: 'in_progress_intervals',
       name: (
-        <TableHeaderTooltipCell title={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL} tooltipContent="" />
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_MANUAL_FILL_TASKS_LABEL_TOOLTIP}
+        />
       ),
       render: (value: Gap['in_progress_intervals']) => {
         if (!value || !value.length) return null;
@@ -86,7 +99,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
       name: (
         <TableHeaderTooltipCell
           title={i18n.GAPS_TABLE_EVENT_TIME_COVERED_LABEL}
-          tooltipContent=""
+          tooltipContent={i18n.GAPS_TABLE_EVENT_TIME_COVERED_LABEL_TOOLTIP}
         />
       ),
       render: (item: Gap) => {
@@ -106,7 +119,7 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem style={{ maxWidth: '40px' }}>
+            <EuiFlexItem css={{ maxWidth: '40px' }}>
               <EuiProgress value={value} max={100} size="xs" />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -115,7 +128,12 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
     },
     {
       field: 'range',
-      name: <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_RANGE_LABEL} tooltipContent={''} />,
+      name: (
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_GAP_RANGE_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_GAP_RANGE_LABEL_TOOLTIP}
+        />
+      ),
       render: (value: Gap['range']) => (
         <>
           <FormattedDate value={value?.gte} fieldName={'start'} />
@@ -129,7 +147,10 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
       field: 'total_gap_duration_ms',
       sortable: true,
       name: (
-        <TableHeaderTooltipCell title={i18n.GAPS_TABLE_GAP_DURATION_TOOLTIP} tooltipContent={''} />
+        <TableHeaderTooltipCell
+          title={i18n.GAPS_TABLE_GAP_DURATION_LABEL}
+          tooltipContent={i18n.GAPS_TABLE_GAP_DURATION_LABEL_TOOLTIP}
+        />
       ),
       render: (value: Gap['total_gap_duration_ms']) => (
         <> {value != null ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}</>

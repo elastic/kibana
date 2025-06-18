@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 
-import { type Output } from '../../../../../../../common/types';
+import { SyncStatus, type Output } from '../../../../../../../common/types';
 
 import { useGetRemoteSyncedIntegrationsStatusQuery } from '../../../../hooks';
 
@@ -16,6 +16,16 @@ import { IntegrationStatusBadge } from './integration_status_badge';
 
 interface Props {
   output: Output;
+}
+
+export function getIntegrationStatus(statuses: SyncStatus[]): SyncStatus {
+  return statuses.some((current) => current === SyncStatus.FAILED)
+    ? SyncStatus.FAILED
+    : statuses.some((current) => current === SyncStatus.WARNING)
+    ? SyncStatus.WARNING
+    : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
+    ? SyncStatus.SYNCHRONIZING
+    : SyncStatus.COMPLETED;
 }
 
 export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ output }) => {
@@ -36,21 +46,24 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
     if (!error && !syncedIntegrationsStatus) {
       return 'SYNCHRONIZING';
     }
-
-    const syncCompleted =
-      syncedIntegrationsStatus?.integrations.every(
-        (integration) => integration.sync_status === 'completed'
-      ) &&
-      Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).every(
-        (asset) => asset.sync_status === 'completed'
-      );
+    const installedSyncedIntegrations = (syncedIntegrationsStatus?.integrations ?? []).filter(
+      (integration) =>
+        !(
+          integration.install_status?.main === 'not_installed' &&
+          integration.install_status?.remote === 'not_installed'
+        )
+    );
+    const statuses = [
+      ...(installedSyncedIntegrations.map((integration) => integration.sync_status) || []),
+      ...Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).map(
+        (asset) => asset.sync_status
+      ),
+    ];
+    const integrationStatus = getIntegrationStatus(statuses).toUpperCase();
 
     const newStatus =
-      (error as any)?.message || syncedIntegrationsStatus?.error
-        ? 'FAILED'
-        : syncCompleted
-        ? 'COMPLETED'
-        : 'SYNCHRONIZING';
+      (error as any)?.message || syncedIntegrationsStatus?.error ? 'FAILED' : integrationStatus;
+
     return newStatus;
   }, [output, syncedIntegrationsStatus, error]);
 
@@ -79,6 +92,9 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
               : syncedIntegrationsStatus
           }
           outputName={output.name}
+          syncUninstalledIntegrations={
+            output.type === 'remote_elasticsearch' && output?.sync_uninstalled_integrations
+          }
         />
       )}
     </>

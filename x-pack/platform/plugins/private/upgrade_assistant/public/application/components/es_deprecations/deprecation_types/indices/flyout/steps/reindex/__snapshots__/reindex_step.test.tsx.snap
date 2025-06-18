@@ -11,7 +11,7 @@ exports[`ReindexStep renders 1`] = `
           values={
             Object {
               "docsLink": <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/docs-reindex.html#reindex-from-remote"
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
                 target="_blank"
               >
                 Learn more
@@ -40,6 +40,7 @@ exports[`ReindexStep renders 1`] = `
             "aliases": Array [],
             "indexName": "myIndex",
             "isClosedIndex": false,
+            "isFollowerIndex": false,
             "isFrozen": false,
             "isInDataStream": false,
             "isReadonly": false,
@@ -70,23 +71,28 @@ exports[`ReindexStep renders 1`] = `
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
       >
-        <EuiButton
-          color="primary"
-          data-test-subj="startReindexingButton"
-          disabled={false}
-          fill={true}
-          isLoading={false}
-          onClick={[MockFunction]}
+        <EuiFlexItem
+          grow={false}
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
 </Fragment>
@@ -104,7 +110,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           values={
             Object {
               "docsLink": <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/docs-reindex.html#reindex-from-remote"
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
                 target="_blank"
               >
                 Learn more
@@ -133,6 +139,7 @@ exports[`ReindexStep renders for frozen indices 1`] = `
             "aliases": Array [],
             "indexName": "myIndex",
             "isClosedIndex": false,
+            "isFollowerIndex": false,
             "isFrozen": true,
             "isInDataStream": false,
             "isReadonly": false,
@@ -163,23 +170,28 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
       >
-        <EuiButton
-          color="primary"
-          data-test-subj="startReindexingButton"
-          disabled={false}
-          fill={true}
-          isLoading={false}
-          onClick={[MockFunction]}
+        <EuiFlexItem
+          grow={false}
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
 </Fragment>

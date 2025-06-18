@@ -86,7 +86,7 @@ export const NavigationPanel: FC = () => {
               className={panelClasses}
               hasShadow
               borderRadius="none"
-              paddingSize="m"
+              paddingSize="none"
               data-test-subj={getTestSubj(selectedNode)}
             >
               {getContent()}

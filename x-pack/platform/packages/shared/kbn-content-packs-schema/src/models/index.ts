@@ -5,10 +5,40 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
-import type { SavedObject } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
-import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
+import { ContentPackSavedObject, SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
+
+export * from './api';
+export * from './saved_object';
+
+export const SUPPORTED_ENTRY_TYPE: Record<ContentPackEntry['type'], string> = {
+  ...SUPPORTED_SAVED_OBJECT_TYPE,
+};
+
+export type SupportedEntryType = keyof typeof SUPPORTED_ENTRY_TYPE;
+
+export const isSupportedFile = (rootDir: string, filepath: string) => {
+  return Object.values(SUPPORTED_ENTRY_TYPE).some(
+    (dir) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+  );
+};
+
+export const getEntryTypeByFile = (rootDir: string, filepath: string): SupportedEntryType => {
+  const entry = Object.entries(SUPPORTED_ENTRY_TYPE).find(
+    ([t, dir]) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+  ) as [SupportedEntryType, string] | undefined;
+
+  if (!entry) {
+    throw new Error(`Unknown entry type for filepath [${filepath}]`);
+  }
+
+  return entry[0];
+};
+
+export const isSupportedEntryType = (type: string) => {
+  return type in SUPPORTED_ENTRY_TYPE;
+};
 
 export interface ContentPackManifest {
   name: string;
@@ -22,38 +52,19 @@ export const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object
   version: z.string(),
 });
 
+export type ContentPackEntry = ContentPackSavedObject;
+
 export interface ContentPack extends ContentPackManifest {
   entries: ContentPackEntry[];
 }
 
-type ContentPackDashboard = SavedObject<DashboardAttributes>;
-type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
-export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
-
-export type ContentPackEntry = ContentPackSavedObject;
-
-export interface ContentPackIncludeObjects {
-  objects: {
-    dashboards: string[];
-  };
+export interface ContentPackPreviewEntry {
+  type: string;
+  id: string;
+  title: string;
+  errors: Array<{ severity: 'fatal' | 'warning'; message: string }>;
 }
 
-export interface ContentPackIncludeAll {
-  all: {};
+export interface ContentPackPreview extends ContentPackManifest {
+  entries: ContentPackPreviewEntry[];
 }
-
-export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
-
-const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ dashboards: z.array(z.string()) }),
-});
-const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
-
-export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
-  return contentPackIncludeAllSchema.safeParse(value).success;
-};
-
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.union([
-  contentPackIncludeObjectsSchema,
-  contentPackIncludeAllSchema,
-]);

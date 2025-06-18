@@ -55,6 +55,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await deleteSavedObject();
     });
 
+    it('Only redirect', async () => {
+      await browser.get(deployment.getHostPort() + `/app/cloud/onboarding`);
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/observability/landing');
+    });
+
     it('Redirect and save token', async () => {
       await browser.get(
         deployment.getHostPort() +
@@ -180,6 +189,113 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           migration: {
             value: true,
             type: 'other',
+          },
+        },
+      });
+    });
+
+    it('Redirect and save search project subtype at creation time', async () => {
+      const resourceDataString = '{"project":{"search":{"type":"vector"}}}';
+
+      await browser.get(
+        deployment.getHostPort() +
+          `/app/cloud/onboarding?onboarding_token=vector&resource_data=${resourceDataString}&next=${encodeURIComponent(
+            '/app/security/get_started'
+          )}#some=hash-value`
+      );
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/security/get_started');
+      expect(currentURL.hash).to.eql('#some=hash-value');
+
+      const {
+        body: { onboardingData, resourceData },
+      } = await supertest
+        .get('/internal/cloud/solution')
+        .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'cloud')
+        .set('elastic-api-version', '1')
+        .expect(200);
+      expect(onboardingData).to.eql({
+        token: 'vector',
+      });
+
+      expect(resourceData).to.eql({
+        project: {
+          search: {
+            type: 'vector',
+          },
+        },
+      });
+    });
+
+    it('Redirect and update search project subtype', async () => {
+      const resourceDataString = '{"project":{"search":{"type":"vector"}}}';
+
+      await browser.get(
+        deployment.getHostPort() +
+          `/app/cloud/onboarding?onboarding_token=token&resource_data=${resourceDataString}&next=${encodeURIComponent(
+            '/app/security/get_started'
+          )}#some=hash-value`
+      );
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/security/get_started');
+      expect(currentURL.hash).to.eql('#some=hash-value');
+
+      const {
+        body: { onboardingData, resourceData },
+      } = await supertest
+        .get('/internal/cloud/solution')
+        .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'cloud')
+        .set('elastic-api-version', '1')
+        .expect(200);
+
+      expect(onboardingData).to.eql({
+        token: 'token',
+      });
+
+      expect(resourceData).to.eql({
+        project: {
+          search: {
+            type: 'vector',
+          },
+        },
+      });
+
+      const resourceDataStringUpdated = '{"project":{"search":{"type":"general"}}}';
+
+      await browser.get(
+        deployment.getHostPort() +
+          `/app/cloud/onboarding?resource_data=${resourceDataStringUpdated}&next=${encodeURIComponent(
+            '/app/security/get_started'
+          )}#some=hash-value`
+      );
+
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+
+      const {
+        body: { onboardingData: onboardingDataUpdated, resourceData: resourceDataUpdated },
+      } = await supertest
+        .get('/internal/cloud/solution')
+        .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'cloud')
+        .set('elastic-api-version', '1')
+        .expect(200);
+
+      expect(onboardingDataUpdated).to.eql({
+        token: 'token',
+      });
+
+      expect(resourceDataUpdated).to.eql({
+        project: {
+          search: {
+            type: 'general',
           },
         },
       });

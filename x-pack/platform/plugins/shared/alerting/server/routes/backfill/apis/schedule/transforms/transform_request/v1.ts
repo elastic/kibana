@@ -10,9 +10,8 @@ import type { ScheduleBackfillRequestBodyV1 } from '../../../../../../../common/
 import type { ScheduleBackfillParams } from '../../../../../../application/backfill/methods/schedule/types';
 
 export const transformRequest = (request: ScheduleBackfillRequestBodyV1): ScheduleBackfillParams =>
-  request.map(({ rule_id, start, end, run_actions }) => ({
+  request.map(({ rule_id, run_actions, ranges }) => ({
     ruleId: rule_id,
-    start,
-    end,
     runActions: run_actions,
+    ranges,
   }));

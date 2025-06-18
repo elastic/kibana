@@ -124,7 +124,7 @@ export const ADD_OPEN_API_SPEC_DESCRIPTION = i18n.translate(
   'xpack.automaticImport.step.dataStream.addOpenApiSpecDescription',
   {
     defaultMessage:
-      'To successfully ingest CEL data from an API, provide the associated OpenAPI Specification (OAS) file.',
+      'To successfully ingest data from an API, provide the associated OpenAPI Specification (OAS) file.',
   }
 );
 export const TECH_PREVIEW = i18n.translate(

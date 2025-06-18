@@ -112,6 +112,23 @@ paths:
             oneOf:
               - type: string
               - type: array
+        - name: useLogicalAndFor
+          description: >
+            Specifies whether to apply logical AND filtering for specific fields.
+            Accepts either a string with values "tags" or "locations" or an array containing both.
+          in: query
+          schema:
+            oneOf:
+              - type: string
+                enum:
+                  - tags
+                  - locations
+              - type: array
+                items:
+                  type: string
+                  enum:
+                    - tags
+                    - locations
       responses:
         '200':
           description: A successful response.
@@ -1088,6 +1105,13 @@ components:
           items:
             type: string
           description: An array of tags.
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+          description: >
+            Key-value pairs of labels to associate with the monitor.
+            Labels can be used for filtering and grouping monitors.
         timeout:
           type: number
           default: 16

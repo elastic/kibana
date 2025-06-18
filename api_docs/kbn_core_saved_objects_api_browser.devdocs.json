@@ -343,22 +343,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
           }
         ],
         "children": [
@@ -429,22 +413,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
           }
         ],
         "children": [
@@ -526,22 +494,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/tutorial.tsx"
           }
         ],
         "children": [
@@ -1053,14 +1005,6 @@
             "path": "src/core/public/index.ts"
           },
           {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/kibana_services.ts"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/kibana_services.ts"
-          },
-          {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
           },
@@ -1247,10 +1191,6 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
-              {
-                "plugin": "home",
-                "path": "src/platform/plugins/shared/home/public/application/components/home_app.tsx"
-              },
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/saved_objects_service.mock.ts"
@@ -2930,14 +2870,6 @@
           {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/wizard/search_selection/show_saved_object.test.ts"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
-          },
-          {
-            "plugin": "home",
-            "path": "src/platform/plugins/shared/home/public/application/components/tutorial/saved_objects_installer.tsx"
           },
           {
             "plugin": "@kbn/core",

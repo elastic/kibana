@@ -8,12 +8,22 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
+  FindingsMisconfigurationPanelExpandableFlyoutPropsPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
+  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
+} from '@kbn/cloud-security-posture';
+import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
+import {
+  GenericEntityDetailsPanel,
+  GenericEntityDetailsPanelKey,
+} from './entity_details/generic_details_left';
+import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
+import { GenericEntityPanel } from './entity_details/generic_right';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
-import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
-import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -55,16 +65,24 @@ import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
   HostPanelKey,
   ServicePanelKey,
-  UniversalEntityPanelKey,
+  GenericEntityPanelKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import {
+  MisconfigurationFindingsPanelKey,
+  MisconfigurationFindingsPreviewPanelKey,
+} from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import {
+  VulnerabilityFindingsPanelKey,
+  VulnerabilityFindingsPreviewPanelKey,
+} from './csp_details/vulnerabilities_flyout/constants';
+import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -189,16 +207,22 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: UniversalEntityPanelKey,
+    key: GenericEntityPanelKey,
     component: (props) => (
-      <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+      <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: GenericEntityDetailsPanelKey,
+    component: (props) => (
+      <GenericEntityDetailsPanel {...(props as GenericEntityDetailsExpandableFlyoutProps).params} />
     ),
   },
   {
     key: MisconfigurationFindingsPanelKey,
     component: (props) => (
       <FindingsMisconfigurationPanel
-        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
       />
     ),
   },
@@ -208,6 +232,30 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
+    ),
+  },
+  {
+    key: MisconfigurationFindingsPreviewPanelKey,
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsPreview).params}
+      />
+    ),
+  },
+  {
+    key: VulnerabilityFindingsPanelKey,
+    component: (props) => (
+      <FindingsVulnerabilityPanel
+        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview).params}
+      />
+    ),
+  },
+  {
+    key: VulnerabilityFindingsPreviewPanelKey,
+    component: (props) => (
+      <FindingsVulnerabilityPanel
+        {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
+      />
     ),
   },
 ];

@@ -6,7 +6,7 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
@@ -56,9 +56,13 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
-  const title = internalApi.getDisplayOptions()?.noPanelTitle
-    ? undefined
-    : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() };
+  const title = useMemo(
+    () =>
+      internalApi.getDisplayOptions()?.noPanelTitle
+        ? undefined
+        : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() },
+    [api.defaultTitle$, api.title$, internalApi]
+  );
   const description = api.description$?.getValue()
     ? {
         'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
@@ -67,7 +71,7 @@ export function LensEmbeddableComponent({
 
   return (
     <div
-      style={{ width: '100%', height: '100%' }}
+      css={{ width: '100%', height: '100%', position: 'relative' }}
       data-rendering-count={renderCount + 1}
       data-render-complete={hasRendered}
       {...title}

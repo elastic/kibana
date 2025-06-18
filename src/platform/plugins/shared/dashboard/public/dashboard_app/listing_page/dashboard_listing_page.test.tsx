@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper, ComponentType } from 'enzyme';
+import { faker } from '@faker-js/faker';
 import { I18nProvider } from '@kbn/i18n-react';
+import { render, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
@@ -41,95 +41,71 @@ jest.mock('../no_data/dashboard_app_no_data', () => {
   };
 });
 
-function makeDefaultProps(): DashboardListingPageProps {
-  return {
-    redirectTo: jest.fn(),
-    kbnUrlStateStorage: createKbnUrlStateStorage(),
-  };
-}
-
-function mountWith({ props: incomingProps }: { props?: DashboardListingPageProps }) {
-  const props = incomingProps ?? makeDefaultProps();
-  const wrappingComponent: React.FC<{
-    children: React.ReactNode;
-  }> = ({ children }) => {
-    return <I18nProvider>{children}</I18nProvider>;
-  };
-  const component = mount(<DashboardListingPage {...props} />, {
-    wrappingComponent: wrappingComponent as ComponentType<{}>,
-  });
-  return { component, props };
-}
+const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
+  render(
+    <DashboardListingPage
+      redirectTo={jest.fn()}
+      kbnUrlStateStorage={createKbnUrlStateStorage()}
+      {...props}
+    />,
+    { wrapper: I18nProvider }
+  );
 
 test('renders analytics no data page when the user has no data view', async () => {
   mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
   dataService.dataViews.hasData.hasUserDataView = jest.fn().mockResolvedValue(false);
 
-  let component: ReactWrapper;
-  await act(async () => {
-    ({ component } = mountWith({}));
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(DashboardAppNoDataPage).toHaveBeenCalled();
   });
-  component!.update();
-  expect(DashboardAppNoDataPage).toHaveBeenCalled();
 });
 
 test('initialFilter is passed through if title is not provided', async () => {
-  const props = makeDefaultProps();
-  props.initialFilter = 'filterPassThrough';
+  const initialFilter = faker.lorem.word();
 
-  let component: ReactWrapper;
+  renderDashboardListingPage({ initialFilter });
 
-  await act(async () => {
-    ({ component } = mountWith({ props }));
+  await waitFor(() => {
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter }),
+      expect.any(Object) // react context
+    );
   });
-
-  component!.update();
-  expect(DashboardListing).toHaveBeenCalledWith(
-    expect.objectContaining({ initialFilter: 'filterPassThrough' }),
-    expect.any(Object) // react context
-  );
 });
 
 test('When given a title that matches multiple dashboards, filter on the title', async () => {
-  const title = 'search by title';
-  const props = makeDefaultProps();
-  props.title = title;
-
   (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue(
     undefined
   );
 
-  let component: ReactWrapper;
+  const redirectTo = jest.fn();
 
-  await act(async () => {
-    ({ component } = mountWith({ props }));
+  renderDashboardListingPage({ title: 'search by title', redirectTo });
+
+  await waitFor(() => {
+    expect(redirectTo).not.toHaveBeenCalled();
+    expect(DashboardListing).toHaveBeenCalledWith(
+      expect.objectContaining({ initialFilter: 'search by title' }),
+      expect.any(Object) // react context
+    );
   });
-  component!.update();
-
-  expect(props.redirectTo).not.toHaveBeenCalled();
-  expect(DashboardListing).toHaveBeenCalledWith(
-    expect.objectContaining({ initialFilter: 'search by title' }),
-    expect.any(Object) // react context
-  );
 });
 
 test('When given a title that matches one dashboard, redirect to dashboard', async () => {
-  const title = 'search by title';
-  const props = makeDefaultProps();
-  props.title = title;
   (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue({
     id: 'you_found_me',
   });
+  const redirectTo = jest.fn();
 
-  let component: ReactWrapper;
+  renderDashboardListingPage({ title: 'search by title', redirectTo });
 
-  await act(async () => {
-    ({ component } = mountWith({ props }));
-  });
-  component!.update();
-  expect(props.redirectTo).toHaveBeenCalledWith({
-    destination: 'dashboard',
-    id: 'you_found_me',
-    useReplace: true,
+  await waitFor(() => {
+    expect(redirectTo).toHaveBeenCalledWith({
+      destination: 'dashboard',
+      id: 'you_found_me',
+      useReplace: true,
+    });
   });
 });

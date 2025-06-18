@@ -11,7 +11,7 @@ import type { Alert } from '@kbn/alerting-types';
 import { CellValue } from './render_cell';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BADGE_TEST_ID } from './kibana_alert_severity_cell_renderer';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
@@ -41,10 +41,11 @@ describe('CellValue', () => {
       field1: 'value1',
     };
     const columnId = 'columnId';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -58,10 +59,11 @@ describe('CellValue', () => {
       field1: 'value1',
     };
     const columnId = 'field1';
+    const schema = 'string';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -75,10 +77,11 @@ describe('CellValue', () => {
       field1: 123,
     };
     const columnId = 'field1';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -92,10 +95,11 @@ describe('CellValue', () => {
       field1: [true, false],
     };
     const columnId = 'field1';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -109,10 +113,11 @@ describe('CellValue', () => {
       field1: [1, 2],
     };
     const columnId = 'field1';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -126,10 +131,11 @@ describe('CellValue', () => {
       field1: [null, null],
     };
     const columnId = 'field1';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -143,10 +149,11 @@ describe('CellValue', () => {
       field1: [{ subField1: 'value1', subField2: 'value2' }],
     };
     const columnId = 'field1';
+    const schema = 'unknown';
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -160,10 +167,11 @@ describe('CellValue', () => {
       [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
     };
     const columnId = ALERT_RULE_PARAMETERS;
+    const schema = 'unknown';
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
@@ -179,13 +187,32 @@ describe('CellValue', () => {
       [ALERT_SEVERITY]: ['low'],
     };
     const columnId = ALERT_SEVERITY;
+    const schema = 'unknown';
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} packages={packages} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
       </TestProviders>
     );
 
     expect(getByTestId(BADGE_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should use datetime renderer', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      [TIMESTAMP]: [1735754400000],
+    };
+    const columnId = TIMESTAMP;
+    const schema = 'datetime';
+
+    const { getByText } = render(
+      <TestProviders>
+        <CellValue alert={alert} columnId={columnId} packages={packages} schema={schema} />
+      </TestProviders>
+    );
+
+    expect(getByText('Jan 1, 2025 @ 18:00:00.000')).toBeInTheDocument();
   });
 });

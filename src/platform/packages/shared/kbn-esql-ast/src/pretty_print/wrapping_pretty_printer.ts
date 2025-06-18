@@ -705,7 +705,18 @@ export class WrappingPrettyPrinter {
         ? `${breakOptions ? '\n' + optionIndent : ' '}${options}`
         : '';
 
-      const txt = `${cmd}${argsWithWhitespace}${optionsWithWhitespace}`;
+      let txt = `${cmd}${argsWithWhitespace}${optionsWithWhitespace}`;
+      const formatting = node.formatting;
+
+      if (formatting) {
+        if (formatting.left) {
+          const comments = LeafPrinter.commentList(formatting.left);
+
+          if (comments) {
+            txt = `${comments} ${txt}`;
+          }
+        }
+      }
 
       return { txt, lines: args.lines /* add options lines count */ };
     })

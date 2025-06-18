@@ -17,10 +17,11 @@ import {
   apiPublishesTitle,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
-import type { LinksParentApi } from '../types';
+import type { LinksParentApi, LinksSerializedState } from '../types';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
@@ -42,9 +43,29 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
     });
     if (!runtimeState) return;
 
-    await embeddable.addNewPanel({
+    function serializeState() {
+      if (!runtimeState) return;
+
+      if (runtimeState.savedObjectId !== undefined) {
+        return {
+          rawState: {
+            savedObjectId: runtimeState.savedObjectId,
+          },
+        };
+      }
+
+      const { attributes, references } = serializeLinksAttributes(runtimeState);
+      return {
+        rawState: {
+          attributes,
+        },
+        references,
+      };
+    }
+
+    await embeddable.addNewPanel<LinksSerializedState>({
       panelType: CONTENT_ID,
-      initialState: runtimeState,
+      serializedState: serializeState(),
     });
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],

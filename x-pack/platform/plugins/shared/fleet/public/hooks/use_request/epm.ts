@@ -36,6 +36,8 @@ import type {
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
   BulkUninstallPackagesRequest,
+  DeletePackageDatastreamAssetsRequest,
+  DeletePackageDatastreamAssetsResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -125,6 +127,20 @@ export const useGetLimitedPackages = () => {
     path: epmRouteService.getListLimitedPath(),
     method: 'get',
     version: API_VERSIONS.public.v1,
+  });
+};
+export const useUpdateCustomIntegration = async (
+  id: string,
+  fields: { readMeData: string | undefined; categories: string[] }
+) => {
+  return sendRequest({
+    path: epmRouteService.getUpdateCustomIntegrationsPath(id),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: {
+      readMeData: fields.readMeData,
+      categories: fields.categories,
+    },
   });
 };
 
@@ -450,6 +466,18 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
     method: 'post',
     version: API_VERSIONS.public.v1,
     body,
+  });
+};
+
+export const sendDeletePackageDatastreamAssets = (
+  { pkgName, pkgVersion }: DeletePackageDatastreamAssetsRequest['params'],
+  query: DeletePackageDatastreamAssetsRequest['query']
+) => {
+  return sendRequest<DeletePackageDatastreamAssetsResponse>({
+    path: epmRouteService.getDeletePackageDatastreamAssets(pkgName, pkgVersion),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    query,
   });
 };
 

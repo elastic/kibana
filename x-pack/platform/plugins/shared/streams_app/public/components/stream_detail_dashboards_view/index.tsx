@@ -15,22 +15,23 @@ import {
   EuiSearchBar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { AddDashboardFlyout } from './add_dashboard_flyout';
-import { DashboardsTable } from './dashboard_table';
+import type { Streams } from '@kbn/streams-schema';
+import React, { useMemo, useState } from 'react';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../common/feature_flags';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
-import { ImportContentPackFlyout } from './import_content_pack_flyout';
-import { ExportContentPackFlyout } from './export_content_pack_flyout';
-import { FeatureFlagStreamsContentPackUIEnabled } from '../../../common/feature_flags';
 import { useKibana } from '../../hooks/use_kibana';
+import { AddDashboardFlyout } from './add_dashboard_flyout';
+import { DashboardsTable } from './dashboard_table';
+import { ExportContentPackFlyout } from './export_content_pack_flyout';
+import { ImportContentPackFlyout } from './import_content_pack_flyout';
 
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }) {
   const [query, setQuery] = useState('');
 
@@ -38,8 +39,8 @@ export function StreamDetailDashboardsView({
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
   const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
 
-  const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
-  const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
+  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
+  const { addDashboards, removeDashboards } = useDashboardsApi(definition.stream.name);
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
@@ -56,7 +57,14 @@ export function StreamDetailDashboardsView({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
-    core: { featureFlags },
+    core: {
+      featureFlags,
+      application: {
+        capabilities: {
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canLinkAssets },
+        },
+      },
+    },
   } = useKibana();
 
   const renderContentPackItems = featureFlags.getBooleanValue(
@@ -124,6 +132,7 @@ export function StreamDetailDashboardsView({
                   iconType="importAction"
                   iconSide="left"
                   color="primary"
+                  disabled={!canLinkAssets}
                   onClick={() => setIsPopoverOpen(true)}
                 >
                   {i18n.translate(
@@ -182,6 +191,7 @@ export function StreamDetailDashboardsView({
             <EuiButton
               data-test-subj="streamsAppStreamDetailAddDashboardButton"
               iconType="plusInCircle"
+              disabled={!canLinkAssets}
               onClick={() => {
                 setIsAddDashboardFlyoutOpen(true);
               }}
@@ -199,7 +209,8 @@ export function StreamDetailDashboardsView({
           dashboards={filteredDashboards}
           loading={dashboardsFetch.loading}
           selectedDashboards={selectedDashboards}
-          setSelectedDashboards={setSelectedDashboards}
+          setSelectedDashboards={canLinkAssets ? setSelectedDashboards : undefined}
+          dataTestSubj="streamsAppStreamDetailDashboardsTable"
         />
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout

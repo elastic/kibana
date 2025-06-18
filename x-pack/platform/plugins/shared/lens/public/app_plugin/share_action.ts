@@ -69,6 +69,7 @@ export function getLocatorParams(
   isDirty: boolean
 ) {
   const references = extractReferencesFromState({
+    activeDatasourceId,
     activeDatasources: Object.keys(datasourceStates).reduce(
       (acc, datasourceId) => ({
         ...acc,

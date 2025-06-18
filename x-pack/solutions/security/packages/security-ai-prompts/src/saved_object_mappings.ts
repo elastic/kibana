@@ -45,7 +45,7 @@ export const promptType: SavedObjectsType = {
   hidden: false,
   management: {
     importableAndExportable: true,
-    visibleInManagement: false,
+    visibleInManagement: true, // <--show in management
   },
   namespaceType: 'agnostic',
   mappings: promptSavedObjectMappings,

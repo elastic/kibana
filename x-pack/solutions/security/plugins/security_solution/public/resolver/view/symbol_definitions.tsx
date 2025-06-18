@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
 
@@ -435,7 +435,7 @@ const SymbolsAndShapes = memo(({ id, isDarkMode }: { id: string; isDarkMode: boo
  */
 // eslint-disable-next-line react/display-name
 export const SymbolDefinitions = memo(({ id }: { id: string }) => {
-  const isDarkMode = useDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   return (
     <HiddenSVG>
       <defs>

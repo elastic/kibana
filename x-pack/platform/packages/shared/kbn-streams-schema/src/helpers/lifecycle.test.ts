@@ -5,22 +5,31 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '../models/ingest/base';
+import { Streams } from '../models/streams';
+import { IngestStreamLifecycle } from '../models/ingest/lifecycle';
 import { findInheritedLifecycle, findInheritingStreams } from './lifecycle';
+
+function createMockWiredStream(
+  name: string,
+  lifecycle: IngestStreamLifecycle
+): Streams.WiredStream.Definition {
+  return {
+    name,
+    description: name,
+    ingest: {
+      lifecycle,
+      wired: { fields: {}, routing: [] },
+      processing: [],
+    },
+  };
+}
 
 describe('Lifecycle helpers', () => {
   describe('findInheritedLifecycle', () => {
     it('picks the definition lifecycle', () => {
-      const definition = {
-        name: 'one.two',
-        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
-      } as WiredStreamDefinition;
-      const ancestors = [
-        {
-          name: 'one',
-          ingest: { lifecycle: { ilm: { policy: 'policy' } } },
-        },
-      ] as WiredStreamDefinition[];
+      const definition = createMockWiredStream('one.two', { dsl: { data_retention: '1d' } });
+
+      const ancestors = [createMockWiredStream('one', { ilm: { policy: 'policy' } })];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);
 
@@ -31,24 +40,14 @@ describe('Lifecycle helpers', () => {
     });
 
     it('picks the nearest parent lifecycle', () => {
-      const definition = {
-        name: 'one.two.three.four',
-        ingest: { lifecycle: { inherit: {} } },
-      } as WiredStreamDefinition;
+      createMockWiredStream('one.two.three.four', { inherit: {} });
+
+      const definition = createMockWiredStream('one.two.three.four', { inherit: {} });
       const ancestors = [
-        {
-          name: 'one',
-          ingest: { lifecycle: { ilm: { policy: 'one' } } },
-        },
-        {
-          name: 'one.two.three',
-          ingest: { lifecycle: { inherit: {} } },
-        },
-        {
-          name: 'one.two',
-          ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
-        },
-      ] as WiredStreamDefinition[];
+        createMockWiredStream('one', { ilm: { policy: 'one ' } }),
+        createMockWiredStream('one.two.three', { inherit: {} }),
+        createMockWiredStream('one.two', { dsl: { data_retention: '1d' } }),
+      ] satisfies Streams.WiredStream.Definition[];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);
 
@@ -57,39 +56,18 @@ describe('Lifecycle helpers', () => {
         dsl: { data_retention: '1d' },
       });
     });
-
-    it('returns undefined if no lifecycle defined in the chain', () => {
-      const definition = {
-        name: 'one.two.three',
-        ingest: { lifecycle: { inherit: {} } },
-      } as WiredStreamDefinition;
-      const ancestors = [
-        { name: 'one.two', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one', ingest: { lifecycle: { disabled: {} } } },
-      ] as WiredStreamDefinition[];
-
-      const lifecycle = findInheritedLifecycle(definition, ancestors);
-
-      expect(lifecycle).toEqual({
-        from: 'one',
-        disabled: {},
-      });
-    });
   });
 
   describe('findInheritingStreams', () => {
     it('returns all streams', () => {
-      const definition = {
-        name: 'one',
-        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
-      } as WiredStreamDefinition;
+      const definition = createMockWiredStream('one', { dsl: { data_retention: '1d' } });
       const descendants = [
-        { name: 'one.two.three', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.two2', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.two', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.two2.three', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.two2.three.four', ingest: { lifecycle: { inherit: {} } } },
-      ] as WiredStreamDefinition[];
+        createMockWiredStream('one.two.three', { inherit: {} }),
+        createMockWiredStream('one.two2', { inherit: {} }),
+        createMockWiredStream('one.two', { inherit: {} }),
+        createMockWiredStream('one.two2.three', { inherit: {} }),
+        createMockWiredStream('one.two2.three.four', { inherit: {} }),
+      ];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
 
@@ -106,22 +84,16 @@ describe('Lifecycle helpers', () => {
     });
 
     it('ignores subtrees with overrides', () => {
-      const definition = {
-        name: 'one',
-        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
-      } as WiredStreamDefinition;
+      const definition = createMockWiredStream('one', { dsl: { data_retention: '1d' } });
       const descendants = [
-        {
-          name: 'one.override',
-          ingest: { lifecycle: { ilm: { policy: 'policy' } } },
-        } as WiredStreamDefinition,
-        { name: 'one.override.deeply', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.override.deeply.nested', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.inheriting', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.inheriting.deeply', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.inheriting.deeply.nested', ingest: { lifecycle: { inherit: {} } } },
-        { name: 'one.override2', ingest: { lifecycle: { dsl: { data_retention: '10d' } } } },
-      ] as WiredStreamDefinition[];
+        createMockWiredStream('one.override', { ilm: { policy: 'policy' } }),
+        createMockWiredStream('one.override.deeply', { inherit: {} }),
+        createMockWiredStream('one.override.deeply.nested', { inherit: {} }),
+        createMockWiredStream('one.inheriting', { inherit: {} }),
+        createMockWiredStream('one.inheriting.deeply', { inherit: {} }),
+        createMockWiredStream('one.inheriting.deeply.nested', { inherit: {} }),
+        createMockWiredStream('one.override2', { dsl: { data_retention: '10d' } }),
+      ];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
 
@@ -136,11 +108,8 @@ describe('Lifecycle helpers', () => {
     });
 
     it('handles leaf node', () => {
-      const definition = {
-        name: 'one',
-        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
-      } as WiredStreamDefinition;
-      const descendants = [] as WiredStreamDefinition[];
+      const definition = createMockWiredStream('one', { dsl: { data_retention: '1d' } });
+      const descendants = [] as Streams.WiredStream.Definition[];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
 

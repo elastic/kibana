@@ -44,7 +44,7 @@ export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.1';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
-const INTERVAL = '30m';
+const DEFAULT_INTERVAL = '30m';
 const TIMEOUT = '10m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 10000;
@@ -52,10 +52,16 @@ const MIN_AGENTS_FOR_ROLLOUT = 10;
 const MIN_UPGRADE_DURATION_SECONDS = 600;
 type AgentWithDefinedVersion = Agent & { agent: FleetServerAgentMetadata };
 
+interface AutomaticAgentUpgradeTaskConfig {
+  taskInterval?: string;
+  retryDelays?: string[];
+}
+
 interface AutomaticAgentUpgradeTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: AutomaticAgentUpgradeTaskConfig;
 }
 
 interface AutomaticAgentUpgradeTaskStartContract {
@@ -72,11 +78,14 @@ export class AutomaticAgentUpgradeTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
-  private retryDelays: string[] = [];
+  private taskInterval: string;
+  private retryDelays: string[];
 
   constructor(setupContract: AutomaticAgentUpgradeTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.retryDelays = config.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -103,7 +112,7 @@ export class AutomaticAgentUpgradeTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[AutomaticAgentUpgradeTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[AutomaticAgentUpgradeTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -111,7 +120,7 @@ export class AutomaticAgentUpgradeTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -150,8 +159,6 @@ export class AutomaticAgentUpgradeTask {
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-    this.retryDelays =
-      appContextService.getConfig()?.autoUpgrades?.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
     try {
       await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);

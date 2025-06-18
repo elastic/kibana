@@ -12,7 +12,8 @@ import { ApmOtelFields, SpanKind } from './apm_otel_fields';
 import { ApmOtelError } from './apm_otel_error';
 import { Entity } from '../../entity';
 import { HttpMethod } from '../span';
-
+import { ApmApplicationMetricFields } from '../apm_fields';
+import { OtelMetricset } from './apm_otel_metrics';
 export class OtelInstance extends Entity<ApmOtelFields> {
   span({
     name,
@@ -108,6 +109,13 @@ export class OtelInstance extends Entity<ApmOtelFields> {
       // rpc
       'attributes.rpc.method': method,
       'attributes.rpc.service': service,
+    });
+  }
+
+  appMetrics(metrics: ApmApplicationMetricFields) {
+    return new OtelMetricset<ApmOtelFields>({
+      ...this.fields,
+      ...metrics,
     });
   }
 

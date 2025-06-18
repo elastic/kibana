@@ -43,6 +43,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -57,7 +58,6 @@ import {
   LegendColorPickerWrapperContext,
   getLayers,
   getLegendActions,
-  canFilter,
   getFilterClickData,
   getFilterEventData,
   getPartitionTheme,
@@ -95,6 +95,7 @@ export type PartitionVisComponentProps = Omit<
   visParams: PartitionVisParams;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   renderComplete: IInterpreterRenderHandlers['done'];
   interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -303,7 +304,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     },
   });
 
-  const isDarkMode = props.chartsThemeService.useDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const layers = useMemo(
     () =>
       getLayers(
@@ -340,13 +341,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () =>
       interactive
         ? getLegendActions(
-            canFilter,
+            props.hasCompatibleActions,
             getLegendActionEventData(visData),
             handleLegendAction,
             columnCellValueActions,
             visParams,
             visData,
-            services.data.actions,
             services.fieldFormats
           )
         : undefined,
@@ -355,10 +355,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getLegendActionEventData,
       handleLegendAction,
       interactive,
-      services.data.actions,
       services.fieldFormats,
       visData,
       visParams,
+      props.hasCompatibleActions,
     ]
   );
 

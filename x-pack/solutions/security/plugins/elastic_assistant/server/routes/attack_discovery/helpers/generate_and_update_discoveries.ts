@@ -14,10 +14,15 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  AttackDiscoveryGenerationConfig,
+  CreateAttackDiscoveryAlertsParams,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { updateAttackDiscoveries } from './helpers';
 import { handleGraphError } from '../post/helpers/handle_graph_error';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
@@ -25,6 +30,7 @@ import { generateAttackDiscoveries } from './generate_discoveries';
 
 export interface GenerateAndUpdateAttackDiscoveriesParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
+  attackDiscoveryAlertsEnabled?: boolean;
   authenticatedUser: AuthenticatedUser;
   config: AttackDiscoveryGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
@@ -37,6 +43,7 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
 
 export const generateAndUpdateAttackDiscoveries = async ({
   actionsClient,
+  attackDiscoveryAlertsEnabled,
   authenticatedUser,
   config,
   dataClient,
@@ -49,7 +56,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
-  const { apiConfig, end, filter, replacements, size, start } = config;
+  const { apiConfig, connectorName, end, filter, replacements, size, start } = config;
 
   let latestReplacements: Replacements = { ...replacements };
 
@@ -84,7 +91,51 @@ export const generateAndUpdateAttackDiscoveries = async ({
       telemetry,
     });
 
-    return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };
+    let storedAttackDiscoveries = attackDiscoveries;
+    if (attackDiscoveryAlertsEnabled) {
+      const alertsContextCount = anonymizedAlerts.length;
+
+      /**
+       * Deduplicate attackDiscoveries before creating alerts
+       *
+       * We search for duplicates within the ad hoc index only,
+       * because there will be no duplicates in the scheduled index due to the
+       * fact that we use schedule ID (for the schedules) and
+       * user ID (for the ad hoc generations) as part of the alert ID hash
+       * generated for the deduplication purposes
+       */
+      const indexPattern = dataClient.getAdHocAlertsIndexPattern();
+      const dedupedDiscoveries = await deduplicateAttackDiscoveries({
+        esClient,
+        attackDiscoveries: attackDiscoveries ?? [],
+        connectorId: apiConfig.connectorId,
+        indexPattern,
+        logger,
+        ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
+        spaceId: dataClient.spaceId,
+      });
+      storedAttackDiscoveries = dedupedDiscoveries;
+
+      const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
+        alertsContextCount,
+        anonymizedAlerts,
+        apiConfig,
+        attackDiscoveries: dedupedDiscoveries,
+        connectorName: connectorName ?? apiConfig.connectorId,
+        generationUuid: executionUuid,
+        replacements: latestReplacements,
+      };
+      await dataClient.createAttackDiscoveryAlerts({
+        authenticatedUser,
+        createAttackDiscoveryAlertsParams,
+      });
+    }
+
+    return {
+      anonymizedAlerts,
+      attackDiscoveries: storedAttackDiscoveries,
+      replacements: latestReplacements,
+    };
   } catch (err) {
     await handleGraphError({
       apiConfig,

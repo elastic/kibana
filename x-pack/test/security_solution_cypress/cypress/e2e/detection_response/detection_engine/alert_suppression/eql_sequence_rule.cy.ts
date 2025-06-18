@@ -29,7 +29,6 @@ import {
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 const SUPPRESS_BY_FIELDS = ['agent.type'];
@@ -39,11 +38,7 @@ describe(
   {
     tags: ['@ess', '@serverless'],
     env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForSequenceEqlRuleEnabled',
-        ])}`,
-      ],
+      kbnServerArgs: [],
     },
   },
   () => {
@@ -72,9 +67,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
 
         fillAboutRuleMinimumAndContinue(rule);

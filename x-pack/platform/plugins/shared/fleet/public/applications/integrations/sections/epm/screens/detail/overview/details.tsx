@@ -33,7 +33,7 @@ import type {
   RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
+import { useConfig, useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
@@ -68,6 +68,7 @@ const Replacements = euiStyled(EuiFlexItem)`
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { notifications } = useStartServices();
+  const config = useConfig();
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const {
     changelog,
@@ -139,9 +140,15 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     entries(packageInfo.assets).forEach(([service, typeToParts]) => {
       // Filter out assets we are not going to display
       // (currently we only display Kibana and Elasticsearch assets)
+      // and filter out dashboard references if configured
       const filteredTypes: AssetTypeToParts = entries(typeToParts).reduce(
         (acc: any, [asset, value]) => {
-          if (DisplayedAssetsFromPackageInfo[service].includes(asset)) acc[asset] = value;
+          if (
+            DisplayedAssetsFromPackageInfo[service].includes(asset) &&
+            (!config?.hideDashboards || asset !== 'dashboard')
+          ) {
+            acc[asset] = value;
+          }
           return acc;
         },
         {}
@@ -284,7 +291,11 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       description: (
         <>
           <p>
-            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            {changelog.length > 0 ? (
+              <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            ) : (
+              '-'
+            )}
           </p>
         </>
       ),
@@ -292,6 +303,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
 
     return items;
   }, [
+    changelog,
     packageCategories,
     packageInfo.assets,
     packageInfo.conditions?.elastic?.subscription,
@@ -302,6 +314,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.source?.license,
     packageInfo.owner.type,
     packageInfo.version,
+    config?.hideDashboards,
     toggleLicenseModal,
     toggleNoticeModal,
     toggleChangelogModal,

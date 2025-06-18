@@ -20,6 +20,7 @@ describe('createLoghubGenerator', () => {
     parser = {
       getTimestamp: (line: string) => parseInt(line, 10),
       replaceTimestamp: (line: string, timestamp: number) => line,
+      getFakeMetadata: () => ({}),
     };
   });
 

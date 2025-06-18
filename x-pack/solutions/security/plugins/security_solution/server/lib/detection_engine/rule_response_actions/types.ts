@@ -26,6 +26,7 @@ export type Alert = ParsedTechnicalFields & {
         name: string;
       };
     };
+    space_ids?: string[];
   };
 };
 

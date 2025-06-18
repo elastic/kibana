@@ -172,7 +172,7 @@ const MetadataSummaryListWrapper = ({
           {visibleMetadata
             .filter((metadataValue) => metadataValue)
             .map((metadataValue) => (
-              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
+              <EuiFlexItem key={metadataValue.field} grow={false} css={{ width: '200px' }}>
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>

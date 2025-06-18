@@ -7,7 +7,13 @@
 
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AuthenticatedUser,
+  Logger,
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
@@ -20,6 +26,7 @@ import {
 import { omit, some } from 'lodash';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
@@ -47,6 +54,7 @@ import {
 } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
+  ensureDedicatedInferenceEndpoint,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
@@ -73,7 +81,9 @@ export function getResourceName(resource: string) {
 export interface AIAssistantServiceOpts {
   logger: Logger;
   kibanaVersion: string;
+  elserInferenceId?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  soClientPromise: Promise<SavedObjectsClientContract>;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
@@ -107,7 +117,7 @@ export class AIAssistantService {
   private initialized: boolean;
   private isInitializing: boolean = false;
   private getElserId: GetElser;
-  private modelIdOverride: boolean = false;
+  private elserInferenceId?: string;
   private conversationsDataStream: DataStreamSpacesAdapter;
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
@@ -125,6 +135,8 @@ export class AIAssistantService {
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
     this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
+    this.elserInferenceId = options.elserInferenceId;
+
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
@@ -150,6 +162,7 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: attackDiscoveryFieldMap,
     });
+
     this.defendInsightsDataStream = this.createDataStream({
       resource: 'defendInsights',
       kibanaVersion: options.kibanaVersion,
@@ -358,34 +371,11 @@ export class AIAssistantService {
             ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID
       );
 
-      // Used only for testing purposes
-      if (this.modelIdOverride && !isUsingDedicatedInferenceEndpoint) {
-        this.knowledgeBaseDataStream = await this.rolloverDataStream(
-          ELASTICSEARCH_ELSER_INFERENCE_ID,
-          ASSISTANT_ELSER_INFERENCE_ID
-        );
-      } else if (isUsingDedicatedInferenceEndpoint) {
+      if (isUsingDedicatedInferenceEndpoint) {
         this.knowledgeBaseDataStream = await this.rolloverDataStream(
           ASSISTANT_ELSER_INFERENCE_ID,
           ELASTICSEARCH_ELSER_INFERENCE_ID
         );
-
-        // Delete the old inference endpoint
-        const elserId = await this.getElserId();
-        try {
-          await esClient.inference.delete({
-            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
-            // it's being used in the mapping so we need to force delete
-            force: true,
-          });
-          this.options.logger.debug(
-            `Deleted existing inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}'`
-          );
-        } catch (error) {
-          this.options.logger.debug(
-            `Error deleting inference endpoint ${ASSISTANT_ELSER_INFERENCE_ID} for ELSER model '${elserId}':\n${error}`
-          );
-        }
       } else {
         // We need to make sure that the data stream is created with the correct mappings
         this.knowledgeBaseDataStream = this.createDataStream({
@@ -397,15 +387,23 @@ export class AIAssistantService {
               type: 'semantic_text',
               array: false,
               required: false,
+              ...(this.elserInferenceId ? { inference_id: this.elserInferenceId } : {}),
             },
-          },
-          settings: {
-            // force new semantic_text field behavior
-            'index.mapping.semantic_text.use_legacy_format': false,
           },
           writeIndexOnly: true,
         });
       }
+
+      const soClient = await this.options.soClientPromise;
+
+      await ensureDedicatedInferenceEndpoint({
+        elserId: await this.getElserId(),
+        esClient,
+        getTrainedModelsProvider: () =>
+          this.options.ml.trainedModelsProvider({} as KibanaRequest, soClient),
+        logger: this.options.logger,
+        index: this.knowledgeBaseDataStream.name,
+      });
 
       await this.knowledgeBaseDataStream.install({
         esClient,
@@ -578,18 +576,11 @@ export class AIAssistantService {
         getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
       }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
-    // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
-    if (opts?.modelIdOverride != null) {
-      const modelIdOverride = opts.modelIdOverride;
-      this.getElserId = async () => modelIdOverride;
-      this.modelIdOverride = true;
-    }
-
-    // If a V2 KnowledgeBase has never been initialized or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
+    // If a V2 KnowledgeBase has never been initialized we need to reinitialize all persistence resources to make sure
     // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
-    // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
+    // with a different model/mappings.
     // Added hasInitializedV2KnowledgeBase to prevent the console noise from re-init on each KB request
-    if (!this.hasInitializedV2KnowledgeBase || opts?.modelIdOverride != null) {
+    if (!this.hasInitializedV2KnowledgeBase) {
       await this.initializeResources();
       this.hasInitializedV2KnowledgeBase = true;
     }
@@ -611,7 +602,7 @@ export class AIAssistantService {
       getProductDocumentationStatus: this.getProductDocumentationStatus.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
-      modelIdOverride: !!opts.modelIdOverride,
+      elserInferenceId: this.options.elserInferenceId,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
@@ -620,7 +611,9 @@ export class AIAssistantService {
   }
 
   public async createAttackDiscoveryDataClient(
-    opts: CreateAIAssistantClientParams
+    opts: CreateAIAssistantClientParams & {
+      adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
+    }
   ): Promise<AttackDiscoveryDataClient | null> {
     const res = await this.checkResourcesInstallation(opts);
 
@@ -629,6 +622,7 @@ export class AIAssistantService {
     }
 
     return new AttackDiscoveryDataClient({
+      adhocAttackDiscoveryDataClient: opts.adhocAttackDiscoveryDataClient,
       logger: this.options.logger.get('attackDiscovery'),
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -642,6 +636,8 @@ export class AIAssistantService {
     opts: CreateAttackDiscoveryScheduleDataClientParams
   ): Promise<AttackDiscoveryScheduleDataClient | null> {
     return new AttackDiscoveryScheduleDataClient({
+      actionsClient: opts.actionsClient,
+      logger: opts.logger,
       rulesClient: opts.rulesClient,
     });
   }

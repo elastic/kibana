@@ -34,6 +34,22 @@ export const getRecommendedQueries = ({
       ),
       queryString: `${fromCommand}\n  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
     },
+    {
+      label: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.label',
+        {
+          defaultMessage: 'Search all fields',
+        }
+      ),
+      description: i18n.translate(
+        'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.description',
+        {
+          defaultMessage: 'Use WHERE to filter/search data',
+        }
+      ),
+      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
+      sortText: 'D',
+    },
     ...(timeField
       ? [
           {

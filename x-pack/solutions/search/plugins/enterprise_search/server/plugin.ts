@@ -100,7 +100,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       licensing,
       guidedOnboarding,
       cloud,
-      searchConnectors,
+      contentConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
@@ -317,7 +317,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [])
+        getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

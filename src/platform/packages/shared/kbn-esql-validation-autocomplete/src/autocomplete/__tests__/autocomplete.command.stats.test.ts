@@ -25,7 +25,7 @@ const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any',
   agg: true,
 });
 
-const allEvaFunctions = getFunctionSignaturesByReturnType(
+const allEvalFunctions = getFunctionSignaturesByReturnType(
   Location.STATS,
   'any',
   {
@@ -49,7 +49,14 @@ const allGroupingFunctions = getFunctionSignaturesByReturnType(
 );
 
 // types accepted by the AVG function
-const avgTypes: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+
+export const EXPECTED_FOR_EMPTY_EXPRESSION = [
+  'col0 = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvalFunctions,
+];
 
 describe('autocomplete.suggest', () => {
   describe('STATS <aggregates> [ BY <grouping> ]', () => {
@@ -63,12 +70,7 @@ describe('autocomplete.suggest', () => {
 
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
-        const expected = [
-          'var0 = ',
-          ...allAggFunctions,
-          ...allGroupingFunctions,
-          ...allEvaFunctions,
-        ];
+        const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
@@ -83,7 +85,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=/', [
           ...allAggFunctions,
           ...allGroupingFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
         ]);
       });
 
@@ -139,16 +141,16 @@ describe('autocomplete.suggest', () => {
           ),
         ]);
         await assertSuggestions('from a | stats avg(/', [
-          ...getFieldNamesByType(avgTypes),
-          ...getFunctionSignaturesByReturnType(Location.EVAL, avgTypes, {
+          ...getFieldNamesByType(AVG_TYPES),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
-          ...getFieldNamesByType(avgTypes),
+          ...getFieldNamesByType(AVG_TYPES),
           ...getFunctionSignaturesByReturnType(
             Location.EVAL,
-            avgTypes,
+            AVG_TYPES,
             { scalar: true },
             undefined,
             ['round']
@@ -193,8 +195,8 @@ describe('autocomplete.suggest', () => {
 
       test('inside function argument list', async () => {
         await assertSuggestions('from a | stats avg(b/) by stringField', [
-          ...getFieldNamesByType(avgTypes),
-          ...getFunctionSignaturesByReturnType(Location.EVAL, avgTypes, {
+          ...getFieldNamesByType(AVG_TYPES),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
         ]);
@@ -210,17 +212,17 @@ describe('autocomplete.suggest', () => {
       });
 
       test('increments suggested variable name counter', async () => {
-        await assertSuggestions('from a | eval var0=round(b), var1=round(c) | stats /', [
-          'var2 = ',
+        await assertSuggestions('from a | eval col0=round(b), col1=round(c) | stats /', [
+          'col2 = ',
           // TODO verify that this change is ok
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
-        await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
-          'var2 = ',
+        await assertSuggestions('from a | stats col0=min(b),col1=c,/', [
+          'col2 = ',
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
       });
@@ -243,12 +245,10 @@ describe('autocomplete.suggest', () => {
 
         it('suggests after operator', async () => {
           await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField != /', [
-            ...getFieldNamesByType(['boolean', 'text', 'keyword']),
-            ...getFunctionSignaturesByReturnType(
-              Location.STATS_WHERE,
-              ['boolean', 'text', 'keyword'],
-              { scalar: true }
-            ),
+            ...getFieldNamesByType(['text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, ['text', 'keyword'], {
+              scalar: true,
+            }),
           ]);
         });
 
@@ -298,10 +298,7 @@ describe('autocomplete.suggest', () => {
 
             await assertSuggestions(
               `FROM a | STATS AVG(longField) WHERE ${expression} /`,
-              suggestions
-                .map(({ text }) => text)
-                // match operator not yet supported, see https://github.com/elastic/elasticsearch/issues/116261
-                .filter((text) => text !== ': $0')
+              suggestions.map(({ text }) => text)
             );
           });
 
@@ -327,10 +324,10 @@ describe('autocomplete.suggest', () => {
     describe('... BY <grouping>', () => {
       test('on space after "BY" keyword', async () => {
         const expected = [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
-          ...allEvaFunctions,
+          ...getFieldNamesByType('any'),
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ];
 
@@ -339,27 +336,76 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=min(b) by /', expected);
       });
 
+      test('no grouping functions as args to scalar function', async () => {
+        const suggestions = await suggest('FROM a | STATS a=MIN(b) BY ACOS(/)');
+        expect(
+          suggestions.some((s) => allGroupingFunctions.map((f) => f.text).includes(s.text))
+        ).toBe(false);
+      });
+
+      test('on partial column name', async () => {
+        const expected = [
+          'col0 = ',
+          getDateHistogramCompletionItem(),
+          ...allEvalFunctions,
+          ...allGroupingFunctions,
+        ];
+
+        await assertSuggestions('from a | stats a=max(b) BY keywor/', [
+          ...expected,
+          ...getFieldNamesByType('any'),
+        ]);
+
+        await assertSuggestions('from a | stats a=max(b) BY integerField, keywor/', [
+          ...expected,
+          ...getFieldNamesByType('any').filter((f) => f !== 'integerField'),
+        ]);
+      });
+
+      test('on complete column name', async () => {
+        await assertSuggestions('from a | stats a=max(b) by integerField/', [
+          'col0 = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
+
+        await assertSuggestions('from a | stats a=max(b) by keywordField, integerField/', [
+          'col0 = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
+      });
+
+      test('attaches field range', async () => {
+        const suggestions = await suggest('from a | stats a=max(b) by integerF/');
+        const fieldSuggestion = suggestions.find((s) => s.text === 'integerField');
+        expect(fieldSuggestion?.rangeToReplace).toEqual({
+          start: 27,
+          end: 35,
+        });
+      });
+
       test('on space after grouping field', async () => {
         await assertSuggestions('from a | stats a=c by d /', [', ', '| ']);
       });
 
       test('after comma "," in grouping fields', async () => {
-        const fields = getFieldNamesByType('any').map((field) => `${field} `);
+        const fields = getFieldNamesByType('any');
         await assertSuggestions('from a | stats a=c by d, /', [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
           ...fields,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats a=min(b),/', [
-          'var0 = ',
+          'col0 = ',
           ...allAggFunctions,
-          ...allEvaFunctions,
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
-          'var0 = ',
+          'col0 = ',
           getDateHistogramCompletionItem(),
           ...fields,
           ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -378,16 +424,16 @@ describe('autocomplete.suggest', () => {
           // categorize is not compatible here
           ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
         ]);
-        await assertSuggestions('from a | stats avg(b) by var0 = /', [
+        await assertSuggestions('from a | stats avg(b) by col0 = /', [
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
-          ...allEvaFunctions,
+          ...getFieldNamesByType('any'),
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
-        await assertSuggestions('from a | stats avg(b) by c, var0 = /', [
+        await assertSuggestions('from a | stats avg(b) by c, col0 = /', [
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
-          ...allEvaFunctions,
+          ...getFieldNamesByType('any'),
+          ...allEvalFunctions,
           ...allGroupingFunctions,
         ]);
       });
@@ -398,7 +444,7 @@ describe('autocomplete.suggest', () => {
         });
 
         await assertSuggestions(
-          'from a | stats var0 = AVG(doubleField) BY var1 = BUCKET(dateField, 1 day) /',
+          'from a | stats col0 = AVG(doubleField) BY col1 = BUCKET(dateField, 1 day) /',
           [', ', '| '],
           { triggerCharacter: ' ' }
         );
@@ -431,10 +477,14 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(
           'from a | stats avg(b) by BUCKET(dateField, /50, ?_tstart, ?_tend)',
           [
-            ...getLiteralsByType('time_literal'),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'date_period'], {
-              scalar: true,
-            }),
+            ...getLiteralsByType('time_duration'),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['integer', 'date_period', 'time_duration'],
+              {
+                scalar: true,
+              }
+            ),
           ]
         );
       });
@@ -486,7 +536,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `??function` option', async () => {
-          const suggestions = await suggest('FROM a | STATS var0 = /', {
+          const suggestions = await suggest('FROM a | STATS col0 = /', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -555,7 +605,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `?interval` option', async () => {
-          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+          const suggestions = await suggest('FROM index_a | STATS BY BUCKET(@timestamp, /)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [
@@ -580,7 +630,7 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `Create control` option when ? is being typed', async () => {
-          const suggestions = await suggest('FROM a | STATS PERCENTILE(bytes, ?/)', {
+          const suggestions = await suggest('FROM index_b | STATS PERCENTILE(bytes, ?/)', {
             callbacks: {
               canSuggestVariables: () => true,
               getVariables: () => [],

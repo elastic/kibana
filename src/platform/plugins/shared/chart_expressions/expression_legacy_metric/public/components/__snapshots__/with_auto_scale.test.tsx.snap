@@ -27,10 +27,6 @@ exports[`AutoScale withAutoScale renders 1`] = `
                 
                 .css-4vd3s2-autoScaleWrapperStyle{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;max-width:100%;max-height:100%;overflow:hidden;line-height:1.5;}
               </style>
-              <style
-                data-styled="active"
-                data-styled-version="5.3.11"
-              />
             </head>,
             "ctr": 1,
             "insertionPoint": undefined,

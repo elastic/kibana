@@ -1,0 +1,88 @@
+{
+  "id": "@kbn/core-mount-utils-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-mount-utils-browser-internal",
+        "id": "def-public.MountWrapperComponentProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "MountWrapperComponentProps",
+        "description": [],
+        "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-mount-utils-browser-internal",
+            "id": "def-public.MountWrapperComponentProps.mount",
+            "type": "Function",
+            "tags": [],
+            "label": "mount",
+            "description": [],
+            "signature": [
+              "(element: HTMLElement) => ",
+              "UnmountCallback"
+            ],
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-mount-utils-browser-internal",
+                "id": "def-public.MountWrapperComponentProps.mount.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-mount-utils-browser-internal",
+            "id": "def-public.MountWrapperComponentProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

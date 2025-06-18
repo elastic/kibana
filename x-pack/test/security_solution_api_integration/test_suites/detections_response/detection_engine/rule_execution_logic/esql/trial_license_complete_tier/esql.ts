@@ -31,6 +31,7 @@ import {
   previewRuleWithExceptionEntries,
   removeRandomValuedPropertiesFromAlert,
   patchRule,
+  runSoonRule,
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
@@ -686,12 +687,65 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
+
+            runSoonRule(supertest, createdRule.id);
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(120);
+          });
+
+          it('should create alerts from all events(2 x max_signals)', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2020-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
             await patchRule(supertest, log, {
               id: createdRule.id,
               enabled: false,
             });
             await patchRule(supertest, log, {
               id: createdRule.id,
+              to: new Date().toISOString(),
               enabled: true,
             });
 
@@ -706,6 +760,131 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             expect(alertsResponse.hits.hits.length).toBe(120);
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
+          it('should create alerts from all events(2 x max_signals) when used timestamp override', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+              timestamp_override: 'event.ingested',
+              timestamp_override_fallback_disabled: false,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2019-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+              'event.ingested': '2020-10-28T05:55:00.000Z',
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
+          });
+
+          it('should create alerts from all events(2 x max_signals) when used timestamp override without fallback', async () => {
+            const id = uuidv4();
+            const rule: EsqlRuleCreateProps = {
+              ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
+              query: `from ecs_compliant metadata _id ${internalIdPipe(id)}`,
+              from: '2020-10-28T05:15:00.000Z',
+              to: new Date().toISOString(),
+              max_signals: 100,
+              enabled: true,
+              timestamp_override: 'event.ingested',
+              timestamp_override_fallback_disabled: true,
+            };
+
+            const docs = Array.from({ length: 200 }, (_, i) => ({
+              id,
+              '@timestamp': '2019-10-28T05:55:00.000Z',
+              agent: {
+                name: `test_${i}`,
+                type: 'auditbeat',
+              },
+              'event.ingested': '2020-10-28T05:55:00.000Z',
+            }));
+
+            await indexListOfDocuments(docs);
+
+            const createdRule = await createRule(supertest, log, rule);
+
+            const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              // rule has warning, alerts were truncated, thus "partial failure" status
+              RuleExecutionStatusEnum['partial failure'],
+              200
+            );
+            expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+            // re-trigger rule execution
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              enabled: false,
+            });
+            await patchRule(supertest, log, {
+              id: createdRule.id,
+              to: new Date().toISOString(),
+              enabled: true,
+            });
+
+            const alertsResponse = await getOpenAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum.succeeded,
+              300,
+              new Date()
+            );
+
+            expect(alertsResponse.hits.hits.length).toBe(200);
           });
 
           it('should not create more than max_signals alerts from single document when paginate through results', async () => {
@@ -754,14 +933,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -788,8 +960,8 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             expect(agentTypeCounts).toEqual({
-              auditbeat: 101, // because we use max_signals +1 as ES|QL limit we ending up with 101 alerts
-              filebeat: 99,
+              auditbeat: 100,
+              filebeat: 100,
             });
           });
 
@@ -840,14 +1012,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,
@@ -909,14 +1074,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: false,
-            });
-            await patchRule(supertest, log, {
-              id: createdRule.id,
-              enabled: true,
-            });
+            runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
               supertest,

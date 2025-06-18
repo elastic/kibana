@@ -41,6 +41,9 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    customIntegrations?: {
+      enabled?: boolean;
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
@@ -86,10 +89,15 @@ export interface FleetConfigType {
   };
   createArtifactsBulkBatchSize?: number;
   autoUpgrades?: {
+    taskInterval?: string;
     retryDelays?: string[];
+  };
+  syncIntegrations?: {
+    taskInterval?: string;
   };
   integrationsHomeOverride?: string;
   prereleaseEnabledByDefault?: boolean;
+  hideDashboards?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

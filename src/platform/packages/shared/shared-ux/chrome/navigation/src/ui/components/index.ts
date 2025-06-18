@@ -16,3 +16,5 @@ export type { Props as RecentlyAccessedProps } from './recently_accessed';
 export { FeedbackBtn } from './feedback_btn';
 
 export type { PanelContent, PanelComponentProps } from './panel';
+
+export { NavigationSectionUI } from './navigation_section';

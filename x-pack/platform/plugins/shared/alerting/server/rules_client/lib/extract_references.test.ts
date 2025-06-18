@@ -74,6 +74,7 @@ describe('extractReferences', () => {
           refId: 'dashboard_0',
         },
       ],
+      investigation_guide: { blob: '' },
     });
 
     expect(result.references).toEqual([

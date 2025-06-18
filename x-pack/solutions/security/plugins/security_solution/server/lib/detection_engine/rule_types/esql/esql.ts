@@ -12,6 +12,7 @@ import { cloneDeep } from 'lodash';
 import {
   computeIsESQLQueryAggregating,
   getIndexListFromEsqlQuery,
+  getMvExpandFields,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
@@ -23,7 +24,8 @@ import {
   rowToDocument,
   mergeEsqlResultInSource,
   getMvExpandUsage,
-  updateExcludedIds,
+  updateExcludedDocuments,
+  initiateExcludedDocuments,
   getSourceDocument,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
@@ -32,6 +34,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
+import type { ExcludedDocument, EsqlState } from './types';
 
 import {
   addToSearchAfterReturn,
@@ -50,6 +53,8 @@ import {
 import { bulkCreate } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
+const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
+
 export const esqlExecutor = async ({
   sharedParams,
   services,
@@ -60,7 +65,7 @@ export const esqlExecutor = async ({
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
-  state: Record<string, unknown>;
+  state: EsqlState;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   ruleExecutionTimeout?: string;
@@ -83,6 +88,27 @@ export const esqlExecutor = async ({
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
+    const isRuleAggregating = computeIsESQLQueryAggregating(ruleParams.query);
+    const hasMvExpand = getMvExpandFields(ruleParams.query).length > 0;
+    // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
+    const size = tuple.maxSignals + 1;
+
+    /**
+     * ES|QL returns results as a single page, max size of 10,000
+     * To mitigate this, we will use the maxSignals as a page size
+     * Wll keep track of the earlier found document ids and will exclude them in subsequent requests
+     * to avoid duplicates.
+     * This is a workaround until pagination is supported in ES|QL
+     * Since aggregating queries do not produce event ids, we will not exclude them.
+     * All alerts for aggregating queries are unique anyway
+     */
+    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments({
+      state,
+      isRuleAggregating,
+      tuple,
+      hasMvExpand,
+      query: ruleParams.query,
+    });
 
     /**
      * ES|QL returns results as a single page, max size of 10,000
@@ -97,6 +123,13 @@ export const esqlExecutor = async ({
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
+        if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
+          result.warningMessages.push(
+            `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}, some alerts might not have been created. Consider reducing the lookback time for the rule.`
+          );
+          break;
+        }
+
         const esqlRequest = buildEsqlSearchRequest({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
@@ -136,8 +169,6 @@ export const esqlExecutor = async ({
           `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
         );
 
-        const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
-
         const results = response.values.map((row) => rowToDocument(response.columns, row));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
@@ -148,6 +179,7 @@ export const esqlExecutor = async ({
           isRuleAggregating,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
           hasLoggedRequestsReachedLimit,
+          runtimeMappings: sharedParams.runtimeMappings,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -155,7 +187,7 @@ export const esqlExecutor = async ({
           licensing,
         });
 
-        const { expandedFieldsInResponse: expandedFields, hasMvExpand } = getMvExpandUsage(
+        const { expandedFieldsInResponse: expandedFields } = getMvExpandUsage(
           response.columns,
           completeRule.ruleParams.query
         );
@@ -205,6 +237,14 @@ export const esqlExecutor = async ({
             `Created ${bulkCreateResult.createdItemsCount} alerts. Suppressed ${bulkCreateResult.suppressedItemsCount} alerts`
           );
 
+          updateExcludedDocuments({
+            excludedDocuments,
+            sourceDocuments,
+            results,
+            isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+          });
+
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getSuppressionMaxSignalsWarning());
             break;
@@ -227,6 +267,14 @@ export const esqlExecutor = async ({
           addToSearchAfterReturn({ current: result, next: bulkCreateResult });
           ruleExecutionLogger.debug(`Created ${bulkCreateResult.createdItemsCount} alerts`);
 
+          updateExcludedDocuments({
+            excludedDocuments,
+            sourceDocuments,
+            results,
+            isRuleAggregating,
+            aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+          });
+
           if (bulkCreateResult.alertsWereTruncated) {
             result.warningMessages.push(getMaxSignalsWarning());
             break;
@@ -247,13 +295,6 @@ export const esqlExecutor = async ({
           break;
         }
 
-        updateExcludedIds({
-          excludedDocumentIds,
-          hasMvExpand,
-          sourceDocuments,
-          results,
-          isRuleAggregating,
-        });
         iteration++;
       }
     } catch (error) {
@@ -264,6 +305,14 @@ export const esqlExecutor = async ({
       result.success = false;
     }
 
-    return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
+    return {
+      ...result,
+      state: {
+        ...state,
+        excludedDocuments,
+        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
+      },
+      ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
+    };
   });
 };

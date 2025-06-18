@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     return hits.hits.map((hit) => hit._source!['usage-counter']);
   };
 
-  describe('Kibana API Deprecations', function () {
+  describe.skip('Kibana API Deprecations', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 

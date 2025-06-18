@@ -182,14 +182,14 @@ describe('Update Insights Route Handler', () => {
     it('should throw if retrieved insight is missing', async () => {
       const mockEndpointContext = createMockEndpointAppContext();
       fetchMock.mockResolvedValue([]); // Simulate not found
+      await callRoute({ insightId: 'nope' }, { name: 'test' }, undefined, mockEndpointContext);
 
-      try {
-        await callRoute({ insightId: 'nope' }, { name: 'test' }, undefined, mockEndpointContext);
-        throw new Error('Expected to throw'); // failsafe, if it doesn't throw no assertions will be made
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-        expect(err.message).toMatch(/Failed to retrieve insight/i);
-      }
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: expect.objectContaining({
+          message: expect.stringContaining('Failed to retrieve insight'),
+        }),
+      });
     });
   });
 

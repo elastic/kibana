@@ -93,7 +93,7 @@ describe('AssetInventoryDataClient', () => {
       expect(result).toEqual({ status: 'initializing' });
     });
 
-    it('returns DISABLED when host entity engine is missing', async () => {
+    it('returns DISABLED when generic entity engine is missing', async () => {
       (mockSecSolutionContext.getEntityStoreDataClient as unknown as jest.Mock).mockReturnValue({
         status: () => ({
           status: 'ready',
@@ -106,13 +106,13 @@ describe('AssetInventoryDataClient', () => {
       expect(result).toEqual({ status: 'disabled' });
     });
 
-    it('returns READY when documents have been processed', async () => {
+    it('returns READY when documents have been processed in the generic entity store', async () => {
       (mockSecSolutionContext.getEntityStoreDataClient as unknown as jest.Mock).mockReturnValue({
         status: () => ({
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 10, trigger_count: 5 } },
               ],
@@ -132,7 +132,7 @@ describe('AssetInventoryDataClient', () => {
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 1 } },
               ],
@@ -152,7 +152,7 @@ describe('AssetInventoryDataClient', () => {
           status: 'ready',
           engines: [
             {
-              type: 'host',
+              type: 'generic',
               components: [
                 { resource: 'transform', metadata: { documents_processed: 0, trigger_count: 0 } },
               ],

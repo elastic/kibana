@@ -8,7 +8,7 @@
  */
 
 import { isoToEpochSecsRt } from '.';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('isoToEpochSecsRt', () => {
   it('validates whether its input is a valid ISO timestamp', () => {

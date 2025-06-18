@@ -27,7 +27,7 @@ const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
 
   const ticks = useMemo(
     () => (
-      <EuiFlexGroup data-tests-subj="ticks" gutterSize="none">
+      <EuiFlexGroup data-tests-subj="ticks" gutterSize="none" responsive={false} wrap={false}>
         <div
           css={css`
             overflow: hidden;
@@ -52,7 +52,13 @@ const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
         width: ${WIDTH}px;
       `}
     >
-      <EuiFlexGroup data-test-subj="tactic" direction="column" gutterSize="none" wrap={false}>
+      <EuiFlexGroup
+        data-test-subj="tactic"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        wrap={false}
+      >
         <EuiFlexItem
           css={css`
             position: relative;

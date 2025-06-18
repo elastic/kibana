@@ -20,10 +20,17 @@ import {
   useEuiTheme,
   transparentize,
   EuiHorizontalRule,
+  EuiHideFor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
+import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
+
+import { CREATE_QUERY_RULE_SET_API_SNIPPET } from '../../../common/constants';
+
+import { useKibana } from '../../hooks/use_kibana';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
@@ -32,6 +39,7 @@ interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
+  const { application, share, console: consolePlugin } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const gradientOverlay = css({
     background: `linear-gradient(180deg, ${transparentize(
@@ -71,7 +79,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <h2>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.title"
-                    defaultMessage="Improve your search experience with targeted business logic"
+                    defaultMessage="Add custom business logic with query rules"
                   />
                 </h2>
               </EuiTitle>
@@ -80,7 +88,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <p>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.subtitle"
-                    defaultMessage="Add business logic to your queries to get customized results under different conditions."
+                    defaultMessage="Enhance search experiences with custom rules to filter and prioritize results based on your business logic."
                   />
                 </p>
               </EuiText>
@@ -202,26 +210,49 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner color="subdued" paddingSize="l">
-          <EuiTitle size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.queryRules.emptyPrompt.footer"
-                defaultMessage="Prefer to use the APIs?"
-              />
-            </span>
-          </EuiTitle>
-          &nbsp;
-          <EuiLink
-            data-test-subj="searchQueryRulesEmptyPromptFooterLink"
-            href={docLinks.queryRulesApi}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="xpack.queryRules.emptyPrompt.footerLink"
-              defaultMessage="Query Rules API documentation"
-            />
-          </EuiLink>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.queryRules.emptyPrompt.footer"
+                      defaultMessage="Prefer to use the APIs?"
+                    />
+                  </span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiHideFor sizes={['xs', 's']}>
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    application={application}
+                    sharePlugin={share ?? undefined}
+                    consolePlugin={consolePlugin ?? undefined}
+                    request={CREATE_QUERY_RULE_SET_API_SNIPPET}
+                    type="emptyButton"
+                    content={i18n.translate('xpack.queryRules.emptyPrompt.TryInConsoleLabel', {
+                      defaultMessage: 'Create in Console',
+                    })}
+                    showIcon
+                  />
+                </EuiFlexItem>
+              </EuiHideFor>
+            </EuiFlexGroup>
+
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="searchQueryRulesEmptyPromptFooterLink"
+                href={docLinks.queryRulesApi}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.queryRules.emptyPrompt.footerLink"
+                  defaultMessage="API reference"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </EuiFlexItem>

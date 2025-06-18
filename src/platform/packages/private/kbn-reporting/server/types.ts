@@ -8,7 +8,6 @@
  */
 
 import { Writable } from 'stream';
-
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -36,13 +35,18 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
   req: KibanaRequest
 ) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
+export interface RunTaskOpts<TaskPayloadType = BasePayload> {
+  jobId: string;
+  payload: TaskPayloadType;
+  request: KibanaRequest;
+  taskInstanceFields: TaskInstanceFields;
+  cancellationToken: CancellationToken;
+  stream: Writable;
+}
+
 // standard type for run task function of any ExportType implementation
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: TaskPayloadType,
-  taskInstanceFields: TaskInstanceFields,
-  cancellationToken: CancellationToken,
-  stream: Writable
+  opts: RunTaskOpts<TaskPayloadType>
 ) => Promise<TaskRunResult>;
 
 export interface TimeRangeParams {

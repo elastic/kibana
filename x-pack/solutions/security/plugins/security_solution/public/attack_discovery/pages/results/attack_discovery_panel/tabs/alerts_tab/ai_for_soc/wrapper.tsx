@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { EuiEmptyPrompt, EuiSkeletonLoading, EuiSkeletonRectangle } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { Table } from './table';
+import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { useFetchIntegrations } from '../../../../../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useKibana } from '../../../../../../../common/lib/kibana';
+import { useCreateDataView } from '../../../../../../../common/hooks/use_create_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../../../../data_view_manager/hooks/use_data_view';
+import { SourcererScopeName } from '../../../../../../../sourcerer/store/model';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../../../common/constants';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -22,12 +26,9 @@ const DATAVIEW_ERROR = i18n.translate(
   }
 );
 
-export const LOADING_PROMPT_TEST_ID = 'attack-discovery-alert-loading-prompt';
 export const ERROR_TEST_ID = 'attack-discovery-alert-error';
 export const SKELETON_TEST_ID = 'attack-discovery-alert-skeleton';
 export const CONTENT_TEST_ID = 'attack-discovery-alert-content';
-
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 interface AiForSOCAlertsTabProps {
   /**
@@ -46,9 +47,21 @@ interface AiForSOCAlertsTabProps {
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
-  const { data } = useKibana().services;
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
-  const [dataViewLoading, setDataViewLoading] = useState<boolean>(true);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const spaceId = useSpaceId();
+  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
+
+  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
+    dataViewSpec,
+    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
+  });
+
+  // TODO: use alert only data view when it is ready
+  // https://github.com/elastic/security-team/issues/12589
+  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
+  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
@@ -63,53 +76,34 @@ export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) =>
     [ruleData, ruleIsLoading]
   );
 
-  useEffect(() => {
-    let dv: DataView;
-    const createDataView = async () => {
-      dv = await data.dataViews.create(dataViewSpec);
-      setDataView(dv);
-      setDataViewLoading(false);
-    };
-    createDataView();
-
-    // clearing after leaving the page
-    return () => {
-      if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv?.id);
-      }
-    };
-  }, [data.dataViews]);
-
   return (
-    <EuiSkeletonLoading
-      data-test-subj={LOADING_PROMPT_TEST_ID}
+    <EuiSkeletonRectangle
+      data-test-subj={SKELETON_TEST_ID}
+      height={400}
       isLoading={integrationIsLoading || dataViewLoading}
-      loadingContent={
-        <EuiSkeletonRectangle data-test-subj={SKELETON_TEST_ID} height={400} width="100%" />
-      }
-      loadedContent={
-        <>
-          {!dataView || !dataView.id ? (
-            <EuiEmptyPrompt
-              color="danger"
-              data-test-subj={ERROR_TEST_ID}
-              iconType="error"
-              title={<h2>{DATAVIEW_ERROR}</h2>}
+      width="100%"
+    >
+      <>
+        {!dataView || !dataView.id ? (
+          <EuiEmptyPrompt
+            color="danger"
+            data-test-subj={ERROR_TEST_ID}
+            iconType="error"
+            title={<h2>{DATAVIEW_ERROR}</h2>}
+          />
+        ) : (
+          <div data-test-subj={CONTENT_TEST_ID}>
+            <Table
+              dataView={dataView}
+              id={id}
+              packages={installedPackages}
+              query={query}
+              ruleResponse={ruleResponse}
             />
-          ) : (
-            <div data-test-subj={CONTENT_TEST_ID}>
-              <Table
-                dataView={dataView}
-                id={id}
-                packages={installedPackages}
-                query={query}
-                ruleResponse={ruleResponse}
-              />
-            </div>
-          )}
-        </>
-      }
-    />
+          </div>
+        )}
+      </>
+    </EuiSkeletonRectangle>
   );
 });
 

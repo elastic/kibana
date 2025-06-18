@@ -72,6 +72,7 @@ export const secAll: Role = {
           securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
+          securitySolutionSiemMigrations: ['all'],
         },
         spaces: ['*'],
       },
