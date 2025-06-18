@@ -47,8 +47,7 @@
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects",
-      "cases"
+      "savedObjects"
     ]
   }
 }

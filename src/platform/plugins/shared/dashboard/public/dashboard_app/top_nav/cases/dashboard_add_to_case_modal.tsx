@@ -15,11 +15,7 @@ import type {
   PageAttachmentPersistedState,
   CaseAttachmentsWithoutOwner,
 } from '@kbn/cases-plugin/public';
-import {
-  AttachmentType,
-  PAGE_ATTACHMENT_TYPE,
-  type CasesPermissions,
-} from '@kbn/cases-plugin/common';
+import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { getDashboardTitle } from '../../_dashboard_app_strings';
@@ -133,8 +129,8 @@ const OpenAddToCaseOpenModal = ({
     };
     const attachments = {
       persistableStateAttachmentState,
-      persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
-      type: AttachmentType.persistableState,
+      persistableStateAttachmentTypeId: '.page',
+      type: 'persistableState',
     };
     casesModal.open({
       getAttachments: () => [attachments] as CaseAttachmentsWithoutOwner,
