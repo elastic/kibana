@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { number } from 'io-ts';
 import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   CaseTransformedAttributesRt,
@@ -54,7 +55,7 @@ describe('case types', () => {
     };
 
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
+      (acc, type) => ({ ...acc, ...type.type.props, total_comments: number, total_alerts: number }),
       {}
     );
 
