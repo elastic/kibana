@@ -58,7 +58,8 @@ export const mapRecommendedQueriesFromExtensions = (
     return {
       label: extension.name,
       text: extension.query,
-      detail: extension.description ?? '',
+      detail: extension.name ?? '',
+      ...(extension.description ? { documentation: { value: extension.description } } : {}),
       kind: 'Issue',
       sortText: 'D',
     };
@@ -89,7 +90,10 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
       return {
         label: recommendedQuery.name,
         text: `|${queryParts.slice(1).join('|')}`,
-        detail: recommendedQuery.description ?? '',
+        detail: recommendedQuery.name ?? '',
+        ...(recommendedQuery.description
+          ? { documentation: { value: recommendedQuery.description } }
+          : {}),
         kind: 'Issue',
         sortText: 'D',
       };
