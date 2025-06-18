@@ -231,7 +231,7 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-const getIntegrations = async (core: CoreStart) => {
+const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
   const fleetCapabilities = core.application.capabilities.fleet;
   if (!fleetCapabilities?.read) {
     return [];
@@ -263,7 +263,7 @@ const getIntegrations = async (core: CoreStart) => {
 
 export const getESQLSources = async (
   dataViews: DataViewsPublicPluginStart,
-  core: CoreStart,
+  core: Pick<CoreStart, 'application' | 'http'>,
   areRemoteIndicesAvailable: boolean
 ) => {
   const [remoteIndices, localIndices, integrations] = await Promise.all([
@@ -371,4 +371,11 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       white-space: normal !important;
     }
   `;
+};
+
+export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+  return errors.filter((error) => {
+    const code = typeof error.code === 'object' ? error.code.value : error.code;
+    return code !== 'unknownIndex' && code !== 'unknownColumn';
+  });
 };
