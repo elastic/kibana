@@ -19,7 +19,10 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
-import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import {
+  defaultMonitoringUsersIndex,
+  getPrivilegedMonitorUsersIndex,
+} from '../../../../common/entity_analytics/privilege_monitoring/constants';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -36,7 +39,7 @@ import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings } from './indices';
-import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
+
 import {
   POST_EXCLUDE_INDICES,
   PRE_EXCLUDE_INDICES,
@@ -49,6 +52,11 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
+import type { MonitoringEntitySourceDescriptor } from './saved_objects';
+import {
+  PrivilegeMonitoringEngineDescriptorClient,
+  MonitoringEntitySourceDescriptorClient,
+} from './saved_objects';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -67,12 +75,17 @@ export class PrivilegeMonitoringDataClient {
   private esClient: ElasticsearchClient;
   private internalUserClient: ElasticsearchClient;
   private engineClient: PrivilegeMonitoringEngineDescriptorClient;
+  private monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient;
 
   constructor(private readonly opts: PrivilegeMonitoringClientOpts) {
     this.esClient = opts.clusterClient.asCurrentUser;
     this.internalUserClient = opts.clusterClient.asInternalUser;
     this.apiKeyGenerator = opts.apiKeyManager;
     this.engineClient = new PrivilegeMonitoringEngineDescriptorClient({
+      soClient: opts.soClient,
+      namespace: opts.namespace,
+    });
+    this.monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient: opts.soClient,
       namespace: opts.namespace,
     });
@@ -92,7 +105,17 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-
+    // create default index source for privilege monitoring
+    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex,
+      name: 'default-monitoring-index',
+    });
+    this.log(
+      'debug',
+      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+    );
     try {
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
@@ -115,6 +138,8 @@ export class PrivilegeMonitoringDataClient {
       this.opts.telemetry?.reportEvent(PRIVMON_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
       });
+      // sync all index users from monitoring sources
+      await this.syncAllIndexUsers();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -284,5 +309,71 @@ export class PrivilegeMonitoringDataClient {
     };
 
     return this.opts.auditLogger?.log(event);
+  }
+
+  // --- Privileged User Sync Orchestration ---
+  // These methods coordinate syncing users from monitoring sources.
+  public async syncAllIndexUsers() {
+    // get all monitoring index sources of type 'index
+    const indexSources: MonitoringEntitySourceDescriptor[] =
+      await this.monitoringIndexSourceClient.findByIndex();
+    this.log(
+      'debug',
+      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
+    );
+    // get usernames from each index source
+    const allUserNames = new Set<string>();
+    for (const source of indexSources) {
+      const index = source.indexPattern ?? '';
+      const kuery =
+        typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
+      try {
+        // store / sync usernames in internal privileged users index
+        const usernames = await this.createUsersFromIndexSource(index, kuery);
+        usernames.forEach((username) => allUserNames.add(username));
+      } catch (error) {
+        this.log('error', `Failed to sync users from index ${index}: ${error}`);
+      }
+    }
+    await this.removeStaleIndexUsers(allUserNames);
+  }
+
+  public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    const response = await this.esClient.search<{ user?: { name?: string } }>({
+      index: indexName,
+      _source: ['user.name'],
+      query,
+    });
+
+    const usernames = new Set<string>();
+
+    for (const hit of response.hits.hits) {
+      const username = hit._source?.user?.name;
+      if (username && !usernames.has(username)) {
+        usernames.add(username);
+        this.createUser({ user: { name: username } }, 'index_sync');
+      }
+    }
+    return usernames;
+  }
+
+  public async removeStaleIndexUsers(currentUsernames: Set<string>) {
+    const existingDocs: MonitoredUserDoc[] = await this.listUsers('labels.sources: "index_sync"');
+    const staleUserIds: string[] = [];
+
+    for (const doc of existingDocs) {
+      if (doc.user?.name && !currentUsernames.has(doc.user.name) && doc.id) {
+        this.log(
+          'debug',
+          `User ${doc.user.name} (ID: ${doc.id}) is stale and will be removed from index_sync`
+        );
+        staleUserIds.push(doc.id);
+      }
+    }
+
+    await Promise.all(staleUserIds.map((id) => this.deleteUser(id)));
+    this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 }
