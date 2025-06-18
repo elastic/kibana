@@ -14,6 +14,26 @@ import {
   aiAssistantAnonymizationRules,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
+const baseRuleSchema = schema.object({
+  enabled: schema.boolean(),
+});
+
+const regexRuleSchema = schema.allOf([
+  baseRuleSchema,
+  schema.object({
+    type: schema.literal('regex'),
+    pattern: schema.string(),
+    entityClass: schema.string(),
+  }),
+]);
+
+const nerRuleSchema = schema.allOf([
+  baseRuleSchema,
+  schema.object({
+    type: schema.literal('ner'),
+  }),
+]);
+
 export const uiSettings: Record<string, UiSettingsParams> = {
   [aiAssistantSimulatedFunctionCalling]: {
     category: ['observability'],
@@ -64,33 +84,34 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsTab.anonymizationRulesLabel',
       { defaultMessage: 'Anonymization Rules' }
     ),
-    value: [], // Default is an empty array, which disables all anonymization rules.
+    value: JSON.stringify(
+      [
+        {
+          entityClass: 'EMAIL',
+          type: 'regex',
+          pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+          enabled: false,
+        },
+        {
+          type: 'ner',
+          enabled: false,
+        },
+      ],
+      null,
+      2
+    ),
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
         defaultMessage:
-          'JSON array of anonymization rules. Each rule is an object with properties:\n' +
-          '- id: unique string identifier\n' +
-          '- entityClass: class of entity (e.g., PER, ORG, EMAIL, URL)\n' +
+          'List of anonymization rules.\n' +
           '- type: "ner" or "regex"\n' +
-          '- pattern: (for regex rules) the regex string to match\n' +
-          '- enabled: boolean flag to turn the rule on or off\n' +
-          '- builtIn: boolean indicating this is a built‑in rule\n' +
-          '- description: optional human‑readable description\n' +
-          'Default is an empty array, which disables all anonymization rules.',
+          '- entityClass: (regex type only) eg: email, url, ip\n' +
+          '- pattern: (regex type only) the regular‑expression string to match\n' +
+          '- enabled: boolean flag to turn the rule on or off\n',
       }
     ),
-    schema: schema.arrayOf(
-      schema.object({
-        id: schema.string(),
-        entityClass: schema.string(),
-        type: schema.oneOf([schema.literal('ner'), schema.literal('regex')]),
-        pattern: schema.string(),
-        enabled: schema.boolean(),
-        builtIn: schema.boolean(),
-        description: schema.maybe(schema.string()),
-      })
-    ),
+    schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),
     type: 'json',
     requiresPageReload: true,
     solution: 'oblt',
