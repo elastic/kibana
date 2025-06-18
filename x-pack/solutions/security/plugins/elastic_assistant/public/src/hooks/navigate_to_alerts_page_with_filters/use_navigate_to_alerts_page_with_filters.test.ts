@@ -11,6 +11,7 @@ import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_pag
 
 const mockNavigateTo = jest.fn();
 jest.mock('@kbn/security-solution-navigation', () => ({
+  ...jest.requireActual('@kbn/security-solution-navigation'),
   useNavigation: () => ({ navigateTo: mockNavigateTo }),
 }));
 

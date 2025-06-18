@@ -20,7 +20,7 @@ import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import { AssistantProviderProps, useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
@@ -66,17 +66,17 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     logger: {
       log: jest.fn(),
       warn: jest.fn(),
-      error: () => {},
+      error: () => { },
     },
   });
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
-  const assistantContextValue = useAssistantContextValue({
+  const assistantProviderProps = {
     actionTypeRegistry,
     assistantAvailability: mockAssistantAvailability,
     augmentMessageCodeBlocks: {
-      mount: jest.fn().mockReturnValue(() => {}),
+      mount: jest.fn().mockReturnValue(() => { }),
     },
     basePath: 'https://localhost:5601/kbn',
     docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current' },
@@ -89,14 +89,14 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     currentAppId: 'securitySolutionUI',
     userProfileService: jest.fn() as unknown as UserProfileService,
     chrome,
-  });
+  };
 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
-            <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>
+            <TestAssistantProvider assistantProviderProps={assistantProviderProps}>{children}</TestAssistantProvider>
           </QueryClientProvider>
         </EuiThemeProvider>
       </I18nProvider>
@@ -107,6 +107,17 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
 TestExternalProvidersComponent.displayName = 'TestExternalProvidersComponent';
 
 export const TestExternalProviders = React.memo(TestExternalProvidersComponent);
+
+export const TestAssistantProvider = ({ assistantProviderProps, children }: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+
+  return (
+    <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>
+  )
+}
 
 export interface TestDataQualityProvidersProps {
   children: React.ReactNode;

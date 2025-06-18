@@ -75,7 +75,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
-  const assistantContextValue = useAssistantContextValue({
+  const assistantProviderProps = {
     actionTypeRegistry,
     assistantAvailability,
     augmentMessageCodeBlocks: {
@@ -93,15 +93,15 @@ export const TestProvidersComponent: React.FC<Props> = ({
     },
     userProfileService: jest.fn() as unknown as UserProfileService,
     chrome,
-  });
+  };
 
   return (
     <I18nProvider>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
-          <AssistantProvider value={assistantContextValue}>
+          <TestAssistantProviders assistantProviderProps={assistantProviderProps}>
             <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
-          </AssistantProvider>
+          </TestAssistantProviders>
         </QueryClientProvider>
       </ThemeProvider>
     </I18nProvider>
@@ -111,3 +111,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
 TestProvidersComponent.displayName = 'TestProvidersComponent';
 
 export const TestProviders = React.memo(TestProvidersComponent);
+
+const TestAssistantProviders = ({assistantProviderProps, children}: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>
+}
