@@ -36,6 +36,6 @@
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
-    "@kbn/test-suites-xpack/security_solution_cypress/cypress",
+    "@kbn/cypress-test-helper",
   ]
 }
