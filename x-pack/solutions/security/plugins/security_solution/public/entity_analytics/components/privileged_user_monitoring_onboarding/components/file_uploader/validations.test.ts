@@ -22,25 +22,19 @@ describe('validateParsedContent', () => {
 
   it('should return valid and invalid data based on row validation', () => {
     const data = [
-      ['host', 'host-2', 'invalid_criticality'], // invalid
-      ['user', 'user-1', 'low_criticality', 'invalid column'], // invalid
-      ['host', 'host-1', 'low_impact'], // valid
+      ['user1', 'extra_field'], // invalid
+      ['user2'], // valid
     ];
 
     const result = validateParsedContent(data);
 
     expect(result).toEqual({
-      valid: [data[2]],
-      invalid: [data[0], data[1]],
+      valid: [data[1]],
+      invalid: [data[0]],
       errors: [
         {
-          message:
-            'Invalid criticality level "invalid_criticality", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned',
+          message: 'Expected 1 column, got 2',
           index: 1,
-        },
-        {
-          message: 'Expected 3 columns, got 4',
-          index: 2,
         },
       ],
     });
@@ -74,7 +68,7 @@ describe('validateFile', () => {
 
     expect(result.valid).toBe(false);
     expect(result.errorMessage).toBe(
-      'Invalid file format selected. Please choose a CSV, TXT, TSV file and try again'
+      'Invalid file format selected. Please choose a CSV, TXT file and try again'
     );
   });
 

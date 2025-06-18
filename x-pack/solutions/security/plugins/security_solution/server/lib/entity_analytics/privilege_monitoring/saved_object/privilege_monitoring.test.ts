@@ -81,7 +81,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
       { status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED, apiKey: '', error: undefined },
       { refresh: 'wait_for' }
     );
-    expect(result).toEqual({ status: 'installing', apiKey: '' });
+    expect(result).toEqual({ status: 'started', apiKey: '', error: undefined });
   });
 
   it('should update the descriptor', async () => {

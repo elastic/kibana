@@ -54,16 +54,16 @@ describe('PrivilegedUserMonitoringValidationStep', () => {
       wrapper: TestProviders,
     });
 
-    expect(container).toHaveTextContent('10 asset criticality levels will be assigned');
-    expect(container).toHaveTextContent("5 lines are invalid and won't be assigned");
+    expect(container).toHaveTextContent('10 users will be assigned');
+    expect(container).toHaveTextContent(`5 rows are invalid`);
     expect(container).toHaveTextContent('test.csv preview');
   });
 
-  it('calls onConfirm when assign button is clicked', () => {
+  it('calls onConfirm when add button is clicked', () => {
     const { getByText } = render(<PrivilegedUserMonitoringValidationStep {...defaultProps} />, {
       wrapper: TestProviders,
     });
-    const confirmButton = getByText('Assign');
+    const confirmButton = getByText('Add privileged users');
     fireEvent.click(confirmButton);
     expect(mockOnConfirm).toHaveBeenCalled();
   });
@@ -94,7 +94,7 @@ describe('PrivilegedUserMonitoringValidationStep', () => {
     fireEvent.click(downloadButton);
     expect(downloadBlob).toHaveBeenCalledWith(
       new Blob(['Invalid lines as text']),
-      'invalid_asset_criticality.csv'
+      'invalid_privileged_user_monitoring.csv'
     );
   });
 });

@@ -9,7 +9,7 @@ import type { FilePickerState, ValidationStepState, ReducerState, ErrorStepState
 import { FileUploaderSteps } from './types';
 
 export const getStepStatus = (step: FileUploaderSteps, currentStep: FileUploaderSteps) => {
-  if (step < FileUploaderSteps.VALIDATION && currentStep === FileUploaderSteps.VALIDATION) {
+  if (currentStep === FileUploaderSteps.ERROR) {
     return 'disabled';
   }
 
@@ -39,7 +39,7 @@ export const buildAnnotationsFromError = (
   const annotations: Record<number, string> = {};
 
   errors.forEach((e) => {
-    if (e.index) {
+    if (e.index !== undefined && e.index !== null) {
       annotations[e.index] = e.message;
     }
   });

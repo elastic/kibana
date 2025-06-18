@@ -120,7 +120,7 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
                     <span data-test-subj="privileged-user-monitoring-invalidLinesMessage">
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.validationStep.invalidLinesMessage"
-                        defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} row is invalid and won’t be added} other {{invalidLinesCountBold} rows are invalid and won’t be added}}"
+                        defaultMessage="{invalidLinesCount, plural, one {{invalidLinesCountBold} row is invalid and won't be added} other {{invalidLinesCountBold} rows are invalid and won’t be added}}"
                         values={{
                           invalidLinesCount: invalidLines.count,
                           invalidLinesCountBold: <b>{invalidLines.count}</b>,

@@ -28,7 +28,7 @@ describe('PrivilegedUserMonitoringFilePickerStep', () => {
       { wrapper: TestProviders }
     );
 
-    expect(queryByTestId('asset-criticality-file-picker')).toBeInTheDocument();
+    expect(queryByTestId('privileged-user-monitoring-file-picker')).toBeInTheDocument();
   });
 
   it('should call onFileChange when file is selected', () => {
@@ -42,7 +42,9 @@ describe('PrivilegedUserMonitoringFilePickerStep', () => {
     );
 
     const file = new File(['sample file content'], 'sample.csv', { type: 'text/csv' });
-    fireEvent.change(getByTestId('asset-criticality-file-picker'), { target: { files: [file] } });
+    fireEvent.change(getByTestId('privileged-user-monitoring-file-picker'), {
+      target: { files: [file] },
+    });
 
     expect(mockOnFileChange).toHaveBeenCalledWith([file]);
   });

@@ -31,7 +31,14 @@ export interface ErrorStepState {
   validLinesAsText: string;
 }
 
-export type ReducerState = FilePickerState | ValidationStepState | ErrorStepState;
+export interface ResultStepState {
+  step: FileUploaderSteps.RESULT;
+  fileUploadResponse?: PrivmonBulkUploadUsersCSVResponse;
+  fileUploadError?: string;
+  validLinesAsText: string;
+}
+
+export type ReducerState = FilePickerState | ValidationStepState | ErrorStepState | ResultStepState;
 
 export type ReducerAction =
   | { type: 'loadingFile'; payload: { fileName: string } }
@@ -95,7 +102,16 @@ export const reducer = (state: ReducerState, action: ReducerAction): ReducerStat
         };
       }
       break;
-
+    case 'fileUploaded':
+      if (isValidationStep(state)) {
+        return {
+          fileUploadResponse: action.payload.response,
+          fileUploadError: action.payload.errorMessage,
+          validLinesAsText: state.validatedFile.validLines.text,
+          step: FileUploaderSteps.RESULT,
+        };
+      }
+      break;
     case 'fileUploadError':
       if (isValidationStep(state)) {
         return {

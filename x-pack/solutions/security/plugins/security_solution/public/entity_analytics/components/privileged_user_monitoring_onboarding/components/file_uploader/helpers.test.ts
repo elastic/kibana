@@ -10,7 +10,7 @@ import { FileUploaderSteps } from './types';
 
 describe('helpers', () => {
   describe('getStepStatus', () => {
-    it('should return "disabled" for other steps when currentStep is 3', () => {
+    it('should return "disabled" for other steps when currentStep is 4 (ERROR)', () => {
       const step = FileUploaderSteps.VALIDATION;
       const currentStep = FileUploaderSteps.ERROR;
       const status = getStepStatus(step, currentStep);
@@ -18,8 +18,8 @@ describe('helpers', () => {
     });
 
     it('should return "current" if step is equal to currentStep', () => {
-      const step = FileUploaderSteps.ERROR;
-      const currentStep = FileUploaderSteps.ERROR;
+      const step = FileUploaderSteps.RESULT;
+      const currentStep = FileUploaderSteps.RESULT;
       const status = getStepStatus(step, currentStep);
       expect(status).toBe('current');
     });
@@ -42,8 +42,8 @@ describe('helpers', () => {
         0: 'error 1',
         1: 'error 2',
       };
-
-      expect(buildAnnotationsFromError(errors)).toEqual(annotations);
+      const res = buildAnnotationsFromError(errors);
+      expect(res).toEqual(annotations);
     });
   });
 });
