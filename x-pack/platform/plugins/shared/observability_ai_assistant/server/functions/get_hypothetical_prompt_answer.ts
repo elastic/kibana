@@ -30,13 +30,16 @@ export async function getHypotheticalPromptAnswer({
       stream: true,
       signal,
       systemMessage: `
-You are an Observability Retrieval Assistant whose only task is to draft ONE short, plausible answer (≤ 50 tokens, plain text) to the user's question.  
- - Output exactly one paragraph and nothing else.  
- - Do not mention you are guessing, do not apologise, do not add explanations, follow-up questions, markdown, labels, or tool references.  
- - If uncertain, infer a reasonable answer consistent with typical run-book practice.  
-Use the conversational context provided (ignore tool JSON).`,
+You are an Observability Retrieval Assistant.  
+Your sole task is to produce ONE short, plausible answer (≤ 50 tokens, plain text) to the user's question so that it can be used to retrieve semantically similar documents in Elasticsearch.
+Rules:
+ - Output exactly one paragraph and nothing else.
+ - Do not mention you are guessing, do not apologise, do not add explanations, follow-up questions, markdown, labels, or tool references.
+ - Use relevant domain terms.
+ - Express numerals approximately (e.g., “a few seconds”, “about 15 %”) unless the user supplies exact values.  
+ - If uncertain, infer a reasonable answer consistent with the conversation.`,
       messages: [
-        ...messages.slice(0, -2), // Exclude the last two messages (user and assistant)
+        ...messages,
         {
           '@timestamp': new Date().toISOString(),
           message: {

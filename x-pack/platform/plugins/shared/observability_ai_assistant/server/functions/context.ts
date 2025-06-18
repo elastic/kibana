@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageAddEvent } from '../../common/conversation_complete';
 import { FunctionVisibility } from '../../common/functions/types';
-import { MessageRole } from '../../common/types';
+import { Message, MessageRole } from '../../common/types';
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { recallAndScore } from '../utils/recall/recall_and_score';
 
@@ -61,12 +61,19 @@ export function registerContextFunction({
           return { content };
         }
 
-        const userMessage = last(
+        const lastUserMessage = last(
           messages.filter((message) => message.message.role === MessageRole.User)
         );
 
-        const userPrompt = userMessage?.message.content!;
-        const userMessageFunctionName = userMessage?.message.name;
+        if (!lastUserMessage?.message.content) {
+          resources.logger.warn(
+            'No user message found in the conversation history. Aborting context function.'
+          );
+          return { content };
+        }
+
+        const userPrompt = lastUserMessage.message.content;
+        const userMessageFunctionName = lastUserMessage.message.name;
 
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
@@ -75,7 +82,7 @@ export function registerContextFunction({
           userPrompt,
           userMessageFunctionName,
           context: screenDescription,
-          messages,
+          messages: messages.slice(0, -2), // remove the context function request and the last user message
           signal,
           analytics,
         });
@@ -122,4 +129,14 @@ export function registerContextFunction({
       });
     }
   );
+}
+
+function removeLastContextFunctionRequest(messages: Message[]): Message[] {
+  const idx = messages.findLastIndex(
+    (m) => m.message.function_call?.name === CONTEXT_FUNCTION_NAME
+  );
+  if (idx === -1) {
+    return messages;
+  }
+  return [...messages.slice(0, idx), ...messages.slice(idx + 1)];
 }

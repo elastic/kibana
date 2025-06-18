@@ -115,7 +115,7 @@ export async function scoreSuggestions({
 
   const response = await lastValueFrom(
     chat('score_suggestions', {
-      messages: [...messages.slice(0, -2), newUserMessage],
+      messages: [...messages, newUserMessage],
       functions: [scoreFunction],
       functionCall: SCORE_FUNCTION_NAME,
       signal,
