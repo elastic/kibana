@@ -13,7 +13,7 @@ import type {
   ReferenceDataItemKey,
   ReferenceDataSavedObject,
 } from './types';
-import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from './constants';
+import { REF_DATA_KEY_INITIAL_VALUE, REFERENCE_DATA_SAVED_OBJECT_TYPE } from './constants';
 import { stringify } from '../../utils/stringify';
 import { catchAndWrapError, wrapErrorIfNeeded } from '../../utils';
 
@@ -27,37 +27,7 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
     protected readonly logger: Logger
   ) {}
 
-  public async get<TMeta extends object = {}>(
-    refDataKey: ReferenceDataItemKey,
-    options: Partial<{
-      createIfNotFound: ReferenceDataSavedObject<TMeta>;
-    }> = {}
-  ): Promise<ReferenceDataSavedObject<TMeta>> {
-    const soClient = this.soClient;
-    const logger = this.logger;
-
-    return soClient
-      .get<ReferenceDataSavedObject<TMeta>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey)
-      .then((response) => {
-        logger.debug(`Retrieved [${refDataKey}]\n${stringify(response)}`);
-        return response.attributes;
-      })
-      .catch(async (err) => {
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          if (options.createIfNotFound) {
-            logger.debug(
-              `Creating reference data [${refDataKey}] with: ${stringify(options.createIfNotFound)}`
-            );
-
-            return this.create<TMeta>(refDataKey, options.createIfNotFound);
-          }
-        }
-
-        throw wrapErrorIfNeeded(err, `Failed to retrieve reference data item [${refDataKey}]`);
-      });
-  }
-
-  public async create<TMeta extends object = {}>(
+  protected async create<TMeta extends object = {}>(
     refDataKey: ReferenceDataItemKey,
     data: ReferenceDataSavedObject<TMeta>
   ): Promise<ReferenceDataSavedObject<TMeta>> {
@@ -82,6 +52,31 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
         }
 
         return catchAndWrapError(error);
+      });
+  }
+
+  public async get<TMeta extends object = {}>(
+    refDataKey: ReferenceDataItemKey
+  ): Promise<ReferenceDataSavedObject<TMeta>> {
+    const { soClient, logger } = this;
+
+    return soClient
+      .get<ReferenceDataSavedObject<TMeta>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey)
+      .then((response) => {
+        logger.debug(`Retrieved [${refDataKey}]\n${stringify(response)}`);
+        return response.attributes;
+      })
+      .catch(async (err) => {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          if (REF_DATA_KEY_INITIAL_VALUE[refDataKey]) {
+            return this.create<TMeta>(
+              refDataKey,
+              REF_DATA_KEY_INITIAL_VALUE[refDataKey]() as ReferenceDataSavedObject<TMeta>
+            );
+          }
+        }
+
+        throw wrapErrorIfNeeded(err, `Failed to retrieve reference data item [${refDataKey}]`);
       });
   }
 
