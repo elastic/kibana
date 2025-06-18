@@ -66,9 +66,9 @@ export function initializeLayoutManager(
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
-  const resetLayout = (lastSavedPanels: DashboardState['panels']) => {
+  const resetLayout = (lastSavedState: DashboardState) => {
     const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
-      lastSavedPanels,
+      lastSavedState.panels,
       getReferences
     );
 
