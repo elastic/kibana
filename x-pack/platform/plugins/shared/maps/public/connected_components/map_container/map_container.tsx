@@ -15,7 +15,7 @@ import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';

@@ -26,7 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 

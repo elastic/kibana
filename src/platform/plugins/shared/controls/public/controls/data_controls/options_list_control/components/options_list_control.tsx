@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';

@@ -1,0 +1,32 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+SHARED_DEPS = [
+]
+
+js_library(
+  name = "kbn-css-utils",
+  package_name = "@kbn/css-utils",
+  srcs = ["package.json"] + SRCS,
+  deps = SHARED_DEPS,
+  visibility = ["//visibility:public"],
+)

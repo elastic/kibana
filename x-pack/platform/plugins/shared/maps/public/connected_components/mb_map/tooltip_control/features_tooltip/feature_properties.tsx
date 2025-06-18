@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import {
   EuiCallOut,
   EuiLoadingSpinner,

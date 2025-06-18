@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MountPoint } from '@kbn/core/public';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';

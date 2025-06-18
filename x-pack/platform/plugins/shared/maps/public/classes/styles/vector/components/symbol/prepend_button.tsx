@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { UseEuiTheme } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { SymbolIcon } from '../legend/symbol_icon';
 import { getIsDarkMode } from '../../../../../kibana_services';
 

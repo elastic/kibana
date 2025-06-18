@@ -28,7 +28,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
+import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';

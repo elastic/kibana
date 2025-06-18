@@ -8,7 +8,7 @@
 import React from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { getColorPalette, getLinearGradient } from '../../../color_palettes';
 
 interface Props {

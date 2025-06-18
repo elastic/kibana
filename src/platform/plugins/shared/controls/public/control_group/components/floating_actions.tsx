@@ -17,7 +17,7 @@ import { Subscription, switchMap } from 'rxjs';
 import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { uiActionsService } from '../../services/kibana_services';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
 

@@ -13,7 +13,7 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useMemoCss } from '@kbn/css-utils';
 import { DashboardPanelState } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';

@@ -14,7 +14,7 @@ import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
+import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ClusterAddressForm } from './cluster_address_form';
