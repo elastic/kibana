@@ -37,7 +37,6 @@ import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
-import { buildObservableVariable } from './helper';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -126,7 +125,7 @@ async function expectRerenderOnDataLoader(
   const getState = jest.fn(() => runtimeState);
   const internalApi = getLensInternalApiMock({
     ...internalApiOverrides,
-    attributes$: buildObservableVariable(runtimeState.attributes)[0],
+    attributes$: new BehaviorSubject(runtimeState.attributes),
   });
   const services = {
     ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
@@ -561,7 +560,7 @@ describe('Data Loader', () => {
       },
       {
         internalApiOverrides: {
-          esqlVariables$: buildObservableVariable<ESQLControlVariable[]>(variables)[0],
+          esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>(variables),
         },
       }
     );

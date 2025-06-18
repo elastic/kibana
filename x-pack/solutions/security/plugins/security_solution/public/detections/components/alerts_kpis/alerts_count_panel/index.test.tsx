@@ -120,16 +120,17 @@ it('it does NOT render the inspect button when a `chartOptionsContextMenu` is pr
 });
 
 describe('toggleQuery', () => {
-  it('toggles', async () => {
-    await act(async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} />
-        </TestProviders>
-      );
+  it('toggles', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsCountPanel {...defaultProps} />
+      </TestProviders>
+    );
+    act(() => {
       fireEvent.click(getByTestId('query-toggle-header'));
-      expect(mockSetIsExpanded).toBeCalledWith(false);
     });
+
+    expect(mockSetIsExpanded).toBeCalledWith(false);
   });
 
   it('when isExpanded is true, render counts panel', () => {

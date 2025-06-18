@@ -16,7 +16,7 @@ const Document = z.object({
 export const ExampleDefendInsightsInput = z.object({
   insights: z.array(DefendInsight).nullable().optional(),
   prompt: z.string().optional(),
-  anonymizedEvents: z.array(Document).optional(),
+  anonymizedDocuments: z.array(Document).optional(),
   combinedGenerations: z.string().optional(),
   combinedRefinements: z.string().optional(),
   errors: z.array(z.string()).optional(),

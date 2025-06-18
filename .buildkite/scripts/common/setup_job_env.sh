@@ -144,8 +144,7 @@ EOF
 {
   if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
-    export KIBANA_SECURITY_TESTING_AI_CONNECTORS="$(vault_get security-gen-ai/connectors config)"
-    export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="$(vault_get security-gen-ai/langsmith key)"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
   fi
 }
 

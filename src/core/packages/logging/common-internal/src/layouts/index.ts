@@ -14,5 +14,6 @@ export {
   MessageConversion,
   LevelConversion,
   MetaConversion,
+  ErrorConversion,
   type Conversion,
 } from './conversions';

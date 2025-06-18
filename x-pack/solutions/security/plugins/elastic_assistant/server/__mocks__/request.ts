@@ -57,17 +57,13 @@ import {
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
 import {
-  PromptCreateProps,
-  PromptUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
   AlertSummaryCreateProps,
   AlertSummaryUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
+  PromptCreateProps,
+  PromptUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,

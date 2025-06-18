@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewer, INITIAL_TAB } from './doc_viewer';
@@ -88,13 +88,17 @@ describe('<DocViewer />', () => {
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');
 
-    screen.getByTestId('docViewerTab-test2').click();
+    act(() => {
+      screen.getByTestId('docViewerTab-test2').click();
+    });
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('false');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('true');
     expect(mockSetLocalStorage).toHaveBeenCalledWith('kbn_doc_viewer_tab_test2');
 
-    screen.getByTestId('docViewerTab-test1').click();
+    act(() => {
+      screen.getByTestId('docViewerTab-test1').click();
+    });
 
     expect(screen.getByTestId('docViewerTab-test1').getAttribute('aria-selected')).toBe('true');
     expect(screen.getByTestId('docViewerTab-test2').getAttribute('aria-selected')).toBe('false');

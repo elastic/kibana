@@ -49,21 +49,21 @@ export function SelectModelAndInstallKnowledgeBase({
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
+  const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
+    endpoints: inferenceEndpoints,
+  });
+
   useEffect(() => {
-    if (!selectedInferenceId && inferenceEndpoints.length) {
-      setSelectedInferenceId(inferenceEndpoints[0].inference_id);
+    if (!selectedInferenceId && modelOptions?.length) {
+      setSelectedInferenceId(modelOptions[0].key);
     }
-  }, [inferenceEndpoints, selectedInferenceId]);
+  }, [modelOptions, selectedInferenceId]);
 
   const handleInstall = () => {
     if (selectedInferenceId) {
       onInstall(selectedInferenceId);
     }
   };
-
-  const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
-    endpoints: inferenceEndpoints,
-  });
 
   const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({
     value: option.key,

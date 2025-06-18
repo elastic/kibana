@@ -16,6 +16,8 @@ import {
   GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
+  MigrateSingleAgentRequestSchema,
+  BulkMigrateAgentsRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
@@ -34,6 +36,8 @@ import {
   PostRetrieveAgentsByActionsRequestSchema,
   DeleteAgentUploadFileRequestSchema,
   GetTagsResponseSchema,
+  MigrateSingleAgentResponseSchema,
+  BulkMigrateAgentsResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -88,6 +92,7 @@ import {
   bulkRequestDiagnosticsHandler,
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
+import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -123,6 +128,70 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgentHandler
     );
 
+  // Migrate a single agent
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Migrate a single agent`,
+      description: `Migrate a single agent to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: MigrateSingleAgentRequestSchema,
+          response: {
+            200: {
+              body: () => MigrateSingleAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      migrateSingleAgentHandler
+    );
+  // Bulk migrate multiple agents
+  router.versioned
+    .post({
+      path: AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+        },
+      },
+      summary: `Migrate multiple agents`,
+      description: `Bulk migrate agents to another cluster.`,
+      options: {
+        tags: ['oas-tag:Elastic Agents'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: BulkMigrateAgentsRequestSchema,
+          response: {
+            200: {
+              body: () => BulkMigrateAgentsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      bulkMigrateAgentsHandler
+    );
   // Update
   router.versioned
     .put({

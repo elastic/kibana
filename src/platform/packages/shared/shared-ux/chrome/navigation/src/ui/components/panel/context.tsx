@@ -19,11 +19,10 @@ import React, {
 } from 'react';
 import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 
-import { DefaultContent } from './default_content';
+import { Panel } from './panel';
 
 export interface PanelContext {
   isOpen: boolean;
-  toggle: () => void;
   open: (navNode: PanelSelectedNode, openerEl: Element | null) => void;
   close: () => void;
   /** The expanded node is the node in the main panel that opens the Panel */
@@ -46,13 +45,8 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   selectedNode: selectedNodeProp = null,
   setSelectedNode: setSelectedNodeProp,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
   const selectedNodeEl = useRef<Element | null>(null);
-
-  const toggle = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
 
   const open = useCallback(
     (navNode: PanelSelectedNode, openerEl: Element | null) => {
@@ -63,7 +57,6 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
         selectedNodeEl.current = navNodeEl;
       }
 
-      setIsOpen(true);
       setSelectedNodeProp?.(navNode);
     },
     [setSelectedNodeProp]
@@ -72,7 +65,6 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   const close = useCallback(() => {
     setSelectedNode(null);
     selectedNodeEl.current = null;
-    setIsOpen(false);
     setSelectedNodeProp?.(null);
   }, [setSelectedNodeProp]);
 
@@ -80,12 +72,6 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     if (selectedNodeProp === undefined) return;
 
     setSelectedNode(selectedNodeProp);
-
-    if (selectedNodeProp) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
   }, [selectedNodeProp]);
 
   const getContent = useCallback(() => {
@@ -93,20 +79,19 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       return null;
     }
 
-    return <DefaultContent selectedNode={selectedNode} />;
+    return <Panel selectedNode={selectedNode} />;
   }, [selectedNode]);
 
   const ctx: PanelContext = useMemo(
     () => ({
-      isOpen,
-      toggle,
+      isOpen: Boolean(selectedNode),
       open,
       close,
       selectedNode,
       selectedNodeEl,
       getContent,
     }),
-    [isOpen, toggle, open, close, selectedNode, selectedNodeEl, getContent]
+    [open, close, selectedNode, selectedNodeEl, getContent]
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

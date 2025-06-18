@@ -10,11 +10,13 @@
 import {
   EuiDataGridToolBarAdditionalControlsOptions,
   EuiDataGridToolBarVisibilityOptions,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
 import { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { css } from '@emotion/react';
 import { AlertsCount } from '../components/alerts_count';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsPanelConfig, RowSelection } from '../types';
@@ -52,6 +54,20 @@ const RightControl = memo(
   }
 );
 
+const Divider = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      role="separator"
+      css={css`
+        align-self: center;
+        height: ${euiTheme.size.m};
+        border-right: ${euiTheme.border.thin};
+      `}
+    />
+  );
+};
+
 const LeftAppendControl = memo(
   ({
     alertsCount,
@@ -75,13 +91,16 @@ const LeftAppendControl = memo(
       <>
         <AlertsCount count={alertsCount} />
         {hasBrowserFields && (
-          <FieldBrowser
-            columnIds={columnIds}
-            browserFields={browserFields}
-            onResetColumns={onResetColumns}
-            onToggleColumn={onToggleColumn}
-            options={fieldsBrowserOptions}
-          />
+          <>
+            <Divider />
+            <FieldBrowser
+              columnIds={columnIds}
+              browserFields={browserFields}
+              onResetColumns={onResetColumns}
+              onToggleColumn={onToggleColumn}
+              options={fieldsBrowserOptions}
+            />
+          </>
         )}
       </>
     );
@@ -244,6 +263,7 @@ export const useGetToolbarVisibility = ({
               <>
                 <AlertsCount count={alertsCount} />
                 <Suspense fallback={null}>
+                  <Divider />
                   <BulkActionsToolbar
                     totalItems={alertsCount}
                     panels={bulkActions}

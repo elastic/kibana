@@ -15,7 +15,7 @@ import {
 import {
   FindAlertSummaryRequestQuery,
   FindAlertSummaryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/find_alert_summary_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import _ from 'lodash';
 import { getPrompt, promptDictionary } from '../../lib/prompt';

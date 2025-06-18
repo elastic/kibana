@@ -11,10 +11,6 @@ applies_to:
 
 # SentinelOne connector [sentinelone-action-type]
 
-::::{warning}
-This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-::::
-
 The SentinelOne connector communicates with SentinelOne Management Console via REST API.
 
 To use this connector, you must have authority to run {{endpoint-sec}} connectors, which is an **{{connectors-feature}}** sub-feature privilege. Refer to [{{kib}} privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md).
@@ -40,4 +36,11 @@ URL
 
 ## Test connectors [sentinelone-action-parameters]
 
-At this time, you cannot test the SentinelOne connector.
+You can test connectors as you're creating or editing the connector in {{kib}}.
+For example:
+
+:::{image} ../images/sentinelone-connector-test.png
+:alt: SentinelOne connector test
+:screenshot:
+:::
+

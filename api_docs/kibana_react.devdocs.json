@@ -1008,15 +1008,29 @@
         "parentPluginId": "kibanaReact",
         "id": "def-public.useDarkMode",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "useDarkMode",
-        "description": [],
+        "description": [
+          "\nThis should only be used to pass the darkMode to a theme provider which is outside\nof the global theme provider scope. For example when used with `EuiThemeProvider`.\n"
+        ],
         "signature": [
           "(defaultValue?: boolean | undefined) => boolean"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/dark_mode/use_dark_mode.ts",
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/app/app.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/app/app.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "kibanaReact",
@@ -2432,6 +2446,8 @@
           "ThemeServiceSetup",
           " | undefined; plugins?: ",
           "PluginsServiceStart",
+          " | undefined; pricing?: ",
+          "PricingServiceStart",
           " | undefined; security?: ",
           "SecurityServiceStart",
           " | undefined; userProfile?: ",

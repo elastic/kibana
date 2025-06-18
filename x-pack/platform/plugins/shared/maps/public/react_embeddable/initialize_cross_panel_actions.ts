@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { getTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
@@ -29,6 +29,13 @@ import { getUiActions } from '../kibana_services';
 import { getGeoFieldsLabel } from './get_geo_fields_label';
 import { MapApi, MapSerializedState } from './types';
 import { setOnMapMove } from '../reducers/non_serializable_instances';
+
+export const crossPanelActionsComparators: StateComparators<
+  Pick<MapSerializedState, 'isMovementSynchronized' | 'filterByMapExtent'>
+> = {
+  isMovementSynchronized: 'referenceEquality',
+  filterByMapExtent: 'referenceEquality',
+};
 
 export function initializeCrossPanelActions({
   controlledBy,
@@ -51,7 +58,7 @@ export function initializeCrossPanelActions({
   function getIsMovementSynchronized() {
     return isMovementSynchronized$.value ?? true;
   }
-  function setIsMovementSynchronized(next: boolean) {
+  function setIsMovementSynchronized(next: boolean | undefined) {
     isMovementSynchronized$.next(next);
   }
 
@@ -59,7 +66,7 @@ export function initializeCrossPanelActions({
   function getIsFilterByMapExtent() {
     return isFilterByMapExtent$.value ?? false;
   }
-  function setIsFilterByMapExtent(next: boolean) {
+  function setIsFilterByMapExtent(next: boolean | undefined) {
     isFilterByMapExtent$.next(next);
   }
 
@@ -213,12 +220,15 @@ export function initializeCrossPanelActions({
       mapEmbeddablesSingleton.unregister(uuid);
       unsubscribeFromStore();
     },
-    comparators: {
-      isMovementSynchronized: [isMovementSynchronized$, setIsMovementSynchronized],
-      filterByMapExtent: [isFilterByMapExtent$, setIsFilterByMapExtent],
-    } as StateComparators<Pick<MapSerializedState, 'isMovementSynchronized' | 'filterByMapExtent'>>,
     getIsFilterByMapExtent,
-    serialize: () => {
+    anyStateChange$: merge(isMovementSynchronized$, isFilterByMapExtent$).pipe(
+      map(() => undefined)
+    ),
+    reinitializeState: (lastSaved: MapSerializedState) => {
+      setIsMovementSynchronized(lastSaved.isMovementSynchronized);
+      setIsFilterByMapExtent(lastSaved.filterByMapExtent);
+    },
+    getLatestState: () => {
       return {
         isMovementSynchronized: isMovementSynchronized$.value,
         filterByMapExtent: isFilterByMapExtent$.value,

@@ -48,11 +48,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let onboardingId: string;
 
       beforeEach(async () => {
-        const createFlowResponse = await adminClient
-          .post('/internal/observability_onboarding/flow')
-          .send({
-            name: 'test-onboarding',
-          });
+        const createFlowResponse = await adminClient.post(
+          '/internal/observability_onboarding/flow'
+        );
 
         onboardingId = createFlowResponse.body.onboardingFlow.id;
 

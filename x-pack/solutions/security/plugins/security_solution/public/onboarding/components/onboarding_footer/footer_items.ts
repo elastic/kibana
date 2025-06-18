@@ -120,7 +120,7 @@ export const useFooterItems = () => {
             title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.link.title', {
               defaultMessage: 'Opt into user research',
             }),
-            href: 'https://www.elastic.co/security-labs',
+            href: 'https://elastic.eu.qualtrics.com/jfe/form/SV_exQvUoHguCio4pE',
           },
         },
       ] as const,

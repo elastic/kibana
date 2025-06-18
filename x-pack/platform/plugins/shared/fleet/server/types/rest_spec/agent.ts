@@ -33,6 +33,7 @@ export const GetAgentsRequestSchema = {
           },
         })
       ),
+      showAgentless: schema.boolean({ defaultValue: true }),
       showInactive: schema.boolean({ defaultValue: false }),
       withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
@@ -86,7 +87,35 @@ export const GetAgentsRequestSchema = {
     }
   ),
 };
-
+export const MigrateOptionsSchema = {
+  ca_sha256: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.string()),
+  elastic_agent_cert: schema.maybe(schema.string()),
+  elastic_agent_cert_key: schema.maybe(schema.string()),
+  elastic_agent_cert_key_passphrase: schema.maybe(schema.string()),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  insecure: schema.maybe(schema.boolean()),
+  proxy_disabled: schema.maybe(schema.boolean()),
+  proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  proxy_url: schema.maybe(schema.string()),
+  staging: schema.maybe(schema.boolean()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+  replace_token: schema.maybe(schema.boolean()),
+};
+export const BulkMigrateOptionsSchema = {
+  ca_sha256: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.string()),
+  elastic_agent_cert: schema.maybe(schema.string()),
+  elastic_agent_cert_key: schema.maybe(schema.string()),
+  elastic_agent_cert_key_passphrase: schema.maybe(schema.string()),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  insecure: schema.maybe(schema.boolean()),
+  proxy_disabled: schema.maybe(schema.boolean()),
+  proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  proxy_url: schema.maybe(schema.string()),
+  staging: schema.maybe(schema.boolean()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+};
 export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STARTING'),
   schema.literal('CONFIGURING'),
@@ -523,6 +552,31 @@ export const UpdateAgentRequestSchema = {
     tags: schema.maybe(schema.arrayOf(schema.string())),
   }),
 };
+export const MigrateSingleAgentRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    uri: schema.uri(),
+    enrollment_token: schema.string(),
+    settings: schema.maybe(schema.object(MigrateOptionsSchema)),
+  }),
+};
+export const MigrateSingleAgentResponseSchema = schema.object({
+  actionId: schema.string(),
+});
+
+export const BulkMigrateAgentsRequestSchema = {
+  body: schema.object({
+    agents: schema.arrayOf(schema.string()),
+    uri: schema.uri(),
+    enrollment_token: schema.string(),
+    settings: schema.maybe(schema.object(BulkMigrateOptionsSchema)),
+  }),
+};
+export const BulkMigrateAgentsResponseSchema = schema.object({
+  actionId: schema.string(),
+});
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
@@ -657,6 +711,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('UPDATE_TAGS'),
         schema.literal('POLICY_CHANGE'),
         schema.literal('INPUT_ACTION'),
+        schema.literal('MIGRATE'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {

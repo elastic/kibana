@@ -248,13 +248,10 @@
           {
             "parentPluginId": "@kbn/securitysolution-ecs",
             "id": "def-common.CodeSignature.trusted",
-            "type": "Array",
+            "type": "boolean",
             "tags": [],
             "label": "trusted",
             "description": [],
-            "signature": [
-              "string[]"
-            ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -378,6 +375,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.DllEcs.Ext",
+            "type": "Object",
+            "tags": [],
+            "label": "Ext",
+            "description": [],
+            "signature": [
+              "Ext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/dll/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/securitysolution-ecs",
             "id": "def-common.DllEcs.path",
@@ -1789,6 +1801,27 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-ecs",
+            "id": "def-common.FileEcs.code_signature",
+            "type": "Object",
+            "tags": [],
+            "label": "code_signature",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.CodeSignature",
+                "text": "CodeSignature"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-securitysolution-ecs/src/file/index.ts",
             "deprecated": false,

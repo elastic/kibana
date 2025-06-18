@@ -31,6 +31,7 @@
     "@kbn/palettes",
     "@kbn/charts-theme",
     "@kbn/ebt-tools",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

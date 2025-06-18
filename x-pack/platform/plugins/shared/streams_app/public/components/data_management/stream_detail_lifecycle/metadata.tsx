@@ -170,6 +170,7 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
         button={contextualMenu}
+        dataTestSubj="streamsAppRetentionMetadataRetentionPeriod"
       />
       <EuiHorizontalRule margin="s" />
       <MetadataRow
@@ -238,14 +239,21 @@ function MetadataRow({
   value,
   tip,
   button,
+  dataTestSubj,
 }: {
   metadata: string;
   value: ReactNode;
   tip?: string;
   button?: ReactNode;
+  dataTestSubj?: string;
 }) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xl"
+      responsive={false}
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={1}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>

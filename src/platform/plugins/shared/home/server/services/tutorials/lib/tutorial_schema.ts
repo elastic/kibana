@@ -137,6 +137,8 @@ export const tutorialSchema = schema.object({
   onPremElasticCloud: schema.maybe(instructionsSchema),
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: schema.maybe(artifactsSchema),
+  // Indicates the tutorial will not be available in serverless
+  omitServerless: schema.maybe(schema.boolean()),
 
   customStatusCheckName: schema.maybe(schema.string()),
 

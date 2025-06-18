@@ -31,7 +31,7 @@ const request: Streams.WiredStream.UpsertRequest = {
       wired: {
         routing: [],
         fields: {
-          numberfield: {
+          'attributes.numberfield': {
             type: 'long',
           },
         },

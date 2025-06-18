@@ -144,7 +144,6 @@ describe('indexpattern_datasource utils', () => {
         );
 
         render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
-        screen.debug();
         // Make sure the message is there before checking the absence of the link/button
         expect(screen.getByText(/might be an approximation./)).toBeInTheDocument();
         expect(screen.queryByText('Enable accuracy mode')).toBe(null);

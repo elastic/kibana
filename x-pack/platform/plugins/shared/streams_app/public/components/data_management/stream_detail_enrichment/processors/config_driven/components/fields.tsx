@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { configDrivenProcessors } from '..';
 import { ConfigDrivenProcessorType } from '../types';
 import { ProcessorFieldSelector } from '../../processor_field_selector';
-import { OptionalFieldsAccordion } from '../../optional_fields_accordion';
+import { FieldsAccordion } from '../../optional_fields_accordion';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../../ignore_toggles';
 import { TextField } from './text_field';
 import { BooleanField } from './boolean_field';
@@ -30,20 +30,24 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
     <>
       <ProcessorFieldSelector helpText={processor.fieldOptions.fieldHelpText} />
       {processor.fieldConfigurations
-        .filter((field) => field.required)
-        .map((field) => getFieldComponent(field))}
+        .filter((fieldConfiguration) => fieldConfiguration.required)
+        .map((fieldConfiguration, id) => (
+          <FieldComponentByConfig key={id} fieldConfiguration={fieldConfiguration} />
+        ))}
       <EuiSpacer size="m" />
-      <OptionalFieldsAccordion>
+      <FieldsAccordion>
         {processor.fieldConfigurations
-          .filter((field) => !field.required)
-          .map((field) => getFieldComponent(field))}
+          .filter((fieldConfiguration) => !fieldConfiguration.required)
+          .map((fieldConfiguration, id) => (
+            <FieldComponentByConfig key={id} fieldConfiguration={fieldConfiguration} />
+          ))}
         {processor.fieldOptions.includeCondition && (
           <>
             <EuiSpacer size="m" />
             <ProcessorConditionEditor />
           </>
         )}
-      </OptionalFieldsAccordion>
+      </FieldsAccordion>
       <EuiSpacer size="m" />
       {processor.fieldOptions.includeIgnoreFailures && <IgnoreFailureToggle />}
       {processor.fieldOptions.includeIgnoreMissing && <IgnoreMissingToggle />}
@@ -51,13 +55,17 @@ export const ConfigDrivenProcessorFields = ({ type }: { type: ConfigDrivenProces
   );
 };
 
-const getFieldComponent = (fieldConfig: FieldConfiguration) => {
-  switch (fieldConfig.type) {
+const FieldComponentByConfig = ({
+  fieldConfiguration,
+}: {
+  fieldConfiguration: FieldConfiguration;
+}) => {
+  switch (fieldConfiguration.type) {
     case 'string':
-      return <TextField fieldConfiguration={fieldConfig} />;
+      return <TextField fieldConfiguration={fieldConfiguration} />;
     case 'array':
-      return <ArrayField fieldConfiguration={fieldConfig} />;
+      return <ArrayField fieldConfiguration={fieldConfiguration} />;
     case 'boolean':
-      return <BooleanField fieldConfiguration={fieldConfig} />;
+      return <BooleanField fieldConfiguration={fieldConfiguration} />;
   }
 };

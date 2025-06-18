@@ -9,13 +9,13 @@ import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import Path from 'path';
 import chalk from 'chalk';
-import { assertDockerAvailable } from './assert_docker_available';
+import { assertDockerAvailable } from '../util/assert_docker_available';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
 import { getEisGatewayConfig } from './get_eis_gateway_config';
-import { DATA_DIR, writeFile } from './file_utils';
+import { DATA_DIR, writeFile } from '../util/file_utils';
 import { getNginxConf } from './get_nginx_conf';
-import { untilGatewayReady } from './until_gateway_ready';
 import { getEisCredentials } from './get_eis_credentials';
+import { untilContainerReady } from '../util/until_container_ready';
 
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const NGINX_CONF_FILE_PATH = Path.join(DATA_DIR, 'nginx.conf');
@@ -79,7 +79,13 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   log.debug(`Wrote docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
 
-  untilGatewayReady({ dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH })
+  untilContainerReady({
+    containerName: 'gateway-proxy',
+    signal,
+    log,
+    dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
+    condition: ['.State.Health.Status', 'healthy'],
+  })
     .then(() => {
       log.write('');
 

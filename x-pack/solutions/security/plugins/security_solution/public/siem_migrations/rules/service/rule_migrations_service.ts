@@ -13,14 +13,9 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
-import type { RelatedIntegration } from '../../../../common/api/detection_engine';
+import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
-  RuleMigrationResourceBase,
-  RuleMigrationTaskStats,
-} from '../../../../common/siem_migrations/model/rule_migration.gen';
-import type {
-  CreateRuleMigrationRequestBody,
-  GetRuleMigrationStatsResponse,
+  CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -29,23 +24,13 @@ import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/cons
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import type { StartRuleMigrationParams } from '../api';
-import {
-  createRuleMigration,
-  getRuleMigrationStats,
-  getRuleMigrationsStatsAll,
-  startRuleMigration,
-  type GetRuleMigrationsStatsAllParams,
-  getMissingResources,
-  upsertMigrationResources,
-  getIntegrations,
-} from '../api';
+import * as api from '../api';
 import {
   getMissingCapabilities,
   type MissingCapability,
   type CapabilitiesLevel,
 } from './capabilities';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -84,6 +69,10 @@ export class SiemRulesMigrationsService {
     });
   }
 
+  public get api() {
+    return api;
+  }
+
   public getLatestStats$(): Observable<RuleMigrationStats[] | null> {
     return this.latestStats$.asObservable();
   }
@@ -119,22 +108,36 @@ export class SiemRulesMigrationsService {
       });
   }
 
-  public async createRuleMigration(body: CreateRuleMigrationRequestBody): Promise<string> {
-    const rulesCount = body.length;
+  public async addRulesToMigration(
+    migrationId: string,
+    rules: CreateRuleMigrationRulesRequestBody
+  ) {
+    const rulesCount = rules.length;
+    if (rulesCount === 0) {
+      throw new Error(i18n.EMPTY_RULES_ERROR);
+    }
+
+    // Batching creation to avoid hitting the max payload size limit of the API
+    for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+      const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+      await api.addRulesToMigration({ migrationId, body: rulesBatch });
+    }
+  }
+
+  public async createRuleMigration(data: CreateRuleMigrationRulesRequestBody): Promise<string> {
+    const rulesCount = data.length;
     if (rulesCount === 0) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
 
     try {
-      let migrationId: string | undefined;
-      // Batching creation to avoid hitting the max payload size limit of the API
-      for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-        const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-        const response = await createRuleMigration({ migrationId, body: bodyBatch });
-        migrationId = response.migration_id;
-      }
+      // create the migration
+      const { migration_id: migrationId } = await api.createRuleMigration({});
+
+      await this.addRulesToMigration(migrationId, data);
+
       this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
-      return migrationId as string;
+      return migrationId;
     } catch (error) {
       this.telemetry.reportSetupMigrationCreated({ rulesCount, error });
       throw error;
@@ -155,7 +158,7 @@ export class SiemRulesMigrationsService {
       // Batching creation to avoid hitting the max payload size limit of the API
       for (let i = 0; i < count; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
         const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-        await upsertMigrationResources({ migrationId, body: bodyBatch });
+        await api.upsertMigrationResources({ migrationId, body: bodyBatch });
       }
       this.telemetry.reportSetupResourceUploaded({ migrationId, type, count });
     } catch (error) {
@@ -166,7 +169,8 @@ export class SiemRulesMigrationsService {
 
   public async startRuleMigration(
     migrationId: string,
-    retry?: SiemMigrationRetryFilter
+    retry?: SiemMigrationRetryFilter,
+    settings?: RuleMigrationSettings
   ): Promise<StartRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -175,12 +179,20 @@ export class SiemRulesMigrationsService {
       );
       return { started: false };
     }
-    const connectorId = this.connectorIdStorage.get();
+    const connectorId = settings?.connectorId ?? this.connectorIdStorage.get();
+    const skipPrebuiltRulesMatching = settings?.skipPrebuiltRulesMatching;
     if (!connectorId) {
       this.core.notifications.toasts.add(getNoConnectorToast(this.core));
       return { started: false };
     }
-    const params: StartRuleMigrationParams = { migrationId, connectorId, retry };
+    const params: api.StartRuleMigrationParams = {
+      migrationId,
+      settings: {
+        connectorId,
+        skipPrebuiltRulesMatching,
+      },
+      retry,
+    };
 
     const traceOptions = this.traceOptionsStorage.get();
     if (traceOptions) {
@@ -191,23 +203,22 @@ export class SiemRulesMigrationsService {
     }
 
     try {
-      const result = await startRuleMigration(params);
+      const result = await api.startRuleMigration(params);
       this.startPolling();
 
       this.telemetry.reportStartTranslation(params);
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({
+        ...params,
+        error,
+      });
       throw error;
     }
   }
 
-  public async getRuleMigrationStats(migrationId: string): Promise<GetRuleMigrationStatsResponse> {
-    return getRuleMigrationStats({ migrationId });
-  }
-
   public async getRuleMigrationsStats(
-    params: GetRuleMigrationsStatsAllParams = {}
+    params: api.GetRuleMigrationsStatsAllParams = {}
   ): Promise<RuleMigrationStats[]> {
     const allStats = await this.getRuleMigrationsStatsWithRetry(params);
     const results = allStats.map(
@@ -218,19 +229,15 @@ export class SiemRulesMigrationsService {
     return results;
   }
 
-  public async getMissingResources(migrationId: string): Promise<RuleMigrationResourceBase[]> {
-    return getMissingResources({ migrationId });
-  }
-
   private async getRuleMigrationsStatsWithRetry(
-    params: GetRuleMigrationsStatsAllParams = {},
+    params: api.GetRuleMigrationsStatsAllParams = {},
     sleepSecs?: number
   ): Promise<RuleMigrationTaskStats[]> {
     if (sleepSecs) {
       await new Promise((resolve) => setTimeout(resolve, sleepSecs * 1000));
     }
 
-    return getRuleMigrationsStatsAll(params).catch((e) => {
+    return api.getRuleMigrationsStatsAll(params).catch((e) => {
       // Retry only on network errors (no status) and 503 (Service Unavailable), otherwise throw
       const status = e.response?.status || e.status;
       if (status && status !== 503) {
@@ -243,10 +250,6 @@ export class SiemRulesMigrationsService {
       }
       return this.getRuleMigrationsStatsWithRetry(params, nextSleepSecs);
     });
-  }
-
-  public async getIntegrations(): Promise<Record<string, RelatedIntegration>> {
-    return getIntegrations({});
   }
 
   private async startTaskStatsPolling(): Promise<void> {
@@ -271,11 +274,18 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
-          const connectorId = this.connectorIdStorage.get();
+        // automatically resume interrupted migrations when the proper conditions are met
+        if (
+          result.status === SiemMigrationTaskStatus.INTERRUPTED &&
+          !result.last_execution?.error
+        ) {
+          const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
+          const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            await startRuleMigration({ migrationId: result.id, connectorId });
+            await api.startRuleMigration({
+              migrationId: result.id,
+              settings: { connectorId, skipPrebuiltRulesMatching },
+            });
             pendingMigrationIds.push(result.id);
           }
         }

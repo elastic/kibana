@@ -76,8 +76,6 @@ import {
   createNumericLiteral,
   createOption,
   createParam,
-  createPolicy,
-  createSetting,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
@@ -143,18 +141,6 @@ export function collectAllColumnIdentifiers(
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);
-}
-
-export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || !textExistsAndIsValid(ctx._policyName.text)) {
-    return [];
-  }
-  const policyComponents = ctx._policyName.text.split(':');
-  if (policyComponents.length > 1) {
-    const [setting, policyName] = policyComponents;
-    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
-  }
-  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
@@ -236,7 +222,7 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 }
 
 function visitLogicalIns(ctx: LogicalInContext) {
-  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx, undefined, 'binary-expression');
+  const fn = createFunction(ctx.NOT() ? 'not in' : 'in', ctx, undefined, 'binary-expression');
   const [left, ...list] = ctx.valueExpression_list();
   const leftArg = visitValueExpression(left);
   if (leftArg) {
@@ -511,7 +497,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
     regexes.map((regex) => {
       const negate = regex.NOT();
       const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not_' : ''}${likeType}`;
+      const fnName = `${negate ? 'not ' : ''}${likeType}`;
       const fn = createFunction(fnName, regex, undefined, 'binary-expression');
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {

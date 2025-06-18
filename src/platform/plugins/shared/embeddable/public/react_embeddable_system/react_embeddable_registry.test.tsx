@@ -11,15 +11,14 @@ import {
   registerReactEmbeddableFactory,
   getReactEmbeddableFactory,
 } from './react_embeddable_registry';
-import { ReactEmbeddableFactory } from './types';
+import { EmbeddableFactory } from './types';
 
-describe('react embeddable registry', () => {
+describe('embeddable registry', () => {
   const getTestEmbeddableFactory = () =>
     Promise.resolve({
       type: 'test',
-      deserializeState: jest.fn(),
       buildEmbeddable: jest.fn(),
-    } as ReactEmbeddableFactory);
+    } as EmbeddableFactory);
 
   it('throws an error if requested embeddable factory type is not registered', () => {
     expect(() => getReactEmbeddableFactory('notRegistered')).rejects.toThrow(

@@ -172,6 +172,7 @@ export interface DocLinks {
   };
   readonly heartbeat: {
     readonly base: string;
+    readonly monitorTags: string;
   };
   readonly libbeat: {
     readonly getStarted: string;
@@ -294,7 +295,9 @@ export interface DocLinks {
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
+    readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
     readonly blocklist: string;
@@ -405,6 +408,8 @@ export interface DocLinks {
     slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
+    elasticManagedLlm: string;
+    elasticManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -485,6 +490,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
@@ -527,6 +533,7 @@ export interface DocLinks {
     unprivilegedMode: string;
     httpMonitoring: string;
     agentLevelLogging: string;
+    remoteESOoutputTroubleshooting: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

@@ -12,13 +12,14 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { TAKE_ACTION_BUTTON_TEST_ID, TakeActionButton } from './take_action_button';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useAIForSOCDetailsContext } from '../context';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../context');
 
 describe('TakeActionButton', () => {
-  it('should render component with all options', () => {
+  it('should render component with all options', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -48,14 +49,14 @@ describe('TakeActionButton', () => {
     const button = getByTestId(TAKE_ACTION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId('add-to-existing-case-action')).toBeInTheDocument();
     expect(getByTestId('add-to-new-case-action')).toBeInTheDocument();
     expect(getByTestId('alert-tags-context-menu-item')).toBeInTheDocument();
   });
 
-  it('should not show cases actions if user is not authorized', () => {
+  it('should not show cases actions if user is not authorized', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -85,13 +86,13 @@ describe('TakeActionButton', () => {
     const button = getByTestId(TAKE_ACTION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(queryByTestId('add-to-existing-case-action')).not.toBeInTheDocument();
     expect(queryByTestId('add-to-new-case-action')).not.toBeInTheDocument();
   });
 
-  it('should not show tags actions if user is not authorized', () => {
+  it('should not show tags actions if user is not authorized', async () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -121,7 +122,7 @@ describe('TakeActionButton', () => {
     const button = getByTestId(TAKE_ACTION_BUTTON_TEST_ID);
     expect(button).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(queryByTestId('alert-tags-context-menu-item')).not.toBeInTheDocument();
   });

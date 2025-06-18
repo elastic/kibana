@@ -56,11 +56,13 @@ const defaultGroupingOptions: GroupOption[] = [
 export const getDefaultQuery = ({
   query,
   filters,
+  pageFilters,
 }: AssetsBaseURLQuery): AssetsBaseURLQuery & {
   sort: string[][];
 } => ({
   query,
   filters,
+  pageFilters: [],
   sort: [[]],
 });
 

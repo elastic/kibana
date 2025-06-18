@@ -40,7 +40,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
 
   useEffect(() => {
     if (isByValueEnabled && incomingEmbeddable) {
-      const { embeddableId, input: incomingInput, type } = incomingEmbeddable;
+      const { embeddableId, serializedState: incomingState, type } = incomingEmbeddable;
 
       // retrieve existing element
       const originalElement = selectedPage.elements.find(
@@ -65,7 +65,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           return;
         }
 
-        const originalInput = decode(
+        const originalState = decode(
           originalAst.chain[functionIndex].arguments.config[0] as string
         );
 
@@ -75,16 +75,15 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         const argumentPath = [embeddableId, 'expressionRenderable'];
         dispatch(clearValue({ path: argumentPath }));
 
-        let updatedInput;
+        let updatedState;
 
         // if type was changed, we should not provide originalInput
         if (originalType !== type) {
-          updatedInput = incomingInput;
+          updatedState = incomingState;
         } else {
-          updatedInput = { ...originalInput, ...incomingInput };
+          updatedState = { ...originalState, ...incomingState.rawState };
         }
-
-        const expression = embeddableInputToExpression(updatedInput, type, undefined, true);
+        const expression = embeddableInputToExpression(updatedState, type, undefined, true);
 
         dispatch(
           updateEmbeddableExpression({
@@ -99,7 +98,12 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        const expression = embeddableInputToExpression(incomingInput, type, undefined, true);
+        const expression = embeddableInputToExpression(
+          incomingState.rawState,
+          type,
+          undefined,
+          true
+        );
         dispatch(addElement(selectedPage.id, { expression }));
       }
     }

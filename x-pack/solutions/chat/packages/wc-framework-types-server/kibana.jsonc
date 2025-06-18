@@ -1,7 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/wc-framework-types-server",
-  "owner": "@elastic/search-kibana",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+  ],
   "group": "chat",
   "visibility": "private"
 }

@@ -17,7 +17,7 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_open"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-open-job.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-open-job",
     "availability": {
       "stack": true,
       "serverless": true

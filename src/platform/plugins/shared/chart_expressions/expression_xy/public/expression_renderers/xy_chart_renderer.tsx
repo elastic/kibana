@@ -38,6 +38,8 @@ import {
 } from '@kbn/chart-expressions-common';
 
 import { ThemeServiceSetup } from '@kbn/core/public';
+import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';
@@ -57,7 +59,6 @@ export interface GetStartDeps {
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
-  useLegacyTimeAxis: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
@@ -234,6 +235,9 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
+    const onCreateAlertRule = (data: AlertRuleFromVisUIActionData) => {
+      handlers.event({ name: ALERT_RULE_TRIGGER, data });
+    };
     const setChartSize = (data: ChartSizeSpec) => {
       const event: ChartSizeEvent = { name: 'chartSize', data };
       handlers.event(event);
@@ -290,11 +294,11 @@ export const getXyChartRenderer = ({
             timeZone={deps.timeZone}
             timeFormat={deps.timeFormat}
             eventAnnotationService={deps.eventAnnotationService}
-            useLegacyTimeAxis={deps.useLegacyTimeAxis}
             minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
             interactive={handlers.isInteractive()}
             onClickValue={onClickValue}
             onClickMultiValue={onClickMultiValue}
+            onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}
             renderMode={handlers.getRenderMode()}

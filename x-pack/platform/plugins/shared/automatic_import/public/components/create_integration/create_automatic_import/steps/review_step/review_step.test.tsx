@@ -104,8 +104,8 @@ describe('ReviewStep', () => {
         beforeEach(async () => {
           await act(async () => {
             result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
           });
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should call setIsGenerating', () => {
@@ -131,8 +131,8 @@ describe('ReviewStep', () => {
           });
           await act(async () => {
             result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
           });
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should check pipeline', () => {
@@ -155,8 +155,8 @@ describe('ReviewStep', () => {
           });
           await act(async () => {
             result.getByTestId('savePipelineButton').click();
-            await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
           });
+          await waitFor(() => expect(mockActions.setIsGenerating).toHaveBeenCalledWith(false));
         });
 
         it('should check pipeline', () => {

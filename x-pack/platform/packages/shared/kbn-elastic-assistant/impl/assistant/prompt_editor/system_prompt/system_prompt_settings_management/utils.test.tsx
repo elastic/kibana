@@ -6,7 +6,7 @@
  */
 import { ProviderEnum } from '@kbn/elastic-assistant-common';
 import { getSelectedConversations } from './utils';
-import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 describe('getSelectedConversations', () => {
   const conversationSettings = {
     '8f1e3218-0b02-480a-8791-78c1ed5f3708': {

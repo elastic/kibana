@@ -21,6 +21,7 @@ import type {
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLAstRenameExpression,
+  ESQLAstRerankCommand,
   ESQLColumn,
   ESQLCommandOption,
   ESQLDecimalLiteral,
@@ -501,6 +502,12 @@ export class JoinCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
 
+// RERANK <query> ON field [, field ...] WITH <inference-id>
+export class RerankCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstRerankCommand> {}
+
 // CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
 export class ChangePointCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -509,6 +516,24 @@ export class ChangePointCommandVisitorContext<
 
 // FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]
 export class ForkCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
+// COMPLETION
+export class CompletionCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
+// SAMPLE <probability> [SEED <seed>]
+export class SampleCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
+
+// RRF
+export class RrfCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}

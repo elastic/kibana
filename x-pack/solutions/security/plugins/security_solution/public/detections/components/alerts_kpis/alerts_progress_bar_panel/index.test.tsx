@@ -84,17 +84,18 @@ describe('Alert by grouping', () => {
     });
 
     test('combo box renders corrected options', async () => {
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
       act(() => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
         if (comboBox) {
           comboBox.focus(); // display the combo box options
         }
       });
+
       const optionsFound = screen.getAllByRole('option').map((option) => option.textContent);
       options.forEach((option, i) => {
         expect(optionsFound[i]).toEqual(option);
@@ -103,19 +104,22 @@ describe('Alert by grouping', () => {
 
     test('it invokes setGroupBySelection when an option is selected', async () => {
       const toBeSelected = 'user.name';
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
       act(() => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
         if (comboBox) {
           comboBox.focus(); // display the combo box options
         }
       });
+
       const button = await screen.findByText(toBeSelected);
-      fireEvent.click(button);
+      act(() => {
+        fireEvent.click(button);
+      });
 
       expect(setGroupBySelection).toBeCalledWith(toBeSelected);
     });

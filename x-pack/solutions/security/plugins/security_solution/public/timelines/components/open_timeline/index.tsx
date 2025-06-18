@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
@@ -35,20 +35,20 @@ import type {
   ActionTimelineToShow,
   DeleteTimelines,
   EuiSearchBarQuery,
+  OnCreateRuleFromTimeline,
+  OnDeleteOneTimeline,
   OnDeleteSelected,
   OnOpenTimeline,
   OnQueryChange,
   OnSelectionChange,
   OnTableChange,
   OnTableChangeParams,
-  OpenTimelineProps,
   OnToggleOnlyFavorites,
-  OpenTimelineResult,
   OnToggleShowNotes,
-  OnDeleteOneTimeline,
-  OnCreateRuleFromTimeline,
+  OpenTimelineProps,
+  OpenTimelineResult,
 } from './types';
-import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
@@ -164,13 +164,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-    const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id || '' : oldDataViewId;
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const dataViewId = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec?.id || '' : oldDataViewId),
+      [experimentalDataViewSpec?.id, newDataViewPickerEnabled, oldDataViewId]
+    );
+    const selectedPatterns = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+      [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+    );
 
     const {
       customTemplateTimelineCount,

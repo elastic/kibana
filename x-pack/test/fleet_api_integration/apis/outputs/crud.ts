@@ -800,9 +800,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Remote Output With kibana_api_key',
             type: 'remote_elasticsearch',
             hosts: ['https://test.fr:443'],
-            sync_integrations: true,
             kibana_url: 'https://testhost',
-            kibana_api_key: 'aaaa',
           })
           .expect(200);
         const outputId = res.body.item.id;

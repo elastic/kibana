@@ -37,7 +37,8 @@
     "@kbn/core-security-server-internal",
     "@kbn/core-user-profile-server-internal",
     "@kbn/core-feature-flags-server",
-    "@kbn/core-feature-flags-server-internal"
+    "@kbn/core-feature-flags-server-internal",
+    "@kbn/core-pricing-server"
   ],
   "exclude": [
     "target/**/*",

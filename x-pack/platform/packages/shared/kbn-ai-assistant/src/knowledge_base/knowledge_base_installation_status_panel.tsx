@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '../hooks';
-import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
+import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
 
 const WarmUpModel = ({
   knowledgeBase,
@@ -49,7 +41,7 @@ const WarmUpModel = ({
           : 'xpack.aiAssistant.welcomeMessage.knowledgeBasePausedTextLabel',
         {
           defaultMessage: knowledgeBase.isWarmingUpModel
-            ? 'Re-deploying knowledge base model...'
+            ? 'Redeploying knowledge base model...'
             : pendingDeployment
             ? 'Your knowledge base model has been stopped'
             : 'Knowledge base model paused due to inactivity.',
@@ -72,52 +64,13 @@ const WarmUpModel = ({
             onClick={handleWarmup}
           >
             {i18n.translate('xpack.aiAssistant.knowledgeBase.wakeUpKnowledgeBaseModel', {
-              defaultMessage: 'Re-deploy Model',
+              defaultMessage: 'Redeploy Model',
             })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
-};
-
-const InspectKnowledgeBasePopover = ({
-  knowledgeBase,
-}: {
-  knowledgeBase: UseKnowledgeBaseResult;
-}) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const handleInstall = async (inferenceId: string) => {
-    setIsPopoverOpen(false);
-    await knowledgeBase.install(inferenceId);
-  };
-
-  return knowledgeBase.status.value?.modelStats ? (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        button={
-          <EuiButtonEmpty
-            data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
-            iconType="inspect"
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          >
-            {i18n.translate('xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel', {
-              defaultMessage: 'Inspect',
-            })}
-          </EuiButtonEmpty>
-        }
-        isOpen={isPopoverOpen}
-        panelPaddingSize="none"
-        closePopover={() => setIsPopoverOpen(false)}
-      >
-        <WelcomeMessageKnowledgeBaseSetupErrorPanel
-          knowledgeBase={knowledgeBase}
-          onRetryInstall={handleInstall}
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  ) : null;
 };
 
 export const KnowledgeBaseInstallationStatusPanel = ({
@@ -128,15 +81,12 @@ export const KnowledgeBaseInstallationStatusPanel = ({
   switch (knowledgeBase.status.value?.kbState) {
     case KnowledgeBaseState.NOT_INSTALLED:
       return (
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexItem grow={false}>
-            <SelectModelAndInstallKnowledgeBase
-              onInstall={knowledgeBase.install}
-              isInstalling={knowledgeBase.isInstalling}
-            />
-          </EuiFlexItem>
-        </>
+        <EuiFlexItem grow={false}>
+          <SelectModelAndInstallKnowledgeBase
+            onInstall={knowledgeBase.install}
+            isInstalling={knowledgeBase.isInstalling}
+          />
+        </EuiFlexItem>
       );
     case KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT:
       return <WarmUpModel knowledgeBase={knowledgeBase} pendingDeployment />;

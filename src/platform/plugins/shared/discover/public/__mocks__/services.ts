@@ -18,6 +18,7 @@ import {
   analyticsServiceMock,
   coreMock,
   docLinksServiceMock,
+  notificationServiceMock,
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
@@ -187,6 +188,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
       advancedSettings: {
         save: true,
       },
+      management: {
+        insightsAndAlerting: {
+          triggersActions: true,
+        },
+      },
+      indexPatterns: {
+        save: true,
+      },
     },
     fieldFormats: fieldFormatsMock,
     filterManager: dataPlugin.query.filterManager,
@@ -224,6 +233,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
+    },
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
     },
     expressions: expressionsPlugin,
     savedObjectsTagging: {

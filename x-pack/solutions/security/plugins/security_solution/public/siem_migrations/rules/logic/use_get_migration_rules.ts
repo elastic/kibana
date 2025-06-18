@@ -12,7 +12,7 @@ import type { RuleMigrationFilters } from '../../../../common/siem_migrations/ty
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
-import { getRuleMigrations } from '../api';
+import { getMigrationRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 export const useGetMigrationRules = (params: {
@@ -33,9 +33,9 @@ export const useGetMigrationRules = (params: {
   return useQuery(
     ['GET', SPECIFIC_MIGRATION_PATH, params],
     async ({ signal }) => {
-      const response = await getRuleMigrations({ signal, ...params });
+      const response = await getMigrationRules({ signal, ...params });
 
-      return { ruleMigrations: response.data, total: response.total };
+      return { migrationRules: response.data, total: response.total };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

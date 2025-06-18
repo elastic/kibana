@@ -24,7 +24,8 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe(`GET ${getGuidesPath}`, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/217198
+  describe.skip(`GET ${getGuidesPath}`, () => {
     afterEach(async () => {
       // Clean up saved objects
       await kibanaServer.savedObjects.clean({

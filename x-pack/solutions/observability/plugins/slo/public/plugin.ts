@@ -17,6 +17,7 @@ import {
 import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
@@ -129,8 +130,11 @@ export class SLOPlugin
 
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
-          (serializedState: SloOverviewEmbeddableState | undefined) => {
-            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+          (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
+            if (
+              serializedState?.rawState?.showAllGroupByInstances ||
+              serializedState?.rawState?.groupFilters
+            ) {
               return { width: 24, height: 8 };
             }
             return { width: 12, height: 8 };

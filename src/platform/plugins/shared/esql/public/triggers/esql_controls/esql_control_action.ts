@@ -44,8 +44,8 @@ export class CreateESQLControlAction implements Action<Context> {
     return 'pencil';
   }
 
-  public async isCompatible({ queryString }: Context) {
-    return isActionCompatible(queryString);
+  public async isCompatible({ variableType }: Context) {
+    return isActionCompatible(this.core, variableType);
   }
 
   public async execute({

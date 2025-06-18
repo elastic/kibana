@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('search playground APIs', function () {
     loadTestFile(require.resolve('./playgrounds'));
+    loadTestFile(require.resolve('./playground_utility_apis'));
   });
 }

@@ -19,6 +19,7 @@ import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { getLastValue } from '../../../../../common/last_value_utils';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { getOperator, shouldOperate } from '../../../../../common/operators_utils';
+import { visStyles } from '../_vis_types';
 
 function getColors(props) {
   const { model, visData } = props;
@@ -76,7 +77,7 @@ function MetricVisualization(props) {
   }
 
   return (
-    <div className="tvbVis" style={style}>
+    <div className="tvbVis" css={visStyles} style={style}>
       <Metric {...params} initialRender={props.initialRender} />
     </div>
   );
