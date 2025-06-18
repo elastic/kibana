@@ -20,7 +20,6 @@ import { generateRandomStringName } from './integrations';
 import { request } from './common';
 import { ServerlessRoleName } from '../support/roles';
 
-
 // Minimal type definitions to avoid direct import from security-solution
 interface RuleCreateProps {
   type: string;
@@ -294,26 +293,26 @@ export const loadRule = (includeResponseActions = false) => {
       note: '!{osquery{"query":"SELECT * FROM os_version where name=\'{{host.os.name}}\';","label":"Get processes","ecs_mapping":{"host.os.platform":{"field":"platform"}}}}\n\n!{osquery{"query":"select * from users;","label":"Get users"}}',
       ...(includeResponseActions
         ? {
-          response_actions: [
-            {
-              params: {
-                query: "SELECT * FROM os_version where name='{{host.os.name}}';",
-                ecs_mapping: {
-                  'host.os.platform': {
-                    field: 'platform',
+            response_actions: [
+              {
+                params: {
+                  query: "SELECT * FROM os_version where name='{{host.os.name}}';",
+                  ecs_mapping: {
+                    'host.os.platform': {
+                      field: 'platform',
+                    },
                   },
                 },
+                action_type_id: '.osquery',
               },
-              action_type_id: '.osquery',
-            },
-            {
-              params: {
-                query: 'select * from users;',
+              {
+                params: {
+                  query: 'select * from users;',
+                },
+                action_type_id: '.osquery',
               },
-              action_type_id: '.osquery',
-            },
-          ],
-        }
+            ],
+          }
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
