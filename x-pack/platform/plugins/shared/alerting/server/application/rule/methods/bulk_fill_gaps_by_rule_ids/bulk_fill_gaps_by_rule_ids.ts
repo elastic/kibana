@@ -42,20 +42,20 @@ export const bulkFillGapsByRuleIds = async (
     options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY;
 
   // Make sure user has access to these rules
-  const rulesByAlertType = mapValues(
+  const rulesByRuleType = mapValues(
     groupBy(rules, (rule) => `${rule.alertTypeId}<>${rule.consumer}`),
     (groupedRules) => ({
-      alertTypeId: groupedRules[0].alertTypeId,
+      ruleTypeId: groupedRules[0].alertTypeId,
       consumer: groupedRules[0].consumer,
       rules: groupedRules,
     })
   );
 
   const authorizedRules: typeof rules = [];
-  for (const { alertTypeId, consumer, rules: rulesBatch } of Object.values(rulesByAlertType)) {
+  for (const { ruleTypeId, consumer, rules: rulesBatch } of Object.values(rulesByRuleType)) {
     try {
       await context.authorization.ensureAuthorized({
-        ruleTypeId: alertTypeId,
+        ruleTypeId,
         consumer,
         operation: WriteOperations.FillGaps,
         entity: AlertingAuthorizationEntity.Rule,
@@ -80,12 +80,16 @@ export const bulkFillGapsByRuleIds = async (
         maxGapCountPerRule: options.maxGapCountPerRule,
       });
 
-      if (backfillResult.outcome === BulkFillGapsScheduleResult.BACKFILLED) {
-        backfilled.push(rule);
-      } else if (backfillResult.outcome === BulkFillGapsScheduleResult.ERRORED) {
-        errored.push(backfillResult.error);
-      } else {
-        skipped.push(rule);
+      switch (backfillResult.outcome) {
+        case BulkFillGapsScheduleResult.BACKFILLED:
+          backfilled.push(rule);
+          break;
+        case BulkFillGapsScheduleResult.ERRORED:
+          errored.push(backfillResult.error);
+          break;
+        case BulkFillGapsScheduleResult.SKIPPED:
+          skipped.push(rule);
+          break;
       }
     },
     {
