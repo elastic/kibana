@@ -68,7 +68,6 @@ export const AISearchWorkflow = ({ capability }: { capability: WorkflowProps }) 
             <EuiButton
               iconType="plusInCircle"
               href={createIndexUrl}
-              target="_blank"
               data-test-subj={capability.dataTestSubj}
             >
               {capability.buttonLabel}
