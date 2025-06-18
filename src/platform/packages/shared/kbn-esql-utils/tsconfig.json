@@ -29,6 +29,5 @@
     "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/monaco",
-    "@kbn/stack-alerts-plugin",
   ]
 }
