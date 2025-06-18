@@ -79,8 +79,7 @@ export const useMultiSuperSelectStyles = (isOpen: boolean) => {
       ${backgroundAnimation};
       display: block;
       line-height: 32px;
-      // TODO: Figure out a better value here
-      padding-inline-end: calc(60px * var(--euiFormControlRightIconsCount, 0));
+      padding-inline-end: calc(${euiTheme.size.xxxxl} * var(--euiFormControlRightIconsCount, 0));
       color: ${euiTheme.colors.textParagraph};
       font-weight: ${euiTheme.font.weight.regular};
       border: none;
