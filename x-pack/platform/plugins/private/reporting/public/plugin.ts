@@ -36,7 +36,6 @@ import {
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { createScheduledReportShareIntegration } from './management/integrations/scheduled_report_share_integration';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
@@ -245,11 +244,15 @@ export class ReportingPublicPlugin
       );
     }
 
-    shareSetup.registerShareIntegration<ExportShareDerivatives>(
-      createScheduledReportShareIntegration({
-        apiClient,
-        services: { ...core, ...setupDeps },
-      })
+    import('./management/integrations/scheduled_report_share_integration').then(
+      ({ createScheduledReportShareIntegration }) => {
+        shareSetup.registerShareIntegration<ExportShareDerivatives>(
+          createScheduledReportShareIntegration({
+            apiClient,
+            services: { ...core, ...setupDeps },
+          })
+        );
+      }
     );
 
     this.startServices$ = startServices$;

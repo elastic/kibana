@@ -11,7 +11,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementStart } from '@kbn/management-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface ReportingPublicPluginStartDependencies {

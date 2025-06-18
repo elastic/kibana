@@ -268,14 +268,14 @@ export const CANNOT_LOAD_REPORTING_HEALTH_MESSAGE = i18n.translate(
 );
 
 export function getInvalidEmailAddress(email: string) {
-  return i18n.translate('xpack.stackConnectors.components.email.error.invalidEmail', {
+  return i18n.translate('xpack.reporting.components.email.error.invalidEmail', {
     defaultMessage: 'Email address {email} is not valid',
     values: { email },
   });
 }
 
 export function getNotAllowedEmailAddress(email: string) {
-  return i18n.translate('xpack.stackConnectors.components.email.error.notAllowed', {
+  return i18n.translate('xpack.reporting.components.email.error.notAllowed', {
     defaultMessage: 'Email address {email} is not allowed',
     values: { email },
   });
