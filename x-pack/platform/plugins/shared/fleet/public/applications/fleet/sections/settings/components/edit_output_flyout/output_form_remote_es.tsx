@@ -17,6 +17,8 @@ import {
   EuiLink,
   EuiCode,
   EuiFieldPassword,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -133,6 +135,25 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         )}
         {...inputs.elasticsearchUrlInput.props}
         isUrl
+        helpText={
+          <>
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputHelpText"
+              defaultMessage="Specify the URL that your agents will use to access the remote Elasticsearch cluster"
+            />
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputTooltip',
+                {
+                  defaultMessage:
+                    'To find the remote host address, in the remote cluster open Kibana and go to Management → Fleet → Settings',
+                }
+              )}
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
+          </>
+        }
       />
       <EuiSpacer size="m" />
       {!useSecretsStorage ? (
