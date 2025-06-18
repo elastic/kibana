@@ -2205,10 +2205,45 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload(packetBeatPath);
       });
 
-      it('should handle shard failures and include warning in logs', async () => {
+      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
+        const doc1 = { agent: { name: 'test-1' } };
+        await indexEnhancedDocuments({
+          documents: [doc1],
+          id: uuidv4(),
+        });
+
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from packetbeat-* METADATA _id | limit 101`,
+          query: `from packetbeat-*, ecs_compliant METADATA _id | limit 101`,
+          from: 'now-100000h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(logs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              warnings: expect.arrayContaining([
+                expect.stringContaining(
+                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
+                ),
+              ]),
+            }),
+          ])
+        );
+
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('should handle shard failures and include warning in logs for query that is aggregating', async () => {
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock(),
+          query: `from packetbeat-* | stats _count=count(non_existing) by @timestamp`,
           from: 'now-100000h',
         };
 
@@ -2220,10 +2255,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(logs).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              warnings: expect.arrayContaining([
-                expect.stringContaining(
-                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
-                ),
+              errors: expect.arrayContaining([
+                expect.stringContaining('Unknown column [non_existing]'),
               ]),
             }),
           ])
