@@ -17,6 +17,8 @@ Plugins are defined as classes and present themselves to Kibana through a simple
 or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly,
 and you interact with Core and other plugins in the same way.
 
+This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the external plugin development guide [LINK](https://www.elastic.co/docs/extend/kibana/external-plugin-development).
+
 The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
 
 ```
@@ -54,7 +56,8 @@ plugins/
     ],
    "optionalPlugins": ["alerting"],
    "requiredBundles": ["anotherPlugin"],
-   "group": "chat"
+   "group": "chat",
+   "visibility": "shared"
   }
 }
 
@@ -79,7 +82,9 @@ plugins/
 
 `plugin.requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
 
-`group` - [Optional] An optional field used to distinguish between solution and platform categories. Typical values include "search", "security", "observability", "platform", or "chat".
+`group` - [Required] A field used to distinguish between solution and platform categories. Typical values include "search", "security", "observability", "platform", or "chat".
+
+`visibility` - [Optional] Determines plugin accessibility: "private": The plugin is only accessible from plugins that belong to the same group or "shared": The plugin is accessible from plugins from any group. This only applies to plugins with group: 'platform', as solution plugins are private by definition.
 
 <DocCallOut>
   You don't need to declare a dependency on a plugin if you only wish to access its types.
