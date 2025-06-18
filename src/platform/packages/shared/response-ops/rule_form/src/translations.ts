@@ -113,8 +113,7 @@ export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
 export const ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboards.label.tooltipContent',
   {
-    defaultMessage:
-      'Choose dashboards to link to this rule. Alerts created by this rule will include links to these dashboards.',
+    defaultMessage: `Dashboards let you visualize and analyze alerts created by this rule. When alerts are created, you can quickly access your selected dashboards from the alerts' details page.`,
   }
 );
 
