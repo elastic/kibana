@@ -11,7 +11,7 @@
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanel } from '../../server';
-import { DashboardState, getReferencesForPanelId, isDashboardSection, prefixReferencesFromPanel } from '@kbn/dashboard-plugin/common';
+import { DashboardState, getReferencesForPanelId, isDashboardSection, prefixReferencesFromPanel } from '../../common';
 
 export function generateNewPanelIds(panels: DashboardState['panels'], references?: Reference[]) {
   const newPanels: DashboardState['panels'] = [];

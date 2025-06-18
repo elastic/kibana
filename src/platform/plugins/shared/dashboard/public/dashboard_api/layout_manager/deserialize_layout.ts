@@ -9,9 +9,9 @@
 
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
-import { DashboardState, isDashboardSection } from "@kbn/dashboard-plugin/common";
-import { DashboardChildState, DashboardLayout } from "./types";
-import { DashboardPanel } from "../../../server";
+import { type DashboardState, isDashboardSection } from "../../../common";
+import type { DashboardPanel } from "../../../server";
+import type { DashboardChildState, DashboardLayout } from "./types";
 
 export function deserializeLayout(panels: DashboardState['panels'], getReferences: (id: string) => Reference[]) {
   const layout: DashboardLayout = {

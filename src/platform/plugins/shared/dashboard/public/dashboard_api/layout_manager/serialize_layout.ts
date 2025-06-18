@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState, prefixReferencesFromPanel } from "@kbn/dashboard-plugin/common";
+import { DashboardState, prefixReferencesFromPanel } from "../../../common";
 import { DashboardChildState, DashboardLayout } from './types';
-import { DashboardSection } from '@kbn/dashboard-plugin/server';
+import { DashboardSection } from '../../../server';
 import { omit } from 'lodash';
 
 export function serializeLayout(layout: DashboardLayout, childState: DashboardChildState): Pick<DashboardState, 'panels' | 'references'> {
