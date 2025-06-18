@@ -22,7 +22,6 @@ import {
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 
-
 const types = [
   noteType,
   pinnedEventType,
