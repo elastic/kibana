@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { flatten, get, isEqual } from 'lodash';
+import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -176,9 +176,7 @@ function getDatatypeFromOperation(
   return 'number';
 }
 
-function getIsBucketedFromOperation(
-  operationType: string,
-): boolean {
+function getIsBucketedFromOperation(operationType: string): boolean {
   const operation = operationDefinitionMap[operationType];
   return operation.isBucketed ?? false;
 }
@@ -193,9 +191,7 @@ function getScale(type: string) {
     : 'ratio';
 }
 
-function getScaleFromOperation(
-  operationType: string,
-): 'ratio' | 'ordinal' | 'interval' {
+function getScaleFromOperation(operationType: string): 'ratio' | 'ordinal' | 'interval' {
   const operation = operationDefinitionMap[operationType];
   return operation.scale ?? getScale('');
 }
@@ -952,7 +948,9 @@ export function getFormBasedDatasource({
           const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
-            role: getIsBucketedFromOperation(col.operationType) ? ('split' as const) : ('metric' as const),
+            role: getIsBucketedFromOperation(col.operationType)
+              ? ('split' as const)
+              : ('metric' as const),
             operation: {
               ...columnToOperation(col, undefined, dataView),
               type: col.operationType,
