@@ -75,9 +75,7 @@ export const ElasticsearchQueryViewer = ({
       onChangeUserQuery(value === generatedEsQuery ? null : value);
       trigger(PlaygroundFormFields.userElasticsearchQuery);
     },
-    // We should not include form methods in dep arrays per react-hook-form
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [esQueryFirstEdit, generatedEsQuery, usageTracker]
+    [esQueryFirstEdit, generatedEsQuery, usageTracker, onChangeUserQuery, trigger]
   );
   const userElasticsearchQueryIsCustomized = userElasticsearchQuery !== null;
 
