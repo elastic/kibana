@@ -9,7 +9,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
-import { ThreatDetectionSolutions } from './threat_detection/threat_detection_solutions';
+import { AlternateSolutions } from './alternate_solutions/alternate_solutions';
 import { DiveDeeperWithElasticsearch } from './dive_deeper/dive_deeper_with_elasticsearch';
 import { Footer } from './footer/footer';
 
@@ -23,7 +23,7 @@ export const SearchHomepageBody = () => (
         <EuiHorizontalRule />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ThreatDetectionSolutions />
+        <AlternateSolutions />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiHorizontalRule />

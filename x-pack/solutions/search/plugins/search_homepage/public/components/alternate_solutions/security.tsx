@@ -13,27 +13,32 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiIcon,
+  EuiAvatar,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
-const EXPLORE_LOGSTASH_AND_BEATS = '/app/integrations/browse/observability';
-const CREATE_OBSERVABILITY_SPACE = '/app/management/kibana/spaces/create';
 
-export const Observability: React.FC = () => {
-  const { http } = useKibana().services;
+export const Security: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
+    <EuiFlexGroup gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="logoObservability" size="xl" />
+        <EuiAvatar
+          size="xl"
+          color="plain"
+          name="Security"
+          iconType="logoSecurity"
+          style={{ border: euiTheme.border.thin }}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
               <span>
-                {i18n.translate('xpack.searchHomepage.observability.title', {
-                  defaultMessage: 'Observability',
+                {i18n.translate('xpack.searchHomepage.security.title', {
+                  defaultMessage: 'Security',
                 })}
               </span>
             </EuiTitle>
@@ -41,9 +46,9 @@ export const Observability: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               <span>
-                {i18n.translate('xpack.searchHomepage.observability.description', {
+                {i18n.translate('xpack.searchHomepage.security.description', {
                   defaultMessage:
-                    'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
+                    'Prevent, collect, detect, and respond to threats for unified protection across your infrastructure.',
                 })}
               </span>
             </EuiText>
@@ -58,19 +63,16 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
                       <span>
-                        {i18n.translate('xpack.searchHomepage.observability.logsTitle', {
-                          defaultMessage: 'Collect and analyze logs',
+                        {i18n.translate('xpack.searchHomepage.security.detectThreatsTitle', {
+                          defaultMessage: 'Detect threats in your data',
                         })}
                       </span>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={http.basePath.prepend(EXPLORE_LOGSTASH_AND_BEATS)}
-                      data-test-subj="exploreLogstashAndBeatsLink"
-                    >
-                      {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
-                        defaultMessage: 'Explore Logstash and Beats',
+                    <EuiLink target="_blank" data-test-subj="setupSiemLink">
+                      {i18n.translate('xpack.searchHomepage.security.setupSiem', {
+                        defaultMessage: 'Setup your SIEM',
                       })}
                     </EuiLink>
                   </EuiFlexItem>
@@ -81,23 +83,20 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xxs">
                       <span>
-                        {i18n.translate(
-                          'xpack.searchHomepage.observability.performanceMonitoringTitle',
-                          {
-                            defaultMessage: 'Powerful performance monitoring',
-                          }
-                        )}
+                        {i18n.translate('xpack.searchHomepage.security.secureCloudAssetsTitle', {
+                          defaultMessage: 'Secure your cloud assets',
+                        })}
                       </span>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={http.basePath.prepend(CREATE_OBSERVABILITY_SPACE)}
-                      data-test-subj="createObservabilityProjectLink"
-                    >
-                      {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {
-                        defaultMessage: 'Create an Observability space',
-                      })}
+                    <EuiLink target="_blank" data-test-subj="cloudSecurityPostureManagementLink">
+                      {i18n.translate(
+                        'xpack.searchHomepage.security.cloudSecurityPostureManagementLink',
+                        {
+                          defaultMessage: 'Cloud Security Posture Management',
+                        }
+                      )}
                     </EuiLink>
                   </EuiFlexItem>
                 </EuiFlexGroup>
