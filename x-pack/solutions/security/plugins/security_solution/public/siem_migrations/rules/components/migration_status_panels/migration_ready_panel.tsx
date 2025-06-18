@@ -125,16 +125,16 @@ const StartTranslationButton = React.memo<{ migrationId: string; isStopped: bool
     }, [migrationId, startMigration]);
 
     const text = useMemo(() => {
-      if (isLoading) {
-        return isStopped
+      if (isStopped) {
+        return isLoading
           ? i18n.RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON
-          : i18n.RULE_MIGRATION_STARTING_TRANSLATION_BUTTON;
+          : i18n.RULE_MIGRATION_RESUME_TRANSLATION_BUTTON;
       } else {
-        return isStopped
-          ? i18n.RULE_MIGRATION_RESUME_TRANSLATION_BUTTON
+        return isLoading
+          ? i18n.RULE_MIGRATION_STARTING_TRANSLATION_BUTTON
           : i18n.RULE_MIGRATION_START_TRANSLATION_BUTTON;
       }
-    }, [isLoading, isStopped]);
+    }, [isStopped, isLoading]);
 
     return (
       <EuiButton

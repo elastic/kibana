@@ -95,6 +95,16 @@ describe('MigrationReadyPanel', () => {
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start');
     });
+
+    it('should render starting migration button while loading', () => {
+      useStartMigrationMock.mockReturnValue({
+        startMigration: mockStartMigration,
+        isLoading: true,
+      });
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      expect(screen.getByTestId('startMigrationButton')).toBeVisible();
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');
+    });
   });
 
   describe('Migration with Error', () => {
@@ -125,6 +135,16 @@ describe('MigrationReadyPanel', () => {
     it('should render correct start migration button for aborted migration', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
+    });
+
+    it('should render resuming migration button while loading', () => {
+      useStartMigrationMock.mockReturnValue({
+        startMigration: mockStartMigration,
+        isLoading: true,
+      });
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
+      expect(screen.getByTestId('startMigrationButton')).toBeVisible();
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resuming');
     });
   });
 
