@@ -77,7 +77,11 @@ export const Chat: React.FC<ChatProps> = ({ agentId, conversationId, onConversat
     [sendMessage, setStickToBottom]
   );
 
-  if (!conversationId && conversationEvents.length === 0) {
+  if (
+    !conversationId &&
+    conversationEvents.length === 0 &&
+    (!conversation || conversation.rounds.length === 0)
+  ) {
     return <ChatNewConversationPrompt onSubmit={onSubmit} />;
   }
 

@@ -6,7 +6,12 @@
  */
 
 import type { StructuredToolIdentifier } from '../tools/tools';
-import type { SerializedAgentIdentifier } from '../agents';
+import {
+  OneChatDefaultAgentId,
+  toSerializedAgentIdentifier,
+  type SerializedAgentIdentifier,
+  OneChatDefaultAgentProviderId,
+} from '../agents';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -100,3 +105,19 @@ export interface Conversation {
   updatedAt: string;
   rounds: ConversationRound[];
 }
+
+export const createEmptyConversation = (): Conversation => {
+  const now = new Date().toISOString();
+  return {
+    id: 'new',
+    agentId: toSerializedAgentIdentifier({
+      agentId: OneChatDefaultAgentId,
+      providerId: OneChatDefaultAgentProviderId,
+    }),
+    user: { id: '', username: '' },
+    title: '',
+    createdAt: now,
+    updatedAt: now,
+    rounds: [],
+  };
+};

@@ -10,6 +10,7 @@ import { ChatAgentEventType, ChatEventType, Conversation } from '@kbn/onechat-co
 import { useQueryClient } from '@tanstack/react-query';
 import { produce } from 'immer';
 import { useCallback, useMemo, useState } from 'react';
+import { ConversationRound, createEmptyConversation } from '@kbn/onechat-common/chat/conversation';
 import type { ConversationCreatedEvent, ProgressionEvent } from '../../../common/chat_events';
 import {
   createAssistantMessage,
@@ -65,11 +66,17 @@ export const useChat = ({
       queryClient.setQueryData<Conversation>(
         conversationQueryKey,
         produce((draft) => {
-          draft?.rounds?.push({
+          const nextRound: ConversationRound = {
             userInput: { message: userMessage },
             assistantResponse: { message: '' },
             steps: [],
-          });
+          };
+          if (!draft) {
+            const conversation = createEmptyConversation();
+            conversation.rounds.push(nextRound);
+            return conversation;
+          }
+          draft.rounds.push(nextRound);
         })
       );
     },
@@ -154,6 +161,17 @@ export const useChat = ({
             event.type === ChatEventType.conversationUpdated
           ) {
             const { conversationId: id, title } = event.data;
+            const conversation = queryClient.getQueryData<Conversation>(conversationQueryKey);
+            // Update query data for the new conversation id
+            if (conversation) {
+              queryClient.setQueryData<Conversation>(
+                queryKeys.conversations.byId(id),
+                produce(conversation, (draft) => {
+                  draft.id = id;
+                  draft.title = title;
+                })
+              );
+            }
             onConversationUpdate({ id, title });
           }
         },
@@ -193,6 +211,8 @@ export const useChat = ({
       invalidateConversation,
       addConversation,
       updateConversation,
+      conversationQueryKey,
+      queryClient,
     ]
   );
 
