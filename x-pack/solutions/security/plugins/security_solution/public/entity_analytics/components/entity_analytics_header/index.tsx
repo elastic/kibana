@@ -36,7 +36,6 @@ import { FormattedCount } from '../../../common/components/formatted_number';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import type { SeverityCount } from '../severity/types';
-import type { EntityAnalyticsComponentProps } from '../../../../common/entity_analytics/types';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${SEVERITY_COLOR.critical};
@@ -46,9 +45,7 @@ const StyledEuiTitle = styled(EuiTitle)`
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
 
-export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
-  isOverview = false,
-}) => {
+export const EntityAnalyticsHeader = () => {
   const { from, to } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
   const timerange = useMemo(
@@ -198,7 +195,7 @@ export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
             </EuiFlexItem>
           </>
         )}
-        {!isOverview && (
+        {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
               <EuiFlexItem className="eui-textCenter">
@@ -213,7 +210,7 @@ export const EntityAnalyticsHeader: React.FC<EntityAnalyticsComponentProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-        )}
+        }
       </EuiFlexGroup>
     </EuiPanel>
   );
