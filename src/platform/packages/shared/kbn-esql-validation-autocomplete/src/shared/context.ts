@@ -203,7 +203,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     }
 
     if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name)) {
+      if (['in', 'not_in', 'not in'].includes(node.name)) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, containingFunction };
       }

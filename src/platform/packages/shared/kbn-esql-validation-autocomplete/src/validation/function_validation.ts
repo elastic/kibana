@@ -309,7 +309,6 @@ export function validateFunction({
           );
         });
       });
-
       const shouldCollapseMessages = isArrayType(parameter.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
@@ -350,7 +349,8 @@ const formatType = (argument: ESQLAstExpression): string => {
         return 'string';
       }
       default: {
-        return argument.type + ':' + argument.literalType;
+        return argument.literalType;
+        // return argument.type + ':' + argument.literalType;
       }
     }
   }
