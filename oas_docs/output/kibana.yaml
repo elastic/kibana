@@ -43586,7 +43586,7 @@ paths:
         - Security Timeline API
   /api/observability_ai_assistant/chat/complete:
     post:
-      description: Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
+      description: Create a new chat completion by using the Observability AI Assistant. The API returns the model's response based on the current conversation context. It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
       parameters:
         - description: Response format, either 'default' or 'openai'. If 'openai', the response will be in OpenAI compatible format.
           in: query
@@ -43611,10 +43611,10 @@ paths:
                     $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Function'
                   type: array
                 connectorId:
-                  description: Unique identifier for the connector
+                  description: A unique identifier for the connector.
                   type: string
                 conversationId:
-                  description: Unique identifier for the conversation (if continuing a conversation)
+                  description: A Unique identifier for the conversation if you are continuing an existing conversation.
                   type: string
                 disableFunctions:
                   description: Flag indicating whether functions should be disabled
@@ -43625,7 +43625,7 @@ paths:
                     $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Instruction'
                   type: array
                 messages:
-                  description: Array of message objects containing the conversation history
+                  description: An array of message objects containing the conversation history.
                   items:
                     $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Message'
                   type: array
@@ -43633,7 +43633,7 @@ paths:
                   description: Flag indicating whether to persist the conversation in Kibana
                   type: boolean
                 title:
-                  description: Title of the conversation
+                  description: A title for the conversation.
                   type: string
               required:
                 - messages
@@ -43649,7 +43649,7 @@ paths:
               schema:
                 type: object
           description: Successful response
-      summary: Generate a chat completion
+      summary: Generate a chat completion.
       tags:
         - observability_ai_assistant
   /api/osquery/live_queries:
@@ -66654,7 +66654,7 @@ components:
           ]
         }
     Observability_AI_Assistant_APIs_completeChatResponseExample:
-      summary: Get chat completion via the Observability AI Assistant
+      summary: Get chat completion from the Observability AI Assistant
       value:
         - id: message-id
           message:
@@ -66680,13 +66680,13 @@ components:
       type: object
       properties:
         description:
-          description: The description of the function
+          description: The description of the function.
           type: string
         name:
-          description: The name of the function
+          description: The name of the function.
           type: string
         parameters:
-          description: The parameters of the function
+          description: The parameters of the function.
           type: object
     Observability_AI_Assistant_APIs_Instruction:
       oneOf:
@@ -66696,7 +66696,7 @@ components:
           type: object
           properties:
             id:
-              description: Unique identifier of the instruction.
+              description: A unique identifier for the instruction.
               type: string
             text:
               description: The text of the instruction.
