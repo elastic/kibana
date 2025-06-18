@@ -64,7 +64,7 @@ describe('getRuleIdsWithGapsRoute', () => {
 
     rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResult);
     const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockBody });
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
     await handler(context, req, res);
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
   });
@@ -79,7 +79,7 @@ describe('getRuleIdsWithGapsRoute', () => {
       throw new Error('Failure');
     });
     const [, handler] = router.post.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockBody });
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });
