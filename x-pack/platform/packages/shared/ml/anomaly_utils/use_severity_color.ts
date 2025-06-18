@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, euiPaletteSkyBlue, euiPaletteOrange, euiPaletteYellow } from '@elastic/eui';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 
 /**
@@ -23,6 +23,8 @@ export function getThemeResolvedSeverityColor(
   normalizedScore: number,
   euiTheme: EuiThemeComputed
 ): string {
+  const skyBluePalette = euiPaletteSkyBlue(6);
+
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return euiTheme.colors.severity.danger;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
@@ -30,9 +32,9 @@ export function getThemeResolvedSeverityColor(
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
     return euiTheme.colors.severity.warning;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
-    return '#a6d8ec'; // TODO: euiPaletteSkyBlue(6)[2]
+    return skyBluePalette[2];
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-    return '#dceef7'; // TODO: euiPaletteSkyBlue(6)[0]
+    return skyBluePalette[0];
   } else {
     return euiTheme.colors.severity.unknown;
   }
@@ -42,16 +44,20 @@ export function getThemeResolvedSeverityStrokeColor(
   normalizedScore: number,
   euiTheme: EuiThemeComputed
 ): string {
+  const orangePalette = euiPaletteOrange(6);
+  const yellowPalette = euiPaletteYellow(6);
+  const skyBluePalette = euiPaletteSkyBlue(6);
+
   if (normalizedScore >= ML_ANOMALY_THRESHOLD.CRITICAL) {
     return euiTheme.colors.danger;
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MAJOR) {
-    return '#fc8544'; // TODO: euiPaletteOrange(6)[5]
+    return orangePalette[5];
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.MINOR) {
-    return '#eaae01'; // TODO: euiPaletteYellow(6)[5]
+    return yellowPalette[5];
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.WARNING) {
-    return '#89cee7'; // TODO: euiPaletteSkyBlue(6)[3]
+    return skyBluePalette[3];
   } else if (normalizedScore >= ML_ANOMALY_THRESHOLD.LOW) {
-    return '#c2e3f1'; // TODO: euiPaletteSkyBlue(6)[0]
+    return skyBluePalette[0];
   } else {
     return euiTheme.colors.severity.unknown;
   }
