@@ -10,9 +10,11 @@ import { SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import type { AxiosError, Method } from 'axios';
 import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
 import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ConverseRequest, ConverseStreamRequest } from '@aws-sdk/client-bedrock-runtime';
@@ -79,12 +81,19 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
     this.url = this.config.apiUrl;
     this.model = this.config.defaultModel;
+    const { httpAgent, httpsAgent } = getCustomAgents(
+      this.configurationUtilities,
+      this.logger,
+      this.url
+    );
+    const isHttps = this.url.toLowerCase().startsWith('https');
     this.bedrockClient = new BedrockRuntimeClient({
       region: extractRegionId(this.config.apiUrl),
       credentials: {
         accessKeyId: this.secrets.accessKey,
         secretAccessKey: this.secrets.secret,
       },
+      requestHandler: new NodeHttpHandler(isHttps ? { httpsAgent } : { httpAgent }),
     });
     this.registerSubActions();
   }
