@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +34,11 @@ export function BarDetails({
   const theme = useEuiTheme();
   const { getRelatedErrorsHref } = useTraceWaterfallContext();
 
+  const viewRelatedErrorsLabel = i18n.translate(
+    'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
+    { defaultMessage: 'View related errors' }
+  );
+
   return (
     <div
       css={css`
@@ -49,6 +55,7 @@ export function BarDetails({
           position: absolute;
           right: 0;
           max-width: 100%;
+          margin-top: ${theme.euiTheme.size.xxs};
           & > div:last-child {
             margin-right: ${theme.euiTheme.size.s};
             white-space: nowrap;
@@ -72,7 +79,7 @@ export function BarDetails({
         </EuiFlexItem>
         {item.hasError ? (
           <EuiFlexItem grow={false}>
-            {onErrorClick || getRelatedErrorsHref ? (
+            {onErrorClick ? (
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.apm.barDetails.errorButton.ariaLabel', {
                   defaultMessage: 'View error details',
@@ -90,6 +97,22 @@ export function BarDetails({
                   }
                 }}
               />
+            ) : getRelatedErrorsHref ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiBadge
+                color={theme.euiTheme.colors.danger}
+                iconType="arrowRight"
+                href={getRelatedErrorsHref(item.id) as any}
+                onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
+                  e.stopPropagation();
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={viewRelatedErrorsLabel}
+                onClickAriaLabel={viewRelatedErrorsLabel}
+              >
+                {viewRelatedErrorsLabel}
+              </EuiBadge>
             ) : (
               <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
             )}
