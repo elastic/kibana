@@ -19,8 +19,8 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -44,10 +44,10 @@ export const useInitDataViewManager = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const {
-    signalIndexName,
     loading: loadingSignalIndex,
+    signalIndexName,
     signalIndexMappingOutdated,
-  } = useSignalIndex();
+  } = useUserInfo();
 
   const onSignalIndexUpdated = useCallback(() => {
     if (!loadingSignalIndex && signalIndexName != null) {
