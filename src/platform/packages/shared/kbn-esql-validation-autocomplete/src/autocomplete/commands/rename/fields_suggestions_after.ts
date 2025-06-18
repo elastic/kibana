@@ -8,7 +8,6 @@
  */
 import {
   type ESQLAstCommand,
-  walk,
   type ESQLAstRenameExpression,
   type ESQLAstBaseItem,
 } from '@kbn/esql-ast';
@@ -24,19 +23,15 @@ export const fieldsSuggestionsAfter = (
   const asRenamePairs: ESQLAstRenameExpression[] = [];
   const assignRenamePairs: ESQLAstRenameExpression[] = [];
 
-  walk(command, {
-    visitCommand: (node) => {
-      for (const arg of node.args) {
-        if (isOptionItem(arg)) {
-          if (arg.name === 'as') {
-            asRenamePairs.push(arg as ESQLAstRenameExpression);
-          } else if (arg.name === '=') {
-            assignRenamePairs.push(arg as ESQLAstRenameExpression);
-          }
-        }
+  for (const arg of command.args) {
+    if (isOptionItem(arg)) {
+      if (arg.name === 'as') {
+        asRenamePairs.push(arg as ESQLAstRenameExpression);
+      } else if (arg.name === '=') {
+        assignRenamePairs.push(arg as ESQLAstRenameExpression);
       }
-    },
-  });
+    }
+  }
 
   // rename the columns with the user defined name
   const newFields = previousCommandFields.map((oldColumn) => {
