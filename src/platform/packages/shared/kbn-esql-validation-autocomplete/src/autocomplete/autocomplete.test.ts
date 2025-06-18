@@ -1022,6 +1022,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
@@ -1032,6 +1033,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
@@ -1042,6 +1044,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
 
