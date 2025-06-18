@@ -15,6 +15,7 @@ import { createRestorableStateProvider } from './restorable_state_provider';
 interface RestorableState {
   count?: number;
   message?: string;
+  anotherMessage?: string;
 }
 
 describe('createRestorableStateProvider', () => {
@@ -26,6 +27,7 @@ describe('createRestorableStateProvider', () => {
       const [message, setMessage] = useRestorableState('message', 'Hello');
       return (
         <button
+          data-test-subj="message-button"
           onClick={() => {
             setMessage((value) => `${value} World`);
           }}
@@ -36,7 +38,20 @@ describe('createRestorableStateProvider', () => {
     };
 
     const MockParentComponent = () => {
-      return <MockChildComponent />;
+      const [anotherMessage, setAnotherMessage] = useRestorableState('anotherMessage', '+');
+      return (
+        <div>
+          <MockChildComponent />
+          <button
+            data-test-subj="another-message-button"
+            onClick={() => {
+              setAnotherMessage((value) => `${value}+`);
+            }}
+          >
+            {anotherMessage}
+          </button>
+        </div>
+      );
     };
 
     const WrappedComponent = withRestorableState(MockParentComponent);
@@ -51,7 +66,7 @@ describe('createRestorableStateProvider', () => {
 
     render(<WrappedComponent {...props} />);
 
-    const button = screen.getByRole('button');
+    const button = screen.getByTestId('message-button');
     expect(button).toHaveTextContent('Hello');
     expect(props.onInitialStateChange).not.toHaveBeenCalled();
     await userEvent.click(button);
@@ -60,8 +75,23 @@ describe('createRestorableStateProvider', () => {
     expect(props.onInitialStateChange).toHaveBeenCalledTimes(2);
     expect(mockStoredState).toEqual({ message: 'Hello World World' });
 
-    render(<WrappedComponent {...props} initialState={{ message: 'Hi' }} />);
-    expect(screen.getAllByRole('button')[1]).toHaveTextContent('Hi');
+    const anotherButton = screen.getByTestId('another-message-button');
+    expect(anotherButton).toHaveTextContent('+');
+    await userEvent.click(anotherButton);
+    expect(anotherButton).toHaveTextContent('++');
+    expect(props.onInitialStateChange).toHaveBeenCalledTimes(3);
+    expect(mockStoredState).toEqual({ message: 'Hello World World', anotherMessage: '++' });
+
+    const propsWithSavedState: ComponentProps<typeof WrappedComponent> = {
+      initialState: { message: 'Hi', anotherMessage: '---' },
+      onInitialStateChange: jest.fn((state) => {
+        mockStoredState = state;
+      }),
+    };
+
+    render(<WrappedComponent {...propsWithSavedState} />);
+    expect(screen.getAllByTestId('message-button')[1]).toHaveTextContent('Hi');
+    expect(screen.getAllByTestId('another-message-button')[1]).toHaveTextContent('---');
   });
 
   it('useRestorableRef should work correctly', async () => {
