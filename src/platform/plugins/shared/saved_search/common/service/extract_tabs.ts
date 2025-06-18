@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
@@ -34,7 +35,9 @@ export const extractTabs = (
   const tabs = [
     {
       id: uuidv4(),
-      label: `Untitled session 1`,
+      label: i18n.translate('discover.defaultTabLabel', {
+        defaultMessage: 'Untitled',
+      }),
       attributes: tabAttrs,
     },
   ];
