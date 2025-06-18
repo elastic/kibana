@@ -145,6 +145,33 @@ describe('processAllGapsInTimeRange', () => {
     });
   });
 
+  describe('when there are no gaps to process', () => {
+    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
+    beforeEach(async () => {
+      findGapsSearchAfterMock.mockResolvedValue({
+        data: [],
+        searchAfer: null,
+        pitId: null,
+      });
+      results = await processAllGapsInTimeRange({
+        ruleId,
+        start: new Date().toISOString(),
+        end: new Date().toISOString(),
+        logger: mockLogger,
+        eventLogClient: mockEventLogClient,
+        processGapsBatch: processGapsBatchMock,
+      });
+    });
+
+    it('should not call processGapsBatch', () => {
+      expect(processGapsBatchMock).not.toHaveBeenCalled();
+    });
+
+    it('should return an empty results array', () => {
+      expect(results).toEqual([]);
+    });
+  });
+
   describe('when the max iterations are reached', () => {
     const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(10001);
     const { start, end } = searchRange;

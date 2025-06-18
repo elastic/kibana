@@ -90,7 +90,9 @@ export const processAllGapsInTimeRange = async <T>({
         gapsToProcess = gapsToProcess.slice(0, gaps.length - offset);
       }
 
-      processingResults.push(await processGapsBatch(gapsToProcess));
+      if (gapsToProcess.length > 0) {
+        processingResults.push(await processGapsBatch(gapsToProcess));
+      }
 
       // Exit conditions: no more results or no next search_after or maxFetchedGaps reached
       const maxGapsReached = maxFetchedGaps !== undefined && gapsCount >= maxFetchedGaps;
