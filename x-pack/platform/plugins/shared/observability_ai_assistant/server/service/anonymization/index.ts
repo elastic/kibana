@@ -13,7 +13,11 @@ import type { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { ChatCompletionEvent, ChatCompletionEventType } from '@kbn/inference-common';
 import { ChatCompletionUnredactedMessageEvent } from '@kbn/inference-common/src/chat_complete/events';
-import { unhashString, redactEntities } from '../../../common/utils/anonymization/redaction';
+import {
+  unhashString,
+  redactEntities,
+  NER_MODEL_ID,
+} from '../../../common/utils/anonymization/redaction';
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
 import { chunkText } from './chunk_text';
@@ -29,7 +33,6 @@ import {
 } from '../../../common/types';
 import { getEntityHash } from './get_entity_hash';
 
-const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
 
 export interface Dependencies {

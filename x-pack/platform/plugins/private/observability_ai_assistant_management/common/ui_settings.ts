@@ -12,6 +12,7 @@ import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantAnonymizationRules,
+  NER_MODEL_ID,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 const baseRuleSchema = schema.object({
@@ -95,7 +96,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         },
         {
           type: 'ner',
-          modelId: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
+          modelId: NER_MODEL_ID,
           enabled: false,
         },
       ],
@@ -107,13 +108,11 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       {
         defaultMessage: `List of anonymization rules.
           <ul>
-            <li><strong>id:</strong> unique string identifier</li>
             <li><strong>type:</strong> "ner" or "regex"</li>
-            <li><strong>entityClass:</strong> PER, ORG, LOC</li>
-            <li><strong>pattern:</strong> (regex rules only) the regular-expression string to match</li>
+            <li><strong>entityClass:</strong> (regex type only) eg: email, url, ip</li>
+            <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
             <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
-            <li><strong>description:</strong> optional human-readable description</li>
-            <li><strong>modelId:</strong> (ner rules only) ID of the trained model to use</li>
+            <li><strong>modelId:</strong> (ner type only) ID of the NER (named entity recognition) model to use</li>
           </ul>`,
         values: {
           ul: (chunks) => `<ul>${chunks}</ul>`,
