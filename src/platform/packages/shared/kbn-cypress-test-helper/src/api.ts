@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const API_AUTH = Object.freeze({
+export const getApiAuth = () => ({
   user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
@@ -23,7 +23,7 @@ export const request = <T = unknown>({
   ...options
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
-    auth: API_AUTH,
+    auth: getApiAuth(),
     headers: { ...COMMON_API_HEADERS, ...headers },
     ...options,
   });
