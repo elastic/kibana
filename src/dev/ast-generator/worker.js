@@ -115,10 +115,11 @@ worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ?
 });
 function processPackage(directory, id, map) {
     return __awaiter(this, void 0, void 0, function () {
-        var files, configPath, rootDirectory, configFile, parsed, program, checker, sourceFiles, packageMap, _i, sourceFiles_1, sourceFile, fileName, functions, _a, functions_1, func;
+        var start, files, rootFileNames, configPath, rootDirectory, configFile, parsed, startCompile, program, endCompile, checker, sourceFiles, skippedFiles, packageMap, counter, _i, sourceFiles_1, sourceFile, fileName, functions, _a, functions_1, func, end;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    start = performance.now();
                     files = getAllFiles(directory);
                     if (files.length === 0) {
                         log({
@@ -128,6 +129,7 @@ function processPackage(directory, id, map) {
                         });
                         return [2 /*return*/];
                     }
+                    rootFileNames = new Set(files.map(function (f) { return path.resolve(f); }));
                     processedFilesMap = new Map(map);
                     configPath = (0, typescript_1.findConfigFile)(directory, typescript_1.sys.fileExists, 'tsconfig.json');
                     if (!configPath)
@@ -136,14 +138,18 @@ function processPackage(directory, id, map) {
                     log({ type: 'create', id: id, msg: "Creating program for ".concat(id, "...") });
                     configFile = (0, typescript_1.readConfigFile)(configPath, typescript_1.sys.readFile);
                     parsed = (0, typescript_1.parseJsonConfigFileContent)(configFile.config, typescript_1.sys, rootDirectory);
+                    startCompile = performance.now();
                     program = (0, typescript_1.createProgram)({
                         rootNames: files,
                         options: __assign(__assign({}, parsed.options), { noEmit: true }),
                     });
+                    endCompile = performance.now();
                     checker = program.getTypeChecker();
                     sourceFiles = program.getSourceFiles();
+                    skippedFiles = sourceFiles.filter(function (sf) { return !rootFileNames.has(path.resolve(sf.fileName)); });
                     log({ type: 'total', total: sourceFiles.length });
                     packageMap = new Map();
+                    counter = 0;
                     _i = 0, sourceFiles_1 = sourceFiles;
                     _b.label = 1;
                 case 1:
@@ -160,6 +166,7 @@ function processPackage(directory, id, map) {
                         return [3 /*break*/, 5];
                     }
                     functions = extractFunctionInfo({ sourceFile: sourceFile, map: packageMap, checker: checker });
+                    counter += functions.length;
                     _a = 0, functions_1 = functions;
                     _b.label = 2;
                 case 2:
@@ -176,6 +183,20 @@ function processPackage(directory, id, map) {
                     _i++;
                     return [3 /*break*/, 1];
                 case 6:
+                    end = performance.now();
+                    return [4 /*yield*/, uploadStats({
+                            id: id,
+                            name: id,
+                            filePath: path.relative(cwd, directory),
+                            totalFilesInPackage: files.length,
+                            totalSourceFiles: sourceFiles.length,
+                            totalFunctionsInPackage: counter,
+                            skippedFiles: skippedFiles.length,
+                            timeToCompile: endCompile - startCompile,
+                            timeToProcess: end - start,
+                        })];
+                case 7:
+                    _b.sent();
                     log({ type: 'done', id: id });
                     return [2 /*return*/];
             }
@@ -375,7 +396,6 @@ function queueFunctionForBulkUpload(func) {
         });
     });
 }
-// Call this one final time after everything is processed
 function flushBulkQueue() {
     return __awaiter(this, void 0, void 0, function () {
         var bulkBody, res, responseJson;
@@ -414,6 +434,41 @@ function flushBulkQueue() {
                         });
                     }
                     bulkQueue.length = 0; // Clear queue
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function uploadStats(stats) {
+    return __awaiter(this, void 0, void 0, function () {
+        var res, responseJson;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, fetch("".concat("https://edge-lite-oblt-ccs-vbxbb.es.us-west2.gcp.elastic-cloud.com:443", "/").concat("kibana-ast-stats", "/_doc"), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-ndjson',
+                            Authorization: "Basic ".concat("ZWxhc3RpYzpORW9NRHlFdXFlellwSnFXYjU0ZGhiUXc="),
+                        },
+                        body: JSON.stringify(stats),
+                    })];
+                case 1:
+                    res = _a.sent();
+                    return [4 /*yield*/, res.json()];
+                case 2:
+                    responseJson = _a.sent();
+                    if (!res.ok) {
+                        log({
+                            type: 'error',
+                            msg: "Failed to upload stats for ".concat(stats.id, ": ").concat(res.status, " - ").concat(res.statusText),
+                        });
+                    }
+                    else if (responseJson.errors) {
+                        log({
+                            type: 'error',
+                            msg: "Failed to bulk upload functions, ES errors: ".concat(JSON.stringify(responseJson, null, 2)),
+                        });
+                    }
                     return [2 /*return*/];
             }
         });

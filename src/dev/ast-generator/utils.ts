@@ -11,25 +11,35 @@ import path from 'path';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { createProgram } from 'typescript';
 import { ToolingLog } from '@kbn/tooling-log';
-import { AUTH, ES_HOST, INDEX_NAME } from '.';
+import { AUTH, ES_HOST, AST_INDEX_NAME, STATS_INDEX_NAME } from '.';
+import { PackageStats } from './process_package';
 
 export function createWorker(
   log: ToolingLog,
-  { es, index, auth }: { es: string; index: string; auth: string }
+  {
+    es,
+    auth,
+    astIndex,
+    statsIndex,
+  }: { es: string; auth: string; astIndex: string; statsIndex: string }
 ) {
   deleteWorker(log);
 
   log.info('Creating worker...');
 
   const inputPath = path.join(__dirname, 'process_package.ts');
+
   let source = readFileSync(inputPath, 'utf-8');
 
   // Replace placeholder
   source = source.replaceAll("'__ES_HOST__'", JSON.stringify(es));
-  source = source.replaceAll("'__INDEX_NAME__'", JSON.stringify(index));
   source = source.replaceAll("'__AUTH__'", JSON.stringify(auth));
 
+  source = source.replaceAll("'__AST_INDEX_NAME__'", JSON.stringify(astIndex));
+  source = source.replaceAll("'__STATS_INDEX_NAME__'", JSON.stringify(statsIndex));
+
   const tempPath = path.join(__dirname, 'worker.ts');
+
   writeFileSync(tempPath, source);
 
   const program = createProgram([`${__dirname}/worker.ts`], {});
@@ -43,76 +53,112 @@ export function createWorker(
 }
 
 export function deleteWorker(log: ToolingLog) {
-  if (existsSync(path.join(__dirname, 'worker.js'))) {
+  const worker = path.join(__dirname, 'worker.js');
+
+  if (existsSync(worker)) {
     log.info('Deleting worker...');
-    unlinkSync(path.join(__dirname, 'worker.js'));
+    unlinkSync(worker);
   }
 }
 
-export async function createIndexInElasticsearch(log: ToolingLog) {
-  const indexExists = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
-    method: 'HEAD',
-    headers: {
-      Authorization: `Basic ${AUTH}`,
+type StatIndexProperties = {
+  [K in keyof PackageStats]: { type: 'text' | 'integer' | 'boolean' | 'semantic_text' };
+};
+
+export async function createIndicesInElasticsearch(log: ToolingLog) {
+  await deleteIndex({ index: AST_INDEX_NAME, log });
+  await deleteIndex({ index: STATS_INDEX_NAME, log });
+
+  await createIndex({
+    index: AST_INDEX_NAME,
+    mappings: {
+      properties: {
+        id: { type: 'text' },
+        name: { type: 'text' },
+        filePath: { type: 'text' },
+        line: { type: 'integer' },
+        fullText: { type: 'text' },
+        normalizedCode: { type: 'text' },
+        returnType: { type: 'text' },
+        returnsJSX: { type: 'boolean' },
+        functionDescription: {
+          type: 'semantic_text',
+        },
+      },
     },
+    log,
   });
 
-  if (indexExists.status === 200) {
-    log.info(`Index ${INDEX_NAME} already exists.`);
+  const properties: StatIndexProperties = {
+    id: { type: 'text' },
+    name: { type: 'text' },
+    filePath: { type: 'text' },
+    totalFilesInPackage: { type: 'integer' },
+    totalFunctionsInPackage: { type: 'integer' },
+    totalSourceFiles: { type: 'integer' },
+    skippedFiles: { type: 'integer' },
+    timeToProcess: { type: 'integer' },
+    timeToCompile: { type: 'integer' },
+  };
 
-    const deleteIndexResponse = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Basic ${AUTH}`,
-      },
-    });
-    if (!deleteIndexResponse.ok) {
-      throw new Error(
-        `Failed to delete index ${INDEX_NAME}: [${deleteIndexResponse.statusText}]:
-        ${await deleteIndexResponse.json()}`
-      );
-    }
+  await createIndex({
+    index: STATS_INDEX_NAME,
+    mappings: {
+      properties,
+    },
+    log,
+  });
+}
 
-    log.info(`Index ${INDEX_NAME} deleted successfully.`);
-  }
-
-  const createIndexResponse = await fetch(`${ES_HOST}/${INDEX_NAME}`, {
+async function createIndex({
+  index,
+  mappings,
+  log,
+}: {
+  index: string;
+  mappings: Record<string, any>;
+  log: ToolingLog;
+}) {
+  const createIndexResponse = await fetch(`${ES_HOST}/${index}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Basic ${AUTH}`,
     },
     body: JSON.stringify({
-      mappings: {
-        properties: {
-          name: { type: 'text' },
-          verb: { type: 'text' },
-          noun: { type: 'text' },
-          param_count: { type: 'integer' },
-          param_names: { type: 'keyword' },
-          param_types: { type: 'keyword' },
-          return_type: { type: 'text' },
-          has_side_effects: { type: 'boolean' },
-          functionDescription: {
-            type: 'semantic_text',
-          },
-        },
-      },
-      settings: {
-        'index.mapping.total_fields.limit': 100000,
-        'index.mapping.depth.limit': 100,
-      },
+      mappings,
     }),
   });
 
   if (!createIndexResponse.ok) {
     log.error(
       new Error(
-        `Failed to create index ${INDEX_NAME}: [${createIndexResponse.statusText}]:
+        `Failed to create index ${index}: [${createIndexResponse.statusText}]:
       ${await createIndexResponse.json()}`
       )
     );
   }
 
-  log.info(`Index ${INDEX_NAME} created successfully.`);
+  log.info(`Index ${index} created successfully.`);
+}
+
+async function deleteIndex({ index, log }: { index: string; log: ToolingLog }) {
+  log.info(`Deleting index ${index}...`);
+
+  return fetch(`${ES_HOST}/${index}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${AUTH}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to delete index ${index}: ${res.statusText}`);
+      }
+      log.info(`Index ${index} deleted successfully.`);
+    })
+    .catch((err) => {
+      log.error(err);
+    });
 }

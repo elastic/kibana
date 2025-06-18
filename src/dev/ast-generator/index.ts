@@ -13,18 +13,23 @@ import { MultiBar, SingleBar, Presets } from 'cli-progress';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createIndexInElasticsearch, createWorker, deleteWorker } from './utils';
+import { createIndicesInElasticsearch, createWorker, deleteWorker } from './utils';
 
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
 
-// export const ES_HOST = 'http://localhost:9200';
-export const ES_HOST = 'https://edge-lite-oblt-ccs-vbxbb.es.us-west2.gcp.elastic-cloud.com:443';
-export const INDEX_NAME = 'kibana-ast';
-// export const AUTH = Buffer.from('elastic:changeme').toString('base64');
-export const AUTH = Buffer.from('elastic:NEoMDyEuqezYpJqWb54dhbQw').toString('base64');
+export const ES_HOST = process.env.ES_HOST || 'http://localhost:9200';
+const USER = process.env.ES_USER || 'elastic';
+const PW = process.env.ES_PW || 'changeme';
+export const AUTH = Buffer.from(`${USER}:${PW}`).toString('base64');
+
+export const AST_INDEX_NAME = 'kibana-ast';
+export const STATS_INDEX_NAME = 'kibana-ast-stats';
+
+log.info(`Using Elasticsearch host: ${ES_HOST}`);
+log.info(`Using authentication: ${USER}:${PW}`);
 
 export interface FunctionInfo {
   id: string;
@@ -52,9 +57,15 @@ export async function generateAST() {
   log.info('Generating AST for Kibana files...');
 
   if (debug) deleteWorker(log);
-  if (!debug) createWorker(log, { es: ES_HOST, index: INDEX_NAME, auth: AUTH });
+  if (!debug)
+    createWorker(log, {
+      es: ES_HOST,
+      auth: AUTH,
+      astIndex: AST_INDEX_NAME,
+      statsIndex: STATS_INDEX_NAME,
+    });
 
-  await createIndexInElasticsearch(log);
+  await createIndicesInElasticsearch(log);
 
   const packages = getPackages(REPO_ROOT);
 

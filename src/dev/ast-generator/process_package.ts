@@ -66,6 +66,8 @@ parentPort?.on('message', async ({ action, data }) => {
 });
 
 export async function processPackage(directory: string, id: string, map: Array<[string, true]>) {
+  const start = performance.now();
+
   const files = getAllFiles(directory);
 
   if (files.length === 0) {
@@ -77,6 +79,7 @@ export async function processPackage(directory: string, id: string, map: Array<[
 
     return;
   }
+  const rootFileNames = new Set(files.map((f) => path.resolve(f)));
 
   processedFilesMap = new Map(map);
 
@@ -92,17 +95,26 @@ export async function processPackage(directory: string, id: string, map: Array<[
 
   const parsed = parseJsonConfigFileContent(configFile.config, sys, rootDirectory);
 
+  const startCompile = performance.now();
+
   const program = createProgram({
     rootNames: files,
     options: { ...parsed.options, noEmit: true },
   });
+
+  const endCompile = performance.now();
+
   const checker = program.getTypeChecker();
 
   const sourceFiles = program.getSourceFiles();
 
+  const skippedFiles = sourceFiles.filter((sf) => !rootFileNames.has(path.resolve(sf.fileName)));
+
   log({ type: 'total', total: sourceFiles.length });
 
   const packageMap = new Map<string, [string, string]>();
+
+  let counter = 0;
 
   for (const sourceFile of sourceFiles) {
     const fileName = path.relative(cwd, sourceFile.fileName);
@@ -119,10 +131,26 @@ export async function processPackage(directory: string, id: string, map: Array<[
 
     const functions = extractFunctionInfo({ sourceFile, map: packageMap, checker });
 
+    counter += functions.length;
+
     for (const func of functions) {
       await queueFunctionForBulkUpload(func);
     }
   }
+
+  const end = performance.now();
+
+  await uploadStats({
+    id,
+    name: id,
+    filePath: path.relative(cwd, directory),
+    totalFilesInPackage: files.length,
+    totalSourceFiles: sourceFiles.length,
+    totalFunctionsInPackage: counter,
+    skippedFiles: skippedFiles.length,
+    timeToCompile: endCompile - startCompile,
+    timeToProcess: end - start,
+  });
 
   log({ type: 'done', id });
 }
@@ -321,6 +349,7 @@ function doesReturnJSX(node: Node): boolean {
   }
 
   check(node, true);
+
   return foundJSX;
 }
 
@@ -376,13 +405,12 @@ async function queueFunctionForBulkUpload(func: FunctionInfo) {
   }
 }
 
-// Call this one final time after everything is processed
 async function flushBulkQueue() {
   if (bulkQueue.length === 0) return;
 
   const bulkBody = bulkQueue.flatMap((func) => {
     const { id, ...rest } = func;
-    return [{ index: { _index: '__INDEX_NAME__', _id: id } }, rest];
+    return [{ index: { _index: '__AST_INDEX_NAME__', _id: id } }, rest];
   });
 
   const res = await fetch(`${'__ES_HOST__'}/_bulk`, {
@@ -409,6 +437,43 @@ async function flushBulkQueue() {
   }
 
   bulkQueue.length = 0; // Clear queue
+}
+
+export interface PackageStats {
+  id: string;
+  name: string;
+  filePath: string;
+  totalFilesInPackage: number;
+  totalSourceFiles: number;
+  totalFunctionsInPackage: number;
+  skippedFiles: number;
+  timeToCompile: number;
+  timeToProcess: number;
+}
+
+async function uploadStats(stats: PackageStats) {
+  const res = await fetch(`${'__ES_HOST__'}/${'__STATS_INDEX_NAME__'}/_doc`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-ndjson',
+      Authorization: `Basic ${'__AUTH__'}`,
+    },
+    body: JSON.stringify(stats),
+  });
+
+  const responseJson = await res.json();
+
+  if (!res.ok) {
+    log({
+      type: 'error',
+      msg: `Failed to upload stats for ${stats.id}: ${res.status} - ${res.statusText}`,
+    });
+  } else if (responseJson.errors) {
+    log({
+      type: 'error',
+      msg: `Failed to bulk upload functions, ES errors: ${JSON.stringify(responseJson, null, 2)}`,
+    });
+  }
 }
 
 function log(args: any) {
