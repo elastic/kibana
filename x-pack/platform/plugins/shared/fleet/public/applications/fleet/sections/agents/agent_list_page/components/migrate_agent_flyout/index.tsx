@@ -165,21 +165,17 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             <>
               <EuiSpacer />
               <EuiPanel color="warning" data-test-subj="migrateAgentFlyoutAlertPanel">
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem>
-                    <EuiText>
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                        defaultMessage="{icon} {x} of {y} selected Agents cannot be migrated as they are tamper protected or Fleet-Server agents."
-                        values={{
-                          x: protectedAndFleetAgents.length,
-                          y: agents.length,
-                          icon: <EuiIcon type="warning" />,
-                        }}
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText color="warning" className="eui-alignMiddle">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.migrateAgentFlyout.warning"
+                    defaultMessage="{icon} {x} of {y} selected Agents cannot be migrated as they are tamper protected or Fleet-Server agents."
+                    values={{
+                      icon: <EuiIcon type="warning" />,
+                      x: protectedAndFleetAgents.length,
+                      y: agents.length,
+                    }}
+                  />
+                </EuiText>
 
                 <EuiAccordion
                   id="migrateAgentFlyoutWarningAccordion"
@@ -193,11 +189,14 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                   }
                   initialIsOpen={false}
                 >
-                  <ul>
-                    {protectedAndFleetAgents.map((agent) => (
-                      <li key={agent.id}>{agent.local_metadata?.host?.hostname}</li>
-                    ))}
-                  </ul>
+                  <EuiSpacer size="s" />
+                  <EuiText>
+                    <ul>
+                      {protectedAndFleetAgents.map((agent) => (
+                        <li key={agent.id}>{agent.local_metadata?.host?.hostname}</li>
+                      ))}
+                    </ul>
+                  </EuiText>
                 </EuiAccordion>
               </EuiPanel>
             </>

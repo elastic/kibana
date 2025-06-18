@@ -253,7 +253,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     },
   ];
   if (agentMigrationsEnabled) {
-    menuItems.push({
+    menuItems.splice(1, 0, {
       name: (
         <FormattedMessage
           id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
