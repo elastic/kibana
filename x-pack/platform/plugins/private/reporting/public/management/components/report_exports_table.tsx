@@ -335,10 +335,10 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         }),
         render: (_scheduledReportId: string) => {
           const exportType = _scheduledReportId
-            ? i18n.translate('reporting.jobExportType.scheduled', {
+            ? i18n.translate('xpack.reporting.exports.exportType.scheduled', {
                 defaultMessage: 'Scheduled',
               })
-            : i18n.translate('reporting.jobExportType.single', {
+            : i18n.translate('xpack.reporting.exports.exportType.single', {
                 defaultMessage: 'Single',
               });
 
