@@ -1659,21 +1659,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (appContextService.getExperimentalFeatures().enablePackageRollback) {
       if (previousPolicyRevisionsToCreate.length > 0) {
         await soClient
-        .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
-        .catch(
-          catchAndSetErrorStackTrace.withMessage(
-            'Saved objects bulk create of previous package policy revisions failed'
-          )
-        );
+          .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
+          .catch(
+            catchAndSetErrorStackTrace.withMessage(
+              'Saved objects bulk create of previous package policy revisions failed'
+            )
+          );
       }
       if (previousPolicyRevisionsToUpdate.length > 0) {
         await soClient
-        .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
-        .catch(
-          catchAndSetErrorStackTrace.withMessage(
-            'Saved objects bulk update of previous package policy revisions failed'
-          )
-        );
+          .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
+          .catch(
+            catchAndSetErrorStackTrace.withMessage(
+              'Saved objects bulk update of previous package policy revisions failed'
+            )
+          );
       }
     }
 
