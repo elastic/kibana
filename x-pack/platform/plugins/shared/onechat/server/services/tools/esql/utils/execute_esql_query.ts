@@ -17,7 +17,7 @@ export const esqlSchema = z.object({
 });
 
 export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
-  console.log("Tool creator called with tool:", tool);
+  console.log('Tool creator called with tool:', tool);
   const executableTool: EsqlTool = {
     id: tool.id,
     name: tool.name,
@@ -45,9 +45,9 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
 
       const response = await client.esql.query({
         query: filledQuery,
-      })
+      });
 
-      return response.columns
+      return response.columns;
     },
     meta: tool.meta,
   };

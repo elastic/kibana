@@ -42,10 +42,7 @@ export class ToolsService {
   }
 
   start({ getRunner, logger, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
-    const esql = new EsqlToolRegistryImpl(
-      logger.get('esql'),
-      elasticsearch
-    );
+    const esql = new EsqlToolRegistryImpl(logger.get('esql'), elasticsearch);
 
     this.providers.set(esqlToolProviderId, esql);
 

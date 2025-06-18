@@ -48,7 +48,7 @@ export interface RegisteredTool<
 /**
  * Onechat tool, as registered by built-in tool providers.
  */
-export interface EsqlToolDefinition extends ToolDescriptor{
+export interface EsqlToolDefinition extends ToolDescriptor {
   /**
    * The ESQL Tool name.
    */
@@ -84,7 +84,7 @@ export interface EsqlTool extends RegisteredTool {
    * The ESQL id to be executed.
    */
   id: string;
-  
+
   /**
    * The ESQL Tool name.
    */

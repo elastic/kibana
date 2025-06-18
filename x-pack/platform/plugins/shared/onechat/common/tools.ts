@@ -13,5 +13,5 @@ export type EsqlToolApiObj = Omit<EsqlToolDefinition, 'id'> & {
   updated_at: string;
 };
 
-export type EsqlToolCreateRequest = EsqlToolApiObj
-export type EsqlToolCreateResponse = EsqlToolApiObj
+export type EsqlToolCreateRequest = EsqlToolApiObj;
+export type EsqlToolCreateResponse = EsqlToolApiObj;

@@ -8,18 +8,21 @@
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
 import { EsqlTool, RegisteredTool } from '@kbn/onechat-server';
 import { esqlToolProviderId } from '@kbn/onechat-common';
+import { EsqlToolCreateRequest } from '../../../../common/tools';
 import { EsqlToolClient, createClient } from './client';
 import { createStorage } from './storage';
 import { RegisteredToolProviderWithId } from '../types';
 import { esqlToolCreator } from './utils/execute_esql_query';
-import { EsqlToolCreateRequest } from '@kbn/onechat-plugin/common/tools';
 
 export interface EsqlToolRegistry extends RegisteredToolProviderWithId {
   register(options: { tool: EsqlToolCreateRequest; request: KibanaRequest }): Promise<boolean>;
   getScopedClient(options: { request: KibanaRequest }): Promise<EsqlToolClient>;
 }
 
-export const createEsqlToolRegistry = (logger: Logger, elasticsearch: ElasticsearchServiceStart): EsqlToolRegistry => {
+export const createEsqlToolRegistry = (
+  logger: Logger,
+  elasticsearch: ElasticsearchServiceStart
+): EsqlToolRegistry => {
   return new EsqlToolRegistryImpl(logger, elasticsearch);
 };
 
@@ -33,7 +36,10 @@ export class EsqlToolRegistryImpl implements EsqlToolRegistry {
     this.elasticsearch = elasticsearch;
   }
 
-  async register(options: { tool: EsqlToolCreateRequest; request: KibanaRequest }): Promise<boolean> {
+  async register(options: {
+    tool: EsqlToolCreateRequest;
+    request: KibanaRequest;
+  }): Promise<boolean> {
     const { tool, request } = options;
     const client = await this.getScopedClient({ request });
     await client.create(tool);
