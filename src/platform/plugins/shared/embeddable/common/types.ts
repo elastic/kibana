@@ -8,25 +8,19 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { SavedObjectReference } from '@kbn/core/server';
+import type { Reference } from '@kbn/content-management-utils';
 
 export type EmbeddableTransforms<StoredState, State> = {
   schema?: Type<State>;
-  transformOut?: (
-    state: StoredState,
-    references?: SavedObjectReference[],
-  ) => State;
+  transformOut?: (state: StoredState, references?: SavedObjectReference[]) => State;
   transformIn?: (state: State) => {
-    state: StoredState,
-    references?: SavedObjectReference[],
+    state: StoredState;
+    references?: Reference[];
   };
 };
 
 export type EmbeddableTransformsDefinition = {
   type: string;
-  versions: { 1: EmbeddableTransforms<any, any> } & Record<
-    number,
-    EmbeddableTransforms<any, any>
-  >;
+  versions: { 1: EmbeddableTransforms<any, any> } & Record<number, EmbeddableTransforms<any, any>>;
   latestVersion: number;
 };

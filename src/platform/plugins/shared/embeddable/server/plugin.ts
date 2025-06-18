@@ -42,9 +42,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
-  getTransforms: (
-    type: string
-  ) => EmbeddableTransforms<object, object> | undefined;
+  getTransforms: (type: string) => EmbeddableTransforms<object, object> | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {

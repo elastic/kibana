@@ -9,6 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { isDashboardSection } from '../../../../../common/lib/dashboard_panel_converters';
 import {
   DashboardSavedObjectAttributes,
@@ -16,9 +18,7 @@ import {
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
-import { SavedObjectReference } from '@kbn/core/server';
-import { prefixReferencesFromPanel } from '@kbn/dashboard-plugin/common';
+import { prefixReferencesFromPanel } from '../../../../../common';
 
 export function transformPanelsIn(
   widgets: DashboardAttributes['panels'] | undefined,
@@ -64,7 +64,10 @@ export function transformPanelsIn(
   return { panelsJSON: JSON.stringify(panels), sections, references };
 }
 
-function transformPanel(panel: DashboardPanel, embeddable: EmbeddableStart): {
+function transformPanel(
+  panel: DashboardPanel,
+  embeddable: EmbeddableStart
+): {
   panel: SavedDashboardPanel;
   references?: SavedObjectReference[];
 } {
@@ -75,7 +78,7 @@ function transformPanel(panel: DashboardPanel, embeddable: EmbeddableStart): {
     ? transforms.transformIn(panelConfig)
     : {
         state: panelConfig,
-        references: undefined
+        references: undefined,
       };
   return {
     panel: {
@@ -87,6 +90,6 @@ function transformPanel(panel: DashboardPanel, embeddable: EmbeddableStart): {
         i: idx,
       },
     },
-    references
+    references,
   };
 }

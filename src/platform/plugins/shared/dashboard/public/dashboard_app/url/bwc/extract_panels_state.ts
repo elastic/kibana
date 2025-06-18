@@ -8,11 +8,11 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObject } from '@kbn/core/server';
+import { asyncMap } from '@kbn/std';
+import type { Reference } from '@kbn/content-management-utils';
 import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
-import { DashboardState } from '../../../../common';
-import { coreServices } from '../../../services/kibana_services';
+import { DashboardState, getReferencesForPanelId } from '../../../../common';
+import { coreServices, embeddableService } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
 
 type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
@@ -39,10 +39,9 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export async function extractPanelsState(
-  state: { [key: string]: unknown },
-  embeddableService: EmbeddableStart
-): Promise<Partial<PanelState>> {
+export async function extractPanelsState(state: {
+  [key: string]: unknown;
+}): Promise<Partial<PanelState>> {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -54,26 +53,28 @@ export async function extractPanelsState(
     return {};
   }
 
-  const standardizedPanels = await Promise.all(
-    panels.map(async (panel) => {
-      if (typeof panel === 'object') {
-        // < 8.17 panels state stored panelConfig as embeddableConfig
-        const panelConfig = panel.panelConfig ?? panel.embeddableConfig;
-        const { type } = panel;
+  // < 8.17 panels state stored panelConfig as embeddableConfig
+  const standardizedPanels = panels.map((panel) => {
+    if (typeof panel === 'object' && panel?.embeddableConfig) {
+      const { embeddableConfig, ...rest } = panel;
+      return {
+        ...rest,
+        panelConfig: embeddableConfig,
+      };
+    }
+    return panel;
+  });
 
-        const embeddableCmDefintions =
-          await embeddableService.getEmbeddableContentManagementDefinition(type);
-        if (!embeddableCmDefintions) return { ...panel, panelConfig };
-        const { savedObjectToItem } =
-          embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
-        return {
-          ...panel,
-          panelConfig: savedObjectToItem?.(panelConfig as unknown as SavedObject) ?? panelConfig,
-        };
-      }
-      return panel;
-    })
-  );
+  const references = Array.isArray(state.references) ? (state.references as Reference[]) : [];
 
-  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
+  const transformedPanels = await asyncMap(standardizedPanels, async (panel) => {
+    const transforms = await embeddableService.getTransforms(panel.type);
+    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
+    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+    return transforms?.transformOut
+      ? transforms.transformOut(panel.panelConfig, panelReferences)
+      : panel.panelConfig;
+  });
+
+  return convertPanelsArrayToPanelSectionMaps(transformedPanels);
 }

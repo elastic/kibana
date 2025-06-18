@@ -8,16 +8,16 @@
  */
 
 import { SavedObjectReference } from '@kbn/core/server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { SavedDashboardPanel, SavedDashboardSection } from '../../../../dashboard_saved_object';
 import { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
 export function transformPanelsOut(
   panelsJSON: string = '{}',
   sections: SavedDashboardSection[] = [],
   embeddable: EmbeddableStart,
-  references?: SavedObjectReference[],
+  references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
   const panels = JSON.parse(panelsJSON);
   const sectionsMap: { [uuid: string]: DashboardPanel | DashboardSection } = sections.reduce(
@@ -54,7 +54,7 @@ function transformPanelProperties(
     version,
   }: SavedDashboardPanel,
   embeddable: EmbeddableStart,
-  references?: SavedObjectReference[],
+  references?: SavedObjectReference[]
 ) {
   const { sectionId, ...rest } = gridData; // drop section ID, if it exists
 

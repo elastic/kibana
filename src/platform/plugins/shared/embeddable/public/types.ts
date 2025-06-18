@@ -68,7 +68,10 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
-  registerTransforms: (type: string, getDefinition: () => Promise<EmbeddableTransformsDefinition>) => void;
+  registerTransforms: (
+    type: string,
+    getDefinition: () => Promise<EmbeddableTransformsDefinition>
+  ) => void;
 
   /**
    * @deprecated
@@ -78,8 +81,6 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getTransforms: (
-    type: string
-  ) => Promise<EmbeddableTransforms<object, object> | undefined>;
+  getTransforms: (type: string) => Promise<EmbeddableTransforms<object, object> | undefined>;
   getEnhancement: (enhancementId: string) => PersistableState;
 }

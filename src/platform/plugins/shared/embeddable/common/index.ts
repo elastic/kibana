@@ -13,7 +13,4 @@ export type {
   EmbeddablePersistableStateService,
 } from '../server';
 
-export type {
-  EmbeddableTransforms,
-  EmbeddableTransformsDefinition
-} from './types';
+export type { EmbeddableTransforms, EmbeddableTransformsDefinition } from './types';

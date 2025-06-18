@@ -35,11 +35,7 @@ describe('transformPanelsOut', () => {
     const references: SavedObjectReference[] = [{ name: '1:panel_1', type: 'foo', id: '123' }];
 
     const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
-    const result = await transformPanelsOut({
-      panelsJSON,
-      embeddable: embeddableStartMock,
-      references,
-    });
+    const result = await transformPanelsOut(panelsJSON, [], embeddableStartMock, references);
     expect(injectSpy).toHaveBeenCalledTimes(1);
     expect(injectSpy).toHaveBeenCalledWith({ type: 'foo', foo: 'bar', savedObjectId: '123' }, [
       { name: 'panel_1', type: 'foo', id: '123' },
@@ -74,8 +70,7 @@ describe('transformPanelsOut', () => {
     const references: SavedObjectReference[] = [];
 
     expect(
-      async () =>
-        await transformPanelsOut({ panelsJSON, embeddable: embeddableStartMock, references })
+      async () => await transformPanelsOut(panelsJSON, [], embeddableStartMock, references)
     ).toThrow('Could not find reference "panel_1"');
   });
 
@@ -99,11 +94,7 @@ describe('transformPanelsOut', () => {
       injected: true,
     }));
 
-    const result = await transformPanelsOut({
-      panelsJSON,
-      embeddable: embeddableStartMock,
-      references,
-    });
+    const result = await transformPanelsOut(panelsJSON, [], embeddableStartMock, references);
 
     expect(result).toEqual([
       {

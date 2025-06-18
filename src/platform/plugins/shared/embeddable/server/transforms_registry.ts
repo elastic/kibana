@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableTransformsDefinition } from "../common";
+import { EmbeddableTransformsDefinition } from '../common';
 
 const registry: { [key: string]: EmbeddableTransformsDefinition } = {};
 
@@ -21,7 +21,5 @@ export function registerTransforms(type: string, definition: EmbeddableTransform
 
 export function getTransforms(type: string) {
   const definition = registry[type];
-  return definition
-    ? definition.versions[definition.latestVersion]
-    : undefined;
+  return definition ? definition.versions[definition.latestVersion] : undefined;
 }
