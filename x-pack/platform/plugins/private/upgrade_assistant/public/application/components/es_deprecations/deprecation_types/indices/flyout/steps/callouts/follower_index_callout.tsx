@@ -26,7 +26,7 @@ export const FollowerIndexCallout: React.FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
-            defaultMessage="This index is a cross-cluster replication follower index, which should not be reindexed. You can mark it as read-only or terminate the replication and convert it to a standard index."
+            defaultMessage="This index is a cross-cluster replication follower index, which should not be reindexed. You can set it to read-only or terminate the replication and convert it to a standard index."
           />
         </p>
       </EuiCallOut>
