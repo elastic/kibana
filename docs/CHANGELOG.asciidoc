@@ -552,13 +552,13 @@ The 8.17.8 release includes the following fixes.
 [[fixes-v8.17.8]]
 === Fixes
 Alerting::
-* Fixes an issue with the interface freezing when an error occurred after deleting a connector ({kibana-pull}221958[#221958]).
+* Fixes an issue causing the interface to freeze when an error occurred after deleting a connector ({kibana-pull}221958[#221958]).
 Dashboards and Visualizations::
 * Fixes an issue that prevented navigating through pages when inspecting a chart's data ({kibana-pull}223537[#223537]).
-* Fixes an issue preventing Canvas embeddables from correctly refreshing ({kibana-pull}221326[#221326]).
-* Correctly applies default timezone in **TSVB** when the timezone parameter is set to default in **Advanced Settings** ({kibana-pull}220658[#220658]).
+* Fixes an issue preventing **Canvas** embeddables from correctly refreshing ({kibana-pull}221326[#221326]).
+* Correctly applies default timezone in **TSVB** when the timezone parameter is set to default in Advanced Settings ({kibana-pull}220658[#220658]).
 Data ingestion and Fleet::
-* Fixes the `UnenrollInactiveAgentsTask` query in {{fleet}} to un-enroll only those agents that are inactive for longer than what is defined in the `unenroll_timeout` setting [#222592]({{kib-pull}}222592). ({kibana-pull}222592[#222592]).
+* Fixes the `UnenrollInactiveAgentsTask` query to un-enroll only those agents that are inactive for longer than what is defined in the `unenroll_timeout` setting ({kibana-pull}222592[#222592]).
 * Fixes an issue preventing some integrations from correctly showing as installed ({kibana-pull}221624[#221624]).
 Elastic Observability solution::
 * Fixes network error handling on the **Error details** page in Synthetics ({kibana-pull}224296[#224296]).
@@ -568,7 +568,7 @@ Elastic Observability solution::
 * Fixes an issue preventing metrics graphs from appearing on the Services **Inventory** page ({kibana-pull}222439[#222439]).
 * Fixes a navigation issue where clicking the error count on an APM waterfall item triggers a full page reload ({kibana-pull}221664[#221664]).
 * Fixes pagination not working on the Services **Inventory** page when progressive loading is enabled ({kibana-pull}220514[#220514]).
-* Fixes an issue with Uptime rules appearing on the **Create rule** modal even when the `observability:enableLegacyUptimeApp` setting is disabled ({kibana-pull}220005[#220005]).
+* Fixes an issue with Uptime rules appearing in the **Create rule** modal even when the `observability:enableLegacyUptimeApp` setting is disabled ({kibana-pull}220005[#220005]).
 Elastic Security solution::
 For the Elastic Security 8.17.8 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
