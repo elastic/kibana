@@ -2212,7 +2212,6 @@ describe('CasesService', () => {
       'customFields',
       'observables',
       'incremental_id',
-      'observables',
       'in_progress_at',
       'time_to_acknowledge',
       'time_to_resolve',
