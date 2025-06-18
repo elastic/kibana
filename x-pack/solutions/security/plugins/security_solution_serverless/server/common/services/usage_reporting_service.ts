@@ -20,7 +20,7 @@ import { USAGE_REPORTING_ENDPOINT, USAGE_SERVICE_USAGE_URL } from '../../constan
 export class UsageReportingService {
   private agent: https.Agent | undefined;
 
-  constructor(private readonly config: UsageApiConfigSchema) {}
+  constructor(private readonly config: UsageApiConfigSchema) { }
 
   public async reportUsage(records: UsageRecord[]): Promise<Response> {
     const reqArgs: RequestInit = {

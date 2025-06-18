@@ -77,7 +77,7 @@ export class ConnectorUsageReportingTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => this.runTask(taskInstance, core),
-            cancel: async () => {},
+            cancel: async () => { },
           };
         },
       },
