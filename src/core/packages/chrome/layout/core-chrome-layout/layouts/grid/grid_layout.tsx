@@ -8,19 +8,64 @@
  */
 
 import React from 'react';
+import {
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  ChromeLayoutConfig,
+} from '@kbn/core-chrome-layout-components';
+import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
+import { AppWrapper } from '../../app_containers';
+import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+
+const DEBUG_SIDEBAR: boolean = true; // Set to true to debug the sidebar
+
+const layoutConfig: ChromeLayoutConfig = {
+  headerHeight: 96,
+  bannerHeight: 32,
+  sidebarWidth: 48,
+};
 
 /**
  * Service for providing layout component wired to other core services.
  */
-export class GridLayout implements LayoutService {
-  // @ts-expect-error - this is a placeholder for the actual dependencies
+export class GridLayoutpac implements LayoutService {
   constructor(private readonly deps: LayoutServiceStartDeps) {}
 
   /**
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    throw new Error('Not implemented');
+    const { application, chrome, overlays } = this.deps;
+    const chromeHeader = chrome.getHeaderComponent();
+    const appComponent = application.getComponent();
+    const bannerComponent = overlays.banners.getComponent();
+    const chromeVisible$ = chrome.getIsVisible$();
+
+    return React.memo(() => {
+      return (
+        <>
+          <GridLayoutGlobalStyles />
+          <ChromeLayoutConfigProvider value={layoutConfig}>
+            <ChromeLayout
+              header={chromeHeader}
+              sidebar={DEBUG_SIDEBAR ? 'sidebar is here...' : undefined}
+            >
+              <>
+                <div id="globalBannerList">{bannerComponent}</div>
+                <AppWrapper chromeVisible$={chromeVisible$}>
+                  {/* TODO: test and fix this */}
+                  {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
+                  <div id={APP_FIXED_VIEWPORT_ID} />
+
+                  {/* The actual plugin/app */}
+                  {appComponent}
+                </AppWrapper>
+              </>
+            </ChromeLayout>
+          </ChromeLayoutConfigProvider>
+        </>
+      );
+    });
   }
 }
