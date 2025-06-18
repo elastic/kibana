@@ -24,5 +24,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./failed_docs'));
     loadTestFile(require.resolve('./failed_docs_errors'));
     loadTestFile(require.resolve('./failed_docs_stats'));
+    loadTestFile(require.resolve('./data_streams_failure_store'));
   });
 }
