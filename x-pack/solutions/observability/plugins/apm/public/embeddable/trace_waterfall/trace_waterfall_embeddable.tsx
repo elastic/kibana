@@ -13,7 +13,7 @@ import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
 import { TraceWaterfall } from '../../components/shared/trace_waterfall';
-import { getWaterfallLegends } from '../../components/shared/trace_waterfall/use_trace_waterfall';
+import { getServiceLegends } from '../../components/shared/trace_waterfall/use_trace_waterfall';
 import { WaterfallLegendType } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export function TraceWaterfallEmbeddable({
@@ -39,7 +39,7 @@ export function TraceWaterfallEmbeddable({
     [entryTransactionId, rangeFrom, rangeTo, traceId]
   );
 
-  const legends = getWaterfallLegends(data?.traceItems || []);
+  const legends = getServiceLegends(data?.traceItems || []);
 
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,

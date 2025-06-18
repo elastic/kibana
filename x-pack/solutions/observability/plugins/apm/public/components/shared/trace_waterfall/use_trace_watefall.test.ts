@@ -13,7 +13,7 @@ import {
   getTraceParentChildrenMap,
   getTraceWaterfallDuration,
   getClockSkew,
-  getWaterfallLegends,
+  getServiceLegends,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -381,7 +381,7 @@ describe('getWaterfallLegends', () => {
   it('should generate waterfall legends without duplicates', () => {
     const traceItems: TraceItem[] = [root, root, child1, child2, grandchild];
 
-    const waterfallLegends = getWaterfallLegends(traceItems);
+    const waterfallLegends = getServiceLegends(traceItems);
 
     expect(waterfallLegends).toEqual([
       {
