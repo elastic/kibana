@@ -9,6 +9,9 @@
   },
   "include": [
     "**/*.ts",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "src/**/*.json",
+    "../../../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*"
