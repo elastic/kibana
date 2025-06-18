@@ -8,7 +8,6 @@
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
-export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
 
 export const GLOBAL_SEARCH_BAR_ADD_FILTER =
   '[data-test-subj="globalDatePicker"] [data-test-subj="addFilter"]';
