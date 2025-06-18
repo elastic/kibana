@@ -297,11 +297,7 @@ export const RuleDefinition = () => {
             <EuiText size="s">
               <p>
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
-                <EuiIconTip
-                  position="right"
-                  type="question"
-                  content={SCHEDULE_TOOLTIP_TEXT}
-                />
+                <EuiIconTip position="right" type="question" content={SCHEDULE_TOOLTIP_TEXT} />
               </p>
             </EuiText>
           }

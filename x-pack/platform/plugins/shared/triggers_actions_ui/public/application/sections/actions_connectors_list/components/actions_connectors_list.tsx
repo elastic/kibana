@@ -268,11 +268,7 @@ const ActionsConnectorsList = ({
         ) : (
           <>
             {link}
-            <EuiIconTip
-              type="question"
-              content={checkEnabledResult.message}
-              position="right"
-            />
+            <EuiIconTip type="question" content={checkEnabledResult.message} position="right" />
           </>
         );
       },

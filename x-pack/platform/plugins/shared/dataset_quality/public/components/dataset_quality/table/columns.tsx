@@ -343,12 +343,7 @@ export const getDatasetQualityTableColumns = ({
                 <EuiToolTip content={failedDocsColumnTooltip}>
                   <span>
                     {`${failedDocsColumnName} `}
-                    <EuiIcon
-                      size="s"
-                      color="subdued"
-                      type="question"
-                      className="eui-alignTop"
-                    />
+                    <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
                   </span>
                 </EuiToolTip>
               </EuiTableHeader>

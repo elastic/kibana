@@ -247,12 +247,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                   }
                 )}
               >
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="info"
-                  data-test-subj="usingMaxRetention"
-                />
+                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
               </EuiToolTip>
             </>
           )}
