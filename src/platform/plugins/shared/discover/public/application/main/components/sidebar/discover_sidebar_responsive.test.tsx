@@ -35,6 +35,8 @@ import type { DiscoverCustomizationId } from '../../../../customizations/customi
 import type { FieldListCustomization, SearchBarCustomization } from '../../../../customizations';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
+import { internalStateActions } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
@@ -180,12 +182,25 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
   };
 }
 
-function getStateContainer({ query }: { query?: Query | AggregateQuery }) {
+function getStateContainer({
+  query,
+  fieldListUiState,
+}: {
+  query?: Query | AggregateQuery;
+  fieldListUiState?: UnifiedFieldListRestorableState;
+}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.set({
     query: query ?? { query: '', language: 'lucene' },
     filters: [],
   });
+  if (fieldListUiState) {
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
+        fieldListUiState,
+      })
+    );
+  }
   return stateContainer;
 }
 
@@ -194,7 +209,10 @@ type MountReturn<WithRTL extends boolean> = WithRTL extends true ? undefined : E
 
 async function mountComponent<WithReactTestingLibrary extends boolean = false>(
   props: TestWrapperProps,
-  appStateParams: { query?: Query | AggregateQuery } = {},
+  appStateParams: {
+    query?: Query | AggregateQuery;
+    fieldListUiState?: UnifiedFieldListRestorableState;
+  } = {},
   services?: DiscoverServices,
   withReactTestingLibrary?: WithReactTestingLibrary
 ): Promise<MountReturn<WithReactTestingLibrary>> {
@@ -544,6 +562,24 @@ describe('discover responsive sidebar', function () {
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   }, 10000);
+
+  it('should restore sidebar state after switching tabs', async function () {
+    const comp = await mountComponent(props, {
+      fieldListUiState: {
+        nameFilter: 'byte',
+        selectedFieldTypes: ['number'],
+        pageSize: 10,
+        scrollPosition: 0,
+        accordionState: {},
+      },
+    });
+
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
+    expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
+      '1 popular field. 1 available field. 0 meta fields.'
+    );
+    expect(findTestSubject(comp, 'fieldListFiltersFieldSearch').prop('value')).toBe('byte');
+  });
 
   it('should show "Add a field" button to create a runtime field', async () => {
     const services = createMockServices();
