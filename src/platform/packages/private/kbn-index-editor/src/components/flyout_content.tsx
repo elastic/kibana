@@ -14,6 +14,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { FileDropzone } from './file_drop_zone';
 import { CustomPanel } from './custom_panel';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { FlyoutFooter } from './flyout_footer';
@@ -29,7 +30,6 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const { coreStart, ...restDeps } = deps;
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
-
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
   const totalHits = 10;
@@ -58,13 +58,15 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           <CellActionsProvider
             getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
           >
-            <DataGridLazy
-              {...props}
-              dataView={dataView}
-              columns={dataViewColumns}
-              rows={rows}
-              totalHits={totalHits}
-            />
+            <FileDropzone>
+              <DataGridLazy
+                {...props}
+                dataView={dataView}
+                columns={dataViewColumns}
+                rows={rows}
+                totalHits={totalHits}
+              />
+            </FileDropzone>
           </CellActionsProvider>
         </EuiFlyoutBody>
 

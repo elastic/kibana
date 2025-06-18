@@ -5,13 +5,11 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop",
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": [
     "target/**/*"
   ],

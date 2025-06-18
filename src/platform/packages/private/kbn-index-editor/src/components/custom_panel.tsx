@@ -8,11 +8,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { FilePicker } from './file_picker';
 import { KibanaContextExtra } from '../types';
 
 export const CustomPanel = () => {
@@ -51,13 +52,7 @@ export const CustomPanel = () => {
   return (
     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          display={'fill'}
-          size="s"
-          color={'text'}
-          iconType={'export'}
-          onClick={() => {}}
-        />
+        <FilePicker />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
