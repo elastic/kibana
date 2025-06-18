@@ -52,5 +52,5 @@ describe('Readme', () => {
     const result = render('<script>alert("This should not run")</script>');
 
     expect(result.queryByText('This should not run')).not.toBeInTheDocument();
-  })
+  });
 });

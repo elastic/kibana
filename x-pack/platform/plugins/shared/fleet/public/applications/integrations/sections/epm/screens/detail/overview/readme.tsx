@@ -12,7 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeRaw from 'rehype-raw';
- 
+
 import { useLinks } from '../../../../../hooks';
 
 import { markdownRenderers } from './markdown_renderers';
@@ -56,7 +56,7 @@ export function Readme({
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
-    
+
           <EuiSkeletonText lines={5} />
           <EuiSpacer size="m" />
           <EuiSkeletonText lines={6} />
