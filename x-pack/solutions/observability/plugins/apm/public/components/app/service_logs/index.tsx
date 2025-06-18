@@ -79,14 +79,13 @@ export function ClassicServiceLogsStream() {
 
   const timeRange = useMemo(() => ({ from: start, to: end }), [start, end]);
 
-  const query = useMemo(() => {
-    const baseFilter = getInfrastructureKQLFilter({ data, serviceName, environment });
-    const hasKuery = Boolean(kuery && kuery.trim().length);
-    return {
+  const query = useMemo(
+    () => ({
       language: 'kuery',
-      query: hasKuery ? `${baseFilter} and (${kuery})` : baseFilter,
-    };
-  }, [data, serviceName, environment, kuery]);
+      query: getInfrastructureKQLFilter({ data, serviceName, environment }),
+    }),
+    [data, serviceName, environment]
+  );
 
   return logSources.value ? (
     <LazySavedSearchComponent

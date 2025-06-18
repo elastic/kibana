@@ -330,7 +330,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showQueryInput: true,
+          showQueryInput: false,
         },
       }),
       '/services/{serviceName}/infrastructure': {
