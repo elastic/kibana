@@ -281,7 +281,7 @@ describe('SiemRulesMigrationsService', () => {
 
       service.getRuleMigrationsStats = getStatsMock;
 
-      // Ensure a valid connector is present (so that a STOPPED migration would be resumed, if needed)
+      // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
       jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
 
       // Start polling
@@ -306,12 +306,12 @@ describe('SiemRulesMigrationsService', () => {
       jest.useRealTimers();
     });
 
-    describe('when a stopped migration is found', () => {
-      it('should not start a stopped migration if migration had errors', async () => {
+    describe('when a interrupted migration is found', () => {
+      it('should not start a interrupted migration if migration had errors', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = {
+        const interruptedMigration = {
           id: 'mig-1',
-          status: SiemMigrationTaskStatus.STOPPED,
+          status: SiemMigrationTaskStatus.INTERRUPTED,
           last_execution: {
             error: 'some failure',
           },
@@ -321,7 +321,7 @@ describe('SiemRulesMigrationsService', () => {
         service.getRuleMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
-          .mockResolvedValueOnce([stoppedMigration]);
+          .mockResolvedValueOnce([interruptedMigration]);
 
         jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
         jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
@@ -343,15 +343,15 @@ describe('SiemRulesMigrationsService', () => {
         jest.useRealTimers();
       });
 
-      it('should not start a stopped migration if no connector configured', async () => {
+      it('should not start a interrupted migration if no connector configured', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         service.getRuleMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
-          .mockResolvedValueOnce([stoppedMigration]);
+          .mockResolvedValueOnce([interruptedMigration]);
 
         jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
         jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
@@ -374,23 +374,23 @@ describe('SiemRulesMigrationsService', () => {
         jest.useRealTimers();
       });
 
-      it('should not start a stopped migration if user is missing capabilities', async () => {
+      it('should not start a interrupted migration if user is missing capabilities', async () => {
         // Use fake timers to simulate delays inside the polling loop.
         jest.useFakeTimers();
-        // Simulate a migration that is first reported as STOPPED and then FINISHED.
-        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        // Simulate a migration that is first reported as INTERRUPTED and then FINISHED.
+        const interruptedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.INTERRUPTED };
         const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
 
         // Override getRuleMigrationsStats to return our sequence:
-        // First call: stopped, then finished, then empty array.
+        // First call: interrupted, then finished, then empty array.
         const getStatsMock = jest
           .fn()
           .mockResolvedValue([finishedMigration])
-          .mockResolvedValueOnce([stoppedMigration]);
+          .mockResolvedValueOnce([interruptedMigration]);
 
         service.getRuleMigrationsStats = getStatsMock;
 
-        // Ensure a valid connector is present (so that a STOPPED migration would be resumed, if needed)
+        // Ensure a valid connector is present (so that a INTERRUPTED migration would be resumed, if needed)
         jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
         jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(true);
 
@@ -412,11 +412,11 @@ describe('SiemRulesMigrationsService', () => {
         jest.useRealTimers();
       });
 
-      it('should automatically start the stopped migration with last_execution values', async () => {
+      it('should automatically start the interrupted migration with last_execution values', async () => {
         jest.useFakeTimers();
-        const stoppedMigration = {
+        const interruptedMigration = {
           id: 'mig-1',
-          status: SiemMigrationTaskStatus.STOPPED,
+          status: SiemMigrationTaskStatus.INTERRUPTED,
           last_execution: {
             connector_id: 'connector-last',
             skip_prebuilt_rules_matching: true,
@@ -427,7 +427,7 @@ describe('SiemRulesMigrationsService', () => {
         service.getRuleMigrationsStats = jest
           .fn()
           .mockResolvedValue([finishedMigration])
-          .mockResolvedValueOnce([stoppedMigration]);
+          .mockResolvedValueOnce([interruptedMigration]);
 
         jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
         jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
