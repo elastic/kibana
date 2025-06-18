@@ -32,6 +32,29 @@ const canManageRules: SubFeaturePrivilegeGroupConfig = {
       }),
       includeIn: 'all',
       alerting: {
+        rule: {
+          all: [degradedDocsAlertingFeatures],
+        },
+      },
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['alerting:save'],
+    },
+  ],
+};
+
+const canManageAlerts: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'manage_alerts',
+      name: i18n.translate('xpack.dataQuality.features.canManageAlerts', {
+        defaultMessage: 'Manage alerts',
+      }),
+      includeIn: 'all',
+      alerting: {
         alert: {
           all: [degradedDocsAlertingFeatures],
         },
@@ -101,6 +124,15 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         defaultMessage: 'This feature enables users to manage dataset quality rules.',
       }),
       privilegeGroups: [canManageRules],
+    },
+    {
+      name: i18n.translate('xpack.dataQuality.features.app.manageAlerts', {
+        defaultMessage: 'Manage alerts',
+      }),
+      description: i18n.translate('xpack.dataQuality.features.app.manageAlertsDescription', {
+        defaultMessage: 'This feature enables users to manage dataset quality alerts.',
+      }),
+      privilegeGroups: [canManageAlerts],
     },
   ],
 };
