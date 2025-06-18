@@ -31,7 +31,8 @@ export function PreviewTable({
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
 }) {
-  const allColumns = useMemo(() => {
+  // Determine canonical column order
+  const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
       if (!doc || typeof doc !== 'object') {
@@ -41,33 +42,36 @@ export function PreviewTable({
         cols.add(key);
       });
     });
-    let unorderedAllColumns = Array.from(cols);
+    let allColumns = Array.from(cols);
+
+    // Sort columns by displayColumns or alphabetically as baseline
+    allColumns = allColumns.sort((a, b) => {
+      const indexA = (displayColumns || []).indexOf(a);
+      const indexB = (displayColumns || []).indexOf(b);
+      if (indexA === -1 && indexB === -1) {
+        return a.localeCompare(b);
+      }
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
     // Sort columns based on the columnOrderHint if provided
     if (columnOrderHint.length > 0) {
-      const orderedCols = columnOrderHint.filter((col) => unorderedAllColumns.includes(col));
-      const unorderedCols = unorderedAllColumns.filter((col) => !orderedCols.includes(col));
-      unorderedAllColumns = [...orderedCols, ...unorderedCols];
+      const orderedCols = columnOrderHint.filter((col) => allColumns.includes(col));
+      const unorderedCols = allColumns.filter((col) => !orderedCols.includes(col));
+      allColumns = [...orderedCols, ...unorderedCols];
     }
-    // Always show the displayColumns first, but preserve the order from unorderedAllColumns
+    // Always show the displayColumns first, but preserve the order from allColumns
     if (displayColumns) {
       const displaySet = new Set(displayColumns);
-      unorderedAllColumns = [
-        ...unorderedAllColumns.filter((col) => displaySet.has(col)),
-        ...unorderedAllColumns.filter((col) => !displaySet.has(col)),
+      allColumns = [
+        ...allColumns.filter((col) => displaySet.has(col)),
+        ...allColumns.filter((col) => !displaySet.has(col)),
       ];
     }
-    return unorderedAllColumns;
-  }, [columnOrderHint, displayColumns, documents]);
-  const visibleColumns = useMemo(() => {
-    if (displayColumns) {
-      // if displayColumns is provided, order them according to the columnOrderHint
-      const orderedCols = columnOrderHint.filter((col) => displayColumns.includes(col));
-      const unorderedCols = displayColumns.filter((col) => !orderedCols.includes(col));
-      return [...orderedCols, ...unorderedCols];
-    }
-
     return allColumns;
-  }, [allColumns, columnOrderHint, displayColumns]);
+  }, [columnOrderHint, displayColumns, documents]);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -94,16 +98,23 @@ export function PreviewTable({
     } as EuiDataGridSorting;
   }, [setSorting, sorting]);
 
+  // Derive visibleColumns from canonical order
+  const visibleColumns = useMemo(() => {
+    if (displayColumns) {
+      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
+    }
+    return canonicalColumnOrder;
+  }, [canonicalColumnOrder, displayColumns]);
+
+  // Derive gridColumns from canonical order
   const gridColumns = useMemo(() => {
-    return allColumns.map((column) => ({
+    return canonicalColumnOrder.map((column) => ({
       id: column,
       displayAsText: column,
-      actions: sortingConfig ? { showMoveLeft: false, showMoveRight: false } : (false as false),
-      isSortable: true,
-      defaultSortDirection: 'asc' as 'asc' | 'desc',
+      actions: false as false,
       initialWidth: visibleColumns.length > 10 ? 250 : undefined,
     }));
-  }, [allColumns, sortingConfig, visibleColumns.length]);
+  }, [canonicalColumnOrder, visibleColumns.length]);
 
   return (
     <EuiDataGrid

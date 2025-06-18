@@ -59,7 +59,7 @@ export const toMoment = (value: string): Moment => moment(value);
 export const toString = (value: Moment): string => value.toISOString();
 
 export interface RecurringScheduleFieldsProps {
-  startDate?: string;
+  startDate: string;
   endDate?: string;
   timezone?: string[];
   allowInfiniteRecurrence?: boolean;
@@ -147,7 +147,7 @@ export const RecurringScheduleFormFields = memo(
           />
           {(parsedSchedule?.frequency === Frequency.DAILY ||
             parsedSchedule?.frequency === 'CUSTOM') && (
-            <CustomRecurringSchedule data-test-subj="custom-recurring-form" />
+            <CustomRecurringSchedule startDate={startDate} />
           )}
           <UseField
             path="recurringSchedule.ends"
