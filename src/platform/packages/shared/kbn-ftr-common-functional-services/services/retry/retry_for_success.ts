@@ -9,9 +9,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
-import { delay } from '@kbn/test-jest-helpers';
 
 const returnTrue = () => true;
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const defaultOnFailure = (methodName: string) => (lastError: Error | undefined, reason: string) => {
   throw new Error(
