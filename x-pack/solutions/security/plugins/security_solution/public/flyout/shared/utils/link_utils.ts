@@ -50,6 +50,7 @@ interface GetFlyoutParams {
   field: string;
   scopeId: string;
   ruleId?: string;
+  indexName?: string
 }
 
 const FLYOUT_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
@@ -114,6 +115,7 @@ export const getPreviewPanelParams = ({
   field,
   scopeId,
   ruleId,
+  indexName,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
   if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
@@ -167,6 +169,7 @@ export const getPreviewPanelParams = ({
         params: {
           id: value,
           scopeId,
+          indexName,
         },
       };
     default:
