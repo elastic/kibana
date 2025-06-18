@@ -422,7 +422,7 @@ describe('useQueryRuleFlyoutState hook', () => {
           {
             source: { index: 0, droppableId: 'actions' },
             destination: { index: 1, droppableId: 'actions' },
-          } as DropResult<string>,
+          } as DropResult,
           {} as ResponderProvided
         );
       });
@@ -439,7 +439,7 @@ describe('useQueryRuleFlyoutState hook', () => {
           {
             source: { index: 0, droppableId: 'actions' },
             destination: { index: 1, droppableId: 'actions' },
-          } as DropResult<string>,
+          } as DropResult,
           {} as ResponderProvided
         );
       });
@@ -484,7 +484,7 @@ describe('useQueryRuleFlyoutState hook', () => {
           {
             source: { index: 0, droppableId: 'actions' },
             destination: { index: 1, droppableId: 'actions' },
-          } as DropResult<string>,
+          } as DropResult,
           {} as ResponderProvided
         );
       });
@@ -496,7 +496,7 @@ describe('useQueryRuleFlyoutState hook', () => {
           {
             source: { index: 1, droppableId: 'actions' },
             destination: { index: 0, droppableId: 'actions' },
-          } as DropResult<string>,
+          } as DropResult,
 
           {} as ResponderProvided
         );

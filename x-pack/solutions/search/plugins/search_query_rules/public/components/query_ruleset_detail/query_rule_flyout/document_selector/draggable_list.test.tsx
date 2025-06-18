@@ -65,7 +65,7 @@ describe('DraggableList', () => {
     const onDeleteDocument = jest.fn() as (index: number) => void;
     const onIndexSelectorChange = jest.fn() as (index: number, indexName: string) => void;
     const onIdSelectorChange = jest.fn() as (index: number, id: string) => void;
-    const dragEndHandle = jest.fn() as OnDragEndResponder<string>;
+    const dragEndHandle = jest.fn() as OnDragEndResponder;
 
     render(
       <DraggableList
@@ -95,7 +95,7 @@ describe('DraggableList', () => {
     const onDeleteDocument = jest.fn() as (index: number) => void;
     const onIndexSelectorChange = jest.fn() as (index: number, indexName: string) => void;
     const onIdSelectorChange = jest.fn() as (index: number, id: string) => void;
-    const dragEndHandle = jest.fn() as OnDragEndResponder<string>;
+    const dragEndHandle = jest.fn() as OnDragEndResponder;
 
     render(
       <DraggableList

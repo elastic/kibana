@@ -231,7 +231,7 @@ export const useQueryRuleFlyoutState = ({
 
   const shouldShowCriteriaCallout = criteriaCalloutActive && !isAlways;
 
-  const dragEndHandle: OnDragEndResponder<string> = ({ source, destination }) => {
+  const dragEndHandle: OnDragEndResponder = ({ source, destination }) => {
     if (source && destination && (ruleFromRuleset || createMode)) {
       setIsFlyoutDirty(true);
       if (isDocRule) {

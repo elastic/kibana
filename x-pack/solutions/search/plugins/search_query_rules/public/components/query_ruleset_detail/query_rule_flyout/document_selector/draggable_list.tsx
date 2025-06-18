@@ -20,7 +20,7 @@ interface DraggableListProps {
   pinType: QueryRulesQueryRuleType;
   isIdRule?: boolean;
   indexNames?: string[];
-  dragEndHandle: OnDragEndResponder<string>;
+  dragEndHandle: OnDragEndResponder;
   onDeleteDocument: (index: number) => void;
   onIndexSelectorChange: (index: number, indexName: string) => void;
   onIdSelectorChange: (index: number, id: string) => void;
