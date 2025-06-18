@@ -6,30 +6,27 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { Type } from '@kbn/config-schema';
-import type { SavedObject } from '@kbn/core/server';
 
-export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
-  SavedObject<SavedObjectAttributes>,
-  'attributes' | 'references'
->;
-export type VersionableEmbeddableObject<SOAttributes, ItemAttributes> = {
-  itemSchema?: Type<ItemAttributes>;
-  savedObjectToItem?: (
-    savedObject: SavedObjectAttributesWithReferences<SOAttributes>
-  ) => ItemAttributes;
-  itemToSavedObject?: (item: ItemAttributes) => SavedObjectAttributesWithReferences<SOAttributes>;
+import type { Type } from '@kbn/config-schema';
+import { SavedObjectReference } from '@kbn/core/server';
+
+export type EmbeddableTransforms<StoredState, State> = {
+  schema?: Type<State>;
+  transformOut?: (
+    state: StoredState,
+    references?: SavedObjectReference[],
+  ) => State;
+  transformIn?: (state: State) => {
+    state: StoredState,
+    references?: SavedObjectReference[],
+  };
 };
 
-export type EmbeddableContentManagementDefinition = {
-  id: string;
-  versions: { 1: VersionableEmbeddableObject<any, any> } & Record<
+export type EmbeddableTransformsDefinition = {
+  type: string;
+  versions: { 1: EmbeddableTransforms<any, any> } & Record<
     number,
-    VersionableEmbeddableObject<any, any>
+    EmbeddableTransforms<any, any>
   >;
   latestVersion: number;
-};
-
-export type EmbeddableContentManagementService = {
-  getEmbeddableMigrationDefinition: (id: string) => EmbeddableContentManagementDefinition;
 };

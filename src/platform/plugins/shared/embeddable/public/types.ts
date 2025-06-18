@@ -18,9 +18,8 @@ import { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
-import type { EmbeddableContentManagementDefinition } from '../common';
 import { EnhancementRegistryDefinition } from './enhancements/types';
-import { EmbeddableContentManagementRegistryPublic } from '../common/embeddable_content_management/registry';
+import { EmbeddableTransforms, EmbeddableTransformsDefinition } from '../common';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -69,7 +68,7 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
-  registerEmbeddableContentManagementDefinition: EmbeddableContentManagementRegistryPublic['registerContentManagementDefinition'];
+  registerTransforms: (type: string, getDefinition: () => Promise<EmbeddableTransformsDefinition>) => void;
 
   /**
    * @deprecated
@@ -79,8 +78,8 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getEmbeddableContentManagementDefinition: (
-    id: string
-  ) => Promise<EmbeddableContentManagementDefinition | undefined>;
+  getTransforms: (
+    type: string
+  ) => Promise<EmbeddableTransforms<object, object> | undefined>;
   getEnhancement: (enhancementId: string) => PersistableState;
 }

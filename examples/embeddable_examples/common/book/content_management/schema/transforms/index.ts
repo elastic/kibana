@@ -8,4 +8,4 @@
  */
 
 export { itemToSavedObject } from './item_to_saved_object';
-export { savedObjectToItem } from './saved_object_to_item';
+export { transformOut } from './transform_out';

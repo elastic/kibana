@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { Mutable } from 'utility-types';
 import type { SavedBookAttributes } from '../../../../../server/book/saved_object';
@@ -22,40 +21,43 @@ const injectReferences = (attributes: SavedBookAttributes, references: SavedObje
   return injectedParams;
 };
 
-// 8.x used this SavedObject schema to store Book embeddables in URLs
+// <=9.1 used schema to store Book embeddables in URLs
 // It is NOT recommended to radically change SavedObject schemas other than adding additional optional fields,
 // but legacy URL handling is a special case
-interface BookSavedURLObjectAttributes {
+interface SavedBookAttributes910 {
   bookTitle: string;
   bookSynopsis?: string;
   numberOfPages: number;
   authorName: string;
 }
-const isUrlObject = (so: unknown): so is BookSavedURLObjectAttributes =>
-  !!(so as BookSavedURLObjectAttributes).bookTitle;
+const is910State = (panelConfig: SavedBookAttributes | SavedBookAttributes910): so is SavedBookAttributes910 =>
+  !!(panelConfig as SavedBookAttributes910).bookTitle;
 
-const savedURLObjectToItem = ({
+const transform910 = ({
   bookTitle,
   bookSynopsis,
   numberOfPages,
   authorName,
-}: BookSavedURLObjectAttributes): BookItem => ({
+}: SavedBookAttributes910): BookItem => ({
   bookTitle,
   synopsis: bookSynopsis,
   author: authorName,
   pages: numberOfPages,
 });
 
-export const savedObjectToItem = (
-  so: SavedObjectAttributesWithReferences<SavedBookAttributes> | BookSavedURLObjectAttributes
-): BookItem =>
-  isUrlObject(so)
-    ? savedURLObjectToItem(so)
-    : {
-        bookTitle: so.attributes.bookTitleAsArray.join(''),
-        author: so.attributes.metadata.text.authorName,
-        pages: so.attributes.metadata.numbers.numberOfPages,
-        synopsis: so.attributes.metadata.text.bookSynopsis,
-        published: so.attributes.metadata.numbers.publicationYear ?? undefined,
-        ...injectReferences(so.attributes, so.references),
-      };
+export const transformOut = (
+  panelConfig: SavedBookAttributes | SavedBookAttributes910,
+  references?: SavedObjectReference[],
+): BookItem => {
+  if (is910State(panelConfig)) return transform910(panelConfig as SavedBookAttributes910);
+  
+  const book = panelConfig as SavedBookAttributes;
+  return {
+    bookTitle: book.bookTitleAsArray.join(''),
+    author: book.metadata.text.authorName,
+    pages: book.metadata.numbers.numberOfPages,
+    synopsis: book.metadata.text.bookSynopsis,
+    published: book.metadata.numbers.publicationYear ?? undefined,
+    ...injectReferences(book, references ?? []),
+  };
+}

@@ -71,7 +71,7 @@ export function dashboardAttributesOut(
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...((panelsJSON || sections) && {
-      panels: transformPanelsOut({ panelsJSON, sections, embeddable, references }),
+      panels: transformPanelsOut(panelsJSON, sections, embeddable, references),
     }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },

@@ -21,7 +21,6 @@ import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import { EmbeddableContentManagementRegistryPublic } from '../common/embeddable_content_management/registry';
 import { EnhancementsRegistry } from './enhancements/registry';
 import {
   EmbeddableSetup,
@@ -29,14 +28,14 @@ import {
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import { getTransforms, registerTransforms } from './transforms_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
   private enhancementsRegistry = new EnhancementsRegistry();
-  private embeddableContentManagementRegistry = new EmbeddableContentManagementRegistryPublic();
-
+  
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
@@ -46,8 +45,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
-      registerEmbeddableContentManagementDefinition:
-        this.embeddableContentManagementRegistry.registerContentManagementDefinition,
+      registerTransforms,
     };
   }
 
@@ -72,8 +70,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      getEmbeddableContentManagementDefinition:
-        this.embeddableContentManagementRegistry.getContentManagementDefinition,
+      getTransforms,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 
