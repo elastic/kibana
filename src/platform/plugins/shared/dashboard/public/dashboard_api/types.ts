@@ -161,9 +161,6 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializeLayout: () => {
-    references: Reference[];
-    panels: DashboardState['panels'];
-  };
+  serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
 }

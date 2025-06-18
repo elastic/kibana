@@ -81,7 +81,6 @@ export function getDashboardApi({
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
-    initialState.sections,
     trackPanel,
     getReferences
   );
@@ -118,7 +117,6 @@ export function getDashboardApi({
   function getState() {
     const {
       panels,
-      sections,
       references: panelReferences,
     } = layoutManager.internalApi.serializeLayout();
     const { state: unifiedSearchState, references: searchSourceReferences } =
@@ -127,7 +125,6 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      sections,
       viewMode: viewModeManager.api.viewMode$.value,
     };
 
@@ -138,7 +135,7 @@ export function getDashboardApi({
     return {
       dashboardState,
       controlGroupReferences,
-      panelReferences,
+      panelReferences: panelReferences ?? [],
       searchSourceReferences,
     };
   }
