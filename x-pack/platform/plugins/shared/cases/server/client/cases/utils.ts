@@ -401,27 +401,29 @@ export const getClosedInfoForUpdate = ({
 export const getInProgressInfoForUpdate = ({
   status,
   updatedAt,
+  inProgressAt,
 }: {
   status?: CaseStatuses;
   updatedAt: string;
+  inProgressAt?: string | null;
 }): Partial<Pick<CaseAttributes, 'in_progress_at'>> | undefined => {
-  if (status && status === CaseStatuses['in-progress']) {
+  if (status && status === CaseStatuses['in-progress'] && inProgressAt == null) {
     return {
       in_progress_at: updatedAt,
     };
   }
 };
 
-const checkInProgressCaseDates = (createdAtMillis: number, updatedAtMillis: number) =>
+const areValidDatesWhenChangingToInProgress = (createdAtMillis: number, updatedAtMillis: number) =>
   !isNaN(createdAtMillis) && !isNaN(updatedAtMillis) && updatedAtMillis >= createdAtMillis;
 
-const checkClosedCaseDates = (
+const areValidDatesWhenClosing = (
   createdAtMillis: number,
   updatedAtMillis: number,
   inProgressAtMillis: number | null
 ) => {
-  if (isNaN(createdAtMillis) || isNaN(updatedAtMillis)) {
-    return updatedAtMillis >= createdAtMillis;
+  if (isNaN(createdAtMillis) || isNaN(updatedAtMillis) || updatedAtMillis < createdAtMillis) {
+    return false;
   }
   if (inProgressAtMillis != null) {
     return (
@@ -433,22 +435,25 @@ const checkClosedCaseDates = (
   return true;
 };
 
+/**
+ * Rules:
+ *
+ * - if in_progress_at is set once we will not reset it when we change statuses
+ * - in_progress_at  is set only the first time the status changes to In progress
+ * - When status = closed all metrics ( time_to_acknowledge , time_to_investigate , and time_to_resolve ) will be calculated.
+ * - When status = in progress, only the time_to_acknowledge is calculated,  set time_to_investigate  and  time_to_resolve  to null
+ * - When status = open , nullify all metrics ( time_to_acknowledge , time_to_investigate , and time_to_resolve )
+ */
 export const getTimingMetricsForUpdate = ({
   status,
   createdAt,
   inProgressAt,
   updatedAt,
-  timeToAcknowledge,
-  timeToInvestigate,
-  timeToResolve,
 }: {
   status?: CaseStatuses;
   createdAt: string;
   updatedAt: string;
   inProgressAt?: string | null;
-  timeToAcknowledge?: number | null;
-  timeToInvestigate?: number | null;
-  timeToResolve?: number | null;
 }):
   | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
   | undefined => {
@@ -457,11 +462,11 @@ export const getTimingMetricsForUpdate = ({
     const updatedAtMillis = new Date(updatedAt).getTime();
     let inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
-    if (status && status === CaseStatuses['in-progress'] && !timeToAcknowledge) {
+    if (status && status === CaseStatuses['in-progress']) {
       if (
         createdAt != null &&
         updatedAt != null &&
-        checkInProgressCaseDates(createdAtMillis, updatedAtMillis)
+        areValidDatesWhenChangingToInProgress(createdAtMillis, updatedAtMillis)
       ) {
         return {
           time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
@@ -474,7 +479,7 @@ export const getTimingMetricsForUpdate = ({
       if (
         createdAt != null &&
         updatedAt != null &&
-        checkClosedCaseDates(createdAtMillis, updatedAtMillis, inProgressAtMillis)
+        areValidDatesWhenClosing(createdAtMillis, updatedAtMillis, inProgressAtMillis)
       ) {
         if (inProgressAtMillis == null) {
           // When a case transitions directly from 'open' to 'closed', set inProgressAt to
@@ -482,15 +487,9 @@ export const getTimingMetricsForUpdate = ({
           inProgressAtMillis = updatedAtMillis;
         }
         return {
-          ...(!timeToAcknowledge
-            ? { time_to_acknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000) }
-            : {}),
-          ...(!timeToInvestigate
-            ? { time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000) }
-            : {}),
-          ...(!timeToResolve
-            ? { time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000) }
-            : {}),
+          time_to_acknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000),
+          time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000),
+          time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
         };
       }
     }

@@ -1092,6 +1092,16 @@ describe('utils', () => {
       ).toBeUndefined();
     });
 
+    it('should not overwrite in_progress_at when transitioning again to in-progress', async () => {
+      expect(
+        getInProgressInfoForUpdate({
+          status: CaseStatuses['in-progress'],
+          updatedAt: date,
+          inProgressAt: date,
+        })
+      ).toBeUndefined();
+    });
+
     it('returns undefined if the status is not provided', async () => {
       expect(getInProgressInfoForUpdate({ updatedAt: date })).toBeUndefined();
     });
@@ -1116,18 +1126,6 @@ describe('utils', () => {
       });
     });
 
-    it('should not overwrite time_to_acknowledge', () => {
-      expect(
-        getTimingMetricsForUpdate({
-          status: CaseStatuses['in-progress'],
-          createdAt,
-          inProgressAt,
-          updatedAt,
-          timeToAcknowledge: 1,
-        })
-      ).toBeUndefined();
-    });
-
     it('should return the correct time_to_investigate and time_to_resolve when the case transitions from in-progress to closed', () => {
       expect(
         getTimingMetricsForUpdate({
@@ -1135,9 +1133,9 @@ describe('utils', () => {
           createdAt,
           inProgressAt,
           updatedAt,
-          timeToAcknowledge: 5,
         })
       ).toEqual({
+        time_to_acknowledge: 10,
         time_to_investigate: 10,
         time_to_resolve: 20,
       });
@@ -1155,19 +1153,6 @@ describe('utils', () => {
         time_to_investigate: 0,
         time_to_resolve: 20,
       });
-    });
-
-    it('should not overwrite time_to_investigate and time_to_resolve', () => {
-      const timings = getTimingMetricsForUpdate({
-        status: CaseStatuses.closed,
-        createdAt,
-        inProgressAt,
-        updatedAt,
-        timeToInvestigate: 1,
-        timeToResolve: 1,
-      });
-      expect(timings).not.toHaveProperty('time_to_investigate');
-      expect(timings).not.toHaveProperty('time_to_resolve');
     });
 
     it('returns undefined if the status is not provided', async () => {

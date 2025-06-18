@@ -658,20 +658,16 @@ const createPatchCasesPayload = ({
             closedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
           }),
-          ...(originalCase.attributes.in_progress_at == null
-            ? getInProgressInfoForUpdate({
-                status: trimmedCaseAttributes.status,
-                updatedAt: updatedDt,
-              })
-            : {}),
+          ...getInProgressInfoForUpdate({
+            status: trimmedCaseAttributes.status,
+            updatedAt: updatedDt,
+            inProgressAt: originalCase.attributes.in_progress_at,
+          }),
           ...getTimingMetricsForUpdate({
             status: trimmedCaseAttributes.status,
             updatedAt: updatedDt,
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
-            timeToAcknowledge: originalCase.attributes.time_to_acknowledge,
-            timeToInvestigate: originalCase.attributes.time_to_investigate,
-            timeToResolve: originalCase.attributes.time_to_resolve,
           }),
           updated_at: updatedDt,
           updated_by: user,
