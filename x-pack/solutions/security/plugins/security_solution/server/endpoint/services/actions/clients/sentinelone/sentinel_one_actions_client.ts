@@ -242,7 +242,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
