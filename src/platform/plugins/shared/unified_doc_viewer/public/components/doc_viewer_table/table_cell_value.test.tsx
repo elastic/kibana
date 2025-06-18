@@ -150,8 +150,7 @@ describe('TableFieldValue', () => {
     expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
 
     let valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeDefined();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
+    expect(valueElement).toHaveStyle(truncationStyles);
 
     toggleButton.click();
 
@@ -160,8 +159,7 @@ describe('TableFieldValue', () => {
     expect(toggleButton.getAttribute('aria-expanded')).toBe('true');
 
     valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeNull();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
+    expect(valueElement).not.toHaveStyle(truncationStyles);
 
     toggleButton.click();
 
@@ -170,8 +168,7 @@ describe('TableFieldValue', () => {
     expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
 
     valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeDefined();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(true);
+    expect(valueElement).toHaveStyle(truncationStyles);
   });
 
   it('should not truncate a long value in legacy table if limit is not reached', async () => {
@@ -193,8 +190,7 @@ describe('TableFieldValue', () => {
     expect(screen.queryByTestId('toggleLongFieldValue-message')).toBeNull();
 
     const valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeNull();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
+    expect(valueElement).not.toHaveStyle(truncationStyles);
   });
 
   it('should not truncate a long value in legacy table if setting is 0', async () => {
@@ -217,7 +213,6 @@ describe('TableFieldValue', () => {
     expect(screen.queryByTestId('toggleLongFieldValue-message')).toBeNull();
 
     const valueElement = screen.getByTestId('tableDocViewRow-message-value');
-    expect(valueElement.getAttribute('css')).toBeNull();
-    expect(valueElement.classList.contains('kbnDocViewer__value--truncated')).toBe(false);
+    expect(valueElement).not.toHaveStyle(truncationStyles);
   });
 });
