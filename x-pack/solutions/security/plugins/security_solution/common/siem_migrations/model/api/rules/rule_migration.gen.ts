@@ -24,6 +24,7 @@ import {
   OriginalRule,
   RuleMigrationRule,
   UpdateRuleMigrationRule,
+  RuleMigrationTaskExecutionSettings,
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
@@ -34,7 +35,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
-import { ConnectorId, LangSmithOptions } from '../../common.gen';
+import { LangSmithOptions } from '../../common.gen';
 
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
 export const CreateRuleMigrationResponse = z.object({
@@ -270,10 +271,13 @@ export type StartRuleMigrationRequestParamsInput = z.input<typeof StartRuleMigra
 
 export type StartRuleMigrationRequestBody = z.infer<typeof StartRuleMigrationRequestBody>;
 export const StartRuleMigrationRequestBody = z.object({
-  connector_id: ConnectorId,
+  /**
+   * Settings applicable to current rule migration task execution.
+   */
+  settings: RuleMigrationTaskExecutionSettings,
   langsmith_options: LangSmithOptions.optional(),
   /**
-   * The optional indicator to retry the rule translation based on this filter criteria
+   * The optional indicator to retry the rule translation based on this filter criteria.
    */
   retry: RuleMigrationRetryFilter.optional(),
 });

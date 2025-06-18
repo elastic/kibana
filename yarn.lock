@@ -2229,10 +2229,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.1.tgz#f0261b9cbf516f9294a1ebf3f84d2ef3804db729"
-  integrity sha512-z4MuolpYHhdIViT78l55a072oAwy9u2uGFekTMvUuV5Ewlot1x5P71Kn8iEAhOPv+dHqwUvY/KCWcwMFmhRnZQ==
+"@elastic/monaco-esql@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.2.tgz#83a698293473673db2c4925ed6498da4638be25a"
+  integrity sha512-R/Xk1Yi+SuANcu/+D6LZjvNaSTFeTXPL4UewgWzMK5z2LSwuix+5rcyHDB5xxoZ5cJ9yJOeVpAMUoGFXRXxOoQ==
 
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -6844,7 +6844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/saved-object-test-plugin@link:x-pack/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
+"@kbn/saved-object-test-plugin@link:x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin":
   version "0.0.0"
   uid ""
 
@@ -7677,6 +7677,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-platform@link:x-pack/platform/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
   version "0.0.0"
   uid ""
 
@@ -9500,19 +9504,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@puppeteer/browsers@2.10.3":
-  version "2.10.3"
-  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.3.tgz#4d89b3520359da6f7016ff96316c2c243be2b3ee"
-  integrity sha512-iPpnFpX25gKIVsHsqVjHV+/GzW36xPgsscWkCnrrETndcdxNsXLdCrTwhkCJNR/FGWr122dJUBeyV4niz/j3TA==
-  dependencies:
-    debug "^4.4.0"
-    extract-zip "^2.0.1"
-    progress "^2.0.3"
-    proxy-agent "^6.5.0"
-    semver "^7.7.1"
-    tar-fs "^3.0.8"
-    yargs "^17.7.2"
-
 "@puppeteer/browsers@2.10.5":
   version "2.10.5"
   resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.5.tgz#dddb8f8716ae6364f6f2d31125e76f311dd4a49d"
@@ -9786,12 +9777,12 @@
     "@types/node" ">=18.0.0"
     axios "^1.6.0"
 
-"@smithy/abort-controller@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/abort-controller/-/abort-controller-4.0.1.tgz#7c5e73690c4105ad264c2896bd1ea822450c3819"
-  integrity sha512-fiUIYgIgRjMWznk6iLJz35K2YxSLHzLBA/RC6lBrKfQ8fHbPfvk7Pk9UvpKoHgJjI18MnbPuEju53zcVy6KF1g==
+"@smithy/abort-controller@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@smithy/abort-controller/-/abort-controller-4.0.4.tgz#ab991d521fc78b5c7f24907fcd6803c0f2da51d9"
+  integrity sha512-gJnEjZMvigPDQWHrW3oPrFhQtkrgqBkyjj3pCIdF3A5M6vsZODG93KNlfJprv6bp4245bdT32fsHK4kkH3KYDA==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
 "@smithy/config-resolver@^4.0.1":
@@ -9982,15 +9973,15 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/node-http-handler@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@smithy/node-http-handler/-/node-http-handler-4.0.2.tgz#48d47a046cf900ab86bfbe7f5fd078b52c82fab6"
-  integrity sha512-X66H9aah9hisLLSnGuzRYba6vckuFtGE+a5DcHLliI/YlqKrGoxhisD5XbX44KyoeRzoNlGr94eTsMVHFAzPOw==
+"@smithy/node-http-handler@^4.0.1", "@smithy/node-http-handler@^4.0.2":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@smithy/node-http-handler/-/node-http-handler-4.0.6.tgz#a022da499ba3af4b6b4c815104fde973c0eccc40"
+  integrity sha512-NqbmSz7AW2rvw4kXhKGrYTiJVDHnMsFnX4i+/FzcZAfbOBauPYs2ekuECkSbtqaxETLLTu9Rl/ex6+I2BKErPA==
   dependencies:
-    "@smithy/abort-controller" "^4.0.1"
-    "@smithy/protocol-http" "^5.0.1"
-    "@smithy/querystring-builder" "^4.0.1"
-    "@smithy/types" "^4.1.0"
+    "@smithy/abort-controller" "^4.0.4"
+    "@smithy/protocol-http" "^5.1.2"
+    "@smithy/querystring-builder" "^4.0.4"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
 "@smithy/property-provider@^4.0.1":
@@ -10001,20 +9992,20 @@
     "@smithy/types" "^4.1.0"
     tslib "^2.6.2"
 
-"@smithy/protocol-http@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/protocol-http/-/protocol-http-5.0.1.tgz#37c248117b29c057a9adfad4eb1d822a67079ff1"
-  integrity sha512-TE4cpj49jJNB/oHyh/cRVEgNZaoPaxd4vteJNB0yGidOCVR0jCw/hjPVsT8Q8FRmj8Bd3bFZt8Dh7xGCT+xMBQ==
+"@smithy/protocol-http@^5.0.1", "@smithy/protocol-http@^5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@smithy/protocol-http/-/protocol-http-5.1.2.tgz#8094860c2407f250b80c95899e0385112d6eb98b"
+  integrity sha512-rOG5cNLBXovxIrICSBm95dLqzfvxjEmuZx4KK3hWwPFHGdW3lxY0fZNXfv2zebfRO7sJZ5pKJYHScsqopeIWtQ==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     tslib "^2.6.2"
 
-"@smithy/querystring-builder@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@smithy/querystring-builder/-/querystring-builder-4.0.1.tgz#37e1e05d0d33c6f694088abc3e04eafb65cb6976"
-  integrity sha512-wU87iWZoCbcqrwszsOewEIuq+SU2mSoBE2CcsLwE0I19m0B2gOJr1MVjxWcDQYOzHbR1xCk7AcOBbGFUYOKvdg==
+"@smithy/querystring-builder@^4.0.1", "@smithy/querystring-builder@^4.0.4":
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/@smithy/querystring-builder/-/querystring-builder-4.0.4.tgz#f7546efd59d457b3d2525a330c6137e5f907864c"
+  integrity sha512-SwREZcDnEYoh9tLNgMbpop+UTGq44Hl9tdj3rf+yeLcfH7+J8OXEBaMc2kDxtyRHu8BhSg9ADEx0gFHvpJgU8w==
   dependencies:
-    "@smithy/types" "^4.1.0"
+    "@smithy/types" "^4.3.1"
     "@smithy/util-uri-escape" "^4.0.0"
     tslib "^2.6.2"
 
@@ -10068,10 +10059,10 @@
     "@smithy/util-stream" "^4.0.2"
     tslib "^2.6.2"
 
-"@smithy/types@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.1.0.tgz#19de0b6087bccdd4182a334eb5d3d2629699370f"
-  integrity sha512-enhjdwp4D7CXmwLtD6zbcDMbo6/T6WtuuKCY49Xxc6OMOmUWlBEBDREsxxgV2LIdeQPW756+f97GzcgAwp3iLw==
+"@smithy/types@^4.1.0", "@smithy/types@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.3.1.tgz#c11276ea16235d798f47a68aef9f44d3dbb70dd4"
+  integrity sha512-UqKOQBL2x6+HWl3P+3QqFD4ncKq0I8Nuz9QItGv5WuKuMHuuwlhvqcZCoXGfc+P1QmfJE7VieykoYYmrOoFJxA==
   dependencies:
     tslib "^2.6.2"
 
@@ -14276,17 +14267,17 @@ bowser@^2.11.0:
   integrity sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==
 
 brace-expansion@^1.1.7:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
-  integrity sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==
+  version "1.1.12"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.12.tgz#ab9b454466e5a8cc3a187beaad580412a9c5b843"
+  integrity sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==
   dependencies:
     balanced-match "^1.0.0"
     concat-map "0.0.1"
 
 brace-expansion@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-2.0.1.tgz#1edc459e0f0c548486ecf9fc99f2221364b9a0ae"
-  integrity sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-2.0.2.tgz#54fc53237a613d854c7bd37463aad17df87214e7"
+  integrity sha512-Jt0vHyM+jmUBqojB7E1NIYadt0vI0Qxjxd2TErW94wDz+E2LAm5vKMXXwg6ZZBTHPuUlDgQHKXvjGBdfcF1ZDQ==
   dependencies:
     balanced-match "^1.0.0"
 
@@ -16995,11 +16986,6 @@ detective@^5.0.2:
     acorn-node "^1.6.1"
     defined "^1.0.0"
     minimist "^1.1.1"
-
-devtools-protocol@0.0.1439962:
-  version "0.0.1439962"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1439962.tgz#395c5ca1cd83aa451c667056a025f9873c4598c1"
-  integrity sha512-jJF48UdryzKiWhJ1bLKr7BFWUQCEIT5uCNbDLqkQJBtkFxYzILJH44WN0PDKMIlGDN7Utb8vyUY85C3w4R/t2g==
 
 devtools-protocol@0.0.1452169:
   version "0.0.1452169"
@@ -26363,22 +26349,10 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer-core@24.8.1:
-  version "24.8.1"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.8.1.tgz#20728f431f4ed2daba23515df1f1a586c663b4ba"
-  integrity sha512-UP/VIxVk/Akrgql3a55ZAIuAIx7+yQevz6qEXFUtSTIynEcgsCJ6tlRdi7uKAAlovmNQG4iNMzq9f8WxZLnGGg==
-  dependencies:
-    "@puppeteer/browsers" "2.10.3"
-    chromium-bidi "5.1.0"
-    debug "^4.4.0"
-    devtools-protocol "0.0.1439962"
-    typed-query-selector "^2.12.0"
-    ws "^8.18.2"
-
-puppeteer-core@^24.10.0:
-  version "24.10.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.10.0.tgz#b44175d90511eb414395ae60c51a13185b391421"
-  integrity sha512-xX0QJRc8t19iAwRDsAOR38Q/Zx/W6WVzJCEhKCAwp2XMsaWqfNtQ+rBfQW9PlF+Op24d7c8Zlgq9YNmbnA7hdQ==
+puppeteer-core@24.10.1, puppeteer-core@^24.10.0:
+  version "24.10.1"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.10.1.tgz#e79a6331e85a7449fb9c8e5b23c029830dd9bf4b"
+  integrity sha512-AE6doA9znmEEps/pC5lc9p0zejCdNLR6UBp3EZ49/15Nbvh+uklXxGox7Qh8/lFGqGVwxInl0TXmsOmIuIMwiQ==
   dependencies:
     "@puppeteer/browsers" "2.10.5"
     chromium-bidi "5.1.0"
@@ -26387,16 +26361,16 @@ puppeteer-core@^24.10.0:
     typed-query-selector "^2.12.0"
     ws "^8.18.2"
 
-puppeteer@24.8.1:
-  version "24.8.1"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.8.1.tgz#820ecaec7a793ab5b8fa30269ae5e1b8e7c68cc8"
-  integrity sha512-5OvJCe6tQ09EWf35qqyoH/cr9YGMbLj0ZpoT2pEImF9Ox35JXyAn8kIqj8eBgpDfyzuEwXYIMUwIAIkdgO/gDA==
+puppeteer@24.10.1:
+  version "24.10.1"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.10.1.tgz#1bd5a0de09843ac04d661def6a096921ced682c1"
+  integrity sha512-7T3rfSaaPt5A31VITV5YKQ4wPCCv4aPn8byDaV+9lhDU9v7BWYY4Ncwerw3ZR5mIolrh/PvzGdIDK7yiBth75g==
   dependencies:
-    "@puppeteer/browsers" "2.10.3"
+    "@puppeteer/browsers" "2.10.5"
     chromium-bidi "5.1.0"
     cosmiconfig "^9.0.0"
-    devtools-protocol "0.0.1439962"
-    puppeteer-core "24.8.1"
+    devtools-protocol "0.0.1452169"
+    puppeteer-core "24.10.1"
     typed-query-selector "^2.12.0"
 
 pure-rand@^6.0.0:
