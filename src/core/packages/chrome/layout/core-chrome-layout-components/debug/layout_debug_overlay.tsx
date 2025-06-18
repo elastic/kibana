@@ -40,7 +40,7 @@ const labelStyle = css`
   pointer-events: none;
 `;
 
-const slots = [
+const slots: Array<{name: string; style: React.CSSProperties}> = [
   {
     name: 'banner',
     style: {
@@ -131,12 +131,19 @@ const defaultColors: Record<string, string> = {
   footer: '#7c4dff',
 };
 
+/**
+ * A debug overlay component that visually outlines the main layout slots (banner, header, navigation, sidebar, etc.)
+ * using colored rectangles. This is useful for development and debugging to understand the placement and sizing of layout regions.
+ *
+ * @param props - {@link LayoutDebugOverlayProps} Optional colors to override the default slot colors.
+ * @returns The rendered debug overlay as a fixed-position set of rectangles.
+ */
 export const LayoutDebugOverlay: React.FC<LayoutDebugOverlayProps> = ({ colors = {} }) => {
   const mergedColors = { ...defaultColors, ...colors };
   return (
     <div css={overlayStyle}>
       {slots.map((slot) => {
-        const color = mergedColors[slot.name] || '#0099ff';
+        const color = mergedColors[slot.name] || Object.values(defaultColors)[0]
         return (
           <div
             key={slot.name}
@@ -148,7 +155,7 @@ export const LayoutDebugOverlay: React.FC<LayoutDebugOverlayProps> = ({ colors =
                 color: ${color};
               `,
             ])}
-            style={slot.style as React.CSSProperties}
+            style={slot.style}
           >
             <span css={css([labelStyle, `background: ${color};`])}>{slot.name}</span>
           </div>

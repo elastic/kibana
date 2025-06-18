@@ -9,7 +9,13 @@
 
 import React from 'react';
 
-export interface LayoutStyleArgs {
+/**
+ * Dimensions for each layout section in the Chrome UI.
+ *
+ * This interface defines the pixel sizes for key layout areas such as banner, footer, header,
+ * navigation, and sidebar, including their respective panel widths.
+ */
+export interface LayoutDimensions {
   bannerHeight: number;
   footerHeight: number;
   headerHeight: number;
@@ -19,7 +25,10 @@ export interface LayoutStyleArgs {
   sidebarPanelWidth: number;
 }
 
-export interface LayoutState extends LayoutStyleArgs {
+/**
+ * The state of the layout.
+ */
+export interface LayoutState extends LayoutDimensions {
   hasBanner: boolean;
   hasFooter: boolean;
   hasSidebar: boolean;
@@ -29,10 +38,19 @@ export interface LayoutState extends LayoutStyleArgs {
   hasNavigationPanel: boolean;
 }
 
+/**
+ * Props for the slots.
+ */
 export type SlotProps = LayoutState;
 
+/**
+ * A slot is a React node or a function that returns a React node.
+ */
 export type Slot = React.ReactNode | ((props: SlotProps) => React.ReactNode);
 
+/**
+ * Supported slots for the layout
+ */
 export interface ChromeLayoutSlots {
   header?: Slot | null;
   navigation?: Slot | null;

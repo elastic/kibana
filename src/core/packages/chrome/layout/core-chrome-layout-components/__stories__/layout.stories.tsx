@@ -12,7 +12,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '..';
-import { LayoutDebugOverlay } from '../debug/LayoutDebugOverlay';
+import { LayoutDebugOverlay } from '../debug/layout_debug_overlay';
 import { Box } from './box';
 
 const styles = css`

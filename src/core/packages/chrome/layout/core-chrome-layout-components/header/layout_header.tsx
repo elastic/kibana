@@ -14,6 +14,12 @@ export interface LayoutHeaderProps {
   children: ReactNode;
 }
 
+/**
+ * The header slot wrapper
+ *
+ * @param props - Props for the LayoutHeader component.
+ * @returns The rendered LayoutHeader component.
+ */
 export const LayoutHeader = ({ children }: LayoutHeaderProps) => {
   return <header css={styles.root}>{children}</header>;
 };

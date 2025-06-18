@@ -13,6 +13,12 @@ import { useEuiOverflowScroll } from '@elastic/eui';
 
 import { styles } from './layout_application.styles';
 
+/**
+ * The application slot wrapper
+ *
+ * @param props - Props for the LayoutApplication component.
+ * @returns The rendered LayoutApplication component.
+ */
 export const LayoutApplication = ({ children }: { children: ReactNode }) => {
   const overflow = useEuiOverflowScroll('y');
 

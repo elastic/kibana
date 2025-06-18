@@ -13,8 +13,20 @@ import { ChromeLayoutComponent, type ChromeLayoutComponentProps } from './layout
 import { LayoutGlobalCSS } from './layout_global_css';
 import { LayoutStateProvider } from './layout_state_context';
 
+/**
+ * Props for the ChromeLayout component.
+ * @public
+ */
 export type ChromeLayoutProps = ChromeLayoutComponentProps;
 
+/**
+ * The main Chrome layout component.
+ * Sets up the layout and required global css.
+ *
+ * @public
+ * @param props - Props for the ChromeLayout component.
+ * @returns The rendered ChromeLayout component.
+ */
 export const ChromeLayout = ({ children, ...props }: ChromeLayoutProps) => {
   return (
     <LayoutStateProvider {...props}>

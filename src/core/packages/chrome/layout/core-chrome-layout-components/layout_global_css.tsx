@@ -11,6 +11,54 @@ import React from 'react';
 import { Global, css } from '@emotion/react';
 import { useLayoutState } from './layout_state_context';
 
+/**
+ * Sets up global CSS for the layout using the CSS variables (custom properties) approach.
+ * This enables dynamic theming and consistent styling across the application by defining reusable variables at the global scope.
+ *
+ * @remarks
+ * The following CSS variables are defined:
+ *
+ * Banner:
+ *   --kbn-layout--banner-top
+ *   --kbn-layout--banner-left
+ *   --kbn-layout--banner-height
+ *   --kbn-layout--banner-width
+ *
+ * Header:
+ *   --kbn-layout--header-top
+ *   --kbn-layout--header-left
+ *   --kbn-layout--header-height
+ *   --kbn-layout--header-width
+ *
+ * Navigation:
+ *   --kbn-layout--navigation-top
+ *   --kbn-layout--navigation-height
+ *   --kbn-layout--navigation-width
+ *   --kbn-layout--navigation-panel-width
+ *
+ * Sidebar:
+ *   --kbn-layout--sidebar-top
+ *   --kbn-layout--sidebar-height
+ *   --kbn-layout--sidebar-width
+ *   --kbn-layout--sidebar-panel-width
+ *
+ * Application:
+ *   --kbn-layout--application-top
+ *   --kbn-layout--application-bottom
+ *   --kbn-layout--application-left
+ *   --kbn-layout--application-right
+ *   --kbn-layout--application-height
+ *   --kbn-layout--application-width
+ *
+ * Footer:
+ *   --kbn-layout--footer-top
+ *   --kbn-layout--footer-left
+ *   --kbn-layout--footer-height
+ *   --kbn-layout--footer-width
+ *
+ * These variables are available globally for consistent layout styling and dynamic updates.
+ * @returns The rendered GlobalCSS component.
+ */
 export const LayoutGlobalCSS = () => {
   const {
     bannerHeight,

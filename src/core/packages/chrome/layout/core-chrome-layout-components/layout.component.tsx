@@ -24,6 +24,12 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
   children: Slot;
 }
 
+/**
+ * The chrome layout component that composes slots together.
+ * 
+ * @param props - ChromeLayoutComponentProps
+ * @returns The rendered ChromeLayoutComponent.
+ */
 export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutComponentProps) => {
   const layoutState = useLayoutState();
   const styles = useLayoutStyles(layoutState);

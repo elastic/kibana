@@ -17,6 +17,13 @@ export interface LayoutStateProps extends ChromeLayoutSlots {
 
 const LayoutStateContext = createContext<LayoutState | undefined>(undefined);
 
+/**
+ * The layout state provider component.
+ * Wires up the LayoutConfig to the layout state.
+ *
+ * @param props - Props for the LayoutStateProvider component.
+ * @returns The rendered LayoutStateProvider component.
+ */
 export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) => {
   // Get layout config from context
   const layoutConfig = useLayoutConfig();
