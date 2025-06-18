@@ -150,8 +150,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       const scheduleResult = response2.body;
 
-      log.info(`Scheduled backfill result: ${JSON.stringify(scheduleResult)}`);
-
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
 
@@ -220,13 +218,10 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         expect(e?.kibana?.space_ids).to.eql(['space1']);
       }
 
-      log.info(`Event log events: ${JSON.stringify(events)}`);
-
       // save the execution UUIDs
       const executionUuids = events.map((e) => e?.kibana?.alert?.rule?.execution?.uuid);
 
       // active alert counts and backfill info will differ per backfill run
-      log.info(`event 0 ${JSON.stringify(events[0])}`);
       expect(events[0]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(3);
       expect(events[0]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[0].run_at
@@ -235,7 +230,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         scheduleResult[0].schedule[0].interval
       );
 
-      log.info(`event 1 ${JSON.stringify(events[1])}`);
       expect(events[1]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(1);
       expect(events[1]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[1].run_at
@@ -244,7 +238,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         scheduleResult[0].schedule[1].interval
       );
 
-      log.info(`event 2 ${JSON.stringify(events[2])}`);
       expect(events[2]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(5);
       expect(events[2]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[2].run_at
@@ -253,7 +246,6 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         scheduleResult[0].schedule[2].interval
       );
 
-      log.info(`event 3 ${JSON.stringify(events[3])}`);
       expect(events[3]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.eql(0);
       expect(events[3]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[3].run_at
@@ -534,6 +526,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .expect(200);
 
       const scheduleResult = response2.body;
+      log.info(`Scheduled backfill result: ${JSON.stringify(scheduleResult)}`);
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
@@ -567,6 +560,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         spaceId,
         new Map([['execute-backfill', { equal: 4 }]])
       );
+
+      log.info(`Event log events: ${JSON.stringify(events)}`);
 
       // each event log event should have these fields
       for (const e of events) {
