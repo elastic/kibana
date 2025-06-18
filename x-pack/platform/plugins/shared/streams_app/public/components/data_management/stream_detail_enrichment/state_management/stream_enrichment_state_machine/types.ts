@@ -55,6 +55,9 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }

@@ -36,6 +36,9 @@ export interface SimulationInput {
 }
 
 export type SimulationEvent =
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
@@ -50,6 +53,9 @@ export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
+  explicitlyEnabledPreviewColumns: string[];
+  explicitlyDisabledPreviewColumns: string[];
+  previewColumnsOrder: string[];
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
   simulation?: Simulation;

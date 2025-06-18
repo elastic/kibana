@@ -77,6 +77,24 @@ export const useStreamEnrichmentEvents = () => {
       addDataSource: (dataSource: EnrichmentDataSource) => {
         service.send({ type: 'dataSources.add', dataSource });
       },
+      setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyEnabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setExplicitlyDisabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyDisabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setPreviewColumnsOrder: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.order',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
     }),
     [service]
   );
