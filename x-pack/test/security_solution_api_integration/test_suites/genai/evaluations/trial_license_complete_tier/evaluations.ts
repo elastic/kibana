@@ -85,11 +85,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Run Evaluations', () => {
       const buildNumber = process.env.BUILDKITE_BUILD_NUMBER || os.hostname();
+      const prNumber = process.env.BUILDKITE_PULL_REQUEST;
       const config = getSecurityGenAIConfigFromEnvVar();
       const defaultEvalPayload: PostEvaluateBody = {
-        runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}${
-          isEvalLocalPrompts ? ' [Local Prompts]' : ''
-        }`,
+        runName: `Eval Automation${buildNumber ? ' | Build ' + buildNumber : ''}${
+          prNumber ? ' | PR ' + prNumber : ''
+        }${isEvalLocalPrompts ? ' | [Local Prompts]' : ''}`,
         graphs: ['DefaultAssistantGraph'],
         datasetName: 'Sample Dataset',
         connectorIds: Object.keys(config.connectors),
