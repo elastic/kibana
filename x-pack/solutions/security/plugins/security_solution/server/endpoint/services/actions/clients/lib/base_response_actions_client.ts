@@ -55,6 +55,7 @@ import type {
   CommonResponseActionMethodOptions,
   CustomScriptsResponse,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
 } from './types';
@@ -70,6 +71,8 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ResponseActionParametersWithProcessData,
+  ResponseActionRunScriptOutputContent,
+  ResponseActionRunScriptParameters,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -78,8 +81,6 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  ResponseActionRunScriptOutputContent,
-  ResponseActionRunScriptParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -1002,7 +1003,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
