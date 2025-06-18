@@ -12,6 +12,9 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { DataProviders } from '.';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { matchers } from '@emotion/jest';
+
+expect.extend(matchers);
 
 describe('DataProviders', () => {
   describe('rendering', () => {
