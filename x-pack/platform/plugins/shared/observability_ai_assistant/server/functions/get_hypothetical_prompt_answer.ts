@@ -26,8 +26,6 @@ export async function getHypotheticalPromptAnswer({
   try {
     logger.debug(`Generating hypothetical answer for user prompt: "${userPrompt}"`);
 
-    console.log(`messages`, messages);
-
     const response$ = chat('retrieve_hypothetical_answer', {
       stream: true,
       signal,
