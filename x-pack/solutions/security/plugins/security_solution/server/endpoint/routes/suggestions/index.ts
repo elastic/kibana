@@ -75,47 +75,48 @@ export const getEndpointSuggestionsRequestHandler = (
 > => {
   return async (context, request, response) => {
     const logger = getLogger(endpointContext);
-
-    const config = await firstValueFrom(config$);
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
 
-    if (request.params.suggestion_type === 'eventFilters') {
-      if (!endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        index = eventsIndexPattern;
-      } else {
-        logger.debug('Using space-aware index pattern');
-
-        const spaceId = (await context.securitySolution).getSpaceId();
-        const integrationNamespaces = await endpointContext.service
-          .getInternalFleetServices(spaceId)
-          .getIntegrationNamespaces(['endpoint']);
-
-        const indexPattern = combineIndexWithNamespaces(
-          eventsIndexPattern,
-          integrationNamespaces,
-          'endpoint'
-        );
-
-        if (indexPattern) {
-          logger.debug(`Index pattern to be used: ${indexPattern}`);
-          index = indexPattern;
-        } else {
-          logger.error('Failed to retrieve current space index patterns');
-          return response.badRequest({
-            body: 'Failed to retrieve current space index patterns',
-          });
-        }
-      }
-    } else {
-      return response.badRequest({
-        body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
-      });
-    }
-
-    const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-    const { savedObjects, elasticsearch } = await context.core;
     try {
+      const config = await firstValueFrom(config$);
+
+      if (request.params.suggestion_type === 'eventFilters') {
+        if (!endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+          index = eventsIndexPattern;
+        } else {
+          logger.debug('Using space-aware index pattern');
+
+          const spaceId = (await context.securitySolution).getSpaceId();
+          const integrationNamespaces = await endpointContext.service
+            .getInternalFleetServices(spaceId)
+            .getIntegrationNamespaces(['endpoint']);
+
+          const indexPattern = combineIndexWithNamespaces(
+            eventsIndexPattern,
+            integrationNamespaces,
+            'endpoint'
+          );
+
+          if (indexPattern) {
+            logger.debug(`Index pattern to be used: ${indexPattern}`);
+            index = indexPattern;
+          } else {
+            logger.error('Failed to retrieve current space index patterns');
+            return response.badRequest({
+              body: 'Failed to retrieve current space index patterns',
+            });
+          }
+        }
+      } else {
+        return response.badRequest({
+          body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
+        });
+      }
+
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+      const { savedObjects, elasticsearch } = await context.core;
+
       const body = await termsEnumSuggestions(
         config,
         savedObjects.client,
