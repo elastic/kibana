@@ -9,9 +9,9 @@
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { get, isEqual } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButton,
