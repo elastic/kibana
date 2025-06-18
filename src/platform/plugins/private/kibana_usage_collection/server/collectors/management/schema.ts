@@ -656,4 +656,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
+  'observability:streamsEnableSignificantEvents': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable significant events in streams.',
+    },
+  },
 };
