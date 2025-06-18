@@ -282,7 +282,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
           />
         </EuiPortal>
       )}
-      {enableAutomaticAgentUpgrades ? (
+      {canEnableAutomaticAgentUpgrades ? (
         <AutoUpgradeAgentsTour anchor="#auto-upgrade-manage-button" />
       ) : null}
     </>

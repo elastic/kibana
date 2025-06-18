@@ -17,6 +17,8 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
 import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
+import { DefaultPageTitle } from './default_page_title';
+
 interface Props {
   section?: Section;
   children?: React.ReactNode;
