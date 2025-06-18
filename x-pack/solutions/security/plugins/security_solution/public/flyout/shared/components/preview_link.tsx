@@ -15,6 +15,7 @@ import {
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
+  EVENT_SOURCE_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
@@ -25,8 +26,14 @@ import { USER_PREVIEW_BANNER } from '../../document_details/right/components/use
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
+import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 
-const PREVIEW_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
+const PREVIEW_FIELDS = [
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  EVENT_SOURCE_FIELD_NAME,
+];
 
 // Helper function to check if the field has a preview link
 export const hasPreview = (field: string) =>
@@ -75,6 +82,14 @@ const getPreviewParams = (
       return {
         id: RulePreviewPanelKey,
         params: { ruleId, banner: RULE_PREVIEW_BANNER, isPreviewMode: true },
+      };
+    case EVENT_SOURCE_FIELD_NAME:
+      return {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: value,
+          scopeId,
+        },
       };
     default:
       return null;

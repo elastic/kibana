@@ -25,6 +25,7 @@ import {
 } from '../../../../common/field_maps/field_names';
 import {
   AGENT_STATUS_FIELD_NAME,
+  EVENT_SOURCE_FIELD_NAME,
   QUARANTINED_PATH_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { EventSummaryField } from './types';
@@ -50,6 +51,10 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
 
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [
+  {
+    id: 'kibana.alert.ancestors.id',
+    overrideField: EVENT_SOURCE_FIELD_NAME,
+  },
   { id: 'host.name' },
 
   // Add all fields used to identify the agent ID in alert events and override them to
