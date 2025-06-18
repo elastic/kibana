@@ -27,7 +27,6 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
     schema: esqlSchema,
     handler: async ({ params }, { esClient }) => {
       const client = esClient.asCurrentUser;
-      console.log("Params received in handler:", params);
       const filledQuery = tool.query.replace(/\?(\w+)/g, (_, key) => {
         if (!(key in tool.params)) {
           throw new Error(
@@ -48,7 +47,7 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
         query: filledQuery,
       })
 
-      return response;
+      return response.columns
     },
     meta: tool.meta,
   };

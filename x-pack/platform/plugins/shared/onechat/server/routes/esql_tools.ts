@@ -240,8 +240,8 @@ export function registerESQLToolsRoutes({
         version: '2023-10-31',
         validate: { 
           request: {
+              params: schema.object({id: schema.string()}, { unknowns: 'allow' }),
               body: schema.object({
-                id: schema.string(),
                 name: schema.maybe(schema.string()),
                 description: schema.maybe(schema.string()),
                 query: schema.maybe(schema.string()),
@@ -271,12 +271,12 @@ export function registerESQLToolsRoutes({
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
 
-        const toolId = request.body.id;
-
-        const { description, query, params, meta } = request.body
+        const toolId = request.params.id;
+        const { name, description, query, params, meta } = request.body
 
         const updates: Partial<EsqlToolCreateRequest> = {
-          id: request.body.id || toolId,
+          id: toolId,
+          name: name || undefined,
           description: description || undefined,
           query: query || undefined,
           params: params || undefined,
@@ -308,7 +308,7 @@ export function registerESQLToolsRoutes({
 
   router.versioned
     .delete({
-      path: '/api/chat/tools/esql/{name}',
+      path: '/api/chat/tools/esql/{id}',
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -326,7 +326,7 @@ export function registerESQLToolsRoutes({
       {
         version: '2023-10-31',
         validate: {
-          request: { params: schema.object({name: schema.string(),}, { unknowns: 'allow' }) },
+          request: { params: schema.object({id: schema.string(),}, { unknowns: 'allow' }) },
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -340,14 +340,14 @@ export function registerESQLToolsRoutes({
         try {
           const { esql: esqlToolService } = getInternalServices();
           const client = await esqlToolService.getScopedClient({ request });
-          const result = await client.delete(request.params.name);
+          const result = await client.delete(request.params.id);
 
           logger.info("RESULT: " + result)
 
           if (result === null || result === undefined) {
             return response.notFound({
               body: {
-                message: `Tool with name "${request.params.name}" not found.`,
+                message: `Tool with name "${request.params.id}" not found.`,
               },
             });
           }
