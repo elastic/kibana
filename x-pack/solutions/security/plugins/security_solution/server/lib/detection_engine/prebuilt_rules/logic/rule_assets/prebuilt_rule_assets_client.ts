@@ -79,7 +79,7 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds: string[] = []): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds?: string[]): Promise<RuleVersionSpecifier[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
         if (ruleIds && ruleIds.length === 0) {
           return [];
@@ -154,6 +154,7 @@ export const createPrebuiltRuleAssetsClient = (
 
     fetchAssetsByVersion: (versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchAssetsByVersion', async () => {
+        // debugger;
         if (versions.length === 0) {
           // NOTE: without early return it would build incorrect filter and fetch all existing saved objects
           return [];
