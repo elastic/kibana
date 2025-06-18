@@ -3010,10 +3010,10 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "inference",
-                "scope": "server",
-                "docId": "kibInferencePluginApi",
-                "section": "def-server.InferenceClient",
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceClient",
                 "text": "InferenceClient"
               }
             ],

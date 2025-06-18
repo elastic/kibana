@@ -14,12 +14,7 @@
         "none"
       ],
       "ignore_unavailable": "__flag__",
-      "fields": [],
-      "wait_for_active_shards": [
-        "1",
-        "all",
-        "index-setting"
-      ]
+      "fields": []
     },
     "methods": [
       "GET"
@@ -27,7 +22,7 @@
     "patterns": [
       "{index}/_field_usage_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/field-usage-stats.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-field-usage-stats",
     "availability": {
       "stack": true,
       "serverless": false
