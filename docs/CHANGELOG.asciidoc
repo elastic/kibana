@@ -572,7 +572,7 @@ Elastic Observability solution::
 Elastic Security solution::
 For the Elastic Security 8.17.8 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Machine Learning::
-* Fixes an issue with **Anomaly Explorer** where the selected Overall swimlane bucket is not respected for `viewBy jobId` ({kibana-pull}222845[#222845]).
+* Fixes an issue with **Anomaly Explorer** where the selected overall swimlane bucket is not respected for `viewBy jobId` ({kibana-pull}222845[#222845]).
 * Fixes the inference endpoint assignment to the trained model object ({kibana-pull}222076[#222076]).
 Installation and upgrade::
 * Fixes an issue where `/etc/default/kibana` on Debian packages and `/etc/sysconfig/kibana` on RPM packages would be overwritten during upgrade ({kibana-pull}221276[#221276]).
