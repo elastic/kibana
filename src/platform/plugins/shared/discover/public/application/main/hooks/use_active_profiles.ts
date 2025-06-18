@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../context_awareness';
@@ -42,18 +42,11 @@ export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocu
   });
 
   useEffect(() => {
-    const documentsSubscription = dataDocuments$.pipe(
-      distinctUntilChanged((a, b) => a.fetchStatus === b.fetchStatus),
-      filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
-      map(({ result }) => result ?? [])
-    );
-
-    const subscription = combineLatest([
-      scopedProfilesManager.getContexts$(),
-      documentsSubscription,
-    ])
+    const documentsSubscription = dataDocuments$
       .pipe(
-        map(([contexts, documents]) => {
+        filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
+        map(({ result }) => result ?? []),
+        map((documents) => {
           const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
 
           for (const record of documents) {
@@ -65,19 +58,36 @@ export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocu
             documentContexts[record.context.profileId].push(record);
           }
 
-          return {
-            rootContext: contexts.rootContext,
-            dataSourceContext: contexts.dataSourceContext,
-            documentContexts,
-          };
+          return documentContexts;
         })
       )
-      .subscribe(setUsedProfiles);
+      .subscribe((documentContexts) => {
+        setUsedProfiles((currentProfiles) => ({
+          ...currentProfiles,
+          documentContexts,
+        }));
+      });
+
+    return () => {
+      documentsSubscription.unsubscribe();
+    };
+  }, [dataDocuments$]);
+
+  useEffect(() => {
+    const subscription = scopedProfilesManager
+      .getContexts$()
+      .subscribe(({ rootContext, dataSourceContext }) => {
+        setUsedProfiles((currentProfiles) => ({
+          ...currentProfiles,
+          rootContext: rootContext ?? null,
+          dataSourceContext: dataSourceContext ?? null,
+        }));
+      });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [scopedProfilesManager, dataDocuments$]);
+  }, [scopedProfilesManager]);
 
   function getProfilesAdapter({
     onOpenDocDetails,
