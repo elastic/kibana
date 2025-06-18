@@ -75,7 +75,6 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       href={http.basePath.prepend(EXPLORE_LOGSTASH_AND_BEATS)}
-                      target="_blank"
                       data-test-subj="exploreLogstashAndBeatsLink"
                     >
                       {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
@@ -102,7 +101,6 @@ export const Observability: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiLink
                       href={http.basePath.prepend(CREATE_OBSERVABILITY_SPACE)}
-                      target="_blank"
                       data-test-subj="createObservabilityProjectLink"
                     >
                       {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {
