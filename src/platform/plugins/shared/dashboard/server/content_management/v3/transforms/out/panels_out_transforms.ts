@@ -102,26 +102,9 @@ function injectPanelReferences(
       const filteredReferences = getReferencesForPanelId(widget.panelIndex, references);
       const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
       const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(widget, panelReferences);
-      return injectPanelEmbeddableReferences(
-        panelsWithSavedObjectIdInjected,
-        embeddable,
-        panelReferences
-      );
+      return panelsWithSavedObjectIdInjected;
     }
   });
-}
-
-function injectPanelEmbeddableReferences(
-  panel: DashboardPanel,
-  embeddable: EmbeddableStart,
-  references: SavedObjectReference[] = []
-) {
-  const state = embeddable.inject({ type: panel.type, ...panel.panelConfig }, references);
-  const { type, ...injectedPanelConfig } = state;
-  return {
-    ...panel,
-    panelConfig: injectedPanelConfig,
-  };
 }
 
 function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObjectReference[]) {
