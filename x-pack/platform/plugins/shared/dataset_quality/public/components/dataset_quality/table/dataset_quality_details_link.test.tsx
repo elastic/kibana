@@ -7,9 +7,9 @@
 
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { BrowserUrlService } from '@kbn/share-plugin/public';
-import { shallow } from 'enzyme';
 import React from 'react';
 import { DatasetQualityDetailsLink } from './dataset_quality_details_link';
+import { screen, render } from '@testing-library/react';
 
 const createMockLocator = (id: string) => ({
   navigate: jest.fn(),
@@ -51,7 +51,7 @@ describe('DatasetQualityDetailsLink', () => {
   });
 
   it('renders a link to dataset quality details', () => {
-    const wrapper = shallow(
+    render(
       <DatasetQualityDetailsLink
         urlService={urlServiceMock}
         dataStream={dataStream.rawName}
@@ -65,6 +65,8 @@ describe('DatasetQualityDetailsLink', () => {
       dataStream: dataStream.rawName,
       timeRange,
     });
-    expect(wrapper.prop('href')).toBe(DATA_QUALITY_DETAILS_LOCATOR_ID);
+
+    const link = screen.getByTestId(`datasetQualityTableDetailsLink-${dataStream.rawName}`);
+    expect(link).toHaveAttribute('href', DATA_QUALITY_DETAILS_LOCATOR_ID);
   });
 });

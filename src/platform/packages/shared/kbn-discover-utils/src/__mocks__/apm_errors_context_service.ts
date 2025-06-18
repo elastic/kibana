@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './logs';
-export * from './traces';
-export * from './apm';
+import { getApmErrorsContextService } from '../data_types';
+
+export const createApmErrorsContextServiceMock = () => getApmErrorsContextService('errors-*');

@@ -18,7 +18,8 @@ const LATEST_FINDINGS_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-d
 const LATEST_FINDINGS_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
 const LATEST_FINDINGS_TRANSFORM_V880 = 'cloud_security_posture.findings_latest-default-8.8.0';
 
-const CURRENT_FINDINGS_TRANSFORM_VERSION = 'cloud_security_posture.findings_latest-default-8.15.0';
+export const CURRENT_FINDINGS_TRANSFORM_VERSION =
+  'cloud_security_posture.findings_latest-default-8.15.0';
 
 export const DEPRECATED_FINDINGS_TRANSFORMS_VERSION = [
   LATEST_FINDINGS_TRANSFORM_V830,
