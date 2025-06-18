@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+exit 0
+
 source .buildkite/scripts/common/util.sh
 
 echo --- Deduplicate yarn.lock
