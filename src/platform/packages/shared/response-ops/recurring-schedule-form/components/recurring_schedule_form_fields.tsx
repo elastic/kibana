@@ -55,6 +55,7 @@ export interface RecurringScheduleFieldsProps {
   hideTimezone?: boolean;
   supportsEndOptions?: boolean;
   allowInfiniteRecurrence?: boolean;
+  showTimeInSummary?: boolean;
   readOnly?: boolean;
 }
 
@@ -69,6 +70,7 @@ export const RecurringScheduleFormFields = memo(
     hideTimezone = false,
     supportsEndOptions = true,
     allowInfiniteRecurrence = true,
+    showTimeInSummary = false,
     readOnly = false,
   }: RecurringScheduleFieldsProps) => {
     const [formData] = useFormData<{ recurringSchedule: RecurringSchedule }>({
@@ -253,7 +255,7 @@ export const RecurringScheduleFormFields = memo(
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner>
           {i18n.RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY_PREFIX(
-            recurringSummary(moment(startDate), parsedSchedule, presets)
+            recurringSummary(moment(startDate), parsedSchedule, presets, showTimeInSummary)
           )}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

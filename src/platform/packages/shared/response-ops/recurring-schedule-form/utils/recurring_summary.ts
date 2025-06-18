@@ -22,13 +22,15 @@ import {
   RECURRING_SCHEDULE_FORM_UNTIL_DATE_SUMMARY,
   RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY,
   RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY,
+  RECURRING_SCHEDULE_FORM_TIME_SUMMARY,
 } from '../translations';
 import type { RecurrenceFrequency, RecurringSchedule } from '../types';
 
 export const recurringSummary = (
   startDate: Moment,
   recurringSchedule: RecurringSchedule | undefined,
-  presets: Record<RecurrenceFrequency, Partial<RecurringSchedule>>
+  presets: Record<RecurrenceFrequency, Partial<RecurringSchedule>>,
+  showTime = false
 ) => {
   if (!recurringSchedule) return '';
 
@@ -93,10 +95,13 @@ export const recurringSummary = (
     ? RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY(schedule.count)
     : null;
 
+  const time = showTime ? RECURRING_SCHEDULE_FORM_TIME_SUMMARY(startDate.format('HH:mm')) : null;
+
   const every = RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY(
     !dailyWithWeekdays ? frequencySummary : null,
     onSummary,
-    untilSummary
+    untilSummary,
+    time
   ).trim();
 
   return every;

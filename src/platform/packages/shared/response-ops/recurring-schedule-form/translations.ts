@@ -275,14 +275,16 @@ export const RECURRING_SCHEDULE_FORM_OCURRENCES_SUMMARY = (count: number) =>
 export const RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY = (
   frequencySummary: string | null,
   onSummary: string | null,
-  untilSummary: string | null
+  untilSummary: string | null,
+  time: string | null
 ) =>
   i18n.translate('responseOpsRecurringScheduleForm.recurrenceSummary', {
-    defaultMessage: 'every {frequencySummary}{on}{until}',
+    defaultMessage: 'every {frequencySummary}{on}{until}{time}',
     values: {
       frequencySummary: frequencySummary ? `${frequencySummary} ` : '',
       on: onSummary ? `${onSummary} ` : '',
       until: untilSummary ? `${untilSummary}` : '',
+      time: time ? `${time}` : '',
     },
   });
 
@@ -306,4 +308,10 @@ export const RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY = (date: string) =>
   i18n.translate('responseOpsRecurringScheduleForm.yearlyBymonthSummary', {
     defaultMessage: 'on {date}',
     values: { date },
+  });
+
+export const RECURRING_SCHEDULE_FORM_TIME_SUMMARY = (time: string) =>
+  i18n.translate('responseOpsRecurringScheduleForm.timeSummary', {
+    defaultMessage: 'at {time}',
+    values: { time },
   });

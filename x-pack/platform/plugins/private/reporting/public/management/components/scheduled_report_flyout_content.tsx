@@ -243,6 +243,7 @@ export const ScheduledReportFlyoutContent = ({
                   hideTimezone
                   readOnly={readOnly}
                   supportsEndOptions={false}
+                  showTimeInSummary
                 />
               )}
             </ResponsiveFormGroup>
