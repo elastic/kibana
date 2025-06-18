@@ -21,7 +21,6 @@ import { Sample } from '@kbn/grok-ui';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
@@ -250,16 +249,17 @@ const OutcomePreviewTable = () => {
     setPreviewColumnsOrder(visibleColumns);
   };
 
-  if (!previewDocuments || isEmpty(previewDocuments)) {
+  if (isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
-        titleSize="xs"
-        icon={<AssetImage type="noResults" />}
+        color="warning"
+        iconType="warning"
+        titleSize="s"
         title={
           <h2>
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.noDataTitle',
-              { defaultMessage: 'Unable to generate a preview' }
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
+              { defaultMessage: 'No data available to validate processor changes' }
             )}
           </h2>
         }
@@ -269,7 +269,7 @@ const OutcomePreviewTable = () => {
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
               {
                 defaultMessage:
-                  "There are no sample documents to test the processors. Try updating the time range or ingesting more data, it might be possible we could not find any matching documents with the processors' source fields.",
+                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
               }
             )}
           </p>
