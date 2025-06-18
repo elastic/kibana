@@ -749,12 +749,12 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
-            onTextLangQuerySubmit={async () => {
+            onTextLangQuerySubmit={async () =>
               onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
-              });
-            }}
+              })
+            }
             isDisabled={props.isDisabled}
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
