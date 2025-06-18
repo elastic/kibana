@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -37,7 +36,6 @@ import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_lo
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,
-  IHttpSerializedFetchError,
   selectMonitorUpsertStatus,
   selectOverviewState,
   selectServiceLocationsState,
@@ -48,6 +46,7 @@ import {
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { ErrorCallout } from '../../../common/components/error_callout';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
@@ -256,16 +255,7 @@ export function MonitorDetailFlyout(props: Props) {
   const upsertStatus = useSelector(selectMonitorUpsertStatus(configId));
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
-  let error = useSelector(selectSyntheticsMonitorError);
-  error = {
-    name: 'HttpFetchError',
-    body: {
-      error: 'Resource not found',
-      message: 'The resource you requested could not be found',
-      statusCode: 404,
-    },
-    requestUrl: 'http://localhost:5601',
-  };
+  const error = useSelector(selectSyntheticsMonitorError);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -409,48 +399,6 @@ export const MaybeMonitorDetailsFlyout = ({
     />
   ) : null;
 };
-
-export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
-  return (
-    <EuiCallOut
-      color="danger"
-      title={i18n.translate('xpack.synthetics.monitorDetail.errorTitle', {
-        defaultMessage: 'Error fetching monitor details',
-      })}
-      iconType="alert"
-    >
-      <p>
-        {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {
-          defaultMessage: 'Unable to fetch monitor details',
-        })}
-      </p>
-      {error.body?.message && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.message', {
-            defaultMessage: 'Message: {message}',
-            values: { message: error.body.message },
-          })}
-        </p>
-      )}
-      {error.body?.error && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.error', {
-            defaultMessage: 'Error: {error}',
-            values: { error: error.body.error },
-          })}
-        </p>
-      )}
-      {error.body?.statusCode && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.statusCode', {
-            defaultMessage: 'Status code: {statusCode}',
-            values: { statusCode: error.body.statusCode },
-          })}
-        </p>
-      )}
-    </EuiCallOut>
-  );
-}
 
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',
