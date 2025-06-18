@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -37,13 +37,8 @@ export class ElasticAssistantPublicPlugin
       ElasticAssistantPublicPluginStartDependencies
     >
 {
-  private readonly version: string;
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.version = initializerContext.env.packageInfo.version;
-  }
 
   public setup(coreSetup: CoreSetup) {
     this.telemetry.setup({ analytics: coreSetup.analytics });
@@ -81,9 +76,7 @@ export class ElasticAssistantPublicPlugin
       },
     });
 
-    return {
-      getVersion: () => this.version,
-    };
+    return {};
   }
 
   private mountAIAssistantButton(

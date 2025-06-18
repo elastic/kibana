@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { ElasticAssistantPublicPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ElasticAssistantPublicPlugin(initializerContext);
+export const plugin = () => new ElasticAssistantPublicPlugin();
