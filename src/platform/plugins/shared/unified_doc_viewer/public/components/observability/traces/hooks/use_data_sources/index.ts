@@ -7,6 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './logs';
-export * from './traces';
-export * from './apm';
+import createContainer from 'constate';
+
+type UseDataSourcesParams = DataSources;
+
+export interface DataSources {
+  indexes: {
+    logs: string;
+    apm: {
+      errors: string;
+      traces: string;
+    };
+  };
+}
+
+const useDataSources = ({ indexes }: UseDataSourcesParams) => {
+  return { indexes };
+};
+
+export const [DataSourcesProvider, useDataSourcesContext] = createContainer(useDataSources);
