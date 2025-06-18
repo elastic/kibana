@@ -1,6 +1,6 @@
-# Observability AI Assistant app OpenAPI documentation
+# Observability AI Assistant OpenAPI documentation
 
-This directory contains [OpenAPI specifications](https://swagger.io/specification/) for the [Observability AI Assistant app API](https://www.elastic.co/docs/solutions/observability/observability-ai-assistant) in Kibana.
+This directory contains [OpenAPI specifications](https://swagger.io/specification/) for the [Observability AI Assistant API](https://www.elastic.co/docs/solutions/observability/observability-ai-assistant) in Kibana.
 
 # OpenAPI (Experimental)
 

@@ -40,20 +40,20 @@ paths:
                   description: A unique identifier for the connector.
                 conversationId:
                   type: string
-                  description: A Unique identifier for the conversation if you are continuing an existing conversation.
+                  description: A unique identifier for the conversation if you are continuing an existing conversation.
                 title:
                   type: string
                   description: A title for the conversation.
                 persist:
                   type: boolean
-                  description: Flag indicating whether to persist the conversation in Kibana
+                  description: Flag indicating whether to persist the conversation in Kibana.
                 actions:
                   type: array
                   items:
                     $ref: '#/components/schemas/Function'
                 disableFunctions:
                   type: boolean
-                  description: Flag indicating whether functions should be disabled
+                  description: Flag indicating whether functions should be disabled.
                 instructions:
                   type: array
                   description: An array of instruction objects, which can be either simple strings or detailed objects.
@@ -171,7 +171,7 @@ components:
         trigger:
           type: string
           enum:
-            - Assistant
+            - assistant
             - user
             - elastic
           description: The trigger of the function call.
@@ -210,7 +210,7 @@ components:
             - id
             - text
     completeChatResponseExample:
-      summary: Get chat completion from the Observability AI Assistant
+      summary: Get a chat completion from the Observability AI Assistant
       value:
         - type: chatCompletionMessage
           id: 'message-id'
