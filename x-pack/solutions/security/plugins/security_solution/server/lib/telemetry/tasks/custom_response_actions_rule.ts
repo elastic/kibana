@@ -111,13 +111,13 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelEndpointPrefix),
-          counterType: 'response_actions_rules_count',
+          counterType: 'response_actions_endpoint_rules_count',
           incrementBy: responseActionsRulesTelemetryData.response_actions_rules.endpoint,
         });
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelOsqueryPrefix),
-          counterType: 'response_actions_rules_count',
+          counterType: 'response_actions_osquery_rules_count',
           incrementBy: responseActionsRulesTelemetryData.response_actions_rules.osquery,
         });
 
