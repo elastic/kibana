@@ -142,6 +142,7 @@ export const Controls = ({
       )}
       {showCenter && (
         <EuiFlexItem grow={false}>
+          {showZoom ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
             iconType="bullseye"
             aria-label={CenterLabel}
@@ -155,7 +156,7 @@ export const Controls = ({
       )}
       {showFitView && (
         <EuiFlexItem grow={false}>
-          <EuiHorizontalRule size="full" margin="none" />
+          {showZoom || showCenter ? <EuiHorizontalRule size="full" margin="none" /> : null}
           <EuiButtonIcon
             iconType={fitToViewIconFn}
             aria-label={FitViewLabel}
