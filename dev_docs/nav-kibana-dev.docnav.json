@@ -142,9 +142,6 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
-        },
-        {
-          "id": "kibDevDocsHttpApiIaaCConsiderations"
         }
       ]
     },
@@ -653,6 +650,14 @@
         },
         {
           "id": "kibDevDocsOpsTest"
+        }
+      ]
+    },
+    {
+      "label": "HTTP API guidelines",
+      "items": [
+        {
+          "id": "kibHttpApiIaaCGuidelines"
         }
       ]
     }
