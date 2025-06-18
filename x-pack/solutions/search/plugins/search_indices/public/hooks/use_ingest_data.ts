@@ -8,7 +8,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { PerformInstallResponse } from '@kbn/sample-data-ingest/common/http_api/installation';
+import type { InstallResponse } from '@kbn/sample-data-ingest/common';
 import { useKibana } from './use_kibana';
 import { navigateToIndexDetails } from '../components/utils';
 
@@ -22,14 +22,10 @@ export function useIngestSampleData() {
     notifications: { toasts },
   } = useKibana().services;
 
-  const { mutate: ingestSampleData, isLoading } = useMutation<
-    PerformInstallResponse,
-    ServerError,
-    void
-  >(
+  const { mutate: ingestSampleData, isLoading } = useMutation<InstallResponse, ServerError, void>(
     ['ingestSampleData'],
     () => {
-      return sampleDataIngest.installation.install();
+      return sampleDataIngest.install();
     },
     {
       onSuccess: ({ indexName }) => {
