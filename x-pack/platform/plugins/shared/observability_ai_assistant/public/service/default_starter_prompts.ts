@@ -55,7 +55,7 @@ export const defaultStarterPrompts: StarterPrompt[] = [
       defaultMessage: 'SLOs',
     }),
     prompt: i18n.translate('xpack.observabilityAiAssistant.app.starterPrompts.whatAreSlos.prompt', {
-      defaultMessage: 'What are SLOs?',
+      defaultMessage: 'What are Service Level Objectives?',
     }),
     icon: 'bullseye',
     scopes: ['observability'],
