@@ -62,8 +62,8 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
-  private indexName: string | null = null;
-  private indexName$ = new Subject<string | null>();
+  private _indexName$ = new BehaviorSubject<string | null>(null);
+  public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
   private readonly actions$ = new Subject<Action>();
 
@@ -123,7 +123,7 @@ export class IndexUpdateService {
     )
   );
 
-  public readonly dataView$: Observable<DataView> = this.indexName$.pipe(
+  public readonly dataView$: Observable<DataView> = this._indexName$.pipe(
     skipWhile((indexName) => !indexName),
     switchMap((indexName) => {
       return from(this.getDataView(indexName!));
@@ -215,9 +215,12 @@ export class IndexUpdateService {
             });
 
             return from(
-              this.http.post<BulkResponse>(`/internal/esql/lookup_index/${this.indexName}/update`, {
-                body,
-              })
+              this.http.post<BulkResponse>(
+                `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+                {
+                  body,
+                }
+              )
             ).pipe(
               withLatestFrom(this._rows$, this.dataView$),
               map(([response, rows, dataView]) => {
@@ -285,7 +288,6 @@ export class IndexUpdateService {
           switchMap(([dataView, timeRangeEmit]) => {
             return from(
               this.data.search.searchSource.create({
-                // index: this.indexName!,
                 index: dataView.toSpec(),
                 size: 1000, // Adjust size as needed
               })
@@ -329,8 +331,11 @@ export class IndexUpdateService {
       // TODO check if index is already created
       throw new Error(`Index with name ${indexName} already exists.`);
     }
-    this.indexName$.next(indexName);
-    this.indexName = indexName;
+    this._indexName$.next(indexName);
+  }
+
+  public getIndexName(): string | null {
+    return this._indexName$.getValue();
   }
 
   // Add a new index

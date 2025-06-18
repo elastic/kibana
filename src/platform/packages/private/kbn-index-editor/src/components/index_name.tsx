@@ -12,13 +12,24 @@ import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
 
 export const IndexName: FC = () => {
   const {
-    services: { fileUpload },
+    services: { fileUpload, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
-  const { indexName, setIndexName, setIndexValidationStatus } = useFileUploadContext();
+
+  const existingIndexName = useObservable(
+    indexUpdateService.indexName$,
+    indexUpdateService.getIndexName()
+  );
+
+  const {
+    indexName: fileUploadIndexName,
+    setIndexName: setFileUploadIndexName,
+    setIndexValidationStatus,
+  } = useFileUploadContext();
 
   const [error, setError] = React.useState<string[]>([]);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -33,8 +44,8 @@ export const IndexName: FC = () => {
       placeholder={i18n.translate('indexEditor.indexName.placeholder', {
         defaultMessage: 'Set index name',
       })}
-      defaultValue={indexName}
-      isReadOnly={false}
+      defaultValue={existingIndexName ?? fileUploadIndexName}
+      isReadOnly={existingIndexName !== null}
       isInvalid={error !== null}
       editModeProps={{
         formRowProps: { error },
@@ -47,7 +58,7 @@ export const IndexName: FC = () => {
         setIsLoading(false);
         if (!indexExists) {
           setIndexValidationStatus(STATUS.COMPLETED);
-          setIndexName(value);
+          setFileUploadIndexName(value);
           setError([]);
           return true;
         }
