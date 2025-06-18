@@ -23,6 +23,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
+
   // First validate the agent exists
   const agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
   // Using the agent id, get the agent policy
