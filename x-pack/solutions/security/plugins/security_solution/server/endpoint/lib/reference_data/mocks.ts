@@ -7,6 +7,7 @@
 
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReferenceDataClientInterface, ReferenceDataSavedObject } from './types';
 import { REF_DATA_KEYS } from './constants';
 
@@ -26,10 +27,9 @@ const createReferenceDataItemMock = <TMeta extends object = {}>(
 
 const createReferenceDataClientMock = (
   refData: ReferenceDataSavedObject = createReferenceDataItemMock()
-): jest.Mocked<ReferenceDataClientInterface> => {
+): DeeplyMockedKeys<ReferenceDataClientInterface> => {
   return {
     get: jest.fn().mockReturnValue(refData),
-    create: jest.fn().mockReturnValue(refData),
     update: jest.fn().mockReturnValue(refData),
     delete: jest.fn(),
   };

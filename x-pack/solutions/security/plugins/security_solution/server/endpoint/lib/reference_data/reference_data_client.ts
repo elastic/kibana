@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import type {
   ReferenceDataClientInterface,
   ReferenceDataItemKey,
@@ -87,6 +88,12 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
     const { soClient, logger } = this;
 
     logger.debug(`updating reference data [${refDataKey}]`);
+
+    if (data.id !== refDataKey) {
+      throw new EndpointError(
+        `Update data 'id' value [${data.id}] differs from the reference data key provided [${refDataKey}]`
+      );
+    }
 
     await soClient
       .update<ReferenceDataSavedObject<TMeta>>(REFERENCE_DATA_SAVED_OBJECT_TYPE, refDataKey, data, {

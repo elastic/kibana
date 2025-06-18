@@ -63,7 +63,7 @@ export const REF_DATA_KEY_INITIAL_VALUE: Readonly<
     (): ReferenceDataSavedObject<OrphanResponseActionsMetadata> => ({
       id: REF_DATA_KEYS.orphanResponseActionsSpace,
       owner: 'EDR',
-      type: '',
+      type: 'RESPONSE-ACTIONS',
       metadata: { spaceId: '' },
     }),
 };
