@@ -10,6 +10,7 @@
 import React, {
   useContext,
   useState,
+  useRef,
   createContext,
   PropsWithChildren,
   forwardRef,
@@ -17,6 +18,7 @@ import React, {
   SetStateAction,
   Dispatch,
   useMemo,
+  useEffect,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 
@@ -118,6 +120,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
       }
 
       _setValue(nextValue);
+      // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
       // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
       onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
     });
@@ -128,5 +131,31 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return [value, setValue] as const;
   };
 
-  return { withRestorableState, useRestorableState };
+  const useRestorableRef = <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey]) => {
+    const { initialState, onInitialStateChange } = useContext(context);
+    const valueRef = useRef<TState[TKey]>(
+      initialState?.[key] !== undefined ? initialState[key] : initialValue
+    );
+    const stableOnInitialStateChange = useLatest(() => {
+      const nextValue = valueRef.current;
+      if (nextValue === initialValue) {
+        return;
+      }
+      onInitialStateChange?.({ ...initialState, [key]: valueRef.current } as TState);
+    });
+
+    const [unmount] = useState(
+      (): typeof stableOnInitialStateChange.current => () => stableOnInitialStateChange.current()
+    );
+
+    useEffect(() => {
+      return () => {
+        unmount();
+      };
+    }, [unmount]);
+
+    return valueRef;
+  };
+
+  return { withRestorableState, useRestorableState, useRestorableRef };
 };

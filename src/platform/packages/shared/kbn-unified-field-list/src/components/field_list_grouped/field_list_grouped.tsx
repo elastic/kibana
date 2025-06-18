@@ -8,7 +8,7 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer, EuiSkipLink, useGeneratedHtmlId } from '@elastic/eui';
@@ -18,6 +18,7 @@ import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './field
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
+import { useRestorableState, useRestorableRef } from '../../restorable_state';
 
 const PAGINATION_SIZE = 50;
 export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
@@ -65,7 +66,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
     Object.entries(fieldGroups),
     ([, { showInAccordion }]) => showInAccordion
   );
-  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
+  const isInitializedRef = useRef<boolean>(false);
+  const [pageSize, setPageSize] = useRestorableState('pageSize', PAGINATION_SIZE);
+  const scrollPositionRef = useRestorableRef('scrollPosition', 0);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
@@ -89,16 +92,30 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list
     if (scrollContainer && scrollToTopResetCounter) {
+      if (!isInitializedRef.current) {
+        isInitializedRef.current = true;
+        // If this is the first time after the mount, no need to reset the scroll position
+        return;
+      }
       scrollContainer.scrollTop = 0;
+      scrollPositionRef.current = 0;
       setPageSize(PAGINATION_SIZE);
     }
-  }, [scrollToTopResetCounter, scrollContainer]);
+  }, [scrollToTopResetCounter, scrollContainer, setPageSize, scrollPositionRef]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
+      if (scrollContainer.scrollTop === scrollPositionRef.current) {
+        // scroll top was restored to the last position
+        return;
+      }
+
       const nearBottom =
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
+
+      scrollPositionRef.current = scrollContainer.scrollTop;
+
       if (nearBottom) {
         setPageSize(
           Math.max(
@@ -111,7 +128,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         );
       }
     }
-  }, [scrollContainer, pageSize, setPageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollPositionRef, setPageSize, pageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
@@ -134,6 +151,16 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       className="unifiedFieldList__fieldListGrouped"
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
+        if (el && !el.scrollTop && scrollPositionRef.current) {
+          // restore scroll position after restoring the initial ref value
+          setTimeout(() => {
+            el.scrollTo?.({
+              top: scrollPositionRef.current,
+              behavior: 'instant',
+            });
+          }, 0);
+        }
+
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';
           setScrollContainer(el);

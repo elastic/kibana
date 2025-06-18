@@ -19,7 +19,15 @@ export interface UnifiedFieldListRestorableState {
    * Field type filters
    */
   selectedFieldTypes: FieldTypeKnown[];
+  /**
+   * The number of actually rendered (visible) fields
+   */
+  pageSize: number;
+  /**
+   * Scroll position of the field list
+   */
+  scrollPosition: number;
 }
 
-export const { withRestorableState, useRestorableState } =
+export const { withRestorableState, useRestorableState, useRestorableRef } =
   createRestorableStateProvider<UnifiedFieldListRestorableState>();
