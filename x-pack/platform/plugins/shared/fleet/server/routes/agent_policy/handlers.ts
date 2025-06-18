@@ -17,7 +17,12 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
+import {
+  appContextService,
+  agentPolicyService,
+  packagePolicyService,
+  licenseService,
+} from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import {
   AGENTS_PREFIX,
@@ -309,6 +314,12 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
   const [_, fleetContext] = await Promise.all([context.core, context.fleet]);
 
   const agentClient = fleetContext.agentClient.asCurrentUser;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Auto-upgrade agents feature requires at least Enterprise license'
+    );
+  }
 
   const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
   return response.ok({
