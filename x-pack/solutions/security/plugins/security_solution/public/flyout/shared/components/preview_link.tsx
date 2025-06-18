@@ -49,7 +49,8 @@ const getPreviewParams = (
   value: string,
   field: string,
   scopeId: string,
-  ruleId?: string
+  ruleId?: string,
+  indexName?: string
 ): PreviewParams | null => {
   if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
@@ -89,6 +90,7 @@ const getPreviewParams = (
         params: {
           id: value,
           scopeId,
+          indexName,
         },
       };
     default:
@@ -126,6 +128,11 @@ interface PreviewLinkProps {
    * React components to render, if none provided, the value will be rendered
    */
   children?: React.ReactNode;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  indexName?: string;
 }
 
 /**
@@ -138,13 +145,14 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   ruleId,
   isRulePreview,
   children,
+  indexName,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
   const onClick = useCallback(() => {
-    const previewParams = getPreviewParams(value, field, scopeId, ruleId);
+    const previewParams = getPreviewParams(value, field, scopeId, ruleId, indexName);
     if (previewParams) {
       openPreviewPanel({
         id: previewParams.id,
@@ -155,7 +163,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         panel: 'preview',
       });
     }
-  }, [field, scopeId, value, telemetry, openPreviewPanel, ruleId]);
+  }, [field, scopeId, value, telemetry, openPreviewPanel, ruleId, indexName]);
 
   // If the field is not previewable, do not render link
   if (!hasPreview(field)) {
