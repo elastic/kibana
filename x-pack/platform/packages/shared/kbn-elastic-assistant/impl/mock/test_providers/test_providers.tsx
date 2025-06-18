@@ -112,10 +112,13 @@ TestProvidersComponent.displayName = 'TestProvidersComponent';
 
 export const TestProviders = React.memo(TestProvidersComponent);
 
-const TestAssistantProviders = ({assistantProviderProps, children}: {
+const TestAssistantProviders = ({
+  assistantProviderProps,
+  children,
+}: {
   assistantProviderProps: AssistantProviderProps;
   children: React.ReactNode;
 }) => {
   const assistantContextValue = useAssistantContextValue(assistantProviderProps);
-  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>
-}
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+};

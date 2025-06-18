@@ -35,7 +35,11 @@ describe('CommentActions', () => {
       role: 'assistant',
       timestamp: '2025-01-08T10:47:34.578Z',
     };
-    render(<BaseCommentActions message={message}><></></BaseCommentActions>);
+    render(
+      <BaseCommentActions message={message}>
+        <></>
+      </BaseCommentActions>
+    );
 
     expect(EuiCopy).toHaveBeenCalledWith(
       expect.objectContaining({
