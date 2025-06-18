@@ -54,9 +54,7 @@ describe('privilege check util', () => {
     await checkPrivileges(mockCore, mockResponse);
 
     expect(mockResponse.forbidden).toHaveBeenCalledWith({
-      body: expect.stringContaining(
-        "Your user doesn't have manage_search_query_rules privilegesUser does not have the required privileges to access this resource"
-      ),
+      body: "You don't have manage_search_query_rules privileges",
     });
   });
   it('should not return an error if all checks are passed', async () => {

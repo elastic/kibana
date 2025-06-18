@@ -15,7 +15,7 @@ export const QueryRuleDraggableItemCriteriaDisplay: React.FC<{
   const { euiTheme } = useEuiTheme();
   return (
     <EuiText size="s">
-      {criteria.metadata && (
+      {Boolean(criteria.metadata) && (
         <>
           <EuiBadge>{criteria.metadata}</EuiBadge>&nbsp;
         </>

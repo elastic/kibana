@@ -27,8 +27,7 @@ export const checkPrivileges = async (
   if (!hasPrivilege.has_all_requested) {
     response.forbidden({
       body: i18n.translate('xpack.search.queryRules.api.routes.permissionError', {
-        defaultMessage:
-          "Your user doesn't have manage_search_query_rules privilegesUser does not have the required privileges to access this resource",
+        defaultMessage: "You don't have manage_search_query_rules privileges",
       }),
     });
   }
