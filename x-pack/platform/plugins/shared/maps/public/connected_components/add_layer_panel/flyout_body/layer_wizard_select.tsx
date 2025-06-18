@@ -176,7 +176,7 @@ export class LayerWizardSelect extends Component<Props, State> {
         );
 
         return (
-          <EuiFlexItem key={layerWizard.title}>
+          <EuiFlexItem key={layerWizard.title} component="li">
             {layerWizard.isDisabled && layerWizard.disabledReason ? (
               <EuiToolTip
                 position="top"
@@ -197,7 +197,7 @@ export class LayerWizardSelect extends Component<Props, State> {
         {this._renderCategoryFacets()}
 
         <EuiSpacer size="s" />
-        <EuiFlexGrid columns={2} gutterSize="m">
+        <EuiFlexGrid columns={2} gutterSize="m" component="ul">
           {wizardCards}
         </EuiFlexGrid>
       </>

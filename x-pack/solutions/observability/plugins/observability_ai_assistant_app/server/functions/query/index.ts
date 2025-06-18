@@ -18,6 +18,7 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
+import { VISUALIZE_QUERY_NAME } from '../../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 
@@ -50,8 +51,17 @@ export function registerQueryFunction({
   Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
   even if it has been called before.
 
-  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`;
+  ${
+    availableFunctionNames.includes(VISUALIZE_QUERY_NAME)
+      ? `When the "${VISUALIZE_QUERY_NAME}" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "${VISUALIZE_QUERY_NAME}" function call with your own visualization attempt`
+      : ''
+  }
+
+  ${
+    availableFunctionNames.includes(EXECUTE_QUERY_NAME)
+      ? `If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
+      : ''
+  }`;
   });
 
   functions.registerFunction(
@@ -114,14 +124,14 @@ export function registerQueryFunction({
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
       function takes no input.`,
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
           (fn) =>
-            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === 'visualize_query'
+            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === VISUALIZE_QUERY_NAME
         )
         .map((fn) => fn.definition);
 
