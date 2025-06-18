@@ -30,6 +30,7 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import semver from 'semver';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -159,8 +160,9 @@ export class CspPlugin
             esClient: ElasticsearchClient
           ): Promise<UpdatePackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              const isIntegrationVersionIncludesTransformAsset =
-                parseInt(packagePolicy.package!.version.split('.')[0], 10) >= 2;
+              const isIntegrationVersionIncludesTransformAsset = isTransformAssetIncluded(
+                packagePolicy.package?.version
+              );
               await deletePreviousTransformsVersions(
                 esClient,
                 isIntegrationVersionIncludesTransformAsset,
@@ -226,7 +228,7 @@ export class CspPlugin
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     const isIntegrationVersionIncludesTransformAsset =
-      parseInt(packagePolicyVersion.split('.')[0], 10) >= 2;
+      isTransformAssetIncluded(packagePolicyVersion);
     await initializeCspIndices(
       esClient,
       this.config,
@@ -257,3 +259,8 @@ export class CspPlugin
 
 const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
   inputs.filter((i) => i.enabled).length === 1;
+
+const isTransformAssetIncluded = (integrationVersion: string): boolean => {
+  const majorVersion = semver.major(integrationVersion);
+  return majorVersion >= 2;
+};
