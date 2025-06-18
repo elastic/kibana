@@ -326,14 +326,14 @@ export const getCategorizeColumns = (esql: string): string[] => {
   if (!renameCommand) {
     return columns;
   }
-  const renameOptions: ESQLCommandOption[] = [];
+  const renameFunctions: ESQLFunction[] = [];
   walk(renameCommand, {
-    visitCommandOption: (node) => renameOptions.push(node),
+    visitFunction: (node) => renameFunctions.push(node),
   });
 
-  renameOptions.forEach(({ args }) => {
-    const oldColumn = (args[0] as ESQLColumn).name;
-    const newColumn = (args[1] as ESQLColumn).name;
+  renameFunctions.forEach(({ args, name }) => {
+    const oldColumn = ((name === 'as' ? args[0] : args[1]) as ESQLColumn).name;
+    const newColumn = ((name === 'as' ? args[1] : args[0]) as ESQLColumn).name;
     if (columns.includes(oldColumn)) {
       columns[columns.indexOf(oldColumn)] = newColumn;
     }
