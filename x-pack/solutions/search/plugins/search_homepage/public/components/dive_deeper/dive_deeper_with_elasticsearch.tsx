@@ -10,54 +10,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiButton,
-  EuiText,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { docLinks } from '../../../common/doc_links';
-
-interface DocCalloutsProps {
-  title: string;
-  description: string;
-  buttonHref: string;
-  buttonLabel: string;
-  buttonTelem: string;
-}
-
-const DocCallouts = ({
-  title,
-  description,
-  buttonHref,
-  buttonLabel,
-  buttonTelem,
-}: DocCalloutsProps) => {
-  return (
-    <>
-      <EuiTitle size="s">
-        <h4>{title}</h4>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
-      <EuiText size="s" color="subdued">
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <span>
-        <EuiButton
-          iconType={'popout'}
-          href={buttonHref}
-          iconSide="right"
-          data-test-subj={buttonTelem}
-          color="text"
-        >
-          {buttonLabel}
-        </EuiButton>
-      </span>
-    </>
-  );
-};
+import { DocCallouts } from './doc_callouts';
 
 export const DiveDeeperWithElasticsearch: React.FC = () => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
@@ -85,7 +43,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             buttonLabel={i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
               defaultMessage: 'Visit Search Labs',
             })}
-            buttonTelem="searchLabsButton"
+            dataTestSubj="searchLabsButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -101,7 +59,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             buttonLabel={i18n.translate('xpack.searchHomepage.pythonNotebooks.buttonText', {
               defaultMessage: 'Open notebooks',
             })}
-            buttonTelem="openNotebooksButton"
+            dataTestSubj="openNotebooksButton"
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -123,7 +81,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
                 defaultMessage: 'View Documentation',
               }
             )}
-            buttonTelem="viewDocumentationButton"
+            dataTestSubj="viewDocumentationButton"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
