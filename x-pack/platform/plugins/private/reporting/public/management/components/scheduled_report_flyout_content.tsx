@@ -163,8 +163,10 @@ export const ScheduledReportFlyoutContent = ({
 
   const onSubmit = async () => {
     try {
-      await form.submit();
-      onClose();
+      if (await form.validate()) {
+        await form.submit();
+        onClose();
+      }
     } catch (e) {
       // Don't close the flyout in case of errors
     }

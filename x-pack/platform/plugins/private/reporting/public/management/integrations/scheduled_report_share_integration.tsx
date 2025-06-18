@@ -54,7 +54,14 @@ export const createScheduledReportShareIntegration = ({
             />
           );
         },
+        flyoutSizing: { size: 'm', maxWidth: 500 },
       };
+    },
+    prerequisiteCheck: ({ license }) => {
+      if (!license) {
+        return false;
+      }
+      return license.type !== 'basic';
     },
   };
 };
