@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_OVERVIEW } from '../../app/translations';
+import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../sourcerer/containers';
@@ -26,11 +26,8 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
-import type { EntityAnalyticsComponentProps } from '../../../common/entity_analytics/types';
 
-const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
-  isOverview = false,
-}) => {
+const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
   const {
@@ -72,14 +69,14 @@ const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-            <HeaderPage title={isOverview ? ENTITY_ANALYTICS_OVERVIEW : ENTITY_ANALYTICS} />
+            <HeaderPage title={ENTITY_ANALYTICS} />
 
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
               <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                 <EuiFlexItem>
-                  <EntityAnalyticsHeader isOverview={isOverview} />
+                  <EntityAnalyticsHeader />
                 </EuiFlexItem>
 
                 {!isEntityStoreFeatureFlagDisabled ? (
@@ -96,7 +93,9 @@ const EntityAnalyticsComponent: React.FC<EntityAnalyticsComponentProps> = ({
                   </>
                 )}
 
-                <EuiFlexItem>{!isOverview && <EntityAnalyticsAnomalies />}</EuiFlexItem>
+                <EuiFlexItem>
+                  <EntityAnalyticsAnomalies />
+                </EuiFlexItem>
               </EuiFlexGroup>
             )}
           </SecuritySolutionPageWrapper>

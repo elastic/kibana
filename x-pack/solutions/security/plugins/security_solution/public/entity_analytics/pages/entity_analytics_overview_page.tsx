@@ -9,5 +9,5 @@ import React from 'react';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 
 export const OverviewDashboard: React.FC = () => {
-  return <EntityAnalyticsPage isOverview={true} />;
+  return <EntityAnalyticsPage />;
 };
