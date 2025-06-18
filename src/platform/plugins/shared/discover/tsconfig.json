@@ -107,7 +107,6 @@
     "@kbn/unified-histogram",
     "@kbn/alerts-ui-shared",
     "@kbn/core-pricing-browser-mocks",
-    "@kbn/discover-plugin"
   ],
   "exclude": ["target/**/*"]
 }
