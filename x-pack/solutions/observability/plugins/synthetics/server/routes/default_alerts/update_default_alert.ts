@@ -28,7 +28,6 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
 
     const activeSpace = await currentSpacePromise;
 
-    console.log('activespace a', activeSpace);
     try {
       const [statusRule, tlsRule] = await Promise.all([
         defaultAlertService.updateStatusRule(

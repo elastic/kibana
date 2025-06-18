@@ -164,6 +164,7 @@ export class DefaultAlertService {
     } catch (error) {
       if (error.message && !error.message.includes('document already exists')) {
         this.server.logger.error(`Error creating default alert for ${ruleType}: ${error.message}`);
+        throw error;
       }
     }
 
