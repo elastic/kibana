@@ -8,17 +8,19 @@
  */
 
 import {
+  ACTOR_ENTITY_ID,
   ALERT_ACTION_GROUP,
   ALERT_CASE_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_END,
-  ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
+  ALERT_INTENDED_TIMESTAMP,
   ALERT_LAST_DETECTED,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
@@ -42,18 +44,24 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
-  SPACE_IDS,
-  TIMESTAMP,
-  VERSION,
   EVENT_ACTION,
   EVENT_KIND,
   EVENT_ORIGINAL,
+  RELATED_ENTITY,
+  SPACE_IDS,
   TAGS,
-  ALERT_INTENDED_TIMESTAMP,
+  TARGET_ENTITY_ID,
+  TIMESTAMP,
+  VERSION,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
 export const alertFieldMap = {
+  [ACTOR_ENTITY_ID]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [ALERT_ACTION_GROUP]: {
     type: 'keyword',
     array: false,
@@ -258,12 +266,22 @@ export const alertFieldMap = {
     required: false,
     ignore_above: 1024,
   },
+  [RELATED_ENTITY]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [SPACE_IDS]: {
     type: 'keyword',
     array: true,
     required: true,
   },
   [TAGS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [TARGET_ENTITY_ID]: {
     type: 'keyword',
     array: true,
     required: false,
