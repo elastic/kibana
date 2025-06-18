@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { getGrantedRightsEsqlCount } from './esql_query';
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 
@@ -22,17 +21,15 @@ interface Props {
   };
 }
 
-const grantedRightsLensAttributes: LensAttributes = createKeyInsightsPanelLensAttributes({
-  title: 'Granted Rights',
-  label: 'Granted Rights',
-  esqlQuery: getGrantedRightsEsqlCount('default'),
-});
-
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const GrantedRightsTile: React.FC<Props> = ({ timerange }) => {
-  const { euiTheme } = useEuiTheme();
+  const grantedRightsLensAttributes = createKeyInsightsPanelLensAttributes({
+    title: 'Granted Rights',
+    label: 'Granted Rights',
+    esqlQuery: getGrantedRightsEsqlCount('default', timerange),
+  });
 
   return (
     <EuiFlexItem grow={false}>
@@ -42,13 +39,11 @@ export const GrantedRightsTile: React.FC<Props> = ({ timerange }) => {
           min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
           width: auto;
           display: inline-block;
-          background: ${euiTheme.colors.lightestShade};
-          border-radius: ${euiTheme.border.radius.medium};
         `}
       >
         <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={false}
-          applyPageAndTabsFilters={false}
+          applyGlobalQueriesAndFilters={true}
+          applyPageAndTabsFilters={true}
           lensAttributes={grantedRightsLensAttributes}
           id="privileged-user-monitoring-granted-rights"
           timerange={timerange}

@@ -6,9 +6,13 @@
  */
 
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
+import { createTimeFilter, type TimeRange } from '../common/time_filter';
 
-export const getActivePrivilegedUsersEsqlCount = (namespace: string) => {
+export const getActivePrivilegedUsersEsqlCount = (namespace: string, timeRange?: TimeRange) => {
+  const timeFilter = createTimeFilter(timeRange);
+
   return `FROM logs-* METADATA _id, _index
+      ${timeFilter}
       ${getPrivilegedMonitorUsersJoin(namespace)}
       | STATS COUNT(*)`;
 };

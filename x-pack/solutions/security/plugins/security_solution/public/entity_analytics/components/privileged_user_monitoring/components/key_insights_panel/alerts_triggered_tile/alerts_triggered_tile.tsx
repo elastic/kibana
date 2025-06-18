@@ -25,7 +25,7 @@ export const AlertsTriggeredTile: React.FC<Props> = ({ timerange }) => {
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Alerts Triggered',
     label: 'Alerts Triggered',
-    esqlQuery: getAlertsTriggeredEsqlCount('default'),
+    esqlQuery: getAlertsTriggeredEsqlCount('default', timerange),
   });
 
   return (

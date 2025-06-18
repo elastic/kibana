@@ -8,17 +8,20 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { KeyInsightsPanel } from './components/key_insights_panel';
-
-const timerange = {
-  from: 'now-90d',
-  to: 'now',
-};
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 
 export const PrivilegedUserMonitoring = () => {
   const spaceId = useSpaceId();
+  const { from, to } = useGlobalTime();
+
+  const timerange = {
+    from,
+    to,
+  };
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>

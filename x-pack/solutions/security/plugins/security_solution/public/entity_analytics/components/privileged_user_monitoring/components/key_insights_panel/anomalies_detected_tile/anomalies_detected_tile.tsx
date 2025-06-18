@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
-import { VisualizationContextMenuActions } from '../../../../../../common/components/visualization_actions/types';
 import { getAnomaliesDetectedEsqlQuery } from './esql_query';
 
 interface Props {
@@ -21,17 +20,15 @@ interface Props {
   };
 }
 
-const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
-  title: 'Anomalies Detected',
-  label: 'Anomalies Detected',
-  esqlQuery: getAnomaliesDetectedEsqlQuery('default'),
-});
-
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
-  const { euiTheme } = useEuiTheme();
+  const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
+    title: 'Anomalies Detected',
+    label: 'Anomalies Detected',
+    esqlQuery: getAnomaliesDetectedEsqlQuery('default', undefined, undefined, timerange),
+  });
 
   return (
     <EuiFlexItem grow={false}>
@@ -41,25 +38,17 @@ export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
           min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
           width: auto;
           display: inline-block;
-          background: ${euiTheme.colors.lightestShade};
-          border-radius: ${euiTheme.border.radius.medium};
         `}
       >
         <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={false}
-          applyPageAndTabsFilters={false}
-          esql={getAnomaliesDetectedEsqlQuery('default')}
+          applyGlobalQueriesAndFilters={true}
+          applyPageAndTabsFilters={true}
           lensAttributes={anomaliesDetectedLensAttributes}
-          withActions={[
-            VisualizationContextMenuActions.inspect,
-            VisualizationContextMenuActions.addToNewCase,
-            VisualizationContextMenuActions.addToExistingCase,
-            VisualizationContextMenuActions.saveToLibrary,
-          ]}
           id="privileged-user-monitoring-anomalies-detected"
           timerange={timerange}
           width="auto"
           height={LENS_VISUALIZATION_HEIGHT}
+          disableOnClickFilter
           inspectTitle={
             <FormattedMessage
               id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"

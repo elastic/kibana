@@ -6,14 +6,20 @@
  */
 
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
+import { createTimeFilter, type TimeRange } from '../common/time_filter';
 
 export const getAnomaliesDetectedEsqlQuery = (
   namespace: string,
   jobIds?: string[],
-  userNames?: string[]
+  userNames?: string[],
+  timeRange?: TimeRange
 ) => {
+  const timeFilter = createTimeFilter(timeRange);
+
   return `FROM .ml-anomalies-shared
-    | WHERE record_score IS NOT NULL AND record_score > 0 AND user.name IS NOT NULL
+    ${timeFilter}
+    | WHERE record_score IS NOT NULL AND record_score > 0
+    | WHERE user.name IS NOT NULL
     ${getPrivilegedMonitorUsersJoin(namespace)}
     | STATS COUNT(*)`;
 };

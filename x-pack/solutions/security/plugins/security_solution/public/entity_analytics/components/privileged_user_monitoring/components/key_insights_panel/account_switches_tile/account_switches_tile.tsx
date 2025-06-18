@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,17 +22,21 @@ interface Props {
   };
 }
 
-const accountSwitchesLensAttributes: LensAttributes = createKeyInsightsPanelLensAttributes({
-  title: 'Account Switches',
-  label: 'Account Switches',
-  esqlQuery: getAccountSwitchesEsqlCount('default'),
-});
-
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const AccountSwitchesTile: React.FC<Props> = ({ timerange }) => {
   const { euiTheme } = useEuiTheme();
+
+  const accountSwitchesLensAttributes: LensAttributes = useMemo(
+    () =>
+      createKeyInsightsPanelLensAttributes({
+        title: 'Account Switches',
+        label: 'Account Switches',
+        esqlQuery: getAccountSwitchesEsqlCount('default', timerange),
+      }),
+    [timerange]
+  );
 
   return (
     <EuiFlexItem grow={false}>

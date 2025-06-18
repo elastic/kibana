@@ -21,11 +21,14 @@ interface Props {
   };
 }
 
+const LENS_VISUALIZATION_HEIGHT = 126;
+const LENS_VISUALIZATION_MIN_WIDTH = 160;
+
 export const ActivePrivilegedUsersTile: React.FC<Props> = ({ timerange }) => {
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Active Privileged Users',
     label: 'Active Privileged Users',
-    esqlQuery: getActivePrivilegedUsersEsqlCount('default'),
+    esqlQuery: getActivePrivilegedUsersEsqlCount('default', timerange),
   });
 
   return (
@@ -58,6 +61,3 @@ export const ActivePrivilegedUsersTile: React.FC<Props> = ({ timerange }) => {
     </EuiFlexItem>
   );
 };
-
-const LENS_VISUALIZATION_HEIGHT = 126;
-const LENS_VISUALIZATION_MIN_WIDTH = 160;

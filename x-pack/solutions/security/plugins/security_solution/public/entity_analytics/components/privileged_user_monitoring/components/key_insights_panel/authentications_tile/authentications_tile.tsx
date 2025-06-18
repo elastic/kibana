@@ -27,7 +27,7 @@ export const AuthenticationsTile: React.FC<Props> = ({ timerange }) => {
   const authenticationsTileLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Authentications',
     label: 'Authentications',
-    esqlQuery: getAuthenticationsEsqlCount('default'),
+    esqlQuery: getAuthenticationsEsqlCount('default', timerange),
   });
 
   return (
