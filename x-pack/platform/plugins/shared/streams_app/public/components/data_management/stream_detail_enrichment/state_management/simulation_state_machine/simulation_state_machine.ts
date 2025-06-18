@@ -89,6 +89,21 @@ export const simulationMachine = setup({
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
+    storeExplicitlyEnabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
+      explicitlyEnabledPreviewColumns: params.columns,
+      explicitlyDisabledPreviewColumns: context.explicitlyDisabledPreviewColumns.filter(
+        (col) => !params.columns.includes(col)
+      ),
+    })),
+    storeExplicitlyDisabledPreviewColumns: assign(({ context }, params: { columns: string[] }) => ({
+      explicitlyDisabledPreviewColumns: params.columns,
+      explicitlyEnabledPreviewColumns: context.explicitlyEnabledPreviewColumns.filter(
+        (col) => !params.columns.includes(col)
+      ),
+    })),
+    storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
+      previewColumnsOrder: params.columns,
+    })),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
@@ -110,6 +125,9 @@ export const simulationMachine = setup({
     resetSimulation: assign({
       processors: [],
       detectedSchemaFields: [],
+      explicitlyEnabledPreviewColumns: [],
+      explicitlyDisabledPreviewColumns: [],
+      previewColumnsOrder: [],
       simulation: undefined,
       samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
@@ -137,6 +155,9 @@ export const simulationMachine = setup({
     detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
+    explicitlyDisabledPreviewColumns: [],
+    explicitlyEnabledPreviewColumns: [],
+    previewColumnsOrder: [],
     processors: input.processors,
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
@@ -155,6 +176,33 @@ export const simulationMachine = setup({
     'simulation.reset': {
       target: '.idle',
       actions: [{ type: 'resetSimulation' }],
+    },
+    'previewColumns.updateExplicitlyEnabledColumns': {
+      actions: [
+        {
+          type: 'storeExplicitlyEnabledPreviewColumns',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.updateExplicitlyDisabledColumns': {
+      actions: [
+        {
+          type: 'storeExplicitlyDisabledPreviewColumns',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.order': {
+      actions: [
+        {
+          type: 'storePreviewColumnsOrder',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
     },
     // Handle adding/reordering processors
     'processors.*': {
