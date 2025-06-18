@@ -154,7 +154,7 @@ const enrichOperators = (
       op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
 
     const isInOperator = op.name === 'in' || op.name === 'not_in';
-    const isLikeOperator = /like/i.test(op.name);
+    const isLikeOperator = /like$/i.test(op.name);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
