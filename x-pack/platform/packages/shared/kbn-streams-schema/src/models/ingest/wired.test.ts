@@ -96,6 +96,7 @@ describe('WiredStream', () => {
           manage: true,
           monitor: true,
           simulate: true,
+          text_structure: true,
         },
         effective_lifecycle: {
           inherit: {},
@@ -135,6 +136,7 @@ describe('WiredStream', () => {
           manage: true,
           monitor: true,
           simulate: true,
+          text_structure: true,
         },
         dashboards: [],
         queries: [],

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getDataTestSubjectSelector } from '../helpers/common';
 import { GLOBAL_KQL_WRAPPER } from './search_bar';
 
 // main links
@@ -77,6 +78,11 @@ export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const LOADING_INDICATOR_HIDDEN = '[data-test-subj="globalLoadingIndicator-hidden"]';
 
 export const KIBANA_LOADING_ICON = '[data-test-subj="kbnLoadingMessage"]';
+
+// Siem Migrations
+export const TRANSLATED_RULES_PAGE = getDataTestSubjectSelector(
+  'solutionSideNavPanelLink-siem_migrations-rules'
+);
 
 // opens the navigation panel for a given nested link
 export const openNavigationPanelFor = (page: string) => {

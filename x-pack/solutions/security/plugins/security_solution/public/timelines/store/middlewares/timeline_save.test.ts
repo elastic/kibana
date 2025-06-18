@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { Direction } from '../../../../common/search_strategy';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { convertTimelineAsInput } from './timeline_save';
 import type { TimelineModel } from '../model';
 import { createMockStore, kibanaMock, mockGlobalState } from '../../../common/mock';
@@ -19,11 +19,11 @@ import { refreshTimelines } from './helpers';
 import * as i18n from '../../pages/translations';
 
 import {
-  startTimelineSaving,
   endTimelineSaving,
-  showCallOutUnauthorizedMsg,
   saveTimeline,
   setChanged,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
 } from '../actions';
 
 jest.mock('../actions', () => {
@@ -310,7 +310,6 @@ describe('Timeline save middleware', () => {
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectAll: false,
         selectedEventIds: {},
-        sessionViewConfig: null,
         show: true,
         sort: [
           {

@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema } from './config';
+import { PluginInitializerContext } from '@kbn/core/server';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
-
-export const config: PluginConfigDescriptor<any> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    visualize_v2: { enabled: true },
-  },
-};
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { VisualizationsPlugin } = await import('./plugin');

@@ -140,7 +140,8 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(result.userError).toEqual(true);
+    // eventually tagged as a user error in the rule wrapper
+    expect(result.userError).toBeFalsy();
     expect(result.success).toEqual(false);
     expect(result.errors).toEqual(['my_test_job_name missing']);
   });

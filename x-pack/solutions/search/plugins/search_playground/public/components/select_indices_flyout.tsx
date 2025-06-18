@@ -25,9 +25,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getIndicesWithNoSourceFields } from '@kbn/search-queries';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
-import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';

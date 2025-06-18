@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
+export type {
+  Message,
+  Conversation,
+  KnowledgeBaseEntry,
+  ConversationCreateRequest,
+  AnonymizationRule,
+} from './types';
 export {
   KnowledgeBaseEntryRole,
   MessageRole,
@@ -47,6 +53,7 @@ export {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantAnonymizationRules,
 } from './ui_settings/settings_keys';
 
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
@@ -58,4 +65,5 @@ export {
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
+  EIS_PRECONFIGURED_INFERENCE_IDS,
 } from './preconfigured_inference_ids';

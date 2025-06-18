@@ -117,6 +117,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   canSuggestVariables: [],
   getJoinIndices: [],
   getTimeseriesIndices: [],
+  getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -216,7 +218,7 @@ function validateCommand(
   }
 
   if (commandDef.validate) {
-    messages.push(...commandDef.validate(command, references));
+    messages.push(...commandDef.validate(command, references, ast));
   }
 
   switch (commandDef.name) {
@@ -404,7 +406,7 @@ export function validateSources(
 
     if (source.sourceType === 'index') {
       const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
       if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {

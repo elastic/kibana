@@ -26,13 +26,49 @@ const streams: StreamPutItem[] = [
             '@timestamp': {
               type: 'date',
             },
-            message: {
-              type: 'match_only_text',
+            'scope.dropped_attributes_count': {
+              type: 'long',
             },
-            'host.name': {
+            dropped_attributes_count: {
+              type: 'long',
+            },
+            'resource.dropped_attributes_count': {
+              type: 'long',
+            },
+            'resource.schema_url': {
               type: 'keyword',
             },
-            'log.level': {
+            'scope.name': {
+              type: 'keyword',
+            },
+            'scope.schema_url': {
+              type: 'keyword',
+            },
+            'scope.version': {
+              type: 'keyword',
+            },
+            observed_timestamp: {
+              type: 'date',
+            },
+            trace_id: {
+              type: 'keyword',
+            },
+            span_id: {
+              type: 'keyword',
+            },
+            event_name: {
+              type: 'keyword',
+            },
+            severity_text: {
+              type: 'keyword',
+            },
+            'body.text': {
+              type: 'match_only_text',
+            },
+            severity_number: {
+              type: 'long',
+            },
+            'resource.attributes.host.name': {
               type: 'keyword',
             },
             'stream.name': {
@@ -45,7 +81,7 @@ const streams: StreamPutItem[] = [
               if: {
                 and: [
                   {
-                    field: 'numberfield',
+                    field: 'attributes.numberfield',
                     operator: 'gt',
                     value: 15,
                   },
@@ -57,7 +93,7 @@ const streams: StreamPutItem[] = [
               if: {
                 and: [
                   {
-                    field: 'field2',
+                    field: 'attributes.field2',
                     operator: 'eq',
                     value: 'abc',
                   },
@@ -79,7 +115,7 @@ const streams: StreamPutItem[] = [
         wired: {
           routing: [],
           fields: {
-            numberfield: {
+            'attributes.numberfield': {
               type: 'long',
             },
           },
@@ -96,15 +132,15 @@ const streams: StreamPutItem[] = [
         processing: [
           {
             grok: {
-              field: 'message',
-              patterns: ['%{NUMBER:numberfield}'],
+              field: 'body.text',
+              patterns: ['%{NUMBER:attributes.numberfield}'],
               if: { always: {} },
             },
           },
         ],
         wired: {
           fields: {
-            field2: {
+            'attributes.field2': {
               type: 'keyword',
             },
           },
@@ -122,7 +158,7 @@ const streams: StreamPutItem[] = [
         processing: [],
         wired: {
           fields: {
-            field2: {
+            'attributes.field2': {
               type: 'keyword',
             },
           },

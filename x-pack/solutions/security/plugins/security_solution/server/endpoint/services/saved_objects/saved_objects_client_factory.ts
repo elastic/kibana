@@ -9,10 +9,11 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
+import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../../lib/reference_data';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -36,7 +37,8 @@ export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError
 export class SavedObjectsClientFactory {
   constructor(
     private readonly savedObjectsServiceStart: SavedObjectsServiceStart,
-    private readonly httpServiceSetup: HttpServiceSetup
+    /** Can either be the  `HttpServiceSetup` or  `HttpServiceStart` or just an interface that hs a `basePath` implementation from core */
+    private readonly httpServiceSetup: { basePath: IBasePath }
   ) {}
 
   protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
@@ -82,7 +84,10 @@ export class SavedObjectsClientFactory {
   }: Partial<{ spaceId: string; readonly: boolean }> = {}): SavedObjectsClientContract {
     const soClient = this.savedObjectsServiceStart.getScopedClient(
       this.createFakeHttpRequest(spaceId),
-      { excludedExtensions: [SECURITY_EXTENSION_ID] }
+      {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
+      }
     );
 
     if (readonly) {
@@ -101,6 +106,7 @@ export class SavedObjectsClientFactory {
   createInternalUnscopedSoClient(readonly: boolean = true): SavedObjectsClientContract {
     const soClient = this.savedObjectsServiceStart.getScopedClient(this.createFakeHttpRequest(), {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      includedHiddenTypes: [REFERENCE_DATA_SAVED_OBJECT_TYPE],
     });
 
     if (readonly) {

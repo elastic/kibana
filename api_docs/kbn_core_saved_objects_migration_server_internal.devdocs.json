@@ -2701,27 +2701,27 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "; knnSearch: { (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ">; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "KnnSearchResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              ", options?: ",
+              "TODO",
+              ", unknown>>; (this: That, params?: ",
+              "TODO",
+              " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "KnnSearchResponse",
-              "<TDocument>>; }; license: ",
+              "TODO",
+              ">; }; license: ",
               "default",
               "; logstash: ",
               "default",
@@ -3378,25 +3378,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-server.REMOVED_TYPES",
-        "type": "Array",
-        "tags": [],
-        "label": "REMOVED_TYPES",
-        "description": [
-          "\nTypes that are no longer registered and need to be removed\nAs of 8.8, no new types are allowed to be removed.\nRemoving saved object types is not backward compatible"
-        ],
-        "signature": [
-          "string[]"
-        ],
-        "path": "src/core/packages/saved-objects/migration-server-internal/src/core/unused_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "common": {

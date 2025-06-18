@@ -12,10 +12,16 @@ export const findReferenceLink = (references: string[], id: string): string | nu
   const foundReference = references.find((ref) => {
     try {
       const url = new URL(ref);
-      return (
-        url.searchParams.get('name') === id ||
-        url.pathname?.toLowerCase().includes(id?.toLowerCase())
-      );
+      const hasMatchingPathname = url.pathname?.toLowerCase().includes(id?.toLowerCase());
+
+      let hasMatchingParam = false;
+      url.searchParams.forEach((value, _) => {
+        if (value === id || value.toLowerCase().includes(id.toLowerCase())) {
+          hasMatchingParam = true;
+        }
+      });
+
+      return hasMatchingParam || hasMatchingPathname;
     } catch {
       return false;
     }

@@ -22,7 +22,8 @@ import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165968
-describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/221541
+describe.skip('Pagination', { tags: ['@ess', '@serverless'] }, () => {
   describe('Host uncommon processes table)', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'host_uncommon_processes' });

@@ -244,7 +244,9 @@ Use the following email connector configuration to send email from the [Gmail](h
 
 #### Microsoft Exchange with basic authentication [preconfigured-email-configuration-exchange-basic-auth]
 
-[7.16.0]
+:::{admonition} Deprecated in 7.16.0
+Microsoft Exchange with basic authentication was deprecated in 7.16.0.
+:::
 
 ```text
 config:
@@ -343,7 +345,11 @@ xpack.actions.preconfigured:
 1. The {{ibm-r}} instance URL.
 2. The {{ibm-r}} organization identifier.
 3. The authentication key ID for HTTP basic authentication.
-4. The authentication key secret for HTTP basic authentication. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. The authentication key secret for HTTP basic authentication.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 
@@ -386,7 +392,11 @@ xpack.actions.preconfigured:
 1. The Jira instance URL.
 2. The Jira project key.
 3. The account email for HTTP basic authentication.
-4. The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. The API authentication token for HTTP basic authentication.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 
@@ -477,7 +487,11 @@ xpack.actions.preconfigured:
 
 1. The ServiceNow instance URL.
 2. A user name.
-3. A password. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+3. A password.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 The following example creates a {{sn-itom}} connector with OAuth authentication:
@@ -532,7 +546,11 @@ xpack.actions.preconfigured:
 1. The ServiceNow instance URL.
 2. Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is `false`, the Elastic application should be installed in {{sn}}.
 3. The user name.
-4. The password. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. The password.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 The following example creates a {{sn-itsm}} connector with OAuth authentication:
@@ -588,7 +606,11 @@ xpack.actions.preconfigured:
 1. The ServiceNow instance URL.
 2. Specifies whether the connector uses the Table API or the Import Set API. If `usesTableApi` is false, the Elastic application should be installed in {{sn}}.
 3. The user name.
-4. The password. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. The password.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 The following example creates a {{sn-sir}} connector with OAuth authentication:
@@ -710,7 +732,11 @@ xpack.actions.preconfigured:
 1. The {{swimlane}} instance URL.
 2. The {{swimlane}} application identifier.
 3. Field mappings for properties such as the alert identifer, severity, and rule name.
-4. The API authentication token for HTTP basic authentication. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. The API authentication token for HTTP basic authentication.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 
@@ -781,8 +807,11 @@ xpack.actions.preconfigured:
 3. A set of key-value pairs sent as headers with the request.
 4. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
 5. A valid user name. Required if `hasAuth` is set to `true`.
-6. A valid password. Required if `hasAuth` is set to `true`. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+6. A valid password. Required if `hasAuth` is set to `true`.
 
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 ::::{note}
 SSL authentication is not supported in preconfigured webhook connectors.
@@ -859,7 +888,11 @@ xpack.actions.preconfigured:
 1. The request URL for the Elastic Alerts trigger in xMatters.
 2. Indicates whether the connector uses HTTP basic authentication. If `true`, you must provide `user` and `password` values. Defaults to `true`.
 3. A user name for authentication, which is required when `usesBasic` is `true`.
-4. A password for authentication, which is required when `usesBasic` is `true`. NOTE: This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+4. A password for authentication, which is required when `usesBasic` is `true`.
+
+    :::{note}
+    This value should be stored in the [{{kib}} keystore](docs-content://deploy-manage/security/secure-settings.md#creating-keystore).
+    :::
 
 
 The following example creates an xMatters connector with URL authentication:

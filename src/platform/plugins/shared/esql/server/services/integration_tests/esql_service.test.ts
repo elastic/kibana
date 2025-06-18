@@ -65,4 +65,16 @@ describe('EsqlService', () => {
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });
+
+  it('can load the inference endpoints by type', async () => {
+    const url = '/internal/esql/autocomplete/inference_endpoints/rerank';
+    const result = await testbed.GET(url).send().expect(200);
+
+    const rerankInferenceEndpoint = result.body.inferenceEndpoints[0];
+
+    expect(rerankInferenceEndpoint).toMatchObject({
+      inference_id: '.rerank-v1-elasticsearch',
+      task_type: 'rerank',
+    });
+  });
 });

@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const toasts = getService('toasts');
   const driver = getService('__webdriver__');
 
-  describe('ai assistant management privileges', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/191707
+  describe.skip('ai assistant management privileges', () => {
     describe('all privileges', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {

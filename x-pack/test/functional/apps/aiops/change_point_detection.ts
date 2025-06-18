@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
+  const PageObjects = getPageObjects(['timePicker']);
 
   describe('change point detection UI', function () {
     before(async () => {
@@ -35,6 +36,59 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
       await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
+    });
+
+    it('shows a no data screen if there is no data available for selected time range', async () => {
+      await aiops.changePointDetectionPage.assertNoDataFoundScreen();
+    });
+
+    it('displays a sample result and warning when no change point was found', async () => {
+      await aiops.changePointDetectionPage.clickUseFullDataButton();
+      await ml.testExecution.logTestStep(
+        'Displays a callout warning when no change point was found with no reason'
+      );
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning();
+
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jun 12, 2023 @ 01:00:19.000'
+      );
+
+      await ml.testExecution.logTestStep('Displays a reason why no change point was found');
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning(
+        'not enough buckets to calculate change_point. Requires at least [22]; found [6]'
+      );
+
+      // Verify that we still have one result in the table
+      const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
+      expect(result.length).to.eql(1);
+    });
+
+    it('displays a sample result and warning when no change point was found with split field selected', async () => {
+      await aiops.changePointDetectionPage.clickUseFullDataButton();
+
+      await aiops.changePointDetectionPage.selectSplitField(0, 'customer_gender');
+
+      await ml.testExecution.logTestStep(
+        'Displays a callout warning when no change point was found with split field'
+      );
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning();
+
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Jun 12, 2023 @ 00:04:19.000',
+        'Jun 12, 2023 @ 01:00:19.000'
+      );
+
+      await ml.testExecution.logTestStep(
+        'Displays a reason why no change point was found with split field'
+      );
+      await aiops.changePointDetectionPage.assertNoChangePointFoundCalloutWarning(
+        'not enough buckets to calculate change_point. Requires at least [22]; found [3]'
+      );
+
+      // Verify that we still have results in the table
+      const result = await aiops.changePointDetectionPage.getTable(0).parseTable();
+      expect(result.length).to.eql(1);
     });
 
     it('detects a change point when no split field is selected', async () => {

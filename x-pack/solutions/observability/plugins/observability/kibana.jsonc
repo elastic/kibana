@@ -32,12 +32,14 @@
       "features",
       "files",
       "inspector",
+      "lens",
       "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
       "security",
       "share",
       "unifiedSearch",
+      "visualizations",
       "dashboard",
       "expressions",
       "logsShared",
@@ -48,7 +50,6 @@
     "optionalPlugins": [
       "discover",
       "home",
-      "lens",
       "usageCollection",
       "cloud",
       "spaces",
@@ -56,8 +57,7 @@
       "guidedOnboarding",
       "observabilityAIAssistant",
       "investigate",
-      "streams",
-      "visualizations"
+      "streams"
     ],
     "requiredBundles": [
       "data",

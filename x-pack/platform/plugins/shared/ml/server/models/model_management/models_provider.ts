@@ -157,7 +157,9 @@ export class ModelsProvider {
 
       const inferenceAPIMap = groupBy(
         endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
+        (endpoint) =>
+          (endpoint.service === 'elser' || endpoint.service === 'elasticsearch') &&
+          endpoint.service_settings.model_id
       );
 
       for (const model of trainedModels) {

@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiPanel,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButton,
+  EuiPanel,
   EuiThemeProvider,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,27 +22,30 @@ import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
 import {
-  DEFAULT_TTY_ROWS,
   DEFAULT_TTY_COLS,
   DEFAULT_TTY_FONT_SIZE,
+  DEFAULT_TTY_ROWS,
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
 import { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { DETAIL_PANEL, TOGGLE_TTY_PLAYER } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   index: string;
   sessionEntityId: string;
   sessionStartTime: string;
   show: boolean;
+
   onClose(): void;
-  isFullscreen: boolean;
+
   onJumpToEvent(event: ProcessEvent): void;
+
   autoSeekToEntityId?: string;
   canReadPolicyManagement?: boolean;
+
   trackEvent(name: SessionViewTelemetryKey): void;
 }
 
@@ -52,7 +55,6 @@ export const TTYPlayer = ({
   sessionStartTime,
   show,
   onClose,
-  isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
   canReadPolicyManagement,
@@ -241,7 +243,6 @@ export const TTYPlayer = ({
               containerHeight={containerHeight}
               fontSize={fontSize}
               onFontSizeChanged={setFontSize}
-              isFullscreen={isFullscreen}
             />
           }
         />
