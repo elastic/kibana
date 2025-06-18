@@ -137,6 +137,8 @@ export const termsOperation: OperationDefinition<
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  isBucketed: true,
+  scale: 'ordinal',
   getCurrentFields: (targetColumn) => {
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },

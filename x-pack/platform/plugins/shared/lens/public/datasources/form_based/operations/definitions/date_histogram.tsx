@@ -145,6 +145,8 @@ export const dateHistogramOperation: OperationDefinition<
     defaultMessage: 'Date histogram',
   }),
   input: 'field',
+  scale: 'interval',
+  isBucketed: true,
   priority: 5, // Highest priority level used
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) => [
@@ -185,11 +187,8 @@ export const dateHistogramOperation: OperationDefinition<
   buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
-      dataType: 'date',
       operationType: 'date_histogram',
       sourceField: field.name,
-      isBucketed: true,
-      scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,

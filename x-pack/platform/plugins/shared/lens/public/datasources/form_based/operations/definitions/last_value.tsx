@@ -177,6 +177,8 @@ export const lastValueOperation: OperationDefinition<
 > = {
   type: LAST_VALUE_ID,
   displayName: LAST_VALUE_NAME,
+  isBucketed: false,
+  scale: 'ratio',
   getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
@@ -248,10 +250,7 @@ export const lastValueOperation: OperationDefinition<
 
     return {
       label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
-      dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
-      isBucketed: false,
-      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

@@ -55,6 +55,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDefaultLabel: (column) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
+    isBucketed: false,
+    scale: 'ratio',
     filterable: {
       helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
         defaultMessage: 'The provided filter will be applied to the entire formula.',
@@ -207,10 +209,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
 
       return {
         label: previousFormula || defaultLabel,
-        dataType: 'number',
         operationType: 'formula',
-        isBucketed: false,
-        scale: 'ratio',
         params: previousFormula
           ? {
               formula: previousFormula,

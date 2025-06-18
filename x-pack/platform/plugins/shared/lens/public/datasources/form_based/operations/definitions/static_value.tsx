@@ -62,6 +62,8 @@ export const staticValueOperation: OperationDefinition<
   getDefaultLabel: (column) => ofName(column.params.value),
   input: 'managedReference',
   hidden: true,
+  scale: 'ratio',
+  isBucketed: false,
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
   },
@@ -127,11 +129,7 @@ export const staticValueOperation: OperationDefinition<
     };
     return {
       label: ofName(previousParams.value),
-      dataType: 'number',
       operationType: 'static_value',
-      isStaticValue: true,
-      isBucketed: false,
-      scale: 'ratio',
       params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };

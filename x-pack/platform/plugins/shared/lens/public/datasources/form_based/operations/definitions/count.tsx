@@ -87,6 +87,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   type: COUNT_ID,
   displayName: COUNT_NAME,
   input: 'field',
+  isBucketed: IS_BUCKETED,
+  scale: SCALE,
   getErrorMessage: (layer, columnId, indexPattern) => [
     ...getInvalidFieldMessage(layer, columnId, indexPattern),
     ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
@@ -128,10 +130,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.timeScale,
         previousColumn?.reducedTimeRange
       ),
-      dataType: 'number',
       operationType: COUNT_ID,
-      isBucketed: false,
-      scale: 'ratio',
       sourceField: field.name,
       timeScale: previousColumn?.timeScale,
       filter: getFilter(previousColumn, columnParams),

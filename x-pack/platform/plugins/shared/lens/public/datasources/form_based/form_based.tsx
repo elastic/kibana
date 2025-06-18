@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { flatten, isEqual } from 'lodash';
+import { flatten, get, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -40,6 +40,7 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
+  DataType,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -127,13 +128,13 @@ const getSelectedFieldsFromColumns = memoizeOne(
 );
 
 function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
-  if (column.dataType === 'string') {
+  if (getDatatypeFromOperation(column.operationType, column, dataView) === 'string') {
     const fieldTypes =
       'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
     return fieldTypes?.[0] || undefined;
   }
   if (isColumnOfType<LastValueIndexPatternColumn>('last_value', column)) {
-    return column.dataType;
+    return getDatatypeFromOperation(column.operationType, column, dataView);
   }
 }
 
@@ -158,18 +159,63 @@ export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = (
   });
 };
 
+function getDatatypeFromOperation(
+  operationType: string,
+  column: GenericIndexPatternColumn,
+  dataView?: IndexPattern | DataView
+): DataType {
+  const operation = operationDefinitionMap[operationType];
+  const field = 'sourceField' in column ? column.sourceField : undefined;
+  if (field && dataView) {
+    const fieldType = dataView.getFieldByName(field)?.type;
+    if (fieldType) {
+      return fieldType as DataType;
+    }
+  }
+
+  return 'number';
+}
+
+function getIsBucketedFromOperation(
+  operationType: string,
+): boolean {
+  const operation = operationDefinitionMap[operationType];
+  return operation.isBucketed ?? false;
+}
+
+function getScale(type: string) {
+  return type === 'string' ||
+    type === 'ip' ||
+    type === 'ip_range' ||
+    type === 'date_range' ||
+    type === 'number_range'
+    ? 'ordinal'
+    : 'ratio';
+}
+
+function getScaleFromOperation(
+  operationType: string,
+): 'ratio' | 'ordinal' | 'interval' {
+  const operation = operationDefinitionMap[operationType];
+  return operation.scale ?? getScale('');
+}
+
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { label, operationType, timeShift, reducedTimeRange } = column;
+
+  const dataType = getDatatypeFromOperation(operationType, column, dataView);
+  const isBucketed = getIsBucketedFromOperation(operationType);
+  const scale = getScaleFromOperation(operationType);
 
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
-    label: uniqueLabel || label,
+    label: uniqueLabel || label || '',
     isStaticValue: operationType === 'static_value',
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
@@ -243,6 +289,16 @@ export function getFormBasedDatasource({
     },
 
     getPersistableState(state: FormBasedPrivateState) {
+      Object.keys(state.layers).forEach((layerId) => {
+        const layer = state.layers[layerId];
+        Object.keys(layer.columns).forEach((columnId) => {
+          const column = layer.columns[columnId];
+          if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+            // ensure that the secondary fields are always sorted
+            column.params.secondaryFields = [...(column.params.secondaryFields || [])].sort();
+          }
+        });
+      });
       return extractReferences(state);
     },
 
@@ -507,7 +563,7 @@ export function getFormBasedDatasource({
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
           columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
+            column.label
               ? column.label
               : operationDefinitionMap[column.operationType].getDefaultLabel(
                   column,
@@ -840,7 +896,7 @@ export function getFormBasedDatasource({
           return (
             Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
+              .filter((colId) => getIsBucketedFromOperation(layer.columns[colId].operationType))
               .some((colId) => {
                 const column = layer.columns[colId];
                 return (
@@ -896,7 +952,7 @@ export function getFormBasedDatasource({
           const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
-            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            role: getIsBucketedFromOperation(col.operationType) ? ('split' as const) : ('metric' as const),
             operation: {
               ...columnToOperation(col, undefined, dataView),
               type: col.operationType,
