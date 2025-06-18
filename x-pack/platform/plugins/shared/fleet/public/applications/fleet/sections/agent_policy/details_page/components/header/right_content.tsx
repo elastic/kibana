@@ -65,7 +65,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
     useState<boolean>(false);
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-  const canEnabledAutomaticAgentUpgrades =
+  const canEnableAutomaticAgentUpgrades =
     enableAutomaticAgentUpgrades && licenseService.isEnterprise();
 
   const isFleetServerPolicy = useMemo(
@@ -219,7 +219,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                   '',
               },
               { isDivider: true },
-              ...(canEnabledAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
+              ...(canEnableAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
                 ? [
                     {
                       label: i18n.translate('xpack.fleet.policyDetails.summary.autoUpgrade', {

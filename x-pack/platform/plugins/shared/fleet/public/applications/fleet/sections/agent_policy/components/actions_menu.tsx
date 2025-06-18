@@ -55,7 +55,7 @@ export const AgentPolicyActionMenu = memo<{
       useState<boolean>(false);
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-    const canEnabledAutomaticAgentUpgrades =
+    const canEnableAutomaticAgentUpgrades =
       enableAutomaticAgentUpgrades && licenseService.isEnterprise();
 
     const isFleetServerPolicy = useMemo(
@@ -212,7 +212,7 @@ export const AgentPolicyActionMenu = memo<{
               )}
             </EuiContextMenuItem>,
             viewPolicyItem,
-            ...(canEnabledAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
+            ...(canEnableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
             copyPolicyItem,
             deletePolicyItem,
           ];

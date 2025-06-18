@@ -37,7 +37,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
   const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-  const canEnabledAutomaticAgentUpgrades =
+  const canEnableAutomaticAgentUpgrades =
     enableAutomaticAgentUpgrades && licenseService.isEnterprise();
 
   const tabs = [
@@ -149,7 +149,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
       <WithHeaderLayout leftColumn={<DefaultPageTitle />} rightColumn={rightColumn} tabs={tabs}>
         {children}
       </WithHeaderLayout>
-      {canEnabledAutomaticAgentUpgrades ? (
+      {canEnableAutomaticAgentUpgrades ? (
         <AutoUpgradeAgentsTour anchor="#fleet-agent-policies-tab" />
       ) : null}
     </>
