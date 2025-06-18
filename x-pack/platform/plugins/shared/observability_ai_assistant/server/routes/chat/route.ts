@@ -302,9 +302,9 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
-  summary: 'Generate a chat completion',
+  summary: 'Generate a chat completion.',
   description:
-    "Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).",
+    "Create a new chat completion by using the Observability AI Assistant. The API returns the model's response based on the current conversation context. It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).",
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -312,7 +312,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   },
   params: chatCompletePublicRt,
   options: {
-    tags: ['oas-tag:Observability AI assistant'],
+    tags: ['observability-ai-assistant'],
   },
   handler: async (resources): Promise<Readable> => {
     const { params, logger } = resources;

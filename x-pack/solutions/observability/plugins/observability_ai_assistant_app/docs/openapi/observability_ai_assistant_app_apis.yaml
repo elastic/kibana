@@ -18,8 +18,8 @@ servers:
 paths:
   /api/observability_ai_assistant/chat/complete:
     post:
-      summary: Generate a chat completion
-      description: Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
+      summary: Generate a chat completion.
+      description: Create a new chat completion by using the Observability AI Assistant. The API returns the model's response based on the current conversation context. It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
       tags:
         - observability_ai_assistant
       security:
@@ -32,28 +32,28 @@ paths:
               properties:
                 messages:
                   type: array
-                  description: 'Array of message objects containing the conversation history'
+                  description: An array of message objects containing the conversation history.
                   items:
                     $ref: '#/components/schemas/Message'
                 connectorId:
                   type: string
-                  description: 'Unique identifier for the connector'
+                  description: A unique identifier for the connector.
                 conversationId:
                   type: string
-                  description: 'Unique identifier for the conversation (if continuing a conversation)'
+                  description: A Unique identifier for the conversation if you are continuing an existing conversation.
                 title:
                   type: string
-                  description: 'Title of the conversation'
+                  description: A title for the conversation.
                 persist:
                   type: boolean
-                  description: 'Flag indicating whether to persist the conversation in Kibana'
+                  description: Flag indicating whether to persist the conversation in Kibana
                 actions:
                   type: array
                   items:
                     $ref: '#/components/schemas/Function'
                 disableFunctions:
                   type: boolean
-                  description: 'Flag indicating whether functions should be disabled'
+                  description: Flag indicating whether functions should be disabled
                 instructions:
                   type: array
                   description: An array of instruction objects, which can be either simple strings or detailed objects.
@@ -186,13 +186,13 @@ components:
       properties:
         name:
           type: string
-          description: 'The name of the function'
+          description: The name of the function.
         description:
           type: string
-          description: 'The description of the function'
+          description: The description of the function.
         parameters:
           type: object
-          description: 'The parameters of the function'
+          description: The parameters of the function.
     Instruction:
       oneOf:
         - type: string
@@ -202,7 +202,7 @@ components:
           properties:
             id:
               type: string
-              description: Unique identifier of the instruction.
+              description: A unique identifier for the instruction.
             text:
               type: string
               description: The text of the instruction.
@@ -210,7 +210,7 @@ components:
             - id
             - text
     completeChatResponseExample:
-      summary: Get chat completion via the Observability AI Assistant
+      summary: Get chat completion from the Observability AI Assistant
       value:
         - type: chatCompletionMessage
           id: 'message-id'
