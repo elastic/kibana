@@ -49,6 +49,7 @@ export const esqlToolProviderMock = (): EsqlToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+    register: jest.fn(),
     getScopedClient: jest.fn(),
   };
 };

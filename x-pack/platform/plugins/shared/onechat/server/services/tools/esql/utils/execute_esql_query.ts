@@ -17,7 +17,6 @@ export const esqlSchema = z.object({
 });
 
 export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
-  console.log('Tool creator called with tool:', tool);
   const executableTool: EsqlTool = {
     id: tool.id,
     name: tool.name,
