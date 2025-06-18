@@ -29,10 +29,7 @@ import { PreviewListItem } from './field_list_item';
 import type { PreviewListItemProps } from './field_list_item';
 import { useStateSelector } from '../../../state_utils';
 import { getPositionAfterToggling } from './get_item_position';
-
-export const ITEM_HEIGHT = 40;
-const SHOW_MORE_HEIGHT = 40;
-const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
+import { ITEM_HEIGHT, SHOW_MORE_HEIGHT, INITIAL_MAX_NUMBER_OF_FIELDS } from './constants';
 
 export type DocumentField = FieldPreview & {
   isPinned?: boolean;
