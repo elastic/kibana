@@ -25,6 +25,11 @@ export const IndexName: FC = () => {
     indexUpdateService.getIndexName()
   );
 
+  const isIndexCreated = useObservable<boolean>(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.getIndexCreated()
+  );
+
   const {
     indexName: fileUploadIndexName,
     setIndexName: setFileUploadIndexName,
@@ -45,7 +50,7 @@ export const IndexName: FC = () => {
         defaultMessage: 'Set index name',
       })}
       defaultValue={existingIndexName ?? fileUploadIndexName}
-      isReadOnly={existingIndexName !== null}
+      isReadOnly={isIndexCreated}
       isInvalid={error !== null}
       editModeProps={{
         formRowProps: { error },

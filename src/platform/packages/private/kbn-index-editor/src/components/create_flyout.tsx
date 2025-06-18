@@ -28,6 +28,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   if (props.indexName) {
     // set initial index name
     indexUpdateService.setIndexName(props.indexName);
+    indexUpdateService.setIndexCreated(props.doesIndexExist);
   }
 
   const LazyFlyoutContent = lazy(async () => {

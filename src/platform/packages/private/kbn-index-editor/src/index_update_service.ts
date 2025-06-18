@@ -65,6 +65,17 @@ export class IndexUpdateService {
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
+  // Indicated if the index exists (has been created) in Elasticsearch.
+  private _indexCrated$ = new BehaviorSubject<boolean>(false);
+  public readonly indexCreated$: Observable<boolean> = this._indexCrated$.asObservable();
+
+  public setIndexCreated(created: boolean) {
+    this._indexCrated$.next(created);
+  }
+  public getIndexCreated(): boolean {
+    return this._indexCrated$.getValue();
+  }
+
   private readonly actions$ = new Subject<Action>();
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
