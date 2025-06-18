@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import { StorageContext } from '@kbn/content-management-plugin/server';
 import { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import Boom from '@hapi/boom';
-import { CreateResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import { CreateResult, SearchQuery, DeleteResult } from '@kbn/content-management-plugin/common';
 import type { MapAttributes, MapItem, MapsSearchOut } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common';
 import {
@@ -98,62 +98,6 @@ export class MapsStorage {
     return value;
   }
 
-  async search(
-    ctx: StorageContext,
-    query: SearchQuery,
-    options: MapsSearchOptions
-  ): Promise<MapsSearchOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
-      MapsSearchOptions,
-      MapsSearchOptions
-    >(options);
-
-    this.logger.warn(`@@@+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++_______`);
-
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
-    }
-
-    const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
-    const soResponse = await soClient.find<MapsSavedObjectAttributes>(soQuery);
-    const hits = await Promise.all(
-      soResponse.saved_objects
-        .map(async (so) => {
-          const item = savedObjectToItem(so, false);
-          return item;
-        })
-        .filter((item) => item !== null)
-    );
-
-    const response = {
-      hits,
-      pagination: {
-        total: soResponse.total,
-      },
-    };
-
-    const validationError = transforms.search.out.result.validate(response);
-    if (validationError) {
-      if (this.throwOnResultValidationError) {
-        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-      } else {
-        this.logger.warn(`Invalid response. ${validationError.message}`);
-      }
-    }
-
-    const { value, error: resultError } = transforms.search.out.result.down<
-      MapsSearchOut,
-      MapsSearchOut
-    >(response, undefined, { validate: false });
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-    }
-    return value;
-  }
-
   async bulkGet(): Promise<never> {
     // Not implemented
     throw new Error(`[bulkGet] has not been implemented. See MapsStorage class.`);
@@ -166,7 +110,6 @@ export class MapsStorage {
   ): Promise<MapsCreateOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
     const soClient = await savedObjectClientFromRequest(ctx);
-    this.logger.warn(`@@@+--------------------------------create+_______`);
 
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
@@ -240,7 +183,6 @@ export class MapsStorage {
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
-    this.logger.warn(`*******************************update**********+_______`);
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
       MapsUpdateOptions,
       MapsUpdateOptions
@@ -289,59 +231,103 @@ export class MapsStorage {
 
     return value;
   }
+
+  async delete(
+    ctx: StorageContext,
+    id: string,
+    // force is necessary to delete saved objects that exist in multiple namespaces
+    options?: { force: boolean }
+  ): Promise<DeleteResult> {
+    const soClient = await savedObjectClientFromRequest(ctx);
+    await soClient.delete(MAP_SAVED_OBJECT_TYPE, id, { force: options?.force ?? false });
+    return { success: true };
+  }
+
+  async search(
+    ctx: StorageContext,
+    query: SearchQuery,
+    options: MapsSearchOptions
+  ): Promise<MapsSearchOut> {
+    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const soClient = await savedObjectClientFromRequest(ctx);
+
+    const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
+      MapsSearchOptions,
+      MapsSearchOptions
+    >(options);
+
+    if (optionsError) {
+      throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
+    }
+
+    const soQuery = searchArgsToSOFindOptions(query, optionsToLatest);
+    const soResponse = await soClient.find<MapsSavedObjectAttributes>(soQuery);
+    const hits = await Promise.all(
+      soResponse.saved_objects
+        .map(async (so) => {
+          const item = savedObjectToItem(so, false);
+          return item;
+        })
+        .filter((item) => item !== null)
+    );
+
+    const response = {
+      hits,
+      pagination: {
+        total: soResponse.total,
+      },
+    };
+
+    const validationError = transforms.search.out.result.validate(response);
+    if (validationError) {
+      if (this.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
+
+    const { value, error: resultError } = transforms.search.out.result.down<
+      MapsSearchOut,
+      MapsSearchOut
+    >(response, undefined, { validate: false });
+    if (resultError) {
+      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+    }
+    return value;
+  }
+
+  mSearch = {
+    savedObjectType: MAP_SAVED_OBJECT_TYPE,
+    toItemResult: (
+      ctx: StorageContext,
+      savedObject: SavedObject<MapsSavedObjectAttributes>
+    ): MapItem => {
+      const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+
+      const contentItem = savedObjectToItem(savedObject, false);
+
+      const validationError = transforms.mSearch.out.result.validate(contentItem);
+      if (validationError) {
+        if (this.throwOnResultValidationError) {
+          throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+        } else {
+          this.logger.warn(`Invalid response. ${validationError.message}`);
+        }
+      }
+
+      // Validate DB response and DOWN transform to the request version
+      const { value, error: resultError } = transforms.mSearch.out.result.down<MapItem, MapItem>(
+        contentItem,
+        undefined, // do not override version
+        { validate: false } // validation is done above
+      );
+
+      if (resultError) {
+        throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+      }
+
+      return value;
+    },
+  };
 }
-
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
-
-// import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
-// import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
-// import type { Logger } from '@kbn/logging';
-// import { CONTENT_ID } from '../../common/content_management';
-// import { cmServicesDefinition } from './schema/cm_services';
-// import type { MapCrudTypes } from '../../common/content_management';
-
-// const searchArgsToSOFindOptions = (args: MapCrudTypes['SearchIn']): SavedObjectsFindOptions => {
-//   const { query, contentTypeId, options } = args;
-
-//   return {
-//     type: contentTypeId,
-//     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-//     fields: ['description', 'title'],
-//     search: query.text,
-//     perPage: query.limit,
-//     page: query.cursor ? +query.cursor : undefined,
-//     defaultSearchOperator: 'AND',
-//     ...tagsToFindOptions(query.tags),
-//   };
-// };
-
-// export class MapsStorage extends SOContentStorage<MapCrudTypes> {
-//   constructor({
-//     logger,
-//     throwOnResultValidationError,
-//   }: {
-//     logger: Logger;
-//     throwOnResultValidationError: boolean;
-//   }) {
-//     super({
-//       savedObjectType: CONTENT_ID,
-//       cmServicesDefinition,
-//       searchArgsToSOFindOptions,
-//       enableMSearch: true,
-//       allowedSavedObjectAttributes: [
-//         'title',
-//         'description',
-//         'mapStateJSON',
-//         'layerListJSON',
-//         'uiStateJSON',
-//       ],
-//       logger,
-//       throwOnResultValidationError,
-//     });
-//   }
-// }
