@@ -1240,7 +1240,6 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/es_archives/visualize @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
 /src/platform/test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/managed_content/managed_content.ts#L38
-/src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
 /src/platform/test/functional/apps/getting_started/*.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
 /x-pack/test/upgrade/apps/graph @elastic/kibana-visualizations
 /x-pack/test/functional/page_objects/log_wrapper.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/36437
@@ -1275,9 +1274,11 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/test/functional/apps/graph @elastic/kibana-visualizations
-/src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+/src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
+/src/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
+/src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
