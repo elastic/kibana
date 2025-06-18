@@ -49,7 +49,7 @@ export const WarningCheckbox: React.FunctionComponent<{
                   />
                 }
                 position="right"
-                iconType="question"
+                type="question"
               />
             </EuiLink>
           </EuiFlexItem>
