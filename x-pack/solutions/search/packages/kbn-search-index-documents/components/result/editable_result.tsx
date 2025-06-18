@@ -75,7 +75,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                   }}
                   fullWidth
                   placeholder={i18n.translate(
-                    'xpack.sharedKbnSearchIndexDocuments.editableResult.documentIdPlaceholder',
+                    'searchIndexDocuments.editableResult.documentIdPlaceholder',
                     {
                       defaultMessage: 'Document ID',
                     }
@@ -87,7 +87,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                   <EuiComboBox
                     data-test-subj="editableResultIndexSelector"
                     placeholder={i18n.translate(
-                      'xpack.sharedKbnSearchIndexDocuments.editableResult.selectIndexPlaceholder',
+                      'searchIndexDocuments.editableResult.selectIndexPlaceholder',
                       {
                         defaultMessage: 'Select index',
                       }
