@@ -472,7 +472,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
-      GITHUB_PR_LABELS.includes('ci:security-genai-prompts-run-evals')
+      GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts')
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')

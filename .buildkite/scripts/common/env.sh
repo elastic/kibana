@@ -84,7 +84,7 @@ if is_pr; then
   fi
 
   # value for security genai prompts evals
-  if is_pr_with_label "ci:security-genai-prompts-run-evals"; then
+  if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
     export IS_SECURITY_AI_PROMPT_TEST=true
   fi
 
