@@ -139,7 +139,7 @@ const StartTranslationButton = React.memo<{ migrationId: string; isStopped: bool
     return (
       <EuiButton
         data-test-subj={'startMigrationButton'}
-        fill
+        fill={!isStopped}
         onClick={onStartMigration}
         isLoading={isLoading}
         size="s"

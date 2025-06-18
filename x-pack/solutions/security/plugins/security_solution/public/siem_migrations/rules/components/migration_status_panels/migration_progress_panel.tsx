@@ -62,6 +62,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              iconType="stop"
               isLoading={isStopping}
               onClick={onStopMigration}
               data-test-subj="stopMigrationButton"
