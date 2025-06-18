@@ -266,7 +266,7 @@ export const performBulkUpdate = async <T>(
         ];
       } else if (registry.isSingleNamespace(type)) {
         // if `objectNamespace` is undefined, fall back to `options.namespace`
-        savedObjectNamespace = objectNamespace ?? namespaceString;
+        savedObjectNamespace = objectNamespace ?? namespace;
       }
 
       const document = getSavedObjectFromSource<T>(
