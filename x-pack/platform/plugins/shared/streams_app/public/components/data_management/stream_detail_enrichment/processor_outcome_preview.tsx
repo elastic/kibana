@@ -38,11 +38,43 @@ import { WithUIAttributes } from './types';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (state) =>
-      state.matches('debouncingChanges') ||
-      state.matches('loadingSamples') ||
-      state.matches('runningSimulation')
+    (snapshot) =>
+      snapshot.matches('debouncingChanges') ||
+      snapshot.matches('loadingSamples') ||
+      snapshot.matches('runningSimulation')
   );
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+
+  if (isEmpty(previewDocuments)) {
+    return (
+      <EuiEmptyPrompt
+        color="warning"
+        iconType="warning"
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
+              { defaultMessage: 'No data available to validate processor changes' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
+              {
+                defaultMessage:
+                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
+  }
 
   return (
     <>
@@ -55,6 +87,7 @@ export const ProcessorOutcomePreview = () => {
     </>
   );
 };
+
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
   maximumFractionDigits: 0,
@@ -248,35 +281,6 @@ const OutcomePreviewTable = () => {
     }
     setPreviewColumnsOrder(visibleColumns);
   };
-
-  if (isEmpty(previewDocuments)) {
-    return (
-      <EuiEmptyPrompt
-        color="warning"
-        iconType="warning"
-        titleSize="s"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
-              { defaultMessage: 'No data available to validate processor changes' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
-              {
-                defaultMessage:
-                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
-              }
-            )}
-          </p>
-        }
-      />
-    );
-  }
 
   return (
     <PreviewTable
