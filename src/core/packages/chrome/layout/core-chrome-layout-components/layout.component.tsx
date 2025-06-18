@@ -26,7 +26,7 @@ export interface ChromeLayoutComponentProps extends ChromeLayoutSlots {
 
 /**
  * The chrome layout component that composes slots together.
- * 
+ *
  * @param props - ChromeLayoutComponentProps
  * @returns The rendered ChromeLayoutComponent.
  */

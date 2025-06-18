@@ -40,7 +40,7 @@ const labelStyle = css`
   pointer-events: none;
 `;
 
-const slots: Array<{name: string; style: React.CSSProperties}> = [
+const slots: Array<{ name: string; style: React.CSSProperties }> = [
   {
     name: 'banner',
     style: {
@@ -143,7 +143,7 @@ export const LayoutDebugOverlay: React.FC<LayoutDebugOverlayProps> = ({ colors =
   return (
     <div css={overlayStyle}>
       {slots.map((slot) => {
-        const color = mergedColors[slot.name] || Object.values(defaultColors)[0]
+        const color = mergedColors[slot.name] || Object.values(defaultColors)[0];
         return (
           <div
             key={slot.name}
