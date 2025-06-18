@@ -646,7 +646,7 @@ export function mlApiProvider(httpService: HttpService) {
       return httpService.http<MlInfoResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/info`,
         method: 'GET',
-        version: '2',
+        version: '1',
       });
     },
 
