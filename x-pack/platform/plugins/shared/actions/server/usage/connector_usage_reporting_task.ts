@@ -309,7 +309,6 @@ export class ConnectorUsageReportingTask {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
-        // @ts-expect-error option added to node 20.18.0 but @types/node has not been updated to reflect this
         allowPartialTrustChain: true,
         ca: this.caCertificate,
       }),
