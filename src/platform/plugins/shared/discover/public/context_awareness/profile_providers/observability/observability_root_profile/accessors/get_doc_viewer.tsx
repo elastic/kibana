@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { UnifiedDocViewerObservabilityAttributesOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import { hasAnyFieldWithPrefixes } from '../../utils/has_any_field_with_prefixes';
 import type { ObservabilityRootProfileProvider } from '../types';
 
@@ -29,7 +31,7 @@ export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocVi
             }),
             order: 9,
             component: (props) => {
-              return 'Attributes Overview';
+              return <UnifiedDocViewerObservabilityAttributesOverview {...props} />;
             },
           });
         }
