@@ -49,7 +49,6 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
 
   usePageReady({
     isReady: Boolean(monitorList.isLoaded),
-    // Do we still care about uptime metrics?
     isRefreshing: false,
   });
 
