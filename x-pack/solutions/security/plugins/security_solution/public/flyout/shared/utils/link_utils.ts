@@ -13,6 +13,7 @@ import {
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
+  EVENT_SOURCE_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { HostPreviewPanelKey } from '../../entity_details/host_right';
@@ -25,6 +26,7 @@ import {
   NETWORK_PREVIEW_BANNER,
 } from '../../network_details';
 import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
+import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
@@ -157,6 +159,14 @@ export const getPreviewPanelParams = ({
           ruleId,
           banner: RULE_PREVIEW_BANNER,
           isPreviewMode: true,
+        },
+      };
+    case EVENT_SOURCE_FIELD_NAME:
+      return {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: value,
+          scopeId,
         },
       };
     default:
