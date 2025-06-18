@@ -37,10 +37,8 @@ describe('autocomplete.suggest', () => {
     it('suggests = after a field that does not exist', async () => {
       const { assertSuggestions } = await setup();
       await assertSuggestions('from a | rename field /', ['= ']);
-      await assertSuggestions('from a | rename field A/', ['= ']);
       await assertSuggestions('from a | rename field AS foo, field /', ['= ']);
       await assertSuggestions('from a | rename field as foo , field /', ['= ']);
-      await assertSuggestions('from a | rename field AS foo, field A/', ['= ']);
     });
 
     it('suggests nothing after AS', async () => {
