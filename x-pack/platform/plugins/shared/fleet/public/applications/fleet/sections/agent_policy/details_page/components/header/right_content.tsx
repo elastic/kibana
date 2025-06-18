@@ -23,7 +23,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
+import { licenseService, useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
@@ -65,6 +65,8 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
     useState<boolean>(false);
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
+  const canEnabledAutomaticAgentUpgrades =
+    enableAutomaticAgentUpgrades && licenseService.isEnterprise();
 
   const isFleetServerPolicy = useMemo(
     () =>
@@ -217,7 +219,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                   '',
               },
               { isDivider: true },
-              ...(enableAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
+              ...(canEnabledAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
                 ? [
                     {
                       label: i18n.translate('xpack.fleet.policyDetails.summary.autoUpgrade', {
@@ -253,7 +255,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                 {item.isDivider ?? false ? (
                   <Divider />
                 ) : item.label ? (
-                  <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
+                  <EuiDescriptionList compressed textStyle="reverse" css={{ textAlign: 'right' }}>
                     <EuiDescriptionListTitle className="eui-textNoWrap">
                       {item.label}
                     </EuiDescriptionListTitle>
