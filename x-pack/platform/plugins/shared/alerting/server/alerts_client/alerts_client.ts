@@ -526,6 +526,8 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces:
+                this.ruleType.alerts?.dangerouslyCreateAlertsInAllSpaces,
             })
           );
         } else {
@@ -548,6 +550,8 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces:
+                this.ruleType.alerts?.dangerouslyCreateAlertsInAllSpaces,
             })
           );
         }
@@ -582,6 +586,8 @@ export class AlertsClient<
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
                 kibanaVersion: this.options.kibanaVersion,
+                dangerouslyCreateAlertsInAllSpaces:
+                  this.ruleType.alerts?.dangerouslyCreateAlertsInAllSpaces,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: trackedAlert,

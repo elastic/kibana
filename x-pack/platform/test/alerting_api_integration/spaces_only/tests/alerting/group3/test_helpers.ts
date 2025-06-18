@@ -24,7 +24,7 @@ export const createRule = async ({
   objectRemover,
   overwrites,
 }: {
-  actionId: string;
+  actionId?: string;
   pattern?: { instance: boolean[] };
   supertest: SuperTestAgent;
   objectRemover: ObjectRemover;
@@ -43,18 +43,20 @@ export const createRule = async ({
         params: {
           pattern,
         },
-        actions: [
-          {
-            id: actionId,
-            group: 'default',
-            params: {},
-          },
-          {
-            id: actionId,
-            group: 'recovered',
-            params: {},
-          },
-        ],
+        actions: actionId
+          ? [
+              {
+                id: actionId,
+                group: 'default',
+                params: {},
+              },
+              {
+                id: actionId,
+                group: 'recovered',
+                params: {},
+              },
+            ]
+          : [],
         ...overwrites,
       })
     )

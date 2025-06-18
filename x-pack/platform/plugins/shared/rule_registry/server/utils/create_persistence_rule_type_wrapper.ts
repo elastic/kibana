@@ -56,13 +56,15 @@ const augmentAlerts = async <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
+  dangerouslyCreateAlertsInAllSpaces,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  dangerouslyCreateAlertsInAllSpaces: boolean;
 }) => {
-  const commonRuleFields = getCommonAlertFields(options);
+  const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
     alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
 
@@ -246,6 +248,8 @@ export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
+    const dangerouslyCreateAlertsInAllSpaces =
+      type.alerts?.dangerouslyCreateAlertsInAllSpaces ?? false;
     return {
       ...type,
       executor: async (options) => {
@@ -307,6 +311,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
+                  dangerouslyCreateAlertsInAllSpaces,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -573,6 +578,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  dangerouslyCreateAlertsInAllSpaces: false,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

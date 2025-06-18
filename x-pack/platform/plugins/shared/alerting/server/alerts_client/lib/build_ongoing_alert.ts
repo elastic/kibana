@@ -50,6 +50,7 @@ interface BuildOngoingAlertOpts<
   runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export const buildOngoingAlert = <
   runTimestamp,
   timestamp,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildOngoingAlertOpts<
   AlertData,
   LegacyState,
@@ -122,7 +124,7 @@ export const buildOngoingAlert = <
       : {}),
     ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
-    [SPACE_IDS]: rule[SPACE_IDS],
+    [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
       new Set([
