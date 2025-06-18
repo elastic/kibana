@@ -8,6 +8,9 @@
  */
 import React from 'react';
 import { EuiAccordion, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AttributesTable } from './attributes_table';
 
 interface AttributesAccordionProps {
@@ -15,17 +18,17 @@ interface AttributesAccordionProps {
   title: string;
   ariaLabel: string;
   fields: string[];
-  hit: any;
-  dataView: any;
-  columns: any;
-  columnsMeta: any;
+  hit: DataTableRecord;
+  dataView: DataView;
+  columns?: string[];
+  columnsMeta?: DataTableColumnsMeta;
   searchTerm: string;
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
-  filter?: any;
+  filter?: DocViewFilterFn;
 }
 
-export const AttributesAccordion: React.FC<AttributesAccordionProps> = ({
+export const AttributesAccordion = ({
   id,
   title,
   ariaLabel,
@@ -38,7 +41,7 @@ export const AttributesAccordion: React.FC<AttributesAccordionProps> = ({
   onAddColumn,
   onRemoveColumn,
   filter,
-}) => (
+}: AttributesAccordionProps) => (
   <EuiAccordion
     id={id}
     buttonContent={

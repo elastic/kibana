@@ -28,7 +28,7 @@ interface AttributesTableProps
   searchTerm: string;
 }
 
-export const AttributesTable: React.FC<AttributesTableProps> = ({
+export const AttributesTable = ({
   hit,
   dataView,
   columnsMeta,
@@ -38,7 +38,7 @@ export const AttributesTable: React.FC<AttributesTableProps> = ({
   filter,
   onAddColumn,
   onRemoveColumn,
-}) => {
+}: AttributesTableProps) => {
   const flattened = hit.flattened;
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
 
@@ -89,14 +89,18 @@ export const AttributesTable: React.FC<AttributesTableProps> = ({
   const gridColumns: EuiDataGridProps['columns'] = [
     {
       id: 'name',
-      displayAsText: 'Field',
+      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+        defaultMessage: 'Field',
+      }),
       actions: false,
       visibleCellActions: 3,
       cellActions: fieldCellActions,
     },
     {
       id: 'value',
-      displayAsText: 'Value',
+      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+        defaultMessage: 'Value',
+      }),
       actions: false,
       visibleCellActions: 3,
       cellActions: fieldValueCellActions,

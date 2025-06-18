@@ -22,7 +22,7 @@ import {
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
-import { getDataStreamType } from './get_data_stream_type';
+import { getAttributesTitle } from './get_attributes_title';
 
 export function AttributesOverview({
   columns,
@@ -48,42 +48,8 @@ export function AttributesOverview({
     () => getShouldShowFieldHandler(Object.keys(flattened), dataView, showMultiFields),
     [flattened, dataView, showMultiFields]
   );
-  const signalType = getDataStreamType(hit);
 
-  let attributesTitle: string;
-  switch (signalType) {
-    case 'logs':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.logs',
-        {
-          defaultMessage: 'Log attributes',
-        }
-      );
-      break;
-    case 'metrics':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.metrics',
-        {
-          defaultMessage: 'Metric attributes',
-        }
-      );
-      break;
-    case 'traces':
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.traces',
-        {
-          defaultMessage: 'Span attributes',
-        }
-      );
-      break;
-    default:
-      attributesTitle = i18n.translate(
-        'unifiedDocViewer.docView.attributes.signalAttributesTitle.default',
-        {
-          defaultMessage: 'Attributes',
-        }
-      );
-  }
+  const attributesTitle = getAttributesTitle(hit);
 
   const allFields = Object.keys(flattened);
 
@@ -93,39 +59,61 @@ export function AttributesOverview({
     [allFields, shouldShowFieldHandler]
   );
 
-  const attributesFields = useMemo(
-    () =>
-      filteredFields.filter(
-        (name) =>
-          name.startsWith('attributes.') &&
-          !name.startsWith('resource.attributes.') &&
-          !name.startsWith('scope.attributes.') &&
-          name.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [filteredFields, searchTerm]
-  );
-  const resourceAttributesFields = useMemo(
-    () =>
-      filteredFields.filter(
-        (name) =>
-          name.startsWith('resource.attributes.') &&
-          name.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [filteredFields, searchTerm]
-  );
-  const scopeAttributesFields = useMemo(
-    () =>
-      filteredFields.filter(
-        (name) =>
-          name.startsWith('scope.attributes.') &&
-          name.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [filteredFields, searchTerm]
-  );
+  const groupedFields = useMemo(() => {
+    const attributesFields: string[] = [];
+    const resourceAttributesFields: string[] = [];
+    const scopeAttributesFields: string[] = [];
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    for (const fieldName of filteredFields) {
+      const lowerFieldName = fieldName.toLowerCase();
+      if (!lowerFieldName.includes(lowerSearchTerm)) {
+        continue;
+      }
+      if (lowerFieldName.startsWith('resource.attributes.')) {
+        resourceAttributesFields.push(fieldName);
+      } else if (lowerFieldName.startsWith('scope.attributes.')) {
+        scopeAttributesFields.push(fieldName);
+      } else if (lowerFieldName.startsWith('attributes.')) {
+        attributesFields.push(fieldName);
+      }
+    }
+    return { attributesFields, resourceAttributesFields, scopeAttributesFields };
+  }, [filteredFields, searchTerm]);
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
     : 0;
+
+  const accordionConfigs = [
+    {
+      id: 'signal_attributes',
+      title: attributesTitle,
+      ariaLabel: attributesTitle,
+      fields: groupedFields.attributesFields,
+    },
+    {
+      id: 'resource_attributes',
+      title: i18n.translate('unifiedDocViewer.docView.attributes.resourceAttributesTitle', {
+        defaultMessage: 'Resource attributes',
+      }),
+      ariaLabel: i18n.translate(
+        'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
+        { defaultMessage: 'Resource attributes' }
+      ),
+      fields: groupedFields.resourceAttributesFields,
+    },
+    {
+      id: 'scope_attributes',
+      title: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTitle', {
+        defaultMessage: 'Scope attributes',
+      }),
+      ariaLabel: i18n.translate(
+        'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
+        { defaultMessage: 'Scope attributes' }
+      ),
+      fields: groupedFields.scopeAttributesFields,
+    },
+  ];
 
   return (
     <EuiFlexGroup
@@ -149,9 +137,6 @@ export function AttributesOverview({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
-          aria-label={i18n.translate('unifiedDocViewer.docView.attributes.searchAriaLabel', {
-            defaultMessage: 'Search attributes names or values',
-          })}
           placeholder={i18n.translate('unifiedDocViewer.docView.attributes.placeholder', {
             defaultMessage: 'Search attributes names or values',
           })}
@@ -171,70 +156,29 @@ export function AttributesOverview({
         `}
       >
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <AttributesAccordion
-              id="signal_attributes"
-              title={attributesTitle}
-              ariaLabel={attributesTitle}
-              fields={attributesFields}
-              hit={hit}
-              dataView={dataView}
-              columns={columns}
-              columnsMeta={columnsMeta}
-              searchTerm={searchTerm}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-              filter={filter}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AttributesAccordion
-              id="resource_attributes"
-              title={i18n.translate('unifiedDocViewer.docView.attributes.resourceAttributesTitle', {
-                defaultMessage: 'Resource attributes',
-              })}
-              ariaLabel={i18n.translate(
-                'unifiedDocViewer.docView.attributes.resourceAttributesTitle.ariaLabel',
-                { defaultMessage: 'Resource attributes' }
-              )}
-              fields={resourceAttributesFields}
-              hit={hit}
-              dataView={dataView}
-              columns={columns}
-              columnsMeta={columnsMeta}
-              searchTerm={searchTerm}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-              filter={filter}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AttributesAccordion
-              id="scope_attributes"
-              title={i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTitle', {
-                defaultMessage: 'Scope attributes',
-              })}
-              ariaLabel={i18n.translate(
-                'unifiedDocViewer.docView.attributes.scopeAttributesTitle.ariaLabel',
-                { defaultMessage: 'Scope attributes' }
-              )}
-              fields={scopeAttributesFields}
-              hit={hit}
-              dataView={dataView}
-              columns={columns}
-              columnsMeta={columnsMeta}
-              searchTerm={searchTerm}
-              onAddColumn={onAddColumn}
-              onRemoveColumn={onRemoveColumn}
-              filter={filter}
-            />
-          </EuiFlexItem>
+          {accordionConfigs.map(({ id, title, ariaLabel, fields }) => (
+            <React.Fragment key={id}>
+              <EuiFlexItem grow={false}>
+                <AttributesAccordion
+                  id={id}
+                  title={title}
+                  ariaLabel={ariaLabel}
+                  fields={fields}
+                  hit={hit}
+                  dataView={dataView}
+                  columns={columns}
+                  columnsMeta={columnsMeta}
+                  searchTerm={searchTerm}
+                  onAddColumn={onAddColumn}
+                  onRemoveColumn={onRemoveColumn}
+                  filter={filter}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSpacer size="s" />
+              </EuiFlexItem>
+            </React.Fragment>
+          ))}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
