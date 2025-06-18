@@ -37,9 +37,11 @@ export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
+  // NEW: Optional custom parser provider for packaging environments
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
+export const MonacoEditor = ({ localStorageValue, value, setValue, customParsedRequestsProvider }: EditorProps) => {
   const context = useServicesContext();
   const {
     services: { notifications, settings: settingsService, autocompleteInfo },
@@ -90,13 +92,23 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
+      // Create custom provider if factory function is provided
+      const customProvider = customParsedRequestsProvider ? 
+                            customParsedRequestsProvider(editor.getModel()) : 
+                            undefined;
+      
+      const provider = new MonacoEditorActionsProvider(
+        editor, 
+        setEditorActionsCss, 
+        isDevMode, 
+        customProvider
+      );
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode, customParsedRequestsProvider]
   );
 
   useEffect(() => {

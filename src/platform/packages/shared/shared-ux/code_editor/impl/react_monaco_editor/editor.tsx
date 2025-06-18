@@ -228,14 +228,17 @@ export function MonacoEditor({
       }
 
       const model = editor.current.getModel();
+      if (!model) {
+        return;
+      }
       __prevent_trigger_change_event.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
-      model!.pushEditOperations(
+      model.pushEditOperations(
         [],
         [
           {
-            range: model!.getFullModelRange(),
+            range: model.getFullModelRange(),
             text: value!,
           },
         ],
@@ -250,7 +253,9 @@ export function MonacoEditor({
   useEffect(() => {
     if (editor.current) {
       const model = editor.current.getModel();
-      monaco.editor.setModelLanguage(model!, language);
+      if (model) {
+        monaco.editor.setModelLanguage(model, language);
+      }
     }
   }, [language]);
 

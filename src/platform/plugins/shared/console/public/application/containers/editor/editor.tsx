@@ -168,6 +168,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                       localStorageValue={currentTextObject.text}
                       value={inputEditorValue}
                       setValue={setInputEditorValue}
+                      customParsedRequestsProvider={useEditorReadContext().customParsedRequestsProvider}
                     />
                   )}
                 </EuiSplitPanel.Inner>

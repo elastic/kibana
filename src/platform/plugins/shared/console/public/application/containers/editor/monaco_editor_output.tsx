@@ -60,6 +60,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
+      // Ensure editor and model are properly initialized before setting up providers
+      if (!editor || !editor.getModel) {
+        console.warn('Output editor not properly initialized');
+        return;
+      }
+
       const provider = new MonacoEditorOutputActionsProvider(editor, setEditorActionsCss);
       actionsProvider.current = provider;
 

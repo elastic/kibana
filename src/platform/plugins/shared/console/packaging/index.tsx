@@ -11,66 +11,39 @@ import React from 'react';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import { autocompleteEntities } from './http_mocks/autocomplete_entities';
 
-// Import Console language registration - this registers the Console Monaco language
-import '@kbn/monaco/src/languages/console';
-import { initializeSupportedLanguages } from '@kbn/monaco/src/languages';
-import { getSyncParsedRequestsProvider } from './sync_console_parser';
+import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
 
-// Configure Monaco Environment for packaged use (no workers needed)
+// Configure Monaco Environment for packaged use
 (window as any).MonacoEnvironment = {
   getWorkerUrl: () => '',
   getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
 };
 
-// Initialize all Monaco languages including Console
-initializeSupportedLanguages();
+// Create a provider factory for packaging environment
+const createPackagingParsedRequestsProvider = () => {
+  return (model: any) => {
+    // Add null check for model
+    if (!model) {
+      console.warn('Monaco editor model is null, creating fallback provider');
+      return {
+        getRequests: () => Promise.resolve([]),
+        getErrors: () => Promise.resolve([]),
+      };
+    }
+    return createStandaloneParsedRequestsProvider(model);
+  };
+};
 
-// Patch the getParsedRequestsProvider function to use our sync implementation
+// Register console language manually (simplified version)
 setTimeout(() => {
   try {
-    // Get the Monaco module and override the getParsedRequestsProvider function
-    const monacoModule = require('@kbn/monaco');
-    const originalGetParsedRequestsProvider = monacoModule.getParsedRequestsProvider;
-    
-    monacoModule.getParsedRequestsProvider = function(model: any) {
-      console.log('Using synchronous parsed requests provider');
-      return getSyncParsedRequestsProvider(model);
-    };
-    
-    console.log('Successfully patched getParsedRequestsProvider to use sync implementation');
+    // Register the console language with Monaco
+    (window as any).monaco?.languages?.register({ id: 'console' });
+    (window as any).monaco?.languages?.register({ id: 'console-output' });
   } catch (error) {
-    console.error('Failed to patch getParsedRequestsProvider:', error);
+    console.error('Failed to register console language:', error);
   }
 }, 100);
-
-// Test the parser after patches are applied
-setTimeout(() => {
-  try {
-    const { monaco, getParsedRequestsProvider } = require('@kbn/monaco');
-    console.log('Testing patched parser...');
-    const testModel = monaco.editor.createModel('GET /_search\n{\n  "query": { "match_all": {} }\n}', 'console');
-    console.log('Test model created:', testModel);
-
-    const provider = getParsedRequestsProvider(testModel);
-    console.log('Provider obtained:', provider);
-
-    provider.getRequests()
-      .then((requests: any) => {
-        console.log('SUCCESS - Parsed requests:', requests);
-        console.log('Number of requests found:', requests ? requests.length : 0);
-        if (requests && requests.length > 0) {
-          console.log('First request:', requests[0]);
-        }
-        testModel.dispose();
-      })
-      .catch((error: any) => {
-        console.error('FAILED - Parser error:', error);
-        testModel.dispose();
-      });
-  } catch (error) {
-    console.error('Failed to test parser:', error);
-  }
-}, 1500);
 
 import {
   createStorage,
@@ -279,7 +252,10 @@ export const OneConsole = ({ }: BootDependencies) => {
         }}
       >
         <RequestContextProvider>
-          <EditorContextProvider settings={settings.toJSON()}>
+          <EditorContextProvider
+            settings={settings.toJSON()}
+            customParsedRequestsProvider={createPackagingParsedRequestsProvider()}
+          >
             <Main />
           </EditorContextProvider>
         </RequestContextProvider>
