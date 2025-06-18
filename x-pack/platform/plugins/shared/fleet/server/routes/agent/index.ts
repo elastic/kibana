@@ -208,6 +208,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
         },
       },
+      summary: `Update an agent by ID`,
       description: `Update an agent by ID.`,
       options: {
         tags: ['oas-tag:Elastic Agents'],
