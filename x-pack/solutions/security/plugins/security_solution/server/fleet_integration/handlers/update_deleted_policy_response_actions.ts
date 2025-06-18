@@ -36,7 +36,7 @@ export const updateDeletedPolicyResponseActions = async (
   const policyIds: string[] = [];
 
   for (const deletedPolicy of deletedIntegrationPolicies) {
-    if (packageNames.includes(deletedPolicy?.package?.name ?? '')) {
+    if (deletedPolicy.success && packageNames.includes(deletedPolicy?.package?.name ?? '')) {
       policyIds.push(deletedPolicy.id);
     }
   }
@@ -85,7 +85,7 @@ if (ctx._source.containsKey('tags')) {
         )}] done:\n${stringify(updateResponse)}`
       );
 
-      if (updateResponse.failures?.length > 0) {
+      if (updateResponse.failures?.length) {
         logger.error(
           `The following response action updates (as a result of deleted integration policy) failed:${stringify(
             updateResponse.failures
