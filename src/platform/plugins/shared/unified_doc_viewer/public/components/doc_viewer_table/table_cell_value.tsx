@@ -21,7 +21,7 @@ import {
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 

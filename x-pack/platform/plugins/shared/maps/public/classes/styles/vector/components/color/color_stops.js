@@ -11,7 +11,7 @@ import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from 
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
 
 export const ColorStops = ({

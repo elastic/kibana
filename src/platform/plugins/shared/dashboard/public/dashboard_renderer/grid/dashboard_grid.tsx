@@ -14,7 +14,7 @@ import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { GridData } from '../../../common/content_management/v2/types';
 import { areLayoutsEqual } from '../../dashboard_api/are_layouts_equal';

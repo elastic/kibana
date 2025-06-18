@@ -18,7 +18,7 @@ import {
   UseEuiTheme,
 } from '@elastic/eui';
 import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,

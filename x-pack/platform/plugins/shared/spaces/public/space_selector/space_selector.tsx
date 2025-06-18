@@ -25,7 +25,7 @@ import type { Observable, Subscription } from 'rxjs';
 
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils';
+import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';

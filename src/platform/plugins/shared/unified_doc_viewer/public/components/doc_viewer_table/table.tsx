@@ -38,7 +38,7 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {

@@ -11,7 +11,7 @@ import { EuiIcon, EuiImage, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils';
+import { useFullScreenGraphicsMixinStyles } from '@kbn/css-utils/public/fullscreen_graphics_css';
 
 interface Props {
   className?: string;

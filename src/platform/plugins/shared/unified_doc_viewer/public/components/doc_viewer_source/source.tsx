@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';

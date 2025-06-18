@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { kibanaFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatRequestPayload, formatJson } from '../lib/format';

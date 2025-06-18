@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiText, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface Props {
   onClick: () => void;

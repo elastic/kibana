@@ -15,7 +15,7 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface ControlErrorProps {
   error: Error | string;

@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';

@@ -24,7 +24,7 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
