@@ -13,6 +13,7 @@ import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
 import { RecalledEntry } from '../../service/knowledge_base_service';
+import { getHypotheticalPromptAnswer } from '../../functions/get_hypothetical_prompt_answer';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'esScore'>;
 
@@ -41,9 +42,17 @@ export async function recallAndScore({
   llmScores?: Array<{ id: string; llmScore: number }>;
   suggestions: RecalledSuggestion[];
 }> {
+  const hypotheticalPromptAnswer = await getHypotheticalPromptAnswer({
+    userPrompt,
+    chat,
+    messages,
+    logger,
+    signal,
+  });
+
   const queries = [
-    { text: userPrompt, boost: 3 },
-    { text: context, boost: 1 },
+    { text: userPrompt, boost: 1 },
+    { text: hypotheticalPromptAnswer, boost: 2 },
   ].filter((query) => query.text.trim());
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
