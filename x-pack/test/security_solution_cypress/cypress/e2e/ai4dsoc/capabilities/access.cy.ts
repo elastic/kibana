@@ -28,9 +28,9 @@ describe(
         kbnServerArgs: [
           '--serverless=security',
           '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
-          '--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
+          `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
             { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
-          ])}',
+          ])}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',
         ],
