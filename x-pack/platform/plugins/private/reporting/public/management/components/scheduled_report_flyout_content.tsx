@@ -95,7 +95,9 @@ export const ScheduledReportFlyoutContent = ({
     ),
     [http.basePath]
   );
-  const { mutateAsync: scheduleReport } = useScheduleReport({ http });
+  const { mutateAsync: scheduleReport, isLoading: isScheduleExportLoading } = useScheduleReport({
+    http,
+  });
   const { defaultTimezone } = useDefaultTimezone();
   const now = useMemo(() => moment().tz(defaultTimezone), [defaultTimezone]);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
@@ -162,13 +164,9 @@ export const ScheduledReportFlyoutContent = ({
   const isEmailActive = sendByEmail || false;
 
   const onSubmit = async () => {
-    try {
-      if (await form.validate()) {
-        await form.submit();
-        onClose();
-      }
-    } catch (e) {
-      // Don't close the flyout in case of errors
+    if (await form.validate()) {
+      await form.submit();
+      onClose();
     }
   };
 
@@ -324,7 +322,7 @@ export const ScheduledReportFlyoutContent = ({
                 form={SCHEDULED_REPORT_FORM_ID}
                 isDisabled={false}
                 onClick={onSubmit}
-                isLoading={form.isSubmitting}
+                isLoading={isScheduleExportLoading}
                 fill
               >
                 {i18n.SCHEDULED_REPORT_FLYOUT_SUBMIT_BUTTON_LABEL}
