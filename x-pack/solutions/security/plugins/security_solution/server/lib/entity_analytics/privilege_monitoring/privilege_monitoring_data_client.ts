@@ -19,7 +19,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
+import Papa from 'papaparse';
+import { Readable } from 'stream';
+
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
+import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { HapiReadableStream } from '../../../types';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -49,6 +54,13 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
+
+import { batchPartitions } from '../shared/streams/batching';
+import { queryExistingUsers } from './users/query_existing_users';
+import { bulkBatchUpsertFromCSV } from './users/bulk/update_from_csv';
+import type { SoftDeletionResults } from './users/bulk/soft_delete_omitted_usrs';
+import { softDeleteOmittedUsers } from './users/bulk/soft_delete_omitted_usrs';
+import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -97,6 +109,8 @@ export class PrivilegeMonitoringDataClient {
       await this.createOrUpdateIndex().catch((e) => {
         if (e.meta.body.error.type === 'resource_already_exists_exception') {
           this.opts.logger.info('Privilege monitoring index already exists');
+        } else {
+          throw e;
         }
       });
 
@@ -154,6 +168,16 @@ export class PrivilegeMonitoringDataClient {
         },
       },
     });
+  }
+
+  public async doesIndexExist() {
+    try {
+      return await this.internalUserClient.indices.exists({
+        index: this.getIndex(),
+      });
+    } catch (e) {
+      return false;
+    }
   }
 
   public async searchPrivilegesIndices(query: string | undefined) {
@@ -238,6 +262,7 @@ export class PrivilegeMonitoringDataClient {
   public async listUsers(kuery?: string): Promise<MonitoredUserDoc[]> {
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     const response = await this.esClient.search({
+      size: 10000,
       index: this.getIndex(),
       query,
     });
@@ -245,6 +270,40 @@ export class PrivilegeMonitoringDataClient {
       id: hit._id,
       ...(hit._source as {}),
     })) as MonitoredUserDoc[];
+  }
+
+  public async uploadUsersCSV(
+    stream: HapiReadableStream,
+    { retries, flushBytes }: { retries: number; flushBytes: number }
+  ): Promise<PrivmonBulkUploadUsersCSVResponse> {
+    const csvStream = Papa.parse(Papa.NODE_STREAM_INPUT, {
+      header: false,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+    });
+
+    return Readable.from(stream.pipe(csvStream))
+      .pipe(privilegedUserParserTransform())
+      .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
+      .map(queryExistingUsers(this.esClient, this.getIndex()))
+      .map(bulkBatchUpsertFromCSV(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .map(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .reduce(
+        (
+          { errors, stats }: PrivmonBulkUploadUsersCSVResponse,
+          batch: SoftDeletionResults
+        ): PrivmonBulkUploadUsersCSVResponse => {
+          return {
+            errors: errors.concat(batch.updated.errors),
+            stats: {
+              failed: stats.failed + batch.updated.failed,
+              successful: stats.successful + batch.updated.successful,
+              total: stats.total + batch.updated.failed + batch.updated.successful,
+            },
+          };
+        },
+        { errors: [], stats: { failed: 0, successful: 0, total: 0 } }
+      );
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

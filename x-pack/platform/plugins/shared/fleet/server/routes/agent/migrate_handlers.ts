@@ -7,7 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { FleetRequestHandler, MigrateSingleAgentRequestSchema } from '../../types';
+import type {
+  FleetRequestHandler,
+  MigrateSingleAgentRequestSchema,
+  BulkMigrateAgentsRequestSchema,
+} from '../../types';
 import * as AgentService from '../../services/agents';
 
 export const migrateSingleAgentHandler: FleetRequestHandler<
@@ -38,5 +42,27 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
       policyId: agentPolicy?.id,
     }
   );
+  return response.ok({ body });
+};
+export const bulkMigrateAgentsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkMigrateAgentsRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const options = request.body;
+  // // First validate all agents exist
+  const agents = await AgentService.getByIds(esClient, soClient, request.body.agents, {
+    ignoreMissing: false, // throw error if any agents are missing
+  });
+
+  // then get all the policies for the agents
+  const agentPolicies = await AgentService.getAgentPolicyForAgents(soClient, agents);
+
+  const body = await AgentService.bulkMigrateAgents(esClient, agents, agentPolicies, {
+    ...options,
+  });
   return response.ok({ body });
 };
