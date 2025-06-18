@@ -270,6 +270,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
