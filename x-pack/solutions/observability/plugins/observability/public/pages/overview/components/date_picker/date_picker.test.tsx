@@ -125,6 +125,8 @@ describe('DatePicker', () => {
     await user.click(datePicker);
 
     const lastDayButton = await screen.findByTestId('superDatePickerRelativeDateInputNumber');
+    // weird fix since the input may not be cleared properly
+    await user.clear(lastDayButton);
     await user.clear(lastDayButton);
     await user.type(lastDayButton, '30');
 

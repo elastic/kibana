@@ -3,18 +3,18 @@
 exports[`Marker renders agent marker correctly 1`] = `
 <div>
   <div
-    class="css-1oyht0a-MarkerContainer eoof5b20"
+    class="sc-imWYAI leNvtl"
     style="left: 4.5px;"
   >
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <div
-        class="css-1ejn3a9-Container en0jakt1"
+        class="sc-aXZVg kATlBv"
       >
         <span
-          class="css-xbgcmn-Indicator en0jakt0"
-          color="#8E9FBC"
+          class="sc-gEvEer idDBSa"
+          color="#98a2b3"
           shape="circle"
         />
       </div>
@@ -26,7 +26,7 @@ exports[`Marker renders agent marker correctly 1`] = `
 exports[`Marker renders error marker correctly 1`] = `
 <div>
   <div
-    class="css-1oyht0a-MarkerContainer eoof5b20"
+    class="sc-imWYAI leNvtl"
     style="left: 4.5px;"
   >
     <div
@@ -34,12 +34,12 @@ exports[`Marker renders error marker correctly 1`] = `
       id="popover"
     >
       <div
-        class="e1tl8a5o0 css-lzkl4t-Container-Button en0jakt1"
+        class="sc-aXZVg kATlBv sc-kAyceB kqPckl"
         data-test-subj="popover"
       >
         <span
-          class="css-1p2bud6-Indicator en0jakt0"
-          color="#C61E25"
+          class="sc-gEvEer giNLnC"
+          color="#bd271e"
           shape="square"
         />
       </div>

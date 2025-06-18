@@ -133,7 +133,7 @@ describe('MetricsExplorerChartContextMenu', () => {
 
   it('should not display "Open in Visualize" when unavailable in uiCapabilities', async () => {
     const user = userEvent.setup();
-    const customUICapabilities = { ...uiCapabilities, visualize_v2: { show: false } };
+    const customUICapabilities = { ...uiCapabilities, visualize: { show: false } };
 
     renderComponent({
       timeRange,

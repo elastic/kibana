@@ -6,11 +6,11 @@ exports[`AgentMarker renders correctly 1`] = `
     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
   >
     <div
-      class="css-1ejn3a9-Container en0jakt1"
+      class="sc-aXZVg kATlBv"
     >
       <span
-        class="css-xbgcmn-Indicator en0jakt0"
-        color="#8E9FBC"
+        class="sc-gEvEer idDBSa"
+        color="#98a2b3"
         shape="circle"
       />
     </div>
