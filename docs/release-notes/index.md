@@ -35,7 +35,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.0.3-fixes]
 
 **Alerting**:
-* Fixes an issue that caused {{kib}} to repeatedly reload when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
+* Fixes an issue that caused {{kib}} to repeatedly restart when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
 
 **Dashboards and Visualizations**:
 * Prevents data tables from breaking if Lens visualizations are missing data [#217937]({{kib-pull}}217937).
