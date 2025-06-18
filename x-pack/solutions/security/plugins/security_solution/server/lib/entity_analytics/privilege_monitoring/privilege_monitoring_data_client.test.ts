@@ -208,6 +208,7 @@ describe('Privilege Monitoring Data Client', () => {
     it('should handle errors syncing users from index source', async () => {
       // Arrange: mock index sources
       const mockLog = jest.fn();
+      Object.defineProperty(dataClient, 'log', { value: mockLog });
       dataClient.listUsers = jest.fn().mockResolvedValue([]);
       const mockSources = [
         {

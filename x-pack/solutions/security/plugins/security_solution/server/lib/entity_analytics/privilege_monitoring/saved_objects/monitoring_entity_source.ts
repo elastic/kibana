@@ -89,11 +89,14 @@ export class MonitoringEntitySourceDescriptorClient {
   /**
    * Need to update to understand the id based on the
    * type and indexPattern or integrationName.
+   *
+   * Two options: create a getById method that takes the id,
+   * or use a dynamic ID based on the type and indexPattern/integrationName.
    */
   async get() {
     const { attributes } = await this.dependencies.soClient.get<MonitoringEntitySourceDescriptor>(
       monitoringEntitySourceTypeName,
-      'temp-id' // TODO: update to use dynamic ID
+      'temp-id' // TODO: https://github.com/elastic/security-team/issues/12851
     );
     return attributes;
   }
@@ -101,9 +104,12 @@ export class MonitoringEntitySourceDescriptorClient {
   /**
    * Need to update to understand the id based on the
    * type and indexPattern or integrationName.
+   *
+   * * Two options: create a getById method that takes the id,
+   * or use a dynamic ID based on the type and indexPattern/integrationName.
    */
   async delete() {
-    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, 'temp-id'); // TODO: update
+    await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, 'temp-id'); // TODO: https://github.com/elastic/security-team/issues/12851
   }
 
   public async findByIndex() {
