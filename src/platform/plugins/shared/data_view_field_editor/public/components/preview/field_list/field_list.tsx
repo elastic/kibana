@@ -9,9 +9,18 @@
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { FixedSizeList as VirtualList, areEqual } from 'react-window';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { get, isEqual } from 'lodash';
-import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiTextColor,
+  type UseEuiTheme,
+} from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -73,6 +82,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
 }, areEqual);
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
+  const styles = useMemoizedStyles(componentStyles);
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
   const virtualListRef = useRef<VirtualList>(null);
@@ -160,7 +170,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
           iconType="search"
           title={
             <EuiTextColor color="subdued">
-              <h3 className="indexPatternFieldEditor__previewEmptySearchResult__title">
+              <h3 css={styles.emptySearchResult}>
                 {i18n.translate(
                   'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
                   {
@@ -255,4 +265,11 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       {renderToggleFieldsButton()}
     </div>
   );
+};
+
+const componentStyles = {
+  emptySearchResult: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.medium,
+    }),
 };
