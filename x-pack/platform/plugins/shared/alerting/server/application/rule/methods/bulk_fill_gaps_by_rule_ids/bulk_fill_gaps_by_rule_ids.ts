@@ -38,8 +38,10 @@ export const bulkFillGapsByRuleIds = async (
   const skipped: BulkFillGapsByRuleIdsResult['skipped'] = [];
   const backfilled: BulkFillGapsByRuleIdsParams['rules'] = [];
   const eventLogClient = await context.getEventLogClient();
-  const maxBackfillConcurrency =
-    options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY;
+  const maxBackfillConcurrency = Math.max(
+    options?.maxBackfillConcurrency ?? DEFAULT_MAX_BACKFILL_CONCURRENCY,
+    DEFAULT_MAX_BACKFILL_CONCURRENCY
+  );
 
   // Make sure user has access to these rules
   const rulesByRuleType = mapValues(
