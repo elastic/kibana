@@ -283,19 +283,32 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     if (success) {
       break;
     } else {
+      console.log("Retrying Entity Store setup...");
       await cleanUpEntityStore(providerContext);
     }
   }
   expect(success).ok();
+  return true;
 }
 
 async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
   const es = providerContext.getService('es');
   const utils = EntityStoreUtils(providerContext.getService);
+  const attempts = 5;
+  const delayMs = 60000;
+
   await utils.cleanEngines();
   for (const kind of ['host', 'user', 'service', 'generic']) {
     const name : string = `entity_store_field_retention_${kind}_default_v1.0.0`;
-    await es.enrich.deletePolicy({ name }, { ignore: [404] });
+    for (let currentAttempt = 0; currentAttempt < attempts; currentAttempt++) {
+      try {
+        await es.enrich.deletePolicy({ name }, { ignore: [404] });
+        break
+      } catch (e) {
+        console.log(`Error deleting policy ${name}: ${e.message} after ${currentAttempt} tries`);
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
   }
   return true;
 }
