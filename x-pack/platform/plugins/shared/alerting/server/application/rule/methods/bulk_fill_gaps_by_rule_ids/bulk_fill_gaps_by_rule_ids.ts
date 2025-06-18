@@ -18,7 +18,7 @@ import {
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
-import { bulkFillGapsByRuleIdParamsSchema } from './schemas';
+import { validateBackfillSchedule } from '../../../../../common/lib';
 
 const DEFAULT_MAX_BACKFILL_CONCURRENCY = 10;
 
@@ -27,11 +27,10 @@ export const bulkFillGapsByRuleIds = async (
   { rules, range }: BulkFillGapsByRuleIdsParams,
   options: BulkFillGapsByRuleIdsOptions
 ): Promise<BulkFillGapsByRuleIdsResult> => {
-  const result = bulkFillGapsByRuleIdParamsSchema.safeParse(range);
-  if (!result.success) {
-    const message = result.error.errors.map((error) => error.message).join(' ');
+  const errorString = validateBackfillSchedule(range.start, range.end);
+  if (errorString) {
     throw Boom.badRequest(
-      `Error validating backfill schedule parameters "${JSON.stringify(range)}" - ${message}`
+      `Error validating backfill schedule parameters "${JSON.stringify(range)}" - ${errorString}`
     );
   }
 

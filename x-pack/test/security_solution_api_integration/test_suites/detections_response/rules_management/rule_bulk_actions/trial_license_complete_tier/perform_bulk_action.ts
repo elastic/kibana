@@ -2625,7 +2625,7 @@ export default ({ getService }: FtrProviderContext): void => {
         { rule: { id: string; name: string }; gapEvents: GapFromEvent[] }
       >;
 
-      const backfillStart = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+      const backfillStart = new Date(Date.now() - 89 * 24 * 60 * 60 * 1000);
       const backfillEnd = new Date();
 
       const resetEverything = async () => {
@@ -2755,7 +2755,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(400);
 
-        expect(body.message).toContain('end must be greater than the start date.');
+        expect(body.message).toContain('Backfill end must be greater than backfill start');
       });
 
       it('should return 400 error when start date is in the future', async () => {
@@ -2773,7 +2773,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(400);
 
-        expect(body.message).toContain('start cannot be in the future.');
+        expect(body.message).toContain('Backfill cannot be scheduled for the future');
       });
 
       it('should return 400 error when end date is in the future', async () => {
@@ -2791,7 +2791,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(400);
 
-        expect(body.message).toContain('end cannot be in the future.');
+        expect(body.message).toContain('Backfill cannot be scheduled for the future');
       });
 
       it('should return 400 error when range between start and end are greater than 90 days', async () => {
@@ -2811,7 +2811,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(400);
 
-        expect(body.message).toContain('The date range must not exceed 90 days.');
+        expect(body.message).toContain('Backfill cannot look back more than 90 days');
       });
 
       it('should return 500 error if some rules do not exist', async () => {
