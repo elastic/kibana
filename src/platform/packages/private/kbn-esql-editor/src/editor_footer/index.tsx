@@ -30,7 +30,7 @@ import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_star
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
-import type { ESQLEditorDeps } from '../types';
+import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -61,6 +61,7 @@ interface EditorFooterProps {
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   displayDocumentationAsFlyout?: boolean;
+  dataErrorsControl?: DataErrorsControl;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -86,6 +87,7 @@ export const EditorFooter = memo(function EditorFooter({
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
+  dataErrorsControl,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -209,6 +211,7 @@ export const EditorFooter = memo(function EditorFooter({
                     setIsErrorPopoverOpen(isOpen);
                   }}
                   onErrorClick={onErrorClick}
+                  dataErrorsControl={dataErrorsControl}
                 />
               )}
               {warnings && warnings.length > 0 && (

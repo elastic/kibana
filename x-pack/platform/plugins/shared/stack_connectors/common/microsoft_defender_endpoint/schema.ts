@@ -219,12 +219,7 @@ export const GetActionsParamsSchema = schema.object({
 });
 
 export const GetActionResultsParamsSchema = schema.object({
-  id: schema.maybe(
-    schema.oneOf([
-      schema.string({ minLength: 1 }),
-      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-    ])
-  ),
+  id: schema.string({ minLength: 1 }),
 });
 
 export const MSDefenderLibraryFileSchema = schema.object(
@@ -248,6 +243,8 @@ export const GetLibraryFilesResponse = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export const DownloadActionResultsResponseSchema = schema.stream();
 
 // ----------------------------------
 // Connector Sub-Actions

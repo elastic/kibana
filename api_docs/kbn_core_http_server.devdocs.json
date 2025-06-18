@@ -8054,6 +8054,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/data_streams/register_put_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/enrich_policies/register_execute_route.ts"
               },
               {

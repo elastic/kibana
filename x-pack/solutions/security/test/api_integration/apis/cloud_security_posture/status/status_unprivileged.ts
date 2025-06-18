@@ -7,14 +7,12 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy, createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
@@ -31,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
   const security = getService('security');
 
   const allIndices = [
-    LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     FINDINGS_INDEX_PATTERN,
     BENCHMARK_SCORE_INDEX_DEFAULT_NS,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
@@ -139,7 +137,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {
-        const privilegedIndices = without(allIndices, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+        const privilegedIndices = without(
+          allIndices,
+          CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+        );
         await createCSPRole(security, UNPRIVILEGED_ROLE, privilegedIndices);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
@@ -173,9 +174,10 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(res).to.have.property('indicesDetails');
-        expect(find(res.indicesDetails, { index: LATEST_FINDINGS_INDEX_DEFAULT_NS })?.status).eql(
-          'unprivileged'
-        );
+        expect(
+          find(res.indicesDetails, { index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS })
+            ?.status
+        ).eql('unprivileged');
 
         privilegedIndices.forEach((index) => {
           expect(find(res.indicesDetails, { index })?.status).not.eql('unprivileged');

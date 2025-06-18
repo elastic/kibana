@@ -807,6 +807,18 @@ export async function getAgentPolicyForAgent(
     return agentPolicy;
   }
 }
+// Get all the policies for a list of agents
+export async function getAgentPolicyForAgents(
+  soClient: SavedObjectsClientContract,
+  agents: Agent[]
+) {
+  const policyIds = new Set(agents.map((agent) => agent.policy_id));
+  const agentPolicies = await agentPolicyService.getByIds(
+    soClient,
+    Array.from(policyIds).filter((id) => id !== undefined) as string[]
+  );
+  return agentPolicies;
+}
 
 async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();

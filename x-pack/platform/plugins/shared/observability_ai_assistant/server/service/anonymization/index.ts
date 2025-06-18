@@ -24,6 +24,8 @@ import {
   type InferenceChunk,
   type Message,
   type AnonymizationRule,
+  RegexAnonymizationRule,
+  NerAnonymizationRule,
 } from '../../../common/types';
 import { getEntityHash } from './get_entity_hash';
 
@@ -124,8 +126,12 @@ export class AnonymizationService {
     this.logger.debug(`Detecting entities in text content`);
 
     // Filter rules by type
-    const nerRules = this.rules.filter((rule) => rule.type === 'ner' && rule.enabled);
-    const regexRules = this.rules.filter((rule) => rule.type === 'regex' && rule.enabled);
+    const nerRules = this.rules.filter(
+      (rule) => rule.type === 'ner' && rule.enabled
+    ) as NerAnonymizationRule[];
+    const regexRules = this.rules.filter(
+      (rule) => rule.type === 'regex' && rule.enabled
+    ) as RegexAnonymizationRule[];
 
     // Only run NER if we have NER rules enabled
     let nerEntities: DetectedEntity[] = [];

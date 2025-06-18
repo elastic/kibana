@@ -341,6 +341,9 @@ export const streamEnrichmentMachine = setup({
                     'simulation.changePreviewDocsFilter': {
                       actions: forwardTo('simulator'),
                     },
+                    'previewColumns.*': {
+                      actions: forwardTo('simulator'),
+                    },
                   },
                 },
                 viewDetectedFields: {

@@ -132,7 +132,11 @@ export function ChatTimeline({
 
   const { anonymizationEnabled } = useMemo(() => {
     try {
-      const rules = uiSettings?.get<AnonymizationRule[]>(aiAssistantAnonymizationRules);
+      // the response is JSON but will be a string while the setting is hidden temporarily (unregistered)
+      let rules = uiSettings?.get<AnonymizationRule[] | string>(aiAssistantAnonymizationRules);
+      if (typeof rules === 'string') {
+        rules = JSON.parse(rules);
+      }
       return {
         anonymizationEnabled: Array.isArray(rules) && rules.some((rule) => rule.enabled),
       };

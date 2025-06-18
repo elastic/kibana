@@ -93,21 +93,6 @@
     "misc": [
       {
         "parentPluginId": "canvas",
-        "id": "def-common.CANVAS_APP_LOCATOR",
-        "type": "string",
-        "tags": [],
-        "label": "CANVAS_APP_LOCATOR",
-        "description": [],
-        "signature": [
-          "\"CANVAS_APP_LOCATOR\""
-        ],
-        "path": "x-pack/platform/plugins/private/canvas/common/locator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "canvas",
         "id": "def-common.CanvasAppLocator",
         "type": "Type",
         "tags": [],
