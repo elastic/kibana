@@ -38,10 +38,10 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 * Fixes an issue that caused {{kib}} to repeatedly reload when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
 
 **Dashboards and Visualizations**:
-* Prevents data tables from breaking when Lens visualizations are missing data [#217937]({{kib-pull}}217937).
+* Prevents data tables from breaking if Lens visualizations are missing data [#217937]({{kib-pull}}217937).
 
 **Discover**:
-* Ensures that the absolute time range is used when exporting a report from Discover in the CSV format [#223249]({{kib-pull}}223249).
+* Ensures the absolute time range is used when exporting a report from Discover and in the CSV format [#223249]({{kib-pull}}223249).
 * Adds request parameters that were formerly missing from the **Request** tab when you inspected an ES|QL request [#221816]({{kib-pull}}221816).
 
 **Elastic Observability solution**:
@@ -51,9 +51,9 @@ For the Elastic Observability 9.0.3 release information, refer to [Elastic Obser
 For the Elastic Security 9.0.3 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Machine Learning**:
-* Ensures that the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
-* Ensures that the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
-* Allows you to still add additional fields if your ingest pipeline is empty [#222775]({{kib-pull}}222775).
+* Ensures the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
+* Ensures the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
+* Allows you to add additional fields even if your ingest pipeline is empty [#222775]({{kib-pull}}222775).
 * Resolves multiple issues in the Watcher UI that were introduced in 8.18.0, 8.18.1, 9.0.0, and 9.1.0. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected [#223898]({{kib-pull}}223898).
 
 ## 9.0.2 [kibana-9.0.2-release-notes]
