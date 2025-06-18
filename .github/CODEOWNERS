@@ -433,7 +433,7 @@ src/platform/packages/shared/kbn-encrypted-saved-objects-shared @elastic/kibana-
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
-x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
@@ -1012,6 +1012,8 @@ x-pack/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
+x-pack/solutions/search/test @elastic/search-kibana
+x-pack/solutions/security/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
@@ -1102,12 +1104,13 @@ src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-ma
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
-/x-pack/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-ux-infra_services-team
 x-pack/test_serverless/api_integration/test_suites/common/platform_security @elastic/kibana-security
 
 # Observability Entities Team (@elastic/obs-entities)
 /x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
-/x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 /x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
 
 
@@ -1537,7 +1540,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/accessibility/apps/group2/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/group2/ml_* @elastic/ml-ui
 /x-pack/test/accessibility/apps/group3/ml_embeddables_in_dashboard.ts @elastic/ml-ui
-/x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
+/x-pack/platform/test/api_integration/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
@@ -1652,8 +1655,11 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/functional/services/remote_es/remote_es.ts @elastic/appex-qa
 /x-pack/test/functional/services/random.js @elastic/appex-qa
 /x-pack/test/functional/services/index.ts @elastic/appex-qa
+/x-pack/platform/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/test/functional/page_objects/index.ts @elastic/appex-qa
+/x-pack/platform/test/functional/page_objects/index.ts @elastic/appex-qa
 /x-pack/test/functional/ftr_provider_context.ts @elastic/appex-qa
+/x-pack/platform/test/functional/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/test/functional/README.md @elastic/appex-qa
 /x-pack/test/examples/config.ts @elastic/appex-qa
 /x-pack/test/common/services/index.ts @elastic/appex-qa
@@ -1724,6 +1730,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test/scalability @elastic/appex-qa
 /src/dev/performance @elastic/appex-qa
 /x-pack/test/functional/config.*.* @elastic/appex-qa
+/x-pack/platform/test/functional/config.*.* @elastic/appex-qa
 /x-pack/test/api_integration/ftr_provider_context.d.ts @elastic/appex-qa # Maybe this should be a glob?
 /x-pack/test/accessibility/services.ts @elastic/appex-qa
 /x-pack/test/accessibility/page_objects.ts @elastic/appex-qa
@@ -1924,6 +1931,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 ^/src/platform/test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
+/x-pack/platform/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/space_selector_page.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/security_page.ts @elastic/kibana-security
@@ -2608,9 +2616,9 @@ x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
 x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
-x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
 ## CSP Serverless tests
 x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture

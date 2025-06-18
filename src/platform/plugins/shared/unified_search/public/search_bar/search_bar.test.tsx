@@ -9,7 +9,7 @@
 
 import React from 'react';
 import SearchBar from './search_bar';
-
+import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -74,6 +74,10 @@ function wrapSearchBarInContext(testProps: any) {
   (dataViewEditorMock.userPermissions.editDataView as jest.Mock).mockReturnValue(true);
 
   const services = {
+    chrome: {
+      ...startMock.chrome,
+      getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
+    },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
     savedObjects: startMock.savedObjects,
