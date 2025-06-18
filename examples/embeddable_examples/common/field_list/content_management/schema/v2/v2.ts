@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { SavedFieldListAttributes } from '../../../../../server/types';
 import type { FieldListAttributes } from '../../../../../server/field_list/content_management/schema/v2';
 import { FIELD_LIST_DATA_VIEW_REF_NAME } from '../../../constants';
 
-export const fieldListAttributesDefinition: VersionableEmbeddableObject<
+export const fieldListAttributesDefinition: EmbeddableTransforms<
   SavedFieldListAttributes,
   FieldListAttributes
 > = {
-  itemToSavedObject: (item) => {
+  transformIn: (item) => {
     const { selectedFieldNames, dataViewId } = item;
     const references = [];
     if (dataViewId) {
@@ -29,17 +29,17 @@ export const fieldListAttributesDefinition: VersionableEmbeddableObject<
       });
     }
     return {
-      attributes: {
+      state: {
         // don't store the dataViewId, it's in the references
         selectedFieldNames,
       },
       references,
     };
   },
-  savedObjectToItem: ({ attributes, references }) => {
-    const { selectedFieldNames } = attributes;
+  transformOut: (state, references) => {
+    const { selectedFieldNames } = state;
     // inject data view id from references
-    const dataViewRef = references.find((ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME);
+    const dataViewRef = (references ?? []).find((ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME);
     return {
       selectedFieldNames,
       dataViewId: dataViewRef?.id,

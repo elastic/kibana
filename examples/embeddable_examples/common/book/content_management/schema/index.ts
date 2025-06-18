@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { bookAttributesDefinition, bookItemSchema, type BookItem } from './schema';
-export { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from './constants';
-export { itemToSavedObject, savedObjectToItem } from './transforms';
+export { bookTransforms, bookItemSchema, type BookItem } from './schema';
+export { BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from './constants';
+export { transformIn, transformOut } from './transforms';

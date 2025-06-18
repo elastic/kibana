@@ -21,9 +21,9 @@ const injectReferences = (attributes: SavedBookAttributes, references: SavedObje
   return injectedParams;
 };
 
-// <=9.1 used schema to store Book embeddables in URLs
-// It is NOT recommended to radically change SavedObject schemas other than adding additional optional fields,
-// but legacy URL handling is a special case
+// Shape of state <=9.1 
+// Legacy shape could be provided to transformOut 
+// from URLs state or dashboard panel state
 interface SavedBookAttributes910 {
   bookTitle: string;
   bookSynopsis?: string;

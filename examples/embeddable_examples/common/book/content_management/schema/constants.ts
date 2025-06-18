@@ -9,6 +9,6 @@
 
 export const BOOK_LATEST_VERSION = 1;
 
-export const BOOK_CONTENT_ID = 'book';
+export const BOOK_EMBEDDABLE_TYPE = 'book';
 
 export const SEQUEL_TO_REF_NAME = 'kibanaSavedObjectMeta.sequelToBook.id';

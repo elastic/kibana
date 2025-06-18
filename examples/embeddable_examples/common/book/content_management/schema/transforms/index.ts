@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { itemToSavedObject } from './item_to_saved_object';
+export { transformIn } from './transform_in';
 export { transformOut } from './transform_out';

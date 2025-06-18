@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
+import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { Mutable } from 'utility-types';
 import {
@@ -17,35 +17,38 @@ import {
 import { SEQUEL_TO_REF_NAME } from '../constants';
 import { BookItem } from '../schema';
 
-const extractReferences = (attributes: BookItem) => {
+const extractReferences = (state: BookItem) => {
   const references: SavedObjectReference[] = [];
   const extractedRefNames: Mutable<Partial<SavedBookAttributes['metadata']>> = {};
-  if (attributes.sequelTo) {
+  if (state.sequelTo) {
     extractedRefNames.sequelToBookRefName = SEQUEL_TO_REF_NAME;
     references.push({
       name: SEQUEL_TO_REF_NAME,
       type: BOOK_SAVED_OBJECT_TYPE,
-      id: attributes.sequelTo,
+      id: state.sequelTo,
     });
   }
   return { references, extractedRefNames };
 };
 
-export const itemToSavedObject = (
-  attributes: BookItem
-): SavedObjectAttributesWithReferences<SavedBookAttributes> => {
-  const { references, extractedRefNames } = extractReferences(attributes);
+export const transformIn = (
+  state: BookItem
+): {
+  state: SavedBookAttributes;
+  references?: Reference[];
+} => {
+  const { references, extractedRefNames } = extractReferences(state);
   return {
-    attributes: {
-      bookTitleAsArray: [...attributes.bookTitle],
+    state: {
+      bookTitleAsArray: [...state.bookTitle],
       metadata: {
         numbers: {
-          numberOfPages: attributes.pages,
-          publicationYear: attributes.published ?? undefined,
+          numberOfPages: state.pages,
+          publicationYear: state.published ?? undefined,
         },
         text: {
-          authorName: attributes.author,
-          bookSynopsis: attributes.synopsis,
+          authorName: state.author,
+          bookSynopsis: state.synopsis,
         },
         ...extractedRefNames,
       },

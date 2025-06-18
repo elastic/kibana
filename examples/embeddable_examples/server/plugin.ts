@@ -8,15 +8,13 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import type { SetupDeps, StartDeps } from './types';
-import { bookCmDefinitions } from '../common/book/content_management/cm_services';
+import { bookTransformsDefinitions } from '../common/book/content_management/cm_services';
 import { SavedBookAttributes, createBookSavedObjectType } from './book/saved_object';
 import { SavedBookStorage } from './book/content_management';
 import {
-  BOOK_CONTENT_ID,
+  BOOK_EMBEDDABLE_TYPE,
   BOOK_LATEST_VERSION,
-  bookItemSchema,
 } from '../common/book/content_management/schema';
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -27,18 +25,10 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
   }
 
   public setup(core: CoreSetup, { contentManagement, embeddable }: SetupDeps) {
-    const bookCmDefinitionsWithSchemas: EmbeddableContentManagementDefinition = {
-      id: 'book',
-      versions: {
-        1: { ...bookCmDefinitions.versions[1], itemSchema: bookItemSchema },
-      },
-      latestVersion: 1,
-    };
-
     core.savedObjects.registerType<SavedBookAttributes>(createBookSavedObjectType());
 
     contentManagement.register({
-      id: BOOK_CONTENT_ID,
+      id: BOOK_EMBEDDABLE_TYPE,
       storage: new SavedBookStorage({
         logger: this.logger.get('storage'),
       }),
@@ -47,9 +37,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerEmbeddableContentManagementDefinition(
-      'book',
-      () => bookCmDefinitionsWithSchemas
+    embeddable.registerTransforms(
+      BOOK_EMBEDDABLE_TYPE,
+      bookTransformsDefinitions
     );
 
     return {};

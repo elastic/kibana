@@ -33,7 +33,7 @@ import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
-import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
+import { BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
 import { setKibanaServices } from './kibana_services';
 import { BookSerializedState } from './react_embeddables/saved_book/types';
 
@@ -101,19 +101,19 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
 
-    embeddable.registerEmbeddableContentManagementDefinition('book', async () => {
-      const { bookCmDefinitions } = await import('../common/book/content_management/cm_services');
-      return bookCmDefinitions;
+    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, async () => {
+      const { bookTransformsDefinitions } = await import('../common/book/content_management/cm_services');
+      return bookTransformsDefinitions;
     });
-    embeddable.registerEmbeddableContentManagementDefinition('field_list', async () => {
-      const { fieldListCmDefinitions } = await import(
+    embeddable.registerTransforms('field_list', async () => {
+      const { fieldListTransformsDefinitions } = await import(
         '../common/field_list/content_management/cm_services'
       );
-      return fieldListCmDefinitions;
+      return fieldListTransformsDefinitions;
     });
 
     contentManagement.registry.register({
-      id: BOOK_CONTENT_ID,
+      id: BOOK_EMBEDDABLE_TYPE,
       version: {
         latest: BOOK_LATEST_VERSION,
       },
@@ -123,7 +123,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       onAdd: async (container, savedObject) => {
         container.addNewPanel<BookSerializedState>(
           {
-            panelType: BOOK_CONTENT_ID,
+            panelType: BOOK_EMBEDDABLE_TYPE,
             serializedState: {
               rawState: {
                 savedObjectId: savedObject.id,
@@ -133,7 +133,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
           true
         );
       },
-      savedObjectType: BOOK_CONTENT_ID,
+      savedObjectType: BOOK_EMBEDDABLE_TYPE,
       savedObjectName: 'Book',
       getIconForSavedObject: () => 'article',
     });

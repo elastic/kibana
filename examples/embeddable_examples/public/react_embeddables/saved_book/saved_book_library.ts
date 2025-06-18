@@ -16,10 +16,10 @@ import {
   UpdateIn,
   UpdateResult,
 } from '@kbn/content-management-plugin/common';
-import { BOOK_CONTENT_ID } from '../../../common/book/content_management/schema';
+import { BOOK_EMBEDDABLE_TYPE } from '../../../common/book/content_management/schema';
 import { BookItem, BookSavedObject } from './types';
 
-type BookContentType = typeof BOOK_CONTENT_ID;
+type BookContentType = typeof BOOK_EMBEDDABLE_TYPE;
 
 class SavedBookClient {
   private client: ContentClient;
@@ -32,7 +32,7 @@ class SavedBookClient {
         UpdateIn<BookContentType, BookItem>,
         UpdateResult<BookSavedObject, { id: string }>
       >({
-        contentTypeId: BOOK_CONTENT_ID,
+        contentTypeId: BOOK_EMBEDDABLE_TYPE,
         id,
         data: attributes,
       });
@@ -41,13 +41,13 @@ class SavedBookClient {
         CreateIn<BookContentType, BookItem>,
         CreateResult<BookSavedObject, { id: string }>
       >({
-        contentTypeId: BOOK_CONTENT_ID,
+        contentTypeId: BOOK_EMBEDDABLE_TYPE,
         data: attributes,
       });
   }
   load(id: string): Promise<GetResult<BookItem>> {
     return this.client.get<GetIn<BookContentType>, GetResult<BookItem>>({
-      contentTypeId: BOOK_CONTENT_ID,
+      contentTypeId: BOOK_EMBEDDABLE_TYPE,
       id,
     });
   }

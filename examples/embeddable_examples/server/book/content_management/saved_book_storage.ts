@@ -19,7 +19,7 @@ import { omit } from 'lodash';
 import type { BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
 import {
-  BOOK_CONTENT_ID,
+  BOOK_EMBEDDABLE_TYPE,
   BookItem,
   itemToSavedObject,
   savedObjectToItem,
@@ -80,7 +80,7 @@ export class SavedBookStorage implements ContentStorage {
           name: item.bookTitle,
           title: item.bookTitle,
         },
-        type: BOOK_CONTENT_ID,
+        type: BOOK_EMBEDDABLE_TYPE,
         references: [],
       };
 

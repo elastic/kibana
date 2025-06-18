@@ -8,9 +8,9 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedBookAttributes } from '../../../../server/types';
-import { itemToSavedObject, transformOut } from './transforms';
+import { transformIn, transformOut } from './transforms';
 
 export const bookItemSchema = schema.object({
   bookTitle: schema.string(),
@@ -23,8 +23,8 @@ export const bookItemSchema = schema.object({
 
 export type BookItem = TypeOf<typeof bookItemSchema>;
 
-export const bookAttributesDefinition: VersionableEmbeddableObject<SavedBookAttributes, BookItem> =
+export const bookTransforms: EmbeddableTransforms<SavedBookAttributes, BookItem> =
   {
-    itemToSavedObject,
+    transformIn,
     transformOut,
   };

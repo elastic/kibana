@@ -9,7 +9,7 @@
 
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { useState, useLayoutEffect, useCallback } from 'react';
-import { BOOK_CONTENT_ID } from '../../../common/book/content_management/schema';
+import { BOOK_EMBEDDABLE_TYPE } from '../../../common/book/content_management/schema';
 import { BookItem } from './types';
 
 export const useBookSavedObjectTitle = (
@@ -23,7 +23,7 @@ export const useBookSavedObjectTitle = (
     try {
       const so: { item: BookItem } = await contentClient.get({
         id,
-        contentTypeId: BOOK_CONTENT_ID,
+        contentTypeId: BOOK_EMBEDDABLE_TYPE,
       });
       const { bookTitle } = so.item;
       return bookTitle;

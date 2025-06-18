@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
-import { bookAttributesDefinition } from './schema';
+import { EmbeddableTransformsDefinition } from '@kbn/embeddable-plugin/common';
+import { bookItemSchema, bookTransforms } from './schema';
 
-export const bookCmDefinitions: EmbeddableContentManagementDefinition = {
-  id: 'book',
+export const bookTransformsDefinitions: EmbeddableTransformsDefinition = {
+  type: 'book',
   versions: {
-    1: bookAttributesDefinition,
+    1: {
+      schema: bookItemSchema,
+      ...bookTransforms
+    },
   },
   latestVersion: 1,
 };
