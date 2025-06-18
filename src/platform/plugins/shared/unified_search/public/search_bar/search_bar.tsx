@@ -223,6 +223,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       currentProps: nextProps,
     };
     if (nextQuery) {
+      console.log('somehow the edited query in Discover doesnt arrive here', nextQuery);
       nextState.query = nextQuery;
     }
     if (nextDateRange) {

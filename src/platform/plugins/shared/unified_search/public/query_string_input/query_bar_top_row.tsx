@@ -731,6 +731,7 @@ export const QueryBarTopRow = React.memo(
       if (adHocDataview && typeof adHocDataview !== 'string') {
         detectedTimestamp = adHocDataview?.timeFieldName;
       }
+      console.log('query', props.query);
       return (
         isQueryLangSelected &&
         props.query &&
