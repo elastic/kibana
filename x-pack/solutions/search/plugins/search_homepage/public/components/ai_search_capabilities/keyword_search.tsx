@@ -29,13 +29,13 @@ const KEYWORD_TEXT = {
   ),
   featureBullets: [
     i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.firstLine', {
-      defaultMessage: 'Take advantage of EIS...',
+      defaultMessage: 'Enhanced query flexibility to create complex search functionalities.',
     }),
     i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.secondLine', {
-      defaultMessage: 'Take advantage of EIS...',
+      defaultMessage: 'Scalable architecture accommodates growing datasets.',
     }),
     i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.thirdLine', {
-      defaultMessage: 'Take advantage of EIS...',
+      defaultMessage: 'Enable precise results by targeting for users or other query conditions.',
     }),
   ],
   buttonLabel: i18n.translate(
