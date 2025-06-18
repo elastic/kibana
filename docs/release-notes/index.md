@@ -41,7 +41,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 * Prevents data tables from breaking if Lens visualizations are missing data [#217937]({{kib-pull}}217937).
 
 **Discover**:
-* Ensures the absolute time range is used when exporting a report from Discover and in the CSV format [#223249]({{kib-pull}}223249).
+* Ensures the absolute time range is used when exporting a report from Discover in the CSV format [#223249]({{kib-pull}}223249).
 * Adds request parameters that were formerly missing from the **Request** tab when you inspected an ES|QL request [#221816]({{kib-pull}}221816).
 
 **Elastic Observability solution**:
