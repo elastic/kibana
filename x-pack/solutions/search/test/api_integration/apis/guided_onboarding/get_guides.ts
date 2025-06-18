@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -16,8 +14,8 @@ import {
 import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { createGuides } from '@kbn/test-suites-src/api_integration/apis/guided_onboarding/helpers';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { createGuides } from './helpers';
 
 const getGuidesPath = `${API_BASE_PATH}/guides`;
 export default function testGetGuidesState({ getService }: FtrProviderContext) {

@@ -2719,6 +2719,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 ^/src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 ^/src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 ^/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
+/x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
