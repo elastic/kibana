@@ -21,7 +21,7 @@ import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities, isServerless }: SystemRouteDeps
 ) {
   router.versioned
     .post({
@@ -205,6 +205,46 @@ export function systemRoutes(
               isCloudTrial,
               cloudUrl: cloud.baseUrl,
               isMlAutoscalingEnabled,
+            },
+          });
+        } catch (error) {
+          return response.customError(wrapError(error));
+        }
+      })
+    )
+    .addVersion(
+      {
+        version: '2',
+        validate: false,
+      },
+      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client }) => {
+        try {
+          const body = await mlClient.info();
+          const cloudId = cloud?.cloudId;
+          const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
+
+          let isMlAutoscalingEnabled = false;
+          try {
+            // kibana_system user does not have the manage_autoscaling cluster privilege.
+            // perform this check as a current user.
+            await client.asCurrentUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
+            isMlAutoscalingEnabled = true;
+          } catch (e) {
+            // If ml autoscaling policy doesn't exist or the user does not have privileges to fetch it,
+            // check the number of lazy ml nodes to determine if autoscaling is enabled.
+            const lazyMlNodeCount = await getLazyMlNodeCount(client);
+            isMlAutoscalingEnabled = lazyMlNodeCount > 0;
+          }
+
+          return response.ok({
+            body: {
+              ...body,
+              cloudId,
+              isCloudTrial,
+              cloudUrl: cloud.baseUrl,
+              isMlAutoscalingEnabled,
+              showNodeInfo: !isServerless,
+              showLicenseInfo: !isServerless,
             },
           });
         } catch (error) {

@@ -70,6 +70,8 @@ export interface MlInfoResponse {
   isCloudTrial?: boolean;
   cloudUrl?: string;
   isMlAutoscalingEnabled: boolean;
+  showNodeInfo: boolean;
+  showLicenseInfo: boolean;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -644,7 +646,7 @@ export function mlApiProvider(httpService: HttpService) {
       return httpService.http<MlInfoResponse>({
         path: `${ML_INTERNAL_BASE_PATH}/info`,
         method: 'GET',
-        version: '1',
+        version: '2',
       });
     },
 
