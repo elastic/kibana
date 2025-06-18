@@ -8,9 +8,36 @@
 /** A union of all valid `owner` values for reference data entries */
 export type ReferenceDataOwner = 'EDR';
 
+/**
+ * List of allowed `key`'s of reference data items.
+ * Use the `REF_DATA_KEYS` object from `./constants` to reference these in code.
+ */
+export type ReferenceDataItemKey =
+  | 'SPACE-AWARENESS-ARTIFACT-MIGRATION'
+  | `SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION`;
+
 export interface ReferenceDataSavedObject<Meta extends object = {}> {
-  id: string;
+  id: ReferenceDataItemKey;
   type: string;
   owner: ReferenceDataOwner;
   metadata: Meta;
+}
+
+export interface ReferenceDataClientInterface {
+  get<TMeta extends object = {}>(
+    refDataKey: ReferenceDataItemKey,
+    options?: Partial<{ createIfNotFound: ReferenceDataSavedObject<TMeta> }>
+  ): Promise<ReferenceDataSavedObject<TMeta>>;
+
+  create<TMeta extends object = {}>(
+    refDataKey: ReferenceDataItemKey,
+    data: ReferenceDataSavedObject<TMeta>
+  ): Promise<ReferenceDataSavedObject<TMeta>>;
+
+  update<TMeta extends object = {}>(
+    refDataKey: ReferenceDataItemKey,
+    data: ReferenceDataSavedObject<TMeta>
+  ): Promise<ReferenceDataSavedObject<TMeta>>;
+
+  delete(refDataKey: ReferenceDataItemKey): Promise<void>;
 }

@@ -6,3 +6,10 @@
  */
 
 export const REFERENCE_DATA_SAVED_OBJECT_TYPE = 'security:reference-data';
+
+export const REF_DATA_KEYS = {
+  /** V9.1 migration of artifacts state */
+  spaceAwarenessArtifactMigration: 'SPACE-AWARENESS-ARTIFACT-MIGRATION',
+  /** V9.1 migration of response actions state */
+  spaceAwarenessResponseActionsMigration: 'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION',
+} as const;
