@@ -35,7 +35,7 @@ export const GraphPreviewContainer: React.FC = () => {
     eventId,
     indexName,
     scopeId,
-    isPreview,
+    isRulePreview,
     isPreviewMode,
     dataFormattedForFieldBrowser,
   } = useDocumentDetailsContext();
@@ -43,7 +43,7 @@ export const GraphPreviewContainer: React.FC = () => {
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
-  const allowFlyoutExpansion = visualizationInFlyoutEnabled && !isPreviewMode && !isPreview;
+  const allowFlyoutExpansion = visualizationInFlyoutEnabled && !isPreviewMode && !isRulePreview;
 
   const { navigateToGraphVisualization } = useNavigateToGraphVisualization({
     eventId,
