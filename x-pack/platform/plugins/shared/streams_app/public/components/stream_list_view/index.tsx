@@ -27,6 +27,7 @@ export function StreamListView() {
         share,
       },
     },
+    core: { docLinks },
   } = useKibana();
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -92,10 +93,7 @@ export function StreamListView() {
             defaultMessage:
               'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
           })}{' '}
-          <EuiLink
-            target="_blank"
-            href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams"
-          >
+          <EuiLink target="_blank" href={docLinks.links.observability.logsStreams}>
             {i18n.translate('xpack.streams.streamsListView.pageHeaderDocsLink', {
               defaultMessage: 'See docs',
             })}
