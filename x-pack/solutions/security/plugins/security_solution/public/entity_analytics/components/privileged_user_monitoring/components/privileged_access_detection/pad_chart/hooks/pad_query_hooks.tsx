@@ -77,11 +77,21 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
   const search = useKibana().services.data.search.search;
   const filterQuery = useEsqlGlobalFilterQuery();
 
-  const { userNames } = usePrivilegedAccessDetectionTopUsersQuery(params);
+  const {
+    userNames,
+    isError: isTopUsersError,
+    isLoading: isTopUsersLoading,
+  } = usePrivilegedAccessDetectionTopUsersQuery(params);
 
   const padAnomalyDataEsqlSource = usePadAnomalyDataEsqlSource({ ...params, userNames });
 
-  const { isLoading, isRefetching, data, error, isError, refetch } = useQuery<{
+  const {
+    isLoading: isAnomaliesLoading,
+    data,
+    error,
+    isError: isAnomaliesError,
+    refetch,
+  } = useQuery<{
     anomalyRecords: ESQLAnomalyRecord[];
     userNames: string[];
   }>(
@@ -126,10 +136,9 @@ export const usePrivilegedAccessDetectionAnomaliesQuery = (params: {
 
   return {
     data,
-    isLoading: isLoading || isRefetching,
+    isLoading: isTopUsersLoading || isAnomaliesLoading,
+    isError: isTopUsersError || isAnomaliesError,
     refetch,
     error,
-    isRefetching,
-    isError,
   };
 };

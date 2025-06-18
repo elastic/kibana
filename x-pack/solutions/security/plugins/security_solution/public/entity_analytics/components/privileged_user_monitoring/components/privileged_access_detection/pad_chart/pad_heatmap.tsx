@@ -14,7 +14,15 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiImage,
+  EuiText,
+  EuiTitle,
+  EuiLoadingChart,
+  EuiCallOut,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -141,43 +149,59 @@ export const PrivilegedAccessDetectionHeatmap: React.FC<PrivilegedAccessDetectio
         height: `${padChartStyling.heightOfHeatmap(userNames)}px`,
       }}
     >
+      {isLoading && (
+        <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
+          <EuiLoadingChart size="xl" />
+        </EuiFlexGroup>
+      )}
+      {isError && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.anomalyDetectionDataError',
+            {
+              defaultMessage:
+                'There was an error retrieving privileged access detection anomaly data.',
+            }
+          )}
+          color="danger"
+          iconType="error"
+        />
+      )}
       {!isLoading && !isError && (
-        <>
-          <Chart>
-            <Settings
-              theme={{ heatmap: heatmapComponentStyle }}
-              noResults={<PrivilegedAccessDetectionHeatmapNoResults />}
-              xDomain={xDomain}
-            />
-            <Heatmap
-              id={'privileged-access-detection-heatmap-chart'}
-              xScale={{
-                type: ScaleType.Time,
-                interval: {
-                  type: 'fixed',
-                  value: intervalForHeatmap,
-                  unit: 'h',
-                },
-              }}
-              colorScale={{
-                type: 'bands',
-                bands: anomalyBands,
-              }}
-              data={records}
-              name={i18n.translate(
-                'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetections.maxAnomalyScore',
-                { defaultMessage: 'Max anomaly score' }
-              )}
-              xAccessor="@timestamp"
-              xAxisLabelName={''}
-              xAxisLabelFormatter={timeFormatter}
-              yAccessor="user.name"
-              yAxisLabelName={'user.name'}
-              ySortPredicate="numDesc"
-              valueAccessor="record_score"
-            />
-          </Chart>
-        </>
+        <Chart>
+          <Settings
+            theme={{ heatmap: heatmapComponentStyle }}
+            noResults={<PrivilegedAccessDetectionHeatmapNoResults />}
+            xDomain={xDomain}
+          />
+          <Heatmap
+            id={'privileged-access-detection-heatmap-chart'}
+            xScale={{
+              type: ScaleType.Time,
+              interval: {
+                type: 'fixed',
+                value: intervalForHeatmap,
+                unit: 'h',
+              },
+            }}
+            colorScale={{
+              type: 'bands',
+              bands: anomalyBands,
+            }}
+            data={records}
+            name={i18n.translate(
+              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetections.maxAnomalyScore',
+              { defaultMessage: 'Max anomaly score' }
+            )}
+            xAccessor="@timestamp"
+            xAxisLabelName={''}
+            xAxisLabelFormatter={timeFormatter}
+            yAccessor="user.name"
+            yAxisLabelName={'user.name'}
+            ySortPredicate="numDesc"
+            valueAccessor="record_score"
+          />
+        </Chart>
       )}
     </EuiFlexItem>
   );
