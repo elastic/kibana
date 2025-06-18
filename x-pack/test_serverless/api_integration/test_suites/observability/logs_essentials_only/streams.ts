@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const svlCommonApi = getService('svlCommonApi');
 
-  describe.only('Streams', function () {
+  describe('Streams', function () {
     let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
 
     before(async () => {
