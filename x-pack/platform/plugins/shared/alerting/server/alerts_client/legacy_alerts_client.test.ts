@@ -460,7 +460,6 @@ describe('Legacy Alerts Client', () => {
     alertsClient.determineFlappingAlerts();
 
     expect(determineFlappingAlerts).toHaveBeenCalledWith({
-      logger,
       newAlerts: {},
       activeAlerts: {},
       recoveredAlerts: {},
@@ -471,7 +470,6 @@ describe('Legacy Alerts Client', () => {
       },
       previouslyRecoveredAlerts: {},
       actionGroupId: 'default',
-      maxAlerts: 1000,
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({
