@@ -14,6 +14,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { CustomPanel } from './custom_panel';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
 import { FlyoutFooter } from './flyout_footer';
 
@@ -52,14 +53,12 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          <CustomPanel />
+
           <CellActionsProvider
             getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
           >
             <DataGridLazy
-              data={deps.data}
-              fieldFormats={deps.fieldFormats}
-              core={deps.coreStart}
-              share={deps.share}
               {...props}
               dataView={dataView}
               columns={dataViewColumns}

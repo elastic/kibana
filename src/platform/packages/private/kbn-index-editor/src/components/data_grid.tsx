@@ -7,23 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiLink, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
-import type { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   CustomCellRenderer,
   DataLoadingState,
-  UnifiedDataTable,
-  UnifiedDataTableRenderCustomToolbarProps,
-  renderCustomToolbar,
   type SortOrder,
+  UnifiedDataTable,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -35,7 +28,6 @@ interface ESQLDataGridProps {
   rows: DataTableRecord[];
   dataView: DataView;
   columns: DatatableColumn[];
-  query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
   initialColumns?: DatatableColumn[];
   initialRowHeight?: number;
@@ -54,7 +46,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       fieldFormats,
       theme,
       uiSettings,
-      share,
       data,
       notifications,
       dataViewFieldEditor,
@@ -134,59 +125,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     };
   }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
 
-  const discoverLocator = useMemo<DiscoverAppLocator | undefined>(() => {
-    return share?.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
-  }, [share?.url.locators]);
-
-  const renderToolbar = useCallback(
-    (customToolbarProps: UnifiedDataTableRenderCustomToolbarProps) => {
-      const discoverLink = discoverLocator?.getRedirectUrl({
-        timeRange: data.query.timefilter.timefilter.getTime(),
-        query: {
-          esql: `FROM ${props.dataView.getIndexPattern()} | LIMIT ${rowsPerPage}`,
-        },
-        columns: activeColumns,
-      });
-      return renderCustomToolbar({
-        ...customToolbarProps,
-        toolbarProps: {
-          ...customToolbarProps.toolbarProps,
-          hasRoomForGridControls: true,
-        },
-        gridProps: {
-          inTableSearchControl: customToolbarProps.gridProps.inTableSearchControl,
-          additionalControls: (
-            <EuiLink
-              href={discoverLink}
-              target="_blank"
-              color="primary"
-              css={css`
-                display: flex;
-                align-items: center;
-              `}
-              external={false}
-            >
-              <EuiIcon
-                type="discoverApp"
-                size="s"
-                color="primary"
-                css={css`
-                  margin-right: 4px;
-                `}
-              />
-              <EuiText size="xs">
-                {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
-                  defaultMessage: 'Open in Discover',
-                })}
-              </EuiText>
-            </EuiLink>
-          ),
-        },
-      });
-    },
-    [discoverLocator, data.query.timefilter.timefilter, props.dataView, rowsPerPage, activeColumns]
-  );
-
   const onValueChange = useCallback(
     (docId: string, update: any) => {
       // reset editing cell
@@ -213,11 +151,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     <>
       <UnifiedDataTable
         columns={activeColumns}
-        css={css`
-          .unifiedDataTableToolbar {
-            padding: 4px 0px;
-          }
-        `}
         rows={rows}
         columnsMeta={columnsMeta}
         services={services}
@@ -251,7 +184,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rowHeightState={rowHeight}
         onUpdateRowHeight={setRowHeight}
         controlColumnIds={props.controlColumnIds}
-        renderCustomToolbar={discoverLocator ? renderToolbar : undefined}
         disableCellActions
         disableCellPopover
       />

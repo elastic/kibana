@@ -9,10 +9,12 @@
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
 export interface EditLookupIndexContentContext {
@@ -43,4 +45,10 @@ export interface KibanaContextExtra {
   dataViewFieldEditor: DataViewFieldEditorStart;
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
+  // Required services
+  theme: ThemeServiceStart;
+  uiSettings: IUiSettingsClient;
+  notifications: NotificationsStart;
+  // Additional services
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
