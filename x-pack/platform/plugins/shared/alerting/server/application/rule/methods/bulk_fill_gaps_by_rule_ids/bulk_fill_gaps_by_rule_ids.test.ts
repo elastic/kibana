@@ -18,6 +18,7 @@ import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { toBulkGapFillError } from './utils';
+import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 
 jest.mock('./batch_backfill_rule_gaps', () => {
   return {
@@ -37,21 +38,23 @@ jest.mock('../../../../rules_client/common/audit_events', () => {
 
 const ruleAuditEventMock = ruleAuditEvent as jest.Mock;
 
-const buildRule = (id: string): BulkFillGapsByRuleIdsParams['rules'][0] => {
+const buildRule = (id: number): BulkFillGapsByRuleIdsParams['rules'][0] => {
   return {
-    id,
+    id: id.toString(),
     name: `${id}-rule-name`,
-    consumer: `${id}-rule-consumer`,
-    alertTypeId: `${id}-rule-alert-type-id`,
+    consumer: `rule-consumer-${id % 2}`,
+    alertTypeId: `rule-alert-type-id-${id % 2}`,
   };
 };
 const backfillRange = { start: '2025-05-09T09:15:09.457Z', end: '2025-05-09T09:24:09.457Z' };
 const successfulRules = Array.from({ length: 3 }, (_, idx) =>
-  buildRule(idx.toString())
+  buildRule(idx)
 ) as BulkFillGapsByRuleIdsParams['rules'];
-const erroredRuleAtAuthorization = buildRule('3');
-const skippedRule = buildRule('4');
-const errroredRuleAtBackfilling = buildRule('6');
+const erroredRuleAtAuthorization = buildRule(3);
+erroredRuleAtAuthorization.alertTypeId = 'should-break';
+erroredRuleAtAuthorization.consumer = 'should-break';
+const skippedRule = buildRule(4);
+const errroredRuleAtBackfilling = buildRule(5);
 const allRules = [
   ...successfulRules,
   erroredRuleAtAuthorization,
@@ -65,6 +68,7 @@ let rulesClientContext: RulesClientContext;
 describe('bulkFillGapsByRuleIds', () => {
   let refreshIndexMock: jest.Mock;
   let results: BulkFillGapsByRuleIdsResult;
+  let ensuredAuthorizedMock: jest.Mock;
 
   const authorizationError = new Error('error at authorization');
   const schedulingError = new Error('error at scheduling');
@@ -75,7 +79,7 @@ describe('bulkFillGapsByRuleIds', () => {
     refreshIndexMock = jest.fn();
     eventLogClientMock.mockResolvedValue({ refreshIndex: refreshIndexMock });
 
-    const ensuredAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as jest.Mock;
+    ensuredAuthorizedMock = rulesClientContext.authorization.ensureAuthorized as jest.Mock;
     ensuredAuthorizedMock.mockImplementation(async ({ ruleTypeId }) => {
       if (ruleTypeId === erroredRuleAtAuthorization.alertTypeId) {
         throw authorizationError;
@@ -123,10 +127,31 @@ describe('bulkFillGapsByRuleIds', () => {
     jest.resetAllMocks();
   });
 
-  it('should call the scheduling function correctly', () => {
-    rulesThatAttemptedToBackfill.forEach((rule, idx) => {
-      const callOrder = idx + 1;
-      expect(batchBackfillRuleGapsMock).toHaveBeenNthCalledWith(callOrder, rulesClientContext, {
+  it('should ensure the user is authorized for each combination of ruleTypeId and consumer found in the rules', () => {
+    expect(ensuredAuthorizedMock).toHaveBeenCalledTimes(3);
+    expect(ensuredAuthorizedMock).toHaveBeenNthCalledWith(1, {
+      consumer: 'rule-consumer-0',
+      entity: AlertingAuthorizationEntity.Rule,
+      operation: WriteOperations.FillGaps,
+      ruleTypeId: 'rule-alert-type-id-0',
+    });
+    expect(ensuredAuthorizedMock).toHaveBeenNthCalledWith(2, {
+      consumer: 'rule-consumer-1',
+      entity: AlertingAuthorizationEntity.Rule,
+      operation: WriteOperations.FillGaps,
+      ruleTypeId: 'rule-alert-type-id-1',
+    });
+    expect(ensuredAuthorizedMock).toHaveBeenNthCalledWith(3, {
+      consumer: 'should-break',
+      entity: AlertingAuthorizationEntity.Rule,
+      operation: WriteOperations.FillGaps,
+      ruleTypeId: 'should-break',
+    });
+  });
+
+  it('should call batchBackfillRuleGaps correctly', () => {
+    rulesThatAttemptedToBackfill.forEach((rule) => {
+      expect(batchBackfillRuleGapsMock).toHaveBeenCalledWith(rulesClientContext, {
         rule,
         range: backfillRange,
         maxGapCountPerRule: 1000,
@@ -135,7 +160,11 @@ describe('bulkFillGapsByRuleIds', () => {
   });
 
   it('should return a list with rules that succeeded', () => {
-    expect(results.backfilled).toEqual(successfulRules);
+    expect(results.backfilled).toHaveLength(successfulRules.length);
+    // the order in which they are processed is not guaranteed because we use pMap
+    successfulRules.forEach((successfulRule) => {
+      expect(results.backfilled).toContain(successfulRule);
+    });
   });
 
   it('should return a list with errored rules', () => {
