@@ -320,7 +320,7 @@
         "release_note:skip",
         "backport:all-open"
       ],
-      "enabled": true
+      "enabled": false
     },
     {
       "matchDepNames": [
@@ -466,7 +466,7 @@
         "release_note:skip",
         "backport:all-open"
       ],
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "Emotion dependencies",
@@ -514,7 +514,7 @@
         "release_note:skip",
         "backport:all-open"
       ],
-      "enabled": true
+      "enabled": false
     },
     {
       "matchDepNames": [
@@ -574,7 +574,7 @@
         "release_note:skip",
         "backport:all-open"
       ],
-      "enabled": true
+      "enabled": false
     },
     {
       "groupName": "react-markdown",
