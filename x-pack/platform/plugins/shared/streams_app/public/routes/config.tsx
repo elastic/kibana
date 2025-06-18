@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StreamDetailView } from '../components/stream_detail_view';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
@@ -51,15 +50,28 @@ const streamsAppRoutes = {
         }),
         children: {
           '/{key}': {
-            element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+            ),
           },
+          /**
+           * This route matching the StreamDetailView will be temporarily disable as it does not provide additional value than the stream list and lifecycle view
+           */
+          // '/{key}/{tab}': {
+          //   element: <StreamDetailView />,
+          //   params: t.type({
+          //     path: t.type({
+          //       tab: t.string,
+          //     }),
+          //   }),
+          // },
+          /**
+           * This route is added as a replacement of the old StreamDetailView routing to redirect from existing overview/dashboard links into the management page
+           */
           '/{key}/{tab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
-              }),
-            }),
+            element: (
+              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
+            ),
           },
           '/{key}/management/{tab}': {
             element: <StreamManagementView />,
