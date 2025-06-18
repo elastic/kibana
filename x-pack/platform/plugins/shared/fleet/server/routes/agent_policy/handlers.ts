@@ -317,7 +317,7 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
 
   if (!licenseService.isEnterprise()) {
     throw new FleetUnauthorizedError(
-      'Agents auto upgrades feature requires at least Enterprise license'
+      'Auto-upgrade agents feature requires at least Enterprise license'
     );
   }
 

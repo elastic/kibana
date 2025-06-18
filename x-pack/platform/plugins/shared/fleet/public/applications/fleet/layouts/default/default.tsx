@@ -11,14 +11,11 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useDismissableTour } from '../../../../hooks/use_dismissable_tour';
 import type { Section } from '../../sections';
-import { useLink, useConfig, useAuthz, useStartServices, licenseService } from '../../hooks';
+import { useLink, useConfig, useAuthz, useStartServices } from '../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 
 import { AutoUpgradeAgentsTour } from '../../sections/agent_policy/components/auto_upgrade_agents_tour';
-
-import { ExperimentalFeaturesService } from '../../services';
-
-import { DefaultPageTitle } from './default_page_title';
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../hooks/use_can_enable_auto_upgrades';
 
 interface Props {
   section?: Section;
@@ -36,9 +33,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
-  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-  const canEnableAutomaticAgentUpgrades =
-    enableAutomaticAgentUpgrades && licenseService.isEnterprise();
+  const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
   const tabs = [
     {

@@ -23,7 +23,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 
-import { licenseService, useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../types';
 import { AgentPolicyActionMenu, LinkedAgentCount } from '../../../components';
 import { AddAgentHelpPopover } from '../../../../../components';
@@ -31,7 +31,8 @@ import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
 import { getRootIntegrations } from '../../../../../../../../common/services';
 import { ManageAutoUpgradeAgentsModal } from '../../../../agents/components/manage_auto_upgrade_agents_modal';
 import { AutoUpgradeAgentsTour } from '../../../components/auto_upgrade_agents_tour';
-import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../../../hooks/use_can_enable_auto_upgrades';
 
 import { ManageAutoUpgradeAgentsBadge } from './manage_auto_upgrade_agents';
 
@@ -64,9 +65,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
     useState<boolean>(false);
   const refreshAgentPolicy = useAgentPolicyRefresh();
-  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-  const canEnableAutomaticAgentUpgrades =
-    enableAutomaticAgentUpgrades && licenseService.isEnterprise();
+  const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
   const isFleetServerPolicy = useMemo(
     () =>

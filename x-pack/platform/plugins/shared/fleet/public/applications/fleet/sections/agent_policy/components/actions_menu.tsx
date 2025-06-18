@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useAgentPolicyRefresh, useAuthz, licenseService } from '../../../hooks';
+import { useAgentPolicyRefresh, useAuthz } from '../../../hooks';
 import {
   AgentEnrollmentFlyout,
   ContextMenuActions,
@@ -18,11 +18,13 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../services';
+import { policyHasFleetServer } from '../../../services';
 
 import { AgentUpgradeAgentModal } from '../../agents/components';
 
 import { ManageAutoUpgradeAgentsModal } from '../../agents/components/manage_auto_upgrade_agents_modal';
+
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
@@ -54,9 +56,7 @@ export const AgentPolicyActionMenu = memo<{
     const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
       useState<boolean>(false);
     const refreshAgentPolicy = useAgentPolicyRefresh();
-    const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
-    const canEnableAutomaticAgentUpgrades =
-      enableAutomaticAgentUpgrades && licenseService.isEnterprise();
+    const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
     const isFleetServerPolicy = useMemo(
       () =>
