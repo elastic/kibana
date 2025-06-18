@@ -19,8 +19,6 @@ interface ProcessAllGapsInTimeRangeParams<T> {
   end: string;
   statuses?: GapStatus[];
   options?: {
-    pageSize?: number;
-    maxIterations?: number;
     maxFetchedGaps?: number;
   };
   eventLogClient: IEventLogClient;
@@ -28,11 +26,11 @@ interface ProcessAllGapsInTimeRangeParams<T> {
   processGapsBatch: (gaps: Gap[]) => Promise<T>;
 }
 
-export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
+const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
 // Circuit breaker to prevent infinite loops
-// It should be enough to update 50,000,000 gaps
-// 100000 * 500 = 50,000,000 millions gaps
-const DEFAULT_MAX_ITERATIONS = 100000;
+// It should be enough to update 5,000,000 gaps
+// 10000 * 500 = 5,000,000 million gaps
+const DEFAULT_MAX_ITERATIONS = 10000;
 
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
@@ -53,17 +51,13 @@ export const processAllGapsInTimeRange = async <T>({
   let gapsCount = 0;
   const processingResults: T[] = [];
 
-  const {
-    pageSize = PROCESS_GAPS_DEFAULT_PAGE_SIZE,
-    maxIterations = DEFAULT_MAX_ITERATIONS,
-    maxFetchedGaps,
-  } = options ?? {};
+  const { maxFetchedGaps } = options ?? {};
 
   try {
     while (true) {
-      if (iterationCount >= maxIterations) {
+      if (iterationCount >= DEFAULT_MAX_ITERATIONS) {
         logger.warn(
-          `Circuit breaker triggered: Reached maximum number of iterations (${maxIterations}) while processing gaps for rule ${ruleId}`
+          `Circuit breaker triggered: Reached maximum number of iterations (${DEFAULT_MAX_ITERATIONS}) while processing gaps for rule ${ruleId}`
         );
         break;
       }
@@ -76,7 +70,7 @@ export const processAllGapsInTimeRange = async <T>({
           ruleId,
           start,
           end,
-          perPage: pageSize,
+          perPage: PROCESS_GAPS_DEFAULT_PAGE_SIZE,
           statuses,
           sortField: '@timestamp',
           sortOrder: 'asc',

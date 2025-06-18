@@ -20,63 +20,70 @@ jest.mock('./find_gaps', () => {
 
 const findGapsSearchAfterMock = findGapsSearchAfter as jest.Mock;
 
+const range = (rangeStart: string, rangeEnd: string) => ({
+  gte: new Date(rangeStart),
+  lte: new Date(rangeEnd),
+});
+const createGap = (unfilledIntervals: Array<ReturnType<typeof range>>): Gap => {
+  return {
+    unfilledIntervals,
+  } as unknown as Gap;
+};
+
+const generateTestCaseData = (iterations: number) => {
+  const pageSize = 500;
+  const oneMinuteMs = 60 * 1000;
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - iterations * pageSize * oneMinuteMs);
+
+  let nextDate = startDate;
+  const getDateRange = () => {
+    const date = nextDate.toISOString();
+    nextDate = new Date(nextDate.getTime() + oneMinuteMs);
+    return range(date, nextDate.toISOString());
+  };
+  const findGapsSearchReturnValues = Array.from({ length: iterations }).map((_, idx) => {
+    return {
+      data: Array.from({ length: 500 }).map((__) => createGap([getDateRange()])),
+      searchAfter: idx + 1 === iterations ? null : `some-search-after-${idx}`,
+      pitId: `pitd-${idx}`,
+    };
+  });
+
+  return {
+    findGapsSearchReturnValues,
+    searchRange: {
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+    },
+  };
+};
+
 describe('processAllGapsInTimeRange', () => {
   const ruleId = 'some-rule-id';
-  const start = '2025-05-11T17:18:03.608Z';
-  const end = '2025-05-21T17:18:03.608Z';
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
-  const processGapsBatchMock = jest.fn(async (gaps: Gap[]) => {});
 
-  const range = (rangeStart: string, rangeEnd: string) => ({
-    gte: new Date(rangeStart),
-    lte: new Date(rangeEnd),
-  });
-  const createGap = (unfilledIntervals: Array<ReturnType<typeof range>>): Gap => {
-    return {
-      unfilledIntervals,
-    } as unknown as Gap;
-  };
-
-  const findGapsSearchReturnValues = [
-    {
-      data: [
-        createGap([
-          range('2025-05-09T09:15:09.457Z', '2025-05-09T09:20:09.457Z'),
-          range('2025-05-09T09:21:09.457Z', '2025-05-09T09:22:09.457Z'),
-        ]),
-      ],
-      searchAfter: 'some-search-after-1',
-      pitId: 'pitd-1',
-    },
-    {
-      data: [
-        createGap([
-          range('2025-05-09T09:15:09.457Z', '2025-05-09T09:20:09.457Z'),
-          range('2025-05-09T09:21:09.457Z', '2025-05-09T09:22:09.457Z'),
-        ]),
-        createGap([range('2025-05-09T09:23:09.457Z', '2025-05-09T09:24:09.457Z')]),
-      ],
-      searchAfter: 'some-search-after-2',
-      pitId: 'pitd-2',
-    },
-    {
-      data: [createGap([range('2025-05-09T09:23:09.457Z', '2025-05-09T09:24:09.457Z')])],
-      searchAfter: null,
-      pitId: 'pitd-3',
-    },
-  ];
+  let processGapsBatchMock: jest.Mock;
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
+  beforeEach(() => {
+    let processGapsBatchCall = 1;
+    processGapsBatchMock = jest.fn(async () => processGapsBatchCall++);
+  });
+
   describe('happy path', () => {
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3);
+    const { start, end } = searchRange;
+    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
     beforeEach(async () => {
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      await processAllGapsInTimeRange({
+      results = await processAllGapsInTimeRange({
         ruleId,
         start,
         end,
@@ -131,60 +138,78 @@ describe('processAllGapsInTimeRange', () => {
         expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, data);
       });
     });
+
+    it('should return a list with the results of each call to processGapsBatch', () => {
+      // In this test we make processGapsBatch to return a number representing how many times it was called
+      expect(results).toEqual(findGapsSearchReturnValues.map((_, idx) => idx + 1));
+    });
   });
 
   describe('when the max iterations are reached', () => {
-    const maxIterations = 2;
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(10001);
+    const { start, end } = searchRange;
+    let results: Awaited<ReturnType<typeof processAllGapsInTimeRange>>;
     beforeEach(async () => {
+      findGapsSearchAfterMock.mockImplementation(() => {
+        return {
+          data: [],
+          searchAfter: null,
+          pitId: null,
+        };
+      });
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-      await processAllGapsInTimeRange({
+      results = await processAllGapsInTimeRange({
         ruleId,
         start,
         end,
         logger: mockLogger,
         eventLogClient: mockEventLogClient,
         processGapsBatch: processGapsBatchMock,
-        options: {
-          maxIterations,
-        },
       });
     });
 
     it('should stop fetching gaps when the max number of iterations is reached', () => {
-      expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(maxIterations);
+      expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(10000);
     });
 
     it('should call closePointInTime when it is done', () => {
       expect(mockEventLogClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
+
+    it('should return a list with the results of each call to processGapsBatch', () => {
+      // In this test we make processGapsBatch to return a number representing how many times it was called
+      expect(results).toEqual(findGapsSearchReturnValues.slice(0, 10000).map((_, idx) => idx + 1));
+    });
   });
 
   describe('when the max amount of gaps specified in the params is reached', () => {
-    let processedGapsCounts: number[];
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(3);
+    const { start, end } = searchRange;
+    let processedGapsCount = 0;
     beforeEach(async () => {
+      processGapsBatchMock.mockImplementation(async (gaps) => {
+        processedGapsCount += gaps.length;
+      });
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
-
-      processedGapsCounts = [];
-
-      processGapsBatchMock.mockImplementation(async (gaps) => {
-        processedGapsCounts.push(gaps.length);
-      });
-
       await processAllGapsInTimeRange({
         ruleId,
         start,
         end,
         logger: mockLogger,
+        options: {
+          maxFetchedGaps: 550,
+        },
         eventLogClient: mockEventLogClient,
         processGapsBatch: processGapsBatchMock,
-        options: {
-          maxFetchedGaps: 2,
-        },
       });
+    });
+
+    afterEach(() => {
+      processedGapsCount = 0;
     });
 
     it('should stop fetching gaps when the max number of gaps is reached', () => {
@@ -192,8 +217,7 @@ describe('processAllGapsInTimeRange', () => {
     });
 
     it('should only process the amount of gaps specified', () => {
-      // One gap processed in the first run, another in the second, for a total of 2
-      expect(processedGapsCounts).toEqual([1, 1]);
+      expect(processedGapsCount).toEqual(550);
     });
 
     it('should call closePointInTime when it is done', () => {
@@ -202,19 +226,23 @@ describe('processAllGapsInTimeRange', () => {
   });
 
   describe('when nextSearchAfter is null', () => {
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2);
+    // Make it stop after the first result
+    findGapsSearchReturnValues[0].searchAfter = null;
+    const { start, end } = searchRange;
+    let processedGapsCount = 0;
     beforeEach(async () => {
-      const newReturnValues = [
-        ...findGapsSearchReturnValues,
-        // Add one more, however, since the last element of findGapsSearchReturnValues
-        // has a searchAfter equals to null, the execution should stop there
-        {
-          data: [createGap([range('2025-05-09T09:23:09.457Z', '2025-05-09T09:24:09.457Z')])],
+      processGapsBatchMock.mockImplementation(async (gaps) => {
+        processedGapsCount += gaps.length;
+      });
+      findGapsSearchAfterMock.mockImplementation(() => {
+        return {
+          data: [],
           searchAfter: null,
-          pitId: 'pitd-4',
-        },
-      ];
-
-      newReturnValues.forEach((returnValue) =>
+          pitId: null,
+        };
+      });
+      findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
       await processAllGapsInTimeRange({
@@ -227,8 +255,8 @@ describe('processAllGapsInTimeRange', () => {
       });
     });
 
-    it('should stop stop fetching gaps', () => {
-      expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(findGapsSearchReturnValues.length);
+    it('should stop fetching gaps', () => {
+      expect(findGapsSearchAfterMock).toHaveBeenCalledTimes(1);
     });
 
     it('should call closePointInTime when it is done', () => {
@@ -239,6 +267,8 @@ describe('processAllGapsInTimeRange', () => {
   describe('when there is an error', () => {
     const thrownError = new Error('boom!');
     let caughtError: Error;
+    const { findGapsSearchReturnValues, searchRange } = generateTestCaseData(2);
+    const { start, end } = searchRange;
     beforeEach(async () => {
       findGapsSearchAfterMock.mockResolvedValueOnce(findGapsSearchReturnValues[0]);
       findGapsSearchAfterMock.mockRejectedValue(thrownError);
