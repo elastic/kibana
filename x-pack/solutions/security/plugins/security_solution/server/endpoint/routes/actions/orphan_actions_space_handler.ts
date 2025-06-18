@@ -1,0 +1,71 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RequestHandler } from '@kbn/core/server';
+import { errorHandler } from '../error_handler';
+import { ORPHAN_ACTIONS_SPACE_ROUTE } from '../../../../common/endpoint/constants';
+import { withEndpointAuthz } from '../with_endpoint_authz';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import type {
+  SecuritySolutionPluginRouter,
+  SecuritySolutionRequestHandlerContext,
+} from '../../../types';
+import { NotFoundError } from '../../errors';
+
+export const getReadOrphanActionsSpaceHandler = (
+  endpointService: EndpointAppContextService
+): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
+  const logger = endpointService.createLogger('ReadOrphanActionsSpaceHandler');
+
+  return async (context, req, res) => {
+    try {
+      if (!endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+        throw new NotFoundError(`Space awareness feature is disabled`);
+      }
+
+      return res.ok({
+        body: {
+          data: { spaceId: 'tbd....' },
+        },
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
+    }
+  };
+};
+
+export const registerOrphanActionsSpaceRoute = (
+  router: SecuritySolutionPluginRouter,
+  endpointService: EndpointAppContextService
+) => {
+  const logger = endpointService.createLogger('OrphanActionsSpaceRoute');
+
+  router.versioned
+    .get({
+      access: 'internal',
+      path: ORPHAN_ACTIONS_SPACE_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {}, // FIXME:PT need schema
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canReadAdminData'] },
+        logger,
+        getReadOrphanActionsSpaceHandler(endpointService)
+      )
+    );
+};
