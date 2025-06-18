@@ -84,10 +84,10 @@ export class ESTestIndexTool {
                   },
                 },
               },
-            },
-            // store as array of strings
-            tags: {
-              type: 'keyword',
+              // store as array of strings
+              tags: {
+                type: 'keyword',
+              },
             },
           },
         },
