@@ -16,6 +16,7 @@ import React, {
   useImperativeHandle,
   SetStateAction,
   Dispatch,
+  useMemo,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 
@@ -64,12 +65,15 @@ export const createRestorableStateProvider = <TState extends object>() => {
         [currentInitialState]
       );
 
-      return (
-        // TODO: May want to use React.memo to avoid unnecessary re-renders
-        <context.Provider value={{ initialState, onInitialStateChange }}>
-          {children}
-        </context.Provider>
+      const value = useMemo(
+        () => ({
+          initialState,
+          onInitialStateChange,
+        }),
+        [initialState, onInitialStateChange]
       );
+
+      return <context.Provider value={value}>{children}</context.Provider>;
     }
   );
 
