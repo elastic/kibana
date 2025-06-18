@@ -35,7 +35,7 @@ export class AccessControlService {
     object,
   }: {
     type: string;
-    object?: AuthorizeObject | null;
+    object: AuthorizeObject;
   }): Promise<boolean> {
     // check if type supports access control
     const typeSupportsAccessControl = (await this.getTypeRegistryFunc())?.supportsAccessControl(

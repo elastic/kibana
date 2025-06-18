@@ -153,6 +153,73 @@ describe('#update', () => {
       });
     });
 
+    describe('access control', () => {
+      it('should pass access control data to authorizeUpdate', async () => {
+        // Create a repository with security extension
+        const mockSecurityExtension = {
+          authorizeUpdate: jest.fn().mockResolvedValue({}),
+        };
+
+        const extensions = { securityExtension: mockSecurityExtension };
+        // @ts-expect-error must use the private constructor to use the mocked serializer
+        const repositoryWithSecurity = new SavedObjectsRepository({
+          index: '.kibana-test',
+          mappings,
+          client,
+          migrator,
+          typeRegistry: registry,
+          serializer,
+          allowedTypes: registry
+            .getAllTypes()
+            .map((type) => type.name)
+            .filter((type) => !registry.isHidden(type)),
+          logger,
+          extensions,
+        });
+
+        // Setup client mocks for preflight check and existing document with accessControl
+        client.get.mockResponseImplementation(() => {
+          return {
+            body: {
+              _id: `${type}:${id}`,
+              _source: {
+                type,
+                [`${type}`]: { title: 'Testing' },
+                references: [],
+                ...mockTimestampFields,
+                accessControl: { foo: 'bar' }, // Add accessControl data to the response
+              },
+              ...mockVersionProps,
+              found: true,
+            } as estypes.GetResponse,
+          };
+        });
+
+        client.index.mockResponseImplementation((params) => {
+          return {
+            body: {
+              _id: params.id,
+              ...mockVersionProps,
+            } as estypes.IndexResponse,
+          };
+        });
+
+        // Call update
+        await repositoryWithSecurity.update(type, id, attributes);
+
+        // Verify that authorizeUpdate was called with the correct parameters
+        expect(mockSecurityExtension.authorizeUpdate).toHaveBeenCalledWith({
+          namespace: undefined,
+          object: {
+            type,
+            id,
+            existingNamespaces: [],
+            accessControl: { foo: 'bar' },
+          },
+        });
+      });
+    });
+
     describe('client calls', () => {
       it(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
         const type = 'index-pattern';
