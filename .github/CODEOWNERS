@@ -69,7 +69,7 @@ x-pack/plugins/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
-x-pack/plugins/cases @elastic/response-ops
+x-pack/plugins/cases @elastic/response-ops @elastic/kibana-cases
 packages/kbn-cbor @elastic/kibana-operations
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
