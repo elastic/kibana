@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  loggingSystemMock,
-  savedObjectsClientMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { Subject } from 'rxjs';
@@ -17,8 +13,6 @@ import { Subject } from 'rxjs';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-
-import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 
 import type { AgentPolicy } from '../../common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
@@ -29,6 +23,8 @@ import { createAgentPolicyMock } from '../../common/mocks';
 
 import { PolicyWatcher } from './agent_policy_watch';
 import { agentPolicyService } from './agent_policy';
+import { createAppContextStartContractMock } from '../mocks';
+import { appContextService } from './app_context';
 
 jest.mock('./agent_policy');
 const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
@@ -37,13 +33,12 @@ describe('Agent Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic' } });
-  let soStartMock: jest.Mocked<SavedObjectsServiceStart>;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
-    soStartMock = savedObjectsServiceMock.createStartContract();
-    soClientMock = savedObjectsClientMock.create();
-    soStartMock.getScopedClient.mockReturnValue(soClientMock);
+    appContextService.start(createAppContextStartContractMock());
+    soClientMock =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension() as jest.Mocked<SavedObjectsClientContract>;
   });
 
   afterEach(() => {
@@ -65,7 +60,7 @@ describe('Agent Policy-Changing license watcher', () => {
     // mock a license-changing service to test reactivity
     const licenseEmitter: Subject<ILicense> = new Subject();
     const licenseService = new LicenseService();
-    const pw = new PolicyWatcher(soStartMock, logger);
+    const pw = new PolicyWatcher(logger);
 
     // swap out watch function, just to ensure it gets called when a license change happens
     const mockWatch = jest.fn();
@@ -89,7 +84,7 @@ describe('Agent Policy-Changing license watcher', () => {
   it('should return if all policies are compliant', async () => {
     jest.spyOn(agentPolicySvcMock, 'fetchAllAgentPolicies').mockReturnValue([] as any);
 
-    const pw = new PolicyWatcher(soStartMock, logger);
+    const pw = new PolicyWatcher(logger);
 
     // emulate a license change below paid tier
     await pw.watch(Platinum);
@@ -121,7 +116,7 @@ describe('Agent Policy-Changing license watcher', () => {
       ...policiesToUpdate,
     ]); // Add one policy that should not be updated
 
-    const pw = new PolicyWatcher(soStartMock, logger);
+    const pw = new PolicyWatcher(logger);
 
     // Mock paginated responses
 
@@ -172,7 +167,7 @@ describe('Agent Policy-Changing license watcher', () => {
       createAgentPolicyMock({ is_protected: true }),
     ]);
 
-    const pw = new PolicyWatcher(soStartMock, logger);
+    const pw = new PolicyWatcher(logger);
 
     soClientMock.bulkUpdate.mockResolvedValue({
       saved_objects: [

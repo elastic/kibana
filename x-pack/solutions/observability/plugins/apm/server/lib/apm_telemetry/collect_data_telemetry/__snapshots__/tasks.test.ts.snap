@@ -254,6 +254,29 @@ Object {
         },
       },
     },
+    "opentelemetry/dotnet/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
     "opentelemetry/java": Object {
       "agent": Object {
         "activation_method": Array [
@@ -341,6 +364,75 @@ Object {
           "version": Array [
             "17.0.12",
           ],
+        },
+      },
+    },
+    "opentelemetry/nodejs/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/php/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+      },
+    },
+    "opentelemetry/python/elastic": Object {
+      "agent": Object {
+        "activation_method": Array [],
+        "version": Array [],
+      },
+      "service": Object {
+        "framework": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "language": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
+        },
+        "runtime": Object {
+          "composite": Array [],
+          "name": Array [],
+          "version": Array [],
         },
       },
     },
@@ -1205,8 +1297,12 @@ Object {
     "js-base": 0,
     "nodejs": 0,
     "opentelemetry": 4,
+    "opentelemetry/dotnet/elastic": 10,
     "opentelemetry/java": 5,
     "opentelemetry/java/elastic": 6,
+    "opentelemetry/nodejs/elastic": 7,
+    "opentelemetry/php/elastic": 9,
+    "opentelemetry/python/elastic": 8,
     "otlp": 1,
     "otlp/java": 2,
     "otlp/java/elastic": 3,

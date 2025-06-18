@@ -31,7 +31,7 @@ describe('autocomplete.suggest', () => {
       ];
 
       await assertSuggestions(`FROM a | COMPLETION /`, [
-        '"${0:Your prompt to the LLM.}"',
+        { text: '"${0:Your prompt to the LLM.}"', asSnippet: true },
         ...expectedSuggestions,
       ]);
 
@@ -43,8 +43,8 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
     });
 
-    it('suggests nothing after WITH', async () => {
-      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH /`, []);
+    it('suggests inference endpoints after WITH', async () => {
+      await assertSuggestions(`FROM a | COMPLETION "prompt" WITH /`, ['`inference_1` ']);
     });
 
     describe('optional AS', () => {
