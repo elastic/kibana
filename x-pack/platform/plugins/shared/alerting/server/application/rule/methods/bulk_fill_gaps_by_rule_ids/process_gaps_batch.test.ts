@@ -89,7 +89,7 @@ describe('processGapsBatch', () => {
         { some: 'result' },
         { some: 'other unexpected result' },
       ]);
-      expect(callProcessGapsBatch()).rejects.toEqual(
+      await expect(callProcessGapsBatch()).rejects.toEqual(
         new Error('Unexpected scheduling result count 2')
       );
     });
@@ -103,7 +103,7 @@ describe('processGapsBatch', () => {
           },
         },
       ]);
-      expect(callProcessGapsBatch()).rejects.toEqual(new Error(errorMessage));
+      await expect(callProcessGapsBatch()).rejects.toEqual(new Error(errorMessage));
     });
   });
 

@@ -26,7 +26,7 @@ interface ProcessAllGapsInTimeRangeParams<T> {
   processGapsBatch: (gaps: Gap[]) => Promise<T>;
 }
 
-const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
+export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
 // Circuit breaker to prevent infinite loops
 // It should be enough to update 5,000,000 gaps
 // 10000 * 500 = 5,000,000 million gaps
