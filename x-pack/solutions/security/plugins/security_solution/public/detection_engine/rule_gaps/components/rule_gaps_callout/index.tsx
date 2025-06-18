@@ -5,22 +5,34 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { gapStatus } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { GapRangeValue } from '../../constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../../common/lib/kibana';
+import { SecurityPageName } from '../../../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import * as i18n from './translations';
 
 const DISMISSAL_STORAGE_KEY = 'rule-gaps-callout-dismissed';
 
 export const RuleGapsCallout = () => {
+  const { docLinks, spaces } = useKibana().services;
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+
+  const [spaceId, setSpaceId] = useState('');
+  useEffect(() => {
+    if (spaces) {
+      spaces.getActiveSpace().then((space) => setSpaceId(space.id));
+    }
+  }, [spaces]);
   const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   const [isDismissed, setIsDismissed] = useState(false);
 
   const { data } = useGetRuleIdsWithGaps({
-    gapRange: GapRangeValue.LAST_1_D,
+    gapRange: GapRangeValue.LAST_24_H,
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
     hasUnfilledIntervals: true,
   });
@@ -71,7 +83,33 @@ export const RuleGapsCallout = () => {
         iconType="warning"
         onDismiss={handleDismiss}
       >
-        <p>{i18n.RULE_GAPS_CALLOUT_MESSAGE}</p>
+        <>
+          <p>{i18n.RULE_GAPS_CALLOUT_MESSAGE}</p>
+          <EuiFlexGroup>
+            {spaceId && (
+              <EuiButton
+                href={getSecuritySolutionUrl({
+                  deepLinkId: SecurityPageName.dashboards,
+                  path: `security-detection-rule-monitoring-${spaceId}`,
+                })}
+                fill
+                color="warning"
+                target="_blank"
+                size="s"
+              >
+                {i18n.RULE_GAPS_CALLOUT_DASHBOARD}
+              </EuiButton>
+            )}
+            <EuiButton
+              href={`${docLinks.links.siem.gapsTable}`}
+              color="warning"
+              target="_blank"
+              size="s"
+            >
+              {i18n.RULE_GAPS_CALLOUT_READ_DOCS}
+            </EuiButton>
+          </EuiFlexGroup>
+        </>
       </EuiCallOut>
       <EuiSpacer size="s" />
     </>

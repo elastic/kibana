@@ -21,3 +21,17 @@ export const RULE_GAPS_CALLOUT_MESSAGE = i18n.translate(
       'Gaps in rule coverage were detected over the past 24 hours. Check the Rule Monitoring tab to learn which rules are affected and to begin remediating gaps.',
   }
 );
+
+export const RULE_GAPS_CALLOUT_DASHBOARD = i18n.translate(
+  'xpack.securitySolution.ruleGaps.callout.dashboard',
+  {
+    defaultMessage: 'View dashboard',
+  }
+);
+
+export const RULE_GAPS_CALLOUT_READ_DOCS = i18n.translate(
+  'xpack.securitySolution.ruleGaps.callout.readDocs',
+  {
+    defaultMessage: 'Read docs',
+  }
+);
