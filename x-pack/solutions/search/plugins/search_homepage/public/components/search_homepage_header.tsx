@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import searchHomePageLight from '../assets/search_homepage.svg';
+import searchHomePageLight from '../assets/search_homepage_light.svg';
 import searchHomePageDark from '../assets/search_homepage_dark.svg';
 
 export const SearchHomepageHeader: React.FC = () => {
