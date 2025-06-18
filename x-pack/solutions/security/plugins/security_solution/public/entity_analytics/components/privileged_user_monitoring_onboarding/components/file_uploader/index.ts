@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export * from './create';
-export * from './get';
-export * from './list';
-export * from './update';
-export * from './delete';
-export * from './upload_csv';
+export * from './upload_privileged_users_modal';

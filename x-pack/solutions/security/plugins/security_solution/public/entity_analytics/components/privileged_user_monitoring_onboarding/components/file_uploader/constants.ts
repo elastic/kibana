@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export * from './create';
-export * from './get';
-export * from './list';
-export * from './update';
-export * from './delete';
-export * from './upload_csv';
+export const SUPPORTED_FILE_TYPES = [
+  'text/csv',
+  'text/plain',
+  '.csv', // Useful for Windows when it can't recognise the file extension.
+];
+export const SUPPORTED_FILE_EXTENSIONS = ['CSV', 'TXT'];
