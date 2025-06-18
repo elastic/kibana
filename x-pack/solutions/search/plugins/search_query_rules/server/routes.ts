@@ -21,6 +21,7 @@ import { fetchQueryRulesSets } from './lib/fetch_query_rules_sets';
 import { isQueryRulesetExist } from './lib/is_query_ruleset_exist';
 import { putRuleset } from './lib/put_query_rules_ruleset_set';
 import { errorHandler } from './utils/error_handler';
+import { checkPrivileges } from './utils/privilege_check';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -112,16 +113,18 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       const rulesetData = await fetchQueryRulesRuleset(asCurrentUser, request.params.ruleset_id);
 
+      if (!rulesetData) {
+        return response.notFound({
+          body: i18n.translate('xpack.search.rules.api.routes.rulesetNotFoundErrorMessage', {
+            defaultMessage: 'Ruleset not found',
+          }),
+        });
+      }
       return response.ok({
         headers: {
           'content-type': 'application/json',
         },
-        body:
-          rulesetData ??
-          response.customError({
-            statusCode: 404,
-            body: 'Ruleset not found',
-          }),
+        body: rulesetData,
       });
     })
   );
@@ -154,8 +157,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                   criteria: schema.arrayOf(
                     schema.object({
                       type: schema.string(),
-                      metadata: schema.string(),
-                      values: schema.arrayOf(schema.string()),
+                      metadata: schema.maybe(schema.string()),
+                      values: schema.maybe(schema.arrayOf(schema.string())),
                     })
                   ),
                   actions: schema.object({
@@ -218,6 +221,43 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       });
     })
   );
+  router.get(
+    {
+      path: APIRoutes.QUERY_RULES_RULESET_EXISTS,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_search_query_rules'],
+        },
+      },
+      validate: {
+        params: schema.object({
+          rulesetId: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { rulesetId } = request.params;
+      const core = await context.core;
+      const {
+        client: { asCurrentUser },
+      } = core.elasticsearch;
+
+      await checkPrivileges(core, response);
+
+      const isExisting = await isQueryRulesetExist(asCurrentUser, rulesetId);
+
+      return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: { exists: isExisting },
+      });
+    })
+  );
+
   router.delete(
     {
       path: APIRoutes.QUERY_RULES_RULESET_ID,
