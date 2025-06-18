@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import retryForSuccessModule from './retry_for_success';
+import * as retryForSuccessModule from './retry_for_success';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 describe('Retry for success', () => {
