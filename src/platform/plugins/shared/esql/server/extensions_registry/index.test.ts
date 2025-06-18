@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { RecommendedQuery, ResolveIndexResponse } from '@kbn/esql-types';
+import type { RecommendedQuery, RecommendedField, ResolveIndexResponse } from '@kbn/esql-types';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { ESQLExtensionsRegistry } from '.';
 
@@ -224,6 +224,213 @@ describe('ESQLExtensionsRegistry', () => {
       );
 
       expect(result).toEqual([]);
+    });
+  });
+
+  // --- setRecommendedFields tests ---
+  describe('setRecommendedFields', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [
+          { name: 'logs-web' },
+          { name: 'metrics-cpu' },
+          { name: 'user-activity' },
+          { name: 'app-events' },
+        ],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should add recommended fields to the registry', () => {
+      const solutionId: SolutionId = 'security';
+      const fields: RecommendedField[] = [
+        { name: 'user.id', pattern: 'logs-web' },
+        { name: 'http.request.method', pattern: 'logs-web' },
+        { name: 'cpu.usage', pattern: 'metrics-cpu' },
+      ];
+
+      registry.setRecommendedFields(fields, solutionId);
+
+      const retrievedFieldsForLogs = registry.getRecommendedFields(
+        'FROM logs-web',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedFieldsForLogs).toEqual([fields[0], fields[1]]);
+
+      const retrievedFieldsForMetrics = registry.getRecommendedFields(
+        'FROM metrics-cpu',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedFieldsForMetrics).toEqual([fields[2]]);
+    });
+
+    it('should skip malformed recommended fields (missing name or pattern)', () => {
+      const solutionId: SolutionId = 'security';
+      const fields: RecommendedField[] = [
+        { name: 'valid_field', pattern: 'user-activity' },
+        { name: 'Missing Pattern' } as RecommendedField, // Malformed (missing pattern)
+        { pattern: 'app-events' } as RecommendedField, // Malformed (missing name)
+      ];
+
+      registry.setRecommendedFields(fields, solutionId);
+
+      const retrievedFields = registry.getRecommendedFields(
+        'FROM user-activity',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedFields).toEqual([{ name: 'valid_field', pattern: 'user-activity' }]);
+    });
+
+    it('should not add duplicate recommended fields for the same registryId and field name', () => {
+      const solutionId: SolutionId = 'security';
+      const fieldA: RecommendedField = { name: 'event.duration', pattern: 'app-events' };
+      const fields: RecommendedField[] = [fieldA, { ...fieldA }]; // Duplicate entry
+
+      registry.setRecommendedFields(fields, solutionId);
+      const retrievedFields = registry.getRecommendedFields(
+        'FROM app-events',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedFields).toEqual([fieldA]);
+    });
+
+    it('should handle different solution IDs correctly for fields', () => {
+      const field1: RecommendedField = { name: 'error.message', pattern: 'logs-web' };
+      const field2: RecommendedField = { name: 'user.agent', pattern: 'logs-web' }; // Same pattern, different solution
+
+      registry.setRecommendedFields([field1], 'oblt');
+      registry.setRecommendedFields([field2], 'security');
+
+      // Retrieve for oblst
+      const fieldsOblt = registry.getRecommendedFields(
+        'FROM logs-web',
+        availableDatasources,
+        'oblt'
+      );
+      expect(fieldsOblt).toEqual([field1]);
+
+      // Retrieve for security
+      const fieldsSecurity = registry.getRecommendedFields(
+        'FROM logs-web',
+        availableDatasources,
+        'security'
+      );
+      expect(fieldsSecurity).toEqual([field2]);
+    });
+  });
+
+  // --- getRecommendedFields tests ---
+  describe('getRecommendedFields', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [
+          { name: 'app-logs-2023' },
+          { name: 'app-logs-2024' },
+          { name: 'metrics-http' },
+          { name: 'server-logs' },
+          { name: 'user-events' },
+        ],
+        data_streams: [],
+        aliases: [],
+      };
+
+      // Setup some initial fields in the registry
+      const registeredFields: RecommendedField[] = [
+        { name: 'log.level', pattern: 'app-logs-2023' },
+        { name: 'http.response.status_code', pattern: 'metrics-http' },
+        { name: 'app.name', pattern: 'app-logs-*' },
+        { name: 'server.name', pattern: 'server-logs' },
+      ];
+
+      registry.setRecommendedFields(
+        [registeredFields[0], registeredFields[1], registeredFields[2]],
+        'security'
+      );
+      // Register a field for a different solution to test filtering
+      registry.setRecommendedFields([registeredFields[3]], 'oblt');
+    });
+
+    it('should return an empty array if checkSourceExistence returns false for fields', () => {
+      const result = registry.getRecommendedFields(
+        'FROM non_existent_data_stream',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([]);
+    });
+
+    it('should return fields matching the exact index pattern from the query string', () => {
+      const result = registry.getRecommendedFields(
+        'FROM app-logs-2023',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([
+        { name: 'log.level', pattern: 'app-logs-2023' },
+        { name: 'app.name', pattern: 'app-logs-*' },
+      ]);
+    });
+
+    it('should return fields matching a wildcard pattern from the query string', () => {
+      const result = registry.getRecommendedFields(
+        'FROM app-logs-*',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([
+        { name: 'log.level', pattern: 'app-logs-2023' },
+        { name: 'app.name', pattern: 'app-logs-*' },
+      ]);
+    });
+
+    it('should return fields where the registered pattern covers the concrete index in the query string', () => {
+      const result = registry.getRecommendedFields(
+        'FROM app-logs-2024',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([{ name: 'app.name', pattern: 'app-logs-*' }]);
+    });
+
+    it('should filter fields by activeSolutionId', () => {
+      const result = registry.getRecommendedFields(
+        'FROM server-logs',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([]); // Should be empty because it's set for 'oblt', not 'security'
+    });
+
+    it('should return an empty array if no matching indices are found by findMatchingIndicesFromPattern for fields', () => {
+      const result = registry.getRecommendedFields(
+        'FROM no_matching_field_index',
+        {
+          indices: [{ name: 'no_matching_field_index' }],
+          data_streams: [],
+          aliases: [],
+        },
+        'security'
+      );
+      expect(result).toEqual([]);
+    });
+
+    it('should return unique fields when multiple registry entries yield the same field name', () => {
+      const commonField: RecommendedField = { name: 'user.ip', pattern: 'user-events' };
+      // Register the same field under different solution/index pattern combinations
+      registry.setRecommendedFields([{ ...commonField }], 'security');
+      registry.setRecommendedFields([{ ...commonField }], 'oblt');
+
+      const result = registry.getRecommendedFields(
+        'FROM user-events',
+        availableDatasources,
+        'security'
+      );
+      expect(result).toEqual([commonField]); // Should only return one instance of the field
     });
   });
 });
