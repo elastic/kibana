@@ -172,7 +172,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: protectedAndFleetAgents.length,
-                      y: agents.length,
+                      y: agents.length + protectedAndFleetAgents.length,
                     }}
                   />
                 </EuiText>

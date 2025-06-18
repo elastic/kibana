@@ -190,8 +190,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         (p) => p.package?.name === FLEET_SERVER_PACKAGE
       )
     );
-    setProtectedAndFleetAgents([...protectedAgents, ...fleetAgents]);
-    setAgentsToMigrate(agents.filter((agent) => !protectedAndFleetAgents.includes(agent)));
+
+    const unallowedAgents = [...protectedAgents, ...fleetAgents];
+    setProtectedAndFleetAgents(unallowedAgents);
+    setAgentsToMigrate(agents.filter((agent) => !unallowedAgents.some((a) => a.id === agent.id)));
     setMigrateFlyoutOpen(true);
   };
 
@@ -425,10 +427,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             protectedAndFleetAgents={protectedAndFleetAgents ?? []}
             onClose={() => {
               setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
               setMigrateFlyoutOpen(false);
             }}
             onSave={() => {
               setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
               setMigrateFlyoutOpen(false);
               refreshAgents();
             }}
