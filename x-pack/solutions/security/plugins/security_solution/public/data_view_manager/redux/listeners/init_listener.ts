@@ -49,8 +49,6 @@ export const createInitListener = (dependencies: {
         // Initialize default security data view first
         // Note: this is subject to change, as we might want to add specific data view just for alerts
 
-        // TODO: store this in shared reducer and replace all the uses of constant data view id (DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
-        // Issue: https://github.com/elastic/security-team/issues/12667
         const { defaultDataView } = await createDefaultDataView({
           dataViewService: dependencies.dataViews,
           uiSettings: dependencies.uiSettings,
