@@ -690,33 +690,6 @@ export const calculateDuration = (closedAt: string | null, createdAt: string | n
   return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
 };
 
-export const calculateInProgressTimingMetrics = ({
-  createdAt,
-  inProgressAt,
-}: {
-  createdAt: string;
-  inProgressAt?: string | null;
-}) => {
-  if (createdAt == null || inProgressAt == null) {
-    throw new Error('Dates are null');
-  }
-
-  const createdAtMillis = new Date(createdAt).getTime();
-  const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
-
-  if (inProgressAtMillis == null || isNaN(createdAtMillis) || isNaN(inProgressAtMillis)) {
-    throw new Error('Invalid dates');
-  }
-
-  if (inProgressAtMillis < createdAtMillis) {
-    throw new Error('Invalid dates relation');
-  }
-
-  return {
-    timeToAcknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000),
-  };
-};
-
 export const getCasesMetrics = async ({
   supertest,
   features,

@@ -398,18 +398,23 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
+/**
+ * If the status changes to 'in-progress' and in_progress_at is not set, we set it to the current date.
+ * If the status does not change to 'in-progress' or in_progress_at is already set, we do not change it.
+ */
+
 export const getInProgressInfoForUpdate = ({
   status,
-  updatedAt,
+  stateTransitionTimestamp,
   inProgressAt,
 }: {
   status?: CaseStatuses;
-  updatedAt: string;
+  stateTransitionTimestamp: string;
   inProgressAt?: string | null;
 }): Partial<Pick<CaseAttributes, 'in_progress_at'>> | undefined => {
   if (status && status === CaseStatuses['in-progress'] && inProgressAt == null) {
     return {
-      in_progress_at: updatedAt,
+      in_progress_at: stateTransitionTimestamp,
     };
   }
 };
@@ -419,80 +424,92 @@ const areValidDatesWhenChangingToInProgress = (createdAtMillis: number, updatedA
 
 const areValidDatesWhenClosing = (
   createdAtMillis: number,
-  updatedAtMillis: number,
+  stateTransitionTimestampMillis: number,
   inProgressAtMillis: number | null
 ) => {
-  if (isNaN(createdAtMillis) || isNaN(updatedAtMillis) || updatedAtMillis < createdAtMillis) {
+  if (
+    isNaN(createdAtMillis) ||
+    isNaN(stateTransitionTimestampMillis) ||
+    stateTransitionTimestampMillis < createdAtMillis
+  ) {
     return false;
   }
+
   if (inProgressAtMillis != null) {
     return (
       !isNaN(inProgressAtMillis) &&
       inProgressAtMillis >= createdAtMillis &&
-      updatedAtMillis >= inProgressAtMillis
+      stateTransitionTimestampMillis >= inProgressAtMillis
     );
   }
+
   return true;
 };
 
 /**
- * Rules:
- *
- * - if in_progress_at is set once we will not reset it when we change statuses
- * - in_progress_at  is set only the first time the status changes to In progress
- * - When status = closed all metrics ( time_to_acknowledge , time_to_investigate , and time_to_resolve ) will be calculated.
- * - When status = in progress, only the time_to_acknowledge is calculated,  set time_to_investigate  and  time_to_resolve  to null
- * - When status = open , nullify all metrics ( time_to_acknowledge , time_to_investigate , and time_to_resolve )
+ * Calculates timing metrics based on the case status and timestamps.
+ * If the status is 'closed', it calculates all metrics.
+ * If the status is 'in-progress', it calculates only the time to acknowledge and sets the other metrics to null.
+ * If the status is 'open', it nullifies all metrics.
  */
+
 export const getTimingMetricsForUpdate = ({
   status,
   createdAt,
   inProgressAt,
-  updatedAt,
+  stateTransitionTimestamp,
 }: {
   status?: CaseStatuses;
   createdAt: string;
-  updatedAt: string;
+  stateTransitionTimestamp: string;
   inProgressAt?: string | null;
 }):
   | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
   | undefined => {
   try {
     const createdAtMillis = new Date(createdAt).getTime();
-    const updatedAtMillis = new Date(updatedAt).getTime();
-    let inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+    const stateTransitionTimestampMillis = new Date(stateTransitionTimestamp).getTime();
+    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
     if (status && status === CaseStatuses['in-progress']) {
       if (
         createdAt != null &&
-        updatedAt != null &&
-        areValidDatesWhenChangingToInProgress(createdAtMillis, updatedAtMillis)
+        stateTransitionTimestamp != null &&
+        areValidDatesWhenChangingToInProgress(createdAtMillis, stateTransitionTimestampMillis)
       ) {
         return {
-          time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+          time_to_acknowledge: Math.floor(
+            (stateTransitionTimestampMillis - createdAtMillis) / 1000
+          ),
           time_to_investigate: null,
           time_to_resolve: null,
         };
       }
     }
+
     if (status && status === CaseStatuses.closed) {
       if (
         createdAt != null &&
-        updatedAt != null &&
-        areValidDatesWhenClosing(createdAtMillis, updatedAtMillis, inProgressAtMillis)
+        stateTransitionTimestamp != null &&
+        areValidDatesWhenClosing(
+          createdAtMillis,
+          stateTransitionTimestampMillis,
+          inProgressAtMillis
+        )
       ) {
-        if (inProgressAtMillis == null) {
-          // When a case transitions directly from 'open' to 'closed', set inProgressAt to
-          // updatedAtMillis to reflect the implicit start of progress
-          inProgressAtMillis = updatedAtMillis;
-        }
+        const finalInProgressAtMillis =
+          inProgressAtMillis != null ? inProgressAtMillis : stateTransitionTimestampMillis;
+
         return {
-          time_to_acknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000),
-          time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000),
-          time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+          time_to_acknowledge: Math.floor((finalInProgressAtMillis - createdAtMillis) / 1000),
+          time_to_investigate: Math.floor(
+            (stateTransitionTimestampMillis - finalInProgressAtMillis) / 1000
+          ),
+          time_to_resolve: Math.floor((stateTransitionTimestampMillis - createdAtMillis) / 1000),
         };
       }
     }
+
     if (status && status === CaseStatuses.open) {
       // Reset all metrics when the status is re-opened
       return {

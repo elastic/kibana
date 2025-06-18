@@ -660,12 +660,12 @@ const createPatchCasesPayload = ({
           }),
           ...getInProgressInfoForUpdate({
             status: trimmedCaseAttributes.status,
-            updatedAt: updatedDt,
+            stateTransitionTimestamp: updatedDt,
             inProgressAt: originalCase.attributes.in_progress_at,
           }),
           ...getTimingMetricsForUpdate({
             status: trimmedCaseAttributes.status,
-            updatedAt: updatedDt,
+            stateTransitionTimestamp: updatedDt,
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
           }),

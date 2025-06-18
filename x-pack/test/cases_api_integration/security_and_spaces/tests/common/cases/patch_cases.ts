@@ -41,8 +41,6 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
-  calculateCloseTimingMetrics,
-  calculateInProgressTimingMetrics,
 } from '../../../../common/lib/api';
 import {
   createAlertsIndex,
