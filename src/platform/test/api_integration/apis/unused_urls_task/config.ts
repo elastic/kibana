@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...apiIntegrationConfig.getAll(),
-    testFiles: [require.resolve('./run')],
+    testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...apiIntegrationConfig.get('kbnTestServer'),
       serverArgs: [
