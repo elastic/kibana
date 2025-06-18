@@ -593,6 +593,56 @@ describe('getMaxQueued()', () => {
   });
 });
 
+describe('getWebhookSettings()', () => {
+  test('returns the webhook settings from config', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    });
+  });
+
+  test('returns the webhook settings from config when pfx is false', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: false,
+        },
+      },
+    });
+  });
+
+  test('returns true when no webhook settings are defined', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({ ssl: { pfx: { enabled: true } } });
+  });
+});
+
 describe('getAwsSesConfig()', () => {
   test('returns null when no email config set', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
