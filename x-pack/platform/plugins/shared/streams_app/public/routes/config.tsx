@@ -72,6 +72,11 @@ const streamsAppRoutes = {
             element: (
               <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />
             ),
+            params: t.type({
+              path: t.type({
+                tab: t.string,
+              }),
+            }),
           },
           '/{key}/management/{tab}': {
             element: <StreamManagementView />,
