@@ -27,5 +27,6 @@
     "@kbn/core-status-common",
     "@kbn/dev-utils",
     "@kbn/spaces-plugin",
+    "@kbn/config-schema",
   ]
 }
