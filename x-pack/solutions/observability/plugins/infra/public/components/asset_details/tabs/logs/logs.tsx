@@ -151,7 +151,7 @@ export const Logs = () => {
             index={logSources.value}
             timeRange={dateRange}
             query={filter}
-            height="60vh"
+            height="68vh"
             displayOptions={{
               solutionNavIdOverride: 'oblt',
               enableDocumentViewer: false,
