@@ -17,6 +17,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     <h2
       class="euiTitle emotion-euiTitle-m"
       data-test-subj="apiRequestFlyoutTitle"
+      id="generated-id"
     >
       Test title
     </h2>

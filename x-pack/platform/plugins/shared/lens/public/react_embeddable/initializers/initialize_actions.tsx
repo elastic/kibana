@@ -16,13 +16,15 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import {
-  PublishesTitle,
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
-import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import {
+  DynamicActionsSerializedState,
+  EmbeddableDynamicActionsManager,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import { partition } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { TracksOverlays, tracksOverlays } from '@kbn/presentation-containers';
@@ -247,9 +249,9 @@ export function initializeActionApi(
   getLatestState: GetStateType,
   parentApi: unknown,
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
-  title$: PublishesTitle['title$'],
   internalApi: LensInternalApi,
-  services: LensEmbeddableStartServices
+  services: LensEmbeddableStartServices,
+  dynamicActionsManager?: EmbeddableDynamicActionsManager
 ): {
   api: ViewInDiscoverCallbacks &
     HasDynamicActions &
@@ -260,11 +262,6 @@ export function initializeActionApi(
   cleanup: () => void;
   reinitializeState: (lastSaved?: LensSerializedState) => void;
 } {
-  const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
-    uuid,
-    () => title$.getValue(),
-    initialState
-  );
   const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
   return {

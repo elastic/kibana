@@ -387,15 +387,16 @@ paths:
             schema:
               type: object
               required:
-                - connector_id
+                - settings
               properties:
-                connector_id:
-                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
+                settings:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskExecutionSettings'
+                  description: Settings applicable to current rule migration task execution.
                 langsmith_options:
                   $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
                 retry:
                   $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
-                  description: The optional indicator to retry the rule translation based on this filter criteria
+                  description: The optional indicator to retry the rule translation based on this filter criteria.
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.
