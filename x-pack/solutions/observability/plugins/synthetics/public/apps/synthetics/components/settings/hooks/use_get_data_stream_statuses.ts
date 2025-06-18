@@ -91,7 +91,11 @@ function toMissingDataStream({
     timeStampField: { name: '@timestamp' },
     generation: 0,
     health: 'green',
-    privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+    privileges: {
+      delete_index: true,
+      manage_data_stream_lifecycle: true,
+      read_failure_store: true,
+    },
     hidden: false,
     nextGenerationManagedBy: 'Data stream lifecycle',
     indexMode: 'standard',
