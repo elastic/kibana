@@ -31,9 +31,11 @@ import {
   EuiText,
   EuiToolTip,
   formatNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
@@ -57,6 +59,7 @@ export function RetentionMetadata({
   isLoadingStats: boolean;
   statsError?: Error;
 }) {
+  const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
 
@@ -86,6 +89,9 @@ export function RetentionMetadata({
               onClick={toggleMenu}
               disabled={!definition.privileges.lifecycle}
               iconType="pencil"
+              css={css`
+                margin-bottom: -${euiTheme.size.s};
+              `}
             >
               {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
                 defaultMessage: 'Edit data retention',
@@ -153,13 +159,13 @@ export function RetentionMetadata({
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+    <>
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
           defaultMessage: 'Retention period',
         })}
         value={
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" responsive={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
@@ -236,7 +242,7 @@ export function RetentionMetadata({
           </PrivilegesWarningIconWrapper>
         }
       />
-    </EuiPanel>
+    </>
   );
 }
 
@@ -253,7 +259,7 @@ function MetadataRow({
 }) {
   return (
     <EuiFlexGroup
-      alignItems="flexEnd"
+      alignItems="center"
       gutterSize="xl"
       responsive={false}
       data-test-subj={dataTestSubj}
