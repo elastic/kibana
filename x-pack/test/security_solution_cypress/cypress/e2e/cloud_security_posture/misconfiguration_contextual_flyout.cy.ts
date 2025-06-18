@@ -192,7 +192,7 @@ const deleteLatestMisconfigurationIndex = () => {
   });
 };
 
-// skip on serverless uppon this ticket is verified: https://github.com/elastic/security-team/issues/12819
+// Skip on serverless once this ticket is verified: https://github.com/elastic/security-team/issues/12819
 describe(
   'Alert Host details expandable flyout',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
