@@ -13,6 +13,8 @@ import { isPending, useFetcher } from '../../hooks/use_fetcher';
 import { Loading } from './loading';
 import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
 import { TraceWaterfall } from '../../components/shared/trace_waterfall';
+import { getWaterfallLegends } from '../../components/shared/trace_waterfall/use_trace_waterfall';
+import { WaterfallLegendType } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -37,6 +39,8 @@ export function TraceWaterfallEmbeddable({
     [entryTransactionId, rangeFrom, rangeTo, traceId]
   );
 
+  const legends = getWaterfallLegends(data?.traceItems || []);
+
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId: entryTransactionId,
@@ -48,27 +52,28 @@ export function TraceWaterfallEmbeddable({
     return <Loading />;
   }
 
-  const { legends, colorBy } = waterfallFetchResult.waterfall;
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+        <WaterfallLegends
+          serviceName={serviceName}
+          legends={legends}
+          type={WaterfallLegendType.ServiceName}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
+        <TraceWaterfall
+          traceItems={data?.traceItems!}
+          onClick={(id) => onNodeClick?.(id)}
+          scrollElement={scrollElement}
+          getRelatedErrorsHref={getRelatedErrorsHref}
+        />
         <Waterfall
           showCriticalPath={false}
           waterfall={waterfallFetchResult.waterfall}
           displayLimit={displayLimit}
           onNodeClick={(node) => onNodeClick?.(node.id)}
           isEmbeddable
-          // scrollElement={scrollElement}
-          getRelatedErrorsHref={getRelatedErrorsHref}
-        />
-        <TraceWaterfall
-          traceItems={data?.traceItems!}
-          onClick={(id) => onNodeClick?.(id)}
-          scrollElement={scrollElement}
           getRelatedErrorsHref={getRelatedErrorsHref}
         />
       </EuiFlexItem>

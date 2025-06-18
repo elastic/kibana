@@ -7,7 +7,10 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import { uniq } from 'lodash';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
@@ -123,3 +126,17 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
 }
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
+
+export function getWaterfallLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
+  const uniqueServiceNames = uniq(traceItems.map((item) => item.serviceName));
+
+  const palette = euiPaletteColorBlind({
+    rotations: Math.ceil(uniqueServiceNames.length / 10),
+  });
+
+  return uniqueServiceNames.map((serviceName, index) => ({
+    type: WaterfallLegendType.ServiceName,
+    value: serviceName,
+    color: palette[index],
+  }));
+}
