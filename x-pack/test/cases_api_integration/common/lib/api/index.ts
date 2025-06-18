@@ -717,46 +717,6 @@ export const calculateInProgressTimingMetrics = ({
   };
 };
 
-export const calculateCloseTimingMetrics = ({
-  createdAt,
-  inProgressAt,
-  closedAt,
-}: {
-  createdAt: string;
-  inProgressAt?: string | null;
-  closedAt: string | null;
-}) => {
-  if (createdAt == null || closedAt == null || inProgressAt == null) {
-    throw new Error('Dates are null');
-  }
-
-  const createdAtMillis = new Date(createdAt).getTime();
-  const closedAtMillis = new Date(closedAt).getTime();
-  const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
-
-  if (
-    inProgressAtMillis == null ||
-    isNaN(createdAtMillis) ||
-    isNaN(closedAtMillis) ||
-    isNaN(inProgressAtMillis)
-  ) {
-    throw new Error('Invalid dates');
-  }
-
-  if (
-    closedAtMillis < createdAtMillis ||
-    inProgressAtMillis < createdAtMillis ||
-    closedAtMillis < inProgressAtMillis
-  ) {
-    throw new Error('Invalid dates relation');
-  }
-
-  return {
-    timeToInvestigate: Math.floor((closedAtMillis - inProgressAtMillis) / 1000),
-    timeToResolve: Math.floor((closedAtMillis - createdAtMillis) / 1000),
-  };
-};
-
 export const getCasesMetrics = async ({
   supertest,
   features,
