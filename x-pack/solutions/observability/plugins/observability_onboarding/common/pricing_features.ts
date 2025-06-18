@@ -6,5 +6,5 @@
  */
 
 export enum ObservabilityOnboardingPricingFeature {
-  METRICS_ONBOARDING = 'observability-onboarding:metrics-onboarding',
+  METRICS_ONBOARDING = 'observabilityOnboarding:metrics-onboarding',
 }

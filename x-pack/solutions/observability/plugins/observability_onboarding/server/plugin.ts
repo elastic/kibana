@@ -125,7 +125,7 @@ export class ObservabilityOnboardingPlugin
       {
         id: ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING,
         description:
-          'Enables flows that onboard metrics. This feature available only in the "complete" tier.',
+          'Enables flows that onboard metrics. This feature is available only in the "complete" tier.',
         products: [{ name: 'observability', tier: 'complete' }],
       },
     ]);

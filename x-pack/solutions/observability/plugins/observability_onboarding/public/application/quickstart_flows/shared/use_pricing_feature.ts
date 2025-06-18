@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityOnboardingAppServices } from '../../..';
+import { useKibana } from '../../../hooks/use_kibana';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 
-export function usePricingFeature(
-  feature: ObservabilityOnboardingPricingFeature,
-  defaultValue = true
-): boolean {
+export function usePricingFeature(feature: ObservabilityOnboardingPricingFeature): boolean {
   const {
     services: { pricing },
-  } = useKibana<ObservabilityOnboardingAppServices>();
+  } = useKibana();
 
-  return pricing?.isFeatureAvailable(feature) ?? defaultValue;
+  return pricing.isFeatureAvailable(feature);
 }
