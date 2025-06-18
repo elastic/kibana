@@ -7,15 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, PropsWithChildren } from 'react';
-import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useFileUploadContext } from '@kbn/file-upload';
+import React, { PropsWithChildren, useCallback, type FC } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
-  const onFilesSelected = (files: File[]) => {
-    console.log(files, '___files___');
-  };
+  const {
+    fileUploadManager,
+    filesStatus,
+    uploadStatus,
+    fileClashes,
+    fullFileUpload,
+    uploadStarted,
+    onImportClick,
+    canImport,
+    setIndexName,
+    setIndexValidationStatus,
+    deleteFile,
+  } = useFileUploadContext();
+
+  const onFilesSelected = useCallback(
+    async (files: File[]) => {
+      if (files && files.length > 0) {
+        await fileUploadManager.addFiles(files);
+      }
+    },
+    [fileUploadManager]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => {

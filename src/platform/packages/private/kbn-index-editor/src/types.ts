@@ -15,6 +15,8 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FileUploadManager } from '@kbn/file-upload';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { IndexUpdateService } from './index_update_service';
 
 export interface EditLookupIndexContentContext {
@@ -26,14 +28,16 @@ export interface EditLookupIndexContentContext {
 
 export interface EditLookupIndexFlyoutDeps {
   coreStart: CoreStart;
-  share: SharePluginStart;
   data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  share: SharePluginStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   indexUpdateService: IndexUpdateService;
+  fileManager: FileUploadManager;
 };
 
 /** Extended kibana context */
@@ -45,10 +49,12 @@ export interface KibanaContextExtra {
   dataViewFieldEditor: DataViewFieldEditorStart;
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
+  fileUploadManager: FileUploadManager;
   // Required services
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   // Additional services
+  fileUpload: FileUploadPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }

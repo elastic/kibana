@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { FileDropzone } from './file_drop_zone';
-import { CustomPanel } from './custom_panel';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { CustomPanel } from './custom_panel';
+import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
+import { IndexName } from './index_name';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -36,6 +39,17 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
 
+  const fileUploadContextValue = useFileUpload(
+    deps.fileManager,
+    deps.data,
+    coreStart.application,
+    coreStart.http,
+    coreStart.notifications,
+    () => {
+      console.log('File upload context value callback');
+    }
+  );
+
   if (!dataView || !dataViewColumns) return null;
 
   return (
@@ -45,11 +59,18 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         ...restDeps,
       }}
     >
-      <>
+      <FileUploadContext.Provider value={fileUploadContextValue}>
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h3>{props.indexName}</h3>
-          </EuiTitle>
+          <IndexName />
+
+          <EuiText>
+            <FormattedMessage
+              id="indexEditor.flyout.headerDescription"
+              defaultMessage={
+                'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
+              }
+            />
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
@@ -71,7 +92,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         </EuiFlyoutBody>
 
         <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
-      </>
+      </FileUploadContext.Provider>
     </KibanaContextProvider>
   );
 };

@@ -245,13 +245,16 @@ export class DiscoverPlugin
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
     /** Async register the index editor UI actions */
-    registerIndexEditorActions({
-      data: plugins.data,
-      coreStart: core,
-      share: plugins.share,
-      uiActions: plugins.uiActions,
-      fieldFormats: plugins.fieldFormats,
-    });
+    if (plugins.share && plugins.fileUpload) {
+      registerIndexEditorActions({
+        data: plugins.data,
+        coreStart: core,
+        share: plugins.share,
+        uiActions: plugins.uiActions,
+        fieldFormats: plugins.fieldFormats,
+        fileUpload: plugins.fileUpload,
+      });
+    }
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 

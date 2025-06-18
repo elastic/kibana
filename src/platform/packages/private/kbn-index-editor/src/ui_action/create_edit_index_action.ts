@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { FileUploadManager } from '@kbn/file-upload';
 import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
@@ -28,13 +29,24 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open file upload UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
-      const indexUpdateService = new IndexUpdateService(
-        dependencies.coreStart.http,
-        dependencies.data
+      const { coreStart, data, fileUpload } = dependencies;
+
+      const indexUpdateService = new IndexUpdateService(coreStart.http, data);
+
+      const fileManager = new FileUploadManager(
+        fileUpload,
+        coreStart.http,
+        data.dataViews,
+        coreStart.notifications,
+        null,
+        false,
+        true,
+        null,
+        { index: { mode: 'lookup' } }
       );
 
       try {
-        createFlyout({ ...dependencies, indexUpdateService }, context);
+        createFlyout({ ...dependencies, indexUpdateService, fileManager }, context);
       } catch (e) {
         return Promise.reject(e);
       }
