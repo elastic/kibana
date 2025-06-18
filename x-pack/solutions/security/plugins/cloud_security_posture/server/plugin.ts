@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { DeepReadonly } from 'utility-types';
 import {
@@ -29,6 +30,7 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import semver from 'semver';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -42,7 +44,10 @@ import type {
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
-import { initializeCspTransforms } from './create_transforms/create_transforms';
+import {
+  deletePreviousTransformsVersions,
+  initializeCspTransforms,
+} from './create_transforms/create_transforms';
 import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
@@ -110,7 +115,7 @@ export class CspPlugin
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager).catch(() => {});
+          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
         }
 
         plugins.fleet.registerExternalCallback(
@@ -151,9 +156,18 @@ export class CspPlugin
           'packagePolicyUpdate',
           async (
             packagePolicy: UpdatePackagePolicy,
-            soClient: SavedObjectsClientContract
+            soClient: SavedObjectsClientContract,
+            esClient: ElasticsearchClient
           ): Promise<UpdatePackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
+              const isIntegrationVersionIncludesTransformAsset = isTransformAssetIncluded(
+                packagePolicy.package!.version
+              );
+              await deletePreviousTransformsVersions(
+                esClient,
+                isIntegrationVersionIncludesTransformAsset,
+                this.logger
+              );
               return cleanupCredentials(packagePolicy);
             }
 
@@ -168,7 +182,7 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager);
+              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
               return packagePolicy;
             }
 
@@ -206,11 +220,26 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
+  async initialize(
+    core: CoreStart,
+    taskManager: TaskManagerStartContract,
+    packagePolicyVersion: string
+  ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
-    await initializeCspIndices(esClient, this.config, this.logger);
-    await initializeCspTransforms(esClient, this.logger);
+    const isIntegrationVersionIncludesTransformAsset =
+      isTransformAssetIncluded(packagePolicyVersion);
+    await initializeCspIndices(
+      esClient,
+      this.config,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
+    await initializeCspTransforms(
+      esClient,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
     await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;
   }
@@ -230,3 +259,8 @@ export class CspPlugin
 
 const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
   inputs.filter((i) => i.enabled).length === 1;
+
+const isTransformAssetIncluded = (integrationVersion: string): boolean => {
+  const majorVersion = semver.major(integrationVersion);
+  return majorVersion >= 2;
+};
