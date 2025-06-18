@@ -35,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
   const esArchiver = getService('esArchiver');
-  const isPromptMode = getService('config').get('xpack.securitySolution.genAiPromptMode');
 
   /**
    * Results will be written to LangSmith for project associated with the langSmithAPIKey, then later
@@ -64,28 +63,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
+      const isPromptMode = process.env.IS_PROMPT === 'true';
       // if run is to test prompt changes, uninstall prompt integration to default to local prompts
       if (isPromptMode) {
-        const beforeDelete = await supertest
-          .get(
-            routeWithNamespace(
-              `/api/saved_objects/_find?type=epm-packages&type=epm-package-assets&search=security_ai_prompts&per_page=1000`
-            )
-          )
-          .set('kbn-xsrf', 'foo');
-        console.log('BEFORE DELETE ==>', JSON.stringify(beforeDelete, null, 2));
-        // delete prompt integration
+        // delete integration prompt saved objects
         const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
-        const result = await supertest.delete(route).set('kbn-xsrf', 'foo');
-        console.log('DELETED ==>', JSON.stringify(result, null, 2));
-        const afterDelete = await supertest
-          .get(
-            routeWithNamespace(
-              `/api/saved_objects/_find?type=epm-packages&type=epm-package-assets&search=security_ai_prompts&per_page=1000`
-            )
-          )
-          .set('kbn-xsrf', 'foo');
-        console.log('AFTER DELETE ==>', JSON.stringify(afterDelete, null, 2));
+        await supertest.delete(route).set('kbn-xsrf', 'foo');
       }
     });
 
