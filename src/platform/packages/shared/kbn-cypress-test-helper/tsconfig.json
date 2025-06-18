@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
+      "cypress",
       "jest",
-      "node"
+      "node",
     ]
   },
   "include": [
