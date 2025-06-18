@@ -3857,6 +3857,10 @@
                 "path": "x-pack/platform/plugins/shared/license_management/server/routes/api/license/register_start_trial_routes.ts"
               },
               {
+                "plugin": "productDocBase",
+                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
+              },
+              {
                 "plugin": "guidedOnboarding",
                 "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
               },
@@ -3867,10 +3871,6 @@
               {
                 "plugin": "guidedOnboarding",
                 "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
-              },
-              {
-                "plugin": "productDocBase",
-                "path": "x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/routes/installation.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -7322,6 +7322,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/alert_delete/apis/schedule/create_alert_delete_schedule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/find/find_backfill_route.test.ts"
               },
               {
@@ -8043,6 +8047,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_update_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/data_streams/register_put_route.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -14333,6 +14341,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
@@ -14482,10 +14494,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/find.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15979,10 +15987,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
               },
               {
@@ -16127,6 +16131,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts"
               },
               {
@@ -16144,10 +16156,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/coverage_overview/route.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index/create_index_route.ts"
               },
               {
                 "plugin": "securitySolution",
