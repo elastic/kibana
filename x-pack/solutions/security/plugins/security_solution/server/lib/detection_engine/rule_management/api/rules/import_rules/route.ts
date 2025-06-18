@@ -148,7 +148,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           );
 
           const ruleSourceImporter = createRuleSourceImporter({
-            config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),

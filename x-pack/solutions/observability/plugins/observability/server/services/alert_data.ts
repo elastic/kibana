@@ -7,20 +7,25 @@
 
 import { omit } from 'lodash';
 import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
-import { ThresholdParams } from '../../common/custom_threshold_rule/types';
 
 export class AlertData {
-  constructor(private alert: any) {}
+  constructor(private alert: Awaited<ReturnType<AlertsClient['get']>>) {}
 
   getRuleParameters() {
     return this.alert[ALERT_RULE_PARAMETERS];
+  }
+
+  getRuleId() {
+    return this.alert[ALERT_RULE_UUID];
   }
 
   getRelevantRuleFields(): Set<string> {
@@ -31,7 +36,7 @@ export class AlertData {
     }
     switch (this.getRuleTypeId()) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as ThresholdParams;
+        const customThresholdParams = ruleParameters as CustomThresholdParams;
         const metrics = customThresholdParams.criteria[0].metrics;
         metrics.forEach((metric) => {
           if (metric.field) {
@@ -84,7 +89,7 @@ export class AlertData {
     }
   }
 
-  getRuleTypeId() {
+  getRuleTypeId(): string | undefined {
     return this.alert[ALERT_RULE_TYPE_ID];
   }
 }

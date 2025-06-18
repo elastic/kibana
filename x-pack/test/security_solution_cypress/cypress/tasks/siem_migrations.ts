@@ -89,6 +89,22 @@ export const editTranslatedRuleByRow = (rowNum: number) => {
   cy.get(SELECTORS.TRANSLATED_RULE_DETAILS_FLYOUT).should('be.visible');
 };
 
-export const reprocessFailedRules = () => {
+export const openReprocessDialog = () => {
   cy.get(SELECTORS.REPROCESS_FAILED_RULES_BTN).click();
+};
+
+export const reprocessWithoutPrebuiltRulesMatching = () => {
+  cy.get(SELECTORS.START_MIGRATION_MODAL.MODAL).should('be.visible');
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).should(
+    'have.attr',
+    'aria-checked',
+    'true'
+  );
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).click();
+  cy.get(SELECTORS.START_MIGRATION_MODAL.PREBUILT_RULES_MATCH_SWITCH).should(
+    'have.attr',
+    'aria-checked',
+    'false'
+  );
+  cy.get(SELECTORS.START_MIGRATION_MODAL.START_MIGRATION_BTN).click();
 };
