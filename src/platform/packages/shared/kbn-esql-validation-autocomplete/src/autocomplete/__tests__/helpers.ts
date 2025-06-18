@@ -349,8 +349,11 @@ export type AssertSuggestionsFn = (
 ) => Promise<void>;
 
 export type AssertSuggestionOrderFn = (
+  // query to test
   query: string,
+  // field name to check the order of
   fieldName: string,
+  // expected order of the field
   order: string
 ) => Promise<void>;
 

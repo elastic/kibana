@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setup } from './helpers';
+import { attachTriggerCommand, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('KEEP', () => {
@@ -43,6 +43,12 @@ describe('autocomplete.suggest', () => {
       const { assertSuggestionsOrder } = await setup();
 
       assertSuggestionsOrder('FROM logs* | KEEP /', 'kubernetes.something.something', '1C');
+    });
+
+    it('suggests command and pipe after a field has been used in KEEP', async () => {
+      const { assertSuggestions } = await setup();
+
+      assertSuggestions('FROM logs* | KEEP doubleField /', [attachTriggerCommand('| '), ',']);
     });
   });
 });

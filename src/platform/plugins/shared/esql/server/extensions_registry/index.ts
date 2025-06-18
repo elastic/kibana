@@ -28,7 +28,7 @@ export class ESQLExtensionsRegistry {
   private recommendedQueries: Map<string, RecommendedQuery[]> = new Map();
   private recommendedFields: Map<string, RecommendedField[]> = new Map();
 
-  private setRecommendedItem<T extends { name: string }>(
+  private setRecommendedItems<T extends { name: string }>(
     map: Map<string, T[]>,
     items: T[],
     activeSolutionId: SolutionId,
@@ -109,7 +109,7 @@ export class ESQLExtensionsRegistry {
     recommendedQueries: RecommendedQuery[],
     activeSolutionId: SolutionId
   ): void {
-    this.setRecommendedItem(
+    this.setRecommendedItems(
       this.recommendedQueries,
       recommendedQueries,
       activeSolutionId,
@@ -140,7 +140,7 @@ export class ESQLExtensionsRegistry {
   }
 
   setRecommendedFields(recommendedFields: RecommendedField[], activeSolutionId: SolutionId): void {
-    this.setRecommendedItem(
+    this.setRecommendedItems(
       this.recommendedFields,
       recommendedFields,
       activeSolutionId,
