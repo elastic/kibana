@@ -17,6 +17,7 @@ import type {
   SecurityUsageReportingTaskStartContract,
   SecurityUsageReportingTaskSetupContract,
   UsageRecord,
+  BackfillConfig,
 } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
 import type { UsageReportingService } from '../common/services/usage_reporting_service';
@@ -36,6 +37,9 @@ export class SecurityUsageReportingTask {
   private readonly logger: Logger;
   private readonly config: ServerlessSecurityConfig;
   private readonly usageReportingService: UsageReportingService;
+  private readonly backfillConfig: BackfillConfig = {
+    enabled: false,
+  };
 
   constructor(setupContract: SecurityUsageReportingTaskSetupContract) {
     const {
@@ -62,6 +66,7 @@ export class SecurityUsageReportingTask {
       if (backfillConfig.enabled && !backfillConfig.maxRecords) {
         throw new Error('maxRecords is required when backfill is enabled');
       }
+      this.backfillConfig = backfillConfig;
     }
 
     try {
@@ -206,6 +211,17 @@ export class SecurityUsageReportingTask {
             usageRecords.length
           }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
         );
+        if (this.backfillConfig.enabled) {
+          backfillRecords = [...backfillRecords, ...usageRecords];
+          if (
+            this.backfillConfig.maxRecords &&
+            backfillRecords.length > this.backfillConfig.maxRecords
+          ) {
+            backfillRecords = backfillRecords.slice(
+              backfillRecords.length - this.backfillConfig.maxRecords
+            );
+          }
+        }
       }
     }
 
