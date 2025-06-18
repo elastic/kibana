@@ -100,7 +100,11 @@ export const SearchHomepageHeader: React.FC = () => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiImage src={colorMode === 'LIGHT' ? searchHomePageLight : searchHomePageDark} alt="" />
+          <EuiImage
+            size="xl"
+            src={colorMode === 'LIGHT' ? searchHomePageLight : searchHomePageDark}
+            alt=""
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPageTemplate.Section>
