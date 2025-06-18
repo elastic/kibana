@@ -25,7 +25,15 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+  const { dataView: detectionsDataView } = useDataView(SourcererScopeName.detections);
+
+  const dataViewId = newDataViewPickerEnabled ? oldDataViewId : detectionsDataView?.id ?? null;
+
   const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
@@ -35,8 +43,6 @@ export const useSignalHelpers = (): {
   } = useKibana().services;
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const experimentalSignalIndexName = useSignalIndexName();
 
