@@ -52,11 +52,11 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const retry = getService('retry');
 
   describe('@serverless @serverlessQA @ess rule exceptions execution', () => {
     before(async () => {
@@ -197,14 +197,17 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
-        const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
-        // Expect alerts here because all values are "Ubuntu"
-        // and exception is one of ["ubuntu"]
-        expect(alertsOpen.hits.hits.length).toEqual(10);
-        // Expect no alerts here because all values are "Ubuntu"
-        // and exception is one of ["ubuntu", "Ubuntu"]
-        expect(alertsOpen2.hits.hits.length).toEqual(0);
+
+        await retry.try(async () => {
+          const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+          const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
+          // Expect alerts here because all values are "Ubuntu"
+          // and exception is one of ["ubuntu"]
+          expect(alertsOpen.hits.hits.length).toEqual(10);
+          // Expect no alerts here because all values are "Ubuntu"
+          // and exception is one of ["ubuntu", "Ubuntu"]
+          expect(alertsOpen2.hits.hits.length).toEqual(0);
+        });
       });
 
       it('generates no alerts when an exception is added for an EQL rule', async () => {
