@@ -7,7 +7,12 @@
 
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { bulkFillGapsByRuleIds } from './bulk_fill_gaps_by_rule_ids';
-import type { BulkFillGapsByRuleIdsParams, BulkFillGapsByRuleIdsResult } from './types';
+import {
+  BulkGapsFillStep,
+  type BulkFillGapsByRuleIdsParams,
+  type BulkFillGapsByRuleIdsResult,
+  BulkFillGapsScheduleResult,
+} from './types';
 import type { RulesClientContext } from '../../../../rules_client';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
 import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
@@ -80,23 +85,23 @@ describe('bulkFillGapsByRuleIds', () => {
     batchBackfillRuleGapsMock.mockImplementation(async (_, { rule: { id: ruleId } }) => {
       if (ruleId === skippedRule.id) {
         return {
-          outcome: 'skipped',
+          outcome: BulkFillGapsScheduleResult.SKIPPED,
         };
       }
 
       if (ruleId === errroredRuleAtBackfilling.id) {
         return {
-          outcome: 'errored',
+          outcome: BulkFillGapsScheduleResult.ERRORED,
           error: toBulkGapFillError(
             errroredRuleAtBackfilling,
-            'BULK_GAPS_FILL_STEP_SCHEDULING',
+            BulkGapsFillStep.SCHEDULING,
             schedulingError
           ),
         };
       }
 
       return {
-        outcome: 'backfilled',
+        outcome: BulkFillGapsScheduleResult.BACKFILLED,
       };
     });
 
@@ -137,14 +142,10 @@ describe('bulkFillGapsByRuleIds', () => {
     expect(results.errored).toEqual([
       toBulkGapFillError(
         erroredRuleAtAuthorization,
-        'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION',
+        BulkGapsFillStep.ACCESS_VALIDATION,
         authorizationError
       ),
-      toBulkGapFillError(
-        errroredRuleAtBackfilling,
-        'BULK_GAPS_FILL_STEP_SCHEDULING',
-        schedulingError
-      ),
+      toBulkGapFillError(errroredRuleAtBackfilling, BulkGapsFillStep.SCHEDULING, schedulingError),
     ]);
   });
 

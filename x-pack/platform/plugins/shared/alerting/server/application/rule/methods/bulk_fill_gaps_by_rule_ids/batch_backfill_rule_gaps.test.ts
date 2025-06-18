@@ -8,9 +8,18 @@
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { processAllGapsInTimeRange } from '../../../../lib/rule_gaps/process_all_gaps_in_time_range';
 import { batchBackfillRuleGaps } from './batch_backfill_rule_gaps';
-import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import type { BulkGapFillError } from './utils';
+import { BulkFillGapsScheduleResult, BulkGapsFillStep } from './types';
+import { processGapsBatch } from './process_gaps_batch';
+
+jest.mock('./process_gaps_batch', () => {
+  return {
+    processGapsBatch: jest.fn(),
+  };
+});
+
+const processGapsBatchMock = processGapsBatch as jest.Mock;
 
 jest.mock('../../../../lib/rule_gaps/process_all_gaps_in_time_range', () => {
   return {
@@ -25,8 +34,6 @@ jest.mock('../../../backfill/methods/schedule', () => {
     scheduleBackfill: jest.fn(),
   };
 });
-
-const scheduleBackfillMock = scheduleBackfill as jest.Mock;
 
 describe('batchBackfillRuleGaps', () => {
   const context = rulesClientContextMock.create();
@@ -50,13 +57,6 @@ describe('batchBackfillRuleGaps', () => {
     [createGap([range('2025-05-13T09:15:09.457Z', '2025-05-14T09:15:09.457Z')])],
   ];
 
-  const getGapScheduleRange = (gap: Gap) => {
-    return gap.unfilledIntervals.map(({ gte, lte }) => ({
-      start: gte.toISOString(),
-      end: lte.toISOString(),
-    }));
-  };
-
   let result: Awaited<ReturnType<typeof batchBackfillRuleGaps>>;
 
   beforeEach(() => {
@@ -71,14 +71,20 @@ describe('batchBackfillRuleGaps', () => {
     });
   };
 
+  beforeEach(() => {
+    processGapsBatchMock.mockResolvedValue(true);
+    processAllGapsInTimeRangeMock.mockImplementation(async ({ processGapsBatch: processFn }) => {
+      const results: Awaited<ReturnType<typeof processFn>> = [];
+      for (const batch of gapsBatches) {
+        results.push(await processFn(batch));
+      }
+
+      return results;
+    });
+  });
+
   describe('when there are gaps to backfill', () => {
     beforeEach(async () => {
-      processAllGapsInTimeRangeMock.mockImplementation(async ({ processGapsBatch }) => {
-        for (const batch of gapsBatches) {
-          await processGapsBatch(batch);
-        }
-      });
-      scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
       await callBatchBackfillRuleGaps();
     });
 
@@ -95,43 +101,24 @@ describe('batchBackfillRuleGaps', () => {
       });
     });
 
-    it('should trigger the backfilling of each fetched gap batch', () => {
-      expect(scheduleBackfillMock).toHaveBeenCalledTimes(2);
-      expect(scheduleBackfillMock).toHaveBeenNthCalledWith(
-        1,
-        context,
-        [
-          {
-            ruleId: rule.id,
-            ranges: gapsBatches[0].flatMap(getGapScheduleRange),
-          },
-        ],
-        gapsBatches[0]
-      );
-      expect(scheduleBackfillMock).toHaveBeenNthCalledWith(
-        2,
-        context,
-        [
-          {
-            ruleId: rule.id,
-            ranges: gapsBatches[1].flatMap(getGapScheduleRange),
-          },
-        ],
-        gapsBatches[1]
-      );
+    it('should call processGapsBatch for each fetched gap batch', () => {
+      expect(processGapsBatchMock).toHaveBeenCalledTimes(gapsBatches.length);
+      gapsBatches.forEach((batch, idx) => {
+        const callOrder = idx + 1;
+        expect(processGapsBatchMock).toHaveBeenNthCalledWith(callOrder, context, {
+          rule,
+          range: backfillingDateRange,
+          gapsBatch: batch,
+        });
+      });
     });
 
     it('should return a successful outcome', () => {
-      expect(result.outcome).toEqual('backfilled');
+      expect(result.outcome).toEqual(BulkFillGapsScheduleResult.BACKFILLED);
     });
   });
 
-  describe('when there are errors backfilling gaps', () => {
-    beforeEach(() => {
-      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
-        return processGapsBatch(gapsBatches[0]);
-      });
-    });
+  describe('when there are errors processing gaps', () => {
     const getErrorFromResult = () => {
       return (result as { outcome: string; error: BulkGapFillError }).error;
     };
@@ -142,58 +129,35 @@ describe('batchBackfillRuleGaps', () => {
       );
       await callBatchBackfillRuleGaps();
 
-      expect(result.outcome).toEqual('errored');
+      expect(result.outcome).toEqual(BulkFillGapsScheduleResult.ERRORED);
       expect(getErrorFromResult()).toEqual({
         errorMessage: 'processAllGapsInTimeRange failed',
         rule,
-        step: 'BULK_GAPS_FILL_STEP_SCHEDULING',
+        step: BulkGapsFillStep.SCHEDULING,
       });
     });
 
-    it('should propagate the error when the scheduleBackfill returns an unexpected amount of results', async () => {
-      scheduleBackfillMock.mockResolvedValueOnce([
-        { some: 'result' },
-        { some: 'other unexpected result' },
-      ]);
+    it('should propagate the error when the processGapsBatch returns an error', async () => {
+      const errorMessage = 'error when calling processGapsBatch';
+      processGapsBatchMock.mockRejectedValueOnce(new Error(errorMessage));
       await callBatchBackfillRuleGaps();
-      expect(result.outcome).toEqual('errored');
+      expect(result.outcome).toEqual(BulkFillGapsScheduleResult.ERRORED);
       expect(getErrorFromResult()).toEqual({
-        errorMessage: 'Unexpected scheduling result count 2',
+        errorMessage,
         rule,
-        step: 'BULK_GAPS_FILL_STEP_SCHEDULING',
-      });
-    });
-
-    it('should propagate the error when the scheduleBackfill returns an error', async () => {
-      scheduleBackfillMock.mockResolvedValueOnce([
-        {
-          error: {
-            message: 'something went wrong when backfilling',
-          },
-        },
-      ]);
-      await callBatchBackfillRuleGaps();
-      expect(result.outcome).toEqual('errored');
-      expect(getErrorFromResult()).toEqual({
-        errorMessage: 'something went wrong when backfilling',
-        rule,
-        step: 'BULK_GAPS_FILL_STEP_SCHEDULING',
+        step: BulkGapsFillStep.SCHEDULING,
       });
     });
   });
 
   describe('when there is nothing to backfill', () => {
     beforeEach(async () => {
-      processAllGapsInTimeRangeMock.mockImplementation(async ({ processGapsBatch }) => {
-        for (let idx = 0; idx < 2; idx++) {
-          await processGapsBatch([]);
-        }
-      });
+      processGapsBatchMock.mockResolvedValue(false);
       await callBatchBackfillRuleGaps();
     });
 
     it('should return a result indicating that backfilling was skipped for this rule', () => {
-      expect(result.outcome).toEqual('skipped');
+      expect(result.outcome).toEqual(BulkFillGapsScheduleResult.SKIPPED);
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkGapsFillStep } from './types';
+import { BulkGapsFillStep } from './types';
 import type { RulesClientContext } from '../../../../rules_client';
 import type { RuleAuditEventParams } from '../../../../rules_client/common/audit_events';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -20,11 +20,12 @@ export const toBulkGapFillError = (
 ) => {
   let fallbackMessage: string;
   switch (step) {
-    case 'BULK_GAPS_FILL_STEP_SCHEDULING':
+    case BulkGapsFillStep.SCHEDULING:
       fallbackMessage = 'Error scheduling backfills';
       break;
-    case 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION':
+    case BulkGapsFillStep.ACCESS_VALIDATION:
       fallbackMessage = 'Error validating user access to the rule';
+      break;
   }
   return {
     rule: {

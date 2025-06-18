@@ -8,10 +8,12 @@ import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { groupBy, mapValues } from 'lodash';
 import type { RulesClientContext } from '../../../../rules_client';
-import type {
-  BulkFillGapsByRuleIdsResult,
-  BulkFillGapsByRuleIdsParams,
-  BulkFillGapsByRuleIdsOptions,
+import {
+  type BulkFillGapsByRuleIdsResult,
+  type BulkFillGapsByRuleIdsParams,
+  type BulkFillGapsByRuleIdsOptions,
+  BulkGapsFillStep,
+  BulkFillGapsScheduleResult,
 } from './types';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
@@ -64,7 +66,7 @@ export const bulkFillGapsByRuleIds = async (
     } catch (error) {
       rulesBatch.forEach((rule) => {
         logProcessedAsAuditEvent(context, { id: rule.id, name: rule.name }, error);
-        errored.push(toBulkGapFillError(rule, 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION', error));
+        errored.push(toBulkGapFillError(rule, BulkGapsFillStep.ACCESS_VALIDATION, error));
         return;
       });
     }
@@ -79,9 +81,9 @@ export const bulkFillGapsByRuleIds = async (
         maxGapCountPerRule: options.maxGapCountPerRule,
       });
 
-      if (backfillResult.outcome === 'backfilled') {
+      if (backfillResult.outcome === BulkFillGapsScheduleResult.BACKFILLED) {
         backfilled.push(rule);
-      } else if (backfillResult.outcome === 'errored') {
+      } else if (backfillResult.outcome === BulkFillGapsScheduleResult.ERRORED) {
         errored.push(backfillResult.error);
       } else {
         skipped.push(rule);

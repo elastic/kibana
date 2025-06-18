@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-export type BulkGapsFillStep =
-  | 'BULK_GAPS_FILL_STEP_ACCESS_VALIDATION'
-  | 'BULK_GAPS_FILL_STEP_SCHEDULING';
+export enum BulkGapsFillStep {
+  ACCESS_VALIDATION = 'ACCESS_VALIDATION',
+  SCHEDULING = 'SCHEDULING',
+}
+
+export enum BulkFillGapsScheduleResult {
+  BACKFILLED = 'BACKFILLED',
+  SKIPPED = 'SKIPPED',
+  ERRORED = 'ERRORED',
+}
 
 export interface BulkGapFillingErroredRule {
   rule: {

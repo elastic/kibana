@@ -13,7 +13,7 @@ import type { Gap } from './gap';
 import type { GapStatus } from '../../../common/constants';
 import { gapStatus } from '../../../common/constants';
 
-interface ProcessAllGapsInTimeRangeParams {
+interface ProcessAllGapsInTimeRangeParams<T> {
   ruleId: string;
   start: string;
   end: string;
@@ -25,7 +25,7 @@ interface ProcessAllGapsInTimeRangeParams {
   };
   eventLogClient: IEventLogClient;
   logger: Logger;
-  processGapsBatch: (gaps: Gap[]) => Promise<void>;
+  processGapsBatch: (gaps: Gap[]) => Promise<T>;
 }
 
 export const PROCESS_GAPS_DEFAULT_PAGE_SIZE = 500;
@@ -37,7 +37,7 @@ const DEFAULT_MAX_ITERATIONS = 100000;
 /**
  * Fetches all gaps using search_after pagination to process more than 10,000 gaps with stable sorting
  */
-export const processAllGapsInTimeRange = async ({
+export const processAllGapsInTimeRange = async <T>({
   ruleId,
   start,
   end,
@@ -46,11 +46,12 @@ export const processAllGapsInTimeRange = async ({
   logger,
   eventLogClient,
   processGapsBatch,
-}: ProcessAllGapsInTimeRangeParams) => {
+}: ProcessAllGapsInTimeRangeParams<T>): Promise<T[]> => {
   let searchAfter: SortResults[] | undefined;
   let pitId: string | undefined;
   let iterationCount = 0;
   let gapsCount = 0;
+  const processingResults: T[] = [];
 
   const {
     pageSize = PROCESS_GAPS_DEFAULT_PAGE_SIZE,
@@ -95,7 +96,7 @@ export const processAllGapsInTimeRange = async ({
         gapsToProcess = gapsToProcess.slice(0, gaps.length - offset);
       }
 
-      await processGapsBatch(gapsToProcess);
+      processingResults.push(await processGapsBatch(gapsToProcess));
 
       // Exit conditions: no more results or no next search_after or maxFetchedGaps reached
       const maxGapsReached = maxFetchedGaps !== undefined && gapsCount >= maxFetchedGaps;
@@ -110,4 +111,6 @@ export const processAllGapsInTimeRange = async ({
       await eventLogClient.closePointInTime(pitId);
     }
   }
+
+  return processingResults;
 };
