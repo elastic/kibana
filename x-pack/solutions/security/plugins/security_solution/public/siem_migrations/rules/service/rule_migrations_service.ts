@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
-import { replaceParams } from '@kbn/openapi-common/shared';
-import { securitySolutionQueryClient } from '../../../common/containers/query_client/query_client_provider';
+import { isEqual } from 'lodash';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
@@ -22,11 +21,7 @@ import type {
   UpsertRuleMigrationResourcesRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
-import {
-  SiemMigrationTaskStatus,
-  SIEM_RULE_MIGRATION_RULES_PATH,
-  SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
-} from '../../../../common/siem_migrations/constants';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
@@ -80,7 +75,7 @@ export class SiemRulesMigrationsService {
   }
 
   public getLatestStats$(): Observable<RuleMigrationStats[] | null> {
-    return this.latestStats$.asObservable();
+    return this.latestStats$.asObservable().pipe(distinctUntilChanged(isEqual));
   }
 
   public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
@@ -268,7 +263,7 @@ export class SiemRulesMigrationsService {
         pendingMigrationIds.forEach((pendingMigrationId) => {
           const migrationStats = results.find((item) => item.id === pendingMigrationId);
           if (migrationStats?.status === SiemMigrationTaskStatus.FINISHED) {
-            this.onRuleMigrationFinished(migrationStats);
+            this.core.notifications.toasts.addSuccess(getSuccessToast(migrationStats, this.core));
           }
         });
       }
@@ -304,33 +299,5 @@ export class SiemRulesMigrationsService {
         );
       }
     } while (pendingMigrationIds.length > 0);
-  }
-
-  private onRuleMigrationFinished(ruleMigrationStats: RuleMigrationStats) {
-    this.core.notifications.toasts.addSuccess(getSuccessToast(ruleMigrationStats, this.core));
-    this.invalidateRuleMigrationQueries(ruleMigrationStats.id);
-  }
-
-  /**
-   * Once a migration finishes, we invalidate siem migration's
-   * selected`GET` queries
-   *
-   */
-  private invalidateRuleMigrationQueries(migrationId: string) {
-    const MIGRATION_QUERY_PATHS_TO_INVALIDATE = [
-      SIEM_RULE_MIGRATION_RULES_PATH,
-      SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
-    ];
-
-    for (const path of MIGRATION_QUERY_PATHS_TO_INVALIDATE) {
-      const SPECIFIC_MIGRATION_PATH = replaceParams(path, {
-        migration_id: migrationId,
-      });
-
-      securitySolutionQueryClient.invalidateQueries({
-        queryKey: ['GET', SPECIFIC_MIGRATION_PATH],
-        refetchType: 'active',
-      });
-    }
   }
 }

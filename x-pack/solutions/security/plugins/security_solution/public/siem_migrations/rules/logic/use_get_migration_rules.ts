@@ -42,6 +42,7 @@ export const useGetMigrationRules = (params: {
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
       },
+      cacheTime: 2 * 1000,
     }
   );
 };
