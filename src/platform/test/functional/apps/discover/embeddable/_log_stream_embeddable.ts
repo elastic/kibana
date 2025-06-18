@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const spaceId = 'default';
   const importFileName = 'log_stream_dashboard_saved_object.ndjson';
-  const importFilePath = path.join(__dirname, importFileName);
+  const importFilePath = path.join(__dirname, 'exports', importFileName);
 
   describe('dashboards with log stream embeddable', () => {
     before(async () => {

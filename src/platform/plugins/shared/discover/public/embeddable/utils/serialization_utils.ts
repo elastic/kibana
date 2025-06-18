@@ -68,21 +68,6 @@ export const deserializeState = async ({
       serializedState.references ?? []
     ) as SavedSearchUnwrapResult;
 
-    if (!savedSearchUnwrappedResult.attributes) {
-      savedSearchUnwrappedResult.attributes = {
-        title: serializedState.rawState.title ?? '',
-        sort: serializedState.rawState.sort ?? [],
-        columns: serializedState.rawState.columns ?? [],
-        description: '',
-        grid: {},
-        hideChart: false,
-        isTextBasedQuery: false,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '{}',
-        },
-        references: [],
-      };
-    }
     const savedSearch = await byValueToSavedSearch(savedSearchUnwrappedResult, true);
     return {
       ...savedSearch,
