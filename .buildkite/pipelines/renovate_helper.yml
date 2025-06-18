@@ -6,8 +6,8 @@ agents:
 steps:
   - group: 'Renovate PR opened or comment'
     if: >-
-      "(build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened') ||
-       (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created')"
+      "(build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'opened')
+       || (build.env('GITHUB_PR_EVENT_TYPE') == 'issue_comment' && build.env('GITHUB_PR_EVENT_ACTION') == 'created')"
 
     steps:
       - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
@@ -31,7 +31,12 @@ steps:
               limit: 1
 
   - group: 'Renovate PR updated'
-    if: "build.env('GITHUB_PR_USER') != 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize'"
+    # GITHUB_PR_USER is the PR author and GITHUB_PR_TRIGGER_USER is the commit author
+    if: >-
+      "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]'
+       && build.env('GITHUB_PR_TRIGGER_USER') != 'elastic-renovate-prod[bot]'
+       && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request'
+       && build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize'"
 
     steps:
       - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
