@@ -19,7 +19,18 @@ import {
 const MANAGEMENT_PAGE_DESCRIPTION =
   'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.';
 
-describe('Capabilities', { tags: '@serverless' }, () => {
+describe(
+  'Capabilities',
+  {
+    tags: ['@serverless'],
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
+        ],
+      },
+    },
+  }, () => {
   const userRoles = [
     {
       name: 'Admin user',
