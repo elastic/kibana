@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -38,6 +37,8 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
   getFieldCellActions,
@@ -499,7 +500,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       {rows.length === 0 ? (
-        <EuiSelectableMessage css={{ minHeight: 300 }}>
+        <EuiSelectableMessage css={styles.noFieldsFound}>
           <p>
             <EuiI18n
               token="unifiedDocViewer.docViews.table.noFieldFound"
@@ -508,13 +509,7 @@ export const DocViewerTable = ({
           </p>
         </EuiSelectableMessage>
       ) : (
-        <EuiFlexItem
-          grow={Boolean(containerHeight)}
-          css={css`
-            min-block-size: 0;
-            display: block;
-          `}
-        >
+        <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
           <EuiDataGrid
             key={`fields-table-${hit.id}`}
             {...GRID_PROPS}
@@ -522,6 +517,7 @@ export const DocViewerTable = ({
               defaultMessage: 'Field values',
             })}
             className="kbnDocViewer__fieldsGrid"
+            css={styles.fieldsGrid}
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}
@@ -534,4 +530,53 @@ export const DocViewerTable = ({
       )}
     </EuiFlexGroup>
   );
+};
+
+const styles = {
+  fieldsGridWrapper: css({
+    minBlockSize: 0,
+    display: 'block',
+
+    '.euiDataGridRow': {
+      '&:hover': {
+        // we keep using a deprecated shade until proper token is available
+        backgroundColor: euiThemeVars.euiColorLightestShade,
+      },
+    },
+  }),
+  fieldsGrid: css({
+    '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+      borderTop: 'none',
+    },
+
+    '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+      borderBottom: euiThemeVars.euiBorderThin,
+    },
+
+    '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+      paddingTop: 0,
+      paddingBottom: 0,
+    },
+
+    '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
+      padding: `calc(${euiThemeVars.euiSizeXS} / 2) 0 0 ${euiThemeVars.euiSizeXS}`,
+    },
+
+    '.kbnDocViewer__fieldsGrid__pinAction': {
+      opacity: 0,
+    },
+
+    '& [data-gridcell-column-id="pin_field"]:focus-within': {
+      '.kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 1,
+      },
+    },
+
+    '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
+      opacity: 1,
+    },
+  }),
+  noFieldsFound: css({
+    minHeight: 300,
+  }),
 };
