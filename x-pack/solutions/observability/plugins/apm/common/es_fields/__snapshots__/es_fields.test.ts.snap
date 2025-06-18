@@ -67,6 +67,8 @@ exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Error DURATION 1`] = `undefined`;
+
 exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
@@ -98,6 +100,8 @@ exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Error ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error ERROR_STACK_TRACE 1`] = `undefined`;
@@ -109,6 +113,10 @@ exports[`Error EVENT_NAME 1`] = `undefined`;
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Error EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Error EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Error EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -336,6 +344,8 @@ exports[`Error SPAN_SYNC 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error STATUS_CODE 1`] = `undefined`;
+
 exports[`Error TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Error TELEMETRY_SDK_NAME 1`] = `undefined`;
@@ -463,6 +473,8 @@ exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Span DURATION 1`] = `undefined`;
+
 exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
@@ -485,6 +497,8 @@ exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Span ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span ERROR_STACK_TRACE 1`] = `undefined`;
@@ -496,6 +510,10 @@ exports[`Span EVENT_NAME 1`] = `undefined`;
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Span EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Span EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Span EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -715,6 +733,8 @@ exports[`Span SPAN_SYNC 1`] = `false`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
+exports[`Span STATUS_CODE 1`] = `undefined`;
+
 exports[`Span TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Span TELEMETRY_SDK_NAME 1`] = `undefined`;
@@ -846,6 +866,8 @@ exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Transaction DURATION 1`] = `undefined`;
+
 exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
@@ -868,6 +890,8 @@ exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Transaction ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction ERROR_STACK_TRACE 1`] = `undefined`;
@@ -879,6 +903,10 @@ exports[`Transaction EVENT_NAME 1`] = `undefined`;
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Transaction EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Transaction EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -1111,6 +1139,8 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 exports[`Transaction SPAN_SYNC 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
+
+exports[`Transaction STATUS_CODE 1`] = `undefined`;
 
 exports[`Transaction TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
