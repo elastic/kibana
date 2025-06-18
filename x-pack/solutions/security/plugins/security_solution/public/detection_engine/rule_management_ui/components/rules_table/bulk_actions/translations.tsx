@@ -220,7 +220,14 @@ export const bulkAlertSuppression = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.infoText',
     {
       defaultMessage:
-        'Bulk editing will not show the existing suppression on the selected rules. The message after editing has been applied will indicate the amount of changes that have been made on your selection.',
+        'Existing alert suppression settings will be overwritten for all of the selected rules, except for threshold rules.',
+    }
+  ),
+  SUPPRESSION_FOR_THRESHOLD_INFO_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppressionForThreshold.infoText',
+    {
+      defaultMessage:
+        'Existing alert suppression settings will be overwritten for all of the selected threshold rules.',
     }
   ),
   DELETE_CONFIRMATION_TITLE: i18n.translate(
@@ -250,7 +257,14 @@ export const bulkAlertSuppression = {
   DURATION_PER_TIME_PERIOD_LABEL: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodLabel',
     {
-      defaultMessage: 'Per time period duration',
+      defaultMessage: 'Suppression interval',
+    }
+  ),
+  DURATION_PER_TIME_PERIOD_HELP_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodHelpText',
+    {
+      defaultMessage:
+        'Suppress alerts for the selected rules within a repeating time interval. To ensure suppression is appropriately applied, avoid choosing an interval that’s shorter than the rule’s run schedule.',
     }
   ),
 };

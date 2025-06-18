@@ -67,13 +67,14 @@ export const SetAlertSuppressionForThresholdForm = React.memo(function SetAlertS
           <EuiIcon type="iInCircle" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="xs">{i18n.SUPPRESSION_INFO_TEXT}</EuiText>
+          <EuiText size="xs">{i18n.SUPPRESSION_FOR_THRESHOLD_INFO_TEXT}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       <EuiFormRow
         data-test-subj="alertSuppressionDuration"
         label={i18n.DURATION_PER_TIME_PERIOD_LABEL}
+        helpText={i18n.DURATION_PER_TIME_PERIOD_HELP_TEXT}
       >
         <UseMultiFields<{
           suppressionDurationValue: number | undefined;
