@@ -10,27 +10,38 @@
 import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
 import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
-import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   useInternalStateSelector,
   type RuntimeStateManager,
   selectTabRuntimeState,
-  useRuntimeState,
   CurrentTabProvider,
-  RuntimeStateProvider,
   useCurrentTabSelector,
 } from '../../state_management/redux';
 import type { DiscoverMainContentProps } from '../layout/discover_main_content';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
-import { ScopedProfilesManagerProvider } from '../../../../context_awareness';
+import {
+  DiscoverSidebarResponsive,
+  type DiscoverSidebarResponsiveProps,
+} from '../sidebar/discover_sidebar_responsive';
+import { ComponentInPortalGuard } from './component_in_portal_guard';
+
+const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
+interface ChartPortalGuardProps {
+  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+}
 
-export const ChartPortalsRenderer = ({
+export type SidebarPortalNode = HtmlPortalNode;
+export type SidebarPortalNodes = Record<string, SidebarPortalNode>;
+interface SidebarPortalGuardProps {
+  sidebarProps: DiscoverSidebarResponsiveProps['sidebarProps'];
+}
+
+export const TabsPortalsRenderer = ({
   runtimeStateManager,
   children,
 }: PropsWithChildren<{
@@ -39,21 +50,41 @@ export const ChartPortalsRenderer = ({
   const allTabIds = useInternalStateSelector((state) => state.tabs.allIds);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const chartPortalNodes = useRef<ChartPortalNodes>({});
+  const sidebarPortalNodes = useRef<SidebarPortalNodes>({});
 
   chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabIds);
+  sidebarPortalNodes.current = updatePortals(sidebarPortalNodes.current, allTabIds);
 
   return (
     <>
       {Object.keys(chartPortalNodes.current).map((tabId) => {
         return (
           <InPortal key={tabId} node={chartPortalNodes.current[tabId]}>
-            <UnifiedHistogramGuard tabId={tabId} runtimeStateManager={runtimeStateManager} />
+            <ComponentInPortalGuard<ChartPortalGuardProps>
+              tabId={tabId}
+              runtimeStateManager={runtimeStateManager}
+              Component={UnifiedHistogramChartWrapper}
+              componentProps={{ panelsToggle: undefined }}
+            />
+          </InPortal>
+        );
+      })}
+      {Object.keys(sidebarPortalNodes.current).map((tabId) => {
+        return (
+          <InPortal key={tabId} node={sidebarPortalNodes.current[tabId]}>
+            <ComponentInPortalGuard<SidebarPortalGuardProps>
+              tabId={tabId}
+              runtimeStateManager={runtimeStateManager}
+              Component={SidebarMemoized}
+              componentProps={{ sidebarProps: undefined }}
+            />
           </InPortal>
         );
       })}
       <CurrentTabProvider
         currentTabId={currentTabId}
         currentChartPortalNode={chartPortalNodes.current[currentTabId]}
+        currentSidebarPortalNode={sidebarPortalNodes.current[currentTabId]}
       >
         {children}
       </CurrentTabProvider>
@@ -70,58 +101,7 @@ const updatePortals = (portals: ChartPortalNodes, tabsIds: string[]) =>
     {}
   );
 
-interface UnifiedHistogramGuardProps {
-  tabId: string;
-  runtimeStateManager: RuntimeStateManager;
-  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
-}
-
-const UnifiedHistogramGuard = ({
-  tabId,
-  runtimeStateManager,
-  panelsToggle,
-}: UnifiedHistogramGuardProps) => {
-  const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
-  const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
-  const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
-  const currentScopedProfilesManager = useRuntimeState(
-    currentTabRuntimeState.scopedProfilesManager$
-  );
-  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
-  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
-  const isInitialized = useRef(false);
-
-  if (
-    (!isSelected && !isInitialized.current) ||
-    !currentCustomizationService ||
-    !currentStateContainer ||
-    !currentDataView
-  ) {
-    return null;
-  }
-
-  isInitialized.current = true;
-
-  return (
-    <CurrentTabProvider currentTabId={tabId}>
-      <DiscoverCustomizationProvider value={currentCustomizationService}>
-        <DiscoverMainProvider value={currentStateContainer}>
-          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <ScopedProfilesManagerProvider scopedProfilesManager={currentScopedProfilesManager}>
-              <UnifiedHistogramChartWrapper
-                stateContainer={currentStateContainer}
-                panelsToggle={panelsToggle}
-              />
-            </ScopedProfilesManagerProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </DiscoverCustomizationProvider>
-    </CurrentTabProvider>
-  );
-};
-
-type UnifiedHistogramChartProps = Pick<UnifiedHistogramGuardProps, 'panelsToggle'> & {
+type UnifiedHistogramChartProps = Pick<ChartPortalGuardProps, 'panelsToggle'> & {
   stateContainer: DiscoverStateContainer;
 };
 

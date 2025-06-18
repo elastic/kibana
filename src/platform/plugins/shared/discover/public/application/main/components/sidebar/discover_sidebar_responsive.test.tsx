@@ -158,25 +158,29 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
     }
   }
 
+  const stateContainer = getStateContainer({});
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+
   return {
-    columns: ['extension'],
-    documents$: new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: hits,
-    }) as DataDocuments$,
-    onChangeDataView: jest.fn(),
-    onAddBreakdownField: jest.fn(),
-    onAddFilter: jest.fn(),
-    onAddField: jest.fn(),
-    onRemoveField: jest.fn(),
     selectedDataView: dataView,
-    trackUiMetric: jest.fn(),
-    onFieldEdited: jest.fn(),
-    onDataViewCreated: jest.fn(),
-    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
-      isCollapsed: false,
-      toggle: () => {},
-    }),
+    stateContainer,
+    sidebarProps: {
+      columns: ['extension'],
+      onChangeDataView: jest.fn(),
+      onAddBreakdownField: jest.fn(),
+      onAddFilter: jest.fn(),
+      onAddField: jest.fn(),
+      onRemoveField: jest.fn(),
+      trackUiMetric: jest.fn(),
+      onFieldEdited: jest.fn(),
+      onDataViewCreated: jest.fn(),
+      sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: () => {},
+      }),
+    },
   };
 }
 
@@ -193,32 +197,36 @@ type EnzymeReturnType = ReactWrapper<TestWrapperProps>;
 type MountReturn<WithRTL extends boolean> = WithRTL extends true ? undefined : EnzymeReturnType;
 
 async function mountComponent<WithReactTestingLibrary extends boolean = false>(
-  props: TestWrapperProps,
+  { selectedDataView, ...props }: TestWrapperProps,
   appStateParams: { query?: Query | AggregateQuery } = {},
   services?: DiscoverServices,
   withReactTestingLibrary?: WithReactTestingLibrary
 ): Promise<MountReturn<WithReactTestingLibrary>> {
+  if (appStateParams.query) {
+    props.stateContainer.appState.set({
+      query: appStateParams.query,
+      filters: [],
+    });
+  }
+
   let comp: ReactWrapper<TestWrapperProps>;
-  const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
-    props.selectedDataView
-      ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
-      : []
+    selectedDataView ? [{ id: selectedDataView.id!, title: selectedDataView.title! }] : []
   );
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
-    return [props.selectedDataView].find((d) => d!.id === id);
+    return [selectedDataView].find((d) => d!.id === id);
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.appState.getState());
+    .mockImplementation(() => props.stateContainer.appState.getState());
 
   const component = (
     <DiscoverTestProvider
       services={mockedServices}
       stateContainer={stateContainer}
       runtimeState={{
-        currentDataView: props.selectedDataView!,
+        currentDataView: selectedDataView!,
         adHocDataViews: [],
       }}
     >
@@ -272,7 +280,10 @@ describe('discover responsive sidebar', function () {
 
     const compLoadingExistence = await mountComponent({
       ...props,
-      fieldListVariant: 'list-always',
+      sidebarProps: {
+        ...props.sidebarProps,
+        fieldListVariant: 'list-always',
+      },
     });
 
     await act(async () => {
@@ -384,7 +395,10 @@ describe('discover responsive sidebar', function () {
   it('should not have selected fields if no columns selected', async function () {
     const propsWithoutColumns = {
       ...props,
-      columns: [],
+      sidebarProps: {
+        ...props.sidebarProps,
+        columns: [],
+      },
     };
     const compWithoutSelected = await mountComponent(propsWithoutColumns);
     const popularFieldsCount = findTestSubject(
@@ -425,14 +439,11 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should not calculate counts if documents are not fetched yet', async function () {
-    const propsWithoutDocuments: TestWrapperProps = {
-      ...props,
-      documents$: new BehaviorSubject({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-        result: undefined,
-      }) as DataDocuments$,
-    };
-    const compWithoutDocuments = await mountComponent(propsWithoutDocuments);
+    props.stateContainer.dataState.data$.documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+      result: undefined,
+    }) as DataDocuments$;
+    const compWithoutDocuments = await mountComponent(props);
     const availableFieldsCount = findTestSubject(
       compWithoutDocuments,
       'fieldListGroupedAvailableFields-count'
@@ -455,19 +466,19 @@ describe('discover responsive sidebar', function () {
 
     comp.update();
     findTestSubject(comp, 'fieldPopoverHeader_addBreakdownField-extension').simulate('click');
-    expect(props.onAddBreakdownField).toHaveBeenCalled();
+    expect(props.sidebarProps.onAddBreakdownField).toHaveBeenCalled();
   });
   it('should allow selecting fields', async function () {
     const comp = await mountComponent(props);
     const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
-    expect(props.onAddField).toHaveBeenCalledWith('bytes');
+    expect(props.sidebarProps.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', async function () {
     const comp = await mountComponent(props);
     const selectedFields = findTestSubject(comp, 'fieldListGroupedSelectedFields');
     findTestSubject(selectedFields, 'fieldToggle-extension').simulate('click');
-    expect(props.onRemoveField).toHaveBeenCalledWith('extension');
+    expect(props.sidebarProps.onRemoveField).toHaveBeenCalledWith('extension');
   });
   it('should allow adding filters', async function () {
     const comp = await mountComponent(props);
@@ -480,7 +491,7 @@ describe('discover responsive sidebar', function () {
 
     comp.update();
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
-    expect(props.onAddFilter).toHaveBeenCalled();
+    expect(props.sidebarProps.onAddFilter).toHaveBeenCalled();
   });
   it('should allow adding "exist" filter', async function () {
     const comp = await mountComponent(props);
@@ -493,7 +504,7 @@ describe('discover responsive sidebar', function () {
 
     comp.update();
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
-    expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
+    expect(props.sidebarProps.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
 
   it('should allow searching by string, and calcFieldCount should just be executed once', async function () {
@@ -553,19 +564,22 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should render correctly in the ES|QL mode', async () => {
+    props.stateContainer.dataState.data$.documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: getDataTableRecords(stubLogstashDataView),
+      esqlQueryColumns: [
+        { id: '1', name: 'extension', meta: { type: 'text' } },
+        { id: '2', name: 'bytes', meta: { type: 'number' } },
+        { id: '3', name: '@timestamp', meta: { type: 'date' } },
+      ],
+    }) as DataDocuments$;
     const propsWithEsqlMode = {
       ...props,
-      columns: ['extension', 'bytes'],
-      onAddFilter: undefined,
-      documents$: new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: getDataTableRecords(stubLogstashDataView),
-        esqlQueryColumns: [
-          { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ],
-      }) as DataDocuments$,
+      sidebarProps: {
+        ...props.sidebarProps,
+        columns: ['extension', 'bytes'],
+        onAddFilter: undefined,
+      },
     };
     const compInEsqlMode = await mountComponent(propsWithEsqlMode, {
       query: { esql: 'FROM `index`' },
@@ -646,12 +660,10 @@ describe('discover responsive sidebar', function () {
   });
 
   it('should hide field list if documents status is not initialized', async function () {
-    const comp = await mountComponent({
-      ...props,
-      documents$: new BehaviorSubject({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-      }) as DataDocuments$,
-    });
+    props.stateContainer.dataState.data$.documents$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    }) as DataDocuments$;
+    const comp = await mountComponent(props);
     expect(findTestSubject(comp, 'fieldListGroupedFieldGroups').exists()).toBe(false);
   });
 
@@ -660,7 +672,10 @@ describe('discover responsive sidebar', function () {
     const comp = await mountComponent(
       {
         ...props,
-        fieldListVariant: 'list-always',
+        sidebarProps: {
+          ...props.sidebarProps,
+          fieldListVariant: 'list-always',
+        },
       },
       {},
       services
@@ -704,7 +719,10 @@ describe('discover responsive sidebar', function () {
     const services = createMockServices();
     const propsWithPicker: TestWrapperProps = {
       ...props,
-      fieldListVariant: 'button-and-flyout-always',
+      sidebarProps: {
+        ...props.sidebarProps,
+        fieldListVariant: 'button-and-flyout-always',
+      },
     };
     const compWithPicker = await mountComponent(propsWithPicker, {}, services);
     // open flyout
@@ -736,7 +754,10 @@ describe('discover responsive sidebar', function () {
     services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn(() => false);
     const propsWithPicker: TestWrapperProps = {
       ...props,
-      fieldListVariant: 'button-and-flyout-always',
+      sidebarProps: {
+        ...props.sidebarProps,
+        fieldListVariant: 'button-and-flyout-always',
+      },
     };
     const compWithPickerInViewerMode = await mountComponent(propsWithPicker, {}, services);
     // open flyout
@@ -767,7 +788,10 @@ describe('discover responsive sidebar', function () {
       mockUseCustomizations = false;
       const comp = await mountComponent({
         ...props,
-        fieldListVariant: 'button-and-flyout-always',
+        sidebarProps: {
+          ...props.sidebarProps,
+          fieldListVariant: 'button-and-flyout-always',
+        },
       });
 
       await act(async () => {
@@ -784,7 +808,10 @@ describe('discover responsive sidebar', function () {
       mockUseCustomizations = true;
       const comp = await mountComponent({
         ...props,
-        fieldListVariant: 'button-and-flyout-always',
+        sidebarProps: {
+          ...props.sidebarProps,
+          fieldListVariant: 'button-and-flyout-always',
+        },
       });
 
       await act(async () => {

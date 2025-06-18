@@ -26,7 +26,7 @@ import {
 } from './internal_state';
 import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
-import type { ChartPortalNode } from '../../components/chart';
+import type { ChartPortalNode, SidebarPortalNode } from '../../components/chart';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -52,6 +52,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 interface CurrentTabContextValue {
   currentTabId: string;
   currentChartPortalNode?: ChartPortalNode;
+  currentSidebarPortalNode?: ChartPortalNode;
   injectCurrentTab: TabActionInjector;
 }
 
@@ -60,15 +61,21 @@ const currentTabContext = createContext<CurrentTabContextValue | undefined>(unde
 export const CurrentTabProvider = ({
   currentTabId,
   currentChartPortalNode,
+  currentSidebarPortalNode,
   children,
-}: PropsWithChildren<{ currentTabId: string; currentChartPortalNode?: ChartPortalNode }>) => {
+}: PropsWithChildren<{
+  currentTabId: string;
+  currentChartPortalNode?: ChartPortalNode;
+  currentSidebarPortalNode?: SidebarPortalNode;
+}>) => {
   const contextValue = useMemo<CurrentTabContextValue>(
     () => ({
       currentTabId,
       currentChartPortalNode,
+      currentSidebarPortalNode,
       injectCurrentTab: createTabActionInjector(currentTabId),
     }),
-    [currentChartPortalNode, currentTabId]
+    [currentChartPortalNode, currentSidebarPortalNode, currentTabId]
   );
 
   return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
@@ -97,6 +104,7 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 };
 
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
+export const useCurrentSidebarPortalNode = () => useCurrentTabContext().currentSidebarPortalNode;
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

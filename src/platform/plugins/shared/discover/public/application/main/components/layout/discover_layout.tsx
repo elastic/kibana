@@ -41,7 +41,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { DiscoverSidebarResponsive } from '../sidebar';
+import type { DiscoverSidebarResponsiveProps } from '../sidebar/discover_sidebar_responsive';
 import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
@@ -63,7 +63,6 @@ import { TABS_ENABLED } from '../../../../constants';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 const queryClient = new QueryClient();
-const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   // QueryClientProvider is used to allow querying the authorized rules api hook
@@ -310,6 +309,32 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
+  const sidebarProps: DiscoverSidebarResponsiveProps['sidebarProps'] = useMemo(
+    () => ({
+      columns: currentColumns,
+      onAddBreakdownField: canSetBreakdownField ? onAddBreakdownField : undefined,
+      onAddField: onAddColumnWithTracking,
+      onAddFilter: onFilter,
+      onChangeDataView: stateContainer.actions.onChangeDataView,
+      onDataViewCreated: stateContainer.actions.onDataViewCreated,
+      onFieldEdited,
+      onRemoveField: onRemoveColumnWithTracking,
+      sidebarToggleState$,
+      trackUiMetric,
+    }),
+    [
+      currentColumns,
+      canSetBreakdownField,
+      onAddBreakdownField,
+      onAddColumnWithTracking,
+      onFilter,
+      stateContainer.actions,
+      onFieldEdited,
+      onRemoveColumnWithTracking,
+      sidebarToggleState$,
+      trackUiMetric,
+    ]
+  );
 
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
@@ -433,22 +458,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           <DiscoverResizableLayout
             container={sidebarContainer}
             sidebarToggleState$={sidebarToggleState$}
-            sidebarPanel={
-              <SidebarMemoized
-                columns={currentColumns}
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
-                onAddField={onAddColumnWithTracking}
-                onAddFilter={onFilter}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                onFieldEdited={onFieldEdited}
-                onRemoveField={onRemoveColumnWithTracking}
-                selectedDataView={dataView}
-                sidebarToggleState$={sidebarToggleState$}
-                trackUiMetric={trackUiMetric}
-              />
-            }
+            sidebarProps={sidebarProps}
             mainPanel={
               <div css={dscPageContentWrapperCss}>
                 {resultState === 'none' ? (
