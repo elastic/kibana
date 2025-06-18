@@ -46967,7 +46967,6 @@ paths:
       summary: Invalidate user sessions
       tags:
         - user session
-      x-state: Technical Preview
   /api/short_url:
     post:
       description: |
