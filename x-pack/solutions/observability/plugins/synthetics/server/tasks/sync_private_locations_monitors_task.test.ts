@@ -457,7 +457,10 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
     await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      `Error scheduling Synthetics sync private location monitors task: ${error.message}`
+      `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
+      {
+        error,
+      }
     );
   });
 });
