@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiListGroupItem, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiTitle,
+  useCurrentEuiBreakpoint,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
-// Import capability components
 import { KeywordSearch } from './keyword_search';
 import { SemanticSearch } from './semantic_search';
 import { VectorSearch } from './vector_search';
@@ -44,23 +50,27 @@ export const AISearchCapabilities: React.FC = () => {
   const [selectedCapability, setSelectedCapability] = useState<string>(
     SEARCH_CAPABILITIES[0].value
   );
+  const currentBreakpoint = useCurrentEuiBreakpoint();
 
   const SelectedComponent = capabilityComponents[selectedCapability];
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h4>
+            {i18n.translate('xpack.searchHomepage.aiSearchCapabilities.title', {
+              defaultMessage: 'Explore Elastic’s AI search capabilities',
+            })}
+          </h4>
+        </EuiTitle>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <span>
-                {i18n.translate('xpack.searchHomepage.aiSearchCapabilities.title', {
-                  defaultMessage: 'Explore Elastic’s AI search capabilities',
-                })}
-              </span>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          gutterSize="xl"
+          direction={currentBreakpoint === 's' || currentBreakpoint === 'm' ? 'column' : 'row'}
+        >
+          <EuiFlexItem grow={1}>
             <EuiListGroup>
               {SEARCH_CAPABILITIES.map((capability) => (
                 <EuiListGroupItem
@@ -74,10 +84,10 @@ export const AISearchCapabilities: React.FC = () => {
               ))}
             </EuiListGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <SelectedComponent />
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SelectedComponent />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -5,150 +5,47 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import SemanticSearchImage from '../../assets/semantic_search.svg';
-import { useKibana } from '../../hooks/use_kibana';
+import { AISearchWorkflow } from './ai_search_workflow';
+
+const SEMANTIC_SEARCH_TEXT = {
+  image: SemanticSearchImage,
+  imageAlt: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.imageAlt', {
+    defaultMessage: 'Semantic Search',
+  }),
+  heading: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.title', {
+    defaultMessage: 'Enhance search accuracy with advanced semantic capabilities.',
+  }),
+  subheading: i18n.translate(
+    'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.description',
+    {
+      defaultMessage:
+        "Leverage the semantic_text field along with Elastic's advanced ELSER machine learning model for enhanced data analysis.",
+    }
+  ),
+  featureBullets: [
+    i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.firstLine', {
+      defaultMessage: 'Use Elastic’s inference service or connect your own model provider',
+    }),
+    i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.SecondLine', {
+      defaultMessage: 'Default chunking strategies or customize your own',
+    }),
+    i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.ThirdLine', {
+      defaultMessage: 'Combine semantic capabilities with traditional search methods.',
+    }),
+  ],
+  buttonLabel: i18n.translate(
+    'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.createSemanticOptimizedIndex',
+    {
+      defaultMessage: 'Create a semantic optimized index',
+    }
+  ),
+  dataTestSubj: 'createSemanticOptimizedIndexButton',
+};
 
 export const SemanticSearch: React.FC = () => {
-  const { share } = useKibana().services;
-  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
-
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiImage
-              src={SemanticSearchImage}
-              alt={i18n.translate(
-                'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.imageAlt',
-                {
-                  defaultMessage: 'Semantic Search',
-                }
-              )}
-              size="s"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <span>
-                    {i18n.translate(
-                      'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.title',
-                      {
-                        defaultMessage:
-                          'Enhance search accuracy with advanced semantic capabilities.',
-                      }
-                    )}
-                  </span>
-                </EuiTitle>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  {i18n.translate(
-                    'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.description',
-                    {
-                      defaultMessage:
-                        "Leverage the semantic_text field along with Elastic's advanced ELSER machine learning model for enhanced data analysis.",
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="checkInCircleFilled" color="subdued" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate(
-                            'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.firstLine',
-                            {
-                              defaultMessage:
-                                'Use Elastic’s inference service or connect your own model provider',
-                            }
-                          )}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="checkInCircleFilled" color="subdued" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate(
-                            'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.SecondLine',
-                            {
-                              defaultMessage: 'Default chunking strategies or customize your own',
-                            }
-                          )}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="checkInCircleFilled" color="subdued" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate(
-                            'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.ThirdLine',
-                            {
-                              defaultMessage:
-                                'Combine semantic capabilities with traditional search methods.',
-                            }
-                          )}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div>
-                  <EuiButton
-                    iconType="plusInCircle"
-                    href={createIndexUrl}
-                    data-test-subj="createSemanticOptimizedIndexButton"
-                  >
-                    {i18n.translate(
-                      'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.createSemanticOptimizedIndex',
-                      {
-                        defaultMessage: 'Create a semantic optimized index',
-                      }
-                    )}
-                  </EuiButton>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return <AISearchWorkflow capability={SEMANTIC_SEARCH_TEXT} />;
 };
