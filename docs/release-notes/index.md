@@ -42,7 +42,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 
 **Discover**:
 * Ensures that the absolute time range is used when exporting a report from Discover in the CSV format [#223249]({{kib-pull}}223249).
-* Adds request parameters that were formerly missing from the **Request** tab when you inspected an {{esql}} request [#221816]({{kib-pull}}221816).
+* Adds request parameters that were formerly missing from the **Request** tab when you inspected an ES|QL request [#221816]({{kib-pull}}221816).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.0.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
