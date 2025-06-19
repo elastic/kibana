@@ -331,7 +331,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
     this.accessControlService = new AccessControlService({
-      getCurrentUser,
       getTypeRegistry,
       checkPrivilegesFunc: checkPrivileges,
     });
@@ -809,10 +808,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const enforceMap = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
 
+    const currentUser = this.getCurrentUserFunc();
+    this.accessControlService.setUserForOperation(currentUser);
+
     for (const obj of objects) {
-      if (!this.accessControlService.canModifyAccess({ type: obj.type, object: obj })) {
-        continue; // Skip objects that cannot be modified
-      }
       const {
         type,
         objectNamespace: objectNamespace,
@@ -827,6 +826,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
       for (const space of existingNamespaces) {
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
+      }
+      if (
+        !this.accessControlService.canModifyObject({
+          type: obj.type,
+          object: obj,
+          spacesToAuthorize,
+        })
+      ) {
+        continue;
       }
     }
 
