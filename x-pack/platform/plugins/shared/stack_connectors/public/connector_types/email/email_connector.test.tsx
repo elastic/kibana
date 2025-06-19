@@ -7,7 +7,7 @@
 
 import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
@@ -700,8 +700,8 @@ describe('EmailActionConnectorFields', () => {
   });
 });
 
-describe('when only one email service is enabled', () => {
-  const enabledEmailServices = ['google-mail'];
+describe('when not all email services are enabled', () => {
+  const enabledEmailServices = ['amazon-ses', 'other', 'microsoft-exchange'];
   let appMockRenderer: AppMockRenderer;
   const onSubmit = jest.fn();
   const validateEmailAddresses = jest.fn();
@@ -720,25 +720,20 @@ describe('when only one email service is enabled', () => {
     jest.clearAllMocks();
   });
 
-  it('autofills the only available service options', async () => {
+  it('only allows enabled services to be selected only', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
-        clientSecret: null,
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
-      config: {
-        from: 'test@test.com',
-        test: 'test',
-        secure: true,
-      },
+      config: {},
       isDeprecated: false,
     };
 
-    const { getByTestId } = appMockRenderer.render(
+    appMockRenderer.render(
       <ConnectorFormTestProvider
         connector={actionConnector}
         onSubmit={onSubmit}
@@ -752,16 +747,54 @@ describe('when only one email service is enabled', () => {
       </ConnectorFormTestProvider>
     );
 
-    const emailHostInput = screen.getByTestId('emailHostInput') as HTMLInputElement;
-    await waitFor(() => {
-      expect(emailHostInput.value).toBe('https://example.com');
-    });
+    const emailServiceSelect = screen.getByTestId('emailServiceSelectInput') as HTMLSelectElement;
 
-    await userEvent.click(getByTestId('form-test-provide-submit'));
+    const options = within(emailServiceSelect).getAllByRole('option');
+    expect(options).toHaveLength(3);
+    expect(options[0].textContent).toBe('Amazon SES');
+    expect(options[1].textContent).toBe('MS Exchange Server');
+    expect(options[2].textContent).toBe('Other');
+  });
 
-    expect(onSubmit.mock.calls[0][0].data.config.service).toBe('gmail');
-    expect(onSubmit.mock.calls[0][0].data.config.host).toBe('https://example.com');
-    expect(onSubmit.mock.calls[0][0].data.config.port).toBe(2255);
-    expect(onSubmit.mock.calls[0][0].data.config.secure).toBe(true);
+  it('adds the current connector service to the service list even if not enabled', async () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: 'pass',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        test: 'test',
+        service: 'gmail', // not enabled
+        secure: true,
+      },
+      isDeprecated: false,
+    };
+
+    appMockRenderer.render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        onSubmit={onSubmit}
+        connectorServices={{ validateEmailAddresses, enabledEmailServices }}
+      >
+        <EmailActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    const emailServiceSelect = screen.getByTestId('emailServiceSelectInput') as HTMLSelectElement;
+
+    const options = within(emailServiceSelect).getAllByRole('option');
+    expect(options).toHaveLength(4);
+    expect(options[0].textContent).toBe('Gmail');
+    expect(options[1].textContent).toBe('Amazon SES');
+    expect(options[2].textContent).toBe('MS Exchange Server');
+    expect(options[3].textContent).toBe('Other');
   });
 });

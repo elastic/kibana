@@ -88,14 +88,40 @@ describe('getEmailServices', () => {
 
     expect(services).toEqual([
       {
-        kbnSettingValue: 'google-mail',
+        ['kbn-setting-value']: 'google-mail',
         text: 'Gmail',
         value: 'gmail',
       },
       {
-        kbnSettingValue: 'microsoft-outlook',
+        ['kbn-setting-value']: 'microsoft-outlook',
         text: 'Outlook',
         value: 'outlook365',
+      },
+    ]);
+  });
+
+  test('should return enabled services and the current service if specified', () => {
+    const services = getEmailServices(
+      true,
+      [serviceParamValueToKbnSettingMap.gmail, serviceParamValueToKbnSettingMap.outlook365],
+      serviceParamValueToKbnSettingMap.other
+    );
+
+    expect(services).toEqual([
+      {
+        ['kbn-setting-value']: 'google-mail',
+        text: 'Gmail',
+        value: 'gmail',
+      },
+      {
+        ['kbn-setting-value']: 'microsoft-outlook',
+        text: 'Outlook',
+        value: 'outlook365',
+      },
+      {
+        ['kbn-setting-value']: 'other',
+        text: 'Other',
+        value: 'other',
       },
     ]);
   });

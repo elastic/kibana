@@ -18,52 +18,61 @@ import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
 import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
-export const emailServices: Array<EuiSelectOption & { kbnSettingValue: string }> = [
+export const emailServices: Array<EuiSelectOption & { 'kbn-setting-value': string }> = [
   {
     text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
       defaultMessage: 'Gmail',
     }),
     value: 'gmail',
-    kbnSettingValue: emailKbnSettings.gmail,
+    ['kbn-setting-value']: emailKbnSettings.gmail,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.outlookServerTypeLabel', {
       defaultMessage: 'Outlook',
     }),
     value: 'outlook365',
-    kbnSettingValue: emailKbnSettings.outlook365,
+    ['kbn-setting-value']: emailKbnSettings.outlook365,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.amazonSesServerTypeLabel', {
       defaultMessage: 'Amazon SES',
     }),
     value: 'ses',
-    kbnSettingValue: emailKbnSettings.ses,
+    ['kbn-setting-value']: emailKbnSettings.ses,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.elasticCloudServerTypeLabel', {
       defaultMessage: 'Elastic Cloud',
     }),
     value: 'elastic_cloud',
-    kbnSettingValue: emailKbnSettings.elastic_cloud,
+    ['kbn-setting-value']: emailKbnSettings.elastic_cloud,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.exchangeServerTypeLabel', {
       defaultMessage: 'MS Exchange Server',
     }),
     value: 'exchange_server',
-    kbnSettingValue: emailKbnSettings.exchange_server,
+    ['kbn-setting-value']: emailKbnSettings.exchange_server,
   },
   {
     text: i18n.translate('xpack.stackConnectors.components.email.otherServerTypeLabel', {
       defaultMessage: 'Other',
     }),
     value: 'other',
-    kbnSettingValue: emailKbnSettings.other,
+    ['kbn-setting-value']: emailKbnSettings.other,
   },
 ];
 
-export function getEmailServices(isCloudEnabled: boolean, enabledEmailsServices: string[]) {
+// Return the current service regardless of its enabled state to allow users to:
+// 1. View the current service in the dropdown UI
+// 2. Update the service configuration if needed
+// Note: The connector update endpoint will reject updates where the service
+// remains unchanged but is disabled.
+export function getEmailServices(
+  isCloudEnabled: boolean,
+  enabledEmailsServices: string[],
+  currentService?: string
+): Array<EuiSelectOption & { 'kbn-setting-value': string }> {
   const allEmailServices = isCloudEnabled
     ? emailServices
     : emailServices.filter((service) => service.value !== 'elastic_cloud');
@@ -72,8 +81,10 @@ export function getEmailServices(isCloudEnabled: boolean, enabledEmailsServices:
     return allEmailServices;
   }
 
-  return allEmailServices.filter((service) =>
-    enabledEmailsServices.includes(service.kbnSettingValue)
+  return allEmailServices.filter(
+    (service) =>
+      service.value === currentService ||
+      enabledEmailsServices.includes(service['kbn-setting-value'])
   );
 }
 

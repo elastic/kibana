@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect, useMemo } from 'react';
+import React, { lazy, useEffect, useMemo, useRef } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,7 +28,6 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import useMount from 'react-use/lib/useMount';
 import { AdditionalEmailServices } from '../../../common';
 import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
@@ -106,7 +105,6 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     services: { validateEmailAddresses, enabledEmailServices },
   } = useConnectorContext();
 
-  const availableEmailServices = getEmailServices(isCloud, enabledEmailServices);
   const form = useFormContext();
   const { updateFieldValues } = form;
   const [{ config }] = useFormData({
@@ -121,26 +119,15 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   const { service = null, hasAuth = false } = config ?? {};
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
-
-  useMount(() => {
-    if (availableEmailServices.length > 1) {
-      return;
-    }
-
-    const fetchConfig = async () => {
-      const emailConfig = await getEmailServiceConfig(availableEmailServices[0].value as string);
-      updateFieldValues({
-        config: {
-          service: availableEmailServices[0].value,
-          host: emailConfig?.host,
-          port: emailConfig?.port,
-          secure: emailConfig?.secure,
-        },
-      });
-    };
-
-    fetchConfig();
-  });
+  const initialService = useRef(service);
+  if (!initialService.current && service) {
+    initialService.current = service;
+  }
+  const availableEmailServices = getEmailServices(
+    isCloud,
+    enabledEmailServices,
+    initialService.current
+  );
 
   useEffect(() => {
     async function fetchConfig() {
@@ -181,52 +168,29 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          {availableEmailServices.length === 1 ? (
-            <UseField
-              path="config.service"
-              component={TextField}
-              config={{
-                label: i18n.SERVICE_LABEL,
-                validations: [
-                  {
-                    validator: emptyField(i18n.SERVICE_REQUIRED),
-                  },
-                ],
-              }}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'emailServiceInput',
-                  value: availableEmailServices[0].text,
-                  fullWidth: true,
-                  readOnly: true,
-                  disabled: true,
+          <UseField
+            path="config.service"
+            component={SelectField}
+            config={{
+              label: i18n.SERVICE_LABEL,
+              validations: [
+                {
+                  validator: emptyField(i18n.SERVICE_REQUIRED),
                 },
-              }}
-            />
-          ) : (
-            <UseField
-              path="config.service"
-              component={SelectField}
-              config={{
-                label: i18n.SERVICE_LABEL,
-                validations: [
-                  {
-                    validator: emptyField(i18n.SERVICE_REQUIRED),
-                  },
-                ],
-              }}
-              componentProps={{
-                euiFieldProps: {
-                  'data-test-subj': 'emailServiceSelectInput',
-                  options: availableEmailServices,
-                  fullWidth: true,
-                  disabled: readOnly || isLoading,
-                  isLoading,
-                  readOnly,
-                },
-              }}
-            />
-          )}
+              ],
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'emailServiceSelectInput',
+                options: availableEmailServices,
+                fullWidth: true,
+                hasNoInitialSelection: true,
+                disabled: readOnly || isLoading,
+                isLoading,
+                readOnly,
+              },
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {service === AdditionalEmailServices.EXCHANGE ? (
