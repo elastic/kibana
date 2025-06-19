@@ -64,6 +64,24 @@ export const useStreamEnrichmentEvents = () => {
       unmapField: (fieldName: string) => {
         service.send({ type: 'simulation.fields.unmap', fieldName });
       },
+      setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyEnabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setExplicitlyDisabledPreviewColumns: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.updateExplicitlyDisabledColumns',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
+      setPreviewColumnsOrder: (columns: string[]) => {
+        service.send({
+          type: 'previewColumns.order',
+          columns: columns.filter((col) => col.trim() !== ''),
+        });
+      },
     }),
     [service]
   );
