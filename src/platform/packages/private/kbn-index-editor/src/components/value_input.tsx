@@ -9,6 +9,7 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 
 interface ValueInputProps {
   value?: string;
@@ -55,6 +56,9 @@ export const ValueInput = ({
       }}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}
+      css={css`
+        min-width: ${230}px; //HD
+      `}
     />
   );
 };

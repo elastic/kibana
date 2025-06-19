@@ -99,7 +99,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {activeMode === 'add-row' && (
+      {(activeMode === 'add-row' || true) && (
         <EuiPanel
           paddingSize="s"
           css={css`
@@ -108,7 +108,19 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           `}
         >
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexGroup gutterSize="s">{inputs}</EuiFlexGroup>
+            <EuiFlexGroup
+              gutterSize="s"
+              tabIndex={0}
+              className="eui-xScrollWithShadows hide-scrollbar"
+              css={css`
+                &.hide-scrollbar {
+                  scrollbar-width: none;
+                  padding: 0 4px;
+                }
+              `}
+            >
+              {inputs}
+            </EuiFlexGroup>
             <EuiButtonIcon
               onClick={saveNewRow}
               iconType="check"
