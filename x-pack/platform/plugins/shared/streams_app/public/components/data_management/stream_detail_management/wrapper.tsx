@@ -66,7 +66,7 @@ export function Wrapper({
           },
         ]}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
