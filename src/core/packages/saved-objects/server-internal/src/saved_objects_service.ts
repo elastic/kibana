@@ -124,7 +124,11 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
+
+  private typeRegistry = new SavedObjectTypeRegistry({
+    legacyTypes: REMOVED_TYPES,
+  });
+
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
