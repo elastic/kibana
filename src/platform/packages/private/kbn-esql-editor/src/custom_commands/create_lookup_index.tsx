@@ -132,15 +132,15 @@ export const useLookupIndexCommand = (
     [query.esql]
   );
 
-  const onUploadComplete = useCallback(
-    (results: any) => {
+  const onFlyoutClose = useCallback(
+    (resultIndexName: string) => {
       const cursorPosition = editorRef.current?.getPosition();
 
       if (!cursorPosition) {
         throw new Error('Could not find cursor position in the editor');
       }
 
-      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, results.index);
+      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, resultIndexName);
       onIndexCreated(resultQuery);
     },
     [onIndexCreated, query.esql, editorRef]
@@ -155,11 +155,12 @@ export const useLookupIndexCommand = (
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
-        onClose: () => {},
-        onSave: () => {},
+        onClose: ({ indexName: resultIndexName, isIndexCreated }) => {
+          onFlyoutClose(indexName);
+        },
       } as EditLookupIndexContentContext);
     },
-    [uiActions]
+    [onFlyoutClose, uiActions]
   );
 
   monaco.editor.registerCommand('esql.lookup_index.create', async (_, indexName) => {

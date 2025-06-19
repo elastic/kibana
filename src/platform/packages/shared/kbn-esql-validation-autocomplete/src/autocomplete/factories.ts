@@ -558,7 +558,7 @@ export function getLookupIndexCreateSuggestion(indexName?: string): SuggestionRa
       defaultMessage: 'Create lookup index "{indexName}"',
       values: { indexName },
     }),
-    text: '',
+    text: indexName,
     kind: 'Issue',
     filterText: indexName,
     detail: i18n.translate(
