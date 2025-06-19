@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { type ReactNode } from 'react';
+import { styles } from './layout_navigation.styles';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+export interface LayoutNavigationProps {
+  children: ReactNode;
+}
+
+/**
+ * The navigation slot wrapper
+ *
+ * @param props - Props for the LayoutNavigation component.
+ * @returns The rendered LayoutNavigation component.
+ */
+export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
+  return <nav css={styles.root}>{children}</nav>;
 };
