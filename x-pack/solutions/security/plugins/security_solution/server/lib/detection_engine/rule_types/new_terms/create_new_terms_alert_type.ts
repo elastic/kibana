@@ -52,7 +52,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
 > => {
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
-    name: 'New Terms Rule',
+    name: 'New Terms',
     validate: {
       params: {
         validate: (object: unknown) => {
