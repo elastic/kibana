@@ -40,7 +40,10 @@ describe('useSavedDataViews', () => {
     ];
 
     // Mock the useSelector to return our test data
-    (useSelector as jest.Mock).mockReturnValue({ dataViews: mockDataViews });
+    (useSelector as jest.Mock).mockReturnValue({
+      dataViews: mockDataViews,
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
 
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
@@ -68,7 +71,10 @@ describe('useSavedDataViews', () => {
 
   it('should handle empty data views array', () => {
     // Mock the useSelector to return an empty array
-    (useSelector as jest.Mock).mockReturnValue({ dataViews: [] });
+    (useSelector as jest.Mock).mockReturnValue({
+      dataViews: [],
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
 
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
@@ -93,7 +99,10 @@ describe('useSavedDataViews', () => {
     ];
 
     // Mock the useSelector
-    (useSelector as jest.Mock).mockReturnValue({ dataViews: mockDataViews });
+    (useSelector as jest.Mock).mockReturnValue({
+      dataViews: mockDataViews,
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
 
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
