@@ -31,7 +31,6 @@ import {
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
-  GetAllStatsRuleMigrationResponse,
   GetRuleMigrationTranslationStatsResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
@@ -48,6 +47,7 @@ import type {
   CreateRuleMigrationRulesRequestBody,
   GetRuleMigrationIntegrationsStatsResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { RuleMigrationStats } from '../types';
 
 export interface GetRuleMigrationStatsParams {
   /** `id` of the migration to get stats for */
@@ -73,11 +73,12 @@ export interface GetRuleMigrationsStatsAllParams {
 /** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
 export const getRuleMigrationsStatsAll = async ({
   signal,
-}: GetRuleMigrationsStatsAllParams = {}): Promise<GetAllStatsRuleMigrationResponse> => {
-  return KibanaServices.get().http.get<GetAllStatsRuleMigrationResponse>(
-    SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-    { version: '1', signal }
-  );
+}: GetRuleMigrationsStatsAllParams = {}): Promise<RuleMigrationStats[]> => {
+  // Typed with `RuleMigrationStats` instead of `GetAllStatsRuleMigrationResponse` to use native enums instead of the zod enum
+  return KibanaServices.get().http.get<RuleMigrationStats[]>(SIEM_RULE_MIGRATIONS_ALL_STATS_PATH, {
+    version: '1',
+    signal,
+  });
 };
 
 export interface CreateRuleMigrationParams {

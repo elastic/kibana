@@ -44,12 +44,6 @@ export const RULE_MIGRATION_RESTART_TRANSLATION_BUTTON = i18n.translate(
   { defaultMessage: 'Resume translation' }
 );
 
-export const RULE_MIGRATION_TITLE = (number: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.migrationTitle', {
-    defaultMessage: 'SIEM rules migration #{number}',
-    values: { number },
-  });
-
 export const RULE_MIGRATION_PROGRESS_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.progress.description', {
     defaultMessage: `Processing migration of {totalRules} rules.`,

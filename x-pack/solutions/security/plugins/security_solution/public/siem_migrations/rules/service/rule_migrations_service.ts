@@ -13,7 +13,6 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
-import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
@@ -226,18 +225,14 @@ export class SiemRulesMigrationsService {
     params: api.GetRuleMigrationsStatsAllParams = {}
   ): Promise<RuleMigrationStats[]> {
     const allStats = await this.getRuleMigrationsStatsWithRetry(params);
-    const results = allStats.map(
-      // the array order (by creation) is guaranteed by the API
-      (stats, index) => ({ ...stats, number: index + 1 } as RuleMigrationStats) // needs cast because of the `status` enum override
-    );
-    this.latestStats$.next(results); // Always update the latest stats
-    return results;
+    this.latestStats$.next(allStats); // Keep the latest stats observable in sync
+    return allStats;
   }
 
   private async getRuleMigrationsStatsWithRetry(
     params: api.GetRuleMigrationsStatsAllParams = {},
     sleepSecs?: number
-  ): Promise<RuleMigrationTaskStats[]> {
+  ): Promise<RuleMigrationStats[]> {
     if (sleepSecs) {
       await new Promise((resolve) => setTimeout(resolve, sleepSecs * 1000));
     }
