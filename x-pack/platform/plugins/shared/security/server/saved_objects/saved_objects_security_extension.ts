@@ -604,9 +604,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
-    // Perform access control checks if we have objects to check
     if (auditObjects && auditObjects.length > 0) {
-      // Collect all spaces from typesAndSpaces to pass to access control
       const allSpaces = new Set<string>();
       for (const spaces of typesAndSpaces.values()) {
         for (const space of spaces) {
@@ -614,10 +612,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         }
       }
 
-      // Filter objects based on access control
       const filteredObjects = this.checkAccessControl(auditObjects, action, allSpaces);
 
-      // If all objects were filtered out by access control, throw a forbidden error
       if (filteredObjects.length === 0) {
         const msg = 'Access control denied: No modifiable objects';
         const error = this.errors.decorateForbiddenError(new Error(msg));
