@@ -52,10 +52,9 @@ export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocu
           for (const record of documents) {
             if (!recordHasContext(record)) continue;
 
-            if (!documentContexts[record.context.profileId])
-              documentContexts[record.context.profileId] = [];
-
-            documentContexts[record.context.profileId].push(record);
+            const contextProfileId = scopedProfilesManager.getDocumentProfile(record).profileId;
+            if (!documentContexts[contextProfileId]) documentContexts[contextProfileId] = [];
+            documentContexts[contextProfileId].push(record);
           }
 
           return documentContexts;
@@ -71,7 +70,7 @@ export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocu
     return () => {
       documentsSubscription.unsubscribe();
     };
-  }, [dataDocuments$]);
+  }, [scopedProfilesManager, dataDocuments$]);
 
   useEffect(() => {
     const subscription = scopedProfilesManager

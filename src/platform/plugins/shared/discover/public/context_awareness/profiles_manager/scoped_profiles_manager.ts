@@ -111,6 +111,24 @@ export class ScopedProfilesManager {
   }
 
   /**
+   * Resolves and returns the document context profile
+   * @param record The data table record to resolve the document profile for
+   * @returns The resolved document context profile
+   */
+  public getDocumentProfile(record: DataTableRecord) {
+    try {
+      return this.documentProfileService.resolve({
+        record,
+        rootContext: this.rootContext$.getValue(),
+        dataSourceContext: this.dataSourceContext$.getValue(),
+      });
+    } catch (e) {
+      logResolutionError(ContextualProfileLevel.documentLevel, { recordId: record.id }, e);
+      return this.documentProfileService.defaultContext;
+    }
+  }
+
+  /**
    * Resolves the document context profile for a given data table record
    * @param params The document profile provider parameters
    * @returns The data table record with a resolved document context
@@ -128,20 +146,7 @@ export class ScopedProfilesManager {
         }
 
         if (!context) {
-          try {
-            context = this.documentProfileService.resolve({
-              ...params,
-              rootContext: this.rootContext$.getValue(),
-              dataSourceContext: this.dataSourceContext$.getValue(),
-            });
-          } catch (e) {
-            logResolutionError(
-              ContextualProfileLevel.documentLevel,
-              { recordId: params.record.id },
-              e
-            );
-            context = this.documentProfileService.defaultContext;
-          }
+          context = this.getDocumentProfile(params.record);
         }
 
         this.scopedEbtManager.trackContextualProfileResolvedEvent({
