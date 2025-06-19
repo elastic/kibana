@@ -478,8 +478,9 @@ export const getTimingMetricsForUpdate = ({
         areValidDatesWhenChangingToInProgress(createdAtMillis, stateTransitionTimestampMillis)
       ) {
         return {
-          time_to_acknowledge: Math.floor(
-            (stateTransitionTimestampMillis - createdAtMillis) / 1000
+          time_to_acknowledge: calculateTimeDifferenceInSeconds(
+            stateTransitionTimestampMillis,
+            createdAtMillis
           ),
           time_to_investigate: null,
           time_to_resolve: null,
@@ -497,15 +498,25 @@ export const getTimingMetricsForUpdate = ({
           inProgressAtMillis
         )
       ) {
-        const finalInProgressAtMillis =
-          inProgressAtMillis != null ? inProgressAtMillis : stateTransitionTimestampMillis;
+        const timeToResolve = calculateTimeDifferenceInSeconds(
+          stateTransitionTimestampMillis,
+          createdAtMillis
+        );
+
+        const timeToAcknowledge =
+          inProgressAtMillis != null
+            ? calculateTimeDifferenceInSeconds(inProgressAtMillis, createdAtMillis)
+            : timeToResolve;
+
+        const timeToInvestigate =
+          inProgressAtMillis != null
+            ? calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, inProgressAtMillis)
+            : 0;
 
         return {
-          time_to_acknowledge: Math.floor((finalInProgressAtMillis - createdAtMillis) / 1000),
-          time_to_investigate: Math.floor(
-            (stateTransitionTimestampMillis - finalInProgressAtMillis) / 1000
-          ),
-          time_to_resolve: Math.floor((stateTransitionTimestampMillis - createdAtMillis) / 1000),
+          time_to_acknowledge: timeToAcknowledge,
+          time_to_investigate: timeToInvestigate,
+          time_to_resolve: timeToResolve,
         };
       }
     }
@@ -522,6 +533,9 @@ export const getTimingMetricsForUpdate = ({
     // Silence date errors
   }
 };
+
+const calculateTimeDifferenceInSeconds = (endTime: number, startTime: number) =>
+  Math.floor((endTime - startTime) / 1000);
 
 export const getDurationInSeconds = ({
   closedAt,
