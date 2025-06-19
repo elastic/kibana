@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGrid, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
