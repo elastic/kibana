@@ -23,11 +23,11 @@ node --require ./src/setup_node_env/index.js \
 
 ### CLI flags
 
-| Flag         | Type      | Description                                                                                              |
-| ------------ | --------- | -------------------------------------------------------------------------------------------------------- |
-| `--datasets` | `string`  | Comma-separated list of dataset **names** to load.<br>Omit the flag to load **all** predefined datasets. |
-| `--limit`    | `number`  | Max docs per dataset (handy while testing). **Optional**.                                                |
-| `--clear`    | `boolean` | Delete the target index **before** indexing. Defaults to `false`.                                        |
+| Flag         | Type      | Description                                                                                           |
+| ------------ | --------- | ----------------------------------------------------------------------------------------------------- |
+| `--datasets` | `string`  | Comma-separated list of dataset **names** to load. Omit the flag to load **all** predefined datasets. |
+| `--limit`    | `number`  | Max docs per dataset (handy while testing). Defaults to 1k.                                           |
+| `--clear`    | `boolean` | Delete the target index **before** indexing. Defaults to `false`.                                     |
 
 ## Built-in dataset specs
 
