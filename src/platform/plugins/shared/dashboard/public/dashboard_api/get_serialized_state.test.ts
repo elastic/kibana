@@ -110,7 +110,6 @@ describe('getSerializedState', () => {
           "gridData": Object {
             "i": "54321",
           },
-          "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
         },
