@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
-import { EntityType } from '../../../common/api/entity_analytics';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import { EntityType } from '../../../common/api/entity_analytics';
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
@@ -18,6 +18,7 @@ import { installDataView } from './saved_objects/data_view';
 import {
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   ASSET_INVENTORY_DATA_VIEW_NAME,
+  ASSET_INVENTORY_GENERIC_INDEX_PREFIX,
   ASSET_INVENTORY_INDEX_PATTERN,
 } from './constants';
 
@@ -71,6 +72,56 @@ export class AssetInventoryDataClient {
     } catch (err) {
       logger.error(`Error initializing asset inventory: ${err.message}`);
       await this.delete();
+    }
+  }
+
+  // Checks if the Asset Inventory DataView exists, if not, installs it
+  public async installAssetInventoryDataView(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext
+  ) {
+    const { logger } = this.options;
+
+    const dataViewService = secSolutionContext.getDataViewsService();
+
+    const currentSpaceId = secSolutionContext.getSpaceId();
+    const currentSpaceDataViewId = `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${currentSpaceId}`;
+    let dataViewExists = false;
+
+    try {
+      logger.debug(`Checking if data view exists: ${currentSpaceDataViewId}`);
+      await dataViewService.get(currentSpaceDataViewId, false);
+      dataViewExists = true;
+    } catch (error) {
+      logger.error(`Error getting data view: ${error}`);
+      if (
+        error &&
+        typeof error === 'object' &&
+        'output' in error &&
+        'statusCode' in error.output &&
+        error.output.statusCode === 404
+      ) {
+        logger.info(
+          `DataView with ID '${currentSpaceDataViewId}' not found. Proceeding with installation.`
+        );
+        dataViewExists = false; // Confirm it doesn't exist
+      } else {
+        logger.error('An unexpected error occurred while checking data view existence:', error);
+      }
+    }
+
+    if (!dataViewExists) {
+      logger.debug('Installing Asset Inventory DataView');
+
+      return installDataView(
+        currentSpaceId,
+        dataViewService,
+        ASSET_INVENTORY_DATA_VIEW_NAME,
+        ASSET_INVENTORY_INDEX_PATTERN,
+        ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+        logger
+      );
+    } else {
+      logger.debug('DataView is already installed. Skipping installation.');
     }
   }
 
@@ -155,12 +206,29 @@ export class AssetInventoryDataClient {
     secSolutionContext: SecuritySolutionApiRequestHandlerContext,
     entityStorePrivileges: EntityAnalyticsPrivileges
   ) {
+    const { logger } = this.options;
+
     if (!(await this.checkUISettingEnabled())) {
       return { status: ASSET_INVENTORY_STATUS.INACTIVE_FEATURE };
     }
 
     // Check if the user has the required privileges to access the entity store.
     if (!entityStorePrivileges.has_all_required) {
+      try {
+        const hasGenericDocuments = await this.hasGenericDocuments(secSolutionContext);
+        // check if users doesn't have entity store privileges but generic documents are present
+        if (hasGenericDocuments) {
+          try {
+            await this.installAssetInventoryDataView(secSolutionContext);
+          } catch (error) {
+            logger.error(`Error installing asset inventory data view: ${error.message}`);
+          }
+          return { status: ASSET_INVENTORY_STATUS.READY };
+        }
+      } catch (error) {
+        logger.error(`Error checking for generic documents: ${error.message}`);
+      }
+
       return {
         status: ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES,
         privileges: entityStorePrivileges,
@@ -191,6 +259,8 @@ export class AssetInventoryDataClient {
 
     // Determine final status based on transform metadata
     if (this.hasDocumentsProcessed(genericEntityEngine)) {
+      await this.installAssetInventoryDataView(secSolutionContext);
+
       return { status: ASSET_INVENTORY_STATUS.READY };
     }
     if (this.hasTransformTriggered(genericEntityEngine)) {
@@ -252,5 +322,19 @@ export class AssetInventoryDataClient {
       }
       return false;
     });
+  }
+
+  private async hasGenericDocuments(secSolutionContext: SecuritySolutionApiRequestHandlerContext) {
+    const elasticsearchClient = secSolutionContext.core.elasticsearch.client;
+
+    const spaceId = secSolutionContext.getSpaceId();
+
+    const genericIndexCurrentSpace = `${ASSET_INVENTORY_GENERIC_INDEX_PREFIX}${spaceId}`;
+
+    const response = await elasticsearchClient.asInternalUser.count({
+      index: genericIndexCurrentSpace,
+    });
+
+    return response.count > 0;
   }
 }
