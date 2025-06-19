@@ -107,4 +107,4 @@ const EntityAnalyticsComponent = () => {
   );
 };
 
-export const EntityAnalyticsPage = React.memo(EntityAnalyticsComponent);
+export const EntityAnalyticsPage = EntityAnalyticsComponent;
