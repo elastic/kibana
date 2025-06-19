@@ -19,6 +19,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   defaultMonitoringUsersIndex,
   getPrivilegedMonitorUsersIndex,
@@ -139,7 +140,8 @@ export class PrivilegeMonitoringDataClient {
         duration,
       });
       // sync all index users from monitoring sources
-      await this.syncAllIndexUsers();
+      // await this.syncAllIndexUsers();
+      await this.plainIndexSync();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
       this.audit(
@@ -314,7 +316,7 @@ export class PrivilegeMonitoringDataClient {
   // --- Privileged User Sync Orchestration ---
   // These methods coordinate syncing users from monitoring sources.
   public async syncAllIndexUsers() {
-    // get all monitoring index sources of type 'index
+    // get all monitoring index source saved objects of type 'index'
     const indexSources: MonitoringEntitySourceDescriptor[] =
       await this.monitoringIndexSourceClient.findByIndex();
     this.log(
@@ -323,6 +325,7 @@ export class PrivilegeMonitoringDataClient {
     );
     // get usernames from each index source
     const allUserNames = new Set<string>();
+
     for (const source of indexSources) {
       const index = source.indexPattern ?? '';
       const kuery =
@@ -336,6 +339,24 @@ export class PrivilegeMonitoringDataClient {
       }
     }
     await this.removeStaleIndexUsers(allUserNames);
+  }
+
+  public async plainIndexSync() {
+    // get all monitoring index source saved objects of type 'index'
+    const indexSources: MonitoringEntitySourceDescriptor[] =
+      await this.monitoringIndexSourceClient.findByIndex();
+    this.log(
+      'debug',
+      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
+    );
+    const seenUserNames: string[] = [];
+    for (const source of indexSources) {
+      const index = source.indexPattern ?? '';
+      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
+      const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
+      seenUserNames.push(...batchUserNames);
+    }
+    this.log('debug', `Total usernames collected: ${seenUserNames.length}`);
   }
 
   public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
@@ -375,5 +396,41 @@ export class PrivilegeMonitoringDataClient {
 
     await Promise.all(staleUserIds.map((id) => this.deleteUser(id)));
     this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
+  }
+
+  public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
+    const batchUsernames: string[] = [];
+    let searchAfter: SortResults | undefined;
+    const batchSize = 100; // Make a const
+
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+
+    while (true) {
+      const response = await this.esClient.search<{ user?: { name?: string } }>({
+        index: indexName,
+        size: batchSize,
+        _source: ['user.name'],
+        sort: [{ 'user.name.keyword': 'asc' }],
+        search_after: searchAfter,
+        query,
+      });
+
+      const hits = response.hits.hits;
+      if (hits.length === 0) break;
+
+      for (const hit of hits) {
+        const username = hit._source?.user?.name;
+        if (username) batchUsernames.push(username);
+      }
+
+      searchAfter = hits[hits.length - 1].sort;
+
+      this.log(
+        'debug',
+        `Fetched ${hits.length} usernames from ${indexName}, total so far: ${seenUsernames.length}`
+      );
+    }
+
+    return batchUsernames;
   }
 }
