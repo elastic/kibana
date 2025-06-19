@@ -83,7 +83,6 @@ describe('AccessControlService', () => {
 
   describe('canModifyObject', () => {
     beforeEach(() => {
-      // Set the user for all tests in this block
       accessControlService.setUserForOperation(currentUser);
     });
     it('returns true when type does not support access control', async () => {
