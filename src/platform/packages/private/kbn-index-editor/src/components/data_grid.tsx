@@ -15,13 +15,12 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   CustomCellRenderer,
   DataLoadingState,
-  type SortOrder,
   UnifiedDataTable,
+  type SortOrder,
 } from '@kbn/unified-data-table';
 import React, { useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextExtra } from '../types';
-import { RowViewer } from './row_viewer_lazy';
 import { getCellValueRenderer } from './value_input_control';
 
 interface ESQLDataGridProps {
@@ -57,7 +56,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const savingDocs = useObservable(indexUpdateService.savingDocs$);
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
@@ -72,34 +70,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
   }, []);
-
-  const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
-    ) => (
-      <RowViewer
-        dataView={props.dataView}
-        notifications={notifications}
-        hit={hit}
-        hits={displayedRows}
-        columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
-        flyoutType={props.flyoutType ?? 'push'}
-        onRemoveColumn={(column) => {
-          setActiveColumns(activeColumns.filter((c) => c !== column));
-        }}
-        onAddColumn={(column) => {
-          setActiveColumns([...activeColumns, column]);
-        }}
-        onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
-      />
-    ),
-    [activeColumns, notifications, props.dataView, props.flyoutType]
-  );
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
@@ -173,12 +143,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         dataView={props.dataView}
         onSetColumns={onSetColumns}
         onUpdateRowsPerPage={setRowsPerPage}
-        expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDoc}
         sort={sortOrder}
         ariaLabelledBy="lookupIndexDataGrid"
         maxDocFieldsDisplayed={100}
-        renderDocumentView={renderDocumentView}
         showFullScreenButton={false}
         configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
         rowHeightState={rowHeight}

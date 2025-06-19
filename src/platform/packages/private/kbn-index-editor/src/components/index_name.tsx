@@ -22,6 +22,8 @@ export const IndexName: FC = () => {
   } = useKibana<KibanaContextExtra>();
 
   const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   const indexNameValue = useObservable(
     indexUpdateService.indexName$,
@@ -42,6 +44,7 @@ export const IndexName: FC = () => {
   useMount(function validateIndexNameOnMount() {
     if (!indexNameValue) {
       setIsInitialized(true);
+      setIsLoading(false);
       return;
     }
     validateIndexName(indexNameValue).then(() => {
@@ -70,9 +73,6 @@ export const IndexName: FC = () => {
     },
     [fileUpload, setFileUploadIndexName, setIndexValidationStatus]
   );
-
-  const [error, setError] = React.useState<string[]>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   if (!isInitialized) {
     return null; // or a loading spinner
