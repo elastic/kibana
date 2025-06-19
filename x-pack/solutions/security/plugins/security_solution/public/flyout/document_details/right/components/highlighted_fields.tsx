@@ -161,7 +161,7 @@ export const HighlightedFields = memo(
     const items = useMemo(
       () =>
         convertHighlightedFieldsToTableRow(highlightedFields, scopeId, showCellActions, indexName),
-      [highlightedFields, scopeId, showCellActions]
+      [highlightedFields, scopeId, showCellActions, indexName]
     );
 
     return (

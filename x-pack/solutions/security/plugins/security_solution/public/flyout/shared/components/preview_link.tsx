@@ -15,7 +15,6 @@ import {
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
   IP_FIELD_TYPE,
-  EVENT_SOURCE_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
@@ -27,12 +26,13 @@ import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_de
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
 
 const PREVIEW_FIELDS = [
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
-  EVENT_SOURCE_FIELD_NAME,
+  EVENT_SOURCE_FIELD_DESCRIPTOR,
 ];
 
 // Helper function to check if the field has a preview link
@@ -84,7 +84,7 @@ const getPreviewParams = (
         id: RulePreviewPanelKey,
         params: { ruleId, banner: RULE_PREVIEW_BANNER, isPreviewMode: true },
       };
-    case EVENT_SOURCE_FIELD_NAME:
+    case EVENT_SOURCE_FIELD_DESCRIPTOR:
       return {
         id: DocumentDetailsRightPanelKey,
         params: {
