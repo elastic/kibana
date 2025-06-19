@@ -1786,7 +1786,7 @@
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
     "backport": "^10.0.1",
     "blob-polyfill": "^9.0.20240710",
-    "buildkite-test-collector": "^1.8.1",
+    "buildkite-test-collector": "^1.8.2",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
     "chromedriver": "^137.0.0",
