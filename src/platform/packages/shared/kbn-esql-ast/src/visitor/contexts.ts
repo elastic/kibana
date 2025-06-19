@@ -240,6 +240,7 @@ export class CommandVisitorContext<
     option: '' | string = ''
   ): Iterable<ExpressionVisitorOutput<Methods>> {
     this.ctx.assertMethodExists('visitExpression');
+
     for (const arg of singleItems(this.args(option))) {
       yield this.visitExpression(
         arg,
