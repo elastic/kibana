@@ -49,14 +49,9 @@ export const QuerySidePanel = ({
     name: PlaygroundFormFields.elasticsearchQuery,
   });
   const {
-    field: { onChange: userElasticsearchQueryChange },
+    field: { value: userElasticsearchQuery, onChange: userElasticsearchQueryChange },
   } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
     name: PlaygroundFormFields.userElasticsearchQuery,
-  });
-  const {
-    field: { value: userElasticsearchQueryValidations },
-  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
-    name: PlaygroundFormFields.userElasticsearchQueryValidations,
   });
 
   const handleSearch = useCallback(
@@ -134,7 +129,7 @@ export const QuerySidePanel = ({
               indexFields={group}
               updateFields={updateFields}
               queryFields={queryFields}
-              customizedQuery={userElasticsearchQueryValidations?.isUserCustomized ?? false}
+              customizedQuery={userElasticsearchQuery !== null}
             />
           </EuiFlexItem>
         ))}

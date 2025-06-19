@@ -18,6 +18,7 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
+import { VISUALIZE_QUERY_NAME } from '../../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 
@@ -90,14 +91,14 @@ export function registerQueryFunction({
       convert queries from one language to another. Make sure you call one of
       the get_dataset functions first if you need index or field names. This
       function takes no input.`,
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
     },
     async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(
           (fn) =>
-            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === 'visualize_query'
+            fn.definition.name === EXECUTE_QUERY_NAME || fn.definition.name === VISUALIZE_QUERY_NAME
         )
         .map((fn) => fn.definition);
 
