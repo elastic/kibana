@@ -57,6 +57,7 @@ export interface RecurringScheduleFieldsProps {
   allowInfiniteRecurrence?: boolean;
   showTimeInSummary?: boolean;
   readOnly?: boolean;
+  compressed?: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export const RecurringScheduleFormFields = memo(
     allowInfiniteRecurrence = true,
     showTimeInSummary = false,
     readOnly = false,
+    compressed = false,
   }: RecurringScheduleFieldsProps) => {
     const [formData] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
@@ -138,6 +140,7 @@ export const RecurringScheduleFormFields = memo(
             componentProps={{
               'data-test-subj': 'frequency-field',
               euiFieldProps: {
+                compressed,
                 'data-test-subj': 'recurringScheduleRepeatSelect',
                 options,
                 disabled: readOnly,
@@ -146,7 +149,7 @@ export const RecurringScheduleFormFields = memo(
           />
           {(parsedSchedule?.frequency === Frequency.DAILY ||
             parsedSchedule?.frequency === 'CUSTOM') && (
-            <CustomRecurringSchedule startDate={startDate} />
+            <CustomRecurringSchedule startDate={startDate} compressed={compressed} />
           )}
 
           {supportsEndOptions && (
@@ -156,6 +159,7 @@ export const RecurringScheduleFormFields = memo(
                 componentProps={{
                   'data-test-subj': 'ends-field',
                   euiFieldProps: {
+                    compressed,
                     legend: 'Recurrence ends',
                     options: allowInfiniteRecurrence
                       ? [RECURRENCE_END_NEVER, ...RECURRENCE_END_OPTIONS]
@@ -195,6 +199,7 @@ export const RecurringScheduleFormFields = memo(
                         }}
                         componentProps={{
                           'data-test-subj': 'until-field',
+                          compressed,
                           euiFieldProps: {
                             showTimeSelect: false,
                             minDate: today,
@@ -218,6 +223,7 @@ export const RecurringScheduleFormFields = memo(
                               {i18n.RECURRING_SCHEDULE_FORM_TIMEZONE}
                             </EuiFormLabel>
                           }
+                          compressed={compressed}
                         />
                       </EuiFlexItem>
                     ) : null}
@@ -231,6 +237,7 @@ export const RecurringScheduleFormFields = memo(
                     'data-test-subj': 'count-field',
                     id: 'count',
                     euiFieldProps: {
+                      compressed,
                       'data-test-subj': 'recurringScheduleAfterXOccurenceInput',
                       type: 'number',
                       min: 1,

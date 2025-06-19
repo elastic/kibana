@@ -56,6 +56,7 @@ export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource';
 export interface ScheduledReport {
   title: string;
   reportTypeId: ReportTypeId;
+  optimizedForPrinting?: boolean;
   startDate: string;
   timezone: string;
   recurring: boolean;

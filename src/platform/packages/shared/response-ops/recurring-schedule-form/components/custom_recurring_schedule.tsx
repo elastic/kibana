@@ -44,10 +44,11 @@ const styles = {
 export interface CustomRecurringScheduleProps {
   startDate: string;
   readOnly?: boolean;
+  compressed?: boolean;
 }
 
 export const CustomRecurringSchedule = memo(
-  ({ startDate, readOnly = false }: CustomRecurringScheduleProps) => {
+  ({ startDate, readOnly = false, compressed = false }: CustomRecurringScheduleProps) => {
     const [{ recurringSchedule }] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
         'recurringSchedule.frequency',
@@ -97,6 +98,7 @@ export const CustomRecurringSchedule = memo(
                   componentProps={{
                     'data-test-subj': 'interval-field',
                     id: 'interval',
+                    compressed,
                     euiFieldProps: {
                       'data-test-subj': 'customRecurringScheduleIntervalInput',
                       min: 1,
@@ -115,6 +117,7 @@ export const CustomRecurringSchedule = memo(
                   path="recurringSchedule.customFrequency"
                   componentProps={{
                     'data-test-subj': 'custom-frequency-field',
+                    compressed,
                     euiFieldProps: {
                       'data-test-subj': 'customRecurringScheduleFrequencySelect',
                       options: frequencyOptions,
@@ -151,6 +154,7 @@ export const CustomRecurringSchedule = memo(
             }}
             componentProps={{
               'data-test-subj': 'byweekday-field',
+              compressed,
               euiFieldProps: {
                 'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
                 legend: 'Repeat on weekday',
@@ -166,6 +170,7 @@ export const CustomRecurringSchedule = memo(
             path="recurringSchedule.bymonth"
             componentProps={{
               'data-test-subj': 'bymonth-field',
+              compressed,
               euiFieldProps: {
                 legend: 'Repeat on weekday or month day',
                 options: bymonthOptions,

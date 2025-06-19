@@ -55,6 +55,21 @@ export const SCHEDULED_REPORT_FORM_FILE_TYPE_LABEL = i18n.translate(
     defaultMessage: 'File type',
   }
 );
+
+export const SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_LABEL = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.optimizedForPrintingLabel',
+  {
+    defaultMessage: 'Print format',
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_DESCRIPTION = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.optimizedForDescription',
+  {
+    defaultMessage: 'Uses multiple pages, showing at most 2 visualizations per page',
+  }
+);
+
 export const SCHEDULED_REPORT_FORM_FILE_TYPE_REQUIRED_MESSAGE = i18n.translate(
   'xpack.reporting.scheduledReportingForm.fileTypeRequiredMessage',
   {

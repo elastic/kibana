@@ -25,8 +25,8 @@ import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { REPORTING_MANAGEMENT_HOME } from '@kbn/reporting-common';
 import {
+  FIELD_TYPES,
   Form,
-  FormSchema,
   getUseField,
   useForm,
   useFormData,
@@ -52,7 +52,12 @@ const FormField = getUseField({
 
 export type FormData = Pick<
   ScheduledReport,
-  'title' | 'reportTypeId' | 'recurringSchedule' | 'sendByEmail' | 'emailRecipients'
+  | 'title'
+  | 'reportTypeId'
+  | 'recurringSchedule'
+  | 'sendByEmail'
+  | 'emailRecipients'
+  | 'optimizedForPrinting'
 >;
 
 export interface ScheduledReportFlyoutContentProps {
@@ -101,7 +106,7 @@ export const ScheduledReportFlyoutContent = ({
   const { defaultTimezone } = useDefaultTimezone();
   const now = useMemo(() => moment().tz(defaultTimezone), [defaultTimezone]);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
-  const schema = useMemo<FormSchema<ScheduledReport>>(
+  const schema = useMemo(
     () => getScheduledReportFormSchema(validateEmailAddresses, availableReportTypes),
     [availableReportTypes, validateEmailAddresses]
   );
@@ -114,7 +119,14 @@ export const ScheduledReportFlyoutContent = ({
     schema,
     onSubmit: async (formData) => {
       try {
-        const { reportTypeId, recurringSchedule } = formData;
+        const {
+          title,
+          reportTypeId,
+          recurringSchedule,
+          optimizedForPrinting,
+          sendByEmail,
+          emailRecipients,
+        } = formData;
         // Remove start date since it's not supported for now
         const { dtstart, ...rrule } = convertToRRule({
           startDate: now,
@@ -129,13 +141,12 @@ export const ScheduledReportFlyoutContent = ({
             // The assertion at the top of the component ensures these are defined when scheduling
             sharingData: sharingData!,
             objectType: objectType!,
-            title: formData.title,
-            reportTypeId: formData.reportTypeId,
+            title,
+            reportTypeId,
+            ...(reportTypeId === 'printablePdfV2' ? { optimizedForPrinting } : {}),
           }),
           schedule: { rrule: rrule as Rrule },
-          notification: formData.sendByEmail
-            ? { email: { to: formData.emailRecipients } }
-            : undefined,
+          notification: sendByEmail ? { email: { to: emailRecipients } } : undefined,
         });
         toasts.addSuccess({
           title: i18n.SCHEDULED_REPORT_FORM_SUCCESS_TOAST_TITLE,
@@ -155,9 +166,9 @@ export const ScheduledReportFlyoutContent = ({
       }
     },
   });
-  const [{ sendByEmail }] = useFormData<FormData>({
+  const [{ reportTypeId, sendByEmail }] = useFormData<FormData>({
     form,
-    watch: ['sendByEmail'],
+    watch: ['reportTypeId', 'sendByEmail'],
   });
 
   const isRecurring = recurring || false;
@@ -232,6 +243,22 @@ export const ScheduledReportFlyoutContent = ({
                   },
                 }}
               />
+              {reportTypeId === 'printablePdfV2' && (
+                <FormField
+                  path="optimizedForPrinting"
+                  config={{
+                    type: FIELD_TYPES.TOGGLE,
+                    label: i18n.SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_LABEL,
+                  }}
+                  componentProps={{
+                    helpText: i18n.SCHEDULED_REPORT_FORM_OPTIMIZED_FOR_PRINTING_DESCRIPTION,
+                    euiFieldProps: {
+                      compressed: true,
+                      disabled: readOnly,
+                    },
+                  }}
+                />
+              )}
             </ResponsiveFormGroup>
             <ResponsiveFormGroup
               title={<h3>{i18n.SCHEDULED_REPORT_FORM_SCHEDULE_SECTION_TITLE}</h3>}
@@ -244,6 +271,7 @@ export const ScheduledReportFlyoutContent = ({
                   readOnly={readOnly}
                   supportsEndOptions={false}
                   showTimeInSummary
+                  compressed
                 />
               )}
             </ResponsiveFormGroup>
@@ -259,6 +287,7 @@ export const ScheduledReportFlyoutContent = ({
                 path="sendByEmail"
                 componentProps={{
                   euiFieldProps: {
+                    compressed: true,
                     disabled: readOnly || !reportingHealth.areNotificationsEnabled,
                   },
                 }}
