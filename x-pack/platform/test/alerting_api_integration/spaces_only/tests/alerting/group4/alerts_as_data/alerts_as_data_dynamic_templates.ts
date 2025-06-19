@@ -70,7 +70,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         // there is no way to get the real number of fields from ES.
         // Eventhough we have only as many as alertFieldMap fields,
         // ES counts each child of the nested objects and multi_fields as separate fields.
-        // therefore we add 12 to get the real number.
+        // therefore we add 14 to get the real number.
         const nestedObjectsAndMultiFields = 14;
         // Number of free slots that we want to have, so we can add dynamic fields as many
         const numberofFreeSlots = 2;
