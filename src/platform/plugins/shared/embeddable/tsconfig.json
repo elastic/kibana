@@ -25,6 +25,7 @@
     "@kbn/analytics",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/content-management-utils",
   ],
   "exclude": ["target/**/*"]
 }
