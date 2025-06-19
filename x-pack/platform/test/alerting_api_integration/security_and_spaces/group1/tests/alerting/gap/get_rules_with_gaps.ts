@@ -275,7 +275,6 @@ export default function getRuleIdsWithGapsTests({ getService }: FtrProviderConte
                 spaceId: apiOptions.spaceId,
               });
 
-
             // Report late gap second (this should have the latest ingestion timestamp)
             const lateGapReportTime = Date.now();
             await supertest

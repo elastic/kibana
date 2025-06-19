@@ -41,7 +41,14 @@ export const useGetRuleIdsWithGaps = (
   options?: UseQueryOptions<GetRuleIdsWithGapResponseBody>
 ) => {
   return useQuery<GetRuleIdsWithGapResponseBody>(
-    [GET_RULE_IDS_WITH_GAPS, gapRange, ...statuses, hasUnfilledIntervals, hasInProgressIntervals, hasFilledIntervals],
+    [
+      GET_RULE_IDS_WITH_GAPS,
+      gapRange,
+      ...statuses,
+      hasUnfilledIntervals,
+      hasInProgressIntervals,
+      hasFilledIntervals,
+    ],
     async ({ signal }) => {
       const { start, end } = getGapRange(gapRange);
       const response = await getRuleIdsWithGaps({
