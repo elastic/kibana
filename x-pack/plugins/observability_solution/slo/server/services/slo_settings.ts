@@ -9,10 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { PutSLOSettingsParams, sloSettingsSchema } from '@kbn/slo-schema';
-import {
-  DEFAULT_STALE_SLO_THRESHOLD_HOURS,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../common/constants';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../common/constants';
 import { getListOfSloSummaryIndices } from '../../common/summary_indices';
 import { StoredSLOSettings } from '../domain/models';
 import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
@@ -59,8 +56,11 @@ export const getListOfSummaryIndices = async (
   settings: StoredSLOSettings
 ) => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
-  if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return { indices: [SLO_SUMMARY_DESTINATION_INDEX_PATTERN], settings };
+  // If remote clusters are not used, we don't need to fetch the remote cluster info
+  if (useAllRemoteClusters || (!useAllRemoteClusters && selectedRemoteClusters.length === 0)) {
+    return {
+      indices: getListOfSloSummaryIndices(settings),
+    };
   }
 
   const clustersByName = await esClient.cluster.remoteInfo();
