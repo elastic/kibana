@@ -11,12 +11,12 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
-  describe('>= 8.18 panels state', () => {
-    test('should convert embeddableConfig to panelConfig', () => {
+  describe('< 8.19 panels state', () => {
+    test('should move id and title to panelConfig', () => {
       const dashboardState = extractPanelsState({
         panels: [
           {
-            panelConfig: {
+            embeddableConfig: {
               timeRange: {
                 from: 'now-7d/d',
                 to: 'now',
@@ -32,13 +32,13 @@ describe('extractPanelsState', () => {
       });
       expect(dashboardState.panels).toEqual([
         {
-          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-          title: 'Custom title',
           panelConfig: {
+            savedObjectId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             timeRange: {
               from: 'now-7d/d',
               to: 'now',
             },
+            title: 'Custom title',
           },
           panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
           gridData: {},
@@ -60,17 +60,13 @@ describe('extractPanelsState', () => {
               },
             },
             gridData: {},
-            id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
             panelIndex: 'c505cc42-fbde-451d-8720-302dc78d7e0d',
-            title: 'Custom title',
             type: 'map',
           },
         ],
       });
       expect(dashboardState.panels).toEqual([
         {
-          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-          title: 'Custom title',
           panelConfig: {
             timeRange: {
               from: 'now-7d/d',
