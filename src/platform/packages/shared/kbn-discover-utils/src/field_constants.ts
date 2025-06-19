@@ -32,6 +32,7 @@ export const SPAN_TYPE_FIELD = 'span.type';
 export const SPAN_SUBTYPE_FIELD = 'span.subtype';
 export const SPAN_DESTINATION_SERVICE_RESOURCE_FIELD = 'span.destination.service.resource';
 export const PROCESSOR_EVENT_FIELD = 'processor.event';
+export const OTEL_SPAN_KIND = 'kind';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

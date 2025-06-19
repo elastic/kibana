@@ -48,7 +48,15 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS ', 'EVAL '];
+        const FORK_SUBCOMMANDS = [
+          'WHERE ',
+          'SORT ',
+          'LIMIT ',
+          'DISSECT ',
+          'STATS ',
+          'EVAL ',
+          'GROK ',
+        ];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);

@@ -49,10 +49,12 @@ export const migrations730 = (doc: DashboardDoc700To720, { log }: SavedObjectMig
   }
 
   try {
-    const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON!);
-    doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
-      moveFiltersToQuery(searchSource)
-    );
+    if (doc.attributes.kibanaSavedObjectMeta.searchSourceJSON) {
+      const searchSource = JSON.parse(doc.attributes.kibanaSavedObjectMeta.searchSourceJSON);
+      doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+        moveFiltersToQuery(searchSource)
+      );
+    }
   } catch (e) {
     log.warn(
       `Exception @ migrations730 while trying to migrate dashboard query filters!\n` +
