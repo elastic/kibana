@@ -395,6 +395,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
                 defaultMessage: 'View additional information about this report.',
               }
             ),
+            'data-test-subj': 'reportViewInfoLink',
             type: 'icon',
             icon: 'iInCircle',
             onClick: (job) => this.setState({ selectedJob: job }),

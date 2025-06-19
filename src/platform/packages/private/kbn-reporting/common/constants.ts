@@ -74,6 +74,8 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
 
 // Management UI route
 export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+export const REPORTING_MANAGEMENT_SCHEDULES =
+  '/app/management/insightsAndAlerting/reporting/schedules';
 
 /*
  * ILM

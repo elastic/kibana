@@ -25,7 +25,14 @@ export const ScheduledReportFlyout = ({
   onClose,
 }: ScheduledReportFlyoutProps) => {
   return (
-    <EuiFlyout size="m" maxWidth={500} paddingSize="l" ownFocus={true} onClose={onClose}>
+    <EuiFlyout
+      size="m"
+      maxWidth={500}
+      paddingSize="l"
+      ownFocus={true}
+      onClose={onClose}
+      data-test-subj="scheduledReportFlyout"
+    >
       <ScheduledReportFlyoutContent
         apiClient={apiClient}
         scheduledReport={scheduledReport}
