@@ -63,10 +63,12 @@ function transformPanelProperties(
   return {
     gridData: rest,
     id: matchingReference ? matchingReference.id : id,
-    panelConfig: embeddableConfig,
+    panelConfig: {
+      ...embeddableConfig,
+      ...(title !== undefined && { title }),
+    },
     panelIndex,
     panelRefName,
-    title,
     type: matchingReference ? matchingReference.type : type,
     version,
   };
