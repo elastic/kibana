@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -77,13 +77,19 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
 
     const completeBadgeStyles = useCompleteBadgeStyles();
 
+    const toggleCollapsed = useCallback(() => {
+      onToggleCollapsed(!isCollapsed);
+    }, [isCollapsed, onToggleCollapsed]);
+
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} css={headerStyle}>
+            <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
-                <MigrationName migrationStats={migrationStats} />
+                <EuiFlexItem grow={false}>
+                  <MigrationName migrationStats={migrationStats} />
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
                     <p>
@@ -102,7 +108,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                onClick={() => onToggleCollapsed(!isCollapsed)}
+                onClick={toggleCollapsed}
                 aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
               />
             </EuiFlexItem>

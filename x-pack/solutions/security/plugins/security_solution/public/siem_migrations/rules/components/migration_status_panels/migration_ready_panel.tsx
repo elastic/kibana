@@ -64,7 +64,9 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
-            <MigrationName migrationStats={migrationStats} />
+            <EuiFlexItem>
+              <MigrationName migrationStats={migrationStats} />
+            </EuiFlexItem>
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
                 <span>{migrationPanelDescription}</span>

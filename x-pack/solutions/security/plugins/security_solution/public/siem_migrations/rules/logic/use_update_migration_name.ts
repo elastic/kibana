@@ -10,12 +10,17 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { updateMigrationName } from '../api';
 import * as i18n from './translations';
 
-export const useUpdateMigrationName = () => {
+export interface UseUpdateMigrationNameProps {
+  onError?: (error: Error) => void;
+}
+
+export const useUpdateMigrationName = ({ onError }: UseUpdateMigrationNameProps = {}) => {
   const { addError, addSuccess } = useAppToasts();
   return useMutation({
     mutationFn: updateMigrationName,
-    onError: (error) => {
+    onError: (error: Error) => {
       addError(error, { title: i18n.UPDATE_MIGRATION_NAME_FAILURE });
+      onError?.(error);
     },
     onSuccess: () => {
       addSuccess(i18n.UPDATE_MIGRATION_NAME_SUCCESS);

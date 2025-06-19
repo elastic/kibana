@@ -305,16 +305,11 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: {
-          field: 'migration_id',
-          order: { createdAt: 'asc' },
-          size: MAX_ES_SEARCH_SIZE,
-        },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: MAX_ES_SEARCH_SIZE },
         aggregations: {
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
           lastUpdatedAt: { max: { field: 'updated_at' } },
-          name: { terms: { field: 'name' } },
         },
       },
     };
@@ -337,7 +332,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         ?.value_as_string as string,
       last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
         ?.value_as_string as string,
-      name: bucket.name as string,
     }));
   }
 

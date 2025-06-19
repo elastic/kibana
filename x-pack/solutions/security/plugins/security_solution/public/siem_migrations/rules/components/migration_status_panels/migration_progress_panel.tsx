@@ -39,7 +39,9 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
     return (
       <EuiPanel data-test-subj="migrationProgressPanel" hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup direction="column" gutterSize="xs">
-          <MigrationName migrationStats={migrationStats} />
+          <EuiFlexItem grow={false}>
+            <MigrationName migrationStats={migrationStats} />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               {i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(migrationStats.rules.total)}

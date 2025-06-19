@@ -6,39 +6,56 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useVisibility } from '.';
+import { useIsVisible } from '.';
 
 describe('useVisibility', () => {
   let initialState: boolean;
   let onOpen: jest.Mock;
   let onClose: jest.Mock;
+  let onToggle: jest.Mock;
 
   beforeEach(() => {
     initialState = false;
     onOpen = jest.fn();
     onClose = jest.fn();
+    onToggle = jest.fn();
   });
 
   it('should initialize with the correct state', () => {
-    const { result } = renderHook(() => useVisibility(initialState, { onOpen, onClose }));
-    expect(result.current[0]).toBe(initialState);
+    const { result } = renderHook(() => useIsVisible(initialState));
+    expect(result.current.isVisible).toBe(initialState);
   });
 
   it('should call onOpen when opening visibility', () => {
-    const { result } = renderHook(() => useVisibility(initialState, { onOpen, onClose }));
+    const { result } = renderHook(() => useIsVisible(initialState, { onOpen }));
     act(() => {
-      result.current[1](); // Call open
+      result.current.open();
     });
-    expect(result.current[0]).toBe(true);
+    expect(result.current.isVisible).toBe(true);
     expect(onOpen).toHaveBeenCalled();
   });
 
   it('should call onClose when closing visibility', () => {
-    const { result } = renderHook(() => useVisibility(true, { onOpen, onClose }));
+    const { result } = renderHook(() => useIsVisible(true, { onClose }));
     act(() => {
-      result.current[2](); // Call close
+      result.current.close();
     });
-    expect(result.current[0]).toBe(false);
+    expect(result.current.isVisible).toBe(false);
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('should call onToggle when toggling visibility', () => {
+    const { result } = renderHook(() => useIsVisible(true, { onToggle }));
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isVisible).toBe(false);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      result.current.toggle();
+    });
+    expect(result.current.isVisible).toBe(true);
+    expect(onToggle).toHaveBeenCalledTimes(2);
   });
 });

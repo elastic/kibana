@@ -128,10 +128,6 @@ paths:
       responses:
         200:
           description: Indicates rules migrations have been updated correctly.
-          content:
-            application/json:
-              schema:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
         404:
           description: Indicates the migration id was not found.
     get:

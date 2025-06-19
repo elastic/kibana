@@ -6,13 +6,13 @@
  */
 import { useState, useCallback } from 'react';
 
-type UseVisibility = (
-  initialState: boolean,
-  callbacks?: { onOpen?: () => void; onClose?: () => void }
-) => [isVisible: boolean, open: () => void, close: () => void];
+export type UseIsVisible = (
+  defaultValue: boolean,
+  callbacks?: { onOpen?: () => void; onClose?: () => void; onToggle?: () => void }
+) => { isVisible: boolean; open: () => void; close: () => void; toggle: () => void };
 
-export const useVisibility: UseVisibility = (initialState, { onOpen, onClose } = {}) => {
-  const [isVisible, setIsVisible] = useState(initialState);
+export const useIsVisible: UseIsVisible = (defaultValue, { onOpen, onClose, onToggle } = {}) => {
+  const [isVisible, setIsVisible] = useState(defaultValue);
 
   const open = useCallback(() => {
     setIsVisible(true);
@@ -24,5 +24,10 @@ export const useVisibility: UseVisibility = (initialState, { onOpen, onClose } =
     onClose?.();
   }, [onClose]);
 
-  return [isVisible, open, close];
+  const toggle = useCallback(() => {
+    setIsVisible((prev) => !prev);
+    onToggle?.();
+  }, [onToggle]);
+
+  return { isVisible, open, close, toggle };
 };

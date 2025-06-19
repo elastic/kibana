@@ -137,3 +137,12 @@ export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.error',
   { defaultMessage: 'The last execution of this migration failed with the following message:' }
 );
+
+export const OPEN_MIGRATION_OPTIONS_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.openMigrationOptionsButton',
+  { defaultMessage: 'Open migration options' }
+);
+export const RENAME_MIGRATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationButton',
+  { defaultMessage: 'Rename' }
+);
