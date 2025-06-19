@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { GridData } from '@kbn/dashboard-plugin/server/dashboard_saved_object';
 import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
@@ -44,10 +44,18 @@ const getAdhocDataView = (dataView: DataView) => {
   };
 };
 
+interface DashboardPanelMap {
+  [key: string]: {
+    type: string;
+    explicitInput: object;
+    gridData: GridData;
+  };
+}
+
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
-): Promise<DashboardState['panels'] | undefined> {
+): Promise<DashboardPanelMap | undefined> {
   const dashboardFilename = getDashboardFileNameFromProps(props);
   const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
 
@@ -60,22 +68,21 @@ export async function convertSavedDashboardToPanels(
   const panels = panelsRawObjects.reduce((acc, panel) => {
     const { gridData, embeddableConfig, panelIndex, title } = panel;
     const { attributes } = embeddableConfig;
-    const { state } = attributes;
-    const layers =
-      state.datasourceStates?.formBased?.layers ?? state.datasourceStates?.textBased?.layers ?? [];
+    const datasourceStates = attributes?.state?.datasourceStates ?? {};
+    const layers = datasourceStates.formBased?.layers ?? datasourceStates.textBased?.layers ?? [];
 
-    acc.push({
+    acc[gridData.i] = {
       type: panel.type,
       gridData,
-      panelIndex,
-      panelConfig: {
+      explicitInput: {
+        id: panelIndex,
         ...embeddableConfig,
         title,
         attributes: {
           ...attributes,
           references: [],
           state: {
-            ...state,
+            ...(attributes?.state ?? {}),
             adHocDataViews: getAdhocDataView(dataView),
             internalReferences: Object.keys(layers).map((layerId) => ({
               id: dataView.id,
@@ -85,10 +92,10 @@ export async function convertSavedDashboardToPanels(
           },
         },
       },
-    });
+    };
 
     return acc;
-  }, []);
+  }, {}) as DashboardPanelMap;
 
   return panels;
 }
