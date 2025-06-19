@@ -13,7 +13,7 @@ For Terraform to be a first class citizen, the provider needs to cover resources
 
 These guidelines will help you build APIs that are easy to use, whether someone's automating with scripts or managing infrastructure at scale.
 
-## Terraform Provider Developer-Friendly API Design
+## Terraform provider developer-friendly API design
 
 Terraform can work with any API, but some APIs are easier to deal with than others. Here are some tips to make your API more Terraform provider-friendly:
 
@@ -46,26 +46,61 @@ Mapping resource-oriented APIs to a declarative model means users can describe t
 
 The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/\{policy\}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
 
+```
+PUT _ilm/policy/my_ilm_policy
+{
+  "policy": {
+    "_meta": {
+      "description": "used for nginx log",
+      "project": {
+        "name": "myProject",
+        "department": "myDepartment"
+      }
+    },
+    "phases": {
+      "warm": {
+        "min_age": "10d",
+        "actions": {
+          "forcemerge": {
+            "max_num_segments": 1
+          }
+        }
+      },
+      "delete": {
+        "min_age": "30d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+```
+
+[Corresponding resource configuration](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/elasticsearch_index_lifecycle)
+
 ```terraform
+provider "elasticstack" {
+  elasticsearch {}
+}
+
 resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
   name = "my_ilm_policy"
 
-  hot {
-    min_age = "1h"
-    rollover {
-      max_age = "1d"
-      max_size = "50g"
+  warm {
+    min_age = "10d"
+    forcemerge {
+      "max_num_segments": 1
     }
   }
 
   delete {
-    min_age = "60d"
+    min_age = "30d"
     delete {}
   }
 }
 ```
 
-[ILM resource](https://github.com/elastic/terraform-provider-elasticstack/blob/main/docs/resources/elasticsearch_index_lifecycle.md)
 
 #### API imposed challenges
 
@@ -79,7 +114,7 @@ API design decisions can create real challenges for Terraform resource implement
 }
 ```
 
-[Index Settings Update Bug](https://github.com/elastic/terraform-provider-elasticstack/issues/52)
+[Index settings update bug](https://github.com/elastic/terraform-provider-elasticstack/issues/52)
 
 A better API design would separate these concerns with different endpoints or provide metadata about which settings require recreation.
 
@@ -87,10 +122,11 @@ A better API design would separate these concerns with different endpoints or pr
 
 When humans can easily understand your API, machines can too. APIs with clear, descriptive field names and logical resource structures make both manual testing and Terraform resource development much smoother.
 
-#### When APIs Excel: Intuitive Field Names
+#### Use intuitive field names
 
 Clear, descriptive field names translate to intuitive Terraform resources. Elasticsearch APIs generally follow this pattern, and we end up self-documenting configuration.
 
+[Index resource](https://github.com/elastic/terraform-provider-elasticstack/blob/main/docs/resources/elasticsearch_index.md)
 ```terraform
 resource "elasticstack_elasticsearch_index" "example" {
   name                    = "my-index"              # Obvious purpose
@@ -101,9 +137,7 @@ resource "elasticstack_elasticsearch_index" "example" {
 }
 ```
 
-[Index Resource](https://github.com/elastic/terraform-provider-elasticstack/blob/main/docs/resources/elasticsearch_index.md)
-
-##### Complex Configuration Handling
+##### Complex configuration handling
 
 Complex mappings (e.g. saved objects) make life difficult but not impossible. One *can* make complex mappings readable through JSON encoding:
 
@@ -120,11 +154,11 @@ mappings = jsonencode({
 })
 ```
 
-The difficulty lies with validation. Terraform is just not designed to do the validation or testing in the way a conventional language would. It doesn’t do string validation outside of the basic terraform plan which parses pass/fail, or if it does it will be awkward. Typically we fall back to the API layer for validation checks. Not being able to validate a resource configuration in terraform leads to repetitive plan/apply issues which is annoying to say the least\!
+The hickup here is with validation. Terraform just isn't designed to do validation (or testing!) like we would with conventional languages. 
+It doesn’t validate what strings contain, only that they're parsable during terraform plan. 
+Resource developers often fall back to the API layer for validation checks, that can lead to plan/apply issues.
 
-One has to do the [parsing and transforming](https://github.com/elastic/terraform-provider-elasticstack/tree/main/internal/elasticsearch/index/indices) of the data outside terraform and pipe it in and that is where you can do the checks. 
-
-#### Return errors early—and all at once
+### Return errors early—and all at once
 
 If your API can validate inputs upfront and return all the errors in one go, do it\! Terraform handles it and show them in a helpful way:
 
@@ -161,7 +195,7 @@ Terraform might call \`refresh\` multiple times, and Terraform Cloud could do it
 
 If you have to have side effects (like updating a ‘last-read’ timestamp), consumers have to work around it by, for example, limiting the number of times something’s read or building custom tooling to handle state drift.
 
-##### Standardize Patterns Across Your API
+##### Standardize patterns across your API
 
 Consistency is key for Terraform resource development. Using standard patterns make reusable abstractions and helper functions possible.
 
@@ -191,19 +225,19 @@ internal/clients/fleet/:
 
 Standardization means authentication, error handling, and request patterns become reusable across all resources.
 
-##### Return as Much Info as You Can, and handle defaults carefully
+### Return as much as you can, and handle defaults carefully
 
 Terraform needs complete information to track resource state effectively. If your API doesn't return enough details, Terraform can't properly detect changes or manage drift.
 
-**The Challenge with Defaults**
+**The challenge with defaults**
 
 Many Kibana APIs have extensive configuration options. Requiring users to specify every single value would create verbose, unwieldy configurations. However, being too sparse with returned data creates problems for Terraform.
 
-**The Golden Rule**
+**The golden rule**
 
 A resource returned from a GET request should match as closely as possible to what a user specifies in a PUT request. When users don't specify values that affect critical behavior, consider returning those computed values too.
 
-**Why This Matters for Import Operations**
+**Why this matters for import operations**
 
 Terraform import brings existing resources under management by reading their current state. If your API returns different data than what users originally configured, it can cause [import state loss bugs](https://github.com/elastic/terraform-provider-elasticstack/issues/53).
 
@@ -223,7 +257,7 @@ GET /api/resource/my-resource
 # Terraform can't detect if defaults changed!
 ```
 
-**Handling Defaults Strategically**
+**Handling defaults strategically**
 
 Consider these approaches:
 
@@ -259,13 +293,13 @@ Consider these approaches:
    }
    ```
 
-**The Import Problem**
+**The import problem**
 
 When defaults aren't handled carefully, Terraform import operations can lose state. The imported resource might not match the original configuration, forcing users to make unnecessary changes or causing configuration drift.
 
 Choose your approach based on your API's complexity, but prioritize consistency between what users send and what they receive back.
 
-##### Be Predictable
+### Be predictable
 
 Terraform relies on the same input resulting in the same output..  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.  
 
@@ -314,9 +348,9 @@ Volatile fields create a challenging choice: include them (causing constant conf
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
 
-##### Keep Fields Isomorphic
+### Keep fields isomorphic
 
-**Changing Field Types Break Terraform**
+**Changing field types break terraform**
 
 Terraform expects fields to maintain the same data type throughout a resource's lifecycle. When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
 
@@ -336,7 +370,7 @@ resource "elasticstack_transform" "example" {
 
 This change broke every existing Terraform configuration using that field.
 
-**Design for Consistency**
+**Design for consistency**
 
 If your API needs to support multiple data types for the same logical concept, consider these approaches:
 
@@ -355,7 +389,7 @@ If your API needs to support multiple data types for the same logical concept, c
    }
    ```
 
-**When You Must Support Flexible Types**
+**When you have to support flexible types**
 
 If polymorphic behavior is unavoidable, JSON strings provide a workaround—but use them sparingly:
 
@@ -375,21 +409,21 @@ resource "elasticstack_elasticsearch_index" "example" {
 }
 ```
 
-[Index Resource Schema](https://github.com/elastic/terraform-provider-elasticstack/blob/main/internal/elasticsearch/index/schema.go)
+[Index resource schema](https://github.com/elastic/terraform-provider-elasticstack/blob/main/internal/elasticsearch/index/schema.go)
 
-**Why JSON Strings Are a Last Resort**
+**What's the issue with JSON strings?**
 
-While Terraform provides `jsonencode()` and `jsondecode()` functions to handle JSON strings, they come with significant downsides:
+`jsonencode()` and `jsondecode()` come with significant downsides:
 
 - **Limited validation**: Terraform can only validate JSON syntax during plan, not the actual content structure
 - **Poor user experience**: Users lose autocompletion, type checking, and clear error messages
 - **Complex validation logic**: Content validation is left to the API layer, leading to runtime errors that could have been plan-time validation
 
-**Bottom Line**
+**Bottom line**
 
 Consistent field types make everyone's life easier—API consumers, Terraform provider developers, and your future self. When designing your API, choose field types that can accommodate future needs rather than changing them later.
 
-##### Make Requests Transactional
+### Make requests transactional
 
 Terraform expects changes to take effect immediately. Design your API so that changes take effect immediately upon successful response.
 
@@ -433,13 +467,13 @@ private async persistAlertsHelper() {
 
 ```
 
-##### Offer Compare-and-Swap
+### Offer compare-and-swap
 
 Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins. 
 
-If you have to consider case that need concurrency control, support mechanisms like ETags, checksums or, in the case of saved objects, the \`version\` property.
+If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
 
-##### Ignore the Robustness Principle: Don’t Normalize Output
+### Ignore the robustness principle: don’t normalize output
 
 The robustness principle says to accept input in various formats but return output in a consistent format, for example converting strings to lowercase, ordering elements in a list or changing whitespace in \`json\` strings.
 
@@ -451,12 +485,13 @@ Fortunately, the kibana client hasn’t needed to handle complex normalization y
 
 Follow these tips, and you’ll make your API a dream to work with for Terraform provider developers.
 
-#### Examples
+### Example
 
-##### Spaces
+The spaces API follows these guidelines and makes resource management with Terraform ideal.
 
-[AOS](https://www.elastic.co/docs/api/doc/kibana/v9/operation/operation-get-spaces-space-id)  
-[Terraform provider](https://github.com/elastic/terraform-provider-elasticstack/blob/main/examples/resources/elasticstack_kibana_space/resource.tfhttps://github.com/elastic/terraform-provider-elasticstack/blob/main/examples/resources/elasticstack_kibana_space/resource.tf)
+Compare the [OAS specs](https://www.elastic.co/docs/api/doc/kibana/v9/operation/operation-get-spaces-space-id) with the [spaces resource configuration](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_space) and you'll see why:
+
+*Get a space*
 
 ```
 GET /api/spaces/space/{id}
@@ -469,22 +504,22 @@ curl \
  --header "elastic-api-version: 2023-10-31"
 ```
 
-Response (200)
+Returns 200
 
 ```
 {
-  "id": "test_space", <1>
-  "name": "Test Space", <2>
+  "id": "test_space",
+  "name": "Test Space",
   "color": null,
   "imageUrl": "",
-  "initials": "ts", <5>
+  "initials": "ts",
   "solution": "es",
-  "description": "A fresh space for testing visualisations", <3>
-  "disabledFeatures": [ingestManager", "enterpriseSearch"] <4>
+  "description": "A fresh space for testing visualisati*ons",
+  "disabledFeatures": [ingestManager", "enterpriseSearch"]
 }
 ```
 
-Terraform resource specification
+*elasticstack_kibana_space*
 
 ```
 provider "elasticstack" {
@@ -492,11 +527,11 @@ provider "elasticstack" {
 }
 
 resource "elasticstack_kibana_space" "example" {
-  space_id          = "test_space" <1>
-  name              = "Test Space" <2>
-  description       = "A fresh space for testing visualisations" <3>
-  disabled_features = ["ingestManager", "enterpriseSearch"] <4>
-  initials          = "ts" <5>
+  space_id          = "test_space"
+  name              = "Test Space"
+  description       = "A fresh space for testing visualisations"
+  disabled_features = ["ingestManager", "enterpriseSearch"]
+  initials          = "ts"
 }
 ```
 
