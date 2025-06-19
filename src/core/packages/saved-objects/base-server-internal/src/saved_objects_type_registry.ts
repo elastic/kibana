@@ -12,7 +12,6 @@ import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved
 
 export interface SavedObjectTypeRegistryConfig {
   legacyTypes?: string[];
-  accessControlTypes?: string[];
 }
 
 /**
@@ -24,7 +23,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
 
-  constructor({ legacyTypes = [], accessControlTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
+  constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypesMap = new Set(legacyTypes);
   }
 
