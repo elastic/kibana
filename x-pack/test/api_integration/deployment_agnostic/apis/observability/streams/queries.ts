@@ -251,7 +251,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rules.body.data).to.have.length(0);
     });
 
-    it('throws when deleting an inexistant query', async () => {
+    it('returns a 404 when deleting an inexistant query', async () => {
       const queryId = v4();
       await apiClient
         .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
