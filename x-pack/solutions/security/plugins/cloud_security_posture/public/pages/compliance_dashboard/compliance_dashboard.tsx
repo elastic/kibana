@@ -240,7 +240,7 @@ const determineDashboardDataRefetchInterval = (data: ComplianceDashboardDataV2 |
 
 const TabContent = ({
   selectedPostureTypeTab,
-  activeNamespace: namespace,
+  activeNamespace,
 }: {
   selectedPostureTypeTab: PosturePolicyTemplate;
   activeNamespace: string;
@@ -260,7 +260,7 @@ const TabContent = ({
       enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_CSPM,
       refetchInterval: determineDashboardDataRefetchInterval,
     },
-    namespace
+    activeNamespace
   );
 
   const getKspmDashboardData = useKspmStatsApi(
@@ -268,7 +268,7 @@ const TabContent = ({
       enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_KSPM,
       refetchInterval: determineDashboardDataRefetchInterval,
     },
-    namespace
+    activeNamespace
   );
   const setupStatus = getSetupStatus?.[selectedPostureTypeTab]?.status;
   const isStatusManagedInDashboard = setupStatus === 'indexed' || setupStatus === 'not-installed';
@@ -365,11 +365,6 @@ export const ComplianceDashboard = () => {
     activeNamespace
   );
 
-  const namespaces =
-    currentTabUrlState === POSTURE_TYPE_CSPM
-      ? getCspmDashboardData.data?.namespaces || []
-      : getKspmDashboardData.data?.namespaces || [];
-
   const onActiveNamespaceChange = useCallback(
     (selectedNamespace: string) => {
       updateActiveNamespace(selectedNamespace);
@@ -440,6 +435,33 @@ export const ComplianceDashboard = () => {
     services.data.query.queryString,
     services.data.query.filterManager,
   ]);
+
+  // if there is more than one namespace, show the namespace selector in the header
+  const rightSideItems = useMemo(() => {
+    const namespaces =
+      currentTabUrlState === POSTURE_TYPE_CSPM
+        ? getCspmDashboardData.data?.namespaces || []
+        : getKspmDashboardData.data?.namespaces || [];
+
+    return namespaces.length > 1
+      ? [
+          <NamespaceSelector
+            data-test-subj="namespace-selector"
+            namespaces={namespaces}
+            activeNamespace={activeNamespace}
+            postureType={currentTabUrlState}
+            onNamespaceChange={onActiveNamespaceChange}
+          />,
+        ]
+      : [];
+  }, [
+    currentTabUrlState,
+    getCspmDashboardData.data,
+    getKspmDashboardData.data,
+    activeNamespace,
+    onActiveNamespaceChange,
+  ]);
+
   return (
     <CloudPosturePage>
       <EuiPageHeader
@@ -452,15 +474,7 @@ export const ComplianceDashboard = () => {
             })}
           />
         }
-        rightSideItems={[
-          <NamespaceSelector
-            data-test-subj="namespace-selector"
-            namespaces={namespaces}
-            activeNamespace={activeNamespace}
-            postureType={currentTabUrlState}
-            onNamespaceChange={onActiveNamespaceChange}
-          />,
-        ]}
+        rightSideItems={rightSideItems}
         tabs={tabs.map(({ content, ...rest }) => rest)}
       />
 

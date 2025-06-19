@@ -187,7 +187,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trends] =
+          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trendDetails] =
             await Promise.all([
               getStats(esClient, query, pitId, runtimeMappings, logger),
               getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
@@ -201,15 +201,15 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 
-          const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends.trends);
-          const trend = getSummaryTrend(trends.trends);
+          const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trendDetails.trends);
+          const trend = getSummaryTrend(trendDetails.trends);
 
           const body: ComplianceDashboardDataV2 = {
             stats,
             groupedFindingsEvaluation,
             benchmarks,
             trend,
-            namespaces: trends.namespaces,
+            namespaces: trendDetails.namespaces,
           };
 
           return response.ok({

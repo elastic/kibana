@@ -6,7 +6,12 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 
 interface NamespaceSelectorProps {
@@ -25,15 +30,9 @@ export const NamespaceSelector = ({
   postureType,
   'data-test-subj': dataTestSubj,
 }: NamespaceSelectorProps) => {
-  const { euiTheme } = useEuiTheme();
   const title = 'Namespace';
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const isNamespaceSelected = useCallback(
-    (namespaceKey: string) => activeNamespace === namespaceKey,
-    [activeNamespace]
-  );
 
   const onSelectedNamespaceChange = useCallback(
     (namespaceKey: string) => {
@@ -45,19 +44,35 @@ export const NamespaceSelector = ({
     [activeNamespace, onNamespaceChange]
   );
 
-  const panels = [
-    {
-      id: 0,
-      items: namespaces.map((namespace) => ({
-        name: namespace,
-        icon: isNamespaceSelected(namespace) ? 'check' : 'empty',
-        onClick: () => onSelectedNamespaceChange(namespace),
-      })),
-    },
-  ];
-
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const isSelectedProps = useCallback(
+    (namespace: string) => {
+      return namespace === activeNamespace
+        ? { icon: 'check', 'aria-current': true }
+        : { icon: 'empty', 'aria-current': undefined };
+    },
+    [activeNamespace]
+  );
+
+  const menuItems = useMemo(() => {
+    return namespaces.map((namespace, index) => (
+      <>
+        <EuiContextMenuItem
+          {...isSelectedProps(namespace)}
+          key={namespace}
+          onClick={() => {
+            onSelectedNamespaceChange(namespace);
+          }}
+        >
+          {namespace}
+        </EuiContextMenuItem>
+        {index < namespaces.length - 1 && (
+          <EuiHorizontalRule margin="none" key={`rule-${namespace}`} />
+        )}
+      </>
+    ));
+  }, [namespaces, isSelectedProps, onSelectedNamespaceChange]);
 
   const button = useMemo(() => {
     return (
@@ -84,15 +99,7 @@ export const NamespaceSelector = ({
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu
-        data-test-subj="groupByContextMenu"
-        initialPanelId={0}
-        panels={panels}
-        css={{
-          border: euiTheme.border.thin,
-        }}
-        // border={euiTheme.border}
-      />
+      <EuiContextMenuPanel size="s" items={menuItems} className="cspNamespaceSelectorPanel" />
     </EuiPopover>
   );
 };
