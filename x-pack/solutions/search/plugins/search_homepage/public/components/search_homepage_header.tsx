@@ -18,13 +18,13 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import searchHomePageLight from '../assets/search_homepage_light.svg';
-import searchHomePageDark from '../assets/search_homepage_dark.svg';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
 
 export const SearchHomepageHeader: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { colorMode } = useEuiTheme();
+  const assetBasePath = useAssetBasePath();
+
   return (
     <EuiPageTemplate.Section
       data-test-subj="search-homepage-header"
@@ -102,7 +102,11 @@ export const SearchHomepageHeader: React.FC = () => {
         <EuiFlexItem>
           <EuiImage
             size="xl"
-            src={colorMode === 'LIGHT' ? searchHomePageLight : searchHomePageDark}
+            src={
+              colorMode === 'LIGHT'
+                ? `${assetBasePath}/search_homepage_light.svg`
+                : `${assetBasePath}/search_homepage_dark.svg`
+            }
             alt=""
           />
         </EuiFlexItem>
