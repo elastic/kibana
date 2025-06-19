@@ -567,19 +567,22 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     action: SecurityAction,
     spaces: Set<string>
   ): AuthorizeObject[] {
-    // If not an update action, no access control check needed
-    if (action !== SecurityAction.UPDATE && action !== SecurityAction.BULK_UPDATE) {
+    if (
+      action === SecurityAction.UPDATE ||
+      action === SecurityAction.BULK_UPDATE ||
+      action === SecurityAction.DELETE ||
+      action === SecurityAction.BULK_DELETE
+    ) {
+      return objects.filter((obj) =>
+        this.accessControlService.canModifyObject({
+          type: obj.type,
+          object: obj,
+          spacesToAuthorize: spaces,
+        })
+      );
+    } else {
       return objects;
     }
-
-    // Filter objects to only those the user can modify
-    return objects.filter((obj) =>
-      this.accessControlService.canModifyObject({
-        type: obj.type,
-        object: obj,
-        spacesToAuthorize: spaces,
-      })
-    );
   }
 
   /*
@@ -884,15 +887,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
       for (const space of existingNamespaces) {
         spacesToAuthorize.add(space); // existing namespaces are included so we can later redact if necessary
-      }
-      if (
-        !this.accessControlService.canModifyObject({
-          type: obj.type,
-          object: obj,
-          spacesToAuthorize,
-        })
-      ) {
-        continue;
       }
     }
 
