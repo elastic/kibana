@@ -25,6 +25,7 @@ interface RouteInfo {
   iconType: string;
   appRoute: string;
   validRuleConsumers?: readonly AlertConsumers[];
+  cloudId?: string;
 }
 
 export const OWNER_INFO: Record<Owner, RouteInfo> = {
@@ -35,6 +36,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
     iconType: 'logoSecurity',
     appRoute: '/app/security',
     validRuleConsumers: [AlertConsumers.SIEM],
+    cloudId: 'security',
   },
   [OBSERVABILITY_OWNER]: {
     id: OBSERVABILITY_OWNER,
@@ -53,6 +55,7 @@ export const OWNER_INFO: Record<Owner, RouteInfo> = {
       AlertConsumers.MONITORING,
       AlertConsumers.STREAMS,
     ],
+    cloudId: 'observability',
   },
   [GENERAL_CASES_OWNER]: {
     id: GENERAL_CASES_OWNER,

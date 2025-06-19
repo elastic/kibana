@@ -30,13 +30,7 @@ import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
 
-export const getExternalRoutes = ({
-  isServerless,
-  docLinks,
-}: {
-  isServerless?: boolean;
-  docLinks: DocLinksServiceSetup;
-}) =>
+export const getExternalRoutes = ({ docLinks }: { docLinks: DocLinksServiceSetup }) =>
   [
     deleteCaseRoute,
     findCaseRoute,

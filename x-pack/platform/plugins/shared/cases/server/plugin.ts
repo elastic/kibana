@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import type { Owner } from '../common/constants/types';
 
 export class CasePlugin
   implements
@@ -66,6 +67,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private readonly pluginContext: PluginInitializerContext;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -75,6 +77,7 @@ export class CasePlugin
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.pluginContext = initializerContext;
   }
 
   public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
@@ -130,12 +133,10 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
-    const isServerless = plugins.cloud?.isServerlessEnabled;
-
     registerRoutes({
       router,
       routes: [
-        ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
+        ...getExternalRoutes({ docLinks: core.docLinks }),
         ...getInternalRoutes(this.userProfileService),
       ],
       logger: this.logger,
@@ -159,8 +160,7 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const isServerlessSecurity =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+    const serverlessProjectType = plugins.cloud?.serverless.projectType as Owner | undefined;
 
     registerConnectorTypes({
       actions: plugins.actions,
@@ -168,7 +168,7 @@ export class CasePlugin
       core,
       getCasesClient,
       getSpaceId,
-      isServerlessSecurity,
+      serverlessProjectType,
     });
 
     return {
