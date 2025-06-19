@@ -546,9 +546,13 @@ describe('#update', () => {
           namespace: 'default',
         });
         expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.objectContaining({
+            id: expect.stringMatching(`${type}:${id}`),
+          }),
           expect.anything()
         );
+        // Assert that 'namespace' does not exist at all
+        expect(client.index.mock.calls[0][0]).not.toHaveProperty('namespace');
       });
 
       it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
