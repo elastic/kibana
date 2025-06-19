@@ -28,7 +28,7 @@ import {
   LabelNode,
   EdgeGroupNode,
 } from '../node';
-import { layoutGraph } from './layout_graph';
+import { layoutGraph, GRID_SIZE } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
@@ -150,7 +150,7 @@ export const Graph = memo<GraphProps>(
           edgesFocusable={false}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[10, 10]} // Snap nodes to a 10px grid
+          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
