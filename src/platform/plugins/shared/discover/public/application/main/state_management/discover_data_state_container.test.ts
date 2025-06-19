@@ -183,6 +183,7 @@ describe('test getDataStateContainer', () => {
           columns: true,
           rowHeight: true,
           breakdownField: true,
+          hideChart: false,
         },
       })
     );
@@ -225,6 +226,7 @@ describe('test getDataStateContainer', () => {
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
       })
     );

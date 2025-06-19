@@ -521,6 +521,7 @@ describe('buildEsqlFetchSubscribe', () => {
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
       })
     );
@@ -534,6 +535,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -550,6 +552,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: true,
         rowHeight: true,
         breakdownField: true,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -567,6 +570,7 @@ describe('buildEsqlFetchSubscribe', () => {
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -578,6 +582,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     documents$.next({
@@ -590,6 +595,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: true,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
   });
