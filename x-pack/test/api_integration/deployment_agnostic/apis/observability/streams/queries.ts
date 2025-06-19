@@ -251,17 +251,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(rules.body.data).to.have.length(0);
     });
 
-    // Should we still throw in this case?
-    it.skip('throws when deleting an inexistant query', async () => {
+    it('throws when deleting an inexistant query', async () => {
       const queryId = v4();
       await apiClient
         .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
           params: { path: { name: STREAM_NAME, queryId } },
         })
         .expect(404);
-
-      const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([]);
     });
 
     it('bulks insert and remove queries', async () => {

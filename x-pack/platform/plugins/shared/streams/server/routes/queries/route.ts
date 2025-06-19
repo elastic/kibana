@@ -12,6 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 
 export interface ListQueriesResponse {
@@ -131,13 +132,19 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, assetClient } = await getScopedClients({ request });
 
     const {
       path: { queryId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
+
+    const queryLink = await assetClient.bulkGetByIds(streamName, 'query', [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
     await queryClient.delete(streamName, queryId);
 
     return {
