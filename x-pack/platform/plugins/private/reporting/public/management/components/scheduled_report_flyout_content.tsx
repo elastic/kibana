@@ -181,9 +181,13 @@ export const ScheduledReportFlyoutContent = ({
   const isEmailActive = sendByEmail || false;
 
   const onSubmit = async () => {
-    if (await form.validate()) {
-      await form.submit();
-      onClose();
+    try {
+      if (await form.validate()) {
+        await form.submit();
+        onClose();
+      }
+    } catch (e) {
+      // Keep the flyout open in case of schedule error
     }
   };
 
