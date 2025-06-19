@@ -47,13 +47,10 @@ const actionsI18nTexts = {
 
 const UnfreezeActionButtons: React.FunctionComponent<{
   openFlyout: () => void;
+  openModal: () => void;
   correctiveAction: UnfreezeAction;
   setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'readonly'>) => void;
-}> = ({ openFlyout, correctiveAction, setSelectedResolutionType }) => {
-  const clickResolution = (resolutionType: Exclude<IndicesResolutionType, 'readonly'>) => {
-    openFlyout();
-    setSelectedResolutionType(resolutionType);
-  };
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal }) => {
   const { reindexState, updateIndexState } = useIndexContext();
   const reindexingInProgressOrCompleted =
     reindexState.status === ReindexStatus.inProgress ||
@@ -70,30 +67,30 @@ const UnfreezeActionButtons: React.FunctionComponent<{
       iconType: 'indexSettings',
       canDisplay: canDisplayReindex,
       resolutionType: 'reindex',
+      onClick: () => {
+        openFlyout();
+      },
     },
     {
       tooltip: actionsI18nTexts.unfreezeTooltipLabel,
       iconType: 'readOnly',
       canDisplay: canDisplayUnfreeze,
       resolutionType: 'unfreeze',
+      onClick: () => {
+        openModal();
+        setSelectedResolutionType('unfreeze');
+      },
     },
   ];
-  return (
-    <ActionButtons
-      actions={actions}
-      onClick={(resolution: string) =>
-        clickResolution(resolution as Exclude<IndicesResolutionType, 'readonly'>)
-      }
-      dataTestSubjPrefix={correctiveAction.type}
-    />
-  );
+  return <ActionButtons actions={actions} dataTestSubjPrefix={correctiveAction.type} />;
 };
 
 const ReindexActionButtons: React.FunctionComponent<{
   openFlyout: () => void;
+  openModal: () => void;
   correctiveAction: ReindexAction;
   setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'unfreeze'>) => void;
-}> = ({ openFlyout, correctiveAction, setSelectedResolutionType }) => {
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal }) => {
   const { excludedActions = [] } = correctiveAction;
   const { reindexState, updateIndexState } = useIndexContext();
   const { meta } = reindexState;
@@ -117,43 +114,40 @@ const ReindexActionButtons: React.FunctionComponent<{
     !isFollowerIndex &&
     !updateInProgressOrCompleted
   );
-  const clickResolution = (resolutionType: Exclude<IndicesResolutionType, 'unfreeze'>) => {
-    openFlyout();
-    setSelectedResolutionType(resolutionType);
-  };
   const actions: ActionButtonConfig[] = [
     {
       tooltip: actionsI18nTexts.reindexTooltipLabel,
       iconType: 'indexSettings',
       canDisplay: canDisplayReindex,
       resolutionType: 'reindex',
+      onClick: () => {
+        openFlyout();
+      },
     },
     {
       tooltip: actionsI18nTexts.readOnlyTooltipLabel,
       iconType: 'readOnly',
       canDisplay: canDisplayReadOnly,
       resolutionType: 'readonly',
+      onClick: () => {
+        openModal();
+        setSelectedResolutionType('readonly');
+      },
     },
   ];
-  return (
-    <ActionButtons
-      actions={actions}
-      onClick={(resolution: string) =>
-        clickResolution(resolution as Exclude<IndicesResolutionType, 'unfreeze'>)
-      }
-      dataTestSubjPrefix={correctiveAction.type}
-    />
-  );
+  return <ActionButtons actions={actions} dataTestSubjPrefix={correctiveAction.type} />;
 };
 
 interface Props {
   openFlyout: () => void;
   setSelectedResolutionType: (step: IndicesResolutionType) => void;
+  openModal: () => void;
 }
 
 export const ReindexActionCell: React.FunctionComponent<Props> = ({
   openFlyout,
   setSelectedResolutionType,
+  openModal,
 }) => {
   const { reindexState, deprecation } = useIndexContext();
   const correctiveAction = deprecation.correctiveAction?.type;
@@ -176,12 +170,14 @@ export const ReindexActionCell: React.FunctionComponent<Props> = ({
       openFlyout={openFlyout}
       correctiveAction={deprecation.correctiveAction as UnfreezeAction}
       setSelectedResolutionType={setSelectedResolutionType}
+      openModal={openModal}
     />
   ) : (
     <ReindexActionButtons
       openFlyout={openFlyout}
       correctiveAction={deprecation.correctiveAction as ReindexAction}
       setSelectedResolutionType={setSelectedResolutionType}
+      openModal={openModal}
     />
   );
 };
