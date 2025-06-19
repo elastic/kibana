@@ -125,6 +125,7 @@ src/core/packages/capabilities/server-mocks @elastic/kibana-core
 src/core/packages/chrome/browser @elastic/appex-sharedux
 src/core/packages/chrome/browser-internal @elastic/appex-sharedux
 src/core/packages/chrome/browser-mocks @elastic/appex-sharedux
+src/core/packages/chrome/layout/core-chrome-layout-components @elastic/appex-sharedux
 src/core/packages/config/server-internal @elastic/kibana-core
 src/core/packages/custom-branding/browser @elastic/appex-sharedux
 src/core/packages/custom-branding/browser-internal @elastic/appex-sharedux
@@ -918,7 +919,7 @@ x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
-x-pack/platform/plugins/shared/cases @elastic/response-ops
+x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
