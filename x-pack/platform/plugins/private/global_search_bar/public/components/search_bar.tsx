@@ -390,6 +390,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
+      theme={chromeStyle !== 'project' ? { search: 'dark', popover: 'global' } : undefined}
       listProps={{
         className: 'eui-yScroll',
         css: css`
