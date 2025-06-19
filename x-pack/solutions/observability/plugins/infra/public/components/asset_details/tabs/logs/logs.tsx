@@ -11,13 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_LOG_VIEW,
-  getLogsLocatorFromUrlService,
+  getLogsLocatorsFromUrlService,
   getNodeQuery,
   type LogViewReference,
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
-import moment from 'moment';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -51,7 +50,7 @@ export const Logs = () => {
       share: { url },
     },
   } = useKibanaContextForPlugin();
-  const logsLocator = getLogsLocatorFromUrlService(url)!;
+  const { logsLocator } = getLogsLocatorsFromUrlService(url)!;
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -96,15 +95,16 @@ export const Logs = () => {
   );
 
   const logsUrl = useMemo(() => {
+    const nodeQuery = getNodeQuery({
+      nodeField: findInventoryFields(asset.type).id,
+      nodeId: asset.id,
+      filter: textQueryDebounced,
+    });
     return logsLocator.getRedirectUrl({
-      query: getNodeQuery({
-        nodeField: findInventoryFields(asset.type).id,
-        nodeId: asset.id,
-        filter: textQueryDebounced,
-      }),
+      filter: nodeQuery.query,
       timeRange: {
-        from: moment(state.startTimestamp).toISOString(),
-        to: moment(state.currentTimestamp).toISOString(),
+        startTime: state.startTimestamp,
+        endTime: state.currentTimestamp,
       },
       logView,
     });

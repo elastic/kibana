@@ -19,7 +19,7 @@ import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { LogEntry } from '@kbn/logs-shared-plugin/common';
-import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import { i18n } from '@kbn/i18n';
@@ -46,7 +46,7 @@ export const PageViewLogInContext: React.FC = () => {
   } = useKibanaContextForPlugin();
 
   const { dateRange } = useDatePickerContext();
-  const logsLocator = getLogsLocatorFromUrlService(url);
+  const { logsLocator } = getLogsLocatorsFromUrlService(url);
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
   const [{ contextEntry }, { setContextEntry }] = useViewLogInProviderContext();
@@ -73,9 +73,14 @@ export const PageViewLogInContext: React.FC = () => {
     return null;
   }
 
+  const locatorTimeRange = {
+    startTime: new Date(dateRange.from).getTime(),
+    endTime: new Date(dateRange.to).getTime(),
+  };
+
   const discoverLink = logsLocator?.getRedirectUrl({
-    timeRange: dateRange,
-    query: contextQuery,
+    timeRange: locatorTimeRange,
+    filter: contextQuery?.query,
   });
 
   return (

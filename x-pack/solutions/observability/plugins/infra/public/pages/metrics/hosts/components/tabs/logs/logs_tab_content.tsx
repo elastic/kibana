@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
-import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
@@ -47,9 +47,10 @@ export const LogsSavedSearchComponent = () => {
 
   const logSources = useAsync(logSourcesService.getFlattenedLogSources);
 
-  const logsLocator = getLogsLocatorFromUrlService(url);
+  const { logsLocator } = getLogsLocatorsFromUrlService(url);
 
   const {
+    getDateRangeAsTimestamp,
     parsedDateRange: { from, to },
   } = useUnifiedSearchContext();
 
@@ -74,11 +75,16 @@ export const LogsSavedSearchComponent = () => {
     };
   }, [hostNodes, filterQuery]);
 
-  const memoizedTimeRange = useMemo(() => ({ from, to }), [from, to]);
+  const memoizedTimeRange = useMemo(() => {
+    const { from: startTime, to: endTime } = getDateRangeAsTimestamp();
+    return { startTime, endTime };
+  }, [getDateRangeAsTimestamp]);
+
+  const memoizedTimeRangeForSavedSearch = useMemo(() => ({ from, to }), [from, to]);
 
   const discoverLink = logsLocator?.getRedirectUrl({
     timeRange: memoizedTimeRange,
-    query: hostsFilterQuery,
+    filter: hostsFilterQuery.query,
   });
 
   if (!hostNodes.length && !loading) {
@@ -104,7 +110,7 @@ export const LogsSavedSearchComponent = () => {
         <LazySavedSearchComponent
           dependencies={{ embeddable, searchSource, dataViews }}
           index={logSources.value}
-          timeRange={memoizedTimeRange}
+          timeRange={memoizedTimeRangeForSavedSearch}
           query={hostsFilterQuery}
           height="60vh"
           displayOptions={{
