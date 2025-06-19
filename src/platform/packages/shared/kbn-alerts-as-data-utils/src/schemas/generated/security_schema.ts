@@ -120,6 +120,7 @@ const SecurityAlertRequired = rt.type({
 });
 // prettier-ignore
 const SecurityAlertOptional = rt.partial({
+  'actor.entity.id': schemaStringArray,
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
@@ -216,10 +217,12 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
+  'related.entity': schemaStringArray,
   'service.asset.criticality': schemaString,
   'service.risk.calculated_level': schemaString,
   'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
+  'target.entity.id': schemaStringArray,
   'user.asset.criticality': schemaString,
 });
 
