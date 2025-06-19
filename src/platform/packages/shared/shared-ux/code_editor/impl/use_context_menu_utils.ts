@@ -43,7 +43,7 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
         if (selection && model) {
           const selectedText = model.getValueInRange(selection);
           copyToClipboard(selectedText);
-          ed.executeEdits('Cut selection', [{ range: selection, text: '' }]);
+          // ed.executeEdits('Cut selection', [{ range: selection, text: '' }]);
         }
       },
     },
@@ -62,9 +62,11 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
       run: async (ed) => {
         const selection = ed.getSelection();
         const model = ed.getModel();
+        const position = ed.getPosition();
         if (selection && model) {
           const selectedText = model.getValueInRange(selection);
           copyToClipboard(selectedText);
+          ed.setPosition(position); //
         }
       },
     },

@@ -174,7 +174,7 @@ export interface CodeEditorProps {
    * If the custom context menu is enable through {@link enableCustomContextMenu},
    * this prop allows adding more custom menu actions, on top of the default Cut, Copy, and Paste actions.
    */
-  customConextMenuActions?: ContextMenuAction[];
+  customContextMenuActions?: ContextMenuAction[];
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -209,7 +209,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   dataTestSubj,
   classNameCss,
   enableCustomContextMenu = false,
-  customConextMenuActions = [],
+  customContextMenuActions = [],
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -471,7 +471,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         registerContextMenuActions({
           editor,
           enableWriteActions: !isReadOnly,
-          customActions: customConextMenuActions,
+          customActions: customContextMenuActions,
         });
       }
 
@@ -486,7 +486,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       enableCustomContextMenu,
       registerContextMenuActions,
       isReadOnly,
-      customConextMenuActions,
+      customContextMenuActions,
     ]
   );
 
