@@ -24,7 +24,7 @@ export class LegacyFixedLayout implements LayoutService {
    */
   public getComponent(): React.ComponentType {
     const { chrome, overlays, application } = this.deps;
-    const chromeHeader = chrome.getHeaderComponent();
+    const chromeHeader = chrome.getLegacyHeaderComponentForFixedLayout();
     const bannerComponent = overlays.banners.getComponent();
     const appComponent = application.getComponent();
     const chromeVisible$ = chrome.getIsVisible$();

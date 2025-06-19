@@ -242,7 +242,9 @@ describe('start', () => {
 
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
-      expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
+      expect(
+        shallow(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()))
+      ).toBeDefined();
     });
 
     it('renders the custom project side navigation', async () => {
@@ -258,7 +260,7 @@ describe('start', () => {
 
       const component = mount(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getHeaderComponent()}
+          {chrome.getLegacyHeaderComponentForFixedLayout()}
         </KibanaRenderContextProvider>
       );
 
@@ -279,7 +281,7 @@ describe('start', () => {
 
       const component = mount(
         <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getHeaderComponent()}
+          {chrome.getLegacyHeaderComponentForFixedLayout()}
         </KibanaRenderContextProvider>
       );
 
@@ -741,10 +743,9 @@ describe('start', () => {
 });
 
 describe('stop', () => {
-  it('completes applicationClass$, getIsNavDrawerLocked, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+  it('completes applicationClass$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
     const { chrome, service } = await start();
     const promise = Rx.combineLatest([
-      chrome.getIsNavDrawerLocked$(),
       chrome.getBreadcrumbs$(),
       chrome.getIsVisible$(),
       chrome.getHelpExtension$(),
@@ -760,7 +761,6 @@ describe('stop', () => {
 
     await expect(
       Rx.combineLatest([
-        chrome.getIsNavDrawerLocked$(),
         chrome.getBreadcrumbs$(),
         chrome.getIsVisible$(),
         chrome.getHelpExtension$(),

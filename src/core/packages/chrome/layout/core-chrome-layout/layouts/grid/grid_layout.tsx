@@ -42,7 +42,7 @@ export class GridLayout implements LayoutService {
    */
   public getComponent(): React.ComponentType {
     const { application, chrome, overlays } = this.deps;
-    const chromeHeader = chrome.getHeaderComponent();
+    const chromeHeader = chrome.getClassicHeaderComponentForGridLayout();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
     const chromeVisible$ = chrome.getIsVisible$();

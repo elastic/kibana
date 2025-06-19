@@ -28,7 +28,13 @@ export interface InternalChromeStart extends ChromeStart {
    * Used only by the rendering service to render the header UI
    * @internal
    */
-  getHeaderComponent(): JSX.Element;
+  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the header UI
+   * @internal
+   */
+  getClassicHeaderComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to retrieve the set of classNames

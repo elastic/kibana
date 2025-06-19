@@ -15,7 +15,8 @@ import type { ChromeService, InternalChromeStart } from '@kbn/core-chrome-browse
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
-    getHeaderComponent: jest.fn(),
+    getLegacyHeaderComponentForFixedLayout: jest.fn(),
+    getClassicHeaderComponentForGridLayout: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -68,7 +69,6 @@ const createStartContractMock = () => {
     setHelpMenuLinks: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getHelpSupportUrl$: jest.fn(() => of('https://www.elastic.co/support')),
-    getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
@@ -99,7 +99,6 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getGlobalHelpExtensionMenuLinks$.mockReturnValue(new BehaviorSubject([]));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
-  startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
   startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
   startContract.sideNav.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
