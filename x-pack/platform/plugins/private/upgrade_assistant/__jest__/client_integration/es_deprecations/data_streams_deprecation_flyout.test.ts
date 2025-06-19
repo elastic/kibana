@@ -178,7 +178,7 @@ describe('Data streams deprecation flyout', () => {
       expect(find('dataStreamMigrationWarningsCallout').text()).toContain(
         `Indices created on or before ${moment(
           defaultMetaResponse.lastIndexRequiringUpgradeCreationDate
-        ).format(DATE_FORMAT)} need to be reindexed to a compatible format or marked as read-only.`
+        ).format(DATE_FORMAT)} need to be reindexed to a compatible format or set to read-only.`
       );
 
       expect(exists('reindexDsWarningCallout')).toBe(true);
@@ -486,7 +486,7 @@ describe('Data streams deprecation flyout', () => {
 
       expect(exists('readOnlyDsWarningCallout')).toBe(true);
       expect(find('readOnlyDsWarningCallout').text()).toContain(
-        'Marking this data read-only could affect some of the existing setups'
+        'Setting this data to read-only could affect some of the existing setups'
       );
 
       expect(exists('migrationWarningCheckbox')).toBe(true);
