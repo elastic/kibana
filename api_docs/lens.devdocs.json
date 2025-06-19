@@ -23975,17 +23975,17 @@
             "() => ",
             {
               "pluginId": "embeddable",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibEmbeddablePluginApi",
-              "section": "def-common.EmbeddableRegistryDefinition",
+              "section": "def-server.EmbeddableRegistryDefinition",
               "text": "EmbeddableRegistryDefinition"
             },
             "<",
             {
               "pluginId": "embeddable",
-              "scope": "common",
+              "scope": "server",
               "docId": "kibEmbeddablePluginApi",
-              "section": "def-common.EmbeddableStateWithType",
+              "section": "def-server.EmbeddableStateWithType",
               "text": "EmbeddableStateWithType"
             },
             ">"
