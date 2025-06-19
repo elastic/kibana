@@ -19,7 +19,7 @@ import {
   UIM_REINDEX_STOP_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
-import { InitializingFlyoutStep } from '../../../common/initializing_step';
+import { InitializingStep } from '../../../common/initializing_step';
 import { WarningFlyoutStep } from './steps/warning/warning_step';
 import { ReindexFlyoutStep } from './steps/reindex/reindex_step';
 import { FlyoutStep } from './steps/types';
@@ -86,7 +86,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep errorMessage={errorMessage} type="index" />;
+        return <InitializingStep errorMessage={errorMessage} type="index" mode="flyout" />;
       case 'confirmReindex':
         return (
           <WarningFlyoutStep

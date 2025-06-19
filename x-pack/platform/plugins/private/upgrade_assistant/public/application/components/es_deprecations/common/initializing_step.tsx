@@ -29,15 +29,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface InitializingStepProps {
   errorMessage?: string | null;
   type: 'dataStream' | 'index';
+  mode: 'modal' | 'flyout';
 }
 
-const InitializingStep: React.FunctionComponent<InitializingStepProps> = ({
+export const InitializingStep: React.FunctionComponent<InitializingStepProps> = ({
   errorMessage,
   type,
+  mode,
 }) => {
+  const Wrapper = mode === 'modal' ? EuiModalBody : EuiFlyoutBody;
   const hasInitializingError = !!errorMessage;
   return (
-    <>
+    <Wrapper>
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
       <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -71,32 +74,6 @@ const InitializingStep: React.FunctionComponent<InitializingStepProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </>
-  );
-};
-
-export const InitializingFlyoutStep: React.FunctionComponent<InitializingStepProps> = ({
-  errorMessage,
-  type,
-}) => {
-  return (
-    <>
-      <EuiFlyoutBody>
-        <InitializingStep errorMessage={errorMessage} type={type} />
-      </EuiFlyoutBody>
-    </>
-  );
-};
-
-export const InitializingModalStep: React.FunctionComponent<InitializingStepProps> = ({
-  errorMessage,
-  type,
-}) => {
-  return (
-    <>
-      <EuiModalBody>
-        <InitializingStep errorMessage={errorMessage} type={type} />
-      </EuiModalBody>
-    </>
+    </Wrapper>
   );
 };

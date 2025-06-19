@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiModal } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
-import {
-  DataStreamMigrationStatus,
-  EnrichedDeprecationInfo,
-} from '../../../../../../../common/types';
+import { EnrichedDeprecationInfo } from '../../../../../../../common/types';
 
 import { MigrationStateContext } from '../context';
 
@@ -24,11 +21,11 @@ import {
 } from '../../../../../lib/ui_metric';
 
 import { containerMessages } from './messages';
-import type { Step } from './steps/types';
-import { InitializingModalStep } from '../../../common/initializing_step';
+import { InitializingStep } from '../../../common/initializing_step';
 import { ConfirmMigrationReadonlyFlyoutStep } from './steps/confirm';
 import { ChecklistModalStep } from './steps/checklist';
 import { MigrationCompletedModalStep } from './steps/completed/completed_step';
+import { useMigrationStep } from '../use_migration_step';
 
 interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -46,39 +43,8 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
   deprecation,
 }) => {
   const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
-  const [modalStep, setFlyoutStep] = useState<Step>('initializing');
+  const [modalStep, setModalStep] = useMigrationStep(status, loadDataStreamMetadata);
   const { index } = deprecation;
-
-  const switchFlyoutStep = useCallback(() => {
-    switch (status) {
-      case DataStreamMigrationStatus.notStarted: {
-        setFlyoutStep('confirm');
-        return;
-      }
-      case DataStreamMigrationStatus.failed:
-      case DataStreamMigrationStatus.fetchFailed:
-      case DataStreamMigrationStatus.cancelled:
-      case DataStreamMigrationStatus.inProgress: {
-        setFlyoutStep('inProgress');
-        return;
-      }
-      case DataStreamMigrationStatus.completed: {
-        setTimeout(() => {
-          // wait for 1.5 more seconds fur the UI to visually get to 100%
-          setFlyoutStep('completed');
-        }, 1500);
-        return;
-      }
-    }
-  }, [status]);
-
-  useMemo(async () => {
-    if (modalStep === 'initializing') {
-      await loadDataStreamMetadata();
-      switchFlyoutStep();
-    }
-  }, [modalStep, loadDataStreamMetadata, switchFlyoutStep]);
-  useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
 
   const onStartReadonly = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_START_READONLY_CLICK);
@@ -108,13 +74,14 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
   const modalContent = useMemo(() => {
     switch (modalStep) {
       case 'initializing':
-        return <InitializingModalStep errorMessage={errorMessage} type="dataStream" />;
+        return <InitializingStep errorMessage={errorMessage} type="dataStream" mode="modal" />;
       case 'confirm': {
         if (!meta || !resolutionType) {
           return (
-            <InitializingModalStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
               type="dataStream"
+              mode="modal"
             />
           );
         }
@@ -134,9 +101,10 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
       case 'inProgress': {
         if (!resolutionType) {
           return (
-            <InitializingModalStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
               type="dataStream"
+              mode="modal"
             />
           );
         }
@@ -145,7 +113,7 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
           <ChecklistModalStep
             closeModal={closeModal}
             executeAction={() => {
-              setFlyoutStep('confirm');
+              setModalStep('confirm');
             }}
             migrationState={migrationState}
             cancelAction={() => onStopReadonly()}
@@ -165,17 +133,18 @@ export const DataStreamReadonlyModal: React.FunctionComponent<Props> = ({
       }
     }
   }, [
-    modalStep,
-    errorMessage,
-    meta,
-    resolutionType,
-    migrationWarnings,
     closeModal,
-    lastIndexCreationDateFormatted,
-    onStartReadonly,
-    migrationState,
+    errorMessage,
     index,
+    lastIndexCreationDateFormatted,
+    meta,
+    migrationState,
+    migrationWarnings,
+    modalStep,
+    onStartReadonly,
     onStopReadonly,
+    resolutionType,
+    setModalStep,
   ]);
 
   return (

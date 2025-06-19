@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -34,11 +34,11 @@ import {
 } from '../../../../../lib/ui_metric';
 
 import { containerMessages } from './messages';
-import type { Step } from './steps/types';
 import { ConfirmMigrationReindexFlyoutStep } from './steps/confirm';
 import { ChecklistFlyoutStep } from './steps/checklist';
 import { MigrationCompletedFlyoutStep } from './steps/completed';
-import { InitializingFlyoutStep } from '../../../common/initializing_step';
+import { InitializingStep } from '../../../common/initializing_step';
+import { useMigrationStep } from '../use_migration_step';
 
 interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -58,38 +58,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
 }) => {
   const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
   const { index } = deprecation;
-  const [flyoutStep, setFlyoutStep] = useState<Step>('initializing');
-
-  const switchFlyoutStep = useCallback(() => {
-    switch (status) {
-      case DataStreamMigrationStatus.notStarted: {
-        setFlyoutStep('confirm');
-        return;
-      }
-      case DataStreamMigrationStatus.failed:
-      case DataStreamMigrationStatus.fetchFailed:
-      case DataStreamMigrationStatus.cancelled:
-      case DataStreamMigrationStatus.inProgress: {
-        setFlyoutStep('inProgress');
-        return;
-      }
-      case DataStreamMigrationStatus.completed: {
-        setTimeout(() => {
-          // wait for 1.5 more seconds fur the UI to visually get to 100%
-          setFlyoutStep('completed');
-        }, 1500);
-        return;
-      }
-    }
-  }, [status]);
-
-  useMemo(async () => {
-    if (flyoutStep === 'initializing') {
-      await loadDataStreamMetadata();
-      switchFlyoutStep();
-    }
-  }, [flyoutStep, loadDataStreamMetadata, switchFlyoutStep]);
-  useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
+  const [flyoutStep, setFlyoutStep] = useMigrationStep(status, loadDataStreamMetadata);
 
   const onStartReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_START_CLICK);
@@ -139,13 +108,14 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep errorMessage={errorMessage} type="dataStream" />;
+        return <InitializingStep errorMessage={errorMessage} type="dataStream" mode="flyout" />;
       case 'confirm': {
         if (!meta || !resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
               type="dataStream"
+              mode="flyout"
             />
           );
         }
@@ -165,9 +135,10 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       case 'inProgress': {
         if (!resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
               type="dataStream"
+              mode="flyout"
             />
           );
         }
@@ -206,6 +177,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     onStartReindex,
     migrationState,
     index,
+    setFlyoutStep,
     onStopReindex,
   ]);
 

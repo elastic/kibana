@@ -20,7 +20,7 @@ import {
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 import { ModalStep } from './steps/types';
-import { InitializingModalStep } from '../../../common/initializing_step';
+import { InitializingStep } from '../../../common/initializing_step';
 import { UpdateIndexModalStep } from './steps/update/update_step';
 import { WarningModalStep } from './steps/warning/warning_step_modal';
 
@@ -98,7 +98,7 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
   const modalContent = useMemo(() => {
     switch (modalStep) {
       case 'initializing':
-        return <InitializingModalStep errorMessage={errorMessage} type="index" />;
+        return <InitializingStep errorMessage={errorMessage} type="index" mode="modal" />;
       case 'confirmReadonly':
       case 'confirmUnfreeze':
         return (
@@ -165,7 +165,7 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
       onClose={closeModal}
       data-test-subj="updateIndexModal"
       maxWidth={true}
-      css={{ minWidth: 700 }}
+      css={{ minWidth: 750 }}
     >
       {modalContent}
     </EuiModal>
