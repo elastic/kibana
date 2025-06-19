@@ -43,6 +43,7 @@ import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
 import type { DataType } from '../../..';
+import { getIsBucketedFromOperation } from '../utils';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -556,8 +557,7 @@ function replaceFormulaColumn(
 
   // when coming to Formula keep the custom label
   const regeneratedColumn = newLayer.columns[columnId];
-  if (!shouldResetLabel && previousColumn.customLabel) {
-    regeneratedColumn.customLabel = true;
+  if (!shouldResetLabel && previousColumn.label) {
     regeneratedColumn.label = previousColumn.label;
   }
 
@@ -634,12 +634,11 @@ export function replaceColumn({
       // if the formula label is not the default one, propagate it to the new operation
       if (
         !shouldResetLabel &&
-        previousColumn.customLabel &&
+        previousColumn.label &&
         hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, tempLayer.columns, indexPattern)
       ) {
-        hypotheticalLayer.columns[columnId].customLabel = true;
         hypotheticalLayer.columns[columnId].label = previousColumn.label;
       }
       if (hypotheticalLayer.incompleteColumns && hypotheticalLayer.incompleteColumns[columnId]) {
@@ -1185,8 +1184,7 @@ function copyCustomLabel(
     ('sourceField' in newColumn && newColumn.sourceField) !==
     ('sourceField' in previousOptions && previousOptions.sourceField);
   // only copy custom label if either used operation or used field stayed the same
-  if (previousOptions.customLabel && (!operationChanged || !fieldChanged)) {
-    adjustedColumn.customLabel = true;
+  if (previousOptions.label && (!operationChanged || !fieldChanged)) {
     adjustedColumn.label = previousOptions.label;
   }
   return adjustedColumn;
@@ -1202,7 +1200,7 @@ function addBucket(
 ): FormBasedLayer {
   const [buckets, metrics] = partition(
     layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+    (colId) => getIsBucketedFromOperation(layer.columns[colId].operationType)
   );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
@@ -1491,7 +1489,7 @@ export function getExistingColumnGroups(layer: FormBasedLayer): [string[], strin
     layer.columnOrder,
     (columnId) => layer.columns[columnId] && !('references' in layer.columns[columnId])
   );
-  return [...partition(direct, (columnId) => layer.columns[columnId]?.isBucketed), referenced];
+  return [...partition(direct, (columnId) => getIsBucketedFromOperation(layer.columns[columnId]?.operationType)), referenced];
 }
 
 /**
@@ -1719,7 +1717,7 @@ export function updateDefaultLabels(
   const copiedColumns = { ...layer.columns };
   layer.columnOrder.forEach((id) => {
     const col = copiedColumns[id];
-    if (!col.customLabel) {
+    if (!col.label) {
       copiedColumns[id] = {
         ...col,
         label: operationDefinitionMap[col.operationType].getDefaultLabel(

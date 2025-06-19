@@ -35,7 +35,7 @@ import { isColumnFormatted, isColumnOfType } from './operations/definitions/help
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
 import { resolveTimeShift } from './time_shift_utils';
-import { getSamplingValue } from './utils';
+import { getIsBucketedFromOperation, getSamplingValue } from './utils';
 
 export type OriginalColumn = { id: string } & GenericIndexPatternColumn;
 
@@ -248,14 +248,14 @@ function getExpressionForLayer(
           aggs.push(expressionBuilder);
 
           const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
-            ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
+            ? `col-${index + (getIsBucketedFromOperation(col.operationType) ? 0 : 1)}-${aggId}`
             : `col-${index}-${aggId}`;
 
           esAggsIdMap[esAggsId] = [
             {
               ...col,
               id: colId,
-              label: col.customLabel
+              label: col.label
                 ? col.label
                 : operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,
@@ -346,7 +346,7 @@ function getExpressionForLayer(
         matchingEsAggColumnIds.forEach((currentId) => {
           const currentColumn = esAggsIdMap[currentId][0];
           const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
-            ? counter + (currentColumn.isBucketed ? 0 : 1)
+            ? counter + (getIsBucketedFromOperation(currentColumn.operationType) ? 0 : 1)
             : counter;
           const newId = updatePositionIndex(currentId, aggIndex);
           updatedEsAggsIdMap[newId] = esAggsIdMap[currentId];
@@ -421,7 +421,7 @@ function getExpressionForLayer(
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [
-              col.customLabel
+              col.label
                 ? col.label
                 : operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,

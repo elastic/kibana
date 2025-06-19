@@ -379,9 +379,8 @@ export const percentileOperation: OperationDefinition<
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.customLabel
-            ? currentColumn.label
-            : ofName(
+          label: currentColumn.label ??
+              ofName(
                 indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
                   currentColumn.sourceField,
                 Number(value),

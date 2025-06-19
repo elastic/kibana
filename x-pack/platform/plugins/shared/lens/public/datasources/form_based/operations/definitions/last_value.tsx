@@ -40,6 +40,7 @@ import {
   LAST_VALUE_OP_SORT_FIELD_INVALID_TYPE,
   LAST_VALUE_OP_SORT_FIELD_NOT_FOUND,
 } from '../../../../user_messages_ids';
+import { getDatatypeFromOperation } from '../../utils';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -307,7 +308,7 @@ export const lastValueOperation: OperationDefinition<
     const newTimeField = newIndexPattern.getFieldByName(column.params.sortField);
     return Boolean(
       newField &&
-        newField.type === column.dataType &&
+        newField.type === getDatatypeFromOperation(column.operationType, column, newIndexPattern) &&
         !newField.aggregationRestrictions &&
         newTimeField?.type === 'date' &&
         supportedTypes.has(newField.type)

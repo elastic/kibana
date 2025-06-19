@@ -70,6 +70,7 @@ import { rangeOperation } from './ranges';
 import { FormBasedDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 import type { OriginalColumn } from '../../to_expression';
 import { ReferenceEditorProps } from '../../dimension_panel/reference_editor';
+import { DataType } from '../../../..';
 
 export type {
   IncompleteColumn,
@@ -265,6 +266,7 @@ interface BaseOperationDefinitionProps<
 
   isBucketed?: boolean;
   scale?: 'ratio' | 'interval' | 'ordinal';
+  dataType?: DataType;
   /**
    * The default label is assigned by the editor
    */

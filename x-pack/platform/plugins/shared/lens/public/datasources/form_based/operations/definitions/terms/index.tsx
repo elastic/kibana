@@ -57,6 +57,7 @@ import {
 } from './constants';
 import { IncludeExcludeRow } from './include_exclude_options';
 import { shouldShowTimeSeriesOption } from '../../../pure_utils';
+import { getDatatypeFromOperation, getIsBucketedFromOperation } from '../../../utils';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -233,7 +234,7 @@ export const termsOperation: OperationDefinition<
       .map(([id]) => id)[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
-      (col) => col && col.isBucketed
+      (col) => col && getIsBucketedFromOperation(col.operationType)
     ).length;
 
     return {
@@ -416,9 +417,8 @@ export const termsOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: oldColumn.customLabel
-        ? oldColumn.label
-        : ofName(
+      label: oldColumn.label
+        ?? ofName(
             field.displayName,
             newParams.secondaryFields?.length,
             newParams.orderBy.type === 'rare',
@@ -482,7 +482,7 @@ export const termsOperation: OperationDefinition<
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
         const [sourcefield, ...secondaryFields] = fields;
         const dataTypes = uniq(fields.map((field) => indexPattern.getFieldByName(field)?.type));
-        const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || column.dataType;
+        const newDataType = (dataTypes.length === 1 ? dataTypes[0] : 'string') || getDatatypeFromOperation(column.operationType, column);
         const newParams = {
           ...column.params,
         };
@@ -525,9 +525,8 @@ export const termsOperation: OperationDefinition<
               ...column,
               dataType: newDataType,
               sourceField: sourcefield,
-              label: column.customLabel
-                ? column.label
-                : ofName(
+              label: column.label
+                ?? ofName(
                     mainField?.displayName,
                     fields.length - 1,
                     newParams.orderBy.type === 'rare',
@@ -723,9 +722,8 @@ The top values of a specified field ranked by the chosen metric.
                 ...layer.columns,
                 [columnId]: {
                   ...currentColumn,
-                  label: currentColumn.customLabel
-                    ? currentColumn.label
-                    : ofName(
+                  label: currentColumn.label
+                    ?? ofName(
                         indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
                         secondaryFieldsCount,
                         currentColumn.params.orderBy.type === 'rare',
@@ -1120,7 +1118,7 @@ The top values of a specified field ranked by the chosen metric.
                   )
                 }
               />
-              {(currentColumn.dataType === 'number' || currentColumn.dataType === 'string') &&
+              {(getDatatypeFromOperation(currentColumn.operationType, currentColumn) === 'number' || getDatatypeFromOperation(currentColumn.operationType, currentColumn) === 'string') &&
                 !currentColumn.params.secondaryFields?.length && (
                   <>
                     <IncludeExcludeRow
@@ -1130,7 +1128,7 @@ The top values of a specified field ranked by the chosen metric.
                       excludeIsRegex={Boolean(currentColumn.params.excludeIsRegex)}
                       tableRows={activeData?.[rest.layerId]?.rows}
                       columnId={columnId}
-                      isNumberField={Boolean(currentColumn.dataType === 'number')}
+                      isNumberField={Boolean(getDatatypeFromOperation(currentColumn.operationType, currentColumn) === 'number')}
                       updateParams={(operation, operationValue, regex, regexValue) =>
                         paramEditorUpdater({
                           ...layer,

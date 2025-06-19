@@ -70,6 +70,9 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  getDatatypeFromOperation,
+  getScaleFromOperation,
+  getIsBucketedFromOperation,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -158,43 +161,6 @@ export const removeColumn: Datasource<FormBasedPrivateState>['removeColumn'] = (
     }),
   });
 };
-
-function getDatatypeFromOperation(
-  operationType: string,
-  column: GenericIndexPatternColumn,
-  dataView?: IndexPattern | DataView
-): DataType {
-  const operation = operationDefinitionMap[operationType];
-  const field = 'sourceField' in column ? column.sourceField : undefined;
-  if (field && dataView) {
-    const fieldType = dataView.getFieldByName(field)?.type;
-    if (fieldType) {
-      return fieldType as DataType;
-    }
-  }
-
-  return 'number';
-}
-
-function getIsBucketedFromOperation(operationType: string): boolean {
-  const operation = operationDefinitionMap[operationType];
-  return operation.isBucketed ?? false;
-}
-
-function getScale(type: string) {
-  return type === 'string' ||
-    type === 'ip' ||
-    type === 'ip_range' ||
-    type === 'date_range' ||
-    type === 'number_range'
-    ? 'ordinal'
-    : 'ratio';
-}
-
-function getScaleFromOperation(operationType: string): 'ratio' | 'ordinal' | 'interval' {
-  const operation = operationDefinitionMap[operationType];
-  return operation.scale ?? getScale('');
-}
 
 export function columnToOperation(
   column: GenericIndexPatternColumn,
