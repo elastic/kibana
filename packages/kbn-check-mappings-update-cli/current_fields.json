@@ -841,7 +841,6 @@
     "job.job_id",
     "model_id"
   ],
-  "monitoring-entity-source": [],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
