@@ -61,7 +61,7 @@ const isRenameExpression = (
     parent.type === 'command' &&
     parent.name === 'rename' &&
     node.type === 'option' &&
-    node.name === 'as'
+    (node.name === 'as' || node.name === '=')
   );
 };
 
@@ -237,7 +237,7 @@ export class CommandVisitorContext<
         if (arg.type !== 'option') {
           yield arg;
         } else if (isRenameExpression(this.node, arg)) {
-          // We treat "AS" options as rename expressions, not as command options.
+          // We treat "AS" or "=" options as rename expressions, not as command options.
           yield arg;
         }
       }
@@ -259,7 +259,6 @@ export class CommandVisitorContext<
     option: '' | string = ''
   ): Iterable<ExpressionVisitorOutput<Methods>> {
     this.ctx.assertMethodExists('visitExpression');
-
     for (const arg of singleItems(this.args(option))) {
       yield this.visitExpression(
         arg,

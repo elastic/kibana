@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { findRulesSo } from '../../../../data/rule';
 import {
@@ -31,7 +32,8 @@ import type { RawRule } from '../../../../types';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
-  params: ScheduleBackfillParams
+  params: ScheduleBackfillParams,
+  gaps?: Gap[]
 ): Promise<ScheduleBackfillResults> {
   try {
     scheduleBackfillParamsSchema.validate(params);
@@ -163,6 +165,7 @@ export async function scheduleBackfill(
         (connectorId: string) => actionsClient.isSystemAction(connectorId)
       );
     }),
+    gaps,
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
     unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
