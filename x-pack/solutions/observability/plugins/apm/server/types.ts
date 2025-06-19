@@ -60,7 +60,6 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import type { PluginSetup as ESQLPluginSetup } from '@kbn/esql/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -94,7 +93,6 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
-  esql?: ESQLPluginSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies

@@ -58,8 +58,7 @@
       "profilingDataAccess",
       "cases",
       "observabilityAIAssistant",
-      "share",
-      "esql"
+      "share"
     ],
     "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
   }
