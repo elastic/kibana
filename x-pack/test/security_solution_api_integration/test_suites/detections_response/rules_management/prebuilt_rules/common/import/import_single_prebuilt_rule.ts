@@ -507,7 +507,7 @@ export default ({ getService }: FtrProviderContext): void => {
             immutable: true,
             rule_source: {
               type: 'external',
-              is_customized: false,
+              is_customized: true,
             },
           };
 
