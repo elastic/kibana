@@ -7,10 +7,10 @@
 
 import { useEffect, useState } from 'react';
 
-import type { IndicesStatusResponse } from '../../common';
+import type { IndicesStatusResponse } from '../../common/types';
 
 import { useKibana } from './use_kibana';
-import type { UserStartPrivilegesResponse } from '../../common';
+import type { UserStartPrivilegesResponse } from '../../common/types';
 
 export const useSearchHomePageRedirect = (
   indicesStatus?: IndicesStatusResponse,
