@@ -13,10 +13,10 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamDescription } from './description';
+import { StreamDetailContentView } from '../stream_detail_content_view';
 
 const getStreamDetailTabs = ({
   definition,
@@ -36,14 +36,14 @@ const getStreamDetailTabs = ({
         defaultMessage: 'Overview',
       }),
     },
-    dashboards: {
+    content: {
       href: router.link('/{key}/{tab}', {
-        path: { key: definition.stream.name, tab: 'dashboards' },
+        path: { key: definition.stream.name, tab: 'content' },
       }),
       background: true,
-      content: <StreamDetailDashboardsView definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
-        defaultMessage: 'Dashboards',
+      content: <StreamDetailContentView definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.contentTab', {
+        defaultMessage: 'Content',
       }),
     },
   } as const);
@@ -52,7 +52,7 @@ export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
 export type StreamDetailTabName = keyof StreamDetailTabs;
 
 function isValidStreamDetailTab(value: string): value is StreamDetailTabName {
-  return ['overview', 'dashboards'].includes(value as StreamDetailTabName);
+  return ['overview', 'content'].includes(value as StreamDetailTabName);
 }
 
 export function StreamDetailView() {

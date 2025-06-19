@@ -196,12 +196,12 @@ async function resolveDashboard(
 
 async function resolveFields(entry: AdmZip.IZipEntry): Promise<ContentPackFields> {
   const fields = JSON.parse((await readEntry(entry)).toString()) as FieldDefinition;
-  return { id: entry.name, type: 'fields', content: fields };
+  return { id: 'Fields', type: 'fields', content: fields };
 }
 
 async function resolveProcessors(entry: AdmZip.IZipEntry): Promise<ContentPackProcessors> {
   const processors = JSON.parse((await readEntry(entry)).toString()) as ProcessorDefinition[];
-  return { id: entry.name, type: 'processors', content: processors };
+  return { id: 'Processors', type: 'processors', content: processors };
 }
 
 function getRootDir(entries: AdmZip.IZipEntry[]) {
