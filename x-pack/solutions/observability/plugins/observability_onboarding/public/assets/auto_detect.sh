@@ -92,13 +92,18 @@ update_step_progress() {
   local PAYLOAD=${4:-}
   local data=""
 
-  MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+  MESSAGE=$(echo "$MESSAGE" | sed \
+    -e ':a;N;$!ba' \
+    -e 's/\\/\\\\/g' \
+    -e 's/"/\\"/g' \
+    -e 's/\n/\\n/g')
 
   if [ -z "$PAYLOAD" ]; then
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
   else
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
   fi
+
   curl --request POST \
     --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
     --header "Authorization: ApiKey ${install_api_key_encoded}" \
@@ -167,7 +172,7 @@ download_elastic_agent() {
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
     update_step_progress "ea-download" "complete"
   else
-    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent.\nCurl error: $agent_download_result.\nURL: $download_url"
+    update_step_progress "ea-download" "danger" "Failed to download Elastic Agent. Curl error: $agent_download_result.\nURL: $download_url"
     fail "Failed to download Elastic Agent" "$agent_download_result"
   fi
 }
@@ -179,7 +184,7 @@ extract_elastic_agent() {
     printf "\e[32;1m✓\e[0m %s\n" "Archive extracted"
     update_step_progress "ea-extract" "complete"
   else
-    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent.\nTar Error: $agent_extract_result"
+    update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent. Tar Error: $agent_extract_result"
     fail "Failed to extract Elastic Agent" "$agent_extract_result"
   fi
 }
@@ -191,7 +196,7 @@ install_elastic_agent() {
     printf "\e[32;1m✓\e[0m %s\n" "Elastic Agent installed to $(dirname "$elastic_agent_config_path")"
     update_step_progress "ea-install" "complete"
   else
-    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent.\nElastic Agent install error: $agent_install_result"
+    update_step_progress "ea-install" "danger" "Failed to install Elastic Agent. Elastic Agent install error: $agent_install_result"
     fail "Failed to install Elastic Agent" "$agent_install_result"
   fi
 }
