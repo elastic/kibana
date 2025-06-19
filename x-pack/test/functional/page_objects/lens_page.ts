@@ -2007,7 +2007,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openCSVDownloadExport() {
       await this.clickExportButton();
-      await exports.clickPopoverItem('CSV');
+      await exports.clickPopoverItem('CSV', this.clickExportButton);
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
