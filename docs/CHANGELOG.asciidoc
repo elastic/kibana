@@ -155,7 +155,7 @@ Machine Learning::
 * Anomaly Explorer: Correctly respect the selected Overall swimlane bucket for view by `jobId` ({kibana-pull}222845[#222845]).
 * File upload: Fixes adding additional field when a pipeline is blank ({kibana-pull}222775[#222775]).
 * Trained Models: Fixes inference endpoints assignment ({kibana-pull}222076[#222076]).
-* File upload: Correctly restrict auto-deployment to Elastic models ({kibana-pull}221357[#221357]).
+* File upload: Correctly restricts auto-deployment to Elastic models ({kibana-pull}221357[#221357]).
 * Ensures the OpenAI connector respects the action proxy configuration for all sub-actions ({kibana-pull}219617[#219617]).
 
 Installation and upgrade::
