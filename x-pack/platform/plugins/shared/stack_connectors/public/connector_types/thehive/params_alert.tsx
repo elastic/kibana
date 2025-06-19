@@ -32,7 +32,6 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
       ({
         tlp: 2,
         severity: 2,
-        isRuleSeverity: true,
         tags: [],
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
