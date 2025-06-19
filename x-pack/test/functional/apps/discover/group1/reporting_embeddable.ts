@@ -36,14 +36,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const SAVED_DISCOVER_SESSION_WITH_DATA_VIEW = 'savedDiscoverSessionWithDataView';
   const SAVED_DISCOVER_SESSION_WITH_ESQL = 'savedDiscoverSessionWithESQL';
 
-  const getDashboardPanelReport = async (title: string, { timeout } = { timeout: 60 * 1000 }) => {
+  const getDashboardPanelReport = async (title: string) => {
     await toasts.dismissAll();
 
     await dashboardPanelActions.expectExistsPanelAction(GENERATE_CSV_DATA_TEST_SUBJ, title);
     await dashboardPanelActions.clickPanelActionByTitle(GENERATE_CSV_DATA_TEST_SUBJ, title);
     await testSubjects.existOrFail('csvReportStarted'); /* validate toast panel */
 
-    const url = await reporting.getReportURL(timeout);
+    const url = await reporting.getReportURL();
     const res = await reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);

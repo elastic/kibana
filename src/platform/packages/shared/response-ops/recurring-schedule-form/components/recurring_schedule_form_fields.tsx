@@ -23,6 +23,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
+  EuiSelectOption,
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
@@ -55,6 +56,7 @@ export interface RecurringScheduleFieldsProps {
   hideTimezone?: boolean;
   supportsEndOptions?: boolean;
   allowInfiniteRecurrence?: boolean;
+  minFrequency?: Frequency;
   showTimeInSummary?: boolean;
   readOnly?: boolean;
   compressed?: boolean;
@@ -68,6 +70,7 @@ export const RecurringScheduleFormFields = memo(
     startDate,
     endDate,
     timezone,
+    minFrequency = Frequency.YEARLY,
     hideTimezone = false,
     supportsEndOptions = true,
     allowInfiniteRecurrence = true,
@@ -91,13 +94,13 @@ export const RecurringScheduleFormFields = memo(
     const [today] = useState<Moment>(moment());
 
     const { options, presets } = useMemo(() => {
-      if (!startDate) {
-        return { options: DEFAULT_FREQUENCY_OPTIONS, presets: DEFAULT_PRESETS };
-      }
-      const date = moment(startDate);
-      const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date);
-      return {
-        options: [
+      let _options: Array<EuiSelectOption & { 'data-test-subj'?: string }> =
+        DEFAULT_FREQUENCY_OPTIONS;
+      let _presets: Record<number, Partial<RecurringSchedule>> = DEFAULT_PRESETS;
+      if (startDate != null) {
+        const date = moment(startDate);
+        const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(date);
+        _options = [
           {
             text: i18n.RECURRING_SCHEDULE_FORM_FREQUENCY_DAILY,
             value: Frequency.DAILY,
@@ -125,10 +128,19 @@ export const RecurringScheduleFormFields = memo(
             value: 'CUSTOM',
             'data-test-subj': 'recurringScheduleOptionCustom',
           },
-        ],
-        presets: getPresets(date),
+        ];
+        _presets = getPresets(date);
+      }
+      if (minFrequency != null) {
+        _options = _options.filter(
+          (frequency) => typeof frequency.value !== 'number' || frequency.value >= minFrequency
+        );
+      }
+      return {
+        options: _options,
+        presets: _presets,
       };
-    }, [startDate]);
+    }, [minFrequency, startDate]);
 
     const parsedSchedule = useMemo(() => parseSchedule(formData.recurringSchedule), [formData]);
 
@@ -149,7 +161,11 @@ export const RecurringScheduleFormFields = memo(
           />
           {(parsedSchedule?.frequency === Frequency.DAILY ||
             parsedSchedule?.frequency === 'CUSTOM') && (
-            <CustomRecurringSchedule startDate={startDate} compressed={compressed} />
+            <CustomRecurringSchedule
+              startDate={startDate}
+              compressed={compressed}
+              minFrequency={minFrequency}
+            />
           )}
 
           {supportsEndOptions && (

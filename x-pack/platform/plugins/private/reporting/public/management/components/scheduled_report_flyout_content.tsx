@@ -37,6 +37,7 @@ import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Frequency } from '@kbn/rrule';
 import { ResponsiveFormGroup } from './responsive_form_group';
 import { getReportParams } from '../report_params';
 import { getScheduledReportFormSchema } from '../schemas/scheduled_report_form_schema';
@@ -275,6 +276,7 @@ export const ScheduledReportFlyoutContent = ({
                   hideTimezone
                   readOnly={readOnly}
                   supportsEndOptions={false}
+                  minFrequency={Frequency.MONTHLY}
                   showTimeInSummary
                   compressed
                 />

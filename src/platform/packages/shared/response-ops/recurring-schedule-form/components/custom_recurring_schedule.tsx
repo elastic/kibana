@@ -45,10 +45,16 @@ export interface CustomRecurringScheduleProps {
   startDate: string;
   readOnly?: boolean;
   compressed?: boolean;
+  minFrequency?: Frequency;
 }
 
 export const CustomRecurringSchedule = memo(
-  ({ startDate, readOnly = false, compressed = false }: CustomRecurringScheduleProps) => {
+  ({
+    startDate,
+    readOnly = false,
+    compressed = false,
+    minFrequency = Frequency.YEARLY,
+  }: CustomRecurringScheduleProps) => {
     const [{ recurringSchedule }] = useFormData<{ recurringSchedule: RecurringSchedule }>({
       watch: [
         'recurringSchedule.frequency',
@@ -61,10 +67,13 @@ export const CustomRecurringSchedule = memo(
       return parseSchedule(recurringSchedule);
     }, [recurringSchedule]);
 
-    const frequencyOptions = useMemo(
-      () => RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY(parsedSchedule?.interval),
-      [parsedSchedule?.interval]
-    );
+    const frequencyOptions = useMemo(() => {
+      const options = RECURRING_SCHEDULE_FORM_CUSTOM_FREQUENCY(parsedSchedule?.interval);
+      if (minFrequency != null) {
+        return options.filter(({ value }) => Number(value) >= minFrequency);
+      }
+      return options;
+    }, [minFrequency, parsedSchedule?.interval]);
 
     const bymonthOptions = useMemo(() => {
       if (!startDate) return [];
@@ -98,8 +107,8 @@ export const CustomRecurringSchedule = memo(
                   componentProps={{
                     'data-test-subj': 'interval-field',
                     id: 'interval',
-                    compressed,
                     euiFieldProps: {
+                      compressed,
                       'data-test-subj': 'customRecurringScheduleIntervalInput',
                       min: 1,
                       prepend: (
@@ -117,8 +126,8 @@ export const CustomRecurringSchedule = memo(
                   path="recurringSchedule.customFrequency"
                   componentProps={{
                     'data-test-subj': 'custom-frequency-field',
-                    compressed,
                     euiFieldProps: {
+                      compressed,
                       'data-test-subj': 'customRecurringScheduleFrequencySelect',
                       options: frequencyOptions,
                       disabled: readOnly,
