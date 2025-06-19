@@ -92,9 +92,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    // dynamic styles should be set in `style` prop - https://github.com/elastic/eui/discussions/6828#discussioncomment-12867545
-    // eslint-disable-next-line @elastic/eui/prefer-css-prop-for-static-styles
-    <EuiFlexItem css={styles.flyoutColumn} style={dynamicStyles}>
+    <EuiFlexItem css={[styles.flyoutColumn, dynamicStyles]}>
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div
           css={[
