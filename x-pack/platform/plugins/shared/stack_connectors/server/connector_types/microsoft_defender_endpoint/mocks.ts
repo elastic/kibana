@@ -154,6 +154,13 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
         '@odata.context': 'https://api-us3.securitycenter.microsoft.com/api/$metadata#Machines',
         value: [createMicrosoftMachineMock()],
       }),
+
+    // GetActionResults - GetLiveResponseResultDownloadLink (default for test action IDs)
+    [`${apiUrl}/api/machineactions/test-action-123/GetLiveResponseResultDownloadLink(index=0)`]:
+      () =>
+        createAxiosResponseMock({
+          value: 'https://download.microsoft.com/mock-download-url/results.json',
+        }),
   };
 
   instanceMock.request.mockImplementation(
