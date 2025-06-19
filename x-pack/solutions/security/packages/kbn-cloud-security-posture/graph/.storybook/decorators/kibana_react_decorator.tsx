@@ -141,6 +141,8 @@ const services: Partial<KibanaServices> = {
       addError: action(NOTIFICATIONS_ADD_ERROR_ACTION),
       // @ts-ignore
       addSuccess: action(NOTIFICATIONS_ADD_SUCCESS_ACTION),
+      // @ts-ignore
+      addWarning: action(NOTIFICATIONS_ADD_WARNING_ACTION),
       remove: action(NOTIFICATIONS_REMOVE_ACTION),
     },
   },
