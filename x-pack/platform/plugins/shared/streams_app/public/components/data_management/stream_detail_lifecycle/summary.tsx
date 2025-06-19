@@ -33,6 +33,7 @@ export function RetentionSummary({
       <EuiStat
         css={statCss}
         isLoading={isLoadingStats || !stats}
+        titleSize="m"
         title={
           <PrivilegesWarningIconWrapper
             hasPrivileges={definition.privileges.monitor}
@@ -48,6 +49,7 @@ export function RetentionSummary({
       <EuiStat
         css={statCss}
         isLoading={isLoadingStats || !stats}
+        titleSize="m"
         title={
           <PrivilegesWarningIconWrapper
             hasPrivileges={definition.privileges.monitor}
