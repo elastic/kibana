@@ -3119,6 +3119,14 @@
       }
     }
   },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "search": {
     "dynamic": false,
     "properties": {
@@ -3748,6 +3756,9 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {
