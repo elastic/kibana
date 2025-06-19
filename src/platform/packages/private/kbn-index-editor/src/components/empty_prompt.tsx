@@ -9,15 +9,21 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 
 export const EmptyPrompt: FC = () => {
   return (
-    <EuiText color="subdued" textAlign="center">
-      <FormattedMessage
-        id="indexEditor.emptyPrompt.description"
-        defaultMessage="Start creating your lookup index by adding cells to the table, by uploading or dragging and dropping a file."
-      />
-    </EuiText>
+    <EuiEmptyPrompt
+      body={
+        <p>
+          <EuiText color="subdued" textAlign="center" size="s">
+            <FormattedMessage
+              id="indexEditor.emptyPrompt.description"
+              defaultMessage="Start creating your lookup index by adding cells to the table, by uploading or dragging and dropping a file."
+            />
+          </EuiText>
+        </p>
+      }
+    />
   );
 };

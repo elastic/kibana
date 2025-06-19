@@ -64,7 +64,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         <EuiFlyoutHeader hasBorder>
           <IndexName />
 
-          <EuiText>
+          <EuiText size="s" color="subdued">
             <FormattedMessage
               id="indexEditor.flyout.headerDescription"
               defaultMessage={
