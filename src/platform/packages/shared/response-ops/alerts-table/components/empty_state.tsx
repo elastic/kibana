@@ -93,7 +93,7 @@ export const EmptyState: React.FC<{
                           id="xpack.triggersActionsUI.empty.description"
                           defaultMessage={body}
                         />
-                      </p>{' '}
+                      </p>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
