@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UserMenuProvider({ getService }: FtrProviderContext) {

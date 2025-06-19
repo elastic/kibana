@@ -7,6 +7,9 @@
 
 import { services as kibanaFunctionalServices } from '@kbn/test-suites-src/functional/services';
 import { services as kibanaApiIntegrationServices } from '@kbn/test-suites-src/api_integration/services';
+import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/ace_editor';
+import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
+import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 import { ReportingFunctionalProvider } from '../../reporting_functional/services';
@@ -50,13 +53,10 @@ import { PipelineEditorProvider } from './pipeline_editor';
 // @ts-ignore not ts yet
 import { RandomProvider } from './random';
 // @ts-ignore not ts yet
-import { AceEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/ace_editor';
 import { CanvasElementProvider } from './canvas_element';
 // @ts-ignore not ts yet
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
-import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
-import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';

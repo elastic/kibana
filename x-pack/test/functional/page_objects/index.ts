@@ -7,6 +7,11 @@
 
 import { pageObjects as kibanaFunctionalPageObjects } from '@kbn/test-suites-src/functional/page_objects';
 
+import { MonitoringPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/monitoring_page';
+import { SecurityPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/security_page';
+import { CopySavedObjectsToSpacePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/copy_saved_objects_to_space_page';
+import { SpaceSelectorPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/space_selector_page';
+import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { AssetDetailsProvider } from './asset_details';
 import { BannersPageObject } from './banners_page';
@@ -30,7 +35,6 @@ import { LensPageProvider } from './lens_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
-import { MonitoringPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
@@ -40,12 +44,8 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
 import { RollupPageObject } from './rollup_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
-import { SecurityPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/security_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
-import { CopySavedObjectsToSpacePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/copy_saved_objects_to_space_page';
-import { SpaceSelectorPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/space_selector_page';
-import { RoleMappingsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/role_mappings_page';
 import { StatusPageObject } from './status_page';
 import { TagManagementPageObject } from './tag_management_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
