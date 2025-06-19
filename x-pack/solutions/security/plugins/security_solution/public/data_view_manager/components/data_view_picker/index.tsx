@@ -14,7 +14,7 @@ import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDataViewSpec } from '../../hooks/use_data_view_spec';
+import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
@@ -55,12 +55,12 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(scope);
+  const { dataView, status } = useDataView(scope);
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
-  const dataViewId = dataViewSpec?.id;
+  const dataViewId = dataView?.id;
 
   // NOTE: this function is called in response to user interaction with the picker,
   // hence - it is the only place where we should update the url param for the data view selection.
@@ -145,16 +145,16 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       return { label: LOADING };
     }
 
-    if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
+    if (dataView?.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
       return {
         label: DEFAULT_SECURITY_DATA_VIEW,
       };
     }
 
     return {
-      label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
+      label: dataView?.name || dataView?.id || 'Data view',
     };
-  }, [dataViewSpec.id, dataViewSpec?.name, status]);
+  }, [dataView?.id, dataView?.name, status]);
 
   const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
 

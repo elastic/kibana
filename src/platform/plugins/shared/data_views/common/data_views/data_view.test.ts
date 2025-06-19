@@ -812,4 +812,130 @@ describe('IndexPattern', () => {
       ).toMatchInlineSnapshot(`undefined`);
     });
   });
+
+  describe('Caching toSpec call', () => {
+    beforeEach(() => {
+      const formatter = {
+        toJSON: () => ({ id: 'bytes' }),
+      } as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      indexPattern.getFormatterForFieldNoDefault = () => undefined;
+    });
+
+    test('should cache the result of toSpec', () => {
+      const spec1 = indexPattern.toSpec();
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).toBe(spec2);
+    });
+
+    test('should not cache the result of toSpec when fields are not included', () => {
+      const spec1 = indexPattern.toSpec(false);
+      const spec2 = indexPattern.toSpec(false);
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when fields are added', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.fields.add({
+        name: 'new_field',
+        type: 'keyword',
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: false,
+      });
+      const spec2 = indexPattern.toSpec();
+      expect(spec1.fields?.new_field).toBeUndefined();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when fields are removed', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.fields.remove(indexPattern.fields.getByName('bytes')!);
+      const spec2 = indexPattern.toSpec();
+      expect(spec1.fields?.bytes).toBeDefined();
+      expect(spec2.fields?.bytes).toBeUndefined();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when scripted fields are removed', () => {
+      indexPattern.fields.add({
+        name: 'new scripted field',
+        script: 'false',
+        type: 'boolean',
+        scripted: true,
+        lang: 'painless',
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
+      const spec1 = indexPattern.toSpec();
+      indexPattern.removeScriptedField('new scripted field');
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when runtime fields are added', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.addRuntimeField('new_runtime_field', runtimeFieldScript);
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when runtime fields are removed', () => {
+      indexPattern.addRuntimeField('new_runtime_field', runtimeFieldScript);
+      const spec1 = indexPattern.toSpec();
+      indexPattern.removeRuntimeField('new_runtime_field');
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when field custom label is changed', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.setFieldCustomLabel('bytes', 'new label');
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when field custom description is changed', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.setFieldCustomDescription('bytes', 'new description');
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when field count is changed', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.setFieldCount('bytes', 123);
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when composite runtime field is added', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.addRuntimeField('new_runtime_field', {
+        type: 'composite',
+        script: {
+          source: "emit('hello world');",
+        },
+        fields: {
+          a: {
+            type: 'keyword',
+          },
+          b: {
+            type: 'long',
+          },
+        },
+      });
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+
+    test('should clear the cache when index pattern title is changed', () => {
+      const spec1 = indexPattern.toSpec();
+      indexPattern.setIndexPattern('new title');
+      const spec2 = indexPattern.toSpec();
+      expect(spec1).not.toBe(spec2);
+    });
+  });
 });
