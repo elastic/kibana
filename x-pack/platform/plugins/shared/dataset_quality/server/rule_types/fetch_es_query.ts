@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { extractKey } from './extract_key';
+import { MISSING_VALUE } from './types';
 
 const DEFAULT_GROUPS = 1000;
 
@@ -60,7 +61,7 @@ export async function fetchEsQuery({
                 }
               : {
                   multi_terms: {
-                    terms: groupBy.map((field) => ({ field })),
+                    terms: groupBy.map((field) => ({ field, missing: MISSING_VALUE })),
                     size: DEFAULT_GROUPS,
                     order: { _count: 'desc' as const },
                   },

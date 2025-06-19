@@ -38,3 +38,7 @@ export const THRESHOLD_MET_GROUP = {
     defaultMessage: 'Threshold met',
   }),
 };
+
+export const MISSING_VALUE = i18n.translate('xpack.datasetQuality.alerting.missingValue', {
+  defaultMessage: 'N/A',
+});

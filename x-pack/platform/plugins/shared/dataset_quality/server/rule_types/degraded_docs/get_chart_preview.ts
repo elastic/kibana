@@ -7,9 +7,10 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { Coordinate } from '../../../common/types';
 import { PreviewChartResponse } from '../../../common/api_types';
+import { Coordinate } from '../../../common/types';
 import { extractKey } from '../extract_key';
+import { MISSING_VALUE } from '../types';
 
 interface DataStreamTotals {
   x: Coordinate['x'];
@@ -73,7 +74,7 @@ export async function getChartPreview({
                 }
               : {
                   multi_terms: {
-                    terms: groupBy.map((field) => ({ field })),
+                    terms: groupBy.map((field) => ({ field, missing: MISSING_VALUE })),
                     size: DEFAULT_GROUPS,
                     order: { _count: 'desc' as const },
                   },
