@@ -84,7 +84,7 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
       }
     };
     // Need to check if this works on serverless as well
-    const shouldShowOwnerSelector = mapActiveSolutionToOwner(activeSolution) === 'cases';
+    const shouldShowOwnerSelector = mapActiveSolutionToOwner(activeSolution) === 'cases' && availableOwners.length > 1;
 
     if (!shouldShowOwnerSelector) {
       onSelectedOwner(mapActiveSolutionToOwner(activeSolution));
