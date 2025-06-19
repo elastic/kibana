@@ -28,7 +28,8 @@
     "@kbn/analytics",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-http-server",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": [
     "target/**/*",
