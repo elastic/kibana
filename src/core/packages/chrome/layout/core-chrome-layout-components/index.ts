@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+export { ChromeLayout, type ChromeLayoutProps } from './layout';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-};
+export {
+  LayoutConfigProvider as ChromeLayoutConfigProvider,
+  type LayoutConfig as ChromeLayoutConfig,
+  type LayoutConfigProviderProps as ChromeLayoutConfigProviderProps,
+} from './layout_config_context';
