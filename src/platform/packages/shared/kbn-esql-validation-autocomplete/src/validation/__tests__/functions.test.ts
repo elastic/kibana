@@ -190,7 +190,7 @@ describe('function validation', () => {
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
           await expectErrors('ROW "a" IN (1, "b", "c")', [
-            'Argument of [in] must be [keyword], found value [1] type [literal:integer]',
+            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, keyword, keyword)]',
           ]);
         });
       });
