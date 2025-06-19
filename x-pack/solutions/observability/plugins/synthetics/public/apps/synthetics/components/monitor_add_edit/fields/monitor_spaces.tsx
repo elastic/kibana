@@ -68,7 +68,7 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
       }}
       options={spacesList}
       selectedOptions={(value ?? []).map((id) => {
-        const sp = spacesList.find((space) => space.id === id);
+        const sp = spacesList.find((spaceObj) => spaceObj.id === id);
         if (!sp) {
           return {
             id,
