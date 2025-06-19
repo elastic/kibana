@@ -12,8 +12,8 @@ import { StreamsAppPageTemplate } from '../components/streams_app_page_template'
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
-import { StreamManagementView } from '../components/stream_management_view';
 import { StreamDetailRoot } from '../components/stream_root';
+import { StreamDetailManagement } from '../components/data_management/stream_detail_management';
 
 /**
  * The array of route definitions to be used when the application
@@ -79,7 +79,7 @@ const streamsAppRoutes = {
             }),
           },
           '/{key}/management/{tab}': {
-            element: <StreamManagementView />,
+            element: <StreamDetailManagement />,
             params: t.type({
               path: t.type({
                 tab: t.string,
