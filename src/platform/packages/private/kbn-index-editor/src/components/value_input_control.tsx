@@ -86,6 +86,7 @@ export const getCellValueRenderer =
               onValueChange(docId!, { [columnId]: value });
             }}
             value={cellValue}
+            autoFocus
           />
         </div>
       );

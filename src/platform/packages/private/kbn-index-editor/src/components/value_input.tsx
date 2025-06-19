@@ -17,6 +17,7 @@ interface ValueInputProps {
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
+  autoFocus: boolean;
 }
 
 export const ValueInput = ({
@@ -25,6 +26,7 @@ export const ValueInput = ({
   onBlur,
   onEnter,
   onChange,
+  autoFocus = false,
 }: ValueInputProps) => {
   const [editValue, setEditValue] = useState(value);
 
@@ -45,7 +47,7 @@ export const ValueInput = ({
   return (
     <EuiFieldText
       name="test123"
-      autoFocus
+      autoFocus={autoFocus}
       compressed
       placeholder={placeholder}
       value={editValue}

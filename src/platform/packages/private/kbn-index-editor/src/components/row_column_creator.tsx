@@ -59,8 +59,14 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
 
   const inputs = useMemo(
     () =>
-      columns.map((column) => {
-        return <ValueInput placeholder={column.name} onChange={updateRow(column.id)} />;
+      columns.map((column, index) => {
+        return (
+          <ValueInput
+            placeholder={column.name}
+            onChange={updateRow(column.id)}
+            autoFocus={index === 0}
+          />
+        );
       }),
     [columns, updateRow]
   );
@@ -99,7 +105,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      {(activeMode === 'add-row' || true) && (
+      {activeMode === 'add-row' && (
         <EuiPanel
           paddingSize="s"
           css={css`
