@@ -234,6 +234,15 @@ export class AnonymizationService {
     }
     return { unredactedMessages: messages };
   }
+
+  /**
+   * Unredacts function arguments that may contain hashed values.
+   */
+  unhashFunctionArguments(args: string | undefined): string | undefined {
+    if (!args) return args;
+    return unhashString(args, this.currentHashMap);
+  }
+
   unredactChatCompletionEvent(): OperatorFunction<
     ChatCompletionEvent,
     ChatCompletionEvent | ChatCompletionUnredactedMessageEvent

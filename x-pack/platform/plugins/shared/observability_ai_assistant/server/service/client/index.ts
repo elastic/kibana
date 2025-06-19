@@ -292,6 +292,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 connectorId,
                 simulateFunctionCalling,
+                anonymizationService: this.dependencies.anonymizationService,
               })
             )
           );
@@ -503,16 +504,11 @@ export class ObservabilityAIAssistantClient {
       return defer(() =>
         from(this.dependencies.anonymizationService.redactMessages(messages)).pipe(
           switchMap(({ redactedMessages }) => {
-            return (
-              this.dependencies.inferenceClient
-                .chatComplete({
-                  ...options,
-                  stream: true,
-                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
-                })
-                // unredact complete assistant response event
-                .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
-            );
+            return this.dependencies.inferenceClient.chatComplete({
+              ...options,
+              stream: true,
+              messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+            });
           })
         )
       ).pipe(
