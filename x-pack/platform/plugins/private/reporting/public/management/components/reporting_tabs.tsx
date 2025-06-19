@@ -158,9 +158,7 @@ export const ReportingTabs: React.FunctionComponent<
                       {ilmPolicyContextValue?.isLoading ? (
                         <EuiLoadingSpinner />
                       ) : (
-                        showIlmPolicyLink && (
-                          <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
-                        )
+                        showIlmPolicyLink && <IlmPolicyLink locator={ilmLocator!} />
                       )}
                     </EuiFlexItem>
                   )}
