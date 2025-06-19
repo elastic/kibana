@@ -1,0 +1,155 @@
+---
+id: kibDevTutorialElasticsearchClient
+slug: /kibana-dev-docs/tutorials/elasticsearch-client
+title: Access the Elasticsearch Client in a Plugin
+description: Learn how to use the Elasticsearch client in your Kibana plugin.
+date: 2025-06-19
+tags: ['kibana','onboarding', 'dev', 'elasticsearch', 'tutorials']
+---
+
+This guide covers how to obtain the Elasticsearch client in both your plugin's start lifecycle and route handler context. It explains the difference between asCurrentUser and asInternalUser, and demonstrates best practices for robust concurrent index initialization.
+
+## Getting the Elasticsearch Client
+
+### From the Plugin Start Contract
+
+In your plugin's `start` method, the `core` parameter provides access to the Elasticsearch client:
+
+```ts
+import type { CoreStart, Plugin } from '@kbn/core/server';
+
+export class MyPlugin implements Plugin {
+  public start(core: CoreStart) {
+    const esClient = core.elasticsearch.client.asCurrentUser;
+    // You can now use esClient to call Elasticsearch APIs
+  }
+}
+```
+
+- Use `asCurrentUser` to perform actions as the currently authenticated user.
+- Use `asInternalUser` for system-level operations that should bypass user permissions (see security considerations).
+
+### From a Route Handler Context
+
+When defining a server route, you can access the Elasticsearch client from the route handler's `context` parameter:
+
+```ts
+router.get(
+  { path: '/api/my_plugin/search', validate: false },
+  async (context, request, response) => {
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    // Use esClient to call Elasticsearch APIs
+    const result = await esClient.search({
+      index: 'my-index',
+      body: { query: { match_all: {} } }
+    });
+    return response.ok({ body: result });
+  }
+);
+```
+
+- `context.core.elasticsearch.client.asCurrentUser` executes requests as the user making the HTTP request.
+- Always prefer `asCurrentUser` in route handlers to respect user permissions.
+
+## Example: Searching as the Current User
+
+Here is a minimal example of searching an index as the current user from a route handler:
+
+```ts
+router.get(
+  { path: '/api/my_plugin/search', validate: false },
+  async (context, request, response) => {
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const result = await esClient.search({
+      index: 'my-index',
+      body: { query: { match_all: {} } }
+      allow_partial_search_results: true // Optional: allows partial results if some shards are unavailable
+    });
+    return response.ok({ body: result });
+  }
+);
+```
+
+## Example: Initializing, Indexing, and Searching an Index
+
+When working in distributed environments (such as multiple Kibana instances), it is common for several instances to attempt to create the same index at the same time. To ensure the index is ready for ingesting and searching, all instances should:
+
+1. Attempt to create the index.
+2. If the index already exists (or creation succeeds), wait until the index status is **green** before proceeding.
+
+> **Note:** If your use case allows partial search results, waiting for **yellow** status is sufficient. See the footnote below.
+
+### Example: Safe Index Initialization and Usage in the Plugin Start Lifecycle
+
+```ts
+import type { CoreStart, Plugin } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+
+async function ensureIndexReady(esClient: ElasticsearchClient, indexName: string, mappings: object) {
+  try {
+    // Attempt to create the index even if it may already exist
+    // Use a long timeout and set requestTimeout slightly longer to avoid socket closure
+    await esClient.indices.create(
+      {
+        index: indexName,
+        mappings,
+        timeout: '300s',
+      },
+      { requestTimeout: 310_000 } 
+    );
+  } catch (error) {
+    if (error?.body?.error?.type !== 'resource_already_exists_exception') {
+      throw error;
+    }
+    // Index already exists, continue
+  }
+
+  // Wait for the index to be ready (green status)
+  // Use a long timeout and set requestTimeout slightly longer to avoid socket closure
+  await esClient.cluster.health(
+    {
+      index: indexName,
+      wait_for_status: 'green',
+      timeout: '300s',
+    },
+    { requestTimeout: 310_000 }
+  );
+}
+
+export class MyPlugin implements Plugin {
+  public start(core: CoreStart) {
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const indexName = 'my-index';
+    const mappings = {
+      properties: {
+        title: { type: 'text' },
+        description: { type: 'text' },
+      },
+    };
+
+    ensureIndexReady(esClient, indexName, mappings)
+      .then(() => {
+        // Index is ready for ingesting and searching
+      })
+      .catch((err) => {
+        this.logger.error(`Failed to initialize index ${indexName} in start: ${err?.message || err}`);
+      });
+  }
+}
+```
+
+### Why Wait for Green Status?
+
+- Multiple Kibana instances may race to create the same index. All should attempt the create call and handle the "index already exists" exception gracefully.
+- After creation (or if the index already exists), always wait for the index to reach **green** status before indexing or searching. This ensures all primary and replica shards are available, preventing partial or failed operations.
+- If your application allows partial search results, waiting for **yellow** status (only primary shards available) may be sufficient. <sup>1</sup>
+
+---
+
+<sup>1</sup> **Yellow status** means primary shards are allocated but some or all replicas are not. This is enough for indexing and searching if you allow partial results (e.g., `allow_partial_search_results: true` in search requests). For strict requirements (all shards must respond), wait for **green** status.
+
+## Security Considerations
+
+- Use `asCurrentUser` for user-initiated actions to enforce security
+- Use `asInternalUser` only for trusted, internal operations that must not be restricted by user permissions.
+- Never use `asInternalUser` in route handlers that respond to user requests.
