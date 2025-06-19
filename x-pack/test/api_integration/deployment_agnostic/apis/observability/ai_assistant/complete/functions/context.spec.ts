@@ -16,11 +16,7 @@ import {
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/recall_and_score';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import {
-  KnowledgeBaseDocument,
-  LlmProxy,
-  createLlmProxy,
-} from '../../utils/create_llm_proxy';
+import { KnowledgeBaseDocument, LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { addSampleDocsToInternalKb, clearKnowledgeBase } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';

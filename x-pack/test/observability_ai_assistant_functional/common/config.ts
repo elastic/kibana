@@ -12,17 +12,12 @@ import {
   KibanaEBTServerProvider,
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
-import {
-  secondaryEditor,
-  editor,
-  viewer,
-  unauthorizedUser,
-} from './users/users';
+import path from 'path';
+import { secondaryEditor, editor, viewer, unauthorizedUser } from './users/users';
 import { getScopedApiClient } from '../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
 import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
-import path from 'path';
 
 export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
