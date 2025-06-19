@@ -90,7 +90,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
       defaultMessage: 'Issue',
     }),
-    width: '30px',
+    width: '36px',
     sortable: true,
     align: 'left',
   },
@@ -122,7 +122,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.actionsColumnTitle', {
       defaultMessage: 'Actions',
     }),
-    width: '30px',
+    width: '10px',
     sortable: false,
     align: 'right',
   },

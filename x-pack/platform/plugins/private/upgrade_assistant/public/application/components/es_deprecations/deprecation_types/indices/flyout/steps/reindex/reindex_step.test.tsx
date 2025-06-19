@@ -154,14 +154,6 @@ describe('ReindexStep', () => {
     expect(props.startReindex).toHaveBeenCalled();
   });
 
-  it('shows read-only button when reindexing fails', () => {
-    const props = cloneDeep(defaultProps);
-    props.reindexState.status = ReindexStatus.failed;
-    props.reindexState.errorMessage = 'Reindex failed';
-    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(true);
-  });
-
   it('only shows read-only button when status is failed', () => {
     const statuses = [
       ReindexStatus.cancelled,
