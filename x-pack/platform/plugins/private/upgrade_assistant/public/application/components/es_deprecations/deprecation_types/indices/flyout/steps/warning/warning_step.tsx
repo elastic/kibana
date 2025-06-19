@@ -21,8 +21,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  EnrichedDeprecationInfo,
   IndexWarning,
   IndexWarningType,
+  ReindexAction,
+  ReindexStatus,
   ReindexStatusResponse,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
@@ -32,7 +35,18 @@ import {
   MakeIndexReadonlyWarningCheckbox,
   WarningCheckboxProps,
 } from './warning_step_checkbox';
-import { FrozenCallOut } from '../frozen_callout';
+import {
+  FrozenCallOut,
+  FollowerIndexCallout,
+  ESTransformsTargetCallout,
+  MlAnomalyCallout,
+  FetchFailedCallOut,
+  ReindexingFailedCallOut,
+} from '../callouts';
+import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
+import { ReindexState } from '../../../use_reindex';
+
+const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
 interface CheckedIds {
   [id: string]: boolean;
@@ -48,11 +62,13 @@ const warningToComponentMap: {
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningFlyoutStepProps {
-  back: () => void;
+  closeFlyout: () => void;
   confirm: () => void;
   flow: 'readonly' | 'reindex';
   meta: ReindexStatusResponse['meta'];
   warnings: IndexWarning[];
+  deprecation: EnrichedDeprecationInfo;
+  reindexState: ReindexState;
 }
 
 /**
@@ -60,14 +76,17 @@ interface WarningFlyoutStepProps {
  * must acknowledge each change before being allowed to proceed.
  */
 export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> = ({
-  back,
+  closeFlyout,
   confirm,
   flow,
   meta,
   warnings,
+  deprecation,
+  reindexState,
 }) => {
   const {
     services: {
+      api,
       core: { docLinks },
     },
   } = useAppContext();
@@ -79,6 +98,19 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
       return initialCheckedIds;
     }, {} as { [id: string]: boolean })
   );
+
+  const {
+    meta: { indexName },
+    status: reindexStatus,
+  } = reindexState;
+
+  const { data: nodes } = api.useLoadNodeDiskSpace();
+  const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
+  const hasReindexingFailed = reindexStatus === ReindexStatus.failed;
+
+  const correctiveAction = deprecation?.correctiveAction as ReindexAction;
+  const isESTransformTarget = !!correctiveAction?.transformIds?.length;
+  const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
 
   // Do not allow to proceed until all checkboxes are checked.
   const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
@@ -97,7 +129,15 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
   return (
     <>
       <EuiFlyoutBody>
+        {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
+        {!hasFetchFailed && hasReindexingFailed && (
+          <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
+        )}
+        {nodes && nodes.length > 0 && <NodesLowSpaceCallOut nodes={nodes} />}
         {meta.isFrozen && <FrozenCallOut />}
+        {meta.isFollowerIndex && <FollowerIndexCallout />}
+        {isESTransformTarget && <ESTransformsTargetCallout deprecation={deprecation} />}
+        {isMLAnomalyIndex && <MlAnomalyCallout />}
         {warnings.length > 0 && (
           <>
             {flow === 'reindex' && (
@@ -168,10 +208,15 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={back} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeReindexButton"
+            >
               <FormattedMessage
-                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.backButtonLabel"
-                defaultMessage="Back"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

@@ -7,32 +7,22 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import {
-  EuiIcon,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiLink,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+  IndicesResolutionType,
+  ReindexAction,
+  ReindexStatus,
+  UnfreezeAction,
+} from '../../../../../../common/types';
 import { useIndexContext } from './context';
 import { LoadingState } from '../../../types';
+import { ActionButtonConfig, ActionButtons } from '../../common/action_buttons';
 
-const i18nTexts = {
+const actionsI18nTexts = {
   reindexLoadingActionsText: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.reindexLoadingActionsText',
     {
       defaultMessage: 'Loading actions…',
-    }
-  ),
-  reindexText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.reindexLabel', {
-    defaultMessage: 'Reindex',
-  }),
-  reindexFollowerIndexText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexLabel',
-    {
-      defaultMessage: 'Unfollow leader index',
     }
   ),
   reindexTooltipLabel: i18n.translate(
@@ -41,25 +31,12 @@ const i18nTexts = {
       defaultMessage: 'Resolve this issue by reindexing into a new, compatible index.',
     }
   ),
-  reindexFollowerIndexTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexTooltipLabel',
+  readOnlyTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyTooltipLabel',
     {
-      defaultMessage: 'Resolve this issue by terminating replication.',
+      defaultMessage: 'Resolve this issue by setting this index to read-only.',
     }
   ),
-  updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
-    defaultMessage: 'Update',
-  }),
-  updateTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.updateTooltipLabel',
-    {
-      defaultMessage:
-        'Resolve this issue by updating this index. This issue can be resolved automatically either by marking the index as read-only (recommended for large indices) or by reindexing into a new, compatible index.',
-    }
-  ),
-  unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.unfreezeLabel', {
-    defaultMessage: 'Unfreeze',
-  }),
   unfreezeTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.unfreezeTooltipLabel',
     {
@@ -68,34 +45,118 @@ const i18nTexts = {
   ),
 };
 
-const getAction = (
-  correctiveActionType: string | undefined,
-  tooltipLabel: string,
-  actionText: string,
-  openFlyout: () => void
-) => {
+const UnfreezeActionButtons: React.FunctionComponent<{
+  openFlyout: () => void;
+  correctiveAction: UnfreezeAction;
+  setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'readonly'>) => void;
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType }) => {
+  const clickResolution = (resolutionType: Exclude<IndicesResolutionType, 'readonly'>) => {
+    openFlyout();
+    setSelectedResolutionType(resolutionType);
+  };
+  const { reindexState, updateIndexState } = useIndexContext();
+  const reindexingInProgressOrCompleted =
+    reindexState.status === ReindexStatus.inProgress ||
+    reindexState.status === ReindexStatus.completed;
+  const updateInProgressOrCompleted =
+    updateIndexState.status === 'complete' || updateIndexState.status === 'inProgress';
+  const canDisplayUnfreeze = !!(
+    reindexState.hasRequiredPrivileges && !reindexingInProgressOrCompleted
+  );
+  const canDisplayReindex = !!(reindexState.hasRequiredPrivileges && !updateInProgressOrCompleted);
+  const actions: ActionButtonConfig[] = [
+    {
+      tooltip: actionsI18nTexts.reindexTooltipLabel,
+      iconType: 'indexSettings',
+      canDisplay: canDisplayReindex,
+      resolutionType: 'reindex',
+    },
+    {
+      tooltip: actionsI18nTexts.unfreezeTooltipLabel,
+      iconType: 'readOnly',
+      canDisplay: canDisplayUnfreeze,
+      resolutionType: 'unfreeze',
+    },
+  ];
   return (
-    <EuiToolTip position="top" content={tooltipLabel}>
-      <EuiLink data-test-subj={`deprecation-${correctiveActionType}`} onClick={openFlyout}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="indexSettings" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{actionText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiLink>
-    </EuiToolTip>
+    <ActionButtons
+      actions={actions}
+      onClick={(resolution: string) =>
+        clickResolution(resolution as Exclude<IndicesResolutionType, 'readonly'>)
+      }
+      dataTestSubjPrefix={correctiveAction.type}
+    />
+  );
+};
+
+const ReindexActionButtons: React.FunctionComponent<{
+  openFlyout: () => void;
+  correctiveAction: ReindexAction;
+  setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'unfreeze'>) => void;
+}> = ({ openFlyout, correctiveAction, setSelectedResolutionType }) => {
+  const { excludedActions = [] } = correctiveAction;
+  const { reindexState, updateIndexState } = useIndexContext();
+  const { meta } = reindexState;
+  const { isReadonly, isFollowerIndex } = meta;
+  const reindexingInProgressOrCompleted =
+    reindexState.status === ReindexStatus.inProgress ||
+    reindexState.status === ReindexStatus.completed;
+  const updateInProgressOrCompleted =
+    updateIndexState.status === 'complete' || updateIndexState.status === 'inProgress';
+  const readOnlyExcluded = excludedActions.includes('readOnly');
+  const reindexExcluded = excludedActions.includes('reindex');
+  const canDisplayReadOnly = !!(
+    reindexState.hasRequiredPrivileges &&
+    !readOnlyExcluded &&
+    !isReadonly &&
+    !reindexingInProgressOrCompleted
+  );
+  const canDisplayReindex = !!(
+    reindexState.hasRequiredPrivileges &&
+    !reindexExcluded &&
+    !isFollowerIndex &&
+    !updateInProgressOrCompleted
+  );
+  const clickResolution = (resolutionType: Exclude<IndicesResolutionType, 'unfreeze'>) => {
+    openFlyout();
+    setSelectedResolutionType(resolutionType);
+  };
+  const actions: ActionButtonConfig[] = [
+    {
+      tooltip: actionsI18nTexts.reindexTooltipLabel,
+      iconType: 'indexSettings',
+      canDisplay: canDisplayReindex,
+      resolutionType: 'reindex',
+    },
+    {
+      tooltip: actionsI18nTexts.readOnlyTooltipLabel,
+      iconType: 'readOnly',
+      canDisplay: canDisplayReadOnly,
+      resolutionType: 'readonly',
+    },
+  ];
+  return (
+    <ActionButtons
+      actions={actions}
+      onClick={(resolution: string) =>
+        clickResolution(resolution as Exclude<IndicesResolutionType, 'unfreeze'>)
+      }
+      dataTestSubjPrefix={correctiveAction.type}
+    />
   );
 };
 
 interface Props {
   openFlyout: () => void;
+  setSelectedResolutionType: (step: IndicesResolutionType) => void;
 }
 
-export const ReindexActionCell: React.FunctionComponent<Props> = ({ openFlyout }) => {
+export const ReindexActionCell: React.FunctionComponent<Props> = ({
+  openFlyout,
+  setSelectedResolutionType,
+}) => {
   const { reindexState, deprecation } = useIndexContext();
+  const correctiveAction = deprecation.correctiveAction?.type;
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -104,37 +165,23 @@ export const ReindexActionCell: React.FunctionComponent<Props> = ({ openFlyout }
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.reindexLoadingActionsText}</EuiText>
+          <EuiText size="s">{actionsI18nTexts.reindexLoadingActionsText}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 
-  // reindex status "not started"
-  return deprecation.correctiveAction?.type === 'unfreeze' ? (
-    getAction('unfreeze', i18nTexts.unfreezeTooltipLabel, i18nTexts.unfreezeText, openFlyout)
-  ) : reindexState.meta.isReadonly ? (
-    <>
-      {reindexState.meta.isFollowerIndex
-        ? getAction(
-            deprecation.correctiveAction?.type,
-            i18nTexts.reindexFollowerIndexTooltipLabel,
-            i18nTexts.reindexFollowerIndexText,
-            openFlyout
-          )
-        : getAction(
-            deprecation.correctiveAction?.type,
-            i18nTexts.reindexTooltipLabel,
-            i18nTexts.reindexText,
-            openFlyout
-          )}
-    </>
+  return correctiveAction === 'unfreeze' ? (
+    <UnfreezeActionButtons
+      openFlyout={openFlyout}
+      correctiveAction={deprecation.correctiveAction as UnfreezeAction}
+      setSelectedResolutionType={setSelectedResolutionType}
+    />
   ) : (
-    getAction(
-      deprecation.correctiveAction?.type,
-      i18nTexts.updateTooltipLabel,
-      i18nTexts.updateText,
-      openFlyout
-    )
+    <ReindexActionButtons
+      openFlyout={openFlyout}
+      correctiveAction={deprecation.correctiveAction as ReindexAction}
+      setSelectedResolutionType={setSelectedResolutionType}
+    />
   );
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type FlyoutStep = 'initializing' | 'notStarted' | 'confirm' | 'inProgress' | 'completed';
+export type FlyoutStep = 'initializing' | 'confirm' | 'inProgress' | 'completed';

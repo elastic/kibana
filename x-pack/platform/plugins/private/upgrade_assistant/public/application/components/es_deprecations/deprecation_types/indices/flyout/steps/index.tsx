@@ -6,8 +6,6 @@
  */
 
 export type { FlyoutStep } from './types';
-export { ReindexDetailsFlyoutStep } from './details/reindex_details_step';
-export { UnfreezeDetailsFlyoutStep } from './details/unfreeze_details_step';
 export { WarningFlyoutStep } from './warning/warning_step';
 export { ReindexFlyoutStep } from './reindex/reindex_step';
 export { UpdateIndexFlyoutStep } from './update/update_step';
