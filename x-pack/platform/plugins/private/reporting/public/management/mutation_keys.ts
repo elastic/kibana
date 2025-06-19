@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-const root = 'reporting';
-export const queryKeys = {
-  getScheduledList: (params: unknown) => [root, 'scheduledList', params] as const,
-  getHealth: () => [root, 'health'] as const,
-};
-
 export const mutationKeys = {
-  bulkDisableScheduledReports: () => [root, 'bulkDisableScheduledReports'] as const,
+  root: 'reporting',
+  scheduleReport: () => [mutationKeys.root, 'scheduleReport'] as const,
 };

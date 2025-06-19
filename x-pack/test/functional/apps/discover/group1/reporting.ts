@@ -103,7 +103,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await toasts.dismissAll();
 
     await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
     await reporting.clickGenerateReportButton();
+    await exports.closeExportFlyout();
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
@@ -116,6 +118,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
+    await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
     const clipboardValue = decodeURIComponent(await browser.getClipboardValue());
@@ -141,14 +145,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await exports.closeExportFlyout();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await exports.closeExportFlyout();
       });
     });

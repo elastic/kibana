@@ -8,7 +8,7 @@
 import React, { Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -21,33 +21,48 @@ import {
   ReportingAPIClient,
   KibanaContext,
 } from '@kbn/reporting-public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../query_client';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Redirect } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 
 const ReportingTabs = lazy(() => import('./components/reporting_tabs'));
 
-const queryClient = new QueryClient();
-
-export async function mountManagementSection(
-  coreStart: CoreStart,
-  license$: LicensingPluginStart['license$'],
-  dataService: DataPublicPluginStart,
-  shareService: SharePluginStart,
-  config: ClientConfigType,
-  apiClient: ReportingAPIClient,
-  params: ManagementAppMountParams
-) {
+export async function mountManagementSection({
+  coreStart,
+  license$,
+  dataService,
+  shareService,
+  config,
+  apiClient,
+  params,
+  actionsService,
+  notificationsService,
+}: {
+  coreStart: CoreStart;
+  license$: LicensingPluginStart['license$'];
+  dataService: DataPublicPluginStart;
+  shareService: SharePluginStart;
+  config: ClientConfigType;
+  apiClient: ReportingAPIClient;
+  params: ManagementAppMountParams;
+  actionsService: ActionsPublicPluginSetup;
+  notificationsService: NotificationsStart;
+}) {
   const services: KibanaContext = {
     http: coreStart.http,
     application: coreStart.application,
+    settings: coreStart.settings,
     uiSettings: coreStart.uiSettings,
     docLinks: coreStart.docLinks,
     data: dataService,
     share: shareService,
+    actions: actionsService,
+    notifications: notificationsService,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;

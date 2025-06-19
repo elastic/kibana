@@ -41,3 +41,6 @@ export type { DownloadableContent } from './lib/download_as';
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);
 }
+
+import { useShareTypeContext } from './components/context';
+export { useShareTypeContext };
