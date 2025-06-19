@@ -248,7 +248,7 @@ const createFsPromisesProxy = (fs) => {
             return realFsMethods[prop](safePath, ...args);
           }
 
-          return Reflect.apply(target[prop], target, [safePath, ...args.slice(1)]);
+          return Reflect.apply(target[prop], target, [safePath, ...args]);
         };
       }
 
