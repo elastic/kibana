@@ -154,6 +154,7 @@ export const Actions = ({
                 css={[
                   css`
                     position: relative;
+                    overflow: visible;
                     width: 40px;
                   `,
                   !searchToggled
@@ -163,6 +164,11 @@ export const Actions = ({
                       `
                     : undefined,
                 ]}
+                contentProps={{
+                  css: css`
+                    position: initial;
+                  `,
+                }}
                 minWidth={false}
                 size="m"
                 aria-label={toggleSearchBarTooltip}
