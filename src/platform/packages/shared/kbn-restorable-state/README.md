@@ -21,7 +21,11 @@ export const { withRestorableState, useRestorableState } =
 ```typescript
 import { withRestorableState, useRestorableState } from '../path/to/your/restorable-state-utils';
 
-const InternalMyComponent = () => {
+interface InternalMyComponentProps {
+  // your component props here
+}
+
+const InternalMyComponent: React.FC<InternalMyComponentProps> = () => {
   const [count, setCount] = useRestorableState('count', 0);
 
   return (
@@ -33,6 +37,9 @@ const InternalMyComponent = () => {
 }
 
 export const MyComponent = withRestorableState(InternalMyComponent);
+
+// props are now extended with initialState and onInitialStateChange
+export type MyComponentProps = ComponentProps<typeof MyComponent>;
 ```
 
 3. Use the `MyComponent` in your application. The state will be automatically restored when the component is mounted again.
