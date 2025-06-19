@@ -17,6 +17,7 @@ export const siemMigrationEventNames = {
   [SiemMigrationsEventTypes.SetupConnectorSelected]: 'Connector Selected',
   [SiemMigrationsEventTypes.SetupMigrationOpenNew]: 'Open new rules migration',
   [SiemMigrationsEventTypes.SetupMigrationCreated]: 'Create new rules migration',
+  [SiemMigrationsEventTypes.SetupMigrationDeleted]: 'Migration deleted',
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: 'Upload rule resources',
   [SiemMigrationsEventTypes.SetupMigrationOpenResources]: 'Rules Open Resources',
   [SiemMigrationsEventTypes.SetupRulesQueryCopied]: 'Copy rules query',
@@ -127,6 +128,11 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
+  [SiemMigrationsEventTypes.SetupMigrationDeleted]: {
+    ...migrationIdSchema,
+    ...baseResultActionSchema,
+    ...eventNameSchema,
+  },
   [SiemMigrationsEventTypes.SetupRulesQueryCopied]: {
     ...eventNameSchema,
     migrationId: {
@@ -172,6 +178,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       type: 'keyword',
       _meta: {
         description: 'Connector ID',
+        optional: false,
+      },
+    },
+    skipPrebuiltRulesMatching: {
+      type: 'boolean',
+      _meta: {
+        description: 'Flag indicating if prebuilt rules should be matched',
         optional: false,
       },
     },

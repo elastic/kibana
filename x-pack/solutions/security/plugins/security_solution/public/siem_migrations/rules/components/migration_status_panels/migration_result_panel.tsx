@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiFlexGroup,
@@ -34,10 +34,7 @@ import {
   convertTranslationResultIntoText,
   useResultVisColors,
 } from '../../utils/translation_results';
-import type {
-  RuleMigrationTranslationStats,
-  RuleMigrationResourceBase,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTranslationStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
@@ -74,8 +71,6 @@ export interface MigrationResultPanelProps {
   refreshStats: () => void;
 }
 
-const EMPTY_MISSING_RESOURCES: RuleMigrationResourceBase[] = [];
-
 export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
   ({ migrationStats, isCollapsed = false, onToggleCollapsed, refreshStats }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
@@ -83,18 +78,19 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
 
     const completeBadgeStyles = useCompleteBadgeStyles();
 
+    const toggleCollapsed = useCallback(() => {
+      onToggleCollapsed(!isCollapsed);
+    }, [isCollapsed, onToggleCollapsed]);
+
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem onClick={() => onToggleCollapsed(!isCollapsed)} css={headerStyle}>
+            <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
-                <MigrationName
-                  migrationStats={migrationStats}
-                  isLoading={isLoadingTranslationStats}
-                  missingResources={EMPTY_MISSING_RESOURCES}
-                  refreshStats={refreshStats}
-                />
+                <EuiFlexItem grow={false}>
+                  <MigrationName migrationStats={migrationStats} />
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>
                     <p>
@@ -113,7 +109,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                onClick={() => onToggleCollapsed(!isCollapsed)}
+                onClick={toggleCollapsed}
                 aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
               />
             </EuiFlexItem>
@@ -127,9 +123,9 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-            {migrationStats.last_error && (
+            {migrationStats.last_execution?.error && (
               <>
-                <RuleMigrationsLastError message={migrationStats.last_error} />
+                <RuleMigrationsLastError message={migrationStats.last_execution.error} />
                 <EuiSpacer size="m" />
               </>
             )}

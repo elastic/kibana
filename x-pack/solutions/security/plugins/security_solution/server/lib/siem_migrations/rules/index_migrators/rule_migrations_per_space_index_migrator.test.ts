@@ -93,9 +93,9 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
       refresh: 'wait_for',
       operations: [
         { create: { _id: 'migration1', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { id: 'migration1', created_at: '2023-01-01T00:00:00Z', created_by: 'user1', name: '' },
+        { created_at: '2023-01-01T00:00:00Z', created_by: 'user1' },
         { create: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { id: 'migration2', created_at: '2023-01-02T00:00:00Z', created_by: 'user2', name: '' },
+        { created_at: '2023-01-02T00:00:00Z', created_by: 'user2' },
       ],
     });
   });
@@ -135,10 +135,8 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
       operations: [
         { create: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
         {
-          id: 'migration2',
           created_at: '2023-01-02T00:00:00Z',
           created_by: 'user2',
-          name: '',
         },
       ],
     });
@@ -188,9 +186,9 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
       refresh: 'wait_for',
       operations: [
         { update: { _id: 'migration1', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { doc: { name: 'SIEM Migration 1' } },
+        { doc: { name: 'SIEM rules migration #1' } },
         { update: { _id: 'migration2', _index: '.kibana-siem-rule-migrations-migrations-space1' } },
-        { doc: { name: 'SIEM Migration 2' } },
+        { doc: { name: 'SIEM rules migration #2' } },
       ],
     });
   });

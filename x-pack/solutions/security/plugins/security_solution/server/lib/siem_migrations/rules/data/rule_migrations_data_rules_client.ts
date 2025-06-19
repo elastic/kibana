@@ -39,7 +39,7 @@ export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {
@@ -305,11 +305,7 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const index = await this.getIndexName();
     const aggregations: { migrationIds: AggregationsAggregationContainer } = {
       migrationIds: {
-        terms: {
-          field: 'migration_id',
-          order: { createdAt: 'asc' },
-          size: MAX_ES_SEARCH_SIZE,
-        },
+        terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: MAX_ES_SEARCH_SIZE },
         aggregations: {
           status: { terms: { field: 'status' } },
           createdAt: { min: { field: '@timestamp' } },
@@ -326,19 +322,17 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
-    return buckets.map((bucket) => {
-      return {
-        id: `${bucket.key}`,
-        rules: {
-          total: bucket.doc_count,
-          ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
-        },
-        created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
-          ?.value_as_string as string,
-        last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
-          ?.value_as_string as string,
-      };
-    });
+    return buckets.map((bucket) => ({
+      id: `${bucket.key}`,
+      rules: {
+        total: bucket.doc_count,
+        ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
+      },
+      created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
+        ?.value_as_string as string,
+      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
+        ?.value_as_string as string,
+    }));
   }
 
   /** Retrieves the stats for the integrations of all the migration rules */
@@ -450,9 +444,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push(searchConditions.isUntranslatable());
     } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
-    }
-    if (filters.name) {
-      filter.push({ term: { name: filters.name } });
     }
     return { bool: { filter } };
   }

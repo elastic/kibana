@@ -7,16 +7,15 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import type { MigrationNameInputProps } from './migration_name_input';
 import { MigrationNameInput } from './migration_name_input';
 import * as i18n from './translations';
 
 const mockSetMigrationName = jest.fn();
 
-const defaultProps = {
-  migrationName: '',
+const defaultProps: MigrationNameInputProps = {
+  migrationName: 'Default Name',
   setMigrationName: mockSetMigrationName,
-  subStep: 1,
-  defaultMigrationName: 'Default Name',
 };
 
 describe('MigrationNameInput', () => {
@@ -65,14 +64,7 @@ describe('MigrationNameInput', () => {
     fireEvent.blur(input);
 
     expect(screen.getByText(i18n.MIGRATION_NAME_INPUT_ERROR)).toBeInTheDocument();
-    expect(mockSetMigrationName).not.toHaveBeenCalled();
-  });
-
-  it('is disabled when subStep is not 1', () => {
-    render(<MigrationNameInput {...defaultProps} subStep={2} />);
-    const input = screen.getByDisplayValue('Default Name');
-
-    expect(input).toBeDisabled();
+    expect(mockSetMigrationName).toHaveBeenCalled();
   });
 
   it('focuses input on mount', () => {

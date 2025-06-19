@@ -13,7 +13,6 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
-import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
   CreateRuleMigrationRulesRequestBody,
   StartRuleMigrationResponse,
@@ -30,7 +29,7 @@ import {
   type MissingCapability,
   type CapabilitiesLevel,
 } from './capabilities';
-import type { RuleMigrationStats } from '../types';
+import type { RuleMigrationSettings, RuleMigrationStats } from '../types';
 import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
@@ -149,6 +148,21 @@ export class SiemRulesMigrationsService {
     }
   }
 
+  public async deleteMigration(migrationId: string): Promise<string> {
+    try {
+      await api.deleteMigration({ migrationId });
+
+      // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
+      await this.getRuleMigrationsStats();
+
+      this.telemetry.reportSetupMigrationDeleted({ migrationId });
+      return migrationId;
+    } catch (error) {
+      this.telemetry.reportSetupMigrationDeleted({ migrationId, error });
+      throw error;
+    }
+  }
+
   public async upsertMigrationResources(
     migrationId: string,
     body: UpsertRuleMigrationResourcesRequestBody
@@ -174,7 +188,8 @@ export class SiemRulesMigrationsService {
 
   public async startRuleMigration(
     migrationId: string,
-    retry?: SiemMigrationRetryFilter
+    retry?: SiemMigrationRetryFilter,
+    settings?: RuleMigrationSettings
   ): Promise<StartRuleMigrationResponse> {
     const missingCapabilities = this.getMissingCapabilities('all');
     if (missingCapabilities.length > 0) {
@@ -183,12 +198,20 @@ export class SiemRulesMigrationsService {
       );
       return { started: false };
     }
-    const connectorId = this.connectorIdStorage.get();
+    const connectorId = settings?.connectorId ?? this.connectorIdStorage.get();
+    const skipPrebuiltRulesMatching = settings?.skipPrebuiltRulesMatching;
     if (!connectorId) {
       this.core.notifications.toasts.add(getNoConnectorToast(this.core));
       return { started: false };
     }
-    const params: api.StartRuleMigrationParams = { migrationId, connectorId, retry };
+    const params: api.StartRuleMigrationParams = {
+      migrationId,
+      settings: {
+        connectorId,
+        skipPrebuiltRulesMatching,
+      },
+      retry,
+    };
 
     const traceOptions = this.traceOptionsStorage.get();
     if (traceOptions) {
@@ -205,7 +228,10 @@ export class SiemRulesMigrationsService {
       this.telemetry.reportStartTranslation(params);
       return result;
     } catch (error) {
-      this.telemetry.reportStartTranslation({ ...params, error });
+      this.telemetry.reportStartTranslation({
+        ...params,
+        error,
+      });
       throw error;
     }
   }
@@ -214,18 +240,14 @@ export class SiemRulesMigrationsService {
     params: api.GetRuleMigrationsStatsAllParams = {}
   ): Promise<RuleMigrationStats[]> {
     const allStats = await this.getRuleMigrationsStatsWithRetry(params);
-    const results = allStats.map(
-      // the array order (by creation) is guaranteed by the API
-      (stats, index) => ({ ...stats, number: index + 1 } as RuleMigrationStats) // needs cast because of the `status` enum override
-    );
-    this.latestStats$.next(results); // Always update the latest stats
-    return results;
+    this.latestStats$.next(allStats); // Keep the latest stats observable in sync
+    return allStats;
   }
 
   private async getRuleMigrationsStatsWithRetry(
     params: api.GetRuleMigrationsStatsAllParams = {},
     sleepSecs?: number
-  ): Promise<RuleMigrationTaskStats[]> {
+  ): Promise<RuleMigrationStats[]> {
     if (sleepSecs) {
       await new Promise((resolve) => setTimeout(resolve, sleepSecs * 1000));
     }
@@ -267,11 +289,18 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_error) {
-          const connectorId = this.connectorIdStorage.get();
+        // automatically resume interrupted migrations when the proper conditions are met
+        if (
+          result.status === SiemMigrationTaskStatus.INTERRUPTED &&
+          !result.last_execution?.error
+        ) {
+          const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
+          const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
-            await api.startRuleMigration({ migrationId: result.id, connectorId });
+            await api.startRuleMigration({
+              migrationId: result.id,
+              settings: { connectorId, skipPrebuiltRulesMatching },
+            });
             pendingMigrationIds.push(result.id);
           }
         }

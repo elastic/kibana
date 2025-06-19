@@ -22,8 +22,8 @@ export const RULE_MIGRATION_ERROR_DESCRIPTION = (totalRules: number) => {
   });
 };
 
-export const RULE_MIGRATION_ABORTED_DESCRIPTION = (totalRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.aborted.description', {
+export const RULE_MIGRATION_STOPPED_DESCRIPTION = (totalRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.stopped.description', {
     defaultMessage: 'Migration of {totalRules} rules was stopped. You can resume it any time.',
     values: { totalRules },
   });
@@ -43,12 +43,6 @@ export const RULE_MIGRATION_RESTART_TRANSLATION_BUTTON = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.translate.restartButton',
   { defaultMessage: 'Resume translation' }
 );
-
-export const RULE_MIGRATION_TITLE = (number: number) =>
-  i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.migrationTitle', {
-    defaultMessage: 'SIEM rules migration #{number}',
-    values: { number },
-  });
 
 export const RULE_MIGRATION_PROGRESS_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.progress.description', {
@@ -136,6 +130,28 @@ export const RULE_MIGRATION_COLLAPSE = i18n.translate(
 export const RULE_MIGRATION_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.error',
   { defaultMessage: 'The last execution of this migration failed with the following message:' }
+);
+
+export const OPEN_MIGRATION_OPTIONS_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.openMigrationOptionsButton',
+  { defaultMessage: 'Open migration options' }
+);
+export const RENAME_MIGRATION_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationText',
+  { defaultMessage: 'Rename' }
+);
+export const DELETE_MIGRATION_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.deleteMigrationText',
+  { defaultMessage: 'Delete' }
+);
+export const NOT_DELETABLE_MIGRATION_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.notDeletableMigrationText',
+  { defaultMessage: 'Can not delete running migrations' }
+);
+
+export const CANCEL_DELETE_MIGRATION_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.cancelDeleteMigrationText',
+  { defaultMessage: 'Cancel' }
 );
 
 export const DELETE_MIGRATION_TITLE = i18n.translate(

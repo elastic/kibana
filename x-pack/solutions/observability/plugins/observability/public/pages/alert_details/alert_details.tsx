@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -36,6 +35,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -101,7 +101,6 @@ export function AlertDetails() {
     uiSettings,
     serverless,
   } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
   const history = useHistory();
@@ -127,6 +126,10 @@ export function AlertDetails() {
     await Promise.all([refetchRelatedDashboards(), refetch()]);
   }, [refetch, refetchRelatedDashboards]);
 
+  // used to trigger refetch when rule edit flyout closes
+  const onUpdate = useCallback(() => {
+    refetch();
+  }, [refetch]);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
@@ -196,11 +199,10 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === 'overview') {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -399,6 +401,7 @@ export function AlertDetails() {
               alertIndex={alertDetail?.raw._index}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
+              onUpdate={onUpdate}
             />
           </CasesContext>,
         ],

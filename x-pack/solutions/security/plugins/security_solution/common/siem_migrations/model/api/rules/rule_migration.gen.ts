@@ -24,6 +24,7 @@ import {
   OriginalRule,
   RuleMigrationRule,
   UpdateRuleMigrationRule,
+  RuleMigrationTaskExecutionSettings,
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
@@ -34,7 +35,16 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
-import { ConnectorId, LangSmithOptions } from '../../common.gen';
+import { LangSmithOptions } from '../../common.gen';
+
+export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
+export const CreateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
+});
+export type CreateRuleMigrationRequestBodyInput = z.input<typeof CreateRuleMigrationRequestBody>;
 
 export type CreateRuleMigrationResponse = z.infer<typeof CreateRuleMigrationResponse>;
 export const CreateRuleMigrationResponse = z.object({
@@ -53,16 +63,6 @@ export const CreateRuleMigrationRulesRequestParams = z.object({
 export type CreateRuleMigrationRulesRequestParamsInput = z.input<
   typeof CreateRuleMigrationRulesRequestParams
 >;
-
-export type CreateRuleMigrationRequestBody = z.infer<typeof CreateRuleMigrationRequestBody>;
-export const CreateRuleMigrationRequestBody = z.object({
-  name: NonEmptyString,
-});
-
-export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
-export const UpdateRuleMigrationRequestBody = z.object({
-  name: NonEmptyString,
-});
 
 export type CreateRuleMigrationRulesRequestBody = z.infer<
   typeof CreateRuleMigrationRulesRequestBody
@@ -280,10 +280,13 @@ export type StartRuleMigrationRequestParamsInput = z.input<typeof StartRuleMigra
 
 export type StartRuleMigrationRequestBody = z.infer<typeof StartRuleMigrationRequestBody>;
 export const StartRuleMigrationRequestBody = z.object({
-  connector_id: ConnectorId,
+  /**
+   * Settings applicable to current rule migration task execution.
+   */
+  settings: RuleMigrationTaskExecutionSettings,
   langsmith_options: LangSmithOptions.optional(),
   /**
-   * The optional indicator to retry the rule translation based on this filter criteria
+   * The optional indicator to retry the rule translation based on this filter criteria.
    */
   retry: RuleMigrationRetryFilter.optional(),
 });
@@ -318,6 +321,15 @@ export const UpdateRuleMigrationRequestParams = z.object({
 export type UpdateRuleMigrationRequestParamsInput = z.input<
   typeof UpdateRuleMigrationRequestParams
 >;
+
+export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
+export const UpdateRuleMigrationRequestBody = z.object({
+  /**
+   * The rule migration name
+   */
+  name: NonEmptyString,
+});
+export type UpdateRuleMigrationRequestBodyInput = z.input<typeof UpdateRuleMigrationRequestBody>;
 
 export type UpdateRuleMigrationResponse = z.infer<typeof UpdateRuleMigrationResponse>;
 export const UpdateRuleMigrationResponse = RuleMigration;
