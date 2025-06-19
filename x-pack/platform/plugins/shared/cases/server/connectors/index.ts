@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreSetup, SavedObjectsClientContract } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { Owner } from '../../common/constants/types';
+import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
@@ -30,7 +30,7 @@ export function registerConnectorTypes({
   core: CoreSetup;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;
-  serverlessProjectType?: Owner;
+  serverlessProjectType?: ServerlessProjectType;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,

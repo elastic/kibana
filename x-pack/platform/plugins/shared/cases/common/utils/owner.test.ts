@@ -6,7 +6,7 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { OWNER_INFO } from '../constants';
+import { OBSERVABILITY_OWNER, OWNER_INFO } from '../constants';
 import { getCaseOwnerByAppId, getOwnerFromRuleConsumerProducer, isValidOwner } from './owner';
 
 describe('owner utils', () => {
@@ -75,10 +75,10 @@ describe('owner utils', () => {
       const owner = getOwnerFromRuleConsumerProducer({
         consumer: AlertConsumers.OBSERVABILITY,
         producer: AlertConsumers.OBSERVABILITY,
-        isServerlessSecurity: true,
+        serverlessProjectType: OBSERVABILITY_OWNER,
       });
 
-      expect(owner).toBe(OWNER_INFO.securitySolution.id);
+      expect(owner).toBe(OWNER_INFO.observability.id);
     });
 
     it('fallbacks to producer when the consumer is alerts', () => {
@@ -88,6 +88,15 @@ describe('owner utils', () => {
       });
 
       expect(owner).toBe(OWNER_INFO.observability.id);
+    });
+
+    it('returns cases owner when serverlessProjectType is defined but is unknown', () => {
+      const owner = getOwnerFromRuleConsumerProducer({
+        // @ts-expect-error
+        serverlessProjectType: 'unknown',
+      });
+
+      expect(owner).toBe(OWNER_INFO.cases.id);
     });
   });
 });

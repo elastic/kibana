@@ -47,7 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
-import type { Owner } from '../common/constants/types';
+import type { ServerlessProjectType } from '../common/constants/types';
 
 export class CasePlugin
   implements
@@ -161,7 +161,7 @@ export class CasePlugin
     };
 
     const serverlessProjectType = plugins.cloud?.isServerlessEnabled
-      ? (plugins.cloud?.serverless.projectType as Owner)
+      ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
       : undefined;
 
     registerConnectorTypes({

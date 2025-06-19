@@ -9,6 +9,7 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { SECURITY_PROJECT_TYPE_ID } from '../../../common/constants';
 
 describe('getCasesConnectorType', () => {
   let caseConnectorType: SubActionConnectorType<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -324,7 +325,9 @@ describe('getCasesConnectorType', () => {
       });
 
       it('correctly fallsback to security owner if the project is serverless security', () => {
-        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+        const adapter = getCasesConnectorAdapter({
+          serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
+        });
 
         for (const consumer of [AlertConsumers.ML, AlertConsumers.STACK_ALERTS]) {
           const connectorParams = adapter.buildActionParams({
@@ -386,7 +389,9 @@ describe('getCasesConnectorType', () => {
       });
 
       it('correctly overrides the consumer and producer if the project is serverless security', () => {
-        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+        const adapter = getCasesConnectorAdapter({
+          serverlessProjectType: SECURITY_PROJECT_TYPE_ID,
+        });
 
         expect(
           adapter.getKibanaPrivileges?.({

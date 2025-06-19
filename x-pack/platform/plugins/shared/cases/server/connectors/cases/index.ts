@@ -14,7 +14,7 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import type { Owner } from '../../../common/constants/types';
+import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
 import { DEFAULT_MAX_OPEN_CASES } from './constants';
 import { CASES_CONNECTOR_ID, CASES_CONNECTOR_TITLE } from '../../../common/constants';
@@ -87,7 +87,7 @@ export const getCasesConnectorType = ({
 export const getCasesConnectorAdapter = ({
   serverlessProjectType,
 }: {
-  serverlessProjectType?: Owner;
+  serverlessProjectType?: ServerlessProjectType;
 }): ConnectorAdapter<CasesConnectorRuleActionParams, CasesConnectorParams> => {
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
