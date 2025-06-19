@@ -60,7 +60,8 @@ function transformPanelProperties(
       ? references.find((reference) => reference.name === panelRefName)
       : undefined;
 
-  const savedObjectId = matchingReference ? matchingReference.id : id;
+  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
+  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
 
   return {
     gridData: rest,
