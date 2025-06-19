@@ -273,7 +273,7 @@ describe('Alert table context menu', () => {
           });
         });
 
-        test('it removes AddEndpointEventFilter option when timeline id is host events page but does not has write event filters privilege', () => {
+        test('it disables actionMenuButton when timeline id is host events page but does not has write event filters privilege', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
             {
@@ -281,11 +281,11 @@ describe('Alert table context menu', () => {
             }
           );
 
-          // Entire actionMenuButton is removed as there is no option available
-          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
+          // Entire actionMenuButton is disabled as there is no option available
+          expect(wrapper.find(actionMenuButton).first().props().disabled).toBe(true);
         });
 
-        test('it removes AddEndpointEventFilter option when timeline id is user events page but does not has write event filters privilege', () => {
+        test('it disables actionMenuButton when timeline id is user events page but does not has write event filters privilege', () => {
           const wrapper = mount(
             <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
             {
@@ -293,8 +293,8 @@ describe('Alert table context menu', () => {
             }
           );
 
-          // Entire actionMenuButton is removed as there is no option available
-          expect(wrapper.find(actionMenuButton).first().exists()).toEqual(false);
+          // Entire actionMenuButton is disabled as there is no option available
+          expect(wrapper.find(actionMenuButton).first().props().disabled).toBe(true);
         });
       });
     });
