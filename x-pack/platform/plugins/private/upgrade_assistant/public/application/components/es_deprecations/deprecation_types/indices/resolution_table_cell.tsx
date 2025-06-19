@@ -366,6 +366,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
             <EuiIcon
               type="iInCircle"
               aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
+              size="s"
             />
           </EuiToolTip>
         </em>
