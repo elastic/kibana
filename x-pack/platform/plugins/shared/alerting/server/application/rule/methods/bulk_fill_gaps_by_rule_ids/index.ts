@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import type { Rule } from './rule';
-
-export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
-
-export interface BulkActionSkipResult {
-  id: Rule['id'];
-  name?: Rule['name'];
-  skip_reason: BulkEditSkipReason;
-}
+export { bulkFillGapsByRuleIds } from './bulk_fill_gaps_by_rule_ids';

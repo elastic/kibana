@@ -7,12 +7,10 @@
 
 import { useEffect, useState } from 'react';
 
-import { PLUGIN_ID } from '../../common';
-import { PlaygroundPageMode, PlaygroundViewMode } from '../types';
-import { useKibana } from './use_kibana';
+import { PlaygroundPageMode } from '../types';
 import { usePlaygroundParameters } from './use_playground_parameters';
 
-export const usePageMode = ({
+export const useShowSetupPage = ({
   hasSelectedIndices,
   hasConnectors,
 }: {
@@ -20,8 +18,7 @@ export const usePageMode = ({
   hasConnectors: boolean;
 }) => {
   const [showSetupPage, setShowSetupPage] = useState(true);
-  const { pageMode, viewMode } = usePlaygroundParameters();
-  const { application } = useKibana().services;
+  const { pageMode } = usePlaygroundParameters();
 
   useEffect(() => {
     if (pageMode === PlaygroundPageMode.chat) {
@@ -38,19 +35,8 @@ export const usePageMode = ({
       }
     }
   }, [hasSelectedIndices, showSetupPage, pageMode, hasConnectors]);
-  useEffect(() => {
-    // Handle Unknown modes
-    if (!Object.values(PlaygroundPageMode).includes(pageMode)) {
-      application.navigateToApp(PLUGIN_ID, { path: '/not_found' });
-      return;
-    }
-    if (!Object.values(PlaygroundViewMode).includes(viewMode)) {
-      application.navigateToApp(PLUGIN_ID, { path: `/${pageMode}` });
-    }
-  }, [application, pageMode, viewMode]);
 
   return {
     showSetupPage,
-    pageMode,
   };
 };
