@@ -12,6 +12,7 @@ import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
   ChromeLayoutConfig,
+  SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
@@ -24,8 +25,12 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
 const layoutConfig: ChromeLayoutConfig = {
   headerHeight: 96,
-  bannerHeight: 32,
+
+  /** for debug for now */
+  bannerHeight: 48,
   sidebarWidth: 48,
+  footerHeight: 48,
+  navigationWidth: 48,
 };
 
 /**
@@ -53,7 +58,17 @@ export class GridLayout implements LayoutService {
         <>
           <GridLayoutGlobalStyles />
           <ChromeLayoutConfigProvider value={layoutConfig}>
-            <ChromeLayout header={chromeHeader} sidebar={debug ? 'sidebar can be here' : undefined}>
+            <ChromeLayout
+              header={chromeHeader}
+              sidebar={debug ? <SimpleDebugOverlay label="Debug Sidebar" /> : undefined}
+              footer={debug ? <SimpleDebugOverlay label="Debug Footer" /> : undefined}
+              navigation={
+                debug ? (
+                  <SimpleDebugOverlay label="Debug Nav" style={{ transform: 'rotate(180deg)' }} />
+                ) : undefined
+              }
+              banner={debug ? <SimpleDebugOverlay label="Debug Banner" /> : undefined}
+            >
               <>
                 <div id="globalBannerList">{bannerComponent}</div>
                 <AppWrapper chromeVisible$={chromeVisible$}>

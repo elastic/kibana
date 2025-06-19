@@ -91,7 +91,6 @@ describe('Header', () => {
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
-        isLocked$={isLocked$}
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
         headerBanner$={headerBanner$}

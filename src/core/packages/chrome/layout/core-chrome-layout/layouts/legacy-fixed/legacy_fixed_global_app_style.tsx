@@ -17,7 +17,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     // height of the header banner
     --kbnHeaderBannerHeight: ${euiTheme.size.xl};
     // total height of all fixed headers (when the banner is *not* present) inherited from EUI
-    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
+    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0px);
     // total height of everything when the banner is present
     --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
     // height of the action menu in the header in serverless projects

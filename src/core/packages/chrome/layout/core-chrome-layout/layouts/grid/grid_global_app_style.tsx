@@ -9,19 +9,27 @@
 
 import React from 'react';
 import { css, Global } from '@emotion/react';
-import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { logicalCSS, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
+import { useSyncPushFlyoutHack, euiPushFlyoutPaddingInlineEnd } from './hack_use_sync_push_flyout';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   :root {
+    // TODO: these variables are legacy and we keep them for backward compatibility
+
+    // there is no fixed header in the grid layout, so we want to set the offset to 0
+    --euiFixedHeadersOffset: 0px;
+
     // height of the header banner
-    --kbnHeaderBannerHeight: ${euiTheme.size.xl};
-    // total height of all fixed headers (when the banner is *not* present) inherited from EUI
-    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0);
-    // total height of everything when the banner is present
-    --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
+    --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
+
     // height of the action menu in the header in serverless projects
     --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3};
+
+    // the total height of all fixed headers
+    --kbnAppHeadersOffset: var(--kbn-layout--application-top, 0px);
+    // the total height of all fixed footers
+    --kbnAppFootersOffset: var(--kbn-layout--application-bottom, 0px);
   }
 
   #kibana-body {
@@ -53,20 +61,9 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     position: relative; // This is temporary for apps that relied on this being present on \`.application\`
   }
 
-  .kbnBody {
-    padding-top: var(--euiFixedHeadersOffset, 0);
-  }
-
-  // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
-  //on the body will cause all child EUI components to automatically update their offsets
+  // Conditionally override :root CSS fixed header variable.
   .kbnBody--hasHeaderBanner {
-    --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
-
-    // Offset fixed EuiHeaders by the top banner
-    .euiHeader[data-fixed-header] {
-      margin-top: var(--kbnHeaderBannerHeight);
-    }
-
+    // TODO: check if this is still needed, as it was added to support the legacy fixed layout
     // Prevent banners from covering full screen data grids
     .euiDataGrid--fullScreen {
       height: calc(100vh - var(--kbnHeaderBannerHeight));
@@ -78,27 +75,8 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   // height of all fixed headers + the sticky action menu toolbar
   .kbnBody--hasProjectActionMenu {
     --kbnAppHeadersOffset: calc(
-      var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight)
+      var(--kbn-layout--application-top) + var(--kbnProjectHeaderAppActionMenuHeight)
     );
-
-    &.kbnBody--hasHeaderBanner {
-      --kbnAppHeadersOffset: calc(
-        var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight)
-      );
-    }
-  }
-
-  .kbnBody--chromeHidden {
-    // stylelint-disable-next-line length-zero-no-unit
-    --euiFixedHeadersOffset: 0px;
-
-    &.kbnBody--hasHeaderBanner {
-      --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
-    }
-
-    &.kbnBody--hasProjectActionMenu {
-      --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
-    }
   }
 
   .euiDataGrid__restrictBody {
@@ -116,11 +94,52 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
+// temporary hacks that need to be removed after better flyout and global sidenav customization support in EUI
+const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  // adjust position of the classic navigation overlay
+  .kbnBody .euiFlyout.euiCollapsibleNav {
+    ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
+    ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
+    ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+  }
+
+  // adjust position of the overlay flyouts
+  .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta),
+  .kbnBody .euiFlyout:not(.euiCollapsibleNav) {
+    // overlay flyout should only cover the application area
+    &[class*='right']:not([class*='push']) {
+      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
+      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
+    }
+    // push flyout should only cover the application area
+    &[class*='right'][class*='push'] {
+      ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
+      ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+      ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
+    }
+  }
+
+  // push flyout should be pushing the application area
+  main[class*='LayoutApplication'] {
+    ${logicalCSS('padding-right', `var(${euiPushFlyoutPaddingInlineEnd}, 0px)`)};
+  }
+
+  // overlay mask should only cover the application area
+  .kbnBody .euiOverlayMask {
+    ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
+    ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
+    ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};
+    ${logicalCSS('bottom', 'var(--kbn-layout--application-bottom, 0px)')};
+  }
+`;
+
 export const GridLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
+  useSyncPushFlyoutHack();
   return (
     <>
-      <Global styles={globalLayoutStyles(euiTheme)} />
+      <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme)]} />
       <CommonGlobalAppStyles />
     </>
   );
