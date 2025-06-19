@@ -10069,6 +10069,17 @@ paths:
                               timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                value:
+                  action: fill_gaps
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 164d0918-f720-4c9f-9f5c-c5122587cf19
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -10077,6 +10088,7 @@ paths:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkExportRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDuplicateRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleRun'
+                - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkEditRules'
       responses:
         '200':
@@ -23613,7 +23625,7 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Update an agent
+      summary: Update an agent by ID
       tags:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
@@ -23756,109 +23768,6 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/{agentId}/migrate:
-    post:
-      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
-      operationId: post-fleet-agents-agentid-migrate
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                enrollment_token:
-                  type: string
-                settings:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    ca_sha256:
-                      type: string
-                    certificate_authorities:
-                      type: string
-                    elastic_agent_cert:
-                      type: string
-                    elastic_agent_cert_key:
-                      type: string
-                    elastic_agent_cert_key_passphrase:
-                      type: string
-                    headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    insecure:
-                      type: boolean
-                    proxy_disabled:
-                      type: boolean
-                    proxy_headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    proxy_url:
-                      type: string
-                    replace_token:
-                      type: boolean
-                    staging:
-                      type: boolean
-                    tags:
-                      items:
-                        type: string
-                      type: array
-                uri:
-                  format: uri
-                  type: string
-              required:
-                - uri
-                - enrollment_token
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Migrate a single agent
-      tags:
-        - Elastic Agents
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -24454,107 +24363,6 @@ paths:
                   - message
                   - attributes
       summary: Get available agent versions
-      tags:
-        - Elastic Agents
-  /api/fleet/agents/bulk_migrate:
-    post:
-      description: 'Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
-      operationId: post-fleet-agents-bulk-migrate
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                agents:
-                  items:
-                    type: string
-                  type: array
-                enrollment_token:
-                  type: string
-                settings:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    ca_sha256:
-                      type: string
-                    certificate_authorities:
-                      type: string
-                    elastic_agent_cert:
-                      type: string
-                    elastic_agent_cert_key:
-                      type: string
-                    elastic_agent_cert_key_passphrase:
-                      type: string
-                    headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    insecure:
-                      type: boolean
-                    proxy_disabled:
-                      type: boolean
-                    proxy_headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    proxy_url:
-                      type: string
-                    staging:
-                      type: boolean
-                    tags:
-                      items:
-                        type: string
-                      type: array
-                uri:
-                  format: uri
-                  type: string
-              required:
-                - agents
-                - uri
-                - enrollment_token
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Migrate multiple agents
       tags:
         - Elastic Agents
   /api/fleet/agents/bulk_reassign:
@@ -68618,6 +68426,7 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -68627,7 +68436,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -68869,6 +68680,48 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkGapsFillingSkipReason:
+      enum:
+        - NO_GAPS_TO_FILL
+      type: string
+    Security_Detections_API_BulkManualRuleFillGaps:
+      type: object
+      properties:
+        action:
+          enum:
+            - fill_gaps
+          type: string
+        fill_gaps:
+          description: Object that describes applying a manual gap fill action for the specified time range.
+          type: object
+          properties:
+            end_date:
+              description: End date of the manual gap fill
+              type: string
+            start_date:
+              description: Start date of the manual gap fill
+              type: string
+          required:
+            - start_date
+            - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
+        - fill_gaps
     Security_Detections_API_BulkManualRuleRun:
       type: object
       properties:
