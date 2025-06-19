@@ -186,7 +186,6 @@ function testInitialState(): FormBasedPrivateState {
             label: 'My Op',
             customLabel: true,
             dataType: 'string',
-            isBucketed: true,
 
             // Private
             operationType: 'terms',
@@ -815,7 +814,6 @@ describe('IndexPattern Data Source suggestions', () => {
               columns: {
                 cola: {
                   dataType: 'string',
-                  isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
                   customLabel: true,
@@ -828,7 +826,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 } as TermsIndexPatternColumn,
                 colb: {
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'bytes',
                   label: 'Avg of bytes',
                   customLabel: true,
@@ -853,7 +850,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   cola: {
                     dataType: 'date',
-                    isBucketed: true,
                     sourceField: 'timestamp',
                     label: 'timestamp',
                     operationType: 'date_histogram',
@@ -863,7 +859,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   } as DateHistogramIndexPatternColumn,
                   colb: {
                     dataType: 'number',
-                    isBucketed: false,
                     sourceField: 'bytes',
                     label: 'Avg of bytes',
                     customLabel: true,
@@ -1079,7 +1074,6 @@ describe('IndexPattern Data Source suggestions', () => {
               columns: {
                 cola: {
                   dataType: 'string',
-                  isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
                   customLabel: true,
@@ -1183,7 +1177,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 colb: {
                   label: 'Count of records',
                   dataType: 'document',
-                  isBucketed: false,
 
                   operationType: 'count',
                   sourceField: '___records___',
@@ -1215,7 +1208,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: '',
                   customLabel: true,
                   dataType: 'date',
-                  isBucketed: true,
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
@@ -1224,7 +1216,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: '',
                   customLabel: true,
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'average',
                   sourceField: 'bytes',
                 },
@@ -1232,7 +1223,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: '',
                   customLabel: true,
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
@@ -1284,7 +1274,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: '',
                   customLabel: true,
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'average',
                   sourceField: 'bytes',
                 },
@@ -1292,7 +1281,6 @@ describe('IndexPattern Data Source suggestions', () => {
                   label: '',
                   customLabel: true,
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
@@ -2587,7 +2575,6 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: 'dest',
                 label: 'Unique count of dest',
                 operationType: 'unique_count',
@@ -2596,10 +2583,8 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: true,
                 operationType: 'range',
                 sourceField: 'bytes',
-                scale: 'interval',
                 params: {
                   type: 'histogram',
                   maxBars: 100,
@@ -2768,16 +2753,13 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'average',
                 sourceField: 'bytes',
-                scale: 'ratio',
               },
               col3: {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'string',
-                isBucketed: true,
 
                 // Private
                 operationType: 'terms',
@@ -2850,7 +2832,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'string',
-                isBucketed: true,
 
                 operationType: 'terms',
                 sourceField: 'field1',
@@ -2864,8 +2845,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'string',
-                isBucketed: true,
-
                 operationType: 'terms',
                 sourceField: 'field2',
                 params: {
@@ -2878,8 +2857,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'string',
-                isBucketed: true,
-
                 operationType: 'terms',
                 sourceField: 'field3',
                 params: {
@@ -2892,8 +2869,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: false,
-
                 operationType: 'average',
                 sourceField: 'field4',
               },
@@ -2901,8 +2876,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 label: 'My Op',
                 customLabel: true,
                 dataType: 'number',
-                isBucketed: false,
-
                 operationType: 'min',
                 sourceField: 'field5',
               },
@@ -2957,8 +2930,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id1: {
                 label: 'field2',
                 dataType: 'date',
-                isBucketed: true,
-
                 operationType: 'date_histogram',
                 sourceField: 'field2',
                 params: {
@@ -2968,8 +2939,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id2: {
                 label: 'Average of field1',
                 dataType: 'number',
-                isBucketed: false,
-
                 operationType: 'average',
                 sourceField: 'field1',
               },
@@ -3066,8 +3035,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id1: {
                 label: 'Average of field1',
                 dataType: 'number',
-                isBucketed: false,
-
                 operationType: 'average',
                 sourceField: 'field1',
               },
@@ -3133,8 +3100,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id1: {
                 label: 'Date histogram',
                 dataType: 'date',
-                isBucketed: true,
-
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -3144,8 +3109,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id2: {
                 label: 'Top 5',
                 dataType: 'string',
-                isBucketed: true,
-
                 operationType: 'terms',
                 sourceField: 'dest',
                 params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
@@ -3153,8 +3116,6 @@ describe('IndexPattern Data Source suggestions', () => {
               id3: {
                 label: 'Average of field1',
                 dataType: 'number',
-                isBucketed: false,
-
                 operationType: 'average',
                 sourceField: 'bytes',
               },
@@ -3255,21 +3216,18 @@ describe('IndexPattern Data Source suggestions', () => {
                 metric: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'count',
                   sourceField: '___records___',
                 },
                 ref: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
                 ref2: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric2'],
                 },
@@ -3350,7 +3308,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 date: {
                   label: '',
                   dataType: 'date',
-                  isBucketed: true,
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
@@ -3358,14 +3315,12 @@ describe('IndexPattern Data Source suggestions', () => {
                 ref: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
                 ref2: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
@@ -3457,7 +3412,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 date: {
                   label: '',
                   dataType: 'date',
-                  isBucketed: true,
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
                   params: { interval: 'auto' },
@@ -3465,49 +3419,42 @@ describe('IndexPattern Data Source suggestions', () => {
                 metric: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'count',
                   sourceField: '___records___',
                 },
                 ref: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric'],
                 },
                 metric2: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'count',
                   sourceField: '___records___',
                 },
                 metric3: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'count',
                   sourceField: '___records___',
                 },
                 metric4: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'count',
                   sourceField: '___records___',
                 },
                 ref2: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'cumulative_sum',
                   references: ['metric2'],
                 },
                 ref3: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'math',
                   references: ['ref4', 'metric3'],
                   params: {
@@ -3517,7 +3464,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 ref4: {
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'math',
                   references: ['metric4'],
                   params: {
@@ -3593,7 +3539,6 @@ describe('IndexPattern Data Source suggestions', () => {
               date: {
                 label: '',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: { interval: 'auto' },
@@ -3601,7 +3546,6 @@ describe('IndexPattern Data Source suggestions', () => {
               ref: {
                 label: '',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'cumulative_sum',
                 references: ['non_existing_metric'],
               },
@@ -3641,7 +3585,6 @@ describe('IndexPattern Data Source suggestions', () => {
               ref: {
                 label: '',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'math',
                 params: {
                   tinymathAst: '',
@@ -3651,7 +3594,6 @@ describe('IndexPattern Data Source suggestions', () => {
               metric: {
                 label: '',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'count',
                 sourceField: '___records___',
               },

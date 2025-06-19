@@ -74,7 +74,6 @@ describe('filters', () => {
           label: 'filters',
           dataType: 'document',
           operationType: 'filters',
-          isBucketed: true,
           params: {
             filters: [
               {
@@ -91,7 +90,6 @@ describe('filters', () => {
         col2: {
           label: 'Count',
           dataType: 'number',
-          isBucketed: false,
           sourceField: '___records___',
           operationType: 'count',
         },
@@ -198,7 +196,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        isBucketed: true,
         params: {
           filters: [
             {
@@ -220,7 +217,6 @@ describe('filters', () => {
             operationType: 'terms',
             sourceField: 'bytes',
             label: 'Top values of bytes',
-            isBucketed: true,
             dataType: 'number',
             params: {
               // let's ignore terms params here
@@ -234,7 +230,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        isBucketed: true,
         params: {
           filters: [
             {
@@ -256,7 +251,6 @@ describe('filters', () => {
             operationType: 'terms',
             sourceField: 'bytes',
             label: 'Top values of bytes',
-            isBucketed: true,
             dataType: 'number',
             params: {
               // let's ignore terms params here
@@ -272,7 +266,6 @@ describe('filters', () => {
         label: 'Filters',
         dataType: 'string',
         operationType: 'filters',
-        isBucketed: true,
         params: {
           filters: [
             {

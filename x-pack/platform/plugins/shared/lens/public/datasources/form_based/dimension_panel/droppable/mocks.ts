@@ -99,7 +99,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   count: {
     label: 'Count of records',
     dataType: 'number',
-    isBucketed: false,
     sourceField: '___records___',
     operationType: 'count',
   },
@@ -107,7 +106,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     label: 'Static value: 0.75',
     dataType: 'number',
     operationType: 'static_value',
-    isBucketed: false,
     params: {
       value: '0.75',
     },
@@ -117,7 +115,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     label: 'Date histogram of timestamp',
     customLabel: true,
     dataType: 'date',
-    isBucketed: true,
 
     // Private
     operationType: 'date_histogram',
@@ -130,8 +127,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
     label: 'Date histogram of timestamp (1)',
     customLabel: true,
     dataType: 'date',
-    isBucketed: true,
-
     // Private
     operationType: 'date_histogram',
     params: {
@@ -142,7 +137,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   terms: {
     label: 'Top 10 values of src',
     dataType: 'string',
-    isBucketed: true,
     // Private
     operationType: 'terms',
     params: {
@@ -155,7 +149,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   terms2: {
     label: 'Top 10 values of dest',
     dataType: 'string',
-    isBucketed: true,
 
     // Private
     operationType: 'terms',
@@ -169,14 +162,12 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   sum: {
     label: 'Sum of bytes',
     dataType: 'number',
-    isBucketed: false,
     operationType: 'sum',
     sourceField: 'bytes',
   } as GenericIndexPatternColumn,
   median: {
     label: 'Median of bytes',
     dataType: 'number',
-    isBucketed: false,
 
     // Private
     operationType: 'median',
@@ -185,7 +176,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   uniqueCount: {
     label: 'Unique count of bytes',
     dataType: 'number',
-    isBucketed: false,
     sourceField: 'bytes',
     operationType: 'unique_count',
   } as GenericIndexPatternColumn,

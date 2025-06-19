@@ -43,6 +43,7 @@ import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';
 import { isColumnOfType } from './definitions/helpers';
 import type { DataType } from '../../..';
+import { isBucketed } from '../utils';
 
 export interface ColumnAdvancedParams {
   filter?: Query | undefined;
@@ -1202,7 +1203,7 @@ function addBucket(
 ): FormBasedLayer {
   const [buckets, metrics] = partition(
     layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+    (colId) => isBucketed(layer.columns[colId])
   );
 
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
@@ -1480,7 +1481,7 @@ export function getColumnOrder(layer: FormBasedLayer): string[] {
     }
   });
 
-  const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
+  const [aggregations, metrics] = partition(entries, ([, col]) => isBucketed(col));
 
   return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
@@ -1491,7 +1492,7 @@ export function getExistingColumnGroups(layer: FormBasedLayer): [string[], strin
     layer.columnOrder,
     (columnId) => layer.columns[columnId] && !('references' in layer.columns[columnId])
   );
-  return [...partition(direct, (columnId) => layer.columns[columnId]?.isBucketed), referenced];
+  return [...partition(direct, (columnId) => isBucketed(layer.columns[columnId])), referenced];
 }
 
 /**

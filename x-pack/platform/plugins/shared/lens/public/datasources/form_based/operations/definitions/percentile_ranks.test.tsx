@@ -61,7 +61,6 @@ describe('percentile ranks', () => {
         col1: {
           label: 'Top value of category',
           dataType: 'string',
-          isBucketed: true,
           operationType: 'terms',
           params: {
             orderBy: { type: 'alphabetical' },
@@ -73,7 +72,6 @@ describe('percentile ranks', () => {
         col2: {
           label: 'Percentile (100) of a',
           dataType: 'number',
-          isBucketed: false,
           sourceField: 'a',
           operationType: 'percentile_rank',
           params: {
@@ -161,7 +159,6 @@ describe('percentile ranks', () => {
         operationType: 'percentile_rank',
         sourceField: 'bytes',
         label: 'Percentile rank (100) of bytes',
-        isBucketed: true,
         dataType: 'number',
         params: {
           value: 100,
@@ -250,7 +247,6 @@ describe('percentile ranks', () => {
           {
             label: '',
             sourceField: 'response_time',
-            isBucketed: false,
             dataType: 'number',
             operationType: 'percentile_rank',
             params: {

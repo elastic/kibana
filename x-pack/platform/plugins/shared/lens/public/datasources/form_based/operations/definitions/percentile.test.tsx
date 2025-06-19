@@ -69,7 +69,6 @@ describe('percentile', () => {
         col1: {
           label: 'Top value of category',
           dataType: 'string',
-          isBucketed: true,
           operationType: 'terms',
           params: {
             orderBy: { type: 'alphabetical' },
@@ -81,7 +80,6 @@ describe('percentile', () => {
         col2: {
           label: '23rd percentile of a',
           dataType: 'number',
-          isBucketed: false,
           sourceField: 'a',
           operationType: 'percentile',
           params: {
@@ -169,7 +167,6 @@ describe('percentile', () => {
         operationType: 'percentile',
         sourceField: 'bytes',
         label: '23rd percentile of bytes',
-        isBucketed: true,
         dataType: 'number',
         params: {
           percentile: 23,
@@ -583,7 +580,6 @@ describe('percentile', () => {
           {
             label: '',
             sourceField: 'response_time',
-            isBucketed: false,
             dataType: 'number',
             operationType: 'percentile',
             params: {
@@ -700,7 +696,6 @@ describe('percentile', () => {
       const column: PercentileIndexPatternColumn = {
         label: '99.9999th percentile of bytes',
         dataType: 'number',
-        isBucketed: false,
         sourceField: 'bytes',
         operationType: 'percentile',
         params: {

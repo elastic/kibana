@@ -12,6 +12,7 @@ import { FormBasedLayer } from '../types';
 import { hasField } from '../pure_utils';
 import { GenericIndexPatternColumn } from '../operations';
 import { IndexPatternField } from '../../../types';
+import { isBucketed } from '../utils';
 
 function nestColumn(columnOrder: string[], outer: string, inner: string) {
   const result = columnOrder.filter((c) => c !== inner);
@@ -45,7 +46,7 @@ export function BucketNestingEditor({
   const column = layer.columns[columnId];
   const columns = Object.entries(layer.columns);
   const aggColumns = columns
-    .filter(([id, c]) => id !== columnId && c.isBucketed)
+    .filter(([id, c]) => id !== columnId && isBucketed(c))
     .map(([value, c]) => ({
       value,
       text: c.label,
@@ -53,7 +54,7 @@ export function BucketNestingEditor({
       operationType: c.operationType,
     }));
 
-  if (!column || !column.isBucketed || !aggColumns.length) {
+  if (!column || !isBucketed(column) || !aggColumns.length) {
     return null;
   }
 

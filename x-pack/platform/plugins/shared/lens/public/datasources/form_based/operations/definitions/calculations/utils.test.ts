@@ -41,7 +41,6 @@ describe('utils', () => {
               ref: {
                 label: 'Label',
                 operationType: 'testReference',
-                isBucketed: false,
                 dataType: 'number',
                 references: ['missing'],
               },
@@ -67,14 +66,12 @@ describe('utils', () => {
               ref: {
                 label: 'Label',
                 operationType: 'testReference',
-                isBucketed: false,
                 dataType: 'number',
                 references: ['invalid'],
               },
               invalid: {
                 label: 'Date',
                 operationType: 'date_histogram',
-                isBucketed: true,
                 dataType: 'date',
                 sourceField: 'timestamp',
                 params: { interval: 'auto' },

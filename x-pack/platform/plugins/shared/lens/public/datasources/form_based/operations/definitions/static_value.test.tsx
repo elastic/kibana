@@ -58,7 +58,6 @@ describe('static_value', () => {
         col1: {
           label: 'Top value of category',
           dataType: 'string',
-          isBucketed: true,
           operationType: 'terms',
           params: {
             orderBy: { type: 'alphabetical' },
@@ -70,7 +69,6 @@ describe('static_value', () => {
         col2: {
           label: 'Static value: 23',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'static_value',
           references: [],
           params: {
@@ -110,7 +108,6 @@ describe('static_value', () => {
           {
             label: 'Static value: 23',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'static_value',
             references: [],
             params: {
@@ -129,7 +126,6 @@ describe('static_value', () => {
           {
             label: 'Static value',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'static_value',
             references: [],
             params: {
@@ -247,7 +243,6 @@ describe('static_value', () => {
         label: 'Static value',
         dataType: 'number',
         operationType: 'static_value',
-        isBucketed: false,
         params: { value: '100' },
         references: [],
       });
@@ -262,7 +257,6 @@ describe('static_value', () => {
             label: 'Static value',
             dataType: 'number',
             operationType: 'static_value',
-            isBucketed: false,
             params: { value: '23' },
             references: [],
           } as StaticValueIndexPatternColumn,
@@ -271,7 +265,6 @@ describe('static_value', () => {
         label: 'Static value: 23',
         dataType: 'number',
         operationType: 'static_value',
-        isBucketed: false,
         params: { value: '23' },
         references: [],
       });
@@ -290,7 +283,6 @@ describe('static_value', () => {
         label: 'Static value: 23',
         dataType: 'number',
         operationType: 'static_value',
-        isBucketed: false,
         params: { value: '23' },
         references: [],
       });
@@ -306,7 +298,6 @@ describe('static_value', () => {
               label: 'Static value',
               dataType: 'number',
               operationType: 'static_value',
-              isBucketed: false,
               params: { value: '23' },
               references: [],
             } as StaticValueIndexPatternColumn,
@@ -317,7 +308,6 @@ describe('static_value', () => {
         label: 'Static value: 53',
         dataType: 'number',
         operationType: 'static_value',
-        isBucketed: false,
         params: { value: '53' },
         references: [],
       });

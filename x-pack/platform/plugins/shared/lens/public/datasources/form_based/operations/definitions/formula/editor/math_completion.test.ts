@@ -32,7 +32,6 @@ const buildGenericColumn = <T extends 'field' | 'fullReference' = 'field'>(type:
       dataType: 'number',
       operationType: type,
       sourceField: field?.name ?? undefined,
-      isBucketed: false,
       timeScale: false,
     };
   }) as unknown as Extract<GenericOperationDefinition, { input: T }>['buildColumn'];

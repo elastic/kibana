@@ -22,6 +22,7 @@ import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
+import { isBucketed } from '../../../utils';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -124,11 +125,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
             return memo;
           }, new Set<FieldBasedOperationErrorMessage>()),
       ];
-      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
+      const hasBuckets = layer.columnOrder.some((colId) => isBucketed(layer.columns[colId]));
       const hasOtherMetrics = layer.columnOrder.some((colId) => {
         const col = layer.columns[colId];
         return (
-          !col.isBucketed &&
+          !isBucketed(col) &&
           col.operationType !== 'static_value' &&
           col.operationType !== 'math' &&
           col.operationType !== 'formula'
@@ -209,7 +210,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         label: previousFormula || defaultLabel,
         dataType: 'number',
         operationType: 'formula',
-        isBucketed: false,
         params: previousFormula
           ? {
               formula: previousFormula,

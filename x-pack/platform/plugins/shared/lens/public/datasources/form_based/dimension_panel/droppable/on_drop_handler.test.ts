@@ -28,7 +28,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op: OperationMetadata) => op.isBucketed,
+    filterOperations: (op: OperationMetadata) => op.isBucketed  ?? false,
   },
   {
     accessors: [{ columnId: 'col1' }, { columnId: 'col2' }, { columnId: 'col3' }],
@@ -36,7 +36,7 @@ const dimensionGroups = [
     supportsMoreColumns: true,
     hideGrouping: true,
     groupLabel: '',
-    filterOperations: (op: OperationMetadata) => op.isBucketed,
+    filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
   },
   {
     accessors: [{ columnId: 'col4' }],
@@ -119,7 +119,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           dropType: 'field_replace',
           target: {
             ...defaultProps.target,
-            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            filterOperations: (op: OperationMetadata) => op.isBucketed || false,
             columnId: 'col2',
           },
         })
@@ -439,7 +439,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'cumulative_sum',
                 references: ['ref1'],
               },
@@ -501,8 +500,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                isBucketed: false,
-                operationType: 'cumulative_sum',
+                        operationType: 'cumulative_sum',
                 references: ['ref1', 'ref2'],
               },
               ref1: mockedColumns.count,
@@ -566,16 +564,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                isBucketed: false,
-                operationType: 'cumulative_sum',
+                        operationType: 'cumulative_sum',
                 references: ['ref1', 'ref2'],
               },
               ref1: mockedColumns.count,
               ref2: {
                 label: 'Unique count of bytes',
                 dataType: 'number',
-                isBucketed: false,
-                sourceField: 'bytes',
+                        sourceField: 'bytes',
                 operationType: 'unique_count',
               },
             },
@@ -819,7 +815,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
             ...defaultProps.target,
             columnId: 'col1',
             groupId: 'a',
-            filterOperations: (op: OperationMetadata) => op.isBucketed,
+            filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
           },
         })
       ).toEqual({
@@ -995,16 +991,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'count',
                       label: '',
-                      isBucketed: false,
-                      sourceField: '___records___',
+                                    sourceField: '___records___',
                       customLabel: true,
                     },
                     col6: {
                       dataType: 'number',
                       operationType: 'count',
                       label: '',
-                      isBucketed: false,
-                      sourceField: '___records___',
+                                    sourceField: '___records___',
                       customLabel: true,
                     },
                   },
@@ -1034,15 +1028,13 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   dataType: 'number',
                   operationType: 'count',
                   label: '',
-                  isBucketed: false,
-                  sourceField: '___records___',
+                            sourceField: '___records___',
                 }),
                 col6: expect.objectContaining({
                   dataType: 'number',
                   operationType: 'count',
                   label: '',
-                  isBucketed: false,
-                  sourceField: '___records___',
+                            sourceField: '___records___',
                 }),
               },
             },
@@ -1346,7 +1338,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
-                  isBucketed: true,
                   label: 'Top 10 values of bytes',
                   operationType: 'terms',
                   sourceField: 'bytes',
@@ -1444,8 +1435,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               columns: {
                 col1: testState.layers.first.columns.col1,
                 col2: {
-                  isBucketed: true,
-                  label: 'Top 10 values of bytes',
+                            label: 'Top 10 values of bytes',
                   operationType: 'terms',
                   sourceField: 'bytes',
                   dataType: 'number',
@@ -1460,8 +1450,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 },
                 col3: testState.layers.first.columns.col3,
                 col4: {
-                  isBucketed: false,
-                  label: 'Unique count of src',
+                            label: 'Unique count of src',
                   filter: undefined,
                   operationType: 'unique_count',
                   sourceField: 'src',
@@ -1487,7 +1476,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           accessors: [],
           supportsMoreColumns: true,
           dataTestSubj: 'lnsXY_xDimensionPanel',
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
+          filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
         },
         {
           groupId: 'y',
@@ -1507,7 +1496,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: false,
           enableDimensionEditor: true,
-          filterOperations: (op: OperationMetadata) => op.isBucketed,
+          filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
         },
       ];
       describe('simple operations', () => {
@@ -1528,11 +1517,11 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
               columnId: 'col1',
               groupId: 'x',
               layerId: 'first',
-              filterOperations: (op: OperationMetadata) => op.isBucketed,
+              filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
               indexPatternId: 'indexPattern1',
             },
             target: {
-              filterOperations: (op: OperationMetadata) => op.isBucketed,
+              filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
               columnId: 'newCol',
               groupId: 'x',
               layerId: 'second',
@@ -1698,8 +1687,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                    isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                                label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1741,8 +1729,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                    isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                                label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1784,8 +1771,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newCol: {
                     dataType: 'date',
-                    isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                                label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1822,8 +1808,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newCol: {
                     dataType: 'date',
-                    isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                                label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1860,8 +1845,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.first.columns,
                   col1: {
                     dataType: 'number',
-                    isBucketed: true,
-                    label: 'bytes',
+                                label: 'bytes',
                     operationType: 'range',
                     params: {
                       includeEmptyRows: true,
@@ -1885,8 +1869,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col5: {
                     dataType: 'date',
-                    isBucketed: false,
-                    label: 'Minimum of timestampLabel',
+                                label: 'Minimum of timestampLabel',
                     operationType: 'min',
                     params: {
                       emptyAsNull: true,
@@ -1928,7 +1911,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 ...props.target,
                 columnId: 'col4',
                 groupId: 'a',
-                filterOperations: (op: OperationMetadata) => op.isBucketed,
+                filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
               },
             })
           ).toEqual({
@@ -1941,8 +1924,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col4: {
                     dataType: 'string',
-                    isBucketed: true,
-                    label: 'Top values of dest + 1 other',
+                                label: 'Top values of dest + 1 other',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -1991,7 +1973,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                 ...props.target,
                 columnId: 'col4',
                 groupId: 'breakdown',
-                filterOperations: (op: OperationMetadata) => op.isBucketed,
+                filterOperations: (op: OperationMetadata) => op.isBucketed ?? false,
               },
             })
           ).toEqual({
@@ -2004,8 +1986,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   col4: {
                     dataType: 'string',
-                    isBucketed: true,
-                    label: 'Top values of dest + 1 other',
+                                label: 'Top values of dest + 1 other',
                     operationType: 'terms',
                     params: {
                       orderBy: {
@@ -2043,16 +2024,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: 'Part of count()',
                       dataType: 'number',
                       operationType: 'count',
-                      isBucketed: false,
-                      sourceField: '___records___',
+                                    sourceField: '___records___',
                       customLabel: true,
                     },
                     firstColumn: {
                       label: 'count()',
                       dataType: 'number',
                       operationType: 'formula',
-                      isBucketed: false,
-                      params: { formula: 'count()' },
+                                    params: { formula: 'count()' },
                       references: ['firstColumnX0'],
                     } as FormulaIndexPatternColumn,
                   },
@@ -2066,16 +2045,14 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: 'Part of count()',
                       dataType: 'number',
                       operationType: 'count',
-                      isBucketed: false,
-                      sourceField: '___records___',
+                                    sourceField: '___records___',
                       customLabel: true,
                     },
                     second: {
                       label: 'count()',
                       dataType: 'number',
                       operationType: 'formula',
-                      isBucketed: false,
-                      params: { formula: 'count()' },
+                                    params: { formula: 'count()' },
                       references: ['secondX0'],
                     } as FormulaIndexPatternColumn,
                   },
@@ -2121,8 +2098,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   newColumn: {
                     dataType: 'number',
-                    isBucketed: false,
-                    label: 'count()',
+                                label: 'count()',
                     operationType: 'formula',
                     params: {
                       formula: 'count()',
@@ -2134,8 +2110,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     customLabel: true,
                     dataType: 'number',
                     filter: undefined,
-                    isBucketed: false,
-                    label: 'Part of count()',
+                                label: 'Part of count()',
                     operationType: 'count',
                     params: {
                       emptyAsNull: false,
@@ -2177,8 +2152,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   ...props.state.layers.second.columns,
                   second: {
                     dataType: 'number',
-                    isBucketed: false,
-                    label: 'count()',
+                                label: 'count()',
                     operationType: 'formula',
                     params: {
                       formula: 'count()',
@@ -2190,8 +2164,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     customLabel: true,
                     dataType: 'number',
                     filter: undefined,
-                    isBucketed: false,
-                    label: 'Part of count()',
+                                label: 'Part of count()',
                     operationType: 'count',
                     params: {
                       emptyAsNull: false,

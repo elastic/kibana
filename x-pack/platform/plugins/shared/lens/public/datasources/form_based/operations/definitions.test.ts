@@ -91,7 +91,6 @@ const baseColumnArgs: {
     label: 'Count of records per hour',
     timeScale: 'h',
     dataType: 'number',
-    isBucketed: false,
 
     // Private
     operationType: 'count',
@@ -114,7 +113,6 @@ const layer: FormBasedLayer = {
       label: '',
       customLabel: true,
       dataType: 'date',
-      isBucketed: true,
       operationType: 'date_histogram',
       sourceField: 'timestamp',
       params: { interval: 'auto' },
@@ -123,7 +121,6 @@ const layer: FormBasedLayer = {
       label: 'metricLabel',
       customLabel: true,
       dataType: 'number',
-      isBucketed: false,
       operationType: 'average',
       sourceField: 'bytes',
       params: {},
@@ -132,7 +129,6 @@ const layer: FormBasedLayer = {
       label: '',
       customLabel: true,
       dataType: 'number',
-      isBucketed: false,
       operationType: 'differences',
       references: ['metric'],
     } as DerivativeIndexPatternColumn,
@@ -207,7 +203,6 @@ describe('time scale transition', () => {
         previousColumn: {
           label: 'Sum of bytes',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'sum',
           sourceField: 'bytes',
         },
@@ -245,7 +240,6 @@ describe('time scale transition', () => {
           label: 'Sum of bytesLabel per hour',
           timeScale: 'h',
           dataType: 'number',
-          isBucketed: false,
 
           // Private
           operationType: 'sum',

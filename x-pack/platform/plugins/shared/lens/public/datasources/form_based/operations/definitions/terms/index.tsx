@@ -137,6 +137,7 @@ export const termsOperation: OperationDefinition<
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  isBucketed: true,
   scale: () => 'ordinal',
   getCurrentFields: (targetColumn) => {
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
@@ -232,7 +233,7 @@ export const termsOperation: OperationDefinition<
       .map(([id]) => id)[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
-      (col) => col && col.isBucketed
+      (col) => col && isBucketed(col)
     ).length;
 
     return {
@@ -240,7 +241,6 @@ export const termsOperation: OperationDefinition<
       dataType: field.type as DataType,
       operationType: 'terms',
       sourceField: field.name,
-      isBucketed: true,
       params: {
         size: columnParams?.size ?? (previousBucketsLength === 0 ? 5 : DEFAULT_SIZE),
         orderBy:

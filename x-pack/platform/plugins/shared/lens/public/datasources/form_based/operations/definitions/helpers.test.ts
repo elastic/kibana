@@ -28,7 +28,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'count',
           sourceField: 'NoBytes', // <= invalid
@@ -77,7 +76,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'average',
           sourceField: 'timestamp', // <= invalid type for average
@@ -96,7 +94,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'terms',
           sourceField: 'geo.src',
@@ -148,7 +145,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'terms',
           sourceField: 'NotExisting',
@@ -206,7 +202,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'terms',
           sourceField: 'geo.src',
@@ -228,7 +223,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'terms',
           sourceField: 'start_date', // <= invalid type
@@ -250,7 +244,6 @@ describe('helpers', () => {
       const messages = getInvalidFieldMessage(
         getLayerWithColumn({
           dataType: 'number',
-          isBucketed: false,
           label: 'Foo',
           operationType: 'average',
           sourceField: 'bytes',

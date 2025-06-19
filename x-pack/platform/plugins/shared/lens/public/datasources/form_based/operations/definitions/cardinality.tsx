@@ -126,7 +126,6 @@ export const cardinalityOperation: OperationDefinition<
       dataType: 'number',
       operationType: CARDINALITY_ID,
       sourceField: field.name,
-      isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,

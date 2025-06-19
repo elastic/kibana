@@ -22,6 +22,7 @@ import {
   CALCULATIONS_MISSING_COLUMN_REFERENCE,
   CALCULATIONS_WRONG_DIMENSION_CONFIG,
 } from '../../../../../user_messages_ids';
+import { isBucketed } from '../../../utils';
 
 export const buildLabelFunction =
   (ofName: (name?: string) => string) =>
@@ -58,7 +59,7 @@ export function checkForDateHistogram(
   layer: FormBasedLayer,
   name: string
 ): FieldBasedOperationErrorMessage[] {
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => isBucketed(layer.columns[colId]));
   const hasDateHistogram = buckets.some(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
@@ -168,7 +169,7 @@ export function dateBasedOperationToExpression(
   additionalArgs: Record<string, unknown[]> = {}
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => isBucketed(layer.columns[colId]));
   const dateColumnIndex = buckets.findIndex(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   )!;
@@ -199,7 +200,7 @@ export function optionalHistogramBasedOperationToExpression(
   additionalArgs: Record<string, unknown[]> = {}
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
-  const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
+  const buckets = layer.columnOrder.filter((colId) => isBucketed(layer.columns[colId]));
   const nonHistogramColumns = buckets.filter(
     (colId) =>
       layer.columns[colId].operationType !== 'date_histogram' &&

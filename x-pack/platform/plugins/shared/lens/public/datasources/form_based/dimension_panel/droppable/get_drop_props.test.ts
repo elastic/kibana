@@ -566,14 +566,12 @@ describe('FormBasedDimensionEditorPanel#getDropProps', () => {
               col1: {
                 label: 'Test reference',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'cumulative_sum',
                 references: ['ref1'],
               },
               ref1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
