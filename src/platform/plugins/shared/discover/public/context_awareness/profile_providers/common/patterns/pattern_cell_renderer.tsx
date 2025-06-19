@@ -85,7 +85,7 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
         <EuiText size="s">
           <strong>Regex</strong>
           <EuiSpacer size="s" />
-          {pattern}
+          <span data-test-subj="euiDataGridExpansionPopover-patternRegex">{pattern}</span>
         </EuiText>
         <EuiSpacer size="s" />
       </>

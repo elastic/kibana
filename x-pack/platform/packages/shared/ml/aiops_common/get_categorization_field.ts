@@ -17,7 +17,8 @@ export function getCategorizationField(fields: string[]): string | undefined {
       return field;
     }
   }
-  return undefined;
+  // If no prioritized field is found, return the first field in the list
+  return fields[0] ?? undefined;
 }
 
 export function getCategorizationDataViewField(dataView: DataView): {
@@ -34,7 +35,7 @@ export function getCategorizationDataViewField(dataView: DataView): {
   }
 
   return {
-    messageField: dataViewFields[0] ?? null,
+    messageField: null,
     dataViewFields,
   };
 }
