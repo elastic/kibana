@@ -26,6 +26,7 @@ interface AttributesTableProps
   > {
   fields: string[];
   searchTerm: string;
+  isEsqlMode: boolean;
 }
 
 export const AttributesTable = ({
@@ -38,6 +39,7 @@ export const AttributesTable = ({
   filter,
   onAddColumn,
   onRemoveColumn,
+  isEsqlMode,
 }: AttributesTableProps) => {
   const flattened = hit.flattened;
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
@@ -78,12 +80,12 @@ export const AttributesTable = ({
   );
 
   const fieldCellActions = useMemo(
-    () => getFieldCellActions({ rows, isEsqlMode: false, onFilter: filter, onToggleColumn }),
-    [rows, filter, onToggleColumn]
+    () => getFieldCellActions({ rows, isEsqlMode, onFilter: filter, onToggleColumn }),
+    [rows, filter, onToggleColumn, isEsqlMode]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode: false, toasts, onFilter: filter }),
-    [rows, toasts, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
+    [rows, toasts, filter, isEsqlMode]
   );
 
   const gridColumns: EuiDataGridProps['columns'] = [

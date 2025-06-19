@@ -26,6 +26,7 @@ interface AttributesAccordionProps {
   onAddColumn?: (col: string) => void;
   onRemoveColumn?: (col: string) => void;
   filter?: DocViewFilterFn;
+  isEsqlMode: boolean;
 }
 
 export const AttributesAccordion = ({
@@ -41,6 +42,7 @@ export const AttributesAccordion = ({
   onAddColumn,
   onRemoveColumn,
   filter,
+  isEsqlMode = false,
 }: AttributesAccordionProps) => (
   <EuiAccordion
     id={id}
@@ -69,6 +71,7 @@ export const AttributesAccordion = ({
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       filter={filter}
+      isEsqlMode={isEsqlMode}
     />
   </EuiAccordion>
 );
