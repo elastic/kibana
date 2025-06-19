@@ -11,38 +11,42 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { CheckSavedObjectsPrivileges } from '@kbn/security-plugin-types-server';
 
 export class AccessControlService {
-  private getCurrentUserFunc: () => AuthenticatedUser | null;
   private getTypeRegistryFunc: () => Promise<ISavedObjectTypeRegistry>;
   // private isUserAdmin: boolean;
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
+  private userForOperation: AuthenticatedUser | null = null;
 
   constructor({
-    getCurrentUser,
     getTypeRegistry,
     checkPrivilegesFunc,
   }: {
-    getCurrentUser: () => AuthenticatedUser | null;
     getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>;
     checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   }) {
-    this.getCurrentUserFunc = getCurrentUser;
     this.getTypeRegistryFunc = getTypeRegistry;
     this.checkPrivilegesFunc = checkPrivilegesFunc;
   }
 
-  async canModifyAccess({
+  setUserForOperation(user: AuthenticatedUser | null) {
+    this.userForOperation = user;
+  }
+
+  async canModifyObject({
     type,
     object,
+    spacesToAuthorize,
   }: {
     type: string;
     object: AuthorizeObject;
+    spacesToAuthorize: Set<string>;
   }): Promise<boolean> {
-    // check if type supports access control
     const typeSupportsAccessControl = (await this.getTypeRegistryFunc())?.supportsAccessControl(
       type
     );
+
     const accessControl = object?.accessControl;
-    const currentUser = this.getCurrentUserFunc();
+    const currentUser = this.userForOperation;
+
     if (!typeSupportsAccessControl || !accessControl || !currentUser) {
       return true;
     }
@@ -51,14 +55,12 @@ export class AccessControlService {
       return true;
     }
 
-    // Check if user is owner - allow if owner
     if (accessControl.owner === currentUser.username) {
       return true;
     }
 
-    // Check for the specific privilege
     const { hasAllRequested } = await this.checkPrivilegesFunc(
-      'saved_object/dashboard:manageOwnership',
+      `saved_object/${type}:manageOwnership`,
       []
     );
     if (hasAllRequested) {
