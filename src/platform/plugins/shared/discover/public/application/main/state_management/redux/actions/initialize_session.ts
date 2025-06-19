@@ -38,6 +38,7 @@ import { TABS_ENABLED } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab, clearAllTabs } from './tabs';
+import { selectTab } from '../selectors';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -68,6 +69,8 @@ export const initializeSession: InternalStateThunkActionCreator<
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
+    const reduxState = getState();
+
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -77,8 +80,11 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+
     const { currentDataView$, stateContainer$, customizationService$, scopedProfilesManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
+    const tabState = selectTab(reduxState, tabId);
+
     let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
 
     /**
@@ -97,24 +103,23 @@ export const initializeSession: InternalStateThunkActionCreator<
     }
 
     if (TABS_ENABLED && !wasTabInitialized) {
-      const tabGlobalStateFromLocalStorage =
-        tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);
+      const tabInitialGlobalState = tabState.initialGlobalState;
 
-      if (tabGlobalStateFromLocalStorage?.filters) {
-        services.filterManager.setGlobalFilters(cloneDeep(tabGlobalStateFromLocalStorage.filters));
+      if (tabInitialGlobalState?.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(tabInitialGlobalState.filters));
       }
 
-      if (tabGlobalStateFromLocalStorage?.timeRange) {
-        services.timefilter.setTime(tabGlobalStateFromLocalStorage.timeRange);
+      if (tabInitialGlobalState?.timeRange) {
+        services.timefilter.setTime(tabInitialGlobalState.timeRange);
       }
-      if (tabGlobalStateFromLocalStorage?.refreshInterval) {
-        services.timefilter.setRefreshInterval(tabGlobalStateFromLocalStorage.refreshInterval);
+      if (tabInitialGlobalState?.refreshInterval) {
+        services.timefilter.setRefreshInterval(tabInitialGlobalState.refreshInterval);
       }
 
-      const tabAppStateFromLocalStorage = tabsStorageManager.loadTabAppStateFromLocalCache(tabId);
+      const tabInitialAppState = tabState.initialAppState;
 
-      if (tabAppStateFromLocalStorage) {
-        initialUrlState = tabAppStateFromLocalStorage;
+      if (tabInitialAppState) {
+        initialUrlState = tabInitialAppState;
       }
     }
 
@@ -133,7 +138,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
     );
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
+    const { initializationState, defaultProfileAdHocDataViewIds } = reduxState;
     const profileDataViews = runtimeStateManager.adHocDataViews$
       .getValue()
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
