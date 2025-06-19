@@ -107,7 +107,8 @@ export async function readSignificantEvents(
       const isResponseError = err instanceof errors.ResponseError;
       if (isResponseError && err?.body?.error?.type === 'security_exception') {
         throw new SecurityError(
-          `Cannot read significant events, insufficient privileges: ${err.message}`
+          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          { cause: err }
         );
       }
       throw err;
