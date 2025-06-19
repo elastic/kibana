@@ -86,7 +86,7 @@ describe('MigrationReadyPanel', () => {
     it('should render description text correctly', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        `Migration of 6 rules is created and ready to be start.`
+        `Migration of 6 rules is created and ready to start.`
       );
     });
 

@@ -38,6 +38,7 @@ import {
 import type { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
@@ -234,22 +235,7 @@ export const createStartServicesMock = (
     },
     telemetry: createTelemetryServiceMock(),
     theme: themeServiceMock.createSetupContract(),
-    timelines: {
-      getLastUpdated: jest.fn(),
-      getFieldBrowser: jest.fn(),
-      getHoverActions: jest.fn().mockReturnValue({
-        getAddToTimelineButton: jest.fn(),
-      }),
-      getUseAddToTimeline: jest.fn().mockReturnValue(
-        jest.fn().mockReturnValue({
-          startDragToTimeline: jest.fn(),
-          beginDrag: jest.fn(),
-          dragLocation: jest.fn(),
-          endDrag: jest.fn(),
-          cancelDrag: jest.fn(),
-        })
-      ),
-    },
+    timelines: createTGridMocks(),
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
