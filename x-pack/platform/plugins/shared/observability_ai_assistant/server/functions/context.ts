@@ -67,7 +67,7 @@ export function registerContextFunction({
 
         if (!lastUserMessage?.message.content) {
           resources.logger.warn(
-            'No user message found in the conversation history. Aborting context function.'
+            'No user message found in the conversation history. Aborting querying the knowledge base.'
           );
           return { content };
         }
