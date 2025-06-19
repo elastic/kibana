@@ -16,6 +16,7 @@ import {
   EuiPanel,
   useEuiTheme,
   EuiButtonEmpty,
+  EuiForm,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -71,7 +72,8 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     [columns, updateRow]
   );
 
-  const saveNewRow = () => {
+  const saveNewRow = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     indexUpdateService.addDoc(newRow);
     setActiveMode(null);
   };
@@ -113,35 +115,37 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             margin-bottom: ${euiTheme.size.xs};
           `}
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexGroup
-              gutterSize="s"
-              tabIndex={0}
-              className="eui-xScrollWithShadows hide-scrollbar"
-              css={css`
-                &.hide-scrollbar {
-                  scrollbar-width: none;
-                  padding: 0 4px;
-                }
-              `}
-            >
-              {inputs}
+          <EuiForm component="form" onSubmit={saveNewRow}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup
+                gutterSize="s"
+                tabIndex={0}
+                className="eui-xScrollWithShadows hide-scrollbar"
+                css={css`
+                  &.hide-scrollbar {
+                    scrollbar-width: none;
+                    padding: 0 4px;
+                  }
+                `}
+              >
+                {inputs}
+              </EuiFlexGroup>
+              <EuiButtonIcon
+                type="submit"
+                iconType="check"
+                display="base"
+                color="success"
+                aria-label="Save"
+              />
+              <EuiButtonIcon
+                onClick={cancelAction}
+                iconType="cross"
+                display="base"
+                color="danger"
+                aria-label="Cancel"
+              />
             </EuiFlexGroup>
-            <EuiButtonIcon
-              onClick={saveNewRow}
-              iconType="check"
-              display="base"
-              color="success"
-              aria-label="Save"
-            />
-            <EuiButtonIcon
-              onClick={cancelAction}
-              iconType="cross"
-              display="base"
-              color="danger"
-              aria-label="Cancel"
-            />
-          </EuiFlexGroup>
+          </EuiForm>
         </EuiPanel>
       )}
     </>
