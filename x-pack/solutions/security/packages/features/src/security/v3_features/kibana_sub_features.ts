@@ -734,7 +734,7 @@ const globalArtifactManagementSubFeature = (
 
   const COMING_SOON = i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.comingSoon',
-    { defaultMessage: '(Coming Soon)' }
+    { defaultMessage: '(coming soon)' }
   );
 
   const name = experimentalFeatures.endpointManagementSpaceAwarenessEnabled
