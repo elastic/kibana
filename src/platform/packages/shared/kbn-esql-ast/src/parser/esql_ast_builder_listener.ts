@@ -256,6 +256,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitGrokCommand(ctx: GrokCommandContext) {
+    if (this.inFork) {
+      return;
+    }
     const command = createGrokCommand(ctx);
 
     this.ast.push(command);
@@ -333,6 +336,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitChangePointCommand(ctx: ChangePointCommandContext): void {
+    if (this.inFork) {
+      return;
+    }
     const command = createChangePointCommand(ctx);
 
     this.ast.push(command);
@@ -363,6 +369,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitCompletionCommand(ctx: CompletionCommandContext): void {
+    if (this.inFork) {
+      return;
+    }
     const command = createCompletionCommand(ctx);
     this.ast.push(command);
   }
@@ -373,9 +382,6 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
 
     if (ctx._probability) {
       command.args.push(createLiteral('double', ctx._probability.DECIMAL_LITERAL()));
-    }
-    if (ctx._seed) {
-      command.args.push(createLiteral('integer', ctx._seed.INTEGER_LITERAL()));
     }
   }
 
