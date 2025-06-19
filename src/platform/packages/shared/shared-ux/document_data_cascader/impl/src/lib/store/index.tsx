@@ -25,7 +25,6 @@ import {
   type IDispatchAction,
   storeReducer,
 } from './reducers';
-import { getStatsGroupByColumnsFromQuery } from '../parse_esql';
 
 interface IStoreContext<N extends GroupNode, L extends LeafNode> {
   state: IStoreState<N, L>;
@@ -33,7 +32,7 @@ interface IStoreContext<N extends GroupNode, L extends LeafNode> {
 }
 
 interface IDataCascadeProviderProps {
-  query: string;
+  cascadeGroups: string[];
 }
 
 export const createStoreContext = once(<N extends GroupNode, L extends LeafNode>() => {
@@ -42,7 +41,7 @@ export const createStoreContext = once(<N extends GroupNode, L extends LeafNode>
 });
 
 export function DataCascadeProvider<N extends GroupNode, L extends LeafNode>({
-  query,
+  cascadeGroups,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps>) {
   const StoreContext = createStoreContext<N, L>();
@@ -50,26 +49,19 @@ export function DataCascadeProvider<N extends GroupNode, L extends LeafNode>({
   const initialState = useRef<IStoreContext<N, L>['state']>({
     groupNodes: [],
     leafNodes: new Map<string, L[]>(),
-    currentQueryString: '',
     groupByColumns: [],
     currentGroupByColumns: [],
   });
 
   const createInitialState = useCallback(
     (state: IStoreContext<N, L>['state']): IStoreContext<N, L>['state'] => {
-      if (query !== state.currentQueryString) {
-        // TODO: Eyo - move this logic out of the provider so the component itself becomes even more generic
-        const columns = getStatsGroupByColumnsFromQuery(query);
-        return {
-          ...state,
-          currentQueryString: query,
-          groupByColumns: columns,
-          currentGroupByColumns: columns.length ? [columns[0]] : [],
-        };
-      }
-      return state;
+      return {
+        ...state,
+        groupByColumns: cascadeGroups,
+        currentGroupByColumns: cascadeGroups.length ? [cascadeGroups[0]] : [],
+      };
     },
-    [query]
+    [cascadeGroups]
   );
 
   const [state, dispatch] = useReducer(storeReducer, initialState.current, createInitialState);
@@ -103,7 +95,7 @@ export function useCascadeGroupNodes<T extends GroupNode, L extends LeafNode>() 
   return groupNodes;
 }
 
-export function useCascadeLeafNode<T extends GroupNode, L extends LeafNode>(cacheKey: string[]) {
+export function useCascadeLeafNode<T extends GroupNode, L extends LeafNode>(cacheKey: string) {
   const { leafNodes } = useDataCascadeState<T, L>();
   return leafNodes.get(cacheKey) ?? [];
 }
