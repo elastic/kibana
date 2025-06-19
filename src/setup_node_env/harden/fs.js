@@ -122,7 +122,7 @@ const isMockFsActive = () => {
 
     // Once mock-fs is restored, the binding is no longer mocked, but the method is still patched
     // which leades to recursion problems
-    return isActive || process.env.CI === 'true';
+    return isActive || process.env.JEST_WORKER_ID !== undefined;
   } catch (e) {
     // If process.binding is not available (it's deprecated), fallback to other methods
     return false;
@@ -169,14 +169,14 @@ const patchFs = (fs) => {
 
       if (singlePath.includes(prop) && typeof target[prop] === 'function') {
         return (userPath, data, options, cb) => {
-          cb ||= options;
+          const callback = typeof options === 'function' ? options : cb;
           let safePath;
 
           try {
             safePath = getSafePath(userPath);
           } catch (err) {
             // ensure that we invoke the callback asynchronously
-            if (typeof cb === 'function') return process.nextTick(() => cb(err));
+            if (typeof callback === 'function') return process.nextTick(() => callback(err));
 
             throw err;
           }
@@ -194,8 +194,9 @@ const patchFs = (fs) => {
       }
 
       if (dualPath.includes(prop) && typeof target[prop] === 'function') {
-        return (userSrc, userDest, data, options, cb) => {
-          cb ||= options;
+        return (userSrc, userDest, ...args) => {
+          const [modeOrCallback, callbackArg] = args;
+          const callback = typeof modeOrCallback === 'function' ? modeOrCallback : callbackArg;
           let srcSafePath;
           let destSafePath;
 
@@ -204,22 +205,16 @@ const patchFs = (fs) => {
             destSafePath = getSafePath(userDest);
           } catch (err) {
             // ensure that we invoke the callback asynchronously
-            if (typeof cb === 'function') return process.nextTick(() => cb(err));
+            if (typeof callback === 'function') return process.nextTick(() => callback(err));
 
             throw err;
           }
 
           if (isMockFsActive()) {
-            return realMethods[prop](userSrc, userDest, data, options, cb);
+            return realMethods[prop](userSrc, userDest, ...args);
           }
 
-          return Reflect.apply(target[prop], target, [
-            srcSafePath,
-            destSafePath,
-            data,
-            options,
-            cb,
-          ]);
+          return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
         };
       }
 
