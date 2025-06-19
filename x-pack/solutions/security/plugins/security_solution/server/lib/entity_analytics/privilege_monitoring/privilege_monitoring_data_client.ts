@@ -427,7 +427,7 @@ export class PrivilegeMonitoringDataClient {
 
       this.log(
         'debug',
-        `Fetched ${hits.length} usernames from ${indexName}, total so far: ${seenUsernames.length}`
+        `Fetched ${hits.length} usernames from ${indexName}, total so far: ${batchUsernames.length}`
       );
     }
 
