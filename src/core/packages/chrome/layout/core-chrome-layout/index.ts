@@ -8,4 +8,8 @@
  */
 
 export { type LayoutService } from './layout_service';
-export { LAYOUT_FEATURE_FLAG_KEY, type LayoutFeatureFlag } from './layout_feature_flag';
+export {
+  LAYOUT_FEATURE_FLAG_KEY,
+  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
+  type LayoutFeatureFlag,
+} from './layout_feature_flag';

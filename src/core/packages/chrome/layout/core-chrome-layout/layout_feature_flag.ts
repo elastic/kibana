@@ -9,3 +9,4 @@
 
 export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
 export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
+export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';

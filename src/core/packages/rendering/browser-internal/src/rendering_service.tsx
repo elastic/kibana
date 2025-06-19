@@ -25,7 +25,12 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import { LayoutService, LayoutFeatureFlag, LAYOUT_FEATURE_FLAG_KEY } from '@kbn/core-chrome-layout';
+import {
+  LayoutService,
+  LayoutFeatureFlag,
+  LAYOUT_FEATURE_FLAG_KEY,
+  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
+} from '@kbn/core-chrome-layout';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 
@@ -87,6 +92,8 @@ export class RenderingService implements IRenderingService {
       LAYOUT_FEATURE_FLAG_KEY,
       'legacy-fixed'
     );
+    const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
+
     const startServices = this.contextDeps.getValue()!;
 
     const body = document.querySelector('body')!;
@@ -100,7 +107,7 @@ export class RenderingService implements IRenderingService {
 
     const layout: LayoutService =
       layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps)
+        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
         : new LegacyFixedLayout(renderCoreDeps);
 
     const Layout = layout.getComponent();

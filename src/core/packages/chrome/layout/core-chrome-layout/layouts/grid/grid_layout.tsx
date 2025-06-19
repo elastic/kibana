@@ -14,11 +14,13 @@ import {
   ChromeLayoutConfig,
 } from '@kbn/core-chrome-layout-components';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
-import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
+import type {
+  LayoutService,
+  LayoutServiceStartDeps,
+  LayoutServiceParams,
+} from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
-
-const DEBUG_SIDEBAR: boolean = true; // Set to true to debug the sidebar
 
 const layoutConfig: ChromeLayoutConfig = {
   headerHeight: 96,
@@ -29,8 +31,11 @@ const layoutConfig: ChromeLayoutConfig = {
 /**
  * Service for providing layout component wired to other core services.
  */
-export class GridLayoutpac implements LayoutService {
-  constructor(private readonly deps: LayoutServiceStartDeps) {}
+export class GridLayout implements LayoutService {
+  constructor(
+    private readonly deps: LayoutServiceStartDeps,
+    private readonly params: LayoutServiceParams
+  ) {}
 
   /**
    * Returns a layout component with the provided dependencies
@@ -41,16 +46,14 @@ export class GridLayoutpac implements LayoutService {
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
     const chromeVisible$ = chrome.getIsVisible$();
+    const debug = this.params.debug ?? false;
 
     return React.memo(() => {
       return (
         <>
           <GridLayoutGlobalStyles />
           <ChromeLayoutConfigProvider value={layoutConfig}>
-            <ChromeLayout
-              header={chromeHeader}
-              sidebar={DEBUG_SIDEBAR ? 'sidebar is here...' : undefined}
-            >
+            <ChromeLayout header={chromeHeader} sidebar={debug ? 'sidebar can be here' : undefined}>
               <>
                 <div id="globalBannerList">{bannerComponent}</div>
                 <AppWrapper chromeVisible$={chromeVisible$}>

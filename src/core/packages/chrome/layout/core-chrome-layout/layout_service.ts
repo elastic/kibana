@@ -18,6 +18,10 @@ export interface LayoutServiceStartDeps {
   overlays: OverlayStart;
 }
 
+export interface LayoutServiceParams {
+  debug?: boolean;
+}
+
 export interface LayoutService {
   /**
    * Returns a layout component with the provided dependencies
