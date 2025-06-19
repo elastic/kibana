@@ -39,11 +39,11 @@ export const getIconFromType = (type: string | null | undefined) => {
     case 'geo_point':
       return 'tokenGeo';
     case 'object':
-      return 'tokenquestion';
+      return 'tokenQuestion';
     case 'float':
       return 'tokenNumber';
     default:
-      return 'tokenquestion';
+      return 'tokenQuestion';
   }
 };
 
