@@ -61,7 +61,6 @@ import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
 import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 
 interface InsightComponentProps {
   label?: string;
@@ -291,8 +290,8 @@ const InsightEditorComponent = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec();
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
 
   const {
     unifiedSearch: {
@@ -304,8 +303,6 @@ const InsightEditorComponent = ({
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
-
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 

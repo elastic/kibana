@@ -21,7 +21,7 @@ import { defaultUdtHeaders } from '../components/timeline/body/column_headers/de
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
-import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
 import { SourcererScopeName } from '../../sourcerer/store/model';
@@ -59,14 +59,12 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
-    DataViewManagerScopeName.default
-  );
+  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.default);
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
   const dataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
-    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+    () => (newDataViewPickerEnabled ? experimentalDataView?.id ?? '' : oldDataViewId),
+    [newDataViewPickerEnabled, experimentalDataView, oldDataViewId]
   );
   const selectedPatterns = useMemo(
     () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),

@@ -164,7 +164,10 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
+      SourcererScopeName.timeline,
+      false
+    );
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     const dataViewId = useMemo(
