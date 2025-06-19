@@ -516,6 +516,26 @@ export class Walker {
     this.walkList(node.values, node);
   }
 
+  public walkSource(node: types.ESQLSource, parent: types.ESQLProperNode | undefined): void {
+    const { options } = this;
+
+    (options.visitSource ?? options.visitAny)?.(node, parent, this);
+
+    const children: types.ESQLStringLiteral[] = [];
+
+    if (node.prefix) {
+      children.push(node.prefix);
+    }
+    if (node.index) {
+      children.push(node.index);
+    }
+    if (node.selector) {
+      children.push(node.selector);
+    }
+
+    this.walkList(children, node);
+  }
+
   public walkColumn(node: types.ESQLColumn, parent: types.ESQLProperNode | undefined): void {
     const { options } = this;
     const { args } = node;
@@ -607,7 +627,7 @@ export class Walker {
         break;
       }
       case 'source': {
-        (options.visitSource ?? options.visitAny)?.(node, parent, this);
+        this.walkSource(node, parent);
         break;
       }
       case 'column': {

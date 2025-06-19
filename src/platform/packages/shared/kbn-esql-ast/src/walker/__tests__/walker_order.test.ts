@@ -239,4 +239,50 @@ describe('traversal order', () => {
       expect(numbers.map((n) => n.name)).toStrictEqual(['limit', 'from']);
     });
   });
+
+  describe('source components', () => {
+    test('in "forward" order', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM a:b');
+      const numbers = Walker.matchAll(
+        ast,
+        { type: 'literal' },
+        { order: 'forward' }
+      ) as ESQLLiteral[];
+
+      expect(numbers.map((n) => n.value)).toStrictEqual(['a', 'b']);
+    });
+
+    test('in "forward" order (selector)', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM a::b');
+      const numbers = Walker.matchAll(
+        ast,
+        { type: 'literal' },
+        { order: 'forward' }
+      ) as ESQLLiteral[];
+
+      expect(numbers.map((n) => n.value)).toStrictEqual(['a', 'b']);
+    });
+
+    test('in "backward" order', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM a:b');
+      const numbers = Walker.matchAll(
+        ast,
+        { type: 'literal' },
+        { order: 'backward' }
+      ) as ESQLLiteral[];
+
+      expect(numbers.map((n) => n.value)).toStrictEqual(['b', 'a']);
+    });
+
+    test('in "backward" order (selector)', () => {
+      const { ast } = EsqlQuery.fromSrc('FROM a::b');
+      const numbers = Walker.matchAll(
+        ast,
+        { type: 'literal' },
+        { order: 'backward' }
+      ) as ESQLLiteral[];
+
+      expect(numbers.map((n) => n.value)).toStrictEqual(['b', 'a']);
+    });
+  });
 });

@@ -117,8 +117,9 @@ describe('structurally can walk all nodes', () => {
       });
 
       expect(commands.map(({ name }) => name).sort()).toStrictEqual(['from', 'sample']);
-      expect(literals.length).toBe(1);
-      expect(literals[0].value).toBe(0.25);
+      expect(literals.length).toBe(2);
+      expect(literals[0].value).toBe('index');
+      expect(literals[1].value).toBe(0.25);
     });
 
     test('"visitAny" can capture command nodes', () => {
@@ -379,23 +380,28 @@ describe('structurally can walk all nodes', () => {
           expect(columns).toMatchObject([
             {
               type: 'literal',
+              literalType: 'keyword',
+              value: 'index',
+            },
+            {
+              type: 'literal',
               literalType: 'integer',
-              name: '123',
+              value: 123,
             },
             {
               type: 'literal',
               literalType: 'keyword',
-              name: '"foo"',
+              value: '"foo"',
             },
             {
               type: 'literal',
               literalType: 'boolean',
-              name: 'true',
+              value: 'true',
             },
             {
               type: 'literal',
               literalType: 'boolean',
-              name: 'false',
+              value: 'false',
             },
           ]);
         });
@@ -410,6 +416,11 @@ describe('structurally can walk all nodes', () => {
           });
 
           expect(columns).toMatchObject([
+            {
+              type: 'literal',
+              literalType: 'keyword',
+              value: 'index',
+            },
             {
               type: 'literal',
               literalType: 'integer',
@@ -836,6 +847,27 @@ describe('structurally can walk all nodes', () => {
       expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
         '"foo" : /* 1 */ "bar"'
       );
+    });
+
+    test('can visit "source" components', () => {
+      const src = 'FROM a:b';
+      const { ast } = parse(src);
+      const nodes: ESQLLiteral[] = [];
+
+      walk(ast, {
+        visitLiteral: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'literal',
+          valueUnquoted: 'a',
+        },
+        {
+          type: 'literal',
+          valueUnquoted: 'b',
+        },
+      ]);
     });
   });
 
