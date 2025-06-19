@@ -8,7 +8,7 @@
  */
 
 import { EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
-import { DataTableRecord, PARENT_ID_FIELD } from '@kbn/discover-utils';
+import { DataTableRecord } from '@kbn/discover-utils';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -16,6 +16,8 @@ import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import DocViewerSource from '../../../../../doc_viewer_source';
+import { useDataSourcesContext } from '../../../hooks/use_data_sources';
+import { isSpanHit } from '../helpers/is_span';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
@@ -55,9 +57,10 @@ export interface SpanFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: SpanFlyoutProps) => {
+export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
-  const isSpan = !!hit?.flattened[PARENT_ID_FIELD];
+  const isSpan = isSpanHit(hit);
+  const { indexes } = useDataSourcesContext();
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
   const renderTabs = () => {
@@ -84,7 +87,7 @@ export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: S
               (isSpan ? (
                 <SpanOverview
                   hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
+                  indexes={indexes}
                   showWaterfall={false}
                   showActions={false}
                   dataView={dataView}
@@ -92,7 +95,7 @@ export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: S
               ) : (
                 <TransactionOverview
                   hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
+                  indexes={indexes}
                   showWaterfall={false}
                   showActions={false}
                   dataView={dataView}
