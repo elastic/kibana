@@ -15,47 +15,56 @@ import { LOCAL_STORAGE_NAMESPACE_KEY, DEFAULT_NAMESPACE } from '../common/consta
 interface NamespaceSelectorProps {
   'data-test-subj'?: string;
   postureType?: 'cspm' | 'kspm';
+  activeNamespace: string;
   namespaces: string[];
   onNamespaceChangeCallback: (namespace: string) => void;
 }
 
-export const useSelectedNamespace = ({ postureType }: { postureType?: 'cspm' | 'kspm' }) => {
-  const [selectedNamespace, setSelectedNamespace] = useLocalStorage(
+export const useActiveNamespace = ({ postureType }: { postureType?: 'cspm' | 'kspm' }) => {
+  const [localStorageActiveNamespace, localStorageSetActiveNamespace] = useLocalStorage(
     `${LOCAL_STORAGE_NAMESPACE_KEY}:${postureType}`,
     DEFAULT_NAMESPACE
   );
-  return { selectedNamespace, setSelectedNamespace };
+  const [activeNamespace, setActiveNamespaceState] = useState<string>(
+    localStorageActiveNamespace || 'default'
+  );
+
+  const updateActiveNamespace = useCallback(
+    (namespace: string) => {
+      setActiveNamespaceState(namespace);
+      localStorageSetActiveNamespace(namespace);
+    },
+    [localStorageSetActiveNamespace]
+  );
+  return { activeNamespace, updateActiveNamespace };
 };
 
 export const NamespaceSelector = ({
-  'data-test-subj': dataTestSubj,
-  postureType,
+  activeNamespace,
   namespaces,
   onNamespaceChangeCallback,
+
+  postureType,
+  'data-test-subj': dataTestSubj,
 }: NamespaceSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const title = 'Namespace';
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedNamespace, setSelectedNamespace] = useLocalStorage(
-    `${LOCAL_STORAGE_NAMESPACE_KEY}:${postureType}`,
-    DEFAULT_NAMESPACE
-  );
 
   const isNamespaceSelected = useCallback(
-    (namespaceKey: string) => selectedNamespace === namespaceKey,
-    [selectedNamespace]
+    (namespaceKey: string) => activeNamespace === namespaceKey,
+    [activeNamespace]
   );
 
   const onNamespaceChange = useCallback(
     (namespaceKey: string) => {
-      if (namespaceKey !== selectedNamespace) {
-        setSelectedNamespace(namespaceKey);
+      if (namespaceKey !== activeNamespace) {
         onNamespaceChangeCallback(namespaceKey);
       }
       setIsPopoverOpen(false);
     },
-    [setSelectedNamespace, selectedNamespace]
+    [activeNamespace, onNamespaceChangeCallback]
   );
 
   const panels = [
@@ -81,13 +90,13 @@ export const NamespaceSelector = ({
         iconSize="s"
         iconType="arrowDown"
         onClick={onButtonClick}
-        title={selectedNamespace}
+        title={activeNamespace}
         size="xs"
       >
-        {`${title}: ${selectedNamespace}`}
+        {`${title}: ${activeNamespace}`}
       </EuiButtonEmpty>
     );
-  }, [onButtonClick, selectedNamespace]);
+  }, [onButtonClick, activeNamespace]);
 
   return (
     <EuiPopover
