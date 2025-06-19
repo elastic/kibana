@@ -87,7 +87,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
       >
         <EuiPopoverTitle data-test-subj="upcoming-events-popover-title">
           {i18n.CREATE_FORM_RECURRING_SUMMARY_PREFIX(
-            recurringSummary(startDate, recurringSchedule, presets)
+            recurringSummary({ startDate, recurringSchedule, presets })
           )}
         </EuiPopoverTitle>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
