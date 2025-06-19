@@ -254,11 +254,28 @@ describe('logsDataSourceProfileProvider', () => {
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,
+        isDocViewerEnabled: true,
       });
 
       expect(rowAdditionalLeadingControls).toHaveLength(2);
       expect(rowAdditionalLeadingControls?.[0].id).toBe('connectedDegradedDocs');
       expect(rowAdditionalLeadingControls?.[1].id).toBe('connectedStacktraceDocs');
+    });
+
+    it('should not return the passed additional controls if the flag is turned off', () => {
+      const getRowAdditionalLeadingControls =
+        logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
+        });
+      const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
+        dataView: dataViewWithLogLevel,
+        isDocViewerEnabled: false,
+      });
+
+      expect(rowAdditionalLeadingControls).toHaveLength(0);
     });
   });
 });

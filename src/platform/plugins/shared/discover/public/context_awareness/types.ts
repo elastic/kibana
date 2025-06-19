@@ -188,6 +188,10 @@ export interface RowControlsExtensionParams {
    * @param options.initialTabId - The tabId to display in the flyout
    */
   setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  /**
+   * Flag to indicate if Flyout opening controls must be rendered or not
+   */
+  isDocViewerEnabled: boolean;
 }
 
 /**
