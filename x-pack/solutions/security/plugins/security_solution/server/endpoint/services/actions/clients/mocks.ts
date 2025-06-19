@@ -118,6 +118,54 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     return BaseDataGenerator.toEsSearchResponse([]);
   });
 
+  esClient.indices.getFieldMapping.mockResolvedValue({
+    '.ds-.logs-endpoint.actions-default-2025.06.13-000001': {
+      mappings: {
+        'agent.policy.integrationPolicyId': {
+          full_name: 'agent.policy.elasticAgentId',
+          mapping: { elasticAgentId: { type: 'keyword', ignore_above: 1024 } },
+        },
+      },
+    },
+  });
+
+  esClient.cluster.existsComponentTemplate.mockResolvedValue(true);
+
+  esClient.cluster.getComponentTemplate.mockResolvedValue({
+    component_templates: [
+      {
+        name: '.logs-endpoint.actions@package',
+        component_template: {
+          template: {
+            settings: {},
+            mappings: {
+              dynamic: false,
+              properties: {
+                agent: {
+                  properties: {
+                    policy: {
+                      properties: {
+                        agentId: { ignore_above: 1024, type: 'keyword' },
+                        agentPolicyId: { ignore_above: 1024, type: 'keyword' },
+                        elasticAgentId: { ignore_above: 1024, type: 'keyword' },
+                        integrationPolicyId: { ignore_above: 1024, type: 'keyword' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _meta: {
+            package: { name: 'endpoint' },
+            managed_by: 'fleet',
+            managed: true,
+          },
+        },
+      },
+    ],
+  });
+
   (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(
     (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
   );

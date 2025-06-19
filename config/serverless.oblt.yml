@@ -119,10 +119,10 @@ xpack.ml.nlp:
         min: 0
         max: 2
       medium:
-        min: 1
+        min: 0
         max: 32
       high:
-        min: 1
+        min: 0
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
 

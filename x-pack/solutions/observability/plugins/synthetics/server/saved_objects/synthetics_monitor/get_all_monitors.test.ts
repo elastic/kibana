@@ -27,18 +27,20 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationsMap: {
-        '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'us_central_qa',
-          'us_central',
-          'us_central_staging',
-        ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
-      },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
+      },
+      monitorsData: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': {
+          locations: ['us_central_qa', 'us_central', 'us_central_staging'],
+          scheduleInMs: 600000,
+        },
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': {
+          locations: ['us_central_qa', 'us_central_staging'],
+          scheduleInMs: 180000,
+        },
       },
     });
   });
@@ -63,18 +65,20 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationsMap: {
-        '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'us_central_qa',
-          'us_central',
-          'us_central_staging',
-        ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
-      },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
+      },
+      monitorsData: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': {
+          locations: ['us_central_qa', 'us_central', 'us_central_staging'],
+          scheduleInMs: 600000,
+        },
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': {
+          locations: ['us_central_qa', 'us_central_staging'],
+          scheduleInMs: 180000,
+        },
       },
     });
   });
@@ -137,18 +141,20 @@ describe('processMonitors', () => {
       disabledMonitorQueryIds: ['test-project-id-default'],
       monitorLocationIds: ['us_central_qa', 'us_central_staging', 'us_central'],
       maxPeriod: 600000,
-      monitorLocationsMap: {
-        '7f796001-a795-4c0b-afdb-3ce74edea775': [
-          'us_central_qa',
-          'us_central',
-          'us_central_staging',
-        ],
-        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': ['us_central_qa', 'us_central_staging'],
-      },
       monitorQueryIdToConfigIdMap: {
         '7f796001-a795-4c0b-afdb-3ce74edea775': '7f796001-a795-4c0b-afdb-3ce74edea775',
         'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': 'aa925d91-40b0-4f8f-b695-bb9b53cd4e22',
         'test-project-id-default': '5e203f47-1261-4978-a915-cc3315d90fb1',
+      },
+      monitorsData: {
+        '7f796001-a795-4c0b-afdb-3ce74edea775': {
+          locations: ['us_central_qa', 'us_central', 'us_central_staging'],
+          scheduleInMs: 600000,
+        },
+        'aa925d91-40b0-4f8f-b695-bb9b53cd4e22': {
+          locations: ['us_central_qa', 'us_central_staging'],
+          scheduleInMs: 180000,
+        },
       },
     });
   });

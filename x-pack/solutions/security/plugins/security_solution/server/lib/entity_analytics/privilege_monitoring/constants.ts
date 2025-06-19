@@ -13,9 +13,11 @@ export const TIMEOUT = '10m';
 export const INTERVAL = '10m';
 
 export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
-  INSTALLING: 'installing',
+  // TODO Make the engine initialization async before uncommenting these lines
+  // Also implement a status API for FE to poll
+  // INSTALLING: 'installing',
+  // STOPPED: 'stopped',
   STARTED: 'started',
-  STOPPED: 'stopped',
   ERROR: 'error',
 } as const;
 
