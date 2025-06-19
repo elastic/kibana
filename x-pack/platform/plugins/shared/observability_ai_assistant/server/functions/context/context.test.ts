@@ -6,7 +6,7 @@
  */
 
 import { last } from 'lodash';
-import { Message, MessageRole } from '../../common';
+import { Message, MessageRole } from '../../../common';
 import { removeContextToolRequest } from './context';
 
 const CONTEXT_FUNCTION_NAME = 'context';

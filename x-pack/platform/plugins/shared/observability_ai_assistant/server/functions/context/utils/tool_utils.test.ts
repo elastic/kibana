@@ -7,7 +7,7 @@
 
 import { replaceLastUserMessage } from './tool_utils';
 import { Logger } from '@kbn/logging';
-import { Message, MessageRole } from '../../common';
+import { Message, MessageRole } from '../../../../common';
 import { last } from 'lodash';
 
 const messageHistory: Message[] = [

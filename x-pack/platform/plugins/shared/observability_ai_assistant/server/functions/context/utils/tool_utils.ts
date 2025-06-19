@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { last } from 'lodash';
-import { Message, MessageRole } from '../../common';
+import { Message, MessageRole } from '../../../../common';
 
 export function replaceLastUserMessage({
   messages,

@@ -9,12 +9,12 @@ import type { Serializable } from '@kbn/utility-types';
 import { encode } from 'gpt-tokenizer';
 import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
-import { FunctionRegistrationParameters } from '.';
-import { MessageAddEvent } from '../../common/conversation_complete';
-import { FunctionVisibility } from '../../common/functions/types';
-import { Message, MessageRole } from '../../common/types';
-import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
-import { recallAndScore } from '../utils/recall/recall_and_score';
+import { FunctionRegistrationParameters } from '..';
+import { MessageAddEvent } from '../../../common/conversation_complete';
+import { FunctionVisibility } from '../../../common/functions/types';
+import { Message, MessageRole } from '../../../common/types';
+import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
+import { recallAndScore } from './utils/recall_and_score';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 

@@ -8,10 +8,10 @@
 import { scoreSuggestions } from './score_suggestions';
 import { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
-import { MessageRole, StreamingChatResponseEventType } from '../../../common';
+import { MessageRole, StreamingChatResponseEventType } from '../../../../common';
 import { RecalledSuggestion } from './recall_and_score';
-import { FunctionCallChatFunction } from '../../service/types';
-import { ChatEvent } from '../../../common/conversation_complete';
+import { FunctionCallChatFunction } from '../../../service/types';
+import { ChatEvent } from '../../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
 
 const suggestions: RecalledSuggestion[] = [

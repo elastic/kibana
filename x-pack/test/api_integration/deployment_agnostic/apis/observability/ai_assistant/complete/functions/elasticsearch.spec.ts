@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('elasticsearch', function () {
+  describe('tool: elasticsearch', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
     this.tags(['skipCloud']);
     let proxy: LlmProxy;

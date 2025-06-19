@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('visualize_query', function () {
+  describe('tool: visualize_query', function () {
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;

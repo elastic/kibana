@@ -7,11 +7,11 @@
 
 import { RecalledSuggestion, recallAndScore } from './recall_and_score';
 import { scoreSuggestions } from './score_suggestions';
-import { MessageRole, type Message } from '../../../common';
-import type { FunctionCallChatFunction } from '../../service/types';
+import { MessageRole, type Message } from '../../../../common';
+import type { FunctionCallChatFunction } from '../../../service/types';
 import { AnalyticsServiceStart } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
-import { recallRankingEventType } from '../../analytics/recall_ranking';
+import { recallRankingEventType } from '../../../analytics/recall_ranking';
 
 jest.mock('./score_suggestions', () => ({
   scoreSuggestions: jest.fn(),

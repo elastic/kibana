@@ -17,7 +17,7 @@ import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
-import { recallAndScore } from '../../utils/recall/recall_and_score';
+import { recallAndScore } from '../../functions/context/utils/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction } from '../../../common/types';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';

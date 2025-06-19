@@ -10,12 +10,12 @@ import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { omit } from 'lodash';
-import { concatenateChatCompletionChunks, Message } from '../../../common';
-import type { FunctionCallChatFunction } from '../../service/types';
+import { concatenateChatCompletionChunks, Message } from '../../../../common';
+import type { FunctionCallChatFunction } from '../../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
-import { ShortIdTable } from '../../../common/utils/short_id_table';
-import { replaceLastUserMessage } from '../tool_utils';
+import { ShortIdTable } from '../../../../common/utils/short_id_table';
+import { replaceLastUserMessage } from './tool_utils';
 
 export const SCORE_FUNCTION_NAME = 'score';
 
@@ -54,17 +54,7 @@ export async function scoreSuggestions({
 }> {
   const shortIdTable = new ShortIdTable();
 
-  const newMessageContent =
-    dedent(`Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
-    0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the prompt if it helps in
-    answering the prompt. Judge the document according to the following criteria:
-    
-    - The document is relevant to the prompt, and the rest of the conversation
-    - The document has information relevant to the prompt that is not mentioned, or more detailed than what is available in the conversation
-    - The document has a high amount of information relevant to the prompt compared to other documents
-    - The document contains new information not mentioned before in the conversation or provides a correction to previously stated information.
-    
-    User prompt:
+  const newMessageContent = dedent(`User prompt:
     <UserPrompt>
     ${userPrompt}
     </UserPrompt>
@@ -110,6 +100,15 @@ export async function scoreSuggestions({
 
   const response = await lastValueFrom(
     chat('score_suggestions', {
+      systemMessage: dedent(`You are a Document Relevance Scorer.
+        Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
+        0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the prompt if it helps in
+        answering the prompt. Judge the document according to the following criteria:
+        
+        - The document is relevant to the prompt, and the rest of the conversation
+        - The document has information relevant to the prompt that is not mentioned, or more detailed than what is available in the conversation
+        - The document has a high amount of information relevant to the prompt compared to other documents
+        - The document contains new information not mentioned before in the conversation or provides a correction to previously stated information.`),
       messages: replaceLastUserMessage({ messages, newMessageContent, logger }),
       functions: [scoreFunction],
       functionCall: SCORE_FUNCTION_NAME,
