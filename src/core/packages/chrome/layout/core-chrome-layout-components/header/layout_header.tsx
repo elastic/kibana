@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { type ReactNode } from 'react';
+import { styles } from './layout_header.styles';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+export interface LayoutHeaderProps {
+  children: ReactNode;
+}
+
+/**
+ * The header slot wrapper
+ *
+ * @param props - Props for the LayoutHeader component.
+ * @returns The rendered LayoutHeader component.
+ */
+export const LayoutHeader = ({ children }: LayoutHeaderProps) => {
+  return <header css={styles.root}>{children}</header>;
 };

@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import { css } from '@emotion/react';
+import { EmotionFn } from '../types';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+const root: EmotionFn = ({ euiTheme }) =>
+  css`
+    grid-area: application;
+    height: 100%;
+    position: relative;
+    width: 100%;
+    z-index: ${euiTheme.levels.content};
+  `;
+
+export const styles = {
+  root,
 };
