@@ -160,7 +160,7 @@ export function createDataCollectionFailureNofitier({
     const error = getFormattedError(event.error);
     toasts.addError(error, {
       title: i18n.translate('xpack.streams.enrichment.dataSources.dataCollectionError', {
-        defaultMessage: 'An issue occurred retrieving data source documents.',
+        defaultMessage: 'An issue occurred retrieving documents from the data source.',
       }),
       toastMessage: error.message,
     });

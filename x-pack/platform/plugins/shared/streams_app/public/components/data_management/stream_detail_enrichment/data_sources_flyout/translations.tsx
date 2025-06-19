@@ -102,7 +102,7 @@ export const DATA_SOURCES_I18N = {
       'xpack.streams.streamDetailView.managementTab.enrichment.dataSources.randomSamples.callout',
       {
         defaultMessage:
-          'The random samples data source cannot be deleted to guarantee available samples for the simulation. You can still disable it if you want to focus on other data sources samples.',
+          'The random samples data source cannot be deleted to guarantee available samples for the simulation. You can still disable it if you want to focus on samples from other data sources.',
       }
     ),
   },
