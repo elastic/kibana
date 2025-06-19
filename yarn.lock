@@ -2161,12 +2161,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-amsterdam@npm:@elastic/eui@103.0.0-amsterdam.0", "@elastic/eui@103.0.0-amsterdam.0":
-  version "103.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-103.0.0-amsterdam.0.tgz#caf91233905e08b4536fea5606e58f293e72a76d"
-  integrity sha512-+3KSPeeo2ewFAdyIpf8/r21fs8EOVWm6HUMdBGdMNFyVXgWmxC1RUTVa0gCECYVfulXTTztzWDZSH8c14w6oIA==
+"@elastic/eui-amsterdam@npm:@elastic/eui@103.1.0-amsterdam.0":
+  version "103.1.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-103.1.0-amsterdam.0.tgz#d4c0969258ceb22cd85257e81c9a5c182c63faab"
+  integrity sha512-fMSfoR0QOS15DGlLLvx+z2hica5PEPwMycklSd3waYeegjABA21o9VsMILBZNtVkrvMMVGIjNRd1KFv6GYW9aA==
   dependencies:
-    "@elastic/eui-theme-common" "1.2.0"
+    "@elastic/eui-theme-common" "1.2.1"
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2202,14 +2202,55 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-common@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.2.0.tgz#120e7ad70bac8d2adf2a7dbefd98b3107e0395e3"
-  integrity sha512-P9CnI0AGX41uxnxcewwTiZ62og/42fCdA0krtYpc6YVGUpr35FZdNfTsa2hpcQPYPLYbR1SDYF00t516UWDRsQ==
+"@elastic/eui-theme-common@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-1.2.1.tgz#958b546d7832c6a17eb691d72de66deee933aede"
+  integrity sha512-fbFHjanNXau0RCvJcakhZPvJwD/L2LN8tEOlVS5T6P8uhGhpDYFC7WxQAqGbkaAA8Z7Xgalad8705WOtsjqtlg==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
+
+"@elastic/eui@103.1.0":
+  version "103.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-103.1.0.tgz#187aed22593f76d16f1ab13c575dd41027cb40d8"
+  integrity sha512-X7JLLNXa5A3Ksd4akJ7bJ6ou+/jC/qxcUCPZOSUGaQodgw1EghdiSoUakILnWHl6MiOqzwlsXCHyMCaMTTG7/w==
+  dependencies:
+    "@elastic/eui-theme-common" "1.2.1"
+    "@elastic/prismjs-esql" "^1.1.0"
+    "@hello-pangea/dnd" "^16.6.0"
+    "@types/lodash" "^4.14.202"
+    "@types/numeral" "^2.0.5"
+    "@types/react-window" "^1.8.8"
+    "@types/refractor" "^3.4.0"
+    chroma-js "^2.4.2"
+    classnames "^2.5.1"
+    lodash "^4.17.21"
+    mdast-util-to-hast "^10.2.0"
+    numeral "^2.0.6"
+    prop-types "^15.8.1"
+    react-dropzone "^11.7.1"
+    react-element-to-jsx-string "^15.0.0"
+    react-focus-on "^3.9.1"
+    react-is "^17.0.2"
+    react-remove-scroll-bar "^2.3.4"
+    react-virtualized-auto-sizer "^1.0.24"
+    react-window "^1.8.10"
+    refractor "^3.6.0"
+    rehype-raw "^5.1.0"
+    rehype-react "^6.2.1"
+    rehype-stringify "^8.0.0"
+    remark-breaks "^2.0.2"
+    remark-emoji "^2.1.0"
+    remark-parse-no-trim "^8.0.4"
+    remark-rehype "^8.1.0"
+    tabbable "^5.3.3"
+    text-diff "^1.0.1"
+    unified "^9.2.2"
+    unist-util-visit "^2.0.3"
+    url-parse "^1.5.10"
+    uuid "^8.3.0"
+    vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
