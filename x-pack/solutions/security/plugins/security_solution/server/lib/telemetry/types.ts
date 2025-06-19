@@ -391,19 +391,8 @@ export interface ResponseActionsRuleResponseAggregations {
     buckets: Array<{
       key: '.endpoint' | '.osquery';
       doc_count: number;
-      rulesInfo: {
-        buckets: Array<{
-          key: string; // rule ID
-          doc_count: number;
-        }>;
-      };
     }>;
   };
-}
-
-interface ResponseActionsRuleTelemetry {
-  ids: string[];
-  count: number;
 }
 
 export interface ResponseActionsRuleTelemetryTemplate {
@@ -411,15 +400,12 @@ export interface ResponseActionsRuleTelemetryTemplate {
   cluster_uuid: string;
   cluster_name: string;
   license_id: string | undefined;
-  response_actions: {
-    endpoint: ResponseActionsRuleTelemetry;
-    osquery: ResponseActionsRuleTelemetry;
-  };
+  response_actions_rules: ResponseActionRules;
 }
 
 export interface ResponseActionRules {
-  endpoint: string[];
-  osquery: string[];
+  endpoint: number;
+  osquery: number;
 }
 interface DetectionRuleParms {
   ruleId: string;
