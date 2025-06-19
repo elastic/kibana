@@ -24,7 +24,7 @@ const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
 export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
-  const esqlQuery = getAnomaliesDetectedEsqlQuery('default', undefined, undefined, timerange);
+  const esqlQuery = getAnomaliesDetectedEsqlQuery('default', timerange);
   const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Anomalies Detected',
     label: 'Anomalies Detected',

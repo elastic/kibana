@@ -8,12 +8,7 @@
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
 import { createTimeFilter, type TimeRange } from '../common/time_filter';
 
-export const getAnomaliesDetectedEsqlQuery = (
-  namespace: string,
-  jobIds?: string[],
-  userNames?: string[],
-  timeRange?: TimeRange
-) => {
+export const getAnomaliesDetectedEsqlQuery = (namespace: string, timeRange?: TimeRange) => {
   const timeFilter = createTimeFilter(timeRange);
 
   return `FROM .ml-anomalies-shared
