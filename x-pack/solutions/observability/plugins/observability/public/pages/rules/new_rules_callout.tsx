@@ -59,13 +59,13 @@ const CALLOUT_TITLE = i18n.translate('xpack.observability.newRulesCallout.title'
 
 const CALLOUT_DESCRIPTION = i18n.translate('xpack.observability.newRulesCallout.description', {
   defaultMessage:
-    'Consider using the Custom Threshold (CT) rule or Elasticsearch Query (ESQ) rule, which offer more flexibility and customization options.',
+    'Consider using the Custom threshold rule or Elasticsearch query rule, which offer more flexibility and customization options.',
 });
 
 const CREATE_CTR_RULE_LABEL = i18n.translate('xpack.observability.newRulesCallout.createCTRule', {
-  defaultMessage: 'Create CT rule',
+  defaultMessage: 'Create Custom threshold rule',
 });
 
 const CREATE_ESQ_RULE_LABEL = i18n.translate('xpack.observability.newRulesCallout.createESQRule', {
-  defaultMessage: 'Create ESQ rule',
+  defaultMessage: 'Create Elasticsearch query rule',
 });
