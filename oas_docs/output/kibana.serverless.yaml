@@ -66877,14 +66877,6 @@ components:
         labels:
           type: object
           properties:
-            monitoring:
-              type: object
-              properties:
-                privileged_users:
-                  enum:
-                    - monitored
-                    - deleted
-                  type: string
             source_indices:
               items:
                 type: string
@@ -66905,6 +66897,8 @@ components:
           properties:
             name:
               type: string
+            is_privileged:
+              type: boolean
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
       properties:
