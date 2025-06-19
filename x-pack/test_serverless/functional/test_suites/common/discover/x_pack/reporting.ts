@@ -90,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
+        await PageObjects.reporting.clickPopoverItem('CSV');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
