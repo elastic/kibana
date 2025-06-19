@@ -52,7 +52,7 @@ export const createPatternDataSourceProfileProvider = (
           ...patternRenderers,
         };
       },
-    getAdditionalCellActions: (prev, ss) => () => {
+    getAdditionalCellActions: (prev) => () => {
       return [
         ...prev(),
         {
@@ -88,6 +88,12 @@ export const createPatternDataSourceProfileProvider = (
           },
         },
       ];
+    },
+    getDefaultAppState: (prev) => (params) => {
+      return {
+        ...prev(params),
+        hideChart: true,
+      };
     },
   },
   resolve: (params) => {
