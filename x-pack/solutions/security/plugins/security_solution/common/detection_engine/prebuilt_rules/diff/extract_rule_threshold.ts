@@ -12,9 +12,13 @@ import type {
 } from '../../../api/detection_engine/model/rule_schema';
 
 export const extractRuleThreshold = (rule: ThresholdRule | ThresholdRuleCreateProps): Threshold => {
+  const cardinality =
+    rule.threshold.cardinality && rule.threshold.cardinality.length > 0
+      ? rule.threshold.cardinality
+      : undefined;
   return {
     value: rule.threshold.value,
     field: rule.threshold.field,
-    cardinality: rule.threshold.cardinality ?? [],
+    cardinality,
   };
 };
