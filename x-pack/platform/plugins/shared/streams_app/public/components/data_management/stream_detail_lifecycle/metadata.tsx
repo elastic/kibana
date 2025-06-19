@@ -16,7 +16,6 @@ import React, { ReactNode } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -26,11 +25,9 @@ import {
   EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiPopover,
   EuiText,
   EuiToolTip,
-  formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

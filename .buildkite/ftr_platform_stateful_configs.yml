@@ -407,3 +407,4 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
+  - src/platform/test/api_integration/apis/unused_urls_task/config.ts
