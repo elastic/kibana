@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataCascade } from './data_cascade';
+export { DataCascadeImpl } from './data_cascade_impl';
+export type { DataCascadeImplProps } from './data_cascade_impl';

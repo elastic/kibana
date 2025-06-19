@@ -25,6 +25,8 @@ import {
   type IDispatchAction,
   storeReducer,
 } from './reducers';
+export type { GroupNode, LeafNode, IStoreState, IDispatchAction } from './reducers';
+export { storeReducer } from './reducers';
 
 interface IStoreContext<N extends GroupNode, L extends LeafNode> {
   state: IStoreState<N, L>;
