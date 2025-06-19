@@ -9,16 +9,17 @@
 
 import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage, isIdentifier } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import {
-  isStringLiteral,
-  isLiteral,
-  isList,
-  isBooleanLiteral,
-  isIntegerLiteral,
-  isDoubleLiteral,
-} from '@kbn/esql-ast/src/ast/helpers';
-import { resolveItem } from '@kbn/esql-ast/src/visitor/utils';
+// import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+// import {
+//   isStringLiteral,
+//   isLiteral,
+//   isList,
+//   isBooleanLiteral,
+//   isIntegerLiteral,
+//   isDoubleLiteral,
+// } from '@kbn/esql-ast/src/ast/helpers';
+// import { resolveItem } from '@kbn/esql-ast/src/visitor/utils';
+import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import {
   isLiteralItem,
   isTimeIntervalItem,
@@ -47,11 +48,12 @@ import {
   unwrapArrayOneLevel,
   isArrayType,
   isParametrized,
-  isParam,
+  // isParam,
 } from '../shared/helpers';
 import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
 import { ReferenceMaps } from './types';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 
 const NO_MESSAGE: ESQLMessage[] = [];
 
@@ -269,26 +271,50 @@ export function validateFunction({
   }
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
-  const relevantFuncSignatures = matchingSignatures;
+  // const relevantFuncSignatures = matchingSignatures;
+  let relevantFuncSignatures = matchingSignatures;
+  const enrichedArgs = fn.args;
+
+  if (fn.name === 'in' || fn.name === 'not_in') {
+    for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
+      relevantFuncSignatures = fnDefinition.signatures.filter(
+        (s) =>
+          s.params?.length >= argIndex &&
+          s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+            const arg = enrichedArgs[idx];
+
+            if (isLiteralItem(arg)) {
+              return (
+                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
+              );
+            }
+            return false; // Non-literal arguments don't match
+          })
+      );
+    }
+  }
 
   for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    for (let index = 0; index < fn.args.length; index++) {
-      const argument = fn.args[index];
+    let args = fn.args;
+    const second = fn.args[1];
+    if (isList(second)) {
+      args = [fn.args[0], second.values];
+    }
+
+    args.forEach((argument, index) => {
       const parameter = getParamAtPosition(signature, index);
       if ((!argument && parameter?.optional) || !parameter) {
         // that's ok, just skip it
-        // the else case is already caught with the argument counts check
+        // the else case is already catched with the argument counts check
         // few lines above
-        break;
+        return;
       }
 
       // check every element of the argument (may be an array of elements, or may be a single element)
       const hasMultipleElements = Array.isArray(argument);
       const argElements = hasMultipleElements ? argument : [argument];
-      const elementType = hasMultipleElements
-        ? unwrapArrayOneLevel(parameter.type)
-        : parameter.type;
+      const singularType = unwrapArrayOneLevel(parameter.type);
       const messagesFromAllArgElements = argElements.flatMap((arg) => {
         return [
           validateFunctionLiteralArg,
@@ -301,7 +327,7 @@ export function validateFunction({
             arg,
             {
               ...parameter,
-              type: elementType,
+              type: singularType,
               constantOnly: forceConstantOnly || parameter.constantOnly,
             },
             references,
@@ -309,7 +335,9 @@ export function validateFunction({
           );
         });
       });
+
       const shouldCollapseMessages = isArrayType(parameter.type as string) && hasMultipleElements;
+
       failingSignature.push(
         ...(shouldCollapseMessages
           ? collapseWrongArgumentTypeMessages(
@@ -322,7 +350,7 @@ export function validateFunction({
             )
           : messagesFromAllArgElements)
       );
-    }
+    });
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);
     }
@@ -342,95 +370,95 @@ export function validateFunction({
 
 // #region Arg validation
 
-const formatType = (argument: ESQLAstExpression): string => {
-  if (isLiteral(argument)) {
-    switch (argument.literalType) {
-      case 'keyword': {
-        return 'string';
-      }
-      default: {
-        return argument.literalType;
-        // return argument.type + ':' + argument.literalType;
-      }
-    }
-  }
+// const formatType = (argument: ESQLAstExpression): string => {
+//   if (isLiteral(argument)) {
+//     switch (argument.literalType) {
+//       case 'keyword': {
+//         return 'string';
+//       }
+//       default: {
+//         return argument.literalType;
+//         // return argument.type + ':' + argument.literalType;
+//       }
+//     }
+//   }
 
-  return argument.type;
-};
+//   return argument.type;
+// };
 
-type ValidationError = [expected: ValidationParameter, received: ESQLAstExpression];
-type ValidationParameter = Partial<FunctionParameter> &
-  Pick<FunctionParameter, 'type'> & { parent?: ValidationParameter };
+// type ValidationError = [expected: ValidationParameter, received: ESQLAstExpression];
+// type ValidationParameter = Partial<FunctionParameter> &
+//   Pick<FunctionParameter, 'type'> & { parent?: ValidationParameter };
 
-const validateParameter = (
-  parameter: ValidationParameter,
-  argument: ESQLAstExpression
-): ValidationError | undefined => {
-  if (isArrayType(parameter.type)) {
-    if (!isList(argument)) {
-      return [parameter, argument];
-    }
+// const validateParameter = (
+//   parameter: ValidationParameter,
+//   argument: ESQLAstExpression
+// ): ValidationError | undefined => {
+//   if (isArrayType(parameter.type)) {
+//     if (!isList(argument)) {
+//       return [parameter, argument];
+//     }
 
-    const arrayElementParameter: ValidationParameter = {
-      ...parameter,
-      type: unwrapArrayOneLevel(parameter.type),
-      parent: parameter,
-    };
+//     const arrayElementParameter: ValidationParameter = {
+//       ...parameter,
+//       type: unwrapArrayOneLevel(parameter.type),
+//       parent: parameter,
+//     };
 
-    for (const element of argument.values) {
-      const error = validateParameter(arrayElementParameter, element);
-      if (error) {
-        return error;
-      }
-    }
-  }
+//     for (const element of argument.values) {
+//       const error = validateParameter(arrayElementParameter, element);
+//       if (error) {
+//         return error;
+//       }
+//     }
+//   }
 
-  if (isParam(argument)) {
-    return;
-  }
+//   if (isParam(argument)) {
+//     return;
+//   }
 
-  switch (parameter.type) {
-    case 'keyword': {
-      if (isStringLiteral(argument)) {
-        return;
-      }
-    }
-    case 'integer': {
-      if (isIntegerLiteral(argument)) {
-        return;
-      }
-    }
-    case 'double': {
-      if (isDoubleLiteral(argument)) {
-        return;
-      }
-    }
-    case 'boolean': {
-      if (isBooleanLiteral(argument)) {
-        return;
-      }
-    }
-    case 'unsigned_long':
-    case 'long':
-    case 'counter_integer':
-    case 'counter_long':
-    case 'counter_double':
-    case 'any':
-    case 'date':
-    case 'date_period':
-    case 'ip':
-    case 'cartesian_point':
-    case 'cartesian_shape':
-    case 'geo_point':
-    case 'geo_shape':
-    case 'version':
-    case 'date_nanos': {
-      return [parameter, argument];
-    }
-  }
+//   switch (parameter.type) {
+//     case 'keyword': {
+//       if (isStringLiteral(argument)) {
+//         return;
+//       }
+//     }
+//     case 'integer': {
+//       if (isIntegerLiteral(argument)) {
+//         return;
+//       }
+//     }
+//     case 'double': {
+//       if (isDoubleLiteral(argument)) {
+//         return;
+//       }
+//     }
+//     case 'boolean': {
+//       if (isBooleanLiteral(argument)) {
+//         return;
+//       }
+//     }
+//     case 'unsigned_long':
+//     case 'long':
+//     case 'counter_integer':
+//     case 'counter_long':
+//     case 'counter_double':
+//     case 'any':
+//     case 'date':
+//     case 'date_period':
+//     case 'ip':
+//     case 'cartesian_point':
+//     case 'cartesian_shape':
+//     case 'geo_point':
+//     case 'geo_shape':
+//     case 'version':
+//     case 'date_nanos': {
+//       return [parameter, argument];
+//     }
+//   }
 
-  return [parameter, argument];
-};
+//   return [parameter, argument];
+// };
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -441,28 +469,28 @@ function validateFunctionLiteralArg(
 ) {
   const messages: ESQLMessage[] = [];
 
-  // TODO: Currently, we use this special path only fo IN-expressions, but we should
-  // extend the `validateParameter` and run this for all functions.
-  if (astFunction.name === 'in' || astFunction.name === 'not_in') {
-    const error = validateParameter(parameter, resolveItem(argument));
+  // // TODO: Currently, we use this special path only fo IN-expressions, but we should
+  // // extend the `validateParameter` and run this for all functions.
+  // if (astFunction.name === 'in' || astFunction.name === 'not_in') {
+  //   const error = validateParameter(parameter, resolveItem(argument));
 
-    if (error) {
-      const [errorParameter, errorArgument] = error;
+  //   if (error) {
+  //     const [errorParameter, errorArgument] = error;
 
-      messages.push(
-        getMessageFromId({
-          messageId: 'wrongArgumentType',
-          values: {
-            name: astFunction.name,
-            argType: errorParameter.type,
-            value: errorArgument.text,
-            givenType: formatType(errorArgument),
-          },
-          locations: errorArgument.location,
-        })
-      );
-    }
-  }
+  //     messages.push(
+  //       getMessageFromId({
+  //         messageId: 'wrongArgumentType',
+  //         values: {
+  //           name: astFunction.name,
+  //           argType: errorParameter.type,
+  //           value: errorArgument.text,
+  //           givenType: formatType(errorArgument),
+  //         },
+  //         locations: errorArgument.location,
+  //       })
+  //     );
+  //   }
+  // }
 
   if (isLiteralItem(argument)) {
     if (
