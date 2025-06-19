@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -96,8 +96,6 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
