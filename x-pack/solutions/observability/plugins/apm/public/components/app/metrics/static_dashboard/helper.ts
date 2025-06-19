@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { GridData } from '@kbn/dashboard-plugin/server/dashboard_saved_object';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
@@ -44,18 +44,10 @@ const getAdhocDataView = (dataView: DataView) => {
   };
 };
 
-interface DashboardPanelMap {
-  [key: string]: {
-    type: string;
-    explicitInput: object;
-    gridData: GridData;
-  };
-}
-
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
-): Promise<DashboardPanelMap | undefined> {
+): Promise<DashboardState['panels'] | undefined> {
   const dashboardFilename = getDashboardFileNameFromProps(props);
   const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
 
@@ -71,10 +63,11 @@ export async function convertSavedDashboardToPanels(
     const datasourceStates = attributes?.state?.datasourceStates ?? {};
     const layers = datasourceStates.formBased?.layers ?? datasourceStates.textBased?.layers ?? [];
 
-    acc[gridData.i] = {
+    acc.push({
       type: panel.type,
       gridData,
-      explicitInput: {
+      panelIndex,
+      panelConfig: {
         id: panelIndex,
         ...embeddableConfig,
         title,
@@ -92,10 +85,10 @@ export async function convertSavedDashboardToPanels(
           },
         },
       },
-    };
+    });
 
     return acc;
-  }, {}) as DashboardPanelMap;
+  }, []);
 
   return panels;
 }
