@@ -58,11 +58,21 @@ export interface FormBasedLayer {
   ignoreGlobalFilters?: boolean;
 }
 
+export type GenericIndexPatternPersistedColumn = Omit<
+  GenericIndexPatternColumn,
+  'dataType' | 'scale' | 'isBucketed' | 'hasArraySupport' | 'isStaticValue'
+>;
+
 export interface FormBasedPersistedState {
-  layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
+  layers: Record<string, PersistedFormBasedLayer>;
 }
 
-export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
+export type PersistedFormBasedLayer = Omit<
+  FormBasedLayer,
+  'incompleteColumns' | 'columns' | 'indexPatternId'
+> & {
+  columns: Record<string, GenericIndexPatternPersistedColumn>;
+};
 
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;

@@ -243,6 +243,27 @@ export function getFormBasedDatasource({
     },
 
     getPersistableState(state: FormBasedPrivateState) {
+      const newState: FormBasedPrivateState = { ...state, layers: {} };
+      for (const [layerId, layer] of Object.entries(state.layers)) {
+        const { incompleteColumns, ...persistableLayer } = layer;
+        const newLayer: FormBasedPrivateState['layers'][number] = {
+          ...persistableLayer,
+          columns: {},
+        };
+        for (const [columnId, column] of Object.entries(layer.columns)) {
+          const {
+            customLabel,
+            dataType,
+            isBucketed,
+            isStaticValue,
+            hasArraySupport,
+            ...persistableColumn
+          } = column;
+          // @ts-expect-error - operationType is not a valid key of GenericIndexPatternPersistedColumn
+          newState.layers[layerId].columns[columnId] = persistableColumn;
+        }
+        newState.layers[layerId] = newLayer;
+      }
       return extractReferences(state);
     },
 

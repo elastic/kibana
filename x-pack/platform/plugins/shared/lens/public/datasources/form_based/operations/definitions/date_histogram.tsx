@@ -141,6 +141,7 @@ export const dateHistogramOperation: OperationDefinition<
   { interval: string; dropPartials?: boolean; includeEmptyRows?: boolean }
 > = {
   type: 'date_histogram',
+  isBucketed: true,
   displayName: i18n.translate('xpack.lens.indexPattern.dateHistogram', {
     defaultMessage: 'Date histogram',
   }),

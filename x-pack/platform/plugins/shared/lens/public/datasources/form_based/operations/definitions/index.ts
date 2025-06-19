@@ -251,6 +251,7 @@ interface BaseOperationDefinitionProps<
   P = {}
 > {
   type: C['operationType'];
+  isBucketed?: boolean;
   /**
    * The priority of the operation. If multiple operations are possible in
    * a given scenario (e.g. the user dragged a field into the workspace),

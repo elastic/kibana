@@ -17,12 +17,23 @@ import {
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import type { DataType, VisualizeEditorContext } from '../../types';
+import {
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  FormBasedLayer,
+  GenericIndexPatternPersistedColumn,
+} from './types';
 
-import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
+import {
+  LastValueIndexPatternColumn,
+  memoizedGetAvailableOperationsByMetadata,
+  operationDefinitionMap,
+  updateLayerIndexPattern,
+} from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
 import type { IndexPattern, IndexPatternRef } from '../../types';
+import { isColumnOfType } from './operations/definitions/helpers';
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
@@ -66,7 +77,7 @@ export function extractReferences({ layers }: FormBasedPrivateState) {
 export function injectReferences(
   state: FormBasedPersistedState,
   references: SavedObjectReference[]
-) {
+): FormBasedPersistedState & { layers: Record<string, FormBasedLayer> } {
   const layers: Record<string, FormBasedLayer> = {};
   Object.entries(state.layers).forEach(([layerId, persistedLayer]) => {
     const indexPatternId = references.find(
@@ -75,7 +86,7 @@ export function injectReferences(
 
     if (indexPatternId) {
       layers[layerId] = {
-        ...persistedLayer,
+        ...(persistedLayer as FormBasedLayer),
         indexPatternId,
       };
     }
@@ -85,14 +96,65 @@ export function injectReferences(
   };
 }
 
+function getDatatypeFromOperation(
+  column: GenericIndexPatternPersistedColumn,
+  dataView?: IndexPattern
+): DataType {
+  const operation = operationDefinitionMap[column.operationType];
+  if ('dataType' in operation) {
+    return operation.dataType as DataType;
+  }
+  if ('sourceField' in column) {
+    if (column.sourceField && dataView) {
+      const fieldType = dataView.getFieldByName(column.sourceField as string)?.type;
+      if (fieldType) {
+        return fieldType as DataType;
+      }
+    }
+  }
+
+  return 'number';
+}
+
 function createStateFromPersisted({
   persistedState,
   references,
+  indexPatterns,
 }: {
   persistedState?: FormBasedPersistedState;
   references?: SavedObjectReference[];
-}) {
-  return persistedState && references ? injectReferences(persistedState, references) : undefined;
+  indexPatterns: Record<string, IndexPattern>;
+}): Omit<FormBasedPrivateState, 'currentIndexPatternId'> | undefined {
+  if (!persistedState || !references) {
+    return undefined;
+  }
+  const persistedStateWithIndexPatterns = injectReferences(persistedState, references);
+  const runtimeState: Omit<FormBasedPrivateState, 'currentIndexPatternId'> = {
+    ...persistedStateWithIndexPatterns,
+    layers: {},
+  };
+  for (const [layerId, persistedLayer] of Object.entries(
+    persistedStateWithIndexPatterns?.layers || {}
+  )) {
+    const newLayer: FormBasedLayer = {
+      ...persistedLayer,
+      columns: {},
+    };
+    for (const [columnId, column] of Object.entries(persistedLayer.columns)) {
+      const operation = operationDefinitionMap[column.operationType];
+      runtimeState.layers[layerId].columns[columnId] = {
+        ...column,
+        isBucketed: operation.isBucketed ?? false,
+        isStaticValue: column.operationType === 'static_value',
+        hasArraySupport:
+          isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
+          column.params.showArrayValues,
+        dataType: getDatatypeFromOperation(column, indexPatterns[newLayer.indexPatternId]),
+      };
+    }
+    runtimeState.layers[layerId] = newLayer;
+  }
+  return runtimeState;
 }
 
 function getUsedIndexPatterns({
@@ -151,7 +213,7 @@ export function loadInitialState({
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
 }): FormBasedPrivateState {
-  const state = createStateFromPersisted({ persistedState, references });
+  const state = createStateFromPersisted({ persistedState, references, indexPatterns });
   const { usedPatterns, allIndexPatternIds: indexPatternIds } = getUsedIndexPatterns({
     state,
     defaultIndexPatternId,
