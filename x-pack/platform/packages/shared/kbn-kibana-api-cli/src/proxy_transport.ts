@@ -28,6 +28,8 @@ export function createProxyTransport({
     constructor(options: TransportOptions) {
       super({
         ...options,
+        // the elastic-x-product headers cause issues w/ the proxy transport,
+        // as the returned headers are from the proxy endpoint and not ES
         productCheck: undefined,
       });
     }
