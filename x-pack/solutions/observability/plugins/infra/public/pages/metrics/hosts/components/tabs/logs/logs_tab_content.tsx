@@ -6,18 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
+import { LogsSearchBar } from './logs_search_bar';
 
 export const LogsTabContent = () => {
   const {
@@ -54,13 +55,24 @@ export const LogsSavedSearchComponent = () => {
 
   const { hostNodes, loading } = useHostsViewContext();
 
-  const hostsFilterQuery = useMemo(
-    () => ({
-      query: hostNodes.map((node) => `host.name: "${node.name}"`).join(' or '),
+  const [filterQuery] = useLogsSearchUrlState();
+
+  const hostsFilterQuery = useMemo(() => {
+    const hostsQueryPart = hostNodes.length
+      ? hostNodes.map((node) => `host.name: "${node.name}"`).join(' or ')
+      : '';
+
+    const urlQueryPart = filterQuery?.query ? String(filterQuery.query) : '';
+
+    const parts = [] as string[];
+    if (hostsQueryPart) parts.push(hostsQueryPart);
+    if (urlQueryPart) parts.push(`(${urlQueryPart})`);
+
+    return {
       language: 'kuery',
-    }),
-    [hostNodes]
-  );
+      query: parts.join(' and '),
+    };
+  }, [hostNodes, filterQuery]);
 
   const memoizedTimeRange = useMemo(() => ({ from, to }), [from, to]);
 
@@ -74,51 +86,35 @@ export const LogsSavedSearchComponent = () => {
   }
 
   return logSources.value ? (
-    <>
-      {!loading && (
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" style={{ marginBottom: 8 }}>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj="infraHostLogsTabOpenInDiscoverLink"
-              href={discoverLink}
-              target="_blank"
-              color="primary"
-              css={css`
-                display: flex;
-                align-items: center;
-              `}
-              external={false}
-            >
-              <EuiIcon
-                type="discoverApp"
-                size="s"
-                color="primary"
-                css={css`
-                  margin-right: 4px;
-                `}
-              />
-              <EuiText size="xs">
-                {i18n.translate('xpack.infra.hosts.logs.openInDiscoverLabel', {
-                  defaultMessage: 'Open in Discover',
-                })}
-              </EuiText>
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      <LazySavedSearchComponent
-        dependencies={{ embeddable, searchSource, dataViews }}
-        index={logSources.value}
-        timeRange={memoizedTimeRange}
-        query={hostsFilterQuery}
-        height="60vh"
-        displayOptions={{
-          solutionNavIdOverride: 'oblt',
-          enableDocumentViewer: true,
-          enableFilters: false,
-        }}
-      />
-    </>
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <LogsSearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <OpenInLogsExplorerButton
+            href={discoverLink}
+            testSubject="hostsView-logs-link-to-stream-button"
+            flush="both"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexItem>
+        <LazySavedSearchComponent
+          dependencies={{ embeddable, searchSource, dataViews }}
+          index={logSources.value}
+          timeRange={memoizedTimeRange}
+          query={hostsFilterQuery}
+          height="60vh"
+          displayOptions={{
+            solutionNavIdOverride: 'oblt',
+            enableDocumentViewer: true,
+            enableFilters: false,
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   ) : null;
 };
 
