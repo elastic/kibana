@@ -12,7 +12,7 @@ import { ElasticsearchServiceStart } from '@kbn/core/server';
 import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
 import { createInternalRegistry } from './utils';
-import { createEsqlToolRegistry, EsqlToolRegistry } from './esql/esql_registry';
+import { createEsqlToolRegistry } from './esql/esql_registry';
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
