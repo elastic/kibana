@@ -146,7 +146,7 @@ export function AgentExplorer() {
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
             defaultMessage:
-              'Agent Explorer provides an inventory and details of deployed APM agents. (EDOT SDKs are not currently listed.)',
+              'Agent Explorer provides an inventory and details of deployed APM agents. EDOT SDKs are not currently listed.',
           })}
         </EuiText>
       </EuiFlexItem>
