@@ -31,8 +31,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
-  const { fileUploadManager, filesStatus, uploadStatus, uploadStarted, onImportClick, canImport } =
-    useFileUploadContext();
+  const { uploadStatus, uploadStarted, onImportClick, canImport } = useFileUploadContext();
 
   const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
 
@@ -80,6 +79,22 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
                   />
                 </EuiButton>
               </EuiFlexItem>
+            ) : null}
+
+            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty onClick={onClose} disabled={true}>
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.importingButton"
+                      defaultMessage="Importing..."
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : null}
 
             {isSaving ? (

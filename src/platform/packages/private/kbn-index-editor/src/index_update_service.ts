@@ -134,9 +134,14 @@ export class IndexUpdateService {
     )
   );
 
-  public readonly dataView$: Observable<DataView> = this._indexName$.pipe(
-    skipWhile((indexName) => !indexName),
-    switchMap((indexName) => {
+  public readonly dataView$: Observable<DataView> = combineLatest([
+    this._indexName$,
+    this._indexCrated$,
+  ]).pipe(
+    skipWhile(([indexName, indexCreated]) => {
+      return indexCreated === false || !indexName;
+    }),
+    switchMap(([indexName]) => {
       return from(this.getDataView(indexName!));
     }),
     shareReplay({ bufferSize: 1, refCount: true })

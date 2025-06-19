@@ -9,24 +9,13 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useFileUploadContext } from '@kbn/file-upload';
+import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import React, { PropsWithChildren, useCallback, type FC } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { FilesPreview } from './file_preview';
 
 export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
-  const {
-    fileUploadManager,
-    filesStatus,
-    uploadStatus,
-    fileClashes,
-    fullFileUpload,
-    uploadStarted,
-    onImportClick,
-    canImport,
-    setIndexName,
-    setIndexValidationStatus,
-    deleteFile,
-  } = useFileUploadContext();
+  const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
   const onFilesSelected = useCallback(
     async (files: File[]) => {
@@ -62,11 +51,18 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.primary}`,
   });
 
+  const showFilePreview =
+    !isDragActive &&
+    filesStatus.length > 0 &&
+    uploadStatus.overallImportStatus !== STATUS.COMPLETED;
+
+  const content = showFilePreview ? <FilesPreview /> : children;
+
   return (
     <div {...getRootProps()}>
       {isDragActive ? <div css={overlayCss} /> : null}
       <input {...getInputProps()} />
-      {children}
+      {content}
     </div>
   );
 };

@@ -21,6 +21,7 @@ import { CustomPanel } from './custom_panel';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
+import { EmptyPrompt } from './empty_prompt';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -45,12 +46,12 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.application,
     coreStart.http,
     coreStart.notifications,
-    () => {
-      console.log('File upload context value callback');
+    // On upload complete callback
+    (res) => {
+      deps.indexUpdateService.setIndexName(res!.index);
+      deps.indexUpdateService.setIndexCreated(true);
     }
   );
-
-  if (!dataView || !dataViewColumns) return null;
 
   return (
     <KibanaContextProvider
@@ -80,13 +81,17 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
           >
             <FileDropzone>
-              <DataGridLazy
-                {...props}
-                dataView={dataView}
-                columns={dataViewColumns}
-                rows={rows}
-                totalHits={totalHits}
-              />
+              {dataView && dataViewColumns ? (
+                <DataGridLazy
+                  {...props}
+                  dataView={dataView}
+                  columns={dataViewColumns}
+                  rows={rows}
+                  totalHits={totalHits}
+                />
+              ) : (
+                <EmptyPrompt />
+              )}
             </FileDropzone>
           </CellActionsProvider>
         </EuiFlyoutBody>

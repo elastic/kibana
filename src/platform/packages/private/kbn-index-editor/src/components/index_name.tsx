@@ -11,8 +11,9 @@ import { EuiInlineEditTitle } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import useMount from 'react-use/lib/useMount';
 import { KibanaContextExtra } from '../types';
 
 export const IndexName: FC = () => {
@@ -20,7 +21,9 @@ export const IndexName: FC = () => {
     services: { fileUpload, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
-  const existingIndexName = useObservable(
+  const [isInitialized, setIsInitialized] = React.useState<boolean>(false);
+
+  const indexNameValue = useObservable(
     indexUpdateService.indexName$,
     indexUpdateService.getIndexName()
   );
@@ -36,11 +39,50 @@ export const IndexName: FC = () => {
     setIndexValidationStatus,
   } = useFileUploadContext();
 
+  useMount(function validateIndexNameOnMount() {
+    if (!indexNameValue) {
+      setIsInitialized(true);
+      return;
+    }
+    validateIndexName(indexNameValue).then(() => {
+      setIsInitialized(true);
+    });
+  });
+
+  const validateIndexName = useCallback(
+    async (value: string): Promise<boolean> => {
+      setIsLoading(true);
+      const indexExists = await fileUpload.checkIndexExists(value);
+      setIsLoading(false);
+      if (indexExists) {
+        setIndexValidationStatus(STATUS.FAILED);
+        setError([
+          i18n.translate('indexEditor.indexName.alreadyExistsError', {
+            defaultMessage: 'Index name already exists',
+          }),
+        ]);
+        return false;
+      }
+      setIndexValidationStatus(STATUS.COMPLETED);
+      setFileUploadIndexName(value);
+      setError([]);
+      return true;
+    },
+    [fileUpload, setFileUploadIndexName, setIndexValidationStatus]
+  );
+
   const [error, setError] = React.useState<string[]>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+
+  if (!isInitialized) {
+    return null; // or a loading spinner
+  }
+
+  const startWithEditOpen = error.length > 0 || !indexNameValue;
 
   return (
     <EuiInlineEditTitle
+      startWithEditOpen={startWithEditOpen}
       heading="h3"
       size={'m'}
       inputAriaLabel={i18n.translate('indexEditor.indexName.inputAriaLabel', {
@@ -49,13 +91,17 @@ export const IndexName: FC = () => {
       placeholder={i18n.translate('indexEditor.indexName.placeholder', {
         defaultMessage: 'Set index name',
       })}
-      defaultValue={existingIndexName ?? fileUploadIndexName}
+      defaultValue={indexNameValue ?? fileUploadIndexName}
       isReadOnly={isIndexCreated}
       isInvalid={error !== null}
+      isLoading={isLoading}
       editModeProps={{
         formRowProps: { error },
         cancelButtonProps: { onClick: () => setError([]) },
         inputProps: { readOnly: isLoading },
+      }}
+      readModeProps={{
+        'data-test-subj': 'indexNameReadMode',
       }}
       onSave={async (value) => {
         setIsLoading(true);
