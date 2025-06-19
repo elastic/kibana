@@ -151,8 +151,8 @@ export class RuleMigrationsTaskClient {
     for (const dataStats of allDataStats) {
       const migration = allMigrationsMap.get(dataStats.id);
       if (migration) {
-        const taksStats = this.getTaskStats(migration, dataStats.rules);
-        allStats.push({ ...taksStats, ...dataStats, name: migration.name });
+        const tasksStats = this.getTaskStats(migration, dataStats.rules);
+        allStats.push({ ...tasksStats, ...dataStats, name: migration.name });
       }
     }
     return allStats;
