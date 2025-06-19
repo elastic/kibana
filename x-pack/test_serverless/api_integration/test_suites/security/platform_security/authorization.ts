@@ -2079,7 +2079,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV3/investigation-guide",
                 "ui:siemV3/investigation-guide-interactions",
                 "ui:siemV3/threat-intelligence",
-                "ui:siemV3/writeGlobalArtifacts",
               ],
               "minimal_read": Array [
                 "login:",
@@ -4670,7 +4669,6 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:siemV3/investigation-guide",
                 "ui:siemV3/investigation-guide-interactions",
                 "ui:siemV3/threat-intelligence",
-                "ui:siemV3/writeGlobalArtifacts",
               ],
               "minimal_read": Array [
                 "login:",
