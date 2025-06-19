@@ -23,7 +23,6 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
@@ -53,7 +52,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const {
-    analytics,
     locator,
     uiSettings,
     capabilities,
@@ -134,7 +132,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
    */
   useEffect(() => {
     const doFetch = async () => {
-      const startTime = window.performance.now();
+      const surroundingDocsFetchTracker = ebtManager.trackPerformanceEvent(
+        'discoverSurroundingDocsFetch'
+      );
+
       let fetchType = '';
       if (!prevAppState.current) {
         fetchType = 'all';
@@ -153,13 +154,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics && fetchType) {
-        const fetchDuration = window.performance.now() - startTime;
-        reportPerformanceMetricEvent(analytics, {
-          eventName: 'discoverSurroundingDocsFetch',
-          duration: fetchDuration,
-          meta: { fetchType },
-        });
+      if (fetchType) {
+        surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
       }
     };
 
@@ -168,7 +164,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     prevAppState.current = cloneDeep(appState);
     prevGlobalState.current = cloneDeep(globalState);
   }, [
-    analytics,
     appState,
     globalState,
     anchorId,
@@ -176,6 +171,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     fetchAllRows,
     fetchSurroundingRows,
     fetchedState.anchor.id,
+    ebtManager,
   ]);
 
   const rows = useMemo(
