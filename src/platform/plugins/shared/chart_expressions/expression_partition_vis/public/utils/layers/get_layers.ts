@@ -9,7 +9,6 @@
 
 import { Datum, PartitionLayer } from '@elastic/charts';
 import { ColorHandlingFn, PaletteRegistry, getColorFactory } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
@@ -22,12 +21,6 @@ import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predic
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 import { getPartitionFillColor } from '../colors/color_mapping_accessors';
-
-// This is particularly useful in case of a text based languages where
-// it's no possible to use a missingBucketLabel
-const emptySliceLabel = i18n.translate('expressionPartitionVis.emptySlice', {
-  defaultMessage: '(empty)',
-});
 
 export const getLayers = (
   chartType: ChartTypes,
@@ -86,7 +79,8 @@ export const getLayers = (
 
   return columns.map((col, layerIndex) => {
     return {
-      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
+      // groupByRollup expect only strings, but it can be also a number
+      groupByRollup: (d: Datum) => (col.id ? `${d[col.id]}` : `${col.name}`),
       showAccessor: (d: Datum) => true,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel:

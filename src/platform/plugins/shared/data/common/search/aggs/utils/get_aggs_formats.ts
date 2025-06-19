@@ -153,13 +153,6 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           params as SerializedFieldFormat<{}, SerializableRecord>
         );
 
-        if (val === '__other__') {
-          return `${params.otherBucketLabel}`;
-        }
-        if (val === '__missing__') {
-          return `${params.missingBucketLabel}`;
-        }
-
         return format.convert(val, type);
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
