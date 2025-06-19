@@ -64,13 +64,13 @@ interface AggsResponse {
 // Helper to sum buckets by key
 function sumBuckets(bucketsA: Buckets = [], bucketsB: Buckets = []): Buckets {
   const map = new Map<string, number>();
-  for (const { key, doc_count } of bucketsA) {
-    map.set(key, doc_count);
+  for (const { key, doc_count: docCount } of bucketsA) {
+    map.set(key, docCount);
   }
-  for (const { key, doc_count } of bucketsB) {
-    map.set(key, (map.get(key) || 0) + doc_count);
+  for (const { key, doc_count: docCount } of bucketsB) {
+    map.set(key, (map.get(key) || 0) + docCount);
   }
-  return Array.from(map.entries()).map(([key, doc_count]) => ({ key, doc_count }));
+  return Array.from(map.entries()).map(([key, docCount]) => ({ key, doc_count: docCount }));
 }
 
 // Helper to sum monitorIdsAggs buckets
@@ -89,7 +89,11 @@ function sumMonitorIdsBuckets(
       map.set(b.key, { doc_count: b.doc_count, name: b.name });
     }
   }
-  return Array.from(map.entries()).map(([key, { doc_count, name }]) => ({ key, doc_count, name }));
+  return Array.from(map.entries()).map(([key, { doc_count: docCount, name }]) => ({
+    key,
+    doc_count: docCount,
+    name,
+  }));
 }
 
 // Helper to generate aggs for new or legacy monitors
