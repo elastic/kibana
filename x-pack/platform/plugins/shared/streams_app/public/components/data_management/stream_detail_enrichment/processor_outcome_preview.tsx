@@ -143,6 +143,9 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const previewColumnsSorting = useSimulatorSelector(
+    (state) => state.context.previewColumnsSorting
+  );
   const explicitlyEnabledPreviewColumns = useSimulatorSelector(
     (state) => state.context.explicitlyEnabledPreviewColumns
   );
@@ -158,6 +161,7 @@ const OutcomePreviewTable = () => {
     setExplicitlyEnabledPreviewColumns,
     setExplicitlyDisabledPreviewColumns,
     setPreviewColumnsOrder,
+    setPreviewColumnsSorting,
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
@@ -285,6 +289,8 @@ const OutcomePreviewTable = () => {
       rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
       toolbarVisibility
       setVisibleColumns={setVisibleColumns}
+      sorting={previewColumnsSorting}
+      setSorting={setPreviewColumnsSorting}
       columnOrderHint={previewColumnsOrder}
       renderCellValue={
         grokMode

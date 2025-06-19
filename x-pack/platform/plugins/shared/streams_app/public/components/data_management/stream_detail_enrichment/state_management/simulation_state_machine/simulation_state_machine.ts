@@ -104,6 +104,11 @@ export const simulationMachine = setup({
     storePreviewColumnsOrder: assign(({ context }, params: { columns: string[] }) => ({
       previewColumnsOrder: params.columns,
     })),
+    storePreviewColumnsSorting: assign(
+      (_, params: { sorting: SimulationContext['previewColumnsSorting'] }) => ({
+        previewColumnsSorting: params.sorting,
+      })
+    ),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
@@ -158,6 +163,7 @@ export const simulationMachine = setup({
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
     previewColumnsOrder: [],
+    previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
     processors: input.processors,
     samples: [],
     samplingCondition: composeSamplingCondition(input.processors),
@@ -199,6 +205,15 @@ export const simulationMachine = setup({
       actions: [
         {
           type: 'storePreviewColumnsOrder',
+          params: ({ event }) => event,
+        },
+      ],
+      target: '.idle',
+    },
+    'previewColumns.setSorting': {
+      actions: [
+        {
+          type: 'storePreviewColumnsSorting',
           params: ({ event }) => event,
         },
       ],
