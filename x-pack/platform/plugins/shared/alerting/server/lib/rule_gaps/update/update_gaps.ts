@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger, ISavedObjectsRepository } from '@kbn/core/server';
-import { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { BackfillClient } from '../../../backfill_client/backfill_client';
+import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
+import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { findGapsSearchAfter } from '../find_gaps';
-import { Gap } from '../gap';
+import type { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
 import { adHocRunStatus } from '../../../../common/constants';

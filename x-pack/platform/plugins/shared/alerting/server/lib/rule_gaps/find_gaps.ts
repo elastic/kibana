@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { FindGapsParams, FindGapsSearchAfterParams } from './types';
-import { Gap } from './gap';
+import type { FindGapsParams, FindGapsSearchAfterParams } from './types';
+import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
 export const findGaps = async ({

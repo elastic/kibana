@@ -12,14 +12,14 @@ import type { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IEvent } from '../generated/schemas';
-import {
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IEvent } from '../generated/schemas';
+import type {
   AggregateOptionsType,
   FindOptionsSearchAfterType,
   FindOptionsType,
 } from './event_log_client';
-import {
+import type {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
   InternalFields,
