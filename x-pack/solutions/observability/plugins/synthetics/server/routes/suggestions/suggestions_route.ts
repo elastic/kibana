@@ -25,6 +25,10 @@ type Buckets = Array<{
   doc_count: number;
 }>;
 
+type MonitorTypes =
+  | typeof syntheticsMonitorSavedObjectType
+  | typeof legacySyntheticsMonitorTypeSingle;
+
 interface AggsResponse {
   locationsAggs: {
     buckets: Buckets;
@@ -46,7 +50,7 @@ interface AggsResponse {
         hits: {
           hits: Array<{
             _source: {
-              [syntheticsMonitorSavedObjectType]: {
+              [key in MonitorTypes]: {
                 [ConfigKey.NAME]: string;
               };
             };
@@ -213,14 +217,17 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
     );
 
     return {
-      monitorIds: summedMonitorIds?.map(({ key, doc_count: count, name }) => ({
-        label:
-          name?.hits?.hits[0]?._source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] ||
-          name?.hits?.hits[0]?._source?.[legacySyntheticsMonitorTypeSingle]?.[ConfigKey.NAME] ||
-          key,
-        value: key,
-        count,
-      })),
+      monitorIds: summedMonitorIds?.map(({ key, doc_count: count, name }) => {
+        const source = name?.hits?.hits[0]?._source || {};
+        return {
+          label:
+            source?.[syntheticsMonitorSavedObjectType]?.[ConfigKey.NAME] ||
+            source?.[legacySyntheticsMonitorTypeSingle]?.[ConfigKey.NAME] ||
+            key,
+          value: key,
+          count,
+        };
+      }),
       tags:
         summedTags?.map(({ key, doc_count: count }) => ({
           label: key,
