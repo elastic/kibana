@@ -214,7 +214,7 @@ describe('DashboardGrid', () => {
       expect(newSection).toEqual({
         gridData: {
           i: '54321',
-          y: 14,
+          y: 8,
         },
         title: 'New collapsible section',
         collapsed: false,
