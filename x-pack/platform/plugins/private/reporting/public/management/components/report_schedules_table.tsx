@@ -31,7 +31,11 @@ import {
 import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
 import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { ListingPropsInternal } from '..';
-import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
+import {
+  guessAppIconTypeFromObjectType,
+  getDisplayNameFromObjectType,
+  transformScheduledReport,
+} from '../utils';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { prettyPrintJobType } from '../../../common/job_utils';
 import { ReportScheduleIndicator } from './report_schedule_indicator';
@@ -84,7 +88,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.reportTitle', {
         defaultMessage: 'Title',
       }),
-      width: '20%',
+      width: '17%',
       render: (_title: string, item: ScheduledReportApiJSON) => (
         <EuiLink data-test-subj={`reportTitle`} onClick={() => setSelectedReport(item)}>
           <TruncatedTitle text={_title} />
@@ -180,7 +184,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.actionsTitle', {
         defaultMessage: 'Actions',
       }),
-      width: '5%',
+      width: '8%',
       actions: [
         {
           name: i18n.translate('xpack.reporting.schedules.table.viewConfig.title', {
@@ -255,70 +259,6 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
     [setQueryParams]
   );
 
-  const isCustom = (rRule: Rrule) => {
-    const freq = rRule.freq;
-    // interval is greater than 1
-    if (rRule.interval && rRule.interval > 1) {
-      return true;
-    }
-    // frequency is daily and no weekdays are selected
-    if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
-      return true;
-    }
-    // frequency is weekly and there are multiple weekdays selected
-    if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
-      return true;
-    }
-    // frequency is monthly and by month day is selected
-    if (freq && freq === Frequency.MONTHLY && rRule.bymonthday) {
-      return true;
-    }
-    return false;
-  };
-
-  const transformedReport = (report: ScheduledReportApiJSON): ScheduledReport => {
-    const { title, schedule, notification } = report;
-    const rRule = schedule.rrule;
-
-    const isCustomFrequency = isCustom(rRule);
-    const frequency = rRule.freq as RecurrenceFrequency;
-
-    const recurringSchedule: RecurringSchedule = {
-      frequency: isCustomFrequency ? 'CUSTOM' : frequency,
-      interval: rRule.interval,
-      ends: RecurrenceEnd.NEVER,
-    };
-
-    if (isCustomFrequency) {
-      recurringSchedule.customFrequency = frequency;
-    }
-
-    if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
-      recurringSchedule.byweekday = rRule.byweekday.reduce<Record<string, boolean>>((acc, day) => {
-        acc[day] = true;
-        return acc;
-      }, {});
-    }
-    if (frequency === Frequency.MONTHLY) {
-      if (rRule.byweekday) {
-        recurringSchedule.bymonth = 'weekday';
-      } else if (rRule.bymonthday) {
-        recurringSchedule.bymonth = 'day';
-      }
-    }
-
-    return {
-      title,
-      recurringSchedule,
-      reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
-      timezone: schedule.rrule.tzid,
-      startDate: '',
-      recurring: true,
-      sendByEmail: Boolean(notification?.email),
-      emailRecipients: [...(notification?.email?.to || [])],
-    };
-  };
-
   return (
     <Fragment>
       <EuiSpacer size={'l'} />
@@ -342,7 +282,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           onClose={() => {
             setSelectedReport(null);
           }}
-          scheduledReport={transformedReport(selectedReport)}
+          scheduledReport={transformScheduledReport(selectedReport)}
           availableReportTypes={[
             {
               id: selectedReport.jobtype,
