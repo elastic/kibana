@@ -140,6 +140,7 @@ export class CasePlugin
       if (this.caseConfig.incrementalIdService.enabled) {
         this.incrementalIdTaskManager = new IncrementalIdTaskManager(
           plugins.taskManager,
+          this.caseConfig.incrementalIdService,
           this.logger
         );
       }

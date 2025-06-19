@@ -12,20 +12,25 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import { CasesIncrementalIdService } from '../../services/incremental_id';
+import type { ConfigType } from '../../config';
 
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
 export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `Cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
 export const CasesIncrementIdTaskVersion = '1.0.0';
-const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES = 10;
-const CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT = `${CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES}m`;
 
 export class IncrementalIdTaskManager {
+  private config: ConfigType['incrementalIdService'];
   private logger: Logger;
   private casesIncrementService?: CasesIncrementalIdService;
   private taskManager?: TaskManagerStartContract;
 
-  constructor(taskManager: TaskManagerSetupContract, logger: Logger) {
+  constructor(
+    taskManager: TaskManagerSetupContract,
+    config: ConfigType['incrementalIdService'],
+    logger: Logger
+  ) {
+    this.config = config;
     this.logger = logger.get('incremental_id_task');
     this.logger.info('Registering Case Incremental ID Task Manager');
 
@@ -100,11 +105,9 @@ export class IncrementalIdTaskManager {
           id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
           taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
           // start delayed to give the system some time to start up properly
-          runAt: new Date(
-            new Date().getTime() + CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT_MINUTES * 60 * 1000
-          ),
+          runAt: new Date(new Date().getTime() + this.config.taskInterValMinutes * 60 * 1000),
           schedule: {
-            interval: CASES_INCREMENTAL_ID_SYNC_INTERVAL_DEFAULT,
+            interval: `${this.config.taskInterValMinutes}m`,
           },
           params: {},
           state: {},
