@@ -140,7 +140,7 @@ export function getMockPanels() {
       type: 'testPanelType',
     },
     {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '2' },
+      gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
       panelConfig: { title: 'panel Two' },
       panelIndex: '2',
       type: 'testPanelType',
