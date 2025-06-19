@@ -8,10 +8,14 @@
  */
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { LayoutStyleArgs } from './layout.types';
+import { LayoutDimensions } from './layout.types';
 
+/**
+ * Configuration for the layout.
+ * @public
+ */
 export type LayoutConfig = Pick<
-  Partial<LayoutStyleArgs>,
+  Partial<LayoutDimensions>,
   | 'bannerHeight'
   | 'headerHeight'
   | 'footerHeight'
@@ -23,15 +27,29 @@ export type LayoutConfig = Pick<
 
 const LayoutConfigContext = createContext<LayoutConfig | undefined>(undefined);
 
+/**
+ * Props for the LayoutConfigProvider component.
+ * @public
+ */
 export interface LayoutConfigProviderProps {
   value: LayoutConfig;
   children: ReactNode;
 }
 
+/**
+ * Provider of the layout config
+ * @public
+ */
 export const LayoutConfigProvider = ({ value, children }: LayoutConfigProviderProps) => {
   return <LayoutConfigContext.Provider value={value}>{children}</LayoutConfigContext.Provider>;
 };
 
+/**
+ * Hook to access the layout configuration.
+ * @internal
+ * @returns The current layout configuration
+ * @throws Error if used outside of a LayoutConfigProvider
+ */
 export function useLayoutConfig(): LayoutConfig {
   const context = useContext(LayoutConfigContext);
   if (!context) {

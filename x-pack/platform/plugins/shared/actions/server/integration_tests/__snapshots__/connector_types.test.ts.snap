@@ -10652,89 +10652,28 @@ Object {
   "keys": Object {
     "id": Object {
       "flags": Object {
-        "default": [Function],
         "error": [Function],
-        "presence": "optional",
       },
-      "matches": Array [
-        Object {
-          "schema": Object {
-            "flags": Object {
-              "error": [Function],
-            },
-            "metas": Array [
-              Object {
-                "x-oas-min-length": 1,
-              },
-            ],
-            "rules": Array [
-              Object {
-                "args": Object {
-                  "method": [Function],
-                },
-                "name": "custom",
-              },
-              Object {
-                "args": Object {
-                  "method": [Function],
-                },
-                "name": "custom",
-              },
-            ],
-            "type": "string",
-          },
-        },
-        Object {
-          "schema": Object {
-            "flags": Object {
-              "error": [Function],
-            },
-            "items": Array [
-              Object {
-                "flags": Object {
-                  "error": [Function],
-                  "presence": "optional",
-                },
-                "metas": Array [
-                  Object {
-                    "x-oas-min-length": 1,
-                  },
-                ],
-                "rules": Array [
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
-                  Object {
-                    "args": Object {
-                      "method": [Function],
-                    },
-                    "name": "custom",
-                  },
-                ],
-                "type": "string",
-              },
-            ],
-            "rules": Array [
-              Object {
-                "args": Object {
-                  "limit": 1,
-                },
-                "name": "min",
-              },
-            ],
-            "type": "array",
-          },
-        },
-      ],
       "metas": Array [
         Object {
-          "x-oas-optional": true,
+          "x-oas-min-length": 1,
         },
       ],
-      "type": "alternatives",
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
     },
   },
   "type": "object",

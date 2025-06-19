@@ -58,6 +58,7 @@ xpack.features.overrides:
 
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
+xpack.fleet.hideDashboards: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
 xpack.fleet.prereleaseEnabledByDefault: true
 

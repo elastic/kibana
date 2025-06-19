@@ -7,8 +7,8 @@
 
 import type { AgentTargetVersion } from '../../../common/types';
 
-import { AgentPolicyInvalidError } from '../../errors';
-import { appContextService } from '..';
+import { AgentPolicyInvalidError, FleetUnauthorizedError } from '../../errors';
+import { appContextService, licenseService } from '..';
 import { checkTargetVersionsValidity } from '../../../common/services/agent_utils';
 
 export function validateRequiredVersions(
@@ -21,6 +21,11 @@ export function validateRequiredVersions(
   if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
     throw new AgentPolicyInvalidError(
       `Policy "${name}" failed validation: required_versions are not allowed when automatic upgrades feature is disabled`
+    );
+  }
+  if (requiredVersions && !licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError(
+      'Agents auto upgrades feature requires at least Enterprise license'
     );
   }
   const error = checkTargetVersionsValidity(requiredVersions);

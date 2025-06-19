@@ -14,6 +14,12 @@ export interface LayoutSidebarPanelProps {
   children: ReactNode;
 }
 
+/**
+ * The sidebar panel slot wrapper
+ *
+ * @param props - Props for the LayoutSidebarPanel component.
+ * @returns The rendered LayoutSidebarPanel component.
+ */
 export const LayoutSidebarPanel = ({ children }: LayoutSidebarPanelProps) => {
   return <aside css={styles.root}>{children}</aside>;
 };

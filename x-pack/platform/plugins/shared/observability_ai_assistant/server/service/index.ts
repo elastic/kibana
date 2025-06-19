@@ -99,9 +99,13 @@ export class ObservabilityAIAssistantService {
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
     // Read anonymization rules from advanced settings
-    const anonymizationRules =
-      (await uiSettingsClient.get<AnonymizationRule[]>(aiAssistantAnonymizationRules)) ?? [];
-
+    let anonymizationRules: AnonymizationRule[] = [];
+    try {
+      const advSettingsRules = await uiSettingsClient.get<string>(aiAssistantAnonymizationRules);
+      anonymizationRules = JSON.parse(advSettingsRules ?? '[]');
+    } catch {
+      anonymizationRules = [];
+    }
     const basePath = coreStart.http.basePath.get(request);
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);

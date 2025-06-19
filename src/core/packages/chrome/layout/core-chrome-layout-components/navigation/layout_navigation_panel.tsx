@@ -15,6 +15,12 @@ export interface LayoutNavigationPanelProps {
   width: number;
 }
 
+/**
+ * The navigation panel slot wrapper
+ *
+ * @param props - Props for the LayoutNavigationPanel component.
+ * @returns The rendered LayoutNavigationPanel component.
+ */
 export const LayoutNavigationPanel = ({ children, width }: LayoutNavigationPanelProps) => {
   return (
     <nav css={styles.root} style={{ width }}>

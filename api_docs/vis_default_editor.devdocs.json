@@ -97,7 +97,8 @@
                 "label": "eventEmitter",
                 "description": [],
                 "signature": [
-                  "events"
+                  "events",
+                  "<DefaultEventMap>"
                 ],
                 "path": "src/platform/plugins/private/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,

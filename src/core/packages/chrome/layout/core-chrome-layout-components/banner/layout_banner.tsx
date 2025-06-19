@@ -15,6 +15,12 @@ export interface LayoutBannerProps {
   children: ReactNode;
 }
 
+/**
+ * The banner slot wrapper
+ *
+ * @param props - Props for the LayoutBanner component.
+ * @returns The rendered LayoutBanner component.
+ */
 export const LayoutBanner = ({ children }: LayoutBannerProps) => {
   return <section css={styles.root}>{children}</section>;
 };

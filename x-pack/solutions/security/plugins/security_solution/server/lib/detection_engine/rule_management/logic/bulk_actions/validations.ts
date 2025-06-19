@@ -75,6 +75,17 @@ export const validateBulkScheduleBackfill = async ({ rule }: BulkActionsValidati
   );
 };
 
+/**
+ * runs validation for bulk gap filling for a single rule
+ * @param params - {@link DryRunRuleFillGapsBulkActionsValidationArgs}
+ */
+export const validateBulkRuleGapFilling = async ({ rule }: BulkActionsValidationArgs) => {
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot bulk fill gaps for a disabled rule'),
+    BulkActionsDryRunErrCodeEnum.RULE_FILL_GAPS_DISABLED_RULE
+  );
+};
+
 interface BulkEditBulkActionsValidationArgs {
   ruleType: RuleType;
   mlAuthz: MlAuthz;

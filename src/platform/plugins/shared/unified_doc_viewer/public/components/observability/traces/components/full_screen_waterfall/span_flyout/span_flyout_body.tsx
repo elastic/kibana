@@ -16,6 +16,7 @@ import SpanOverview from '../../../doc_viewer_span_overview';
 import TransactionOverview from '../../../doc_viewer_transaction_overview';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import DocViewerSource from '../../../../../doc_viewer_source';
+import { useDataSourcesContext } from '../../../hooks/use_data_sources';
 
 const tabIds = {
   OVERVIEW: 'unifiedDocViewerTracesSpanFlyoutOverview',
@@ -55,9 +56,10 @@ export interface SpanFlyoutProps {
   onCloseFlyout: () => void;
 }
 
-export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: SpanFlyoutProps) => {
+export const SpanFlyoutBody = ({ hit, loading, dataView }: SpanFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const isSpan = !!hit?.flattened[PARENT_ID_FIELD];
+  const { indexes } = useDataSourcesContext();
   const onSelectedTabChanged = (id: string) => setSelectedTabId(id);
 
   const renderTabs = () => {
@@ -84,7 +86,7 @@ export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: S
               (isSpan ? (
                 <SpanOverview
                   hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
+                  indexes={indexes}
                   showWaterfall={false}
                   showActions={false}
                   dataView={dataView}
@@ -92,7 +94,7 @@ export const SpanFlyoutBody = ({ tracesIndexPattern, hit, loading, dataView }: S
               ) : (
                 <TransactionOverview
                   hit={hit}
-                  tracesIndexPattern={tracesIndexPattern}
+                  indexes={indexes}
                   showWaterfall={false}
                   showActions={false}
                   dataView={dataView}

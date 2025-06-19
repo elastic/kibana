@@ -14,6 +14,12 @@ export interface LayoutNavigationProps {
   children: ReactNode;
 }
 
+/**
+ * The navigation slot wrapper
+ *
+ * @param props - Props for the LayoutNavigation component.
+ * @returns The rendered LayoutNavigation component.
+ */
 export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
   return <nav css={styles.root}>{children}</nav>;
 };

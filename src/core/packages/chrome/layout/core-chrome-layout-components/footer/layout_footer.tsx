@@ -15,6 +15,12 @@ export interface LayoutFooterProps {
   children: ReactNode;
 }
 
+/**
+ * The footer slot wrapper
+ *
+ * @param props - Props for the LayoutFooter component.
+ * @returns The rendered LayoutFooter component.
+ */
 export const LayoutFooter = ({ children }: LayoutFooterProps) => {
   return <footer css={styles.root}>{children}</footer>;
 };

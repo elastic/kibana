@@ -33,6 +33,14 @@ export const isArtifactByPolicy = (
   return !isArtifactGlobal(item);
 };
 
+export const hasGlobalOrPerPolicyTag = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
+  return (item.tags ?? []).some(
+    (tag) => tag === GLOBAL_ARTIFACT_TAG || tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)
+  );
+};
+
 export const getPolicyIdsFromArtifact = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
 ): string[] => {
