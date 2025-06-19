@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { ReactNode } from 'react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+import { styles } from './layout_sidebar.styles';
+
+export interface LayoutSidebarProps {
+  children: ReactNode;
+  width: number;
+}
+
+export const LayoutSidebar = ({ children, width }: LayoutSidebarProps) => {
+  return (
+    <nav css={styles.root} style={{ width }}>
+      {children}
+    </nav>
+  );
 };

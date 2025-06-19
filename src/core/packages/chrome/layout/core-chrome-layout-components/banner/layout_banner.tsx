@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import React, { ReactNode } from 'react';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
+import { styles } from './layout_banner.styles';
+
+export interface LayoutBannerProps {
+  children: ReactNode;
+  height: number;
+}
+
+export const LayoutBanner = ({ children, height }: LayoutBannerProps) => {
+  return (
+    <section css={styles.root} style={{ height }}>
+      {children}
+    </section>
+  );
 };
