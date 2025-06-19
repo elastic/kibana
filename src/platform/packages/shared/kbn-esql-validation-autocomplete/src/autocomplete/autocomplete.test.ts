@@ -95,7 +95,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('/', [
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -255,7 +255,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('f/', [
       ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -401,10 +401,10 @@ describe('autocomplete', () => {
     );
 
     // RENAME field
-    testSuggestions(
-      'FROM index1 | RENAME f/',
-      getFieldNamesByType('any').map((name) => `${name} `)
-    );
+    testSuggestions('FROM index1 | RENAME f/', [
+      'col0 = ',
+      ...getFieldNamesByType('any').map((name) => `${name} `),
+    ]);
 
     // RENAME field AS
     testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
@@ -482,7 +482,7 @@ describe('autocomplete', () => {
     // Source command
     testSuggestions('F/', [
       ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
-      ...mapRecommendedQueriesFromExtensions(editorExtensions),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -1022,6 +1022,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
@@ -1032,6 +1033,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
@@ -1042,6 +1044,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
 

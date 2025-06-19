@@ -4989,26 +4989,6 @@
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
               },
               {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/packages/get.test.ts"
               },
@@ -7132,11 +7112,7 @@
         "tags": [],
         "label": "SavedObjectsModelUnsafeTransformChange",
         "description": [
-          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\n"
-        ],
-        "signature": [
-          "SavedObjectsModelUnsafeTransformChange",
-          "<PreviousAttributes, NewAttributes>"
+          "\nA {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.\nPlease define your transform function on a separate const.\nUse explicit types for the generic arguments, as shown below.\nThis will reduce the chances of introducing bugs."
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
         "deprecated": false,
@@ -7166,51 +7142,39 @@
               "\nThe transform function to execute."
             ],
             "signature": [
-              "(document: ",
-              "SavedObjectModelTransformationDoc",
-              "<PreviousAttributes>, context: ",
-              "SavedObjectModelTransformationContext",
-              ") => ",
-              "SavedObjectModelTransformationResult",
-              "<NewAttributes>"
+              "(typeSafeGuard: <PreviousAttributes, NewAttributes>(fn: ",
+              "SavedObjectModelUnsafeTransformFn",
+              "<PreviousAttributes, NewAttributes>) => ",
+              "SavedObjectModelTransformationFn",
+              "<unknown, unknown>) => ",
+              "SavedObjectModelTransformationFn",
+              "<unknown, unknown>"
             ],
             "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server",
                 "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$1",
-                "type": "CompoundType",
+                "type": "Function",
                 "tags": [],
-                "label": "document",
+                "label": "typeSafeGuard",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc",
-                  "<InputAttributes> & { references?: ",
-                  "SavedObjectReference",
-                  "[] | undefined; }"
+                  "<PreviousAttributes, NewAttributes>(fn: ",
+                  "SavedObjectModelUnsafeTransformFn",
+                  "<PreviousAttributes, NewAttributes>) => ",
+                  "SavedObjectModelTransformationFn",
+                  "<unknown, unknown>"
                 ],
-                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
+                "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
                 "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/core-saved-objects-server",
-                "id": "def-server.SavedObjectsModelUnsafeTransformChange.transformFn.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "SavedObjectModelTransformationContext"
-                ],
-                "path": "src/core/packages/saved-objects/server/src/model_version/transformations.ts",
-                "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8987,28 +8951,28 @@
                 "path": "src/core/packages/usage-data/server-internal/src/saved_objects/core_usage_stats.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
-              },
-              {
                 "plugin": "taskManager",
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
                 "plugin": "dataViews",
@@ -11361,8 +11325,7 @@
           "<any, any> | ",
           "SavedObjectsModelDataRemovalChange",
           " | ",
-          "SavedObjectsModelUnsafeTransformChange",
-          "<any, any>"
+          "SavedObjectsModelUnsafeTransformChange"
         ],
         "path": "src/core/packages/saved-objects/server/src/model_version/model_change.ts",
         "deprecated": false,
