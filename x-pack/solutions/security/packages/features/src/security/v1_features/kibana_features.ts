@@ -50,6 +50,7 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 
 export const getSecurityBaseKibanaFeature = ({
   savedObjects,
+  isServerless,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
   deprecated: {
     notice: i18n.translate(
@@ -114,8 +115,15 @@ export const getSecurityBaseKibanaFeature = ({
             privileges: [
               'minimal_all',
 
-              // See above.
-              'global_artifact_management_all',
+              ...(isServerless
+                ? [
+                    // Serverless MINIMAL_ALL means that Endpoint Exception is controlled by its sub-feature privilege.
+                    // Therefore no need to replace by Global Artifact Management:ALL, it will be triggered by the Endpoint Exception privilege if needed.
+                  ]
+                : [
+                    // See ALL privilege above.
+                    'global_artifact_management_all',
+                  ]),
             ],
           },
         ],

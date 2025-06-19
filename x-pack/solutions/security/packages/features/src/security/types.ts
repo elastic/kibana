@@ -18,6 +18,14 @@ export interface SecurityFeatureParams {
    */
   experimentalFeatures: Record<string, boolean>;
   savedObjects: string[];
+
+  /**
+   * Sort of temporary solution to be able to migrate from Endpoint Exceptions (on Serverless) OR SIEM (on ESS)
+   * to global_artifact_management_all.
+   *
+   * It would be best not to use it for other things.
+   */
+  isServerless: boolean;
 }
 
 export type DefaultSecurityProductFeaturesConfig = Omit<
