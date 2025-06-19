@@ -24,12 +24,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
 
     // height of the action menu in the header in serverless projects
-    --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3};
+    --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3}px;
 
-    // the total height of all fixed headers
-    --kbnAppHeadersOffset: var(--kbn-layout--application-top, 0px);
-    // the total height of all fixed footers
-    --kbnAppFootersOffset: var(--kbn-layout--application-bottom, 0px);
+    // the total height of all app-area headers
+    --kbnAppHeadersOffset: 0px;
   }
 
   #kibana-body {
@@ -45,10 +43,10 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     pointer-events: none;
     visibility: hidden;
     position: fixed;
-    top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
-    right: 0;
-    bottom: 0;
-    left: 0;
+    top: var(--kbn-layout--application-top, 0px);
+    right: var(--kbn-layout--application-right, 0px);
+    bottom: var(--kbn-layout--application-bottom, 0px);
+    left: var(--kbn-layout--application-left, 0px);
   }
 
   .kbnAppWrapper {
@@ -74,9 +72,7 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   // Set a body CSS variable for the app container to use - calculates the total
   // height of all fixed headers + the sticky action menu toolbar
   .kbnBody--hasProjectActionMenu {
-    --kbnAppHeadersOffset: calc(
-      var(--kbn-layout--application-top) + var(--kbnProjectHeaderAppActionMenuHeight)
-    );
+    --kbnAppHeadersOffset: var(--kbnProjectHeaderAppActionMenuHeight);
   }
 
   .euiDataGrid__restrictBody {

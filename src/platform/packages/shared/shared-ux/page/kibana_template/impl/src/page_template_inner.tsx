@@ -62,7 +62,7 @@ export const KibanaPageTemplateInner: FC<Props> = ({
   let sideBar;
   if (pageSideBar) {
     const sideBarProps = { ...pageSideBarProps };
-    sideBarProps.sticky = { offset: 0 };
+    sideBarProps.sticky = true;
     sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
   }
 
