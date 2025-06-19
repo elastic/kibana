@@ -62,6 +62,7 @@ export const performCreate = async <T>(
     refresh = DEFAULT_REFRESH_SETTING,
     initialNamespaces,
     version,
+    accessControl,
   } = options;
   const { migrationVersionCompatibility } = options;
   if (!allowedTypes.includes(type)) {
@@ -109,6 +110,7 @@ export const performCreate = async <T>(
       id,
       initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      accessControl,
     },
   });
 

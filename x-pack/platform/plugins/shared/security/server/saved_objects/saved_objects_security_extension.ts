@@ -571,7 +571,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       action === SecurityAction.UPDATE ||
       action === SecurityAction.BULK_UPDATE ||
       action === SecurityAction.DELETE ||
-      action === SecurityAction.BULK_DELETE
+      action === SecurityAction.BULK_DELETE ||
+      action === SecurityAction.CREATE ||
+      action === SecurityAction.BULK_CREATE
     ) {
       return objects.filter((obj) =>
         this.accessControlService.canModifyObject({
@@ -707,6 +709,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       options: { allowGlobalResource: params.options?.allowGlobalResource === true },
     });
 
+    const currentUser = this.getCurrentUserFunc();
+    this.accessControlService.setUserForOperation(currentUser);
     const typesAndSpaces = params.enforceMap;
     if (typesAndSpaces !== undefined && checkResult) {
       params.actions.forEach((action) => {
@@ -868,9 +872,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const enforceMap = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
-
-    const currentUser = this.getCurrentUserFunc();
-    this.accessControlService.setUserForOperation(currentUser);
 
     for (const obj of objects) {
       const {
