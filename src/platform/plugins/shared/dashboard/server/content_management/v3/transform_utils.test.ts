@@ -45,7 +45,7 @@ describe('dashboardAttributesOut', () => {
     {
       embeddableConfig: { enhancements: {} },
       gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-      id: '1',
+      id: 'savedObject1',
       panelIndex: '1',
       panelRefName: 'ref1',
       title: 'title1',
@@ -92,9 +92,11 @@ describe('dashboardAttributesOut', () => {
       },
       panels: [
         {
-          panelConfig: { enhancements: {} },
+          panelConfig: {
+            enhancements: {},
+            savedObjectId: 'savedObject1',
+          },
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
           panelIndex: '1',
           panelRefName: 'ref1',
           title: 'title1',
@@ -179,6 +181,7 @@ describe('dashboardAttributesOut', () => {
         {
           panelConfig: {
             enhancements: {},
+            savedObjectId: 'savedObject1',
           },
           gridData: {
             x: 0,
@@ -187,7 +190,6 @@ describe('dashboardAttributesOut', () => {
             h: 10,
             i: '1',
           },
-          id: '1',
           panelIndex: '1',
           panelRefName: 'ref1',
           title: 'title1',
@@ -243,8 +245,10 @@ describe('itemAttrsToSavedObject', () => {
       panels: [
         {
           gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-          id: '1',
-          panelConfig: { enhancements: {} },
+          panelConfig: {
+            enhancements: {},
+            savedObjectId: 'savedObject1',
+          },
           panelIndex: '1',
           panelRefName: 'ref1',
           title: 'title1',
@@ -384,9 +388,11 @@ describe('savedObjectToItem', () => {
         timeRestore: true,
         panels: [
           {
-            panelConfig: { enhancements: {} },
+            panelConfig: {
+              enhancements: {},
+              savedObjectId: 'savedObject1',
+            },
             gridData: { x: 0, y: 0, w: 10, h: 10, i: '1' },
-            id: '1',
             panelIndex: '1',
             panelRefName: 'ref1',
             title: 'title1',

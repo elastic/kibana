@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
@@ -40,14 +39,11 @@ export function serializeLayout(
     }
 
     const { sectionId, ...restOfGridData } = gridData; // drop section ID
-    const title = (panelConfig as { title?: string }).title;
     const panelState = {
       type,
       gridData: restOfGridData,
       panelIndex: panelId,
-      panelConfig: omit(panelConfig, ['id', 'savedObjectId', 'title']),
-      ...(title !== undefined && { title }),
-      ...(savedObjectId !== undefined && { id: savedObjectId }),
+      panelConfig,
       ...(panelRefName !== undefined && { panelRefName }),
     };
 

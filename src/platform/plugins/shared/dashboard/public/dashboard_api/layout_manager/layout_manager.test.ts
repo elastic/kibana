@@ -108,9 +108,8 @@ describe('layout manager', () => {
         {
           gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
           type: 'testPanelType',
-          panelConfig: {},
+          panelConfig: { title: 'Updated Panel One' },
           panelIndex: 'panelOne',
-          title: 'Updated Panel One',
         },
       ]);
     });
@@ -125,9 +124,8 @@ describe('layout manager', () => {
         {
           gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
           type: 'testPanelType',
-          panelConfig: {},
+          panelConfig: { title: 'Panel One' },
           panelIndex: 'panelOne',
-          title: 'Panel One',
         },
       ]);
     });

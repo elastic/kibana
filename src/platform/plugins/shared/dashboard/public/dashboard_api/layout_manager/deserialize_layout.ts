@@ -35,8 +35,6 @@ export function deserializeLayout(
     };
     childState[panelId] = {
       rawState: {
-        ...(panel.id !== undefined && { savedObjectId: panel.id }),
-        ...(panel.title !== undefined && { title: panel.title }),
         ...panel.panelConfig,
       },
       references: getReferences(panelId),
