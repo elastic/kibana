@@ -13,7 +13,7 @@ export interface MyRestorableState {
 }
 
 export const { withRestorableState, useRestorableState } =
-  createRestorableStateProvider<UnifiedDataTableRestorableState>();
+  createRestorableStateProvider<MyRestorableState>();
 ```
 
 2. Wrap your component with the `withRestorableState` HOC and use the `useRestorableState` instead of the usual `useState`.
