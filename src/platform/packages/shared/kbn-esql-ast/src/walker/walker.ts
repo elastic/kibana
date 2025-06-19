@@ -43,6 +43,11 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
+  visitOrder?: (
+    node: types.ESQLOrderExpression,
+    parent: types.ESQLProperNode | undefined,
+    walker: WalkerVisitorApi
+  ) => void;
   visitLiteral?: (
     node: types.ESQLLiteral,
     parent: types.ESQLProperNode | undefined,
@@ -547,6 +552,17 @@ export class Walker {
     }
   }
 
+  public walkOrder(
+    node: types.ESQLOrderExpression,
+    parent: types.ESQLProperNode | undefined
+  ): void {
+    const { options } = this;
+
+    (options.visitOrder ?? options.visitAny)?.(node, parent, this);
+
+    this.walkList(node.args, node);
+  }
+
   public walkInlineCast(
     node: types.ESQLInlineCast,
     parent: types.ESQLProperNode | undefined
@@ -632,6 +648,10 @@ export class Walker {
       }
       case 'column': {
         this.walkColumn(node, parent);
+        break;
+      }
+      case 'order': {
+        this.walkOrder(node, parent);
         break;
       }
       case 'literal': {
