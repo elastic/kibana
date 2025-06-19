@@ -133,7 +133,7 @@ Dashboards and Visualizations::
 
 Data ingestion and Fleet::
 * Fixes the `UnenrollInactiveAgentsTask` task to correctly only unenroll agents inactive for longer than the value defined by the `unenroll_timeout` setting ({kibana-pull}222592[#222592]).
-* Fixes an issue that could prevent some integrations from correctly showing as installed  ({kibana-pull}221624[#221624]).
+* Fixes an issue that could prevent some integrations from correctly showing as installed ({kibana-pull}221624[#221624]).
 
 Discover::
 * Fixes an issue with CSV Post URLs incorrectly using an absolute time range instead of a relative one ({kibana-pull}223249[#223249]).
