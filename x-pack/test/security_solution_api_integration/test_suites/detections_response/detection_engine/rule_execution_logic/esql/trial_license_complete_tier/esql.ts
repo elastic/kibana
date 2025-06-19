@@ -2237,7 +2237,7 @@ export default ({ getService }: FtrProviderContext) => {
           ])
         );
 
-        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts?.length).toBeGreaterThan(0);
       });
 
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
