@@ -13,7 +13,7 @@ import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { extractKeywordsFromRegex } from '@kbn/aiops-log-pattern-analysis';
 
-export interface Props {
+interface Props {
   row: DataTableRecord;
   columnId: string;
   isDetails: boolean;

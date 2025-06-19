@@ -18,6 +18,8 @@ import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
+const DOC_LIMIT = 10000;
+
 export const createPatternDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
@@ -74,7 +76,7 @@ export const createPatternDataSourceProfileProvider = (
             }
             const query = {
               ...context.query,
-              esql: `FROM ${index}\n  | WHERE MATCH(${categorizeField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT 10000`,
+              esql: `FROM ${index}\n  | WHERE MATCH(${categorizeField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
             };
 
             const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -84,7 +86,6 @@ export const createPatternDataSourceProfileProvider = (
             });
             window.open(discoverLink, '_blank');
           },
-          isCompatible: ({ field }) => true,
         },
       ];
     },
