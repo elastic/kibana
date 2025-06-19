@@ -30,7 +30,9 @@ const getRelevantRuleFieldsMap: Record<
     const relevantFields = new Set<string>();
     const metrics = (customThresholdParams as CustomThresholdParams).criteria[0].metrics;
     metrics.forEach((metric) => {
-      relevantFields.add(metric.field);
+      // The property "field" is of type string | never but it collapses to just string
+      // We should probably avoid typing field as never and just omit it from the type to avoid situations like this one
+      if ('field' in metric) relevantFields.add(metric.field);
     });
     return relevantFields;
   },
