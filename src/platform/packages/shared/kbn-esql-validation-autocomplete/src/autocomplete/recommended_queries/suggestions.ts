@@ -14,9 +14,12 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<SuggestionRawDefinition[]> => {
-  const fieldSuggestions = await getFieldsByType(['date', 'text'], [], {
-    openSuggestions: true,
-  });
+  const [fieldSuggestions, textFieldSuggestions] = await Promise.all([
+    getFieldsByType(['date'], [], { openSuggestions: true }),
+    // get text fields separately to avoid mixing them with date fields
+    getFieldsByType(['text'], [], { openSuggestions: true }),
+  ]);
+
   let timeField = '';
   let categorizationField: string | undefined = '';
 
@@ -24,7 +27,10 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
     timeField =
       fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
       fieldSuggestions[0].label;
-    categorizationField = getCategorizationField(fieldSuggestions.map((field) => field.label));
+  }
+
+  if (textFieldSuggestions.length) {
+    categorizationField = getCategorizationField(textFieldSuggestions.map((field) => field.label));
   }
 
   const recommendedQueries = getRecommendedQueries({
@@ -122,5 +128,6 @@ export function getCategorizationField(fields: string[]): string | undefined {
       return field;
     }
   }
-  return undefined;
+
+  return fields[0] ?? undefined;
 }
