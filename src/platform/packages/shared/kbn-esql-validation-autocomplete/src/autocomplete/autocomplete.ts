@@ -135,17 +135,21 @@ export async function suggest(
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
-        } else fromCommand = `FROM ${visibleSources[0].name}`;
+        } else if (visibleSources.length) {
+          fromCommand = `FROM ${visibleSources[0].name}`;
+        }
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
           resourceRetriever,
           innerText
         );
-        const editorExtensions =
-          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
-        const recommendedQueriesSuggestionsFromExtensions =
-          mapRecommendedQueriesFromExtensions(editorExtensions);
+        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
+          recommendedQueries: [],
+        };
+        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+          editorExtensions.recommendedQueries
+        );
 
         const recommendedQueriesSuggestionsFromStaticTemplates =
           await getRecommendedQueriesSuggestionsFromStaticTemplates(
@@ -354,9 +358,12 @@ async function getSuggestionsWithinCommandExpression(
 
   // Function returning suggestions from static templates and editor extensions
   const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
-    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
-    const recommendedQueriesFromExtensions =
-      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+      recommendedQueries: [],
+    };
+    const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
+      editorExtensions.recommendedQueries
+    );
 
     const recommendedQueriesFromTemplates =
       await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);

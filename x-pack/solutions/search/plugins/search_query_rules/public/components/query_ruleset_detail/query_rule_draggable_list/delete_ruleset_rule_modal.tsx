@@ -7,30 +7,18 @@
 
 import React, { useState } from 'react';
 
-import {
-  EuiCheckbox,
-  EuiCodeBlock,
-  EuiConfirmModal,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiCheckbox, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDeleteRulesetRule } from '../../../hooks/use_delete_query_rules_rule';
 
 export interface DeleteRulesetRuleModalProps {
-  rulesetId: string;
-  ruleId: string;
   closeDeleteModal: () => void;
-  onSuccessAction?: () => void;
+  onConfirm?: () => void;
 }
 
 export const DeleteRulesetRuleModal = ({
   closeDeleteModal,
-  rulesetId,
-  ruleId,
-  onSuccessAction,
+  onConfirm: onSuccessAction,
 }: DeleteRulesetRuleModalProps) => {
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const onSuccess = () => {
     setIsLoading(false);
@@ -44,15 +32,11 @@ export const DeleteRulesetRuleModal = ({
   });
   const [checked, setChecked] = useState(false);
 
-  const onError = (errorMessage: string) => {
-    setIsLoading(false);
-    setError(errorMessage);
-  };
-  const { mutate: deleteEndpoint } = useDeleteRulesetRule(onSuccess, onError);
   const deleteOperation = () => {
     setIsLoading(true);
-    deleteEndpoint({ rulesetId, ruleId });
+    onSuccess();
   };
+
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.queryRules.deleteRulesetRuleModal.title', {
@@ -83,12 +67,6 @@ export const DeleteRulesetRuleModal = ({
           setChecked(e.target.checked);
         }}
       />
-
-      {error && (
-        <EuiCodeBlock fontSize="s" paddingSize="s">
-          {error}
-        </EuiCodeBlock>
-      )}
     </EuiConfirmModal>
   );
 };
