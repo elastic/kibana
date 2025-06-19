@@ -15,9 +15,16 @@ interface ValueInputProps {
   placeholder?: string;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
+  onChange?: (value: string) => void;
 }
 
-export const ValueInput = ({ value = '', placeholder = '', onBlur, onEnter }: ValueInputProps) => {
+export const ValueInput = ({
+  value = '',
+  placeholder = '',
+  onBlur,
+  onEnter,
+  onChange,
+}: ValueInputProps) => {
   const [editValue, setEditValue] = useState(value);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -31,7 +38,7 @@ export const ValueInput = ({ value = '', placeholder = '', onBlur, onEnter }: Va
     if (onBlur) {
       onBlur(event);
     }
-    // Perform Validations
+    // Perform Validations ?
   };
 
   return (
@@ -44,6 +51,7 @@ export const ValueInput = ({ value = '', placeholder = '', onBlur, onEnter }: Va
       aria-label="Use aria labels when no actual label is in use"
       onChange={(e) => {
         setEditValue(e.target.value);
+        onChange?.(e.target.value);
       }}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}

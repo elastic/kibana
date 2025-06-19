@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -19,12 +19,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../types';
 import { ValueInput } from './value_input';
 
 type ToggleMode = 'add-row' | 'add-column';
 
 export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { indexUpdateService },
+  } = useKibana<KibanaContextExtra>();
 
   const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
 
@@ -40,13 +45,30 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     setActiveMode(null);
   };
 
+  const [newRow, setNewRow] = useState<Record<string, unknown>>({});
+
+  const updateRow = useCallback(
+    (columnId: string) => (value: unknown) => {
+      setNewRow((prev) => ({
+        ...prev,
+        [columnId]: value,
+      }));
+    },
+    [setNewRow]
+  );
+
   const inputs = useMemo(
     () =>
       columns.map((column) => {
-        return <ValueInput placeholder={column.name} />;
+        return <ValueInput placeholder={column.name} onChange={updateRow(column.id)} />;
       }),
-    [columns]
+    [columns, updateRow]
   );
+
+  const saveNewRow = () => {
+    indexUpdateService.addDoc(newRow);
+    setActiveMode(null);
+  };
 
   return (
     <>
@@ -88,7 +110,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexGroup gutterSize="s">{inputs}</EuiFlexGroup>
             <EuiButtonIcon
-              onClick={() => {}}
+              onClick={saveNewRow}
               iconType="check"
               display="base"
               color="success"
