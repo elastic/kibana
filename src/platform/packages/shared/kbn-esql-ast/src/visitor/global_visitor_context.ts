@@ -533,7 +533,8 @@ export class GlobalVisitorContext<
       }
       case 'option': {
         switch (expressionNode.name) {
-          case 'as': {
+          case 'as':
+          case '=': {
             if (!this.methods.visitRenameExpression) break;
             return this.visitRenameExpression(
               parent,
@@ -542,6 +543,7 @@ export class GlobalVisitorContext<
             );
           }
         }
+        break;
       }
       case 'query': {
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
