@@ -20,8 +20,34 @@ export interface MonitorSpacesProps {
   readOnly?: boolean;
 }
 
+/**
+ * Returns the updated list of selected space ids based on the selection logic.
+ * @param selectedIds Array of selected space ids
+ * @param currentSpaceId The id of the current space
+ * @param allSpacesId The id representing "All spaces"
+ */
+export function getUpdatedSpacesSelection(
+  selectedIds: string[],
+  currentSpaceId?: string,
+  allSpacesId?: string
+): string[] {
+  if (allSpacesId && selectedIds.includes(allSpacesId)) {
+    // Only return allSpacesId if selected, ignore all others including currentSpaceId
+    return [allSpacesId];
+  }
+  // Remove allSpacesId if present (should only be present alone)
+  const filtered = allSpacesId ? selectedIds.filter((id) => id !== allSpacesId) : selectedIds;
+  if (filtered.length === 0 && currentSpaceId) {
+    return [currentSpaceId];
+  }
+  if (currentSpaceId && !filtered.includes(currentSpaceId)) {
+    return [...filtered, currentSpaceId];
+  }
+  return filtered;
+}
+
 export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) => {
-  const { space } = useKibanaSpace();
+  const { space: currentSpace } = useKibanaSpace();
   const NAMESPACES_NAME = 'spaces';
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
@@ -52,10 +78,26 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
 
   useEffect(() => {
     // set space as current value if no value is provided
-    if (!value && space) {
-      onChange([space.id]);
+    if ((!value || value.length === 0) && currentSpace) {
+      onChange([currentSpace.id]);
     }
-  }, [onChange, space, value]);
+  }, [onChange, currentSpace, value]);
+
+  // Ensure selected options always include the current space
+  const selectedIds = React.useMemo(() => {
+    if (!currentSpace) {
+      return value ?? [];
+    }
+    if (!value || value.length === 0) {
+      return [currentSpace.id];
+    }
+    return value.includes(currentSpace.id) || value.includes(ALL_SPACES_ID)
+      ? value
+      : [...value, currentSpace.id];
+  }, [value, currentSpace]);
+
+  // Compute if "All spaces" is selected
+  const isAllSpacesSelected = selectedIds.includes(ALL_SPACES_ID);
 
   return (
     <EuiComboBox<string>
@@ -66,8 +108,10 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
       onBlur={async () => {
         await trigger();
       }}
-      options={spacesList}
-      selectedOptions={(value ?? []).map((id) => {
+      options={spacesList.map((option) =>
+        isAllSpacesSelected && option.id !== ALL_SPACES_ID ? { ...option, disabled: true } : option
+      )}
+      selectedOptions={selectedIds.map((id) => {
         const sp = spacesList.find((spaceObj) => spaceObj.id === id);
         if (!sp) {
           return {
@@ -79,21 +123,13 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
       })}
       isClearable={true}
       onChange={(selected) => {
-        const selectedIds = selected.map((option) => option.id!);
-
-        // if last value is not all spaces, remove all spaces value
-        if (selectedIds.length > 0 && selectedIds[selectedIds.length - 1] !== allSpacesOption.id) {
-          onChange(selectedIds.filter((id) => id !== allSpacesOption.id));
-          return;
-        }
-
-        // if last value is all spaces, remove all other values
-        if (selectedIds.length > 0 && selectedIds[selectedIds.length - 1] === allSpacesOption.id) {
-          onChange([allSpacesOption.id]);
-          return;
-        }
-
-        onChange(selectedIds);
+        const newSelectedIds = selected.map((option) => option.id!);
+        const updatedIds = getUpdatedSpacesSelection(
+          newSelectedIds,
+          currentSpace?.id,
+          allSpacesOption.id
+        );
+        onChange(updatedIds);
       }}
     />
   );
