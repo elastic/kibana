@@ -248,17 +248,17 @@ describe('single line query', () => {
 
     describe('SAMPLE', () => {
       test('from single line', () => {
-        const { text } = reprint(`FROM index | SAMPLE 0.1 123`);
+        const { text } = reprint(`FROM index | SAMPLE 0.1`);
 
-        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+        expect(text).toBe('FROM index | SAMPLE 0.1');
       });
 
       test('from multiline', () => {
         const { text } = reprint(`FROM index
-| SAMPLE 0.1 123
+| SAMPLE 0.1
           `);
 
-        expect(text).toBe('FROM index | SAMPLE 0.1 123');
+        expect(text).toBe('FROM index | SAMPLE 0.1');
       });
     });
 
@@ -291,24 +291,24 @@ describe('single line query', () => {
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION "Shakespeare" WITH inferenceId AS result'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION "prompt" WITH \`openai-completion\` AS result
+                 | COMPLETION result = "prompt" WITH \`openai-completion\`
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION "prompt" WITH `openai-completion` AS result | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
         );
       });
     });
