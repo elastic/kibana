@@ -2070,7 +2070,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 columns: {
                   'column-id-1': expect.objectContaining({
                     operationType: 'static_value',
-                    isStaticValue: true,
                     params: expect.objectContaining({
                       value: '10',
                     }),
