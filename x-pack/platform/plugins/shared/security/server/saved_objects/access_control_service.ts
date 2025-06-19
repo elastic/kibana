@@ -61,7 +61,7 @@ export class AccessControlService {
 
     const { hasAllRequested } = await this.checkPrivilegesFunc(
       `saved_object/${type}:manageOwnership`,
-      []
+      [...spacesToAuthorize]
     );
     if (hasAllRequested) {
       return true;
