@@ -11,15 +11,17 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 
 /**
- * Only 3 bulk actions are supported for for confirmation dry run modal:
+ * Only 4 bulk actions are supported for for confirmation dry run modal:
  * * export
  * * edit
  * * manual rule run
+ * * fill gaps
  */
 export type BulkActionForConfirmation =
   | BulkActionTypeEnum['export']
   | BulkActionTypeEnum['edit']
-  | BulkActionTypeEnum['run'];
+  | BulkActionTypeEnum['run']
+  | BulkActionTypeEnum['fill_gaps'];
 
 /**
  * transformed results of dry run

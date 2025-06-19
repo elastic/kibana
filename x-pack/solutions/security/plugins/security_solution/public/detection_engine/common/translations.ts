@@ -110,6 +110,13 @@ export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
   }
 );
 
+export const BULK_ACTION_FILL_RULE_GAPS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillGapsTitle',
+  {
+    defaultMessage: 'Fill gaps',
+  }
+);
+
 export const BULK_ACTION_DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
   {
@@ -266,6 +273,29 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
   }
 );
 
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastTitle',
+  {
+    defaultMessage: 'Rules updates are in progress',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastDescription',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} updating.',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastNotifyButtonLabel',
+  {
+    defaultMessage: `Notify me when done`,
+  }
+);
+
 export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle',
@@ -281,6 +311,16 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: num
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'The gaps of {rulesCount, plural, =1 {# rule} other {# rules}} cannot be filled',
     }
   );
 
@@ -341,6 +381,16 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: 'Schedule {rulesCount, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkFillRuleGapsConfirmation.confirmButtonLabel',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Schedule the gaps fill for {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
@@ -1366,24 +1416,24 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
 export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
   {
-    defaultMessage: 'Gaps filling for rules scheduled',
+    defaultMessage: 'Gaps fill scheduling successful',
   }
 );
 
 export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
   {
-    defaultMessage: 'Error scheduling gaps filling for rules',
+    defaultMessage: 'Error scheduling the gaps fill',
   }
 );
 
-export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (totalRules: number) =>
+export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (succeeded: number, skipped: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
     {
-      values: { totalRules },
-      defaultMessage:
-        'Successfully scheduled gaps filling for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+      values: { succeededRulesCount: succeeded, skippedRulesCount: skipped },
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully scheduled the gaps fill for # rule. } other {You've successfully scheduled the gaps fill for # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}`,
     }
   );
 
@@ -1393,7 +1443,7 @@ export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: numbe
     {
       values: { failedRulesCount },
       defaultMessage:
-        'Failed to schedule gaps filling for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+        'Failed to schedule the gaps fill for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
     }
   );
 

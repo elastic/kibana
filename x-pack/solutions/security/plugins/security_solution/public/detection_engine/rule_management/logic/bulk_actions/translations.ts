@@ -69,7 +69,7 @@ export function explainBulkSuccess(
       return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION(summary.succeeded);
 
     case BulkActionTypeEnum.fill_gaps:
-      return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded);
+      return i18n.RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION(summary.succeeded, summary.skipped);
   }
 }
 

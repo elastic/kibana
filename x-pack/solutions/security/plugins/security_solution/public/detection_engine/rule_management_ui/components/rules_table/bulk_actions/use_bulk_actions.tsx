@@ -62,6 +62,7 @@ interface UseBulkActionsArgs {
   ) => Promise<boolean>;
   showBulkDuplicateConfirmation: () => Promise<string | null>;
   showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  showBulkFillRuleGapsConfirmation: () => Promise<TimeRange | null>;
   showManualRuleRunLimitError: () => void;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
@@ -75,6 +76,7 @@ export const useBulkActions = ({
   showBulkActionConfirmation,
   showBulkDuplicateConfirmation,
   showManualRuleRunConfirmation,
+  showBulkFillRuleGapsConfirmation,
   showManualRuleRunLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
@@ -287,6 +289,111 @@ export const useBulkActions = ({
         });
       };
 
+      const handleScheduleFillGapsAction = async () => {
+        let longTimeWarningToast: Toast;
+        let isBulkFillGapsFinished = false;
+
+        startTransaction({ name: BULK_RULE_ACTIONS.FILL_GAPS });
+        closePopover();
+
+        setIsPreflightInProgress(true);
+
+        const dryRunResult = await executeBulkActionsDryRun({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds }),
+          fillGapsPayload: {
+            start_date: new Date(Date.now() - 1000).toISOString(),
+            end_date: new Date().toISOString(),
+          },
+        });
+
+        setIsPreflightInProgress(false);
+
+        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_MANUAL_RULE_RUN_BULK_SIZE) {
+          showManualRuleRunLimitError();
+          return;
+        }
+
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkActionTypeEnum.fill_gaps
+        );
+        if (hasActionBeenConfirmed === false) {
+          return;
+        }
+
+        const modalManualGapsFillingConfirmationResult = await showBulkFillRuleGapsConfirmation();
+        // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.FillGaps, {
+        //   type: 'bulk',
+        // });
+
+        if (modalManualGapsFillingConfirmationResult === null) {
+          return;
+        }
+
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+
+        const hideWarningToast = () => {
+          if (longTimeWarningToast) {
+            toasts.api.remove(longTimeWarningToast);
+          }
+        };
+
+        // show warning toast only if bulk fill gaps action exceeds 5s
+        // if bulkAction already finished, we won't show toast at all (hence flag "isBulkFillGapsFinished")
+        setTimeout(() => {
+          if (isBulkFillGapsFinished) {
+            return;
+          }
+          longTimeWarningToast = toasts.addWarning(
+            {
+              title: i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE,
+              text: toMountPoint(
+                <>
+                  <p>
+                    {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION(
+                      dryRunResult?.succeededRulesCount ?? 0
+                    )}
+                  </p>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                        {i18n.BULK_FILL_RULE_GAPS_WARNING_TOAST_NOTIFY}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>,
+                startServices
+              ),
+              iconType: undefined,
+            },
+            { toastLifeTimeMs: 10 * 60 * 1000 }
+          );
+        }, 5 * 1000);
+
+        await executeBulkAction({
+          type: BulkActionTypeEnum.fill_gaps,
+          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          fillGapsPayload: {
+            start_date: modalManualGapsFillingConfirmationResult.startDate.toISOString(),
+            end_date: modalManualGapsFillingConfirmationResult.endDate.toISOString(),
+          },
+        });
+
+        isBulkFillGapsFinished = true;
+        hideWarningToast();
+
+        // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
+        //   rangeInMs: modalManualGapsFillingConfirmationResult.endDate.diff(
+        //     modalManualGapsFillingConfirmationResult.startDate
+        //   ),
+        //   status: 'success',
+        //   rulesCount: enabledIds.length,
+        // });
+      };
+
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
         let longTimeWarningToast: Toast;
         let isBulkEditFinished = false;
@@ -496,6 +603,14 @@ export const useBulkActions = ({
               icon: undefined,
             },
             {
+              key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+              'data-test-subj': 'scheduleFillGaps',
+              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              onClick: handleScheduleFillGapsAction,
+              icon: undefined,
+            },
+            {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
               'data-test-subj': 'disableRuleBulk',
@@ -667,6 +782,8 @@ export const useBulkActions = ({
       isAlertSuppressionLicenseValid,
       alertSuppressionUpsellingMessage,
       globalQuery,
+      kql,
+      showBulkFillRuleGapsConfirmation,
     ]
   );
 

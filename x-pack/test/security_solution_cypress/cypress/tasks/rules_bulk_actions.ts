@@ -62,6 +62,7 @@ import {
   SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM,
+  BULK_FILL_RULE_GAPS_BTN,
 } from '../screens/rules_bulk_actions';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -479,5 +480,22 @@ export const scheduleManualRuleRunForSelectedRules = (
 // Confirmation modal
 
 export const confirmBulkEditAction = () => {
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const scheduleBulkFillGapsForSelectedRules = (
+  enabledCount: number,
+  disabledCount: number
+) => {
+  cy.log('Bulk fill gaps for selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_FILL_RULE_GAPS_BTN).click();
+  if (disabledCount > 0) {
+    cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
+      'have.text',
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
+    );
+    cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
+  }
   cy.get(MODAL_CONFIRMATION_BTN).click();
 };
