@@ -62,13 +62,27 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
-  private indexName: string | null = null;
-  private indexName$ = new Subject<string | null>();
+  private _indexName$ = new BehaviorSubject<string | null>(null);
+  public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
+
+  // Indicated if the index exists (has been created) in Elasticsearch.
+  private _indexCrated$ = new BehaviorSubject<boolean>(false);
+  public readonly indexCreated$: Observable<boolean> = this._indexCrated$.asObservable();
+
+  public setIndexCreated(created: boolean) {
+    this._indexCrated$.next(created);
+  }
+  public getIndexCreated(): boolean {
+    return this._indexCrated$.getValue();
+  }
 
   private readonly actions$ = new Subject<Action>();
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
+
+  private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
+  public readonly isFetching$: Observable<boolean> = this._isSaving$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
@@ -123,9 +137,14 @@ export class IndexUpdateService {
     )
   );
 
-  public readonly dataView$: Observable<DataView> = this.indexName$.pipe(
-    skipWhile((indexName) => !indexName),
-    switchMap((indexName) => {
+  public readonly dataView$: Observable<DataView> = combineLatest([
+    this._indexName$,
+    this._indexCrated$,
+  ]).pipe(
+    skipWhile(([indexName, indexCreated]) => {
+      return indexCreated === false || !indexName;
+    }),
+    switchMap(([indexName]) => {
       return from(this.getDataView(indexName!));
     }),
     shareReplay({ bufferSize: 1, refCount: true })
@@ -215,9 +234,12 @@ export class IndexUpdateService {
             });
 
             return from(
-              this.http.post<BulkResponse>(`/internal/esql/lookup_index/${this.indexName}/update`, {
-                body,
-              })
+              this.http.post<BulkResponse>(
+                `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+                {
+                  body,
+                }
+              )
             ).pipe(
               withLatestFrom(this._rows$, this.dataView$),
               map(([response, rows, dataView]) => {
@@ -282,10 +304,12 @@ export class IndexUpdateService {
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
       ])
         .pipe(
+          tap(() => {
+            this._isFetching$.next(true);
+          }),
           switchMap(([dataView, timeRangeEmit]) => {
             return from(
               this.data.search.searchSource.create({
-                // index: this.indexName!,
                 index: dataView.toSpec(),
                 size: 1000, // Adjust size as needed
               })
@@ -316,21 +340,21 @@ export class IndexUpdateService {
             });
 
             this._rows$.next(resultRows);
+            this._isFetching$.next(false);
           },
           error: (error) => {
-            // setIsFetching(false);
+            this._isFetching$.next(false);
           },
         })
     );
   }
 
   public setIndexName(indexName: string) {
-    if (false) {
-      // TODO check if index is already created
-      throw new Error(`Index with name ${indexName} already exists.`);
-    }
-    this.indexName$.next(indexName);
-    this.indexName = indexName;
+    this._indexName$.next(indexName);
+  }
+
+  public getIndexName(): string | null {
+    return this._indexName$.getValue();
   }
 
   // Add a new index

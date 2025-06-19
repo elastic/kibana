@@ -28,6 +28,7 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   if (props.indexName) {
     // set initial index name
     indexUpdateService.setIndexName(props.indexName);
+    indexUpdateService.setIndexCreated(props.doesIndexExist);
   }
 
   const LazyFlyoutContent = lazy(async () => {
@@ -38,18 +39,18 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   });
 
   const onFlyoutClose = () => {
+    props.onClose?.({
+      indexName: indexUpdateService.getIndexName()!,
+      indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.getIndexCreated(),
+    });
+    indexUpdateService.destroy();
     flyoutSession.close();
-  };
-
-  const onSave = () => {
-    // TODO refresh lookup index list
-    onFlyoutClose();
   };
 
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<LoadingContents />}>
-        <LazyFlyoutContent deps={deps} props={{ ...props, onClose: onFlyoutClose, onSave }} />
+        <LazyFlyoutContent deps={deps} props={{ ...props, onClose: onFlyoutClose }} />
       </Suspense>,
       startServices
     ),
