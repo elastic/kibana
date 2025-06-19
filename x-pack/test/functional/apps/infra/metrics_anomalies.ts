@@ -22,6 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
@@ -151,10 +152,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const hostName = await pageObjects.infraHome.getAnomalyHostName();
           await pageObjects.infraHome.clickShowAffectedHostsButton();
           await pageObjects.header.waitUntilLoadingHasFinished();
-          const currentUrl = await browser.getCurrentUrl();
-          expect(currentUrl).to.contain(
-            encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)
-          );
+
+          await retry.tryForTime(5000, async () => {
+            const currentUrl = await browser.getCurrentUrl();
+            expect(currentUrl).to.contain(
+              encodeURIComponent(`query:(terms:(host.name:!(${hostName})))`)
+            );
+          });
         });
       });
     });
