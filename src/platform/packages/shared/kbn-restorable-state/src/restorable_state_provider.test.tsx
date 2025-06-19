@@ -25,14 +25,16 @@ describe('createRestorableStateProvider', () => {
 
     const MockChildComponent = () => {
       const [message, setMessage] = useRestorableState('message', 'Hello');
+      const [count, setCount] = useRestorableState('count', 0);
       return (
         <button
           data-test-subj="message-button"
           onClick={() => {
             setMessage((value) => `${value} World`);
+            setCount((value) => (value || 0) + 1);
           }}
         >
-          {message}
+          {message} - {count || 0}
         </button>
       );
     };
@@ -71,16 +73,20 @@ describe('createRestorableStateProvider', () => {
     expect(props.onInitialStateChange).not.toHaveBeenCalled();
     await userEvent.click(button);
     await userEvent.click(button);
-    expect(button).toHaveTextContent('Hello World World');
-    expect(props.onInitialStateChange).toHaveBeenCalledTimes(2);
-    expect(mockStoredState).toEqual({ message: 'Hello World World' });
+    expect(button).toHaveTextContent('Hello World World - 2');
+    expect(props.onInitialStateChange).toHaveBeenCalledTimes(4);
+    expect(mockStoredState).toEqual({ message: 'Hello World World', count: 2 });
 
     const anotherButton = screen.getByTestId('another-message-button');
     expect(anotherButton).toHaveTextContent('+');
     await userEvent.click(anotherButton);
     expect(anotherButton).toHaveTextContent('++');
-    expect(props.onInitialStateChange).toHaveBeenCalledTimes(3);
-    expect(mockStoredState).toEqual({ message: 'Hello World World', anotherMessage: '++' });
+    expect(props.onInitialStateChange).toHaveBeenCalledTimes(5);
+    expect(mockStoredState).toEqual({
+      message: 'Hello World World',
+      count: 2,
+      anotherMessage: '++',
+    });
 
     const propsWithSavedState: ComponentProps<typeof WrappedComponent> = {
       initialState: { message: 'Hi', anotherMessage: '---' },
@@ -90,7 +96,7 @@ describe('createRestorableStateProvider', () => {
     };
 
     render(<WrappedComponent {...propsWithSavedState} />);
-    expect(screen.getAllByTestId('message-button')[1]).toHaveTextContent('Hi');
+    expect(screen.getAllByTestId('message-button')[1]).toHaveTextContent('Hi - 0');
     expect(screen.getAllByTestId('another-message-button')[1]).toHaveTextContent('---');
   });
 
