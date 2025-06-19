@@ -238,7 +238,7 @@ export const OneConsole = ({ }: BootDependencies) => {
             esHostService,
             storage,
             history: storageHistory,
-            routeHistory: createMemoryHistory(),
+            // routeHistory: createMemoryHistory(),
             settings,
             notifications: notificationServiceMock.createStartContract(),
             trackUiMetric: trackUiMetricMock,
