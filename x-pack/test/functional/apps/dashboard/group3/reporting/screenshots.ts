@@ -117,7 +117,7 @@ export default function ({
         await reporting.checkUsePrintLayout();
         await reporting.clickGenerateReportButton();
 
-        const url = await reporting.getReportURL();
+        const url = await reporting.getReportURL(60000);
         const res = await reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);
@@ -222,7 +222,7 @@ export default function ({
         await reporting.selectExportItem('PDF');
         await reporting.clickGenerateReportButton();
 
-        const url = await reporting.getReportURL();
+        const url = await reporting.getReportURL(60000);
         const res = await reporting.getResponse(url ?? '');
         await exports.closeExportFlyout();
 
@@ -282,7 +282,7 @@ export default function ({
         await reporting.clickGenerateReportButton();
         await reporting.removeForceSharedItemsContainerSize();
 
-        const url = await reporting.getReportURL();
+        const url = await reporting.getReportURL(60000);
         const reportData = await reporting.getRawReportData(url ?? '');
         sessionReportPath = await reporting.writeSessionReport(
           reportFileName,

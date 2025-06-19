@@ -61,11 +61,15 @@ export class ReportingPageObject extends FtrService {
     }
   }
 
-  async getReportURL() {
+  async getReportURL(timeout: number) {
     this.log.debug('getReportURL');
 
     try {
-      const url = await this.testSubjects.getVisibleText('exportAssetValue');
+      const url = await this.testSubjects.getAttribute(
+        'downloadCompletedReportButton',
+        'href',
+        timeout
+      );
       this.log.debug(`getReportURL got url: ${url}`);
 
       return url;
@@ -87,7 +91,7 @@ export class ReportingPageObject extends FtrService {
     `);
   }
 
-  async getResponse(fullUrl: string, method: string = 'get'): Promise<SuperTest.Response> {
+  async getResponse(fullUrl: string): Promise<SuperTest.Response> {
     this.log.debug(`getResponse for ${fullUrl}`);
     const kibanaServerConfig = this.config.get('servers.kibana');
     const baseURL = formatUrl({
@@ -95,10 +99,7 @@ export class ReportingPageObject extends FtrService {
       auth: false,
     });
     const urlWithoutBase = fullUrl.replace(baseURL, '');
-    const res = await this.security.testUserSupertest[method](urlWithoutBase).set(
-      'kbn-xsrf',
-      'xxx'
-    );
+    const res = await this.security.testUserSupertest.get(urlWithoutBase);
     return res ?? '';
   }
 
@@ -146,7 +147,7 @@ export class ReportingPageObject extends FtrService {
   }
 
   async getGenerateReportButton() {
-    return await this.retry.try(async () => await this.testSubjects.find('exportMenuItem-CSV'));
+    return await this.retry.try(async () => await this.testSubjects.find('generateReportButton'));
   }
 
   async isGenerateReportButtonDisabled() {
@@ -174,7 +175,7 @@ export class ReportingPageObject extends FtrService {
   }
 
   async clickGenerateReportButton() {
-    await this.testSubjects.click('exportMenuItem-CSV');
+    await this.testSubjects.click('generateReportButton');
   }
 
   async toggleReportMode() {

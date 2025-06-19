@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.openShareMenuItem('PDF Reports');
         await reporting.clickGenerateReportButton();
 
-        const url = await reporting.getReportURL();
+        const url = await reporting.getReportURL(60000);
         const res = await reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);

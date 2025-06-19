@@ -98,22 +98,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.info(`Indexed ${res.items.length} test data docs into ${index}.`);
   };
 
-  const getReport = async () => {
+  const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    const url = await getReportPostUrl();
-    const res = await reporting.getResponse(url ?? '', 'post');
+    await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
+    await reporting.clickGenerateReportButton();
+    await exports.closeExportFlyout();
+
+    const url = await reporting.getReportURL(timeout);
+    const res = await reporting.getResponse(url ?? '');
 
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-    await exports.closeExportFlyout();
     return res;
   };
 
   const getReportPostUrl = async () => {
     // click 'Copy POST URL'
     await exports.clickExportTopNavButton();
+    await reporting.selectExportItem('CSV');
     await reporting.clickGenerateReportButton();
     await reporting.copyReportingPOSTURLValueToClipboard();
 
@@ -140,14 +145,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await exports.closeExportFlyout();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await reporting.openExportPopover();
-        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
         await exports.closeExportFlyout();
       });
     });
@@ -240,7 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.saveSearch('large export');
 
         // match file length, the beginning and the end of the csv file contents
-        const { text: csvFile } = await getReport();
+        const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
         expect(csvFile.length).to.be(4845684);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
