@@ -133,7 +133,9 @@ export const useLookupIndexCommand = (
   );
 
   const onFlyoutClose = useCallback(
-    (resultIndexName: string) => {
+    (resultIndexName: string, indexCreated: boolean) => {
+      if (!indexCreated) return;
+
       const cursorPosition = editorRef.current?.getPosition();
 
       if (!cursorPosition) {
@@ -155,8 +157,8 @@ export const useLookupIndexCommand = (
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
-        onClose: ({ indexName: resultIndexName, isIndexCreated }) => {
-          onFlyoutClose(indexName);
+        onClose: ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
+          onFlyoutClose(resultIndexName, indexCreatedDuringFlyout);
         },
       } as EditLookupIndexContentContext);
     },

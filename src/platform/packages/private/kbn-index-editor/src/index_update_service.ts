@@ -81,6 +81,9 @@ export class IndexUpdateService {
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
+  private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
+  public readonly isFetching$: Observable<boolean> = this._isSaving$.asObservable();
+
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
@@ -301,6 +304,9 @@ export class IndexUpdateService {
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
       ])
         .pipe(
+          tap(() => {
+            this._isFetching$.next(true);
+          }),
           switchMap(([dataView, timeRangeEmit]) => {
             return from(
               this.data.search.searchSource.create({
@@ -334,19 +340,16 @@ export class IndexUpdateService {
             });
 
             this._rows$.next(resultRows);
+            this._isFetching$.next(false);
           },
           error: (error) => {
-            // setIsFetching(false);
+            this._isFetching$.next(false);
           },
         })
     );
   }
 
   public setIndexName(indexName: string) {
-    if (false) {
-      // TODO check if index is already created
-      throw new Error(`Index with name ${indexName} already exists.`);
-    }
     this._indexName$.next(indexName);
   }
 

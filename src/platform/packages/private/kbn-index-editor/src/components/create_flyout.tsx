@@ -41,8 +41,9 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
   const onFlyoutClose = () => {
     props.onClose?.({
       indexName: indexUpdateService.getIndexName()!,
-      isIndexCreated: indexUpdateService.getIndexCreated(),
+      indexCreatedDuringFlyout: props.doesIndexExist ? false : indexUpdateService.getIndexCreated(),
     });
+    indexUpdateService.destroy();
     flyoutSession.close();
   };
 

@@ -56,6 +56,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   const savingDocs = useObservable(indexUpdateService.savingDocs$);
 
+  const isFetching = useObservable(indexUpdateService.isFetching$, false);
+
   const [activeColumns, setActiveColumns] = useState<string[]>(
     (props.initialColumns || props.columns).map((c) => c.name)
   );
@@ -139,7 +141,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
         sampleSizeState={10_000}
         canDragAndDropColumns
-        loadingState={DataLoadingState.loaded}
+        loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
         dataView={props.dataView}
         onSetColumns={onSetColumns}
         onUpdateRowsPerPage={setRowsPerPage}

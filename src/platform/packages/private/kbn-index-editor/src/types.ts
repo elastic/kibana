@@ -25,7 +25,7 @@ export interface EditLookupIndexContentContext {
   onClose?: (result: {
     indexName: string;
     /** Indicates if the index was created */
-    isIndexCreated: boolean;
+    indexCreatedDuringFlyout: boolean;
   }) => void;
 }
 
