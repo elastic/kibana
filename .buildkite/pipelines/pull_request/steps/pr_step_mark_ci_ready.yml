@@ -1,0 +1,14 @@
+steps:
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 80
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_api_docs
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
