@@ -28,10 +28,10 @@ test('can create a RERANK command', () => {
 });
 
 test('can create a SAMPLE command', () => {
-  const node = cmd`SAMPLE 0.23 123`;
+  const node = cmd`SAMPLE 0.23`;
   const text = node.toString();
 
-  expect(text).toBe('SAMPLE 0.23 123');
+  expect(text).toBe('SAMPLE 0.23');
 });
 
 test('can create a complex STATS command', () => {
