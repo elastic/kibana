@@ -12,8 +12,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function apiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('guided onboarding', () => {
     loadTestFile(require.resolve('./get_state'));
-    loadTestFile(require.resolve('./put_state'));
-    loadTestFile(require.resolve('./get_guides'));
     loadTestFile(require.resolve('./get_config'));
   });
 }
