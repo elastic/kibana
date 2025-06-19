@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -45,6 +45,7 @@ import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/na
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { NamespaceSelector } from '../../components/namespace_selector';
+import { useActiveNamespace } from '../../components/namespace_selector';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
@@ -239,10 +240,10 @@ const determineDashboardDataRefetchInterval = (data: ComplianceDashboardDataV2 |
 
 const TabContent = ({
   selectedPostureTypeTab,
-  namespace,
+  activeNamespace: namespace,
 }: {
   selectedPostureTypeTab: PosturePolicyTemplate;
-  namespace: string;
+  activeNamespace: string;
 }) => {
   const { data: getSetupStatus } = useCspSetupStatusApi({
     refetchInterval: (data) => {
@@ -262,10 +263,13 @@ const TabContent = ({
     namespace
   );
 
-  const getKspmDashboardData = useKspmStatsApi({
-    enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_KSPM,
-    refetchInterval: determineDashboardDataRefetchInterval,
-  });
+  const getKspmDashboardData = useKspmStatsApi(
+    {
+      enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_KSPM,
+      refetchInterval: determineDashboardDataRefetchInterval,
+    },
+    namespace
+  );
   const setupStatus = getSetupStatus?.[selectedPostureTypeTab]?.status;
   const isStatusManagedInDashboard = setupStatus === 'indexed' || setupStatus === 'not-installed';
   const shouldRenderNoFindings = !isCloudSecurityPostureInstalled || !isStatusManagedInDashboard;
@@ -325,14 +329,6 @@ const TabContent = ({
 export const ComplianceDashboard = () => {
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
-  const getCspmDashboardData = useCspmStatsApi({
-    enabled: isCloudSecurityPostureInstalled,
-  });
-  const getKspmDashboardData = useKspmStatsApi({
-    enabled: isCloudSecurityPostureInstalled,
-  });
-
-  const [selectedNamespace, setSelectedNamespace] = useState<string>('default');
 
   const location = useLocation();
   const history = useHistory();
@@ -352,17 +348,39 @@ export const ComplianceDashboard = () => {
     return tab;
   }, [location.pathname]);
 
+  const { activeNamespace, updateActiveNamespace } = useActiveNamespace({
+    postureType: currentTabUrlState,
+  });
+
+  const getCspmDashboardData = useCspmStatsApi(
+    {
+      enabled: isCloudSecurityPostureInstalled,
+    },
+    activeNamespace
+  );
+  const getKspmDashboardData = useKspmStatsApi(
+    {
+      enabled: isCloudSecurityPostureInstalled,
+    },
+    activeNamespace
+  );
+
   const namespaces =
     currentTabUrlState === POSTURE_TYPE_CSPM
       ? getCspmDashboardData.data?.namespaces || []
       : getKspmDashboardData.data?.namespaces || [];
 
+  const onNamespaceChangeCallback = useCallback(
+    (selectedNamespace: string) => {
+      updateActiveNamespace(selectedNamespace);
+    },
+    [updateActiveNamespace]
+  );
+
   const preferredTabUrlState = useMemo(
     () => getDefaultTab(getSetupStatus, getCspmDashboardData.data, getKspmDashboardData.data),
     [getCspmDashboardData.data, getKspmDashboardData.data, getSetupStatus]
   );
-
-  const onNamespaceChangeCallback = (namespace: string) => setSelectedNamespace(namespace);
 
   const tabs = useMemo(() => {
     const navigateToPostureTypeDashboardTab = (pathname: string) => {
@@ -391,7 +409,7 @@ export const ComplianceDashboard = () => {
             content: (
               <TabContent
                 selectedPostureTypeTab={selectedTab || POSTURE_TYPE_CSPM}
-                namespace={selectedNamespace}
+                activeNamespace={activeNamespace}
               />
             ),
           },
@@ -407,7 +425,7 @@ export const ComplianceDashboard = () => {
             content: (
               <TabContent
                 selectedPostureTypeTab={selectedTab || POSTURE_TYPE_KSPM}
-                namespace={selectedNamespace}
+                activeNamespace={activeNamespace}
               />
             ),
           },
@@ -417,7 +435,7 @@ export const ComplianceDashboard = () => {
     currentTabUrlState,
     preferredTabUrlState,
     isCloudSecurityPostureInstalled,
-    selectedNamespace,
+    activeNamespace,
     history,
     services.data.query.queryString,
     services.data.query.filterManager,
@@ -438,6 +456,7 @@ export const ComplianceDashboard = () => {
           <NamespaceSelector
             data-test-subj="namespace-selector"
             namespaces={namespaces}
+            activeNamespace={activeNamespace}
             postureType={currentTabUrlState}
             onNamespaceChangeCallback={onNamespaceChangeCallback}
           />,
