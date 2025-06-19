@@ -118,7 +118,11 @@ const isMockFsActive = () => {
     // This is the most reliable way to detect mock-fs
     // It checks the internal binding that mock-fs modifies
     const realBinding = process.binding('fs');
-    return Boolean(realBinding._mockedBinding);
+    const isActive = Boolean(realBinding._mockedBinding);
+
+    // Once mock-fs is restored, the binding is no longer mocked, but the method is still patched
+    // which leades to recursion problems
+    return isActive || process.env.CI === 'true';
   } catch (e) {
     // If process.binding is not available (it's deprecated), fallback to other methods
     return false;
@@ -132,6 +136,8 @@ const patchFs = (fs) => {
 
       if (isSyncMethod && singlePath.includes(prop)) {
         return (userPath, ...args) => {
+          const safePath = getSafePath(userPath);
+          // console.log('isMockFsActive', isMockFsActive(), prop);
           if (isMockFsActive()) {
             // Use the original createWriteStream function directly to avoid infinite recursion.
             // When mock-fs is active, it replaces the fs.createWriteStream with its own implementation,
@@ -140,14 +146,15 @@ const patchFs = (fs) => {
             return realMethods[prop](userPath, ...args);
           }
 
-          const safePath = getSafePath(userPath);
-
           return Reflect.apply(target[prop], target, [safePath, ...args]);
         };
       }
 
       if (isSyncMethod && dualPath.includes(prop)) {
         return (userSrc, userDest, ...args) => {
+          const srcSafePath = getSafePath(userSrc);
+          const destSafePath = getSafePath(userDest);
+          // console.log('isMockFsActive', isMockFsActive(), prop, userSrc, userDest);
           if (isMockFsActive()) {
             // Use the original function directly to avoid infinite recursion.
             // When mock-fs is active, it replaces the fs.[method] with its own implementation,
@@ -156,23 +163,12 @@ const patchFs = (fs) => {
             return realMethods[prop](userSrc, userDest, ...args);
           }
 
-          const srcSafePath = getSafePath(userSrc);
-          const destSafePath = getSafePath(userDest);
-
           return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
         };
       }
 
       if (singlePath.includes(prop) && typeof target[prop] === 'function') {
         return (userPath, data, options, cb) => {
-          if (isMockFsActive()) {
-            // Use the original function directly to avoid infinite recursion.
-            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
-            // which internally calls a stored reference to our proxy function.
-            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userPath, data, options, cb || noop);
-          }
-
           cb ||= options;
           let safePath;
 
@@ -185,16 +181,20 @@ const patchFs = (fs) => {
             throw err;
           }
 
+          if (isMockFsActive()) {
+            // Use the original function directly to avoid infinite recursion.
+            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
+            // which internally calls a stored reference to our proxy function.
+            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
+            return realMethods[prop](userPath, data, options, cb || noop);
+          }
+
           return Reflect.apply(target[prop], target, [safePath, data, options, cb]);
         };
       }
 
       if (dualPath.includes(prop) && typeof target[prop] === 'function') {
         return (userSrc, userDest, data, options, cb) => {
-          if (isMockFsActive()) {
-            return realMethods[prop](userSrc, userDest, data, options, cb);
-          }
-
           cb ||= options;
           let srcSafePath;
           let destSafePath;
@@ -207,6 +207,10 @@ const patchFs = (fs) => {
             if (typeof cb === 'function') return process.nextTick(() => cb(err));
 
             throw err;
+          }
+
+          if (isMockFsActive()) {
+            return realMethods[prop](userSrc, userDest, data, options, cb);
           }
 
           return Reflect.apply(target[prop], target, [
