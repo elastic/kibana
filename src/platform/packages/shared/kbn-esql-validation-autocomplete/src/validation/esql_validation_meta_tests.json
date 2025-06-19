@@ -403,14 +403,14 @@
     {
       "query": "row var = 5 not in (\"a\", \"b\", \"c\")",
       "error": [
-        "Argument of [not_in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
+        "Argument of [not in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
       ],
       "warning": []
     },
     {
       "query": "row var = 5 not in (1, 2, 3, \"a\")",
       "error": [
-        "Argument of [not_in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
+        "Argument of [not in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
       ],
       "warning": []
     },
@@ -866,7 +866,7 @@
     {
       "query": "row var = 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -880,7 +880,7 @@
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -914,7 +914,7 @@
     {
       "query": "row var = 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -928,7 +928,7 @@
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -2515,15 +2515,14 @@
     {
       "query": "from a_index | rename textField",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'"
+        "SyntaxError: no viable alternative at input 'textField'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename a",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        "Unknown column [a]"
+        "SyntaxError: no viable alternative at input 'a'"
       ],
       "warning": []
     },
@@ -2560,6 +2559,23 @@
     {
       "query": "from a_index | rename textField As b, b AS c",
       "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename b = textField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename b = textField, b AS c",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename textField = a",
+      "error": [
+        "Unknown column [a]"
+      ],
       "warning": []
     },
     {
@@ -3617,7 +3633,7 @@
     {
       "query": "from a_index | where doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3631,7 +3647,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3665,7 +3681,7 @@
     {
       "query": "from a_index | where doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3679,7 +3695,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6566,7 +6582,7 @@
     {
       "query": "from a_index | eval doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6580,7 +6596,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6614,7 +6630,7 @@
     {
       "query": "from a_index | eval doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6628,7 +6644,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
