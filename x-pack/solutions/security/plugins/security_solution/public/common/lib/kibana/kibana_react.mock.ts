@@ -235,10 +235,15 @@ export const createStartServicesMock = (
     },
     telemetry: createTelemetryServiceMock(),
     theme: themeServiceMock.createSetupContract(),
-    timelines: createTGridMocks(),
     osquery: {
       OsqueryResults: jest.fn().mockReturnValue(null),
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
+    },
+    timelines: createTGridMocks(),
+    savedObjectsTagging: {
+      ui: {
+        getTableColumnDefinition: jest.fn(),
+      },
     },
     triggersActionsUi,
     guidedOnboarding,
