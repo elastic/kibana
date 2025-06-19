@@ -562,11 +562,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * @param spaces The spaces to check authorization for
    * @returns An array of objects that can be modified
    */
-  private checkAccessControl(
+  private async checkAccessControl(
     objects: AuthorizeObject[],
     action: SecurityAction,
     spaces: Set<string>
-  ): AuthorizeObject[] {
+  ): Promise<AuthorizeObject[]> {
     if (
       action === SecurityAction.UPDATE ||
       action === SecurityAction.BULK_UPDATE ||
@@ -575,13 +575,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       action === SecurityAction.CREATE ||
       action === SecurityAction.BULK_CREATE
     ) {
-      return objects.filter((obj) =>
-        this.accessControlService.canModifyObject({
-          type: obj.type,
-          object: obj,
-          spacesToAuthorize: spaces,
-        })
+      const results = await Promise.all(
+        objects.map((obj) =>
+          this.accessControlService.canModifyObject({
+            type: obj.type,
+            object: obj,
+            spacesToAuthorize: spaces,
+          })
+        )
       );
+      return objects.filter((_, index) => results[index]);
     } else {
       return objects;
     }
@@ -592,7 +595,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
    * within the type map. If unauthorized for any type this method will throw.
    */
-  private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>): void {
+  private async enforceAuthorization<A extends string>(
+    params: EnforceAuthorizationParams<A>
+  ): Promise<void> {
     const { typesAndSpaces, action, typeMap, auditOptions } = params;
     const {
       objects: auditObjects,
@@ -612,7 +617,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         }
       }
 
-      const filteredObjects = this.checkAccessControl(auditObjects, action, allSpaces);
+      const filteredObjects = await this.checkAccessControl(auditObjects, action, allSpaces);
 
       if (filteredObjects.length === 0) {
         const msg = 'Access control denied: No modifiable objects';
@@ -709,14 +714,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.accessControlService.setUserForOperation(currentUser);
     const typesAndSpaces = params.enforceMap;
     if (typesAndSpaces !== undefined && checkResult) {
-      params.actions.forEach((action) => {
+      const authorizationPromises = Array.from(params.actions).map((action) =>
         this.enforceAuthorization({
           typesAndSpaces,
           action,
           typeMap: checkResult.typeMap,
           auditOptions: params.auditOptions,
-        });
-      });
+        })
+      );
+
+      await Promise.all(authorizationPromises);
     }
 
     return checkResult;
@@ -1171,7 +1178,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       // Is the user authorized to access this object in this space?
       let isAuthorizedForObject = true;
       try {
-        this.enforceAuthorization({
+        await this.enforceAuthorization({
           typesAndSpaces: new Map([[type, new Set([namespaceString])]]),
           action,
           typeMap,
@@ -1257,7 +1264,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       const getRedactedSpaces = (spacesArray: string[] | undefined) => {
         if (!spacesArray) return;
         const savedObject = { type, namespaces: spacesArray } as SavedObject; // Other SavedObject attributes aren't required
-        const result = this.redactNamespaces({ savedObject, typeMap });
+        const result = this.redactNamespaces({
+          typeMap,
+          savedObject,
+        });
         return result.namespaces;
       };
       const redactedSpaces = getRedactedSpaces(spaces)!;
