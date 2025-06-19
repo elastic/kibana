@@ -16,6 +16,8 @@ import type {
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
+import type { TypeOf } from '@kbn/config-schema';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type { PackageList } from '../../../common';
@@ -25,6 +27,7 @@ import type {
   BundledPackage,
   CategoryId,
   EsAssetReference,
+  GetInstalledPackagesRequestSchema,
   InstallablePackage,
   Installation,
   RegistryPackage,
@@ -38,6 +41,8 @@ import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/ep
 import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
+
+import type { GetInstalledPackagesResponse } from '../../../common/types';
 
 import {
   type CustomPackageDatasetConfiguration,
@@ -57,6 +62,7 @@ import {
   installPackage,
   getTemplateInputs,
   getPackageInfo,
+  getInstalledPackages,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
@@ -137,6 +143,10 @@ export interface PackageClient {
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]>;
+
+  getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -365,6 +375,18 @@ class PackageClientImpl implements PackageClient {
       excludeInstallStatus,
       category,
       prerelease,
+    });
+  }
+
+  public async getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getInstalledPackages({
+      savedObjectsClient: this.internalSoClient,
+      esClient: this.internalEsClient,
+      ...params,
     });
   }
 
