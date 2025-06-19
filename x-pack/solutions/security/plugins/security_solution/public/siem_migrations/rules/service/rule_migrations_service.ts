@@ -275,17 +275,17 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_execution?.error) {
+        // automatically resume interrupted migrations when the proper conditions are met
+        if (
+          result.status === SiemMigrationTaskStatus.INTERRUPTED &&
+          !result.last_execution?.error
+        ) {
           const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
           const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
             await api.startRuleMigration({
               migrationId: result.id,
-              settings: {
-                connectorId,
-                skipPrebuiltRulesMatching,
-              },
+              settings: { connectorId, skipPrebuiltRulesMatching },
             });
             pendingMigrationIds.push(result.id);
           }

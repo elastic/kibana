@@ -51,7 +51,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
 
     expect(soClient.create).toHaveBeenCalledWith(
       privilegeMonitoringTypeName,
-      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING },
+      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED },
       { id: `privilege-monitoring-${namespace}` }
     );
     expect(result).toEqual({ status: 'installing' });
@@ -78,10 +78,10 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
     expect(soClient.update).toHaveBeenCalledWith(
       privilegeMonitoringTypeName,
       `privilege-monitoring-${namespace}`,
-      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING, apiKey: '', error: undefined },
+      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED, apiKey: '', error: undefined },
       { refresh: 'wait_for' }
     );
-    expect(result).toEqual({ status: 'installing', apiKey: '' });
+    expect(result).toEqual({ status: 'started', apiKey: '', error: undefined });
   });
 
   it('should update the descriptor', async () => {
