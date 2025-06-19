@@ -485,7 +485,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -574,7 +574,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -625,7 +625,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
@@ -661,7 +661,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
