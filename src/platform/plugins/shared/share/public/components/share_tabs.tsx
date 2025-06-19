@@ -8,8 +8,6 @@
  */
 
 import React, { type FC } from 'react';
-import { copyToClipboard } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
 import { ShareProvider, useShareContext, type IShareContext } from './context';
@@ -27,7 +25,7 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareContext();
 
-  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, toasts, isDirty } = shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
@@ -42,57 +40,6 @@ export const ShareMenuTabs = () => {
     !objectTypeMeta?.config?.embed?.disabled
   ) {
     tabs.push(embedTab);
-  }
-
-  /**
-   * If there is only one tab and the link is configured to allow copying the link without showing the modal,
-   * we will copy the link to the clipboard and show a success toast on copying the share link for object.
-   */
-  if (
-    !isDirty &&
-    tabs.length === 1 &&
-    !objectTypeMeta?.config.link?.disabled &&
-    objectTypeMeta.config?.link?.attachToAnchorIfIsolate &&
-    objectTypeMeta.config?.link?.delegatedShareUrlHandler
-  ) {
-    void (async function () {
-      let shareableUrl: string | null = null;
-
-      // this ensures that we are creating a new link every time the user clicks on the share button
-      if (!(shareableUrl = anchorElement!.getAttribute('data-share-url'))) {
-        // disable the anchor element to prevent multiple clicks
-        anchorElement?.setAttribute('disabled', String(true));
-        shareableUrl = (await objectTypeMeta.config?.link?.delegatedShareUrlHandler!()) || null;
-        anchorElement?.setAttribute('data-share-url', shareableUrl!);
-        anchorElement?.setAttribute('disabled', String(false));
-      }
-
-      if (!shareableUrl) {
-        toasts.addError(
-          new Error(
-            i18n.translate('share.shareContextMenu.copyLinkError', {
-              defaultMessage: 'Unable to copy link to clipboard',
-            })
-          ),
-          {
-            title: i18n.translate('share.shareContextMenu.copyLinkErrorTitle', {
-              defaultMessage: 'Copy link error',
-            }),
-          }
-        );
-        return;
-      }
-
-      copyToClipboard(shareableUrl!);
-
-      toasts.addSuccess({
-        title: i18n.translate('share.shareContextMenu.copyLinkSuccess', {
-          defaultMessage: 'Link copied to clipboard',
-        }),
-      });
-    })();
-
-    return null;
   }
 
   return Boolean(tabs.length) ? (

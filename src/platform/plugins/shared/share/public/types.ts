@@ -216,10 +216,6 @@ export type LinkShareUIConfig = ShareActionUserInputBase<{
    * handles providing a share url in the context of said consumer
    */
   delegatedShareUrlHandler?: () => Promise<string>;
-  /**
-   * @description allows a consumer to specify if the link action should imply be called when it's the only share action available
-   */
-  attachToAnchorIfIsolate?: boolean;
 }>;
 
 export type EmbedShareUIConfig = ShareActionUserInputBase<{
