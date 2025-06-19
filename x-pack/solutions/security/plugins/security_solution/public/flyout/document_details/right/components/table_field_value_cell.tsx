@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-plugin/common';
+import { css } from '@emotion/react';
 import { getFieldFormat } from '../utils/get_field_format';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { OverflowField } from '../../../../common/components/tables/helpers';
@@ -70,11 +71,7 @@ export const TableFieldValueCell = memo(
     }
 
     return (
-      <EuiFlexGroup
-        data-test-subj={`event-field-${data.field}`}
-        direction="column"
-        gutterSize="none"
-      >
+      <EuiFlexGroup data-test-subj={`event-field-${data.field}`} direction="column" gutterSize="xs">
         {values.map((value, i) => {
           if (fieldFromBrowserField == null) {
             return (

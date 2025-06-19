@@ -37,7 +37,6 @@ import {
   EVENT_URL_FIELD_NAME,
   GEO_FIELD_TYPE,
   IP_FIELD_TYPE,
-  PROCESS_ARGS_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -224,17 +223,6 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (fieldName === PROCESS_ARGS_FIELD_NAME) {
-    return (
-      <span
-        css={css`
-          margin-bottom: ${euiTheme.size.s};
-        `}
-        data-test-subj={`formatted-field-${fieldName}`}
-      >
-        {getOrEmptyTagFromValue(value)}
-      </span>
-    );
   } else {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
