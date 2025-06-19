@@ -83,6 +83,7 @@ export const createPatternDataSourceProfileProvider = (
             const discoverLink = discoverLocator?.getRedirectUrl({
               query,
               timeRange: services.data.query.timefilter.timefilter.getTime(),
+              hideChart: false,
             });
             window.open(discoverLink, '_blank');
           },
