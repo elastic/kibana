@@ -515,7 +515,7 @@ class BuildkiteYamlLoader {
       sharedAgentConfig: getAgentImageConfig(),
     });
 
-    emitPipelineObject(pipeline);
+    emitPipelineObject(pipeline, true);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);

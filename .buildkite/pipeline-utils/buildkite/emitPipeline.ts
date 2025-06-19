@@ -15,12 +15,16 @@ export function emitPipeline(pipelineSteps: string[]) {
   console.log(pipelineStr);
 }
 
-export function emitPipelineObject(pipelineObject: {
-  [key: string]: any;
-  steps?: Array<BuildkiteStep | BuildkiteGroup | 'wait'>;
-  agents?: any;
-  env?: any;
-}) {
+export function emitPipelineObject(
+  pipelineObject: {
+    [key: string]: any;
+    steps?: Array<BuildkiteStep | BuildkiteGroup | 'wait'>;
+    agents?: any;
+    env?: any;
+  },
+  debug = false
+) {
   const pipelineStr = yaml.dump(pipelineObject, { lineWidth: -1 });
+  console.debug('Pipeline YAML:', pipelineStr);
   console.log(pipelineStr);
 }
