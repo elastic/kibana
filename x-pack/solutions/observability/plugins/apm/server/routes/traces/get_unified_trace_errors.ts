@@ -94,8 +94,8 @@ async function getUnprocessedOtelErrors({
             ],
           },
         },
+        fields: optionalFields,
       },
-      fields: optionalFields,
     },
     { skipProcessorEventFilter: true }
   );
