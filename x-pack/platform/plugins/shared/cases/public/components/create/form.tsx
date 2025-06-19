@@ -72,7 +72,6 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
     // 3rd scenario is when the user is in the observability solution, the owner is empty, which causes the owner selector to show up
     // const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
-
     const mapActiveSolutionToOwner = (solution: string): string => {
       switch (solution) {
         case 'oblt':
@@ -84,7 +83,8 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
       }
     };
     // Need to check if this works on serverless as well
-    const shouldShowOwnerSelector = mapActiveSolutionToOwner(activeSolution) === 'cases' && availableOwners.length > 1;
+    const shouldShowOwnerSelector =
+      mapActiveSolutionToOwner(activeSolution) === 'cases' && availableOwners.length > 1;
 
     if (!shouldShowOwnerSelector) {
       onSelectedOwner(mapActiveSolutionToOwner(activeSolution));

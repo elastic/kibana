@@ -22,6 +22,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useActiveSolution } from '../app/use_active_solution';
 
 import { renderWithTestingProviders } from '../../common/mock';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -38,6 +39,7 @@ jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 jest.mock('../app/use_available_owners');
+jest.mock('../app/use_active_solution');
 
 const usePostCaseMock = usePostCase as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
@@ -46,6 +48,7 @@ const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useActiveSolutionMock = useActiveSolution as jest.Mock;
 
 describe('CreateCaseForm', () => {
   const draftStorageKey = 'cases.caseView.createCase.description.markdownEditor';
@@ -127,6 +130,32 @@ describe('CreateCaseForm', () => {
     renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     expect(screen.queryByTestId('caseOwnerSelector')).not.toBeInTheDocument();
+  });
+
+  it('does not render solution picker when securitySolution view is selected under Stack Management > Spaces', async () => {
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'cases']);
+    useActiveSolutionMock.mockReturnValue('security');
+
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
+
+    expect(screen.queryByTestId('caseOwnerSelector')).not.toBeInTheDocument();
+  });
+
+  it('does not render solution picker when observability view is selected under Stack Management > Spaces', async () => {
+    useAvailableOwnersMock.mockReturnValue(['observability', 'cases']);
+    useActiveSolutionMock.mockReturnValue('oblt');
+
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
+
+    expect(screen.queryByTestId('caseOwnerSelector')).not.toBeInTheDocument();
+  });
+
+  it('renders solution picker when classic view is selected', async () => {
+    useAvailableOwnersMock.mockReturnValue(['securitySolution', 'observability', 'cases']);
+    useActiveSolutionMock.mockReturnValue('classic');
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
+
+    expect(screen.getByTestId('caseOwnerSelector')).toBeInTheDocument();
   });
 
   it('hides the sync alerts toggle', async () => {
