@@ -9,7 +9,7 @@
 
 import { parse } from '@kbn/esql-ast';
 
-export const getStatsGroupByColumnsFromQuery = (queryString: string) => {
+export const getESQLStatsGroupByColumnsFromQuery = (queryString: string) => {
   const groupByFields: string[] = [];
   const result = parse(queryString, { withFormatting: false });
 

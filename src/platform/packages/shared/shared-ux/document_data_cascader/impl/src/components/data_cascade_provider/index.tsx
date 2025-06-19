@@ -25,6 +25,8 @@ import {
   type IDispatchAction,
   storeReducer,
 } from './reducers';
+export type { GroupNode, LeafNode, IStoreState, IDispatchAction } from './reducers';
+export { storeReducer } from './reducers';
 
 interface IStoreContext<N extends GroupNode, L extends LeafNode> {
   state: IStoreState<N, L>;
@@ -48,7 +50,7 @@ export function DataCascadeProvider<N extends GroupNode, L extends LeafNode>({
 
   const initialState = useRef<IStoreContext<N, L>['state']>({
     groupNodes: [],
-    leafNodes: new Map<string, L[]>(),
+    leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
     groupByColumns: [],
     currentGroupByColumns: [],
   });
