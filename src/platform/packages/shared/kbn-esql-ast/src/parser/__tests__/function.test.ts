@@ -400,14 +400,14 @@ describe('function AST nodes', () => {
       it('logical NOT IN', () => {
         const query = 'FROM a | STATS a NOT /* comment */ IN (1, 2, 3)';
         const { root, errors } = parse(query);
-        const expression = Walker.findFunction(root, ({ name }) => name === 'not_in');
+        const expression = Walker.findFunction(root, 'not in');
 
         expect(errors.length).toBe(0);
         expect(expression?.args.length).toBe(2);
         expect(expression).toMatchObject({
           type: 'function',
           subtype: 'binary-expression',
-          name: 'not_in',
+          name: 'not in',
           args: [
             { type: 'column', name: 'a' },
             {

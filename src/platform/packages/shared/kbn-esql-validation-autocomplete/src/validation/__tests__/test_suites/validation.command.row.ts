@@ -46,16 +46,16 @@ export const validationRowCommandTestSuite = (setup: helpers.Setup) => {
             'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
           ]);
           await expectErrors('row var = 1 not in ("a", "b", "c")', [
-            'Argument of [not_in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
+            'Argument of [not in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
           ]);
           await expectErrors('row var = 5 in ("a", "b", "c")', [
             'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
           ]);
           await expectErrors('row var = 5 not in ("a", "b", "c")', [
-            'Argument of [not_in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
+            'Argument of [not in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
           ]);
           await expectErrors('row var = 5 not in (1, 2, 3, "a")', [
-            'Argument of [not_in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
+            'Argument of [not in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
           ]);
         });
       });
