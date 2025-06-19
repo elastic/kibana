@@ -50,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
       await pRetry(
         async () => {
           const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
-          if (currentStatsResponse.body.status !== 'aborted') {
-            throw new Error('Retry until migration is aborted');
+          if (currentStatsResponse.body.status !== 'stopped') {
+            throw new Error('Retry until migration is stopped');
           }
           return currentStatsResponse;
         },
@@ -61,8 +61,8 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
-      expect(migrationResponse.body?.last_execution?.ended_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
     });
 
     describe('error scenarios', () => {
