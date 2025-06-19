@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { Rule } from './rule';
+import { useSelector } from 'react-redux';
+import { signalIndexNameSelector } from '../redux/selectors';
 
-export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
-
-export interface BulkActionSkipResult {
-  id: Rule['id'];
-  name?: Rule['name'];
-  skip_reason: BulkEditSkipReason;
-}
+export const useSignalIndexName = () => useSelector(signalIndexNameSelector);
