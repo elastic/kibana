@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, map } from 'rxjs';
-import { useEffect, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../context_awareness';
 import type { ContextWithProfileId } from '../../../context_awareness/profile_service';
@@ -35,68 +33,38 @@ export interface ProfilesAdapter {
 
 export function useActiveProfiles({ dataDocuments$ }: { dataDocuments$: DataDocuments$ }) {
   const scopedProfilesManager = useScopedProfilesManager();
-  const [usedProfiles, setUsedProfiles] = useState<Profiles>({
-    rootContext: null,
-    dataSourceContext: null,
-    documentContexts: {},
-  });
-
-  useEffect(() => {
-    const documentsSubscription = dataDocuments$
-      .pipe(
-        filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
-        map(({ result }) => result ?? []),
-        map((documents) => {
-          const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
-
-          for (const record of documents) {
-            if (!recordHasContext(record)) continue;
-
-            const contextProfileId = scopedProfilesManager.getDocumentProfile(record).profileId;
-            if (!documentContexts[contextProfileId]) documentContexts[contextProfileId] = [];
-            documentContexts[contextProfileId].push(record);
-          }
-
-          return documentContexts;
-        })
-      )
-      .subscribe((documentContexts) => {
-        setUsedProfiles((currentProfiles) => ({
-          ...currentProfiles,
-          documentContexts,
-        }));
-      });
-
-    return () => {
-      documentsSubscription.unsubscribe();
-    };
-  }, [scopedProfilesManager, dataDocuments$]);
-
-  useEffect(() => {
-    const subscription = scopedProfilesManager
-      .getContexts$()
-      .subscribe(({ rootContext, dataSourceContext }) => {
-        setUsedProfiles((currentProfiles) => ({
-          ...currentProfiles,
-          rootContext: rootContext ?? null,
-          dataSourceContext: dataSourceContext ?? null,
-        }));
-      });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [scopedProfilesManager]);
 
   function getProfilesAdapter({
     onOpenDocDetails,
   }: {
     onOpenDocDetails: (record: DataTableRecord) => void;
   }): ProfilesAdapter {
+    const { dataSourceContext$, rootContext$ } = scopedProfilesManager.getContexts$();
+
     return {
-      getRootProfile: () => usedProfiles.rootContext,
-      getDataSourceProfile: () => usedProfiles.dataSourceContext,
-      getDocumentsProfiles: () => usedProfiles.documentContexts,
+      getRootProfile: () => rootContext$.getValue(),
+      getDataSourceProfile: () => dataSourceContext$.getValue(),
+      getDocumentsProfiles: () => {
+        const data = dataDocuments$.getValue();
+        if (data.fetchStatus !== FetchStatus.COMPLETE) {
+          return {};
+        }
+
+        const documents = data.result ?? [];
+        const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
+
+        for (const record of documents) {
+          if (!recordHasContext(record)) continue;
+
+          const contextProfileId = record.context.profileId;
+          if (!documentContexts[contextProfileId]) {
+            documentContexts[contextProfileId] = [];
+          }
+          documentContexts[contextProfileId].push(record);
+        }
+
+        return documentContexts;
+      },
       openDocDetails: onOpenDocDetails,
     };
   }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useActiveProfiles } from './use_active_profiles';
 import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
 import React from 'react';
@@ -16,7 +16,6 @@ import { FetchStatus } from '../../types';
 import { getDataTableRecordMock } from '@kbn/discover-utils/src/__mocks__';
 import { BehaviorSubject } from 'rxjs';
 import type { ScopedProfilesManager } from '../../../context_awareness';
-import type { DataTableRecordWithContext } from '../../../context_awareness/profiles_manager';
 
 const getDataDocumentMsgMock = (): DataDocumentsMsg => {
   return {
@@ -51,14 +50,14 @@ const dataSourceContextMock = {
 
 const getScopedProfilesManagerMock = (withContexts = false) => {
   return {
-    getContexts$: () =>
-      new BehaviorSubject({
-        rootContext: withContexts ? rootContextMock : null,
-        dataSourceContext: withContexts ? dataSourceContextMock : null,
-      }),
-    getDocumentProfile: (record: DataTableRecordWithContext) => {
-      return record.context;
-    },
+    getContexts$: () => ({
+      rootContext$: {
+        getValue: () => (withContexts ? rootContextMock : null),
+      },
+      dataSourceContext$: {
+        getValue: () => (withContexts ? dataSourceContextMock : null),
+      },
+    }),
   } as unknown as ScopedProfilesManager;
 };
 
@@ -81,7 +80,7 @@ const setup = (attrs: {
 };
 
 describe('useActiveProfiles', () => {
-  it('should return null for root and dataSource contexts when none provided', async () => {
+  it('should return null for root and dataSource contexts when none provided', () => {
     const { result } = setup({});
 
     const onOpenDocDetails = jest.fn();
@@ -92,21 +91,19 @@ describe('useActiveProfiles', () => {
     expect(adapter.getDocumentsProfiles()).toEqual({});
   });
 
-  it('should return root and dataSource contexts when provided', async () => {
+  it('should return root and dataSource contexts when provided', () => {
     const { result } = setup({
       scopedProfilesManager: getScopedProfilesManagerMock(true),
     });
 
-    await waitFor(() => {
-      const onOpenDocDetails = jest.fn();
-      const adapter = result.current({ onOpenDocDetails });
+    const onOpenDocDetails = jest.fn();
+    const adapter = result.current({ onOpenDocDetails });
 
-      expect(adapter.getRootProfile()).toEqual(rootContextMock);
-      expect(adapter.getDataSourceProfile()).toEqual(dataSourceContextMock);
-    });
+    expect(adapter.getRootProfile()).toEqual(rootContextMock);
+    expect(adapter.getDataSourceProfile()).toEqual(dataSourceContextMock);
   });
 
-  it('should process documents with context and group them by profile ID', async () => {
+  it('should process documents with context and group them by profile ID', () => {
     const documentWithContext1 = getDataTableRecordWithContextMock('profile-1');
     const documentWithContext2 = getDataTableRecordWithContextMock('profile-1');
     const documentWithContext3 = getDataTableRecordWithContextMock('profile-2');
@@ -120,21 +117,19 @@ describe('useActiveProfiles', () => {
       hookAttrs: { dataDocuments$: documentsSubject },
     });
 
-    await waitFor(() => {
-      const onOpenDocDetails = jest.fn();
-      const adapter = result.current({ onOpenDocDetails });
-      const profiles = adapter.getDocumentsProfiles();
+    const onOpenDocDetails = jest.fn();
+    const adapter = result.current({ onOpenDocDetails });
+    const profiles = adapter.getDocumentsProfiles();
 
-      expect(Object.keys(profiles)).toHaveLength(2);
-      expect(profiles['profile-1']).toHaveLength(2);
-      expect(profiles['profile-2']).toHaveLength(1);
-      expect(profiles['profile-1']).toContain(documentWithContext1);
-      expect(profiles['profile-1']).toContain(documentWithContext2);
-      expect(profiles['profile-2']).toContain(documentWithContext3);
-    });
+    expect(Object.keys(profiles)).toHaveLength(2);
+    expect(profiles['profile-1']).toHaveLength(2);
+    expect(profiles['profile-2']).toHaveLength(1);
+    expect(profiles['profile-1']).toContain(documentWithContext1);
+    expect(profiles['profile-1']).toContain(documentWithContext2);
+    expect(profiles['profile-2']).toContain(documentWithContext3);
   });
 
-  it('should ignore documents without context', async () => {
+  it('should ignore documents without context', () => {
     const documentWithContext = getDataTableRecordWithContextMock();
     const documentWithoutContext = getDataTableRecordMock();
 
@@ -147,18 +142,16 @@ describe('useActiveProfiles', () => {
       hookAttrs: { dataDocuments$: documentsSubject },
     });
 
-    await waitFor(() => {
-      const onOpenDocDetails = jest.fn();
-      const adapter = result.current({ onOpenDocDetails });
-      const profiles = adapter.getDocumentsProfiles();
+    const onOpenDocDetails = jest.fn();
+    const adapter = result.current({ onOpenDocDetails });
+    const profiles = adapter.getDocumentsProfiles();
 
-      expect(Object.keys(profiles)).toHaveLength(1);
-      expect(profiles['test-profile-id']).toHaveLength(1);
-      expect(profiles['test-profile-id']).toContain(documentWithContext);
-    });
+    expect(Object.keys(profiles)).toHaveLength(1);
+    expect(profiles['test-profile-id']).toHaveLength(1);
+    expect(profiles['test-profile-id']).toContain(documentWithContext);
   });
 
-  it('should call onOpenDocDetails when openDocDetails is called', async () => {
+  it('should call onOpenDocDetails when openDocDetails is called', () => {
     const { result } = setup({});
 
     const onOpenDocDetails = jest.fn();
