@@ -30,6 +30,7 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import type { EventSummaryField } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from './translations';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -52,8 +53,8 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
 /** Always show these fields */
 export const alwaysDisplayedFields: EventSummaryField[] = [
   {
-    id: 'kibana.alert.ancestors.id',
-    overrideField: EVENT_SOURCE_FIELD_NAME,
+    id: EVENT_SOURCE_FIELD_NAME,
+    overrideField: EVENT_SOURCE_FIELD_DESCRIPTOR,
   },
   { id: 'host.name' },
 
