@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { Alert } from '../../alert';
 import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
@@ -19,14 +18,12 @@ interface DetermineFlappingAlertsOpts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  logger: Logger;
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   flappingSettings: RulesSettingsFlappingProperties;
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   actionGroupId: string;
-  maxAlerts: number;
 }
 
 export function determineFlappingAlerts<
@@ -35,14 +32,12 @@ export function determineFlappingAlerts<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >({
-  logger,
   newAlerts,
   activeAlerts,
   recoveredAlerts,
   flappingSettings,
   previouslyRecoveredAlerts,
   actionGroupId,
-  maxAlerts,
 }: DetermineFlappingAlertsOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>) {
   setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
     flappingSettings,
@@ -58,10 +53,8 @@ export function determineFlappingAlerts<
   >(flappingSettings, newAlerts, activeAlerts, recoveredAlerts, previouslyRecoveredAlerts);
 
   alerts = delayRecoveredFlappingAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-    logger,
     flappingSettings,
     actionGroupId,
-    maxAlerts,
     alerts.newAlerts,
     alerts.activeAlerts,
     alerts.trackedActiveAlerts,
