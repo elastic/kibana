@@ -35,5 +35,9 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-view-field-editor-plugin",
+    "@kbn/file-upload",
+    "@kbn/file-upload-plugin",
+    "@kbn/react-kibana-context-common",
+    "@kbn/unified-search-plugin",
   ]
 }
