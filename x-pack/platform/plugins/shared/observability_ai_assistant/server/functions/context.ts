@@ -73,16 +73,13 @@ export function registerContextFunction({
         }
 
         const userPrompt = lastUserMessage.message.content;
-        const userMessageFunctionName = lastUserMessage.message.name;
-
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
           userPrompt,
-          userMessageFunctionName,
-          context: screenDescription,
-          messages: messages.slice(0, -2), // remove the context function request and the last user message
+          screenDescription,
+          messages: removeContextToolRequest(messages),
           signal,
           analytics,
         });
@@ -131,12 +128,11 @@ export function registerContextFunction({
   );
 }
 
-function removeLastContextFunctionRequest(messages: Message[]): Message[] {
-  const idx = messages.findLastIndex(
-    (m) => m.message.function_call?.name === CONTEXT_FUNCTION_NAME
-  );
-  if (idx === -1) {
-    return messages;
+export function removeContextToolRequest(messages: Message[]): Message[] {
+  const lastMessage = last(messages);
+  if (lastMessage?.message.name === CONTEXT_FUNCTION_NAME) {
+    return messages.slice(0, -1);
   }
-  return [...messages.slice(0, idx), ...messages.slice(idx + 1)];
+
+  return messages;
 }

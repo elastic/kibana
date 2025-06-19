@@ -22,8 +22,7 @@ export async function recallAndScore({
   chat,
   analytics,
   userPrompt,
-  userMessageFunctionName,
-  context,
+  screenDescription,
   messages,
   logger,
   signal,
@@ -32,8 +31,7 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
-  userMessageFunctionName?: string;
-  context: string;
+  screenDescription: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
@@ -44,6 +42,7 @@ export async function recallAndScore({
 }> {
   const rewrittenUserPrompt = await getRewrittenUserPrompt({
     userPrompt,
+    screenDescription,
     chat,
     messages,
     logger,
@@ -73,8 +72,7 @@ export async function recallAndScore({
       logger,
       messages,
       userPrompt,
-      userMessageFunctionName,
-      context,
+      screenDescription,
       signal,
       chat,
     });

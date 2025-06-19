@@ -200,7 +200,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
             simulateFunctionCalling,
             signal,
           }),
-        context,
+        screenDescription: context,
         logger: resources.logger,
         messages: [],
         userPrompt: prompt,

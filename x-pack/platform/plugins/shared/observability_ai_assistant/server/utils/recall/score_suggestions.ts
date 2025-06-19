@@ -10,11 +10,12 @@ import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { omit } from 'lodash';
-import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../common';
+import { concatenateChatCompletionChunks, Message } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../common/utils/short_id_table';
+import { replaceLastUserMessage } from '../tool_utils';
 
 export const SCORE_FUNCTION_NAME = 'score';
 
@@ -35,8 +36,7 @@ export async function scoreSuggestions({
   suggestions,
   messages,
   userPrompt,
-  userMessageFunctionName,
-  context,
+  screenDescription,
   chat,
   signal,
   logger,
@@ -44,8 +44,7 @@ export async function scoreSuggestions({
   suggestions: RecalledSuggestion[];
   messages: Message[];
   userPrompt: string;
-  userMessageFunctionName?: string;
-  context: string;
+  screenDescription: string;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
@@ -55,7 +54,7 @@ export async function scoreSuggestions({
 }> {
   const shortIdTable = new ShortIdTable();
 
-  const newUserMessageContent =
+  const newMessageContent =
     dedent(`Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
     0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the prompt if it helps in
     answering the prompt. Judge the document according to the following criteria:
@@ -66,12 +65,17 @@ export async function scoreSuggestions({
     - The document contains new information not mentioned before in the conversation or provides a correction to previously stated information.
     
     User prompt:
+    <UserPrompt>
     ${userPrompt}
+    </UserPrompt>
 
-    Context:
-    ${context}
+    Screen description. This is the description of the screen that the user is currently on, and it may contain information relevant to the prompt:
+    <ScreenDescription>
+    ${screenDescription}
+    </ScreenDescription>
 
-    Documents:
+    Documents to score. Please score the documents based on the criteria above.
+    <DocumentsToScore>
     ${JSON.stringify(
       suggestions.map((suggestion) => ({
         ...omit(suggestion, 'esScore'), // Omit ES score to not bias the LLM
@@ -79,18 +83,9 @@ export async function scoreSuggestions({
       })),
       null,
       2
-    )}`);
-
-  const newUserMessage: Message = {
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.User,
-      content: userMessageFunctionName
-        ? JSON.stringify(newUserMessageContent)
-        : newUserMessageContent,
-      ...(userMessageFunctionName ? { name: userMessageFunctionName } : {}),
-    },
-  };
+    )}
+    </DocumentsToScore>
+    `);
 
   const scoreFunction = {
     name: SCORE_FUNCTION_NAME,
@@ -115,7 +110,7 @@ export async function scoreSuggestions({
 
   const response = await lastValueFrom(
     chat('score_suggestions', {
-      messages: [...messages, newUserMessage],
+      messages: replaceLastUserMessage({ messages, newMessageContent, logger }),
       functions: [scoreFunction],
       functionCall: SCORE_FUNCTION_NAME,
       signal,
