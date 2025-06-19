@@ -8,28 +8,44 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-
+import { render, screen } from '@testing-library/react';
 import { FormatEditorSamples } from './samples';
 
+import { DiscoverTestProvider } from '@kbn/discover-plugin/public/__mocks__/test_provider';
+
 describe('FormatEditorSamples', () => {
-  it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
-      <FormatEditorSamples
-        samples={[
-          { input: 'test', output: 'TEST' },
-          { input: 123, output: '456' },
-          { input: ['foo', 'bar'], output: '<span>foo</span>, <span>bar</span>' },
-        ]}
-      />
+  it('should render normally', () => {
+    render(
+      <DiscoverTestProvider>
+        <FormatEditorSamples
+          samples={[
+            { input: 'test', output: 'TEST' },
+            { input: 123, output: '456' },
+            { input: ['foo', 'bar'], output: '<span>foo</span>, <span>bar</span>' },
+          ]}
+        />
+      </DiscoverTestProvider>
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByRole('table')).toBeInTheDocument();
+
+    expect(screen.getByText('Input')).toBeInTheDocument();
+    expect(screen.getByText('Output')).toBeInTheDocument();
+
+    expect(screen.getByText('test')).toBeInTheDocument();
+    expect(screen.getByText('TEST')).toBeInTheDocument();
+    expect(screen.getByText('123')).toBeInTheDocument();
+    expect(screen.getByText('456')).toBeInTheDocument();
+    expect(screen.getByText('["foo","bar"]')).toBeInTheDocument();
   });
 
-  it('should render nothing if there are no samples', async () => {
-    const component = shallowWithI18nProvider(<FormatEditorSamples samples={[]} />);
+  it('should render nothing if there are no samples', () => {
+    const { container } = render(
+      <DiscoverTestProvider>
+        <FormatEditorSamples samples={[]} />
+      </DiscoverTestProvider>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 });
