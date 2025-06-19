@@ -108,6 +108,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         'url.port': null,
         urls: '',
         labels: {},
+        maintenance_windows: [],
       });
     });
     it('should normalize icmp', async () => {
@@ -145,6 +146,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         type: 'icmp',
         wait: '1',
         labels: {},
+        maintenance_windows: [],
       });
     });
     it('should normalize http', async () => {
@@ -204,6 +206,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         urls: '',
         username: '',
         labels: {},
+        maintenance_windows: [],
       });
     });
     it('should normalize browser', async () => {
@@ -259,6 +262,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         'url.port': null,
         urls: '',
         labels: {},
+        maintenance_windows: [],
       });
     });
   });

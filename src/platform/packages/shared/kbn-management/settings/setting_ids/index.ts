@@ -127,6 +127,7 @@ export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
 export const OBSERVABILITY_AI_ASSISTANT_ANONYMIZATION_RULES =
   'observability:aiAssistantAnonymizationRules';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
+export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
