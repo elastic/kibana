@@ -131,7 +131,6 @@ export const staticValueOperation: OperationDefinition<
       operationType: 'static_value',
       isStaticValue: true,
       isBucketed: false,
-      scale: 'ratio',
       params: { ...previousParams, value: String(previousParams.value ?? defaultValue) },
       references: [],
     };
