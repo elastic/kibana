@@ -127,7 +127,6 @@ export class SavedObjectsService
 
   private typeRegistry = new SavedObjectTypeRegistry({
     legacyTypes: REMOVED_TYPES,
-    accessControlTypes: this.config?.accessControlTypes,
   });
 
   private started = false;

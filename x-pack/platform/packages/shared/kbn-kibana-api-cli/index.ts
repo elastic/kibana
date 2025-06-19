@@ -9,3 +9,5 @@ export { discoverKibanaUrl } from './src/discover_kibana_url';
 export { KibanaClient } from './src/client';
 export { createKibanaClient } from './src/create_kibana_client';
 export { FetchResponseError } from './src/kibana_fetch_response_error';
+export { toHttpHandler } from './src/to_http_handler';
+export { toolingLogToLogger } from './src/tooling_log_to_logger';
