@@ -9,6 +9,7 @@ import {
   AssistantMessage,
   Message as InferenceMessage,
   MessageRole as InferenceMessageRole,
+  ToolDefinition,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
@@ -29,7 +30,7 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
 export function convertMessagesForInference(
   messages: Message[],
   logger: Pick<Logger, 'error'>,
-  tools: Record<string, { description: string; schema: any }> | undefined
+  tools: Record<string, ToolDefinition> | undefined
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
