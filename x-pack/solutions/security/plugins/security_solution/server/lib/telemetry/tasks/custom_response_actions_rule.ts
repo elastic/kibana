@@ -78,20 +78,20 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
 
         const responseActionRules = (
           aggregations as unknown as ResponseActionsRuleResponseAggregations
-        ).actionTypes.buckets.reduce<ResponseActionRules>((acc, agg) => {
-          if (agg.key === '.endpoint') {
-            acc.endpoint = agg.doc_count;
-          } else if (agg.key === '.osquery') {
-            acc.osquery = agg.doc_count;
-          }
-          return acc;
-        }, {} as ResponseActionRules);
+        ).actionTypes.buckets.reduce<ResponseActionRules>(
+          (acc, agg) => {
+            if (agg.key === '.endpoint') {
+              acc.endpoint = agg.doc_count;
+            } else if (agg.key === '.osquery') {
+              acc.osquery = agg.doc_count;
+            }
+            return acc;
+          },
+          { endpoint: 0, osquery: 0 }
+        );
 
         const shouldNotProcessTelemetry =
-          responseActionRules.endpoint === undefined ||
-          responseActionRules.osquery === undefined ||
-          responseActionRules.endpoint === 0 ||
-          responseActionRules.osquery === 0;
+          responseActionRules.endpoint === 0 || responseActionRules.osquery === 0;
 
         if (shouldNotProcessTelemetry) {
           log.debug('no new custom response action rules found');
