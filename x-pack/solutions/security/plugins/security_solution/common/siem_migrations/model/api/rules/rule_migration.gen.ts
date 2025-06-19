@@ -331,9 +331,6 @@ export const UpdateRuleMigrationRequestBody = z.object({
 });
 export type UpdateRuleMigrationRequestBodyInput = z.input<typeof UpdateRuleMigrationRequestBody>;
 
-export type UpdateRuleMigrationResponse = z.infer<typeof UpdateRuleMigrationResponse>;
-export const UpdateRuleMigrationResponse = RuleMigration;
-
 export type UpdateRuleMigrationRulesRequestParams = z.infer<
   typeof UpdateRuleMigrationRulesRequestParams
 >;
