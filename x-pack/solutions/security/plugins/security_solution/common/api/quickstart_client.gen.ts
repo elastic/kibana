@@ -407,7 +407,6 @@ import type {
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
-  UpdateRuleMigrationResponse,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -2508,7 +2507,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
-      .request<UpdateRuleMigrationResponse>({
+      .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
