@@ -154,7 +154,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         }}
         errors={errors['createAlertParam.sourceRef'] as string[]}
       />
-      {!isTest && (
+      {!isTest && Boolean(isRuleSeverity) && (
         <EuiFormRow fullWidth>
           <EuiSwitch
             label={translations.IS_RULE_SEVERITY_LABEL}
