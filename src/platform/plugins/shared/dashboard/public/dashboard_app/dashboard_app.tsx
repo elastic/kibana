@@ -142,10 +142,7 @@ export function DashboardApp({
     const getInitialInput = async () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
-        stateFromLocator = await extractDashboardState({
-          embeddableService,
-          state: getScopedHistory().location.state,
-        });
+        stateFromLocator = await extractDashboardState(getScopedHistory().location.state);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from locator. Error: ', e);

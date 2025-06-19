@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedFieldListAttributes } from '../../../../../server/types';
 import type { FieldListAttributes } from '../../../../../server/field_list/content_management/schema/v1';
 
-export const fieldListAttributesDefinition: VersionableEmbeddableObject<
+export const fieldListTransformsV1: EmbeddableTransforms<
   SavedFieldListAttributes,
   FieldListAttributes
 > = {
-  itemToSavedObject: (item) => ({ attributes: item, references: [] }),
-  savedObjectToItem: ({ attributes }) => attributes,
+  transformIn: (item) => ({ state: item, references: [] }),
+  transformOut: (state) => state,
 };

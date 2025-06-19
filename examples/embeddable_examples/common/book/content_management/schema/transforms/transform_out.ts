@@ -21,8 +21,8 @@ const injectReferences = (attributes: SavedBookAttributes, references: SavedObje
   return injectedParams;
 };
 
-// Shape of state <=9.1 
-// Legacy shape could be provided to transformOut 
+// Shape of state <=9.1
+// Legacy shape could be provided to transformOut
 // from URLs state or dashboard panel state
 interface SavedBookAttributes910 {
   bookTitle: string;
@@ -30,8 +30,9 @@ interface SavedBookAttributes910 {
   numberOfPages: number;
   authorName: string;
 }
-const is910State = (panelConfig: SavedBookAttributes | SavedBookAttributes910): so is SavedBookAttributes910 =>
-  !!(panelConfig as SavedBookAttributes910).bookTitle;
+const is910State = (
+  state: SavedBookAttributes | SavedBookAttributes910
+): state is SavedBookAttributes910 => !!(state as SavedBookAttributes910).bookTitle;
 
 const transform910 = ({
   bookTitle,
@@ -46,12 +47,12 @@ const transform910 = ({
 });
 
 export const transformOut = (
-  panelConfig: SavedBookAttributes | SavedBookAttributes910,
-  references?: SavedObjectReference[],
+  state: SavedBookAttributes | SavedBookAttributes910,
+  references?: SavedObjectReference[]
 ): BookItem => {
-  if (is910State(panelConfig)) return transform910(panelConfig as SavedBookAttributes910);
-  
-  const book = panelConfig as SavedBookAttributes;
+  if (is910State(state)) return transform910(state as SavedBookAttributes910);
+
+  const book = state as SavedBookAttributes;
   return {
     bookTitle: book.bookTitleAsArray.join(''),
     author: book.metadata.text.authorName,
@@ -60,4 +61,4 @@ export const transformOut = (
     published: book.metadata.numbers.publicationYear ?? undefined,
     ...injectReferences(book, references ?? []),
   };
-}
+};

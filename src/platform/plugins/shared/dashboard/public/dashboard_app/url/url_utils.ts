@@ -35,7 +35,7 @@ export const loadAndRemoveDashboardState = async (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
 
-  return await extractDashboardState({ state: rawAppStateInUrl, embeddableService });
+  return await extractDashboardState(rawAppStateInUrl);
 };
 
 export const startSyncingExpandedPanelState = ({

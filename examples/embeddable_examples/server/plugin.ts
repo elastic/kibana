@@ -37,10 +37,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerTransforms(
-      BOOK_EMBEDDABLE_TYPE,
-      bookTransformsDefinitions
-    );
+    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, bookTransformsDefinitions);
 
     return {};
   }

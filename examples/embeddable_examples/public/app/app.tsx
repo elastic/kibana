@@ -56,12 +56,10 @@ const App = ({
       {
         id: 'presentationContainer',
         title: 'Create a dashboard like experience with embeddables',
-        component: (
-          <PresentationContainerExample uiActions={deps.uiActions} embeddable={deps.embeddable} />
-        ),
+        component: <PresentationContainerExample uiActions={deps.uiActions} />,
       },
     ];
-  }, [deps.uiActions, deps.embeddable]);
+  }, [deps.uiActions]);
 
   const routes = useMemo(() => {
     return pages.map((page) => (

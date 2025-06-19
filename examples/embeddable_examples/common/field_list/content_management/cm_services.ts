@@ -8,8 +8,8 @@
  */
 
 import { EmbeddableTransformsDefinition } from '@kbn/embeddable-plugin/common';
-import { fieldListAttributesDefinition as fieldListAttributesDefinitionV1 } from './schema/v1';
-import { fieldListAttributesDefinition as fieldListAttributesDefinitionV2 } from './schema/v2';
+import { fieldListTransformsV1 } from './schema/v1';
+import { fieldListTransformsV2 } from './schema/v2';
 import { FIELD_LIST_ID } from '../constants';
 
 /**
@@ -19,11 +19,11 @@ import { FIELD_LIST_ID } from '../constants';
  * So the `itemToSavedObject` and `savedObjectToItem` methods perform reference extraction and injection
  * and the embeddable client does not need to know about references.
  */
-export const fieldListCmDefinitions: EmbeddableTransformsDefinition = {
+export const fieldListTransformsDefinitions: EmbeddableTransformsDefinition = {
   type: FIELD_LIST_ID,
   versions: {
-    1: fieldListAttributesDefinitionV1,
-    2: fieldListAttributesDefinitionV2,
+    1: fieldListTransformsV1,
+    2: fieldListTransformsV2,
   },
   latestVersion: 2,
 };

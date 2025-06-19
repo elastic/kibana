@@ -13,7 +13,7 @@ import type { SavedFieldListAttributes } from '../../../../../server/types';
 import type { FieldListAttributes } from '../../../../../server/field_list/content_management/schema/v2';
 import { FIELD_LIST_DATA_VIEW_REF_NAME } from '../../../constants';
 
-export const fieldListAttributesDefinition: EmbeddableTransforms<
+export const fieldListTransformsV2: EmbeddableTransforms<
   SavedFieldListAttributes,
   FieldListAttributes
 > = {
@@ -39,7 +39,9 @@ export const fieldListAttributesDefinition: EmbeddableTransforms<
   transformOut: (state, references) => {
     const { selectedFieldNames } = state;
     // inject data view id from references
-    const dataViewRef = (references ?? []).find((ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME);
+    const dataViewRef = (references ?? []).find(
+      (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
+    );
     return {
       selectedFieldNames,
       dataViewId: dataViewRef?.id,

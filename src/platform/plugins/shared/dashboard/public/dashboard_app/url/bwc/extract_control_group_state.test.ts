@@ -7,57 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { embeddableService } from '../../../services/kibana_services';
-import { extractDashboardState } from './extract_dashboard_state';
+import { extractControlGroupState } from './extract_control_group_state';
 
-describe('extractDashboardState', () => {
+describe('extractControlGroupState', () => {
   describe('>= 8.19 state', () => {
-    test('should extract labelPosition', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            labelPosition: 'twoLine',
-          },
+    test('should extract labelPosition', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          labelPosition: 'twoLine',
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
+      expect(controlGroupState?.labelPosition).toBe('twoLine');
     });
 
-    test('should extract autoApplySelections', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            autoApplySelections: false,
-          },
+    test('should extract autoApplySelections', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          autoApplySelections: false,
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
+      expect(controlGroupState?.autoApplySelections).toBe(false);
     });
 
-    test('should extract controls', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            controls: [
-              {
-                controlConfig: {
-                  dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                  fieldName: 'machine.os.keyword',
-                  selectedOptions: ['win 7'],
-                },
-                grow: true,
-                order: 0,
-                type: 'optionsListControl',
-                width: 'small',
+    test('should extract controls', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          controls: [
+            {
+              controlConfig: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+                selectedOptions: ['win 7'],
               },
-            ],
-          },
+              grow: true,
+              order: 0,
+              type: 'optionsListControl',
+              width: 'small',
+            },
+          ],
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(controlGroupState?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -74,27 +64,24 @@ describe('extractDashboardState', () => {
   });
 
   describe('>= 8.16 to < 8.19 state', () => {
-    test('should convert controlGroupState to controlGroupInput', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupState: {
-            autoApplySelections: false,
-            initialChildControlState: {
-              ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
-                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                fieldName: 'machine.os.keyword',
-                grow: false,
-                selectedOptions: ['win 7'],
-              },
+    test('should convert controlGroupState to controlGroupInput', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupState: {
+          autoApplySelections: false,
+          initialChildControlState: {
+            ['6c4f5ff4-92ff-4b40-bcc7-9aea6b06d693']: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'machine.os.keyword',
+              grow: false,
+              selectedOptions: ['win 7'],
             },
-            labelPosition: 'twoLine',
           },
+          labelPosition: 'twoLine',
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(controlGroupState?.autoApplySelections).toBe(false);
+      expect(controlGroupState?.labelPosition).toBe('twoLine');
+      expect(controlGroupState?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -109,52 +96,43 @@ describe('extractDashboardState', () => {
   });
 
   describe('< 8.16 state', () => {
-    test('should convert controlStyle to labelPosition', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            controlStyle: 'twoLine',
-          },
+    test('should convert controlStyle to labelPosition', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          controlStyle: 'twoLine',
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
+      expect(controlGroupState?.labelPosition).toBe('twoLine');
     });
 
-    test('should convert showApplySelections to autoApplySelections', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            showApplySelections: true,
-          },
+    test('should convert showApplySelections to autoApplySelections', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          showApplySelections: true,
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
+      expect(controlGroupState?.autoApplySelections).toBe(false);
     });
 
-    test('should convert panels to controls', async () => {
-      const dashboardState = await extractDashboardState({
-        state: {
-          controlGroupInput: {
-            panels: {
-              ['8311639d-92e5-4aa5-99a4-9502b10eead5']: {
-                explicitInput: {
-                  dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-                  fieldName: 'machine.os.keyword',
-                  selectedOptions: ['win 7'],
-                },
-                grow: true,
-                order: 0,
-                type: 'optionsListControl',
-                width: 'small',
+    test('should convert panels to controls', () => {
+      const controlGroupState = extractControlGroupState({
+        controlGroupInput: {
+          panels: {
+            ['8311639d-92e5-4aa5-99a4-9502b10eead5']: {
+              explicitInput: {
+                dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                fieldName: 'machine.os.keyword',
+                selectedOptions: ['win 7'],
               },
+              grow: true,
+              order: 0,
+              type: 'optionsListControl',
+              width: 'small',
             },
           },
         },
-        embeddableService,
       });
-      expect(dashboardState.controlGroupInput?.controls).toEqual([
+      expect(controlGroupState?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',

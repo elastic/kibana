@@ -15,7 +15,7 @@ export const bookTransformsDefinitions: EmbeddableTransformsDefinition = {
   versions: {
     1: {
       schema: bookItemSchema,
-      ...bookTransforms
+      ...bookTransforms,
     },
   },
   latestVersion: 1,

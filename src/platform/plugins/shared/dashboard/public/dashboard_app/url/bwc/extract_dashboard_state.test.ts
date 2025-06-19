@@ -10,7 +10,6 @@
 import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
-import { embeddableService } from '../../../services/kibana_services';
 
 const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
 
@@ -29,11 +28,8 @@ describe('extractDashboardState', () => {
     };
     expect(
       await extractDashboardState({
-        state: {
-          ...DASHBOARD_STATE,
-          ...optionalState,
-        },
-        embeddableService,
+        ...DASHBOARD_STATE,
+        ...optionalState,
       })
     ).toEqual({
       ...DASHBOARD_STATE,

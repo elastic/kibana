@@ -14,15 +14,14 @@ import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import type { SavedObject, SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import { omit } from 'lodash';
 import type { BookSearchOptions } from './latest';
 import { BOOK_SAVED_OBJECT_TYPE, SavedBookAttributes } from '../saved_object';
 import {
   BOOK_EMBEDDABLE_TYPE,
   BookItem,
-  itemToSavedObject,
-  savedObjectToItem,
+  transformIn,
+  transformOut,
 } from '../../../common/book/content_management/schema';
 import { cmServicesDefinition } from './cm_services';
 
@@ -67,7 +66,10 @@ export class SavedBookStorage implements ContentStorage {
       let item;
 
       try {
-        item = savedObjectToItem(savedObject as SavedObject<SavedBookAttributes>);
+        // TODO remove use transformOut.
+        // saved object state and dashboard panelConfig state are not the same types
+        // and should not share code
+        item = transformOut(savedObject.attributes as SavedBookAttributes, savedObject.references);
       } catch (error) {
         this.logger.error(`Error transforming saved book attributes: ${error.message}`);
         throw Boom.badRequest(`Invalid response. ${error.message}`);
@@ -113,7 +115,10 @@ export class SavedBookStorage implements ContentStorage {
     let item;
 
     try {
-      item = savedObjectToItem(savedObject);
+      // TODO remove use transformOut.
+      // saved object state and dashboard panelConfig state are not the same types
+      // and should not share code
+      item = transformOut(savedObject.attributes as SavedBookAttributes, savedObject.references);
     } catch (error) {
       this.logger.error(`Error transforming saved book attributes: ${error.message}`);
       throw Boom.badRequest(`Invalid response. ${error.message}`);
@@ -151,9 +156,12 @@ export class SavedBookStorage implements ContentStorage {
     }
 
     let soAttributes: SavedBookAttributes;
-    let soReferences: SavedObjectReference[];
+    let soReferences: SavedObjectReference[] | undefined;
     try {
-      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject(dataToLatest));
+      // TODO remove use transformIn.
+      // saved object state and dashboard panelConfig state are not the same types
+      // and should not share code
+      ({ state: soAttributes, references: soReferences } = transformIn(dataToLatest));
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }
@@ -170,7 +178,10 @@ export class SavedBookStorage implements ContentStorage {
     let item: BookItem;
 
     try {
-      item = savedObjectToItem(savedObject);
+      // TODO remove use transformOut.
+      // saved object state and dashboard panelConfig state are not the same types
+      // and should not share code
+      item = transformOut(savedObject.attributes as SavedBookAttributes, savedObject.references);
     } catch (error) {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
@@ -203,10 +214,13 @@ export class SavedBookStorage implements ContentStorage {
     }
 
     let soAttributes: SavedBookAttributes;
-    let soReferences: SavedObjectReference[];
+    let soReferences: SavedObjectReference[] | undefined;
 
     try {
-      ({ attributes: soAttributes, references: soReferences } = itemToSavedObject(dataToLatest));
+      // TODO remove use transformIn.
+      // saved object state and dashboard panelConfig state are not the same types
+      // and should not share code
+      ({ state: soAttributes, references: soReferences } = transformIn(dataToLatest));
     } catch (error) {
       throw Boom.badRequest(`Invalid data. ${error.message}`);
     }
@@ -224,10 +238,10 @@ export class SavedBookStorage implements ContentStorage {
     let item: BookItem;
 
     try {
-      // TODO fix partial types
-      item = savedObjectToItem(
-        savedObject as SavedObjectAttributesWithReferences<SavedBookAttributes>
-      );
+      // TODO remove use transformOut.
+      // saved object state and dashboard panelConfig state are not the same types
+      // and should not share code
+      item = transformOut(savedObject.attributes as SavedBookAttributes, savedObject.references);
     } catch (error) {
       throw Boom.badRequest(`Invalid response. ${error.message}`);
     }
@@ -262,8 +276,10 @@ export class SavedBookStorage implements ContentStorage {
     const hits = await Promise.all(
       soResponse.saved_objects
         .map(async (so) => {
-          const item = savedObjectToItem(so);
-          return item;
+          // TODO remove use transformOut.
+          // saved object state and dashboard panelConfig state are not the same types
+          // and should not share code
+          return transformOut(so.attributes as SavedBookAttributes, so.references);
         })
         // Ignore any saved objects that failed to convert to items.
         .filter((item) => item !== null)

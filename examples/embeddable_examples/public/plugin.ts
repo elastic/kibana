@@ -33,7 +33,10 @@ import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
-import { BOOK_EMBEDDABLE_TYPE, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
+import {
+  BOOK_EMBEDDABLE_TYPE,
+  BOOK_LATEST_VERSION,
+} from '../common/book/content_management/schema';
 import { setKibanaServices } from './kibana_services';
 import { BookSerializedState } from './react_embeddables/saved_book/types';
 
@@ -102,7 +105,9 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     );
 
     embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, async () => {
-      const { bookTransformsDefinitions } = await import('../common/book/content_management/cm_services');
+      const { bookTransformsDefinitions } = await import(
+        '../common/book/content_management/cm_services'
+      );
       return bookTransformsDefinitions;
     });
     embeddable.registerTransforms('field_list', async () => {

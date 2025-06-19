@@ -23,8 +23,7 @@ export const bookItemSchema = schema.object({
 
 export type BookItem = TypeOf<typeof bookItemSchema>;
 
-export const bookTransforms: EmbeddableTransforms<SavedBookAttributes, BookItem> =
-  {
-    transformIn,
-    transformOut,
-  };
+export const bookTransforms: EmbeddableTransforms<SavedBookAttributes, BookItem> = {
+  transformIn,
+  transformOut,
+};
