@@ -50,9 +50,7 @@ export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
 
 type ReportEvent = CoreSetup['analytics']['reportEvent'];
 
-type TrackPerformanceEvent = (eventName: string) => {
-  reportEvent: (eventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>) => void;
-};
+type ReportPerformanceEvent = (eventData: PerformanceMetricEvent) => void;
 
 type UpdateProfilesContextWith = (
   discoverProfiles: DiscoverEBTContextProps['discoverProfiles']
@@ -62,7 +60,7 @@ export class DiscoverEBTManager {
   private isCustomContextEnabled: boolean = false;
   private customContext$: DiscoverEBTContext | undefined;
   private reportEvent: ReportEvent | undefined;
-  private reportPerformanceMetricEvent: ((eventData: PerformanceMetricEvent) => void) | undefined;
+  private reportPerformanceEvent: ReportPerformanceEvent | undefined;
 
   private updateProfilesContextWith: UpdateProfilesContextWith = (discoverProfiles) => {
     if (
@@ -86,7 +84,7 @@ export class DiscoverEBTManager {
   }) {
     this.customContext$ = discoverEbtContext$;
     this.reportEvent = core.analytics.reportEvent;
-    this.reportPerformanceMetricEvent = (eventData) =>
+    this.reportPerformanceEvent = (eventData) =>
       reportPerformanceMetricEvent(core.analytics, eventData);
   }
 
@@ -108,59 +106,39 @@ export class DiscoverEBTManager {
       discoverProfiles: [],
     });
 
-    scopedContext$
-      .pipe(skip(1))
-      .subscribe(({ discoverProfiles }) => this.updateProfilesContextWith(discoverProfiles));
+    const withScopedContext =
+      <T extends (...params: Parameters<T>) => void>(callback: T) =>
+      (...params: Parameters<T>) => {
+        const currentDiscoverProfiles = this.customContext$?.getValue().discoverProfiles ?? [];
+        const scopedDiscoverProfiles = scopedContext$.getValue().discoverProfiles;
+
+        this.updateProfilesContextWith(scopedDiscoverProfiles);
+        callback(...params);
+        this.updateProfilesContextWith(currentDiscoverProfiles);
+      };
+
+    let scopedReportEvent: ReportEvent | undefined;
+    if (this.reportEvent) {
+      scopedReportEvent = withScopedContext(this.reportEvent);
+    }
+
+    let scopedReportPerformanceEvent: ReportPerformanceEvent | undefined;
+    if (this.reportPerformanceEvent) {
+      scopedReportPerformanceEvent = withScopedContext(this.reportPerformanceEvent);
+    }
 
     const scopedUpdateProfilesContextWith: UpdateProfilesContextWith = (discoverProfiles) => {
       scopedContext$.next({ discoverProfiles });
     };
 
-    const withScopedContext = (callback: () => void) => {
-      const currentDiscoverProfiles = this.customContext$?.getValue().discoverProfiles ?? [];
-      const scopedDiscoverProfiles = scopedContext$.getValue().discoverProfiles;
-
-      this.updateProfilesContextWith(scopedDiscoverProfiles);
-      callback();
-      this.updateProfilesContextWith(currentDiscoverProfiles);
-    };
-
-    const baseReportEvent = this.reportEvent;
-    let scopedReportEvent: ReportEvent | undefined;
-
-    if (baseReportEvent) {
-      scopedReportEvent = (...params) => withScopedContext(() => baseReportEvent(...params));
-    }
-
-    const baseReportPerformanceMetricEvent = this.reportPerformanceMetricEvent;
-    let scopedTrackPerformanceEvent: TrackPerformanceEvent = () => ({ reportEvent: () => {} });
-
-    if (baseReportPerformanceMetricEvent) {
-      scopedTrackPerformanceEvent = (eventName) => {
-        const startTime = window.performance.now();
-        let reported = false;
-
-        return {
-          reportEvent: (eventData) => {
-            if (reported) return;
-            reported = true;
-            const duration = window.performance.now() - startTime;
-            withScopedContext(() =>
-              baseReportPerformanceMetricEvent({
-                ...eventData,
-                eventName,
-                duration,
-              })
-            );
-          },
-        };
-      };
-    }
+    scopedContext$
+      .pipe(skip(1))
+      .subscribe(({ discoverProfiles }) => this.updateProfilesContextWith(discoverProfiles));
 
     return new ScopedDiscoverEBTManager(
       scopedReportEvent,
-      scopedUpdateProfilesContextWith,
-      scopedTrackPerformanceEvent
+      scopedReportPerformanceEvent,
+      scopedUpdateProfilesContextWith
     );
   }
 }
@@ -178,8 +156,8 @@ export class ScopedDiscoverEBTManager {
 
   constructor(
     private readonly reportEvent: ReportEvent | undefined,
-    public readonly updateProfilesContextWith: UpdateProfilesContextWith,
-    public readonly trackPerformanceEvent: TrackPerformanceEvent
+    private readonly reportPerformanceEvent: ReportPerformanceEvent | undefined,
+    public readonly updateProfilesContextWith: UpdateProfilesContextWith
   ) {}
 
   private async trackFieldUsageEvent({
@@ -290,5 +268,27 @@ export class ScopedDiscoverEBTManager {
     };
 
     this.reportEvent(CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE, eventData);
+  }
+
+  public trackPerformanceEvent(eventName: string) {
+    const startTime = window.performance.now();
+    let reported = false;
+
+    return {
+      reportEvent: (eventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>) => {
+        if (reported || !this.reportPerformanceEvent) {
+          return;
+        }
+
+        reported = true;
+        const duration = window.performance.now() - startTime;
+
+        this.reportPerformanceEvent({
+          ...eventData,
+          eventName,
+          duration,
+        });
+      },
+    };
   }
 }
