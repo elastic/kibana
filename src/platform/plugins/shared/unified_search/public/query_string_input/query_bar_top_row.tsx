@@ -279,7 +279,6 @@ export const QueryBarTopRow = React.memo(
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
-    queryRef.current = props.query;
 
     const persistedLog: PersistedLog | undefined = React.useMemo(
       () =>
@@ -383,14 +382,6 @@ export const QueryBarTopRow = React.memo(
         });
       },
       [propsOnChange]
-    );
-
-    const onTextLangQueryChange = useCallback(
-      (query: AggregateQuery) => {
-        queryRef.current = query as QT;
-        props.onTextLangQueryChange(query);
-      },
-      [props]
     );
 
     const onChangeQueryInputFocus = useCallback((isFocused: boolean) => {
@@ -741,11 +732,11 @@ export const QueryBarTopRow = React.memo(
       }
       return (
         isQueryLangSelected &&
-        props.query &&
-        isOfAggregateQueryType(props.query) && (
+        queryRef.current &&
+        isOfAggregateQueryType(queryRef.current) && (
           <ESQLLangEditor
-            query={props.query}
-            onTextLangQueryChange={onTextLangQueryChange}
+            query={queryRef.current}
+            onTextLangQueryChange={props.onTextLangQueryChange}
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
