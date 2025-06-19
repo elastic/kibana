@@ -71,11 +71,11 @@ export const useLabelNodeExpandPopover = (
           label:
             eventsWithThisActionToggleAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventsWithThisAction',
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
                   { defaultMessage: 'Show related events' }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideEventsWithThisAction',
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
                   { defaultMessage: 'Hide related events' }
                 ),
           onClick: () => {
