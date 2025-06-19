@@ -15,6 +15,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_OVERVIEW_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
@@ -22,6 +23,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
+import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 
 const EntityAnalyticsManagementWrapper = () => (
   <PluginTemplateWrapper>
@@ -127,6 +129,27 @@ const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(()
 EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
   'EntityAnalyticsPrivilegedUserMonitoringContainer';
 
+const EntityAnalyticsOverviewWrapper = () => (
+  <PluginTemplateWrapper>
+    <OverviewDashboard />
+  </PluginTemplateWrapper>
+);
+
+const EntityAnalyticsOverviewContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route
+        path={ENTITY_ANALYTICS_OVERVIEW_PATH}
+        exact
+        component={EntityAnalyticsOverviewWrapper}
+      />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsOverviewContainer.displayName = 'EntityAnalyticsOverviewContainer';
+
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -158,6 +181,13 @@ export const routes = [
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
       SecurityPageName.entityAnalyticsPrivilegedUserMonitoring
+    ),
+  },
+  {
+    path: ENTITY_ANALYTICS_OVERVIEW_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsOverviewContainer,
+      SecurityPageName.entityAnalyticsOverview
     ),
   },
 ];
