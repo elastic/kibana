@@ -30,6 +30,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'storeGapsInEventLogEnabled',
+            'bulkGapsFillEnabled',
           ])}`,
         ],
       },

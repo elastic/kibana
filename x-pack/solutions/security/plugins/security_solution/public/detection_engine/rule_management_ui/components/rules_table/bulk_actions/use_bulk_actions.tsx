@@ -113,6 +113,7 @@ export const useBulkActions = ({
   const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
     'bulkEditAlertSuppressionEnabled'
   );
+  const isBulkGapsFillEnabled = useIsExperimentalFeatureEnabled('bulkGapsFillEnabled');
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
@@ -602,14 +603,18 @@ export const useBulkActions = ({
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
-            {
-              key: i18n.BULK_ACTION_FILL_RULE_GAPS,
-              name: i18n.BULK_ACTION_FILL_RULE_GAPS,
-              'data-test-subj': 'scheduleFillGaps',
-              disabled: containsLoading || (!containsEnabled && !isAllSelected),
-              onClick: handleScheduleFillGapsAction,
-              icon: undefined,
-            },
+            ...(isBulkGapsFillEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    name: i18n.BULK_ACTION_FILL_RULE_GAPS,
+                    'data-test-subj': 'scheduleFillGaps',
+                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
+                    onClick: handleScheduleFillGapsAction,
+                    icon: undefined,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -784,6 +789,7 @@ export const useBulkActions = ({
       globalQuery,
       kql,
       showBulkFillRuleGapsConfirmation,
+      isBulkGapsFillEnabled,
     ]
   );
 
