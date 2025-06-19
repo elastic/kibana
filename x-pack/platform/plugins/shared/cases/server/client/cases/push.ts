@@ -238,7 +238,7 @@ export const push = async (
           ...(shouldMarkAsClosed
             ? getTimingMetricsForUpdate({
                 status: CaseStatuses.closed,
-                updatedAt: pushedDate,
+                stateTransitionTimestamp: pushedDate,
                 createdAt: theCase.created_at,
                 inProgressAt: theCase.in_progress_at,
               })
