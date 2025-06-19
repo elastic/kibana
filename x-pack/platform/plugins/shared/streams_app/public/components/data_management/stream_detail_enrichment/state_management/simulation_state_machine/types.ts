@@ -40,12 +40,18 @@ export type SimulationEvent =
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
   | { type: 'simulation.fields.map'; field: MappedSchemaField }
   | { type: 'simulation.fields.unmap'; fieldName: string }
-  | { type: 'simulation.reset' };
+  | { type: 'simulation.reset' }
+  | { type: 'previewColumns.updateExplicitlyEnabledColumns'; columns: string[] }
+  | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
+  | { type: 'previewColumns.order'; columns: string[] };
 
 export interface SimulationContext {
   detectedSchemaFields: SchemaField[];
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
+  explicitlyEnabledPreviewColumns: string[];
+  explicitlyDisabledPreviewColumns: string[];
+  previewColumnsOrder: string[];
   processors: ProcessorDefinitionWithUIAttributes[];
   samples: SampleDocument[];
   samplingCondition?: Condition;
