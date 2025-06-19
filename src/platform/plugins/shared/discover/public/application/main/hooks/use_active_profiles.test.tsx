@@ -16,6 +16,7 @@ import { FetchStatus } from '../../types';
 import { getDataTableRecordMock } from '@kbn/discover-utils/src/__mocks__';
 import { BehaviorSubject } from 'rxjs';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { DataTableRecordWithContext } from '../../../context_awareness/profiles_manager';
 
 const getDataDocumentMsgMock = (): DataDocumentsMsg => {
   return {
@@ -55,6 +56,9 @@ const getScopedProfilesManagerMock = (withContexts = false) => {
         rootContext: withContexts ? rootContextMock : null,
         dataSourceContext: withContexts ? dataSourceContextMock : null,
       }),
+    getDocumentProfile: (record: DataTableRecordWithContext) => {
+      return record.context;
+    },
   } as unknown as ScopedProfilesManager;
 };
 
