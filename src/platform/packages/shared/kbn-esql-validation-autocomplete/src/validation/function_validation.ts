@@ -243,7 +243,7 @@ export function validateFunction({
   let relevantFuncSignatures = matchingSignatures;
   const enrichedArgs = fn.args;
 
-  if (fn.name === 'in' || fn.name === 'not_in') {
+  if (fn.name === 'in' || fn.name === 'not in') {
     for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
       relevantFuncSignatures = fnDefinition.signatures.filter(
         (s) =>
