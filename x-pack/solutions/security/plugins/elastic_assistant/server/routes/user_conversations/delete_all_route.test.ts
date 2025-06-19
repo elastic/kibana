@@ -64,7 +64,7 @@ describe('Delete all conversations route', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
-        success: true,
+        success: false,
         totalDeleted: 0,
         failures: ['Test error'],
       });
