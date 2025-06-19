@@ -45,7 +45,7 @@ import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/na
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { NamespaceSelector } from '../../components/namespace_selector';
-import { useActiveNamespace } from '../../components/namespace_selector';
+import { useActiveNamespace } from '../../common/hooks/use_active_namespace';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
@@ -370,7 +370,7 @@ export const ComplianceDashboard = () => {
       ? getCspmDashboardData.data?.namespaces || []
       : getKspmDashboardData.data?.namespaces || [];
 
-  const onNamespaceChangeCallback = useCallback(
+  const onActiveNamespaceChange = useCallback(
     (selectedNamespace: string) => {
       updateActiveNamespace(selectedNamespace);
     },
@@ -458,7 +458,7 @@ export const ComplianceDashboard = () => {
             namespaces={namespaces}
             activeNamespace={activeNamespace}
             postureType={currentTabUrlState}
-            onNamespaceChangeCallback={onNamespaceChangeCallback}
+            onNamespaceChange={onActiveNamespaceChange}
           />,
         ]}
         tabs={tabs.map(({ content, ...rest }) => rest)}

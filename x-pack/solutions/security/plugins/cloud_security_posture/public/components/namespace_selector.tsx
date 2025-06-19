@@ -8,41 +8,19 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenu, useEuiTheme } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
-// import { useHistory } from 'react-router-dom';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { LOCAL_STORAGE_NAMESPACE_KEY, DEFAULT_NAMESPACE } from '../common/constants';
 
 interface NamespaceSelectorProps {
   'data-test-subj'?: string;
   postureType?: 'cspm' | 'kspm';
   activeNamespace: string;
   namespaces: string[];
-  onNamespaceChangeCallback: (namespace: string) => void;
+  onNamespaceChange: (namespace: string) => void;
 }
-
-export const useActiveNamespace = ({ postureType }: { postureType?: 'cspm' | 'kspm' }) => {
-  const [localStorageActiveNamespace, localStorageSetActiveNamespace] = useLocalStorage(
-    `${LOCAL_STORAGE_NAMESPACE_KEY}:${postureType}`,
-    DEFAULT_NAMESPACE
-  );
-  const [activeNamespace, setActiveNamespaceState] = useState<string>(
-    localStorageActiveNamespace || 'default'
-  );
-
-  const updateActiveNamespace = useCallback(
-    (namespace: string) => {
-      setActiveNamespaceState(namespace);
-      localStorageSetActiveNamespace(namespace);
-    },
-    [localStorageSetActiveNamespace]
-  );
-  return { activeNamespace, updateActiveNamespace };
-};
 
 export const NamespaceSelector = ({
   activeNamespace,
   namespaces,
-  onNamespaceChangeCallback,
+  onNamespaceChange,
 
   postureType,
   'data-test-subj': dataTestSubj,
@@ -57,14 +35,14 @@ export const NamespaceSelector = ({
     [activeNamespace]
   );
 
-  const onNamespaceChange = useCallback(
+  const onSelectedNamespaceChange = useCallback(
     (namespaceKey: string) => {
       if (namespaceKey !== activeNamespace) {
-        onNamespaceChangeCallback(namespaceKey);
+        onNamespaceChange(namespaceKey);
       }
       setIsPopoverOpen(false);
     },
-    [activeNamespace, onNamespaceChangeCallback]
+    [activeNamespace, onNamespaceChange]
   );
 
   const panels = [
@@ -73,7 +51,7 @@ export const NamespaceSelector = ({
       items: namespaces.map((namespace) => ({
         name: namespace,
         icon: isNamespaceSelected(namespace) ? 'check' : 'empty',
-        onClick: () => onNamespaceChange(namespace),
+        onClick: () => onSelectedNamespaceChange(namespace),
       })),
     },
   ];
