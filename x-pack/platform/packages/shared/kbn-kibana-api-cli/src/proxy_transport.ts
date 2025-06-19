@@ -26,7 +26,10 @@ export function createProxyTransport({
 }): typeof Transport {
   return class ProxyTransport extends Transport {
     constructor(options: TransportOptions) {
-      super(options);
+      super({
+        ...options,
+        productCheck: undefined,
+      });
     }
 
     request<TResponse = unknown>(
@@ -84,7 +87,7 @@ export function createProxyTransport({
 
           if (statusCode >= 400) {
             throw new errors.ResponseError({
-              statusCode: response.statusCode,
+              statusCode,
               body: response.body,
               meta: response.meta,
               warnings: response.warnings,
