@@ -19,7 +19,15 @@ paths:
   /api/observability_ai_assistant/chat/complete:
     post:
       summary: Generate a chat completion.
-      description: Create a new chat completion by using the Observability AI Assistant. The API returns the model's response based on the current conversation context. It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
+      description: |
+        Create a new chat completion by using the Observability AI Assistant. 
+
+        The API returns the model's response based on the current conversation context. 
+
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      x-state: Technical Preview
       tags:
         - observability_ai_assistant
       security:
@@ -73,7 +81,12 @@ paths:
             type: string
             enum: [default, openai]
           required: false
-          description: Response format, either 'default' or 'openai'. If 'openai', the response will be in OpenAI compatible format.
+          description: |
+            The format the response should be returned in.
+
+            If 'openai', the response will be in OpenAI compatible format. 
+
+            If 'default', the response will be in Elastic internal format.
       responses:
         '200':
           description: Successful response
@@ -89,7 +102,7 @@ components:
   schemas:
     Message:
       type: object
-      description: A representation of a message.
+      name: Message
       properties:
         '@timestamp':
           type: string
@@ -116,7 +129,7 @@ components:
               $ref: '#/components/schemas/Unredaction'
             unredactions:
               type: array
-              description: A list of unredacted elements.
+              description: A list of unredacted elements for anonymization.
               items:
                 $ref: '#/components/schemas/Unredaction'
           required:
@@ -126,7 +139,6 @@ components:
         - message
     Unredaction:
       type: object
-      description: A representation of an unredacted element.
       properties:
         entity:
           type: string
@@ -142,7 +154,12 @@ components:
           description: The ending position of the unredacted entity.
         type:
           type: string
-          description: The type of unredaction applied.
+          description: |
+            The type of unredaction applied. 
+
+            If "ner", the entity has been unredacted using Named Entity Recognition (NER). 
+
+            If "regex", the entity has been unredacted using regular expressions.
           enum:
             - ner
             - regex
@@ -229,15 +246,14 @@ components:
               role: 'message role'
         - conversation:
             title: 'my title'
-            id: 'message-id'
+            id: 'conversation-id'
             last_updated: '2025-06-16T15:45:46.258Z'
           type: conversationCreate
     completeChatRequestExample:
       summary: Example of completing a chat interaction
-      description: Run `POST /api/observability_ai_assistant/chat/complete` to complete a chat interaction.
       value: |
         {
-          "connectorId": "Elastic-Managed-LLM",
+          "connectorId": "connector-id",
           "conversationId": "uuid",
           "disableFunctions": false,
           "messages": [
@@ -257,7 +273,6 @@ components:
               "parameters": {}
             }
           ],
-          
           "instructions": [
             "Get the latest server status"
           ]

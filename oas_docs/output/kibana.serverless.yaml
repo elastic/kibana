@@ -41181,9 +41181,21 @@ paths:
         - Security Timeline API
   /api/observability_ai_assistant/chat/complete:
     post:
-      description: Create a new chat completion by using the Observability AI Assistant. The API returns the model's response based on the current conversation context. It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
+      description: |
+        Create a new chat completion by using the Observability AI Assistant. 
+
+        The API returns the model's response based on the current conversation context. 
+
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+
+        This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       parameters:
-        - description: Response format, either 'default' or 'openai'. If 'openai', the response will be in OpenAI compatible format.
+        - description: |
+            The format the response should be returned in.
+
+            If 'openai', the response will be in OpenAI compatible format. 
+
+            If 'default', the response will be in Elastic internal format.
           in: query
           name: format
           required: false
@@ -41209,10 +41221,10 @@ paths:
                   description: A unique identifier for the connector.
                   type: string
                 conversationId:
-                  description: A Unique identifier for the conversation if you are continuing an existing conversation.
+                  description: A unique identifier for the conversation if you are continuing an existing conversation.
                   type: string
                 disableFunctions:
-                  description: Flag indicating whether functions should be disabled
+                  description: Flag indicating whether functions should be disabled.
                   type: boolean
                 instructions:
                   description: An array of instruction objects, which can be either simple strings or detailed objects.
@@ -41225,7 +41237,7 @@ paths:
                     $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Message'
                   type: array
                 persist:
-                  description: Flag indicating whether to persist the conversation in Kibana
+                  description: Flag indicating whether to persist the conversation in Kibana.
                   type: boolean
                 title:
                   description: A title for the conversation.
@@ -41247,6 +41259,7 @@ paths:
       summary: Generate a chat completion.
       tags:
         - observability_ai_assistant
+      x-state: Technical Preview
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -57338,11 +57351,10 @@ components:
       title: Sync API response for trained models
       type: object
     Observability_AI_Assistant_APIs_completeChatRequestExample:
-      description: Run `POST /api/observability_ai_assistant/chat/complete` to complete a chat interaction.
       summary: Example of completing a chat interaction
       value: |
         {
-          "connectorId": "Elastic-Managed-LLM",
+          "connectorId": "connector-id",
           "conversationId": "uuid",
           "disableFunctions": false,
           "messages": [
@@ -57362,13 +57374,12 @@ components:
               "parameters": {}
             }
           ],
-          
           "instructions": [
             "Get the latest server status"
           ]
         }
     Observability_AI_Assistant_APIs_completeChatResponseExample:
-      summary: Get chat completion from the Observability AI Assistant
+      summary: Get a chat completion from the Observability AI Assistant
       value:
         - id: message-id
           message:
@@ -57386,7 +57397,7 @@ components:
               role: message role
           type: messageAdd
         - conversation:
-            id: message-id
+            id: conversation-id
             last_updated: '2025-06-16T15:45:46.258Z'
             title: my title
           type: conversationCreate
@@ -57419,7 +57430,7 @@ components:
             - id
             - text
     Observability_AI_Assistant_APIs_Message:
-      description: A representation of a message.
+      name: Message
       type: object
       properties:
         '@timestamp':
@@ -57446,7 +57457,7 @@ components:
             role:
               $ref: '#/components/schemas/Observability_AI_Assistant_APIs_MessageRoleEnum'
             unredactions:
-              description: A list of unredacted elements.
+              description: A list of unredacted elements for anonymization.
               items:
                 $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Unredaction'
               type: array
@@ -57465,7 +57476,6 @@ components:
         - elastic
       type: string
     Observability_AI_Assistant_APIs_Unredaction:
-      description: A representation of an unredacted element.
       type: object
       properties:
         class_name:
@@ -57481,7 +57491,12 @@ components:
           description: The starting position of the unredacted entity.
           type: number
         type:
-          description: The type of unredaction applied.
+          description: |
+            The type of unredaction applied. 
+
+            If "ner", the entity has been unredacted using Named Entity Recognition (NER). 
+
+            If "regex", the entity has been unredacted using regular expressions.
           enum:
             - ner
             - regex
