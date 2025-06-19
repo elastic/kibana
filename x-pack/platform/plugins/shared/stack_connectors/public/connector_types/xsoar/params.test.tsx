@@ -212,13 +212,13 @@ describe('XSOARParamsFields renders', () => {
       expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
       expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
-      expect(getByTestId('rule-severity-toggle')).toBeChecked();
+      expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
       expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
 
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { createInvestigation: false, severity: 0, isRuleSeverity: true },
+        { createInvestigation: false, severity: 0 },
         0
       );
     });
@@ -238,7 +238,7 @@ describe('XSOARParamsFields renders', () => {
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
-        { createInvestigation: false, severity: 0, isRuleSeverity: false },
+        { createInvestigation: false, severity: 0 },
         0
       );
     });
@@ -264,7 +264,7 @@ describe('XSOARParamsFields renders', () => {
         expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
-          { createInvestigation: false, severity: 0, isRuleSeverity: true },
+          { createInvestigation: false, severity: 0 },
           0
         );
         expect(editAction).toHaveBeenCalledWith(
@@ -273,7 +273,6 @@ describe('XSOARParamsFields renders', () => {
             createInvestigation: false,
             playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
             severity: 0,
-            isRuleSeverity: true,
           },
           0
         );

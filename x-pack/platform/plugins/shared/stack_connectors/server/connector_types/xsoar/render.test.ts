@@ -43,6 +43,23 @@ describe('XSOAR - renderParameterTemplates', () => {
     });
   });
 
+  it('should not use rule severity if isRuleSeverity is false', () => {
+    const paramswithoutRuleSeverity = {
+      ...params,
+      subActionParams: { ...params.subActionParams, isRuleSeverity: false },
+    };
+    const result = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
+
+    expect(result.subActionParams).toEqual({
+      name: `new incident - ${variables.alert.uuid}`,
+      playbookId: 'playbook0',
+      createInvestigation: true,
+      severity: 0,
+      isRuleSeverity: false,
+      body: '',
+    });
+  });
+
   it('should render error body', () => {
     const errorMessage = 'test error';
     jest.spyOn(Mustache, 'render').mockImplementation(() => {

@@ -70,10 +70,9 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
       (actionParams.subActionParams as XSOARRunActionParams) ??
       ({
         severity: XSOARSeverity.UNKNOWN,
-        isRuleSeverity: isTest ? false : true,
         createInvestigation: false,
       } as unknown as XSOARRunActionParams),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [actionParams.subActionParams]
   );
 
@@ -81,7 +80,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
   const [selectedPlaybookOption, setSelectedPlaybookOption] = useState<
     PlaybookOption | null | undefined
   >();
-  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(incident.isRuleSeverity);
+  const [isRuleSeverity, setIsRuleSeverity] = useState<boolean>(Boolean(incident.isRuleSeverity));
   const [playbooks, setPlaybooks] = useState<XSOARPlaybooksObject[]>();
 
   useEffect(() => {
@@ -93,7 +92,6 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
         'subActionParams',
         {
           severity: XSOARSeverity.UNKNOWN,
-          isRuleSeverity: isTest ? false : true,
           createInvestigation: false,
         },
         index
@@ -241,7 +239,7 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
         <EuiFormRow fullWidth>
           <EuiSwitch
             label={translations.IS_RULE_SEVERITY_LABEL}
-            checked={isRuleSeverity}
+            checked={Boolean(isRuleSeverity)}
             data-test-subj="rule-severity-toggle"
             onChange={(e) => {
               setIsRuleSeverity(e.target.checked);
@@ -257,12 +255,12 @@ const XSOARParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorParam
           />
         </EuiFormRow>
       )}
-      {!isRuleSeverity && (
+      {!Boolean(isRuleSeverity) && (
         <EuiFormRow fullWidth label={translations.SEVERITY_LABEL}>
           <EuiSelect
             fullWidth
             data-test-subj="severitySelectInput"
-            disabled={isRuleSeverity}
+            disabled={Boolean(isRuleSeverity)}
             value={incident.severity ?? severityOptions[0].value}
             options={severityOptions}
             onChange={(e) => {
