@@ -38,7 +38,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
 
   const persistGroupByColumnSelection = useCallback(
     (groupByColumn: string[]) => {
-      dispatch({ type: 'SET_GROUP_BY_COLUMN', payload: groupByColumn });
+      dispatch({ type: 'SET_ACTIVE_CASCADE_GROUPS', payload: groupByColumn });
       onSelectionChange?.(groupByColumn);
     },
     [dispatch, onSelectionChange]
@@ -58,7 +58,7 @@ export function SelectionDropdown({ onSelectionChange }: SelectionDropdownProps)
   };
 
   const clearSelectedGroupByColumn = () => {
-    dispatch({ type: 'RESET_GROUP_BY_COLUMN_SELECTION' });
+    dispatch({ type: 'RESET_ACTIVE_CASCADE_GROUPS' });
   };
 
   const onDragEnd = useCallback<ComponentProps<typeof EuiDragDropContext>['onDragEnd']>(
