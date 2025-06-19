@@ -28,16 +28,22 @@ const panelStyle = {
 export const EmptyState: React.FC<{
   height?: keyof typeof heights | 'flex';
   variant?: 'subdued' | 'transparent';
+  messageTitle?: string;
+  messageBody?: string;
   additionalToolbarControls?: ReactNode;
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton?: boolean;
 }> = ({
   height = 'tall',
   variant = 'subdued',
+  messageTitle,
+  messageBody,
   additionalToolbarControls,
   alertsQuerySnapshot,
   showInspectButton,
 }) => {
+  const title = messageTitle || 'No results match your search criteria';
+  const body = messageBody || 'Try searching over a longer period of time or modifying your search';
   return (
     <EuiPanel color={variant} data-test-subj="alertsTableEmptyState">
       <EuiFlexGroup
@@ -78,16 +84,16 @@ export const EmptyState: React.FC<{
                         <h3>
                           <FormattedMessage
                             id="xpack.triggersActionsUI.empty.title"
-                            defaultMessage="No results match your search criteria"
+                            defaultMessage={title}
                           />
                         </h3>
                       </EuiTitle>
                       <p>
                         <FormattedMessage
                           id="xpack.triggersActionsUI.empty.description"
-                          defaultMessage="Try searching over a longer period of time or modifying your search"
+                          defaultMessage={body}
                         />
-                      </p>
+                      </p>{' '}
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
