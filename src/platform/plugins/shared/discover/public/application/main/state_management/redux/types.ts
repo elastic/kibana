@@ -46,7 +46,7 @@ export interface InternalStateDataRequestParams {
   searchSessionId: string | undefined;
 }
 
-interface TabGlobalState {
+export interface TabStateGlobalState {
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
@@ -55,10 +55,10 @@ interface TabGlobalState {
 export interface TabState extends TabItem {
   // Initial app and global state for the tab (provided before the tab is initialized).
   initialAppState?: DiscoverAppState;
-  initialGlobalState?: TabGlobalState;
+  initialGlobalState?: TabStateGlobalState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
-  lastPersistedGlobalState: TabGlobalState;
+  lastPersistedGlobalState: TabStateGlobalState;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
