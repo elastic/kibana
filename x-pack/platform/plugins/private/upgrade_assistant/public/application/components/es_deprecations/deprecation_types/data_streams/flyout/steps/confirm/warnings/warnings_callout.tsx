@@ -23,7 +23,7 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
       <EuiCallOut color="primary" data-test-subj="dataStreamMigrationWarningsCallout">
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"
-          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or marked as read-only."
+          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or set to read-only."
           values={{ formattedDate }}
         />
         <br />
