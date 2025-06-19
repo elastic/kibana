@@ -39,6 +39,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
   const mlFeaturesDisabled = !isFullLicense();
   const canViewMlNodes = usePermissionCheck('canViewMlNodes');
+  const [canUseAiops] = usePermissionCheck(['canUseAiops']);
 
   const [globalState] = useUrlState('_g');
 
@@ -273,6 +274,10 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       },
     ];
 
+    if (canUseAiops === false) {
+      return mlTabs;
+    }
+
     mlTabs.push({
       id: 'aiops_section',
       name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
@@ -318,7 +323,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled, canViewMlNodes]);
+  }, [mlFeaturesDisabled, canViewMlNodes, canUseAiops]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
