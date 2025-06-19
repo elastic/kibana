@@ -25,6 +25,20 @@ const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   ],
 });
 
+const MAINTENANCE_WINDOWS_OPTIONS = (readOnly: boolean) => ({
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.maintenanceWindows.title', {
+    defaultMessage: 'Maintenance windows',
+  }),
+  description: i18n.translate(
+    'xpack.synthetics.monitorConfig.section.maintenanceWindows.description',
+    {
+      defaultMessage:
+        'Configure maintenance windows to prevent alerts from being triggered during scheduled downtime.',
+    }
+  ),
+  components: [FIELD(readOnly)[ConfigKey.MAINTENANCE_WINDOWS]],
+});
+
 const HTTP_ADVANCED = (readOnly: boolean) => ({
   requestConfig: {
     title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfiguration.title', {
@@ -217,6 +231,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       HTTP_ADVANCED(readOnly).requestConfig,
       HTTP_ADVANCED(readOnly).responseConfig,
       HTTP_ADVANCED(readOnly).responseChecks,
@@ -239,6 +254,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       TCP_ADVANCED(readOnly).requestConfig,
       TCP_ADVANCED(readOnly).responseChecks,
       TLS_OPTIONS(readOnly),
@@ -268,6 +284,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
           FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
       KIBANA_SPACES_OPTIONS(readOnly),
     ],
@@ -295,6 +312,7 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
           FIELD(readOnly)[ConfigKey.NAMESPACE],
         ],
       },
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ...BROWSER_ADVANCED(readOnly),
       KIBANA_SPACES_OPTIONS(readOnly),
     ],
@@ -314,8 +332,10 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     ],
     advanced: [
       DEFAULT_DATA_OPTIONS(readOnly),
+      MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ICMP_ADVANCED(readOnly).requestConfig,
       KIBANA_SPACES_OPTIONS(readOnly),
+
     ],
   },
 });

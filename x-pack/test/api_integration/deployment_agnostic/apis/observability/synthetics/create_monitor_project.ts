@@ -231,6 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           updated_at: decryptedCreatedMonitor.rawBody.updated_at,
           created_at: decryptedCreatedMonitor.rawBody.created_at,
           labels: {},
+          maintenance_windows: [],
           spaces: ['default'],
         });
       }
@@ -362,6 +363,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ipv4: true,
             max_attempts: 2,
             labels: {},
+            maintenance_windows: [],
             spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -481,6 +483,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: '',
             max_attempts: 2,
             labels: {},
+            maintenance_windows: [],
             spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -589,6 +592,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
             labels: {},
+            maintenance_windows: [],
             spaces: ['default'],
           });
         }

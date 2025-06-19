@@ -108,6 +108,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         'url.port': null,
         urls: '',
         labels: {},
+        maintenance_windows: [],
         spaces: [],
       });
     });
@@ -146,6 +147,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         type: 'icmp',
         wait: '1',
         labels: {},
+        maintenance_windows: [],
         spaces: [],
       });
     });
@@ -206,6 +208,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         urls: '',
         username: '',
         labels: {},
+        maintenance_windows: [],
         spaces: [],
       });
     });
@@ -262,6 +265,7 @@ describe('AddNewMonitorsPublicAPI', () => {
         'url.port': null,
         urls: '',
         labels: {},
+        maintenance_windows: [],
         spaces: [],
       });
     });

@@ -24,7 +24,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/expect",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/enterprise-search-plugin",
     "@kbn/test-suites-src",
     "@kbn/guided-onboarding",
     "@kbn/search-playground",

@@ -328,6 +328,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               journey_id: '',
               max_attempts: 2,
               labels: {},
+              maintenance_windows: [],
               spaces: ['default'],
             },
             ['config_id', 'id', 'form_monitor_type']
