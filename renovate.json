@@ -298,6 +298,9 @@
       "matchBaseBranches": [
         "main"
       ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -458,6 +461,10 @@
       "reviewers": [
         "team:appex-sharedux"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "matchBaseBranches": [
         "main"
       ],
@@ -508,6 +515,10 @@
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -562,6 +573,10 @@
         "@types/react-router-dom",
         "history",
         "@types/history"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "reviewers": [
         "team:appex-sharedux"
