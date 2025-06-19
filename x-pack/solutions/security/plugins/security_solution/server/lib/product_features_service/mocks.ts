@@ -80,7 +80,7 @@ export const createProductFeaturesServiceMock = (
   featuresPluginSetupContract: FeaturesPluginSetup = featuresPluginMock.createSetup(),
   logger: Logger = loggingSystemMock.create().get('productFeatureMock')
 ) => {
-  const productFeaturesService = new ProductFeaturesService(logger, experimentalFeatures);
+  const productFeaturesService = new ProductFeaturesService(logger, experimentalFeatures, false);
 
   productFeaturesService.init(featuresPluginSetupContract);
 
