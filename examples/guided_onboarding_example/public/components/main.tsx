@@ -37,7 +37,6 @@ interface MainProps {
 }
 
 const exampleGuideIds: GuideId[] = [
-  'websiteSearch',
   'databaseSearch',
   'siem',
   'kubernetes',
