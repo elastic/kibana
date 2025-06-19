@@ -11,13 +11,21 @@ var ritm = require('require-in-the-middle');
 var lodashPatch = require('./lodash_template');
 var patchChildProcess = require('./child_process');
 var hardenPrototypes = require('./prototype');
-var patchFs = require('./fs');
+var fsPatch = require('./fs');
 
 // the performance cost of using require-in-the-middle is atm directly related to the number of
 // registered hooks (as require is patched once for EACH hook)
 // This is why we are defining a single hook delegating for each of the patches we need to apply
 new ritm.Hook(
-  ['child_process', 'lodash', 'lodash/template', 'lodash/fp', 'lodash/fp/template', 'fs'],
+  [
+    'child_process',
+    'lodash',
+    'lodash/template',
+    'lodash/fp',
+    'lodash/fp/template',
+    'fs',
+    'fs/promises',
+  ],
   function (module, name) {
     switch (name) {
       case 'child_process': {
@@ -39,7 +47,10 @@ new ritm.Hook(
         return module;
       }
       case 'fs': {
-        return patchFs(module);
+        return fsPatch.createFsProxy(module);
+      }
+      case 'fs/promises': {
+        return fsPatch.createFsPromisesProxy(module);
       }
     }
 

@@ -9,7 +9,7 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const patchFs = require('./fs');
+const { createFsProxy, createFsPromisesProxy } = require('./fs');
 // eslint-disable-next-line @kbn/imports/uniform_imports
 const { REPO_ROOT } = require('../../platform/packages/shared/kbn-repo-info');
 
@@ -21,8 +21,8 @@ const fs = require('fs');
 const fsPromises = require('fs/promises');
 
 // Patch the fs module
-const safeFs = patchFs(fs);
-const safeFsPromises = patchFs(fsPromises);
+const safeFs = createFsProxy(fs);
+const safeFsPromises = createFsPromisesProxy(fsPromises);
 
 describe('Hardened FS', () => {
   afterAll(() => {
@@ -47,7 +47,7 @@ describe('Hardened FS', () => {
     });
   });
 
-  describe.skip('promise', () => {
+  describe('promise', () => {
     it('should allow writing to safe paths', async () => {
       await expect(
         safeFsPromises.writeFile(join(DATA_PATH, 'good.json'), 'world')

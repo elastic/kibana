@@ -38,6 +38,8 @@ const {
   renameSync,
 } = require('fs');
 
+const fsPromises = require('fs/promises');
+
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
 
@@ -84,7 +86,13 @@ const realMethods = {
   renameSync,
 };
 
-const noop = () => {};
+const realFsMethods = {
+  createWriteStream: fsPromises.createWriteStream,
+  writeFile: fsPromises.writeFile,
+  appendFile: fsPromises.appendFile,
+  copyFile: fsPromises.copyFile,
+  rename: fsPromises.rename,
+};
 
 // TODO: propagate here file specified for file logger (it can change in the runtime)
 // Idea 1: Use EventEmitter to propagate file logger path.
@@ -129,7 +137,7 @@ const isMockFsActive = () => {
   }
 };
 
-const patchFs = (fs) => {
+const createFsProxy = (fs) => {
   const proxiedFs = new Proxy(fs, {
     get(target, prop) {
       const isSyncMethod = typeof prop === 'string' && prop.endsWith('Sync');
@@ -168,7 +176,8 @@ const patchFs = (fs) => {
       }
 
       if (singlePath.includes(prop) && typeof target[prop] === 'function') {
-        return (userPath, data, options, cb) => {
+        return (userPath, ...args) => {
+          const [, options, cb] = args;
           const callback = typeof options === 'function' ? options : cb;
           let safePath;
 
@@ -186,10 +195,10 @@ const patchFs = (fs) => {
             // When mock-fs is active, it replaces the fs.[method] with its own implementation,
             // which internally calls a stored reference to our proxy function.
             // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
-            return realMethods[prop](userPath, data, options, cb || noop);
+            return realMethods[prop](userPath, ...args);
           }
 
-          return Reflect.apply(target[prop], target, [safePath, data, options, cb]);
+          return Reflect.apply(target[prop], target, [safePath, ...args]);
         };
       }
 
@@ -225,4 +234,45 @@ const patchFs = (fs) => {
   return proxiedFs;
 };
 
-module.exports = patchFs;
+const createFsPromisesProxy = (fs) => {
+  const proxiedFsPromises = new Proxy(fs, {
+    get(target, prop) {
+      if (typeof target[prop] === 'function' && singlePath.includes(prop)) {
+        return (userPath, ...args) => {
+          const safePath = getSafePath(userPath);
+          if (isMockFsActive()) {
+            // Use the original function directly to avoid infinite recursion.
+            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
+            // which internally calls a stored reference to our proxy function.
+            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
+            return realFsMethods[prop](safePath, ...args);
+          }
+
+          return Reflect.apply(target[prop], target, [safePath, ...args.slice(1)]);
+        };
+      }
+
+      if (typeof target[prop] === 'function' && dualPath.includes(prop)) {
+        return (userSrc, userDest, ...args) => {
+          const srcSafePath = getSafePath(userSrc);
+          const destSafePath = getSafePath(userDest);
+          if (isMockFsActive()) {
+            // Use the original function directly to avoid infinite recursion.
+            // When mock-fs is active, it replaces the fs.[method] with its own implementation,
+            // which internally calls a stored reference to our proxy function.
+            // This creates an infinite loop: proxy -> mock-fs -> proxy -> mock-fs
+            return realFsMethods[prop](srcSafePath, destSafePath, ...args);
+          }
+
+          return Reflect.apply(target[prop], target, [srcSafePath, destSafePath, ...args]);
+        };
+      }
+
+      return Reflect.get(target, prop);
+    },
+  });
+
+  return proxiedFsPromises;
+};
+
+module.exports = { createFsProxy, createFsPromisesProxy };
