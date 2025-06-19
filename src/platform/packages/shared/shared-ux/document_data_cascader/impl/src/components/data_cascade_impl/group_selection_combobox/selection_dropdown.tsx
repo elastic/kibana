@@ -24,7 +24,7 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDataCascadeState, useDataCascadeDispatch } from '../lib/store';
+import { useDataCascadeState, useDataCascadeDispatch } from '../../data_cascade_provider';
 
 interface SelectionDropdownProps {
   onSelectionChange?: (groupByColumn: string[]) => void;
