@@ -140,7 +140,7 @@ Discover::
 
 Elastic Observability solution::
 * Fixes an issue in Synthetics that could cause the screenshot of the first step to show for each step of the last successful test run ({kibana-pull}224220[#224220]).
-* Fixes an issue that could cause losing unsaved changes after manually running a synthetics test ({kibana-pull}222503[#222503]).
+* Fixes an issue that could cause losing unsaved changes after manually running a Synthetics test ({kibana-pull}222503[#222503]).
 * Fixes an accessibility issue in Synthetics settings, causing the focus to move out of the page when using `cc` and `bcc` elements in the email connector form ({kibana-pull}223828[#223828]).
 * Avoids adding tool instructions to the system messages when tools are disabled ({kibana-pull}223278[#223278]).
 * Fixes an APM error count waterfall navigation reload issue ({kibana-pull}221664[#221664]).
