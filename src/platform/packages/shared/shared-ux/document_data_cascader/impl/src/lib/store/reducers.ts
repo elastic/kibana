@@ -9,19 +9,20 @@
 
 import { produce } from 'immer';
 
+type DocWithId = Record<string, any> & { id: string };
+
 /**
  * Represents a group node document, with a base expectation that specifies
  * that all documents in the store have a unique identifier.
  */
-export type GroupNode = Record<string, any> & { id: string; children?: GroupNode[] };
+export type GroupNode<T extends DocWithId = DocWithId> = T & { id: string; children?: GroupNode[] };
 
-export type LeafNode = Record<string, any> & { id: string };
+export type LeafNode = DocWithId;
 
 type DispatchActionType =
-  | 'UPDATE_QUERY'
-  | 'SET_GROUP_BY_COLUMN'
   | 'SET_INITIAL_STATE'
-  | 'RESET_GROUP_BY_COLUMN_SELECTION'
+  | 'SET_ACTIVE_CASCADE_GROUPS'
+  | 'RESET_ACTIVE_CASCADE_GROUPS'
   | 'UPDATE_ROW_GROUP_NODE_DATA'
   | 'UPDATE_ROW_GROUP_LEAF_DATA';
 
@@ -31,7 +32,7 @@ export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> 
       payload: string;
     }
   | {
-      type: Extract<DispatchActionType, 'SET_GROUP_BY_COLUMN'>;
+      type: Extract<DispatchActionType, 'SET_ACTIVE_CASCADE_GROUPS'>;
       payload: string[];
     }
   | {
@@ -39,7 +40,7 @@ export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> 
       payload: G[];
     }
   | {
-      type: Extract<DispatchActionType, 'RESET_GROUP_BY_COLUMN_SELECTION'>;
+      type: Extract<DispatchActionType, 'RESET_ACTIVE_CASCADE_GROUPS'>;
     }
   | {
       type: Extract<DispatchActionType, 'UPDATE_ROW_GROUP_NODE_DATA'>;
@@ -59,7 +60,6 @@ export type IDispatchAction<G extends GroupNode, L extends Record<string, any>> 
 export interface IStoreState<G extends GroupNode, L extends LeafNode> {
   groupNodes: G[];
   leafNodes: Map<string, L[]>;
-  currentQueryString: string;
   /**
    * The available columns that can be used to group the data.
    */
@@ -75,25 +75,19 @@ export const storeReducer = <G extends GroupNode = GroupNode, L extends LeafNode
   action: IDispatchAction<G, L>
 ) => {
   switch (action.type) {
-    case 'UPDATE_QUERY': {
-      return produce(state, (draft) => {
-        draft.currentQueryString = action.payload;
-        return draft;
-      });
-    }
     case 'SET_INITIAL_STATE': {
       return produce(state, (draft) => {
         draft.groupNodes = [...action.payload];
         return draft;
       });
     }
-    case 'SET_GROUP_BY_COLUMN': {
+    case 'SET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = action.payload;
         return draft;
       });
     }
-    case 'RESET_GROUP_BY_COLUMN_SELECTION': {
+    case 'RESET_ACTIVE_CASCADE_GROUPS': {
       return produce(state, (draft) => {
         draft.currentGroupByColumns = state.groupByColumns.length ? [state.groupByColumns[0]] : [];
         return draft;
