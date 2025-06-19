@@ -35,6 +35,7 @@ async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactio
           size: 1,
           body: {
             timeout: '20s',
+            fields: ['*'],
             query: {
               match: {
                 [SPAN_ID_FIELD]: spanId,
@@ -68,7 +69,7 @@ export const useSpan = ({ spanId, indexPattern }: UseSpanParams) => {
       try {
         setLoading(true);
         const result = await getSpanData({ spanId, indexPattern, data, signal });
-        setSpan(result.rawResponse.hits.hits[0]?._source);
+        setSpan(result.rawResponse.hits.hits[0]?.fields ?? null);
         setDocId(result.rawResponse.hits.hits[0]?._id ?? null);
       } catch (err) {
         if (!signal.aborted) {
