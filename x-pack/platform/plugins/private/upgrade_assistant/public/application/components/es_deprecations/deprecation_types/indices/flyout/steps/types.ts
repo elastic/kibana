@@ -6,7 +6,7 @@
  */
 
 export type FlyoutStep =
-  | 'details'
+  | 'initializing'
   | 'confirmReadonly'
   | 'confirmReindex'
   | 'reindexing'
