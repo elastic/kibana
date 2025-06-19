@@ -37,6 +37,7 @@
     "@kbn/esql-types",
     "@kbn/field-types",
     "@kbn/licensing-plugin",
+    "@kbn/i18n-react",
     "@kbn/index-editor",
     "@kbn/esql-ast"
   ],
