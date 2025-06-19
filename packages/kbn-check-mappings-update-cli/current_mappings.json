@@ -3635,6 +3635,9 @@
           }
         }
       },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
