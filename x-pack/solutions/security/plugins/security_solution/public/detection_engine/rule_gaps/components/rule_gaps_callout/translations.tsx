@@ -14,14 +14,6 @@ export const RULE_GAPS_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const RULE_GAPS_CALLOUT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.ruleGaps.callout.message',
-  {
-    defaultMessage:
-      'Gaps in rule coverage were detected over the past 24 hours. Check the Rule Monitoring tab to learn which rules are affected and to begin remediating gaps.',
-  }
-);
-
 export const RULE_GAPS_CALLOUT_DASHBOARD = i18n.translate(
   'xpack.securitySolution.ruleGaps.callout.dashboard',
   {

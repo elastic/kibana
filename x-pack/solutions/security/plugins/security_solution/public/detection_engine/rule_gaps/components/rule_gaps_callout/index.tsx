@@ -5,8 +5,17 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiLink,
+} from '@elastic/eui';
 import { gapStatus } from '@kbn/alerting-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { GapRangeValue } from '../../constants';
@@ -15,7 +24,11 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
-import * as i18n from './translations';
+import {
+  RULE_GAPS_CALLOUT_DASHBOARD,
+  RULE_GAPS_CALLOUT_READ_DOCS,
+  RULE_GAPS_CALLOUT_TITLE,
+} from './translations';
 
 const DISMISSAL_STORAGE_KEY = 'rule-gaps-callout-dismissed';
 
@@ -80,39 +93,48 @@ export const RuleGapsCallout = () => {
     <>
       <EuiCallOut
         color="warning"
-        title={i18n.RULE_GAPS_CALLOUT_TITLE}
+        title={RULE_GAPS_CALLOUT_TITLE}
         iconType="warning"
         onDismiss={handleDismiss}
       >
         <>
-          <p>{i18n.RULE_GAPS_CALLOUT_MESSAGE}</p>
+          <p>
+            <FormattedMessage
+              id="xpack.securitySolution.ruleGaps.callout.message"
+              defaultMessage="Gaps in rule coverage were detected over the past 24 hours. {link} to learn which rules are affected and to begin remediating gaps."
+              values={{
+                link: (
+                  <EuiLink
+                    href={getSecuritySolutionUrl({
+                      deepLinkId: SecurityPageName.rules,
+                      path: AllRulesTabs.monitoring,
+                    })}
+                    data-test-subj="monitoringLogsLink"
+                  >
+                    {i18n.translate('xpack.securitySolution.ruleGaps.callout.messageLink', {
+                      defaultMessage: 'Check the Rule Monitoring tab',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
           <EuiFlexGroup>
-            <EuiButton
-              href={getSecuritySolutionUrl({
-                deepLinkId: SecurityPageName.rules,
-                path: AllRulesTabs.monitoring,
-              })}
-              fill
-              color="warning"
-              target="_blank"
-              size="s"
-            >
-              {i18n.RULES_MONITORING}
-            </EuiButton>
             {spaceId && (
               <EuiButton
                 href={getSecuritySolutionUrl({
                   deepLinkId: SecurityPageName.dashboards,
                   path: `security-detection-rule-monitoring-${spaceId}`,
                 })}
+                fill
                 color="warning"
                 size="s"
               >
-                {i18n.RULE_GAPS_CALLOUT_DASHBOARD}
+                {RULE_GAPS_CALLOUT_DASHBOARD}
               </EuiButton>
             )}
             <EuiButtonEmpty href={`${docLinks.links.siem.gapsTable}`} color="warning" size="s">
-              {i18n.RULE_GAPS_CALLOUT_READ_DOCS}
+              {RULE_GAPS_CALLOUT_READ_DOCS}
             </EuiButtonEmpty>
           </EuiFlexGroup>
         </>
