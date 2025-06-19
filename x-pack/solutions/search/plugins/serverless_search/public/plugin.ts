@@ -76,21 +76,6 @@ export class ServerlessSearchPlugin
     });
 
     core.application.register({
-      id: 'serverlessHomeRedirect',
-      title: homeTitle,
-      appRoute: '/app/elasticsearch',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: [],
-      async mount({}: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(homeTitle);
-        coreStart.application.navigateToApp('searchHomepage');
-        return () => {};
-      },
-    });
-
-    core.application.register({
       id: 'serverlessElasticsearch',
       title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
         defaultMessage: 'Elasticsearch',
@@ -112,6 +97,21 @@ export class ServerlessSearchPlugin
         }
 
         return await renderApp(element, coreStart, { history, user, ...services }, queryClient);
+      },
+    });
+
+    core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp('searchHomepage');
+        return () => {};
       },
     });
 
