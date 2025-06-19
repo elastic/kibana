@@ -19,6 +19,7 @@ import {
   MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
   TOASTER_BODY,
+  CONFIRM_FILL_RULE_GAPS_WARNING_BTN,
 } from '../screens/alerts_detection_rules';
 import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
@@ -63,6 +64,7 @@ import {
   DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
   SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM,
   BULK_FILL_RULE_GAPS_BTN,
+  BULK_FILL_RULE_GAPS_WARNING_MODAL,
 } from '../screens/rules_bulk_actions';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -491,11 +493,11 @@ export const scheduleBulkFillGapsForSelectedRules = (
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(BULK_FILL_RULE_GAPS_BTN).click();
   if (disabledCount > 0) {
-    cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
+    cy.get(BULK_FILL_RULE_GAPS_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule the gaps fill for ${enabledCount} rules`
     );
-    cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
+    cy.get(CONFIRM_FILL_RULE_GAPS_WARNING_BTN).click();
   }
   cy.get(MODAL_CONFIRMATION_BTN).click();
 };

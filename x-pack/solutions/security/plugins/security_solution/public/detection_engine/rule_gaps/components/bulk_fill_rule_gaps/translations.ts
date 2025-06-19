@@ -58,7 +58,7 @@ export const BULK_FILL_RULE_GAPS_INVALID_TIME_RANGE_ERROR = i18n.translate(
 export const BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR = i18n.translate(
   'xpack.securitySolution.manualRuleGapsFilling.futureTimeRangeError',
   {
-    defaultMessage: 'Manual rule gaps fill cannot be scheduled for the future',
+    defaultMessage: 'Rule gaps fill cannot be scheduled for the future',
   }
 );
 
@@ -66,7 +66,7 @@ export const BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookbac
   i18n.translate('xpack.securitySolution.manuelRulaRun.startDateIsOutOfRangeError', {
     values: { maxDaysLookback },
     defaultMessage:
-      'Manual rule gaps fill cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
+      'Rule gaps fill cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
   });
 
 export const BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS = i18n.translate(

@@ -207,7 +207,7 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
         </EuiConfirmModal>
       )}
       <EuiButton
-        data-test-subj="fill_rule_gaps_button"
+        data-test-subj="fill-rule-gaps-button"
         color="primary"
         onClick={onFillGapsClick}
         aria-label={i18n.GAPS_FILL_ALL_GAPS_BUTTON_LABEL}

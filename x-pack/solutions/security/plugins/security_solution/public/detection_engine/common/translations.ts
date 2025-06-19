@@ -276,7 +276,7 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
 export const BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastTitle',
   {
-    defaultMessage: 'Rules updates are in progress',
+    defaultMessage: 'Scheduling gaps fill',
   }
 );
 
@@ -285,7 +285,7 @@ export const BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION = (rulesCount: number
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastDescription',
     {
       values: { rulesCount },
-      defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} updating.',
+      defaultMessage: 'Scheduling gaps fill for {rulesCount, plural, =1 {# rule} other {# rules}}.',
     }
   );
 

@@ -85,15 +85,15 @@ const BulkFillRuleGapsModalComponent = ({
       confirmButtonDisabled={isInvalid}
       style={{ width: BULK_FILL_RULE_GAPS_MODAL_WIDTH }}
     >
-      <EuiForm data-test-subj="manual-rule-gaps-filling-modal-form" fullWidth>
+      <EuiForm data-test-subj="fill-rule-gaps-modal-modal-form" fullWidth>
         <EuiFormRow
-          data-test-subj="manual-rule-gaps-filling-time-range-form"
+          data-test-subj="fill-rule-gaps-modal-time-range-form"
           label={i18n.BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE}
           isInvalid={isInvalid}
           error={errorMessage}
         >
           <EuiDatePickerRange
-            data-test-subj="manual-rule-gaps-filling-time-range"
+            data-test-subj="fill-rule-gaps-modal-time-range"
             startDateControl={
               <EuiDatePicker
                 className="start-date-picker"

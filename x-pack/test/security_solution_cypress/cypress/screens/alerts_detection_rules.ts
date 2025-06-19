@@ -41,6 +41,9 @@ export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExce
 export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
+export const CONFIRM_FILL_RULE_GAPS_WARNING_BTN =
+  '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';

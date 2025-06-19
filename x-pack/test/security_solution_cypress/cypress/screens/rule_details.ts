@@ -203,5 +203,5 @@ export const RULE_GAPS_FILL_TOOLTIP = '[data-test-subj="rule-gaps-fill-gap-toolt
 export const RULE_GAPS_PROGRESS_BAR = '[data-test-subj="rule-gaps-progress-bar"]';
 export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
 export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
-
+export const RULE_FILL_ALL_GAPS_BUTTON = '[data-test-subj="fill-rule-gaps-button"]';
 export const MODIFIED_PREBUILT_RULE_BADGE = '[data-test-subj="modified-prebuilt-rule-badge"]';
