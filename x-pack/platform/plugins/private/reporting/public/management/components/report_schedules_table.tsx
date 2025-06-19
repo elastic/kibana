@@ -19,11 +19,17 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
+import {
+  RecurrenceFrequency,
+  RecurringSchedule,
+} from '@kbn/response-ops-recurring-schedule-form/types';
+import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
+import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { ListingPropsInternal } from '..';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
@@ -31,6 +37,8 @@ import { prettyPrintJobType } from '../../../common/job_utils';
 import { ReportScheduleIndicator } from './report_schedule_indicator';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
+import { ScheduledReportFlyout } from './scheduled_report_flyout';
+import { ScheduledReport } from '../../types';
 
 interface QueryParams {
   index: number;
@@ -39,7 +47,7 @@ interface QueryParams {
 
 export const ReportSchedulesTable = (props: ListingPropsInternal) => {
   const { http, toasts } = props;
-
+  const [selectedReport, setSelectedReport] = useState<ScheduledReportApiJSON | null>(null);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     index: 1,
     size: 10,
@@ -77,7 +85,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       }),
       width: '20%',
       render: (_title: string, item: ScheduledReportApiJSON) => (
-        <EuiLink data-test-subj={`reportTitle`} onClick={() => {}}>
+        <EuiLink data-test-subj={`reportTitle`} onClick={() => setSelectedReport(item)}>
           {_title}
         </EuiLink>
       ),
@@ -183,7 +191,9 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           'data-test-subj': (item) => `reportViewConfig-${item.id}`,
           type: 'icon',
           icon: 'calendar',
-          onClick: () => {},
+          onClick: (item) => {
+            setSelectedReport(item);
+          },
         },
         {
           name: i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
@@ -244,6 +254,70 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
     [setQueryParams]
   );
 
+  const isCustom = (rRule: Rrule) => {
+    const freq = rRule.freq;
+    // interval is greater than 1
+    if (rRule.interval && rRule.interval > 1) {
+      return true;
+    }
+    // frequency is daily and no weekdays are selected
+    if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
+      return true;
+    }
+    // frequency is weekly and there are multiple weekdays selected
+    if (freq && freq === Frequency.WEEKLY && rRule.byweekday && rRule.byweekday.length > 1) {
+      return true;
+    }
+    // frequency is monthly and by month day is selected
+    if (freq && freq === Frequency.MONTHLY && rRule.bymonthday) {
+      return true;
+    }
+    return false;
+  };
+
+  const transformedReport = (report: ScheduledReportApiJSON): ScheduledReport => {
+    const { title, schedule, notification } = report;
+    const rRule = schedule.rrule;
+
+    const isCustomFrequency = isCustom(rRule);
+    const frequency = rRule.freq as RecurrenceFrequency;
+
+    const recurringSchedule: RecurringSchedule = {
+      frequency: isCustomFrequency ? 'CUSTOM' : frequency,
+      interval: rRule.interval,
+      ends: RecurrenceEnd.NEVER,
+    };
+
+    if (isCustomFrequency) {
+      recurringSchedule.customFrequency = frequency;
+    }
+
+    if (frequency !== Frequency.MONTHLY && rRule.byweekday) {
+      recurringSchedule.byweekday = rRule.byweekday.reduce<Record<string, boolean>>((acc, day) => {
+        acc[day] = true;
+        return acc;
+      }, {});
+    }
+    if (frequency === Frequency.MONTHLY) {
+      if (rRule.byweekday) {
+        recurringSchedule.bymonth = 'weekday';
+      } else if (rRule.bymonthday) {
+        recurringSchedule.bymonth = 'day';
+      }
+    }
+
+    return {
+      title,
+      recurringSchedule,
+      reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
+      timezone: schedule.rrule.tzid,
+      startDate: '',
+      recurring: true,
+      sendByEmail: Boolean(notification?.email),
+      emailRecipients: [...(notification?.email?.to || [])],
+    };
+  };
+
   return (
     <Fragment>
       <EuiSpacer size={'l'} />
@@ -261,6 +335,21 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         onChange={tableOnChangeCallback}
         rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
       />
+      {selectedReport && (
+        <ScheduledReportFlyout
+          apiClient={props.apiClient}
+          onClose={() => {
+            setSelectedReport(null);
+          }}
+          scheduledReport={transformedReport(selectedReport)}
+          availableReportTypes={[
+            {
+              id: selectedReport.jobtype,
+              label: prettyPrintJobType(selectedReport.jobtype),
+            },
+          ]}
+        />
+      )}
     </Fragment>
   );
 };

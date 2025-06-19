@@ -229,7 +229,6 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
       rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 },
     },
     title: 'Scheduled report 2',
-    notification: {},
   },
   {
     created_at: '2025-06-12T12:41:45.136Z',
@@ -244,6 +243,5 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
       rrule: { freq: Frequency.MONTHLY, tzid: 'UTC', interval: 2 },
     },
     title: 'Scheduled report 3',
-    notification: {},
   },
 ];

@@ -220,7 +220,7 @@ export interface ScheduledReportApiJSON {
   jobtype: string;
   last_run: string | undefined;
   next_run: string | undefined;
-  notification: {
+  notification?: {
     email?: {
       to?: string[];
       cc?: string[];
