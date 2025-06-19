@@ -104,6 +104,11 @@ include::upgrade-notes.asciidoc[]
 The 8.18.3 release includes the following fixes.
 
 [float]
+[[known-issues-8.18.3]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-1508]
+
+[float]
 [[enhancement-v8.18.3]]
 === Enhancements
 
@@ -177,6 +182,8 @@ include::CHANGELOG.asciidoc[tag=known-issue-1508]
 .Upgrading Kibana from 8.x to 8.18.2 fails due to a configuration conflict in the kibana.yml file.
 [%collapsible]
 ====
+**This issue is resolved in version 8.18.3** ({kibana-pull}222263[#222263]).
+
 *Details* +
 Upgrading {kib} from version 8.x to 8.18.2 fails due to a configuration conflict if `xpack.alerting.cancelAlertsOnRuleTimeout` is set to `false` in the `kibana.yml` file. {kib} fails to boot and shows a fatal error message in the {kib} logs that's similar to the following:
 
