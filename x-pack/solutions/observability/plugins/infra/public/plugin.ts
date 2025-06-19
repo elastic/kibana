@@ -27,10 +27,6 @@ import {
   map,
   firstValueFrom,
 } from 'rxjs';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   INVENTORY_LOCATOR_ID,
@@ -359,7 +355,6 @@ const getLogsNavigationEntries = ({
   // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
-
 
   return entries;
 };
