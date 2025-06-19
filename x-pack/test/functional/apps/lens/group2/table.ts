@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.changePaletteTo('temperature');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
+      expect(styleObj['background-color']).to.be('rgb(246, 249, 252)');
     });
 
     it('should keep the coloring consistent when changing mode', async () => {
