@@ -68,7 +68,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
+    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
         return [];
@@ -106,16 +106,9 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         ...managedColumns
           .flatMap(([id, col]) => {
             const def = visibleOperationsMap[col.operationType];
-            // TOOD: it would be nice to have nicer column names here rather than `Part of <formula content>`
+            // TODO: it would be nice to have nicer column names here rather than `Part of <formula content>`
             return (
-              def?.getErrorMessage?.(
-                layer,
-                id,
-                indexPattern,
-                dateRange,
-                visibleOperationsMap,
-                targetBars
-              ) ?? []
+              def?.getErrorMessage?.(layer, id, indexPattern, dateRange, visibleOperationsMap) ?? []
             );
           })
           // dedup messages with the same content
