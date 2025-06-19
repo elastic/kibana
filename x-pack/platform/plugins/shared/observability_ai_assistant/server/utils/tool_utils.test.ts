@@ -115,11 +115,11 @@ describe('replaceLastUserMessage', () => {
     });
 
     it('returns all messages', () => {
-      expect(result).toHaveLength(3);
+      expect(result).toHaveLength(4);
     });
 
-    it('returns the original messages', () => {
-      expect(last(result)?.message.content).toBe('Non-updated message');
+    it('appends the new message instead of replacing the last message', () => {
+      expect(last(result)?.message.content).toBe('Updated message');
     });
   });
 });

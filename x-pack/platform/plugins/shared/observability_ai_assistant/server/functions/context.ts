@@ -130,7 +130,7 @@ export function registerContextFunction({
 
 export function removeContextToolRequest(messages: Message[]): Message[] {
   const lastMessage = last(messages);
-  if (lastMessage?.message.name === CONTEXT_FUNCTION_NAME) {
+  if (lastMessage?.message.function_call?.name === CONTEXT_FUNCTION_NAME) {
     return messages.slice(0, -1);
   }
 

@@ -29,7 +29,10 @@ describe('removeContextToolRequest', () => {
     beforeEach(() => {
       const contextMessage: Message = {
         '@timestamp': new Date().toISOString(),
-        message: { role: MessageRole.Assistant, name: CONTEXT_FUNCTION_NAME },
+        message: {
+          role: MessageRole.Assistant,
+          function_call: { name: CONTEXT_FUNCTION_NAME, trigger: MessageRole.Assistant },
+        },
       };
       result = removeContextToolRequest([...baseMessages, contextMessage]);
     });
