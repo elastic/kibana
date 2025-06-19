@@ -245,13 +245,18 @@ export class ReportingPublicPlugin
     }
 
     import('./management/integrations/scheduled_report_share_integration').then(
-      ({ createScheduledReportShareIntegration }) => {
-        shareSetup.registerShareIntegration<ExportShareDerivatives>(
-          createScheduledReportShareIntegration({
-            apiClient,
-            services: { ...core, ...setupDeps },
-          })
-        );
+      async ({
+        shouldRegisterScheduledReportShareIntegration,
+        createScheduledReportShareIntegration,
+      }) => {
+        if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
+          shareSetup.registerShareIntegration<ExportShareDerivatives>(
+            createScheduledReportShareIntegration({
+              apiClient,
+              services: { ...core, ...setupDeps },
+            })
+          );
+        }
       }
     );
 

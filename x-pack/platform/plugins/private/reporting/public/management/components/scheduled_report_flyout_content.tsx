@@ -27,6 +27,7 @@ import { REPORTING_MANAGEMENT_HOME } from '@kbn/reporting-common';
 import {
   FIELD_TYPES,
   Form,
+  FormSchema,
   getUseField,
   useForm,
   useFormData,
@@ -107,7 +108,11 @@ export const ScheduledReportFlyoutContent = ({
   const now = useMemo(() => moment().tz(defaultTimezone), [defaultTimezone]);
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
   const schema = useMemo(
-    () => getScheduledReportFormSchema(validateEmailAddresses, availableReportTypes),
+    () =>
+      getScheduledReportFormSchema(
+        validateEmailAddresses,
+        availableReportTypes
+      ) as FormSchema<FormData>,
     [availableReportTypes, validateEmailAddresses]
   );
   const recurring = true;

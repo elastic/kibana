@@ -11,14 +11,26 @@ import type { ExportShareDerivatives } from '@kbn/share-plugin/public/types';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
+import { queryClient } from '../../query_client';
 import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
 import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
 import type { ReportingPublicPluginSetupDependencies } from '../../plugin';
+import { getReportingHealth } from '../apis/get_reporting_health';
 
 export interface CreateScheduledReportProviderOptions {
   apiClient: ReportingAPIClient;
   services: ReportingPublicPluginSetupDependencies;
 }
+
+export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSetup) => {
+  const { isSufficientlySecure, hasPermanentEncryptionKey } = await queryClient.fetchQuery({
+    queryKey: getReportingHealthQueryKey(),
+    queryFn: () => getReportingHealth({ http }),
+  });
+  return isSufficientlySecure && hasPermanentEncryptionKey;
+};
 
 export const createScheduledReportShareIntegration = ({
   apiClient,
@@ -28,15 +40,7 @@ export const createScheduledReportShareIntegration = ({
     id: 'scheduledReports',
     groupId: 'exportDerivatives',
     shareType: 'integration',
-    config: ({
-      objectType,
-      objectId,
-      isDirty,
-      onClose,
-      shareableUrl,
-      shareableUrlForSavedObject,
-      ...shareOpts
-    }: ShareContext): ReturnType<ExportShareDerivatives['config']> => {
+    config: (shareOpts: ShareContext): ReturnType<ExportShareDerivatives['config']> => {
       const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
       return {
         label: ({ openFlyout }) => (
