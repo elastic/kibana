@@ -56,6 +56,7 @@ import { CanvasElementProvider } from './canvas_element';
 import { GrokDebuggerProvider } from './grok_debugger';
 // @ts-ignore not ts yet
 import { UserMenuProvider } from '@kbn/test-suites-xpack-platform/functional/services/user_menu';
+import { SampleDataServiceProvider } from '@kbn/test-suites-xpack-platform/functional/services/sample_data';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
@@ -121,6 +122,7 @@ export const services = {
   ml: MachineLearningProvider,
   transform: TransformProvider,
   reporting: ReportingFunctionalProvider,
+  sampleData: SampleDataServiceProvider,
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
   actions: ActionsServiceProvider,
