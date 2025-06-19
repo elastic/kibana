@@ -127,7 +127,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsLargeIndex',
         {
           defaultMessage:
-            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index.',
+            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to set it to read-only.',
         }
       ),
     },
@@ -137,7 +137,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsFollowerIndex',
         {
           defaultMessage:
-            'This index is a cross-cluster replication follower index, which should not be reindexed. You can mark it as read-only or terminate the replication and convert it to a standard index.',
+            'This index is a cross-cluster replication follower index, which should not be reindexed. You can set it to read-only or terminate the replication and convert it to a standard index.',
         }
       ),
     },
