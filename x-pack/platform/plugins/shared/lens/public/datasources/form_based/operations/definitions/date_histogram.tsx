@@ -189,7 +189,6 @@ export const dateHistogramOperation: OperationDefinition<
       operationType: 'date_histogram',
       sourceField: field.name,
       isBucketed: true,
-      scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
