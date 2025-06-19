@@ -12,6 +12,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
+import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
@@ -24,6 +25,7 @@ import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
   SUGGESTIONS_INTERNAL_ROUTE,
+  METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
@@ -76,14 +78,21 @@ export const getEndpointSuggestionsRequestHandler = (
 
     try {
       const config = await firstValueFrom(config$);
+      const { savedObjects, elasticsearch } = await context.core;
+      const securitySolutionContext = await context.securitySolution;
+      const spaceId = securitySolutionContext.getSpaceId();
+      const isSpaceAwarenessEnabled =
+        endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
+      let fullFilters = filters ? [...filters] : [];
+      let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
+        termsEnumSuggestions;
 
       if (request.params.suggestion_type === 'eventFilters') {
-        if (!endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+        if (!isSpaceAwarenessEnabled) {
           index = eventsIndexPattern;
         } else {
           logger.debug('Using space-aware index pattern');
 
-          const spaceId = (await context.securitySolution).getSpaceId();
           const integrationNamespaces = await endpointContext.service
             .getInternalFleetServices(spaceId)
             .getIntegrationNamespaces(['endpoint']);
@@ -112,6 +121,34 @@ export const getEndpointSuggestionsRequestHandler = (
             });
           }
         }
+      } else if (request.params.suggestion_type === 'endpoints') {
+        suggestionMethod = termsAggSuggestions;
+        index = METADATA_UNITED_INDEX;
+        let baseFilters: unknown[] = [
+          { exists: { field: 'united.endpoint.agent.id' } },
+          { exists: { field: 'united.agent.agent.id' } },
+        ];
+
+        if (isSpaceAwarenessEnabled) {
+          const fleetService = securitySolutionContext.getInternalFleetServices();
+          const agentPoliciesInSpace = await fleetService.agentPolicy.list(savedObjects.client, {
+            spaceId,
+          });
+          const agentPolicyIdsInSpace = agentPoliciesInSpace.items.map((policy) => policy.id);
+          baseFilters = [
+            ...baseFilters,
+            { terms: { 'united.agent.policy_id': agentPolicyIdsInSpace } },
+          ];
+        }
+
+        fullFilters = [
+          ...fullFilters,
+          {
+            bool: {
+              filter: baseFilters,
+            },
+          },
+        ];
       } else {
         return response.badRequest({
           body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
@@ -119,16 +156,15 @@ export const getEndpointSuggestionsRequestHandler = (
       }
 
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
-      const { savedObjects, elasticsearch } = await context.core;
 
-      const body = await termsEnumSuggestions(
+      const body = await suggestionMethod(
         config,
         savedObjects.client,
         elasticsearch.client.asInternalUser,
         index,
         fieldName,
         query,
-        filters,
+        fullFilters,
         fieldMeta,
         abortSignal
       );
