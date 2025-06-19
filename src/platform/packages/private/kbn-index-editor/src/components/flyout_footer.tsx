@@ -87,7 +87,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
                   <EuiLoadingSpinner size="m" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButtonEmpty onClick={onClose} disabled={true}>
+                  <EuiButtonEmpty disabled>
                     <FormattedMessage
                       id="indexEditor.flyout.footer.importingButton"
                       defaultMessage="Importing..."
