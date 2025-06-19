@@ -24,6 +24,12 @@ import { useGenericEntityCriticality } from './hooks/use_generic_entity_critical
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
+type CustomCriticalityError = Error & {
+  body?: {
+    message?: string;
+  };
+};
+
 export const HeaderDataCards = ({
   id,
   subType,
@@ -127,7 +133,7 @@ export const HeaderDataCards = ({
             iconType="error"
           >
             <p>
-              {assignAssetCriticality.error?.body?.message ||
+              {(assignAssetCriticality.error as CustomCriticalityError)?.body?.message ||
                 i18n.translate(
                   'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorText',
                   {
