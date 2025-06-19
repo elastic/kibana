@@ -16,6 +16,10 @@ export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
   renderAs: 'panelOpener',
   children: [
     {
+      id: SecurityPageName.entityAnalyticsOverview,
+      link: securityLink(SecurityPageName.entityAnalyticsOverview),
+    },
+    {
       id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
     },

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { Rule } from './rule';
+import React from 'react';
+import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 
-export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
-
-export interface BulkActionSkipResult {
-  id: Rule['id'];
-  name?: Rule['name'];
-  skip_reason: BulkEditSkipReason;
-}
+export const OverviewDashboard: React.FC = () => {
+  return <EntityAnalyticsPage />;
+};

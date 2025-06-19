@@ -27,5 +27,8 @@
     "@kbn/enterprise-search-plugin",
     "@kbn/test-suites-src",
     "@kbn/guided-onboarding",
+    "@kbn/search-playground",
+    "@kbn/tooling-log",
+    "@kbn/test-suites-xpack",
   ]
 }
