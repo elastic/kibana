@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -21,7 +21,6 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   DataStreamMigrationStatus,
-  DataStreamResolutionType,
   EnrichedDeprecationInfo,
 } from '../../../../../../../common/types';
 
@@ -31,22 +30,19 @@ import { DeprecationBadge, WarningLevels } from '../../../../shared';
 import {
   UIM_DATA_STREAM_REINDEX_START_CLICK,
   UIM_DATA_STREAM_REINDEX_STOP_CLICK,
-  UIM_DATA_STREAM_START_READONLY_CLICK,
-  UIM_DATA_STREAM_STOP_READONLY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
 import { containerMessages } from './messages';
-import type { FlyoutStep } from './steps/types';
-import { InitializingFlyoutStep } from './steps/initializing';
-import { ConfirmMigrationFlyoutStep } from './steps/confirm';
+import { ConfirmMigrationReindexFlyoutStep } from './steps/confirm';
 import { ChecklistFlyoutStep } from './steps/checklist';
 import { MigrationCompletedFlyoutStep } from './steps/completed';
+import { InitializingStep } from '../../../common/initializing_step';
+import { useMigrationStep } from '../use_migration_step';
 
 interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
-  selectedResolutionType: DataStreamResolutionType | undefined;
 }
 
 const DATE_FORMAT = 'dddd, MMMM Do YYYY, h:mm:ss a';
@@ -57,74 +53,22 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   loadDataStreamMetadata,
   migrationState,
   startReindex,
-  startReadonly,
-  initMigration,
-  cancelReadonly,
   closeFlyout,
   deprecation,
-  selectedResolutionType,
 }) => {
   const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
   const { index } = deprecation;
-  const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
-
-  const switchFlyoutStep = useCallback(() => {
-    switch (status) {
-      case DataStreamMigrationStatus.notStarted: {
-        setFlyoutStep('confirm');
-        return;
-      }
-      case DataStreamMigrationStatus.failed:
-      case DataStreamMigrationStatus.fetchFailed:
-      case DataStreamMigrationStatus.cancelled:
-      case DataStreamMigrationStatus.inProgress: {
-        setFlyoutStep('inProgress');
-        return;
-      }
-      case DataStreamMigrationStatus.completed: {
-        setTimeout(() => {
-          // wait for 1.5 more seconds fur the UI to visually get to 100%
-          setFlyoutStep('completed');
-        }, 1500);
-        return;
-      }
-    }
-  }, [status]);
-
-  useMemo(async () => {
-    if (flyoutStep === 'initializing') {
-      await loadDataStreamMetadata();
-      switchFlyoutStep();
-    }
-  }, [loadDataStreamMetadata, switchFlyoutStep, flyoutStep]);
-  useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
-
-  // Temporary useEffect. With the upcoming changes this won't be needed anymore because the migration actions will have different flows.
-  useEffect(() => {
-    if (selectedResolutionType && status === DataStreamMigrationStatus.notStarted) {
-      initMigration(selectedResolutionType);
-    }
-  }, [selectedResolutionType, initMigration, status]);
+  const [flyoutStep, setFlyoutStep] = useMigrationStep(status, loadDataStreamMetadata);
 
   const onStartReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_START_CLICK);
     await startReindex();
   }, [startReindex]);
 
-  const onStartReadonly = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_START_READONLY_CLICK);
-    await startReadonly();
-  }, [startReadonly]);
-
   const onStopReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_STOP_CLICK);
     await cancelReindex();
   }, [cancelReindex]);
-
-  const onStopReadonly = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_STOP_READONLY_CLICK);
-    await cancelReadonly();
-  }, [cancelReadonly]);
 
   const {
     docsSizeFormatted,
@@ -164,31 +108,26 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep errorMessage={errorMessage} />;
+        return <InitializingStep errorMessage={errorMessage} type="dataStream" mode="flyout" />;
       case 'confirm': {
         if (!meta || !resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+              type="dataStream"
+              mode="flyout"
             />
           );
         }
 
         return (
-          <ConfirmMigrationFlyoutStep
+          <ConfirmMigrationReindexFlyoutStep
             warnings={(migrationWarnings ?? []).filter(
               (warning) => warning.resolutionType === resolutionType
             )}
             meta={meta}
-            resolutionType={resolutionType}
             closeFlyout={closeFlyout}
-            startAction={() => {
-              if (resolutionType === 'readonly') {
-                onStartReadonly();
-              } else {
-                onStartReindex();
-              }
-            }}
+            startAction={() => onStartReindex()}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
           />
         );
@@ -196,8 +135,10 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       case 'inProgress': {
         if (!resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+              type="dataStream"
+              mode="flyout"
             />
           );
         }
@@ -208,15 +149,9 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
             executeAction={() => {
               setFlyoutStep('confirm');
             }}
-            resolutionType={resolutionType}
             migrationState={migrationState}
-            cancelAction={() => {
-              if (resolutionType === 'readonly') {
-                onStopReadonly();
-              } else {
-                onStopReindex();
-              }
-            }}
+            cancelAction={() => onStopReindex()}
+            dataStreamName={index}
           />
         );
       }
@@ -225,7 +160,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
           <MigrationCompletedFlyoutStep
             meta={meta}
             resolutionType={resolutionType}
-            closeFlyout={closeFlyout}
+            close={closeFlyout}
+            dataStreamName={index}
           />
         );
       }
@@ -238,10 +174,10 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     migrationWarnings,
     closeFlyout,
     lastIndexCreationDateFormatted,
-    onStartReadonly,
     onStartReindex,
     migrationState,
-    onStopReadonly,
+    index,
+    setFlyoutStep,
     onStopReindex,
   ]);
 
