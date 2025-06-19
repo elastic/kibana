@@ -35,7 +35,12 @@ async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactio
           size: 1,
           body: {
             timeout: '20s',
-            fields: ['*'],
+            fields: [
+              {
+                field: '*',
+                include_unmapped: true,
+              },
+            ],
             query: {
               match: {
                 [SPAN_ID_FIELD]: spanId,
