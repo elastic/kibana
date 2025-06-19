@@ -7,7 +7,6 @@
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open:ess": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
-    "cypress:asset_inventory:open:ess": "yarn cypress:open:ess --spec './cypress/e2e/asset_inventory/**/*.cy.ts'",
     "cypress:asset_inventory:run:ess": "yarn cypress:ess --spec './cypress/e2e/asset_inventory/**/*.cy.ts'",
     "cypress:entity_analytics:run:ess": "yarn cypress:ess --spec './cypress/e2e/entity_analytics/**/*.cy.ts'",
     "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
