@@ -127,7 +127,7 @@ const i18nTexts = {
         'xpack.upgradeAssistant.esDeprecations.indices.recommendedActionReadonlyReasonIsLargeIndex',
         {
           defaultMessage:
-            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to set it to a read-only index.',
+            'This index is larger than 1GB. Reindexing large indices can take a long time. If you no longer need to update documents in this index (or add new ones), you might want to set it to read-only.',
         }
       ),
     },

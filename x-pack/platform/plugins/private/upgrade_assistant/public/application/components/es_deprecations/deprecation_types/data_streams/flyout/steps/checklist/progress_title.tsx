@@ -58,7 +58,7 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
       return (
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.failed.reindexingDocumentsStepTitle"
-          defaultMessage="Failed to {resolutionType, select, reindex {reindex} readonly {setting to read-only} other {}}"
+          defaultMessage="Failed to {resolutionType, select, reindex {reindex} readonly {set to read-only} other {}}"
           values={{ resolutionType }}
         />
       );
