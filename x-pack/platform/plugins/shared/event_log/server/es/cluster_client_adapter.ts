@@ -11,13 +11,18 @@ import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery, nodeBuilder } from '@kbn/es-query';
 import type { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
 import type { IEvent, IValidatedEvent } from '../types';
 import { SAVED_OBJECT_REL_PRIMARY } from '../types';
-import type { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
+import type {
+  AggregateOptionsType,
+  FindOptionsType,
+  QueryOptionsType,
+  FindOptionsSearchAfterType,
+} from '../event_log_client';
 import type { ParsedIndexAlias } from './init';
 import type { EsNames } from './names';
 
@@ -95,6 +100,10 @@ export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObje
   findOptions: FindOptionsType;
 };
 
+export type FindEventsOptionsSearchAfter = QueryOptionsEventsBySavedObjectFilter & {
+  findOptions: FindOptionsSearchAfterType;
+};
+
 export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
   aggregateOptions: AggregateOptionsType;
 };
@@ -115,6 +124,13 @@ type GetQueryBodyWithAuthFilterOpts =
 type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
+
+export interface QueryEventsBySavedObjectSearchAfterResult {
+  data: IValidatedEventInternalDocInfo[];
+  total: number;
+  search_after?: estypes.SortResults;
+  pit_id?: string;
+}
 
 export class ClusterClientAdapter<
   TDoc extends {
@@ -469,7 +485,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -558,7 +574,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -609,7 +625,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
@@ -645,7 +661,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
@@ -676,6 +692,100 @@ export class ClusterClientAdapter<
       });
     } catch (err) {
       this.logger.error(`error refreshing index: ${err.message}`);
+      throw err;
+    }
+  }
+
+  public async queryEventsBySavedObjectsSearchAfter(
+    queryOptions: FindEventsOptionsSearchAfter
+  ): Promise<QueryEventsBySavedObjectSearchAfterResult> {
+    const { index, type, ids, findOptions } = queryOptions;
+    const {
+      per_page: perPage,
+      sort,
+      pit_id: existingPitId,
+      search_after: searchAfter,
+    } = findOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    let pitId = existingPitId;
+    // Create new PIT if not provided
+    if (!pitId) {
+      const pitResponse = await esClient.openPointInTime({
+        index,
+        keep_alive: '1m',
+      });
+      pitId = pitResponse.id;
+    }
+
+    const query = getQueryBody(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.findOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest = {
+      size: perPage,
+      query,
+      pit: {
+        id: pitId,
+        keep_alive: '1m',
+      },
+      ...(sort
+        ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
+        : { sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'desc' } }] }), // default sort
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    };
+
+    try {
+      const {
+        hits: { hits, total },
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
+        ...body,
+        track_total_hits: true,
+        seq_no_primary_term: true,
+      });
+
+      // Get the sort values from the last hit to use as search_after for next page
+      const lastHit = hits[hits.length - 1];
+      const nextSearchAfter = lastHit?.sort;
+
+      return {
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id!,
+          _index: hit._index,
+          _seq_no: hit._seq_no!,
+          _primary_term: hit._primary_term!,
+        })),
+        total: isNumber(total) ? total : total!.value,
+        search_after: nextSearchAfter,
+        pit_id: pitId,
+      };
+    } catch (err) {
+      try {
+        if (pitId) {
+          await esClient.closePointInTime({ id: pitId });
+        }
+      } catch (closeErr) {
+        this.logger.error(`Failed to close point in time: ${closeErr.message}`);
+      }
+
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
+  public async closePointInTime(pitId: string): Promise<void> {
+    if (!pitId) return;
+
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.closePointInTime({ id: pitId });
+    } catch (err) {
+      this.logger.error(`Failed to close point in time: ${err.message}`);
       throw err;
     }
   }
@@ -847,7 +957,10 @@ function getNamespaceQuery(namespace?: string) {
 
 export function getQueryBody(
   logger: Logger,
-  opts: FindEventsOptionsBySavedObjectFilter | AggregateEventsOptionsBySavedObjectFilter,
+  opts:
+    | FindEventsOptionsBySavedObjectFilter
+    | AggregateEventsOptionsBySavedObjectFilter
+    | FindEventsOptionsSearchAfter,
   queryOptions: QueryOptionsType
 ) {
   const { namespace, type, ids, legacyIds } = opts;
