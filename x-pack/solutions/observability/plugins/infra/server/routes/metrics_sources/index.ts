@@ -8,12 +8,23 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
-import { termsQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { castArray } from 'lodash';
-import { EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
+import {
+  AGENT_TYPE,
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  METRICBEAT,
+  METRICSET_MODULE,
+  OTEL_DATASET_VALUE,
+  OTEL_RECEIVER_DATASET_VALUE,
+  SYSTEM_INTEGRATION,
+} from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
+  getTimeRangeMetadataQueryParamsRT,
+  getTimeRangeMetadataResponseRT,
 } from '../../../common/metrics_sources/get_has_data';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
@@ -34,6 +45,22 @@ const defaultStatus = {
 };
 
 const MAX_MODULES = 5;
+
+const integrationNameBySource: Record<
+  string,
+  { integration: string; otel: string; agentType: string }
+> = {
+  host: {
+    integration: SYSTEM_INTEGRATION,
+    otel: OTEL_RECEIVER_DATASET_VALUE,
+    agentType: METRICBEAT,
+  },
+  kubernetes: {
+    integration: SYSTEM_INTEGRATION,
+    otel: OTEL_DATASET_VALUE,
+    agentType: METRICBEAT,
+  },
+};
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework, logger } = libs;
@@ -254,6 +281,87 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           });
         }
 
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
+    }
+  );
+
+  framework.registerRoute(
+    {
+      method: 'get',
+      path: '/api/metrics/source/time_range_metadata',
+      validate: {
+        query: createRouteValidationFunction(getTimeRangeMetadataQueryParamsRT),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { from, to, dataSource, kuery } = request.query;
+        const infraMetricsClient = await getInfraMetricsClient({
+          request,
+          libs,
+          context,
+        });
+
+        const source = integrationNameBySource[dataSource];
+
+        const [ecsResponse, otelResponse] = (
+          await infraMetricsClient.msearch([
+            {
+              track_total_hits: true,
+              terminate_after: 1,
+              size: 0,
+              query: {
+                bool: {
+                  should: [
+                    ...termsQuery(EVENT_MODULE, source.integration),
+                    ...termsQuery(METRICSET_MODULE, source.integration),
+                    ...termsQuery(AGENT_TYPE, source.agentType),
+                  ],
+                  minimum_should_match: 1,
+                  filter: [...rangeQuery(from, to), ...kqlQuery(kuery)],
+                },
+              },
+            },
+            {
+              track_total_hits: true,
+              terminate_after: 1,
+              size: 0,
+              query: {
+                bool: {
+                  filter: [
+                    ...termQuery(DATASTREAM_DATASET, source.otel),
+                    ...rangeQuery(from, to),
+                    ...kqlQuery(kuery),
+                  ],
+                },
+              },
+            },
+          ])
+        ).responses;
+
+        const hasEcsData = ecsResponse.hits.total.value !== 0;
+        const hasOtelData = otelResponse.hits.total.value !== 0;
+
+        return response.ok({
+          body: getTimeRangeMetadataResponseRT.encode({
+            schemas: (['ecs', 'semconv'] as const).filter((key) => {
+              return (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData);
+            }),
+          }),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
         return response.customError({
           statusCode: err.statusCode ?? 500,
           body: {

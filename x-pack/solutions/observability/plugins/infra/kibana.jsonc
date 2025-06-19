@@ -50,7 +50,8 @@
       "profilingDataAccess",
       "observabilityAIAssistant",
       "licenseManagement",
-      "serverless"
+      "serverless",
+      "observabilityNavigation"
     ],
     "requiredBundles": [
       "unifiedSearch",

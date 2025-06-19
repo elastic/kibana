@@ -109,6 +109,7 @@ export interface FleetStart {
   config: FleetConfigType;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
+
   hooks: {
     epm: {
       getBulkAssets: (

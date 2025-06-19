@@ -120,6 +120,7 @@
     "@kbn/presentation-containers",
     "@kbn/object-utils",
     "@kbn/coloring",
+    "@kbn/observability-navigation-plugin",
     "@kbn/core-saved-objects-server"
   ],
   "exclude": ["target/**/*"]

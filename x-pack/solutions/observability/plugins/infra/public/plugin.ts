@@ -35,6 +35,8 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
+import type { ObservabilityDynamicNavigation } from '@kbn/observability-navigation-plugin/public';
+import type { DynamicNavigationItem } from '@kbn/observability-navigation-plugin/common/types';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -124,8 +126,12 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
-      switchMap(([{ application }]) =>
-        combineLatest([of(application), getLogsExplorerAccessible$(application)])
+      switchMap(([{ application }, { observabilityNavigation }]) =>
+        combineLatest([
+          of(application),
+          getLogsExplorerAccessible$(application),
+          observabilityNavigation?.sideNav$ || of(undefined),
+        ])
       )
     );
 
@@ -134,7 +140,7 @@ export class Plugin implements InfraClientPluginClass {
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndAccessibleFlag$.pipe(
-        map(([application, isLogsExplorerAccessible]) => {
+        map(([application, isLogsExplorerAccessible, navigation]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -175,6 +181,18 @@ export class Plugin implements InfraClientPluginClass {
                         app: 'metrics',
                         path: '/hosts',
                       },
+                      ...(navigation?.map((nav) => ({
+                        label: getDynamicNavigationTitle(nav.title),
+                        app: 'metrics',
+                        path: getDynamicNavigationPath(nav),
+                        deepLinks: nav.subItems?.map((subNav) => {
+                          return {
+                            id: subNav.id,
+                            title: getDynamicNavigationTitle(subNav.title),
+                            path: getDynamicNavigationPath(subNav, nav.title),
+                          };
+                        }),
+                      })) ?? []),
                     ],
                   },
                 ]
@@ -228,8 +246,10 @@ export class Plugin implements InfraClientPluginClass {
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
       metricsExplorerEnabled,
+      navigation,
     }: {
       metricsExplorerEnabled: boolean;
+      navigation?: ObservabilityDynamicNavigation[];
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
@@ -259,6 +279,20 @@ export class Plugin implements InfraClientPluginClass {
               },
             ]
           : []),
+        ...(navigation ?? []).map((nav) => {
+          return {
+            id: `dynamic_${nav.id}`,
+            title: getDynamicNavigationTitle(nav.title),
+            path: getDynamicNavigationPath(nav),
+            deepLinks: (nav.subItems ?? []).map((subNav) => {
+              return {
+                id: `dynamic_${subNav.id}`,
+                title: getDynamicNavigationTitle(subNav.title),
+                path: getDynamicNavigationPath(subNav, nav.id),
+              };
+            }),
+          };
+        }),
         {
           id: 'settings',
           title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
@@ -309,13 +343,16 @@ export class Plugin implements InfraClientPluginClass {
         );
       },
     });
-    startDep$AndAccessibleFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
-      this.appUpdater$.next(() => ({
-        deepLinks: getInfraDeepLinks({
-          metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-        }),
-      }));
-    });
+    startDep$AndAccessibleFlag$.subscribe(
+      ([_applicationStart, _isLogsExplorerAccessible, navigation]) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: getInfraDeepLinks({
+            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+            navigation,
+          }),
+        }));
+      }
+    );
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
@@ -378,6 +415,31 @@ const getLogsExplorerAccessible$ = (application: CoreStart['application']) => {
     ),
     distinctUntilChanged()
   );
+};
+
+const getDynamicNavigationTitle = (title: string) => {
+  return title
+    .replace(/-/g, ' ')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase());
+};
+const getDynamicNavigationPath = (
+  nav: DynamicNavigationItem | ObservabilityDynamicNavigation,
+  parentTitle?: string
+) => {
+  const url = new URL(
+    `/entity/${
+      parentTitle ? `${getDynamicNavigationTitle(parentTitle)}/` : ''
+    }${getDynamicNavigationTitle(nav.title)}`,
+    window.location.origin
+  );
+  if (nav.dashboardId) {
+    url.searchParams.set('dashboardId', nav.dashboardId);
+  }
+  if (nav.entityType) {
+    url.searchParams.set('entityType', nav.entityType);
+  }
+  return `${url.pathname}${url.search}`;
 };
 
 const createNavEntryFromRoute = ({ path, title }: LogsRoute): NavigationEntry => ({
