@@ -352,6 +352,50 @@ describe('ProductFeaturesConfigMerger', () => {
     });
   });
 
+  it('should call baseFeatureConfigModifier() for all product features', () => {
+    const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
+      {
+        subFeatureIds: ['subFeature3', 'subFeature1'],
+        baseFeatureConfigModifier: jest
+          .fn()
+          .mockImplementation((baseConfig: KibanaFeatureConfig): KibanaFeatureConfig => {
+            return { ...baseConfig, name: 'NEW NAME' };
+          }),
+      },
+      {
+        baseFeatureConfigModifier: jest
+          .fn()
+          .mockImplementation((baseConfig: KibanaFeatureConfig): KibanaFeatureConfig => {
+            return { ...baseConfig, order: 666 };
+          }),
+      },
+    ];
+
+    const merged = merger.mergeProductFeatureConfigs(
+      baseKibanaFeature,
+      [],
+      enabledProductFeaturesConfigs
+    );
+
+    expect(enabledProductFeaturesConfigs[0].baseFeatureConfigModifier).toBeCalledWith(
+      baseKibanaFeature
+    );
+    expect(enabledProductFeaturesConfigs[1].baseFeatureConfigModifier).toBeCalledWith({
+      ...baseKibanaFeature,
+      name: 'NEW NAME',
+    });
+
+    expect(merged).toEqual({
+      ...baseKibanaFeature,
+
+      // modifications:
+      name: 'NEW NAME',
+      order: 666,
+
+      subFeatures: [subFeature1, subFeature3],
+    });
+  });
+
   it('should merge everything at the same time', () => {
     const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
       {
