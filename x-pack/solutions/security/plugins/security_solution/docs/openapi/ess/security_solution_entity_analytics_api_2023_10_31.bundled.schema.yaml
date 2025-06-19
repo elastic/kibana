@@ -1642,11 +1642,11 @@ components:
         user:
           type: object
           properties:
+            is_privileged:
+              description: Indicates if the user is privileged.
+              type: boolean
             name:
               type: string
-            is_privileged:
-              type: boolean
-              description: Indicates if the user is privileged.
     MonitoringEngineDescriptor:
       type: object
       properties:
