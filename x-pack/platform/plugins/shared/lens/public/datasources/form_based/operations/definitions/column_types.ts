@@ -10,10 +10,12 @@ import type { Operation } from '../../../../types';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { OperationType } from '.';
 
-export interface BaseIndexPatternColumn extends Operation {
+type OperationWithoutLabel = Omit<Operation, 'label'>;
+
+export interface BaseIndexPatternColumn extends OperationWithoutLabel {
   // Private
   operationType: string;
-  customLabel?: boolean;
+  label?: string;
   timeScale?: TimeScaleUnit;
   filter?: Query;
   reducedTimeRange?: string;

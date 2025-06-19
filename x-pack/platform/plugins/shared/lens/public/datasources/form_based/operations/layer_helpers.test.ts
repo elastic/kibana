@@ -146,7 +146,6 @@ describe('state_helpers', () => {
         references: ['formulaX2'],
       };
       const math = {
-        customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
         operationType: 'math' as const,
@@ -161,7 +160,6 @@ describe('state_helpers', () => {
         },
       };
       const sum = {
-        customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
@@ -170,7 +168,6 @@ describe('state_helpers', () => {
         sourceField: 'bytes',
       };
       const movingAvg = {
-        customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
@@ -952,7 +949,6 @@ describe('state_helpers', () => {
                 label: 'My formula',
                 dataType: 'number',
                 isBucketed: false,
-                customLabel: true,
 
                 // Private
                 operationType: 'formula',
@@ -1090,7 +1086,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'My custom label',
-                  customLabel: true,
                   dataType: 'date',
                   isBucketed: true,
 
@@ -1112,7 +1107,6 @@ describe('state_helpers', () => {
         ).toEqual(
           expect.objectContaining({
             label: 'My custom label',
-            customLabel: true,
           })
         );
       });
@@ -1126,7 +1120,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'My custom label',
-                  customLabel: true,
                   dataType: 'date',
                   isBucketed: true,
 
@@ -1161,7 +1154,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'My custom label',
-                  customLabel: true,
                   dataType: 'date',
                   isBucketed: true,
 
@@ -1183,7 +1175,6 @@ describe('state_helpers', () => {
         ).toEqual(
           expect.objectContaining({
             label: 'My custom label',
-            customLabel: true,
           })
         );
       });
@@ -1228,7 +1219,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'MY CUSTOM LABEL',
-                  customLabel: true,
                   dataType: 'string',
                   isBucketed: true,
                   operationType: 'terms',
@@ -1286,7 +1276,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'MY CUSTOM LABEL',
-                  customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
@@ -1315,7 +1304,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'MY CUSTOM LABEL',
-                  customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
@@ -1344,7 +1332,6 @@ describe('state_helpers', () => {
               columns: {
                 col1: {
                   label: 'average(bytes)',
-                  customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
@@ -1467,7 +1454,6 @@ describe('state_helpers', () => {
     it('should execute adjustments for other columns when creating a reference', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
-        customLabel: true,
         dataType: 'string',
         isBucketed: true,
 
@@ -1571,7 +1557,6 @@ describe('state_helpers', () => {
       it('should wrap around the previous operation as a reference if possible (case new1)', () => {
         const expectedColumn = {
           label: 'Count',
-          customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
           sourceField: '___records___',
@@ -1612,7 +1597,6 @@ describe('state_helpers', () => {
           columns: {
             col1: {
               label: 'Count',
-              customLabel: true,
               dataType: 'number' as const,
               isBucketed: false,
               sourceField: 'bytes',
@@ -1644,7 +1628,6 @@ describe('state_helpers', () => {
       it('should remove filter from the wrapped column if it gets wrapped (case new1)', () => {
         const expectedColumn = {
           label: 'Count',
-          customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
           sourceField: '___records___',
@@ -1890,7 +1873,6 @@ describe('state_helpers', () => {
           columns: {
             ref1: {
               label: 'Count',
-              customLabel: true,
               dataType: 'number' as const,
               isBucketed: false,
 
@@ -1942,7 +1924,6 @@ describe('state_helpers', () => {
           columns: {
             ref1: {
               label: 'Count',
-              customLabel: true,
               dataType: 'number' as const,
               isBucketed: false,
 
@@ -1981,7 +1962,6 @@ describe('state_helpers', () => {
 
       it('should transition from managedReference to fullReference by deleting the managedReference', () => {
         const math = {
-          customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
           label: 'math',
@@ -2003,7 +1983,6 @@ describe('state_helpers', () => {
               references: ['formulaX3'],
             } as FormulaIndexPatternColumn,
             formulaX0: {
-              customLabel: true,
               dataType: 'number' as const,
               isBucketed: false,
               label: 'formulaX0',
@@ -2018,7 +1997,6 @@ describe('state_helpers', () => {
               params: { tinymathAst: 'formulaX0' },
             } as MathIndexPatternColumn,
             formulaX2: {
-              customLabel: true,
               dataType: 'number' as const,
               isBucketed: false,
               label: 'formulaX2',
@@ -2113,7 +2091,6 @@ describe('state_helpers', () => {
         ];
         const expectedCol = {
           label: 'Custom label',
-          customLabel: true,
           dataType: 'string' as const,
           isBucketed: true,
 
@@ -2260,7 +2237,6 @@ describe('state_helpers', () => {
               filter: { language: 'kuery', query: 'bytes > 4000' },
               timeShift: '3h',
               label: 'Cardinality',
-              customLabel: true,
             },
             ref: {
               label: 'Reference',
@@ -2303,7 +2279,6 @@ describe('state_helpers', () => {
             columns: {
               col1: {
                 label: 'MY CUSTOM LABEL',
-                customLabel: true,
                 dataType: 'number',
                 operationType: 'formula',
                 isBucketed: false,
@@ -2358,7 +2333,6 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             label: 'Asdf',
-            customLabel: true,
             dataType: 'number' as const,
             isBucketed: false,
 
@@ -2787,7 +2761,6 @@ describe('state_helpers', () => {
               isBucketed: false,
               scale: 'ratio',
               sourceField: '___records___',
-              customLabel: true,
             },
             date: {
               label: 'timestamp',
@@ -2819,7 +2792,6 @@ describe('state_helpers', () => {
               isBucketed: false,
               scale: 'ratio',
               sourceField: '___records___',
-              customLabel: true,
             },
             math: {
               label: 'math',
@@ -2840,7 +2812,6 @@ describe('state_helpers', () => {
                 },
               },
               references: ['countX0', 'count'],
-              customLabel: true,
             } as MathIndexPatternColumn,
           },
         })
@@ -3321,7 +3292,6 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             label: 'My Op',
-            customLabel: true,
             dataType: 'string',
             isBucketed: true,
 
@@ -3347,7 +3317,6 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             label: 'My Op',
-            customLabel: true,
             dataType: 'string',
             isBucketed: true,
 
@@ -3469,7 +3438,6 @@ describe('state_helpers', () => {
 
     it('should work for a formula chain', () => {
       const math = {
-        customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
         label: 'math',
@@ -3491,7 +3459,6 @@ describe('state_helpers', () => {
             references: ['formulaX3'],
           } as FormulaIndexPatternColumn,
           formulaX0: {
-            customLabel: true,
             dataType: 'number' as const,
             isBucketed: false,
             label: 'formulaX0',
@@ -3506,7 +3473,6 @@ describe('state_helpers', () => {
             params: { tinymathAst: 'formulaX0' },
           } as MathIndexPatternColumn,
           formulaX2: {
-            customLabel: true,
             dataType: 'number' as const,
             isBucketed: false,
             label: 'formulaX2',

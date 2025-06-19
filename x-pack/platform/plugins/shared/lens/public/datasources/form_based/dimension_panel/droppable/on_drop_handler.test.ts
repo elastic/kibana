@@ -997,7 +997,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: '',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     col6: {
                       dataType: 'number',
@@ -1005,7 +1004,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       label: '',
                       isBucketed: false,
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                   },
                 },
@@ -2053,7 +2051,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       isBucketed: false,
                       scale: 'ratio',
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     firstColumn: {
                       label: 'count()',
@@ -2078,7 +2075,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       isBucketed: false,
                       scale: 'ratio',
                       sourceField: '___records___',
-                      customLabel: true,
                     },
                     second: {
                       label: 'count()',
@@ -2143,7 +2139,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     scale: 'ratio',
                   },
                   newColumnX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,
@@ -2201,7 +2196,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     scale: 'ratio',
                   },
                   secondX0: {
-                    customLabel: true,
                     dataType: 'number',
                     filter: undefined,
                     isBucketed: false,

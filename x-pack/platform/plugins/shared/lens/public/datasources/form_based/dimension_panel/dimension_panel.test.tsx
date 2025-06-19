@@ -195,7 +195,6 @@ describe('FormBasedDimensionEditor', () => {
           columns: {
             col1: {
               label: 'Date histogram of timestamp',
-              customLabel: true,
               dataType: 'date',
               isBucketed: true,
 
@@ -660,7 +659,6 @@ describe('FormBasedDimensionEditor', () => {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
               label: 'New Label',
-              customLabel: true,
               // Other parts of this don't matter for this test
             }),
           },
@@ -706,7 +704,6 @@ describe('FormBasedDimensionEditor', () => {
           col1: {
             ...bytesColumn,
             label: 'Custom label',
-            customLabel: true,
           },
         })}
       />
@@ -726,7 +723,6 @@ describe('FormBasedDimensionEditor', () => {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
               label: 'Custom label',
-              customLabel: true,
             }),
           },
         },
@@ -742,7 +738,6 @@ describe('FormBasedDimensionEditor', () => {
           col1: {
             ...bytesColumn,
             label: 'Custom label',
-            customLabel: true,
           },
         })}
       />
@@ -763,8 +758,6 @@ describe('FormBasedDimensionEditor', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              label: 'Sum of bytes',
-              customLabel: false,
               // Other parts of this don't matter for this test
             }),
           },
@@ -1109,7 +1102,6 @@ describe('FormBasedDimensionEditor', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
-            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -1284,7 +1276,7 @@ describe('FormBasedDimensionEditor', () => {
     });
 
     it('should not adjust label if it is custom', () => {
-      const props = getProps({ timeScale: 's', customLabel: true, label: 'My label' });
+      const props = getProps({ timeScale: 's', label: 'My label' });
       wrapper = mountWithProviders(<FormBasedDimensionEditorComponent {...props} />);
       act(() => {
         wrapper
@@ -1338,7 +1330,6 @@ describe('FormBasedDimensionEditor', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
-            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -1478,7 +1469,6 @@ describe('FormBasedDimensionEditor', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
-            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {
@@ -1669,7 +1659,6 @@ describe('FormBasedDimensionEditor', () => {
             dataType: 'date',
             isBucketed: true,
             label: '',
-            customLabel: true,
             operationType: 'date_histogram',
             sourceField: 'ts',
             params: {

@@ -30,9 +30,8 @@ export function setTimeScaling(
   timeScale: TimeScaleUnit | undefined
 ) {
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
-    ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(
+  const label = currentColumn.label
+    ?? adjustTimeScaleLabelSuffix(
         currentColumn.label,
         currentColumn.timeScale,
         timeScale,

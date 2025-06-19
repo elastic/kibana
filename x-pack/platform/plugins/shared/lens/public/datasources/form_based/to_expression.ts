@@ -255,9 +255,8 @@ function getExpressionForLayer(
             {
               ...col,
               id: colId,
-              label: col.customLabel
-                ? col.label
-                : operationDefinitionMap[col.operationType].getDefaultLabel(
+              label: col.label
+                ?? operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,
                     layer.columns,
                     indexPattern
@@ -421,9 +420,8 @@ function getExpressionForLayer(
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [
-              col.customLabel
-                ? col.label
-                : operationDefinitionMap[col.operationType].getDefaultLabel(
+              col.label
+                ?? operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,
                     layer.columns,
                     indexPattern
