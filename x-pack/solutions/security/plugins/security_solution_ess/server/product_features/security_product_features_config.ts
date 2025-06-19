@@ -11,7 +11,7 @@ import type {
 } from '@kbn/security-solution-features';
 import {
   ProductFeatureSecurityKey,
-  type SecuritySubFeatureId,
+  SecuritySubFeatureId,
 } from '@kbn/security-solution-features/keys';
 import {
   securityDefaultProductFeaturesConfig,
@@ -21,6 +21,7 @@ import {
   ProductFeaturesPrivilegeId,
   ProductFeaturesPrivileges,
 } from '@kbn/security-solution-features/privileges';
+import { SECURITY_FEATURE_ID_V3 } from '@kbn/security-solution-features/constants';
 
 export const getSecurityProductFeaturesConfigurator =
   (enabledProductFeatureKeys: ProductFeatureKeys) => (): ProductFeaturesSecurityConfig => {
@@ -46,5 +47,78 @@ const securityProductFeaturesConfig: Record<
   ...securityDefaultProductFeaturesConfig,
   [ProductFeatureSecurityKey.endpointExceptions]: {
     privileges: ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions],
+  },
+
+  [ProductFeatureSecurityKey.endpointArtifactManagement]: {
+    subFeatureIds: [
+      SecuritySubFeatureId.hostIsolationExceptionsBasic,
+      SecuritySubFeatureId.trustedApplications,
+      SecuritySubFeatureId.blocklist,
+      SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
+    ],
+
+    baseFeatureConfigModifier: (baseFeatureConfig) => {
+      if (
+        !['siem', 'siemV2'].includes(baseFeatureConfig.id) ||
+        !baseFeatureConfig.privileges?.all.replacedBy ||
+        !('default' in baseFeatureConfig.privileges.all.replacedBy)
+      ) {
+        return baseFeatureConfig;
+      }
+
+      return {
+        ...baseFeatureConfig,
+        privileges: {
+          ...baseFeatureConfig.privileges,
+
+          all: {
+            ...baseFeatureConfig.privileges.all,
+
+            // overwriting siem:ALL role migration in siem and siemV2
+            replacedBy: {
+              default: baseFeatureConfig.privileges.all.replacedBy.default.map(
+                (privilegesPreference) => {
+                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V3) {
+                    return {
+                      feature: SECURITY_FEATURE_ID_V3,
+                      privileges: [
+                        // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
+                        'minimal_all',
+
+                        // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
+                        // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
+                        // This migration is for Endpoint Exceptions artifact in ESS offering, as it included in Security:ALL privilege.
+                        'global_artifact_management_all',
+                      ],
+                    };
+                  }
+
+                  return privilegesPreference;
+                }
+              ),
+
+              minimal: baseFeatureConfig.privileges.all.replacedBy.minimal.map(
+                (privilegesPreference) => {
+                  if (privilegesPreference.feature === SECURITY_FEATURE_ID_V3) {
+                    return {
+                      feature: SECURITY_FEATURE_ID_V3,
+                      privileges: [
+                        'minimal_all',
+
+                        // on ESS, Endpoint Exception ALL is included in siem:MINIMAL_ALL
+                        'global_artifact_management_all',
+                      ],
+                    };
+                  }
+
+                  return privilegesPreference;
+                }
+              ),
+            },
+          },
+        },
+      };
+    },
   },
 };

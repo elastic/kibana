@@ -93,31 +93,14 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          {
-            feature: SECURITY_FEATURE_ID_V3,
-            privileges: [
-              // Enabling sub-features toggle to show that Global Artifact Management is now provided to the user.
-              'minimal_all',
-
-              // Writing global (not per-policy) Artifacts is gated with Global Artifact Management:ALL starting with siemV3.
-              // Users who have been able to write ANY Artifact before are now granted with this privilege to keep existing behavior.
-              // This migration is for Endpoint Exceptions artifact in ESS offering, as it included in Security:ALL privilege.
-              'global_artifact_management_all',
-            ],
-          },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          {
-            feature: SECURITY_FEATURE_ID_V3,
-            privileges: [
-              'minimal_all',
-
-              // See above.
-              'global_artifact_management_all',
-            ],
-          },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_all'] },
         ],
       },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
