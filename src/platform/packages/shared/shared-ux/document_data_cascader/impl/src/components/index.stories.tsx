@@ -12,8 +12,8 @@ import { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import { DataCascade } from '..';
-import { getStatsGroupByColumnsFromQuery } from '../../lib/parse_esql';
+import { DataCascade } from '.';
+import { getESQLStatsGroupByColumnsFromQuery } from '../lib/parse_esql';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
@@ -33,7 +33,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
     });
 
     return (
-      <EuiFlexGroup direction="column" css={{ height: '70vh' }}>
+      <EuiFlexGroup direction="column" css={{ height: '100vmax' }}>
         <EuiFlexItem grow={false}>
           <EuiText>
             <div>
@@ -45,7 +45,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
         <EuiFlexItem>
           <DataCascade
             data={initData}
-            cascadeGroups={getStatsGroupByColumnsFromQuery(args.query)}
+            cascadeGroups={getESQLStatsGroupByColumnsFromQuery(args.query)}
             tableTitleSlot={({ rows }) => (
               <EuiText>
                 {i18n.translate('sharedUXPackages.data_cascade.toolbar.query_string', {
@@ -80,11 +80,11 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                 />
               );
             }}
-            onGroupByChange={(groupBy) => {
+            onCascadeGroupingChange={(groupBy) => {
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onGroupNodeExpanded={async ({ row }) => {
+            onCascadeNodeExpanded={async ({ row }) => {
               // Simulate a data fetch on row expansion
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -100,7 +100,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                 }, 3000);
               });
             }}
-            onGroupLeafExpanded={async ({ row, nodePathMap }) => {
+            onCascadeLeafExpanded={async ({ row, nodePathMap }) => {
               // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
               return new Promise((resolve) => {
                 setTimeout(() => {
