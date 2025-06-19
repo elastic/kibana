@@ -47,7 +47,11 @@ export class AccessControlService {
     const accessControl = object?.accessControl;
     const currentUser = this.userForOperation;
 
-    if (!typeSupportsAccessControl || !accessControl || !currentUser) {
+    if (!currentUser) {
+      return false;
+    }
+
+    if (!typeSupportsAccessControl || !accessControl) {
       return true;
     }
 
