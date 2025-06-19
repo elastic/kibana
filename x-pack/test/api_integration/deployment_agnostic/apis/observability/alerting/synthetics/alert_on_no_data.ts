@@ -98,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'When down 5 times from 1 location, alert on no data',
         });
         ruleId = rule.id;
-        expect(rule.params).to.eql(params);
+        expect(rule.params).to.eql(params, JSON.stringify(rule));
       });
 
       it('should trigger 1 pending alert per location', async function () {
