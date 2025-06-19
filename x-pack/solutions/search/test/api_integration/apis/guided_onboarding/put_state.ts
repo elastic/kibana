@@ -135,9 +135,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
     it('updates any existing active guides to inactive', async () => {
       // create an active guide
-      await createGuides(kibanaServer, [
-        testGuideStep1ActiveState,
-      ]);
+      await createGuides(kibanaServer, [testGuideStep1ActiveState]);
 
       // Create a new guide with isActive: true
       await supertest

@@ -14,7 +14,7 @@ const apiRoutes = {
   [databaseSearchGuideId]: '/connectors/select_connector',
 };
 
-export type EnterpriseSearchGuideIds =  typeof databaseSearchGuideId;
+export type EnterpriseSearchGuideIds = typeof databaseSearchGuideId;
 
 const getAddDataStep: (method?: EnterpriseSearchGuideIds) => StepConfig = (method) => {
   return {

@@ -40,17 +40,13 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
     });
 
     it('returns all created guides (active and inactive)', async () => {
-      await createGuides(kibanaServer, [
-        testGuideStep1ActiveState,
-      ]);
+      await createGuides(kibanaServer, [testGuideStep1ActiveState]);
       const response = await supertest
         .get(getGuidesPath)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       expect(response.body).not.to.be.empty();
-      expect(response.body.state).to.eql([
-        testGuideStep1ActiveState,
-      ]);
+      expect(response.body.state).to.eql([testGuideStep1ActiveState]);
     });
   });
 }
