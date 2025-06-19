@@ -25,6 +25,8 @@ export function emitPipelineObject(
   debug = false
 ) {
   const pipelineStr = yaml.dump(pipelineObject, { lineWidth: -1 });
-  console.debug('Pipeline YAML:', pipelineStr);
+  if (debug) {
+    console.warn('Pipeline Object:', pipelineObject);
+  }
   console.log(pipelineStr);
 }
