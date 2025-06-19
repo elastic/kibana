@@ -9,17 +9,17 @@ import { getListOfSloSummaryIndices } from './summary_indices';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS, SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 describe('getListOfSloSummaryIndices', () => {
-  it('should return default index if disabled', function () {
+  it('returns the local index if disabled', function () {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: [],
       staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const result = getListOfSloSummaryIndices(settings, []);
-    expect(result).toBe(SUMMARY_DESTINATION_INDEX_PATTERN);
+    expect(result).toStrictEqual([SUMMARY_DESTINATION_INDEX_PATTERN]);
   });
 
-  it('should return all remote clusters when enabled', function () {
+  it('returns a wildcard remote and the local index when useAllRemoteClusters is true', function () {
     const settings = {
       useAllRemoteClusters: true,
       selectedRemoteClusters: [],
@@ -30,24 +30,27 @@ describe('getListOfSloSummaryIndices', () => {
       { name: 'cluster2', isConnected: true },
     ];
     const result = getListOfSloSummaryIndices(settings, clustersByName);
-    expect(result).toBe(
-      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN},cluster2:${SUMMARY_DESTINATION_INDEX_PATTERN}`
-    );
+    expect(result).toStrictEqual([
+      SUMMARY_DESTINATION_INDEX_PATTERN,
+      `*:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+    ]);
   });
 
-  it('should return selected when enabled', function () {
+  it('returns only the connected clusters from the selected list when useAllRemoteClusters is false', function () {
     const settings = {
       useAllRemoteClusters: false,
-      selectedRemoteClusters: ['cluster1'],
+      selectedRemoteClusters: ['cluster1', 'cluster3'],
       staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const clustersByName = [
       { name: 'cluster1', isConnected: true },
       { name: 'cluster2', isConnected: true },
+      { name: 'cluster3', isConnected: false },
     ];
     const result = getListOfSloSummaryIndices(settings, clustersByName);
-    expect(result).toBe(
-      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`
-    );
+    expect(result).toStrictEqual([
+      SUMMARY_DESTINATION_INDEX_PATTERN,
+      `cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+    ]);
   });
 });
