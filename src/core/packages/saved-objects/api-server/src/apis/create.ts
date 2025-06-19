@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
-import type { SavedObjectReference } from '../..';
+import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
@@ -72,4 +72,6 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   managed?: boolean;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+
+  accessControl?: SavedObjectAccessControl;
 }
