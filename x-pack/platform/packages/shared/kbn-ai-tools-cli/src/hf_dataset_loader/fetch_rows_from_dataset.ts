@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { createGunzip } from 'zlib';
 import * as readline from 'node:readline';
 import { pickBy } from 'lodash';
+import { format } from 'util';
 import { HuggingFaceDatasetSpec } from './types';
 
 function toMb(bytes: number): string {
@@ -22,17 +23,19 @@ export async function fetchRowsFromDataset({
   dataset,
   logger,
   limit = 1000,
+  accessToken,
 }: {
   dataset: HuggingFaceDatasetSpec;
   logger: Logger;
   limit?: number;
+  accessToken: string;
 }): Promise<Array<Record<string, unknown>>> {
   const options = {
     repo: dataset.repo,
     path: dataset.file,
     revision: dataset.revision ?? 'main',
-    accessToken: process.env.HUGGING_FACE_ACCESS_TOKEN,
     hubUrl: `https://huggingface.co/datasets`,
+    accessToken,
   };
 
   const fileInfo = await fileDownloadInfo(options);
@@ -71,12 +74,19 @@ export async function fetchRowsFromDataset({
     }
   });
 
+  inputStream.on('end', () => {
+    logger.debug('Completed download');
+  });
+
+  inputStream.on('error', (err) => {
+    logger.debug(`Ended download prematurely: ${format(err)}`);
+  });
+
   const decompressed: Readable = isGzip ? inputStream.pipe(createGunzip()) : inputStream;
 
   const rl = readline.createInterface({ input: decompressed, crlfDelay: Infinity });
 
   const docs: Array<Record<string, unknown>> = [];
-
   for await (const line of rl) {
     if (!line) continue;
     const raw = JSON.parse(line);

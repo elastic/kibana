@@ -24,6 +24,14 @@ run(
   async ({ log, flags }) => {
     const signal = new AbortController().signal;
 
+    const accessToken = process.env.HUGGING_FACE_ACCESS_TOKEN;
+
+    if (!accessToken) {
+      throw new Error(
+        `process.env.HUGGING_FACE_ACCESS_TOKEN not set - this is required for API access`
+      );
+    }
+
     const kibanaClient = await createKibanaClient({
       log,
       signal,
@@ -59,6 +67,7 @@ run(
       clear: Boolean(clear),
       limit: !!limit ? Number(limit) : undefined,
       datasets: specs,
+      accessToken,
     });
   },
   {

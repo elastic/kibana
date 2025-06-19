@@ -35,12 +35,14 @@ const DATASET_EMBEDDINGS_CACHE = createCache({
 export async function loadHuggingFaceDatasets({
   esClient,
   logger,
+  accessToken,
   datasets = ALL_HUGGING_FACE_DATASETS,
   limit = 1000,
   clear = false,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  accessToken: string;
   datasets?: HuggingFaceDatasetSpec[];
   limit?: number;
   clear?: boolean;
@@ -72,6 +74,7 @@ export async function loadHuggingFaceDatasets({
         dataset,
         logger,
         limit,
+        accessToken,
       })
     );
 
