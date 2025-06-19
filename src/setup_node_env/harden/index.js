@@ -17,15 +17,7 @@ var patchFs = require('./fs');
 // registered hooks (as require is patched once for EACH hook)
 // This is why we are defining a single hook delegating for each of the patches we need to apply
 new ritm.Hook(
-  [
-    'child_process',
-    'lodash',
-    'lodash/template',
-    'lodash/fp',
-    'lodash/fp/template',
-    'fs',
-    'fs/promises',
-  ],
+  ['child_process', 'lodash', 'lodash/template', 'lodash/fp', 'lodash/fp/template', 'fs'],
   function (module, name) {
     switch (name) {
       case 'child_process': {
@@ -46,8 +38,7 @@ new ritm.Hook(
         lodashPatch.createFpProxy(module);
         return module;
       }
-      case 'fs':
-      case 'fs/promises': {
+      case 'fs': {
         return patchFs(module);
       }
     }
