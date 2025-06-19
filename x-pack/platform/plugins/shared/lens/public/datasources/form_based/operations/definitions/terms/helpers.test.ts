@@ -49,7 +49,6 @@ function getStringBasedOperationColumn(
   return {
     label: `Top value of ${field}`,
     dataType: 'string',
-    isBucketed: true,
     operationType: 'terms',
     params: {
       orderBy: { type: 'alphabetical' },
@@ -84,7 +83,6 @@ function getCountOperationColumn(
   return {
     label: 'Count',
     dataType: 'number',
-    isBucketed: false,
     sourceField: '___records___',
     operationType: 'count',
     ...params,
@@ -167,7 +165,6 @@ describe('getDisallowedTermsMessage()', () => {
             label: 'Moving average',
             dataType: 'number',
             operationType: 'moving_average',
-            isBucketed: false,
             references: ['col2'],
             timeShift: '3h',
             params: {
@@ -432,7 +429,6 @@ describe('isSortableByColumn()', () => {
             label: `Difference of Average of bytes`,
             dataType: 'number',
             operationType: 'differences',
-            isBucketed: false,
             references: ['colX'],
           },
         ]),
@@ -449,13 +445,11 @@ describe('isSortableByColumn()', () => {
             label: `Difference of Average of bytes`,
             dataType: 'number',
             operationType: 'differences',
-            isBucketed: false,
             references: ['col3'],
           },
           {
             label: 'Average',
             dataType: 'number',
-            isBucketed: false,
             sourceField: 'bytes',
             operationType: 'average',
           },
@@ -473,7 +467,6 @@ describe('isSortableByColumn()', () => {
             label: 'Static value: 100',
             dataType: 'number',
             operationType: 'static_value',
-            isBucketed: false,
             params: { value: 100 },
             references: [],
           } as ReferenceBasedIndexPatternColumn,
@@ -492,7 +485,6 @@ describe('isSortableByColumn()', () => {
             dataType: 'number',
             operationType: 'percentile_rank',
             sourceField: 'bytes',
-            isBucketed: false,
             params: { value: 1024.5 },
           } as PercentileRanksIndexPatternColumn,
         ]),
@@ -510,7 +502,6 @@ describe('isSortableByColumn()', () => {
             dataType: 'number',
             operationType: 'percentile_rank',
             sourceField: 'bytes',
-            isBucketed: false,
             params: { value: 1024 },
           } as PercentileRanksIndexPatternColumn,
         ]),
@@ -527,7 +518,6 @@ describe('isSortableByColumn()', () => {
             {
               label: 'Last Value',
               dataType: 'number',
-              isBucketed: false,
               sourceField: 'bytes',
               operationType: 'last_value',
               params: {
@@ -548,7 +538,6 @@ describe('isSortableByColumn()', () => {
             {
               label: 'Last Value',
               dataType: 'string',
-              isBucketed: false,
               sourceField: 'some_string_field',
               operationType: 'last_value',
               params: {
@@ -569,7 +558,6 @@ describe('isSortableByColumn()', () => {
             {
               label: 'Last Value',
               dataType: 'number',
-              isBucketed: false,
               sourceField: 'bytes',
               operationType: 'last_value',
               params: {
@@ -588,7 +576,6 @@ describe('isSortableByColumn()', () => {
             {
               label: 'Last Value',
               dataType: 'date',
-              isBucketed: false,
               sourceField: 'order_date',
               operationType: 'last_value',
               params: {
@@ -608,7 +595,6 @@ describe('isSortableByColumn()', () => {
       const column = {
         label: `Top value of test`,
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
@@ -624,7 +610,6 @@ describe('isSortableByColumn()', () => {
       const column = {
         label: `Top value of test`,
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
@@ -640,7 +625,6 @@ describe('isSortableByColumn()', () => {
       const column = {
         label: `Top value of test`,
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
@@ -657,7 +641,6 @@ describe('isSortableByColumn()', () => {
       const column = {
         label: `Top value of test`,
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },
@@ -674,7 +657,6 @@ describe('isSortableByColumn()', () => {
       const column = {
         label: `Top value of test`,
         dataType: 'string',
-        isBucketed: true,
         operationType: 'terms',
         params: {
           orderBy: { type: 'alphabetical' },

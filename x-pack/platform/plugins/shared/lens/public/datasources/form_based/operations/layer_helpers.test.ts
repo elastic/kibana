@@ -136,7 +136,7 @@ describe('state_helpers', () => {
     it('should recursively modify a formula and update the math ast', () => {
       const source = {
         dataType: 'number' as const,
-        isBucketed: false,
+        
         label: '5 + moving_average(sum(bytes), window=5)',
         operationType: 'formula' as const,
         params: {
@@ -148,7 +148,7 @@ describe('state_helpers', () => {
       const math = {
         customLabel: true,
         dataType: 'number' as const,
-        isBucketed: false,
+        
         operationType: 'math' as const,
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         references: ['formulaX1'],
@@ -163,7 +163,7 @@ describe('state_helpers', () => {
       const sum = {
         customLabel: true,
         dataType: 'number' as const,
-        isBucketed: false,
+        
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
         sourceField: 'bytes',
@@ -171,7 +171,7 @@ describe('state_helpers', () => {
       const movingAvg = {
         customLabel: true,
         dataType: 'number' as const,
-        isBucketed: false,
+        
         label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'moving_average' as const,
         params: { window: 5 },
@@ -273,7 +273,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'average',
@@ -300,7 +300,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'average',
@@ -328,7 +328,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            isBucketed: true,
+            
 
             // Private
             operationType: 'date_histogram',
@@ -359,7 +359,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            isBucketed: true,
+            
 
             // Private
             operationType: 'date_histogram',
@@ -371,7 +371,7 @@ describe('state_helpers', () => {
           col3: {
             label: 'Reference',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'cumulative_sum',
             references: ['col2'],
@@ -398,7 +398,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Date histogram of timestamp',
             dataType: 'date',
-            isBucketed: true,
+            
 
             // Private
             operationType: 'date_histogram',
@@ -410,7 +410,7 @@ describe('state_helpers', () => {
           col3: {
             label: 'Count of records',
             dataType: 'document',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'count',
@@ -437,7 +437,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Cumulative sum of count of records',
             dataType: 'number',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'cumulative_sum',
@@ -446,7 +446,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Count of records',
             dataType: 'document',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'count',
@@ -494,7 +494,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -524,7 +524,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -554,7 +554,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Top values of source',
                 dataType: 'string',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'terms',
@@ -598,7 +598,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Average of bytes',
                 dataType: 'number',
-                isBucketed: false,
+                
 
                 // Private
                 operationType: 'average',
@@ -607,7 +607,7 @@ describe('state_helpers', () => {
               col2: {
                 label: 'Count of records',
                 dataType: 'document',
-                isBucketed: false,
+                
 
                 // Private
                 operationType: 'count',
@@ -634,7 +634,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -743,7 +743,7 @@ describe('state_helpers', () => {
           columns: {
             col1: {
               dataType: 'number',
-              isBucketed: false,
+              
               label: '',
 
               operationType: 'testReference',
@@ -781,7 +781,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -841,7 +841,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Average of bytes',
             dataType: 'number',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'average',
@@ -850,7 +850,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Max of bytes',
             dataType: 'number',
-            isBucketed: false,
+            
 
             // Private
             operationType: 'max',
@@ -884,7 +884,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -914,7 +914,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -950,7 +950,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'My formula',
                 dataType: 'number',
-                isBucketed: false,
+                
                 customLabel: true,
 
                 // Private
@@ -983,7 +983,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -1017,7 +1017,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Date histogram of timestamp',
                 dataType: 'date',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'date_histogram',
@@ -1056,7 +1056,7 @@ describe('state_helpers', () => {
               col1: {
                 label: 'Filters',
                 dataType: 'string',
-                isBucketed: true,
+                
 
                 // Private
                 operationType: 'filters',
@@ -1091,7 +1091,7 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  isBucketed: true,
+                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1127,7 +1127,7 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  isBucketed: true,
+                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1162,7 +1162,7 @@ describe('state_helpers', () => {
                   label: 'My custom label',
                   customLabel: true,
                   dataType: 'date',
-                  isBucketed: true,
+                  
 
                   // Private
                   operationType: 'date_histogram',
@@ -1197,7 +1197,7 @@ describe('state_helpers', () => {
                 col1: {
                   label: 'Top values of source',
                   dataType: 'string',
-                  isBucketed: true,
+                  
                   operationType: 'terms',
                   sourceField: 'source',
                   params: {
@@ -1229,7 +1229,7 @@ describe('state_helpers', () => {
                   label: 'MY CUSTOM LABEL',
                   customLabel: true,
                   dataType: 'string',
-                  isBucketed: true,
+                  
                   operationType: 'terms',
                   sourceField: 'source',
                   params: {
@@ -1260,7 +1260,7 @@ describe('state_helpers', () => {
                 col1: {
                   label: 'Average of bytes',
                   dataType: 'number',
-                  isBucketed: false,
+                  
                   operationType: 'average',
                   sourceField: 'bytes',
                 },
@@ -1288,7 +1288,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  isBucketed: false,
+                  
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1316,7 +1316,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  isBucketed: false,
+                  
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1344,7 +1344,7 @@ describe('state_helpers', () => {
                   customLabel: true,
                   dataType: 'number',
                   operationType: 'formula',
-                  isBucketed: false,
+                  
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
                 } as FormulaIndexPatternColumn,
@@ -1371,7 +1371,7 @@ describe('state_helpers', () => {
                   label: 'MyDefaultLabel',
                   dataType: 'number',
                   operationType: 'counter_rate',
-                  isBucketed: false,
+                  
                   references: ['col2'],
                   timeScale: 's',
                   timeShift: '',
@@ -1404,7 +1404,7 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'terms',
@@ -1425,7 +1425,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Count',
               dataType: 'number',
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -1447,7 +1447,7 @@ describe('state_helpers', () => {
             col2: expect.objectContaining({
               label: 'Average of bytes',
               dataType: 'number',
-              isBucketed: false,
+              
               sourceField: 'bytes',
               operationType: 'average',
             }),
@@ -1463,7 +1463,7 @@ describe('state_helpers', () => {
         label: 'Top values of source',
         customLabel: true,
         dataType: 'string',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'terms',
@@ -1484,7 +1484,7 @@ describe('state_helpers', () => {
             willBeReference: {
               label: 'Count of records',
               dataType: 'number',
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -1509,13 +1509,13 @@ describe('state_helpers', () => {
             },
             id1: expect.objectContaining({
               dataType: 'number',
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count',
             }),
             willBeReference: expect.objectContaining({
               dataType: 'number',
-              isBucketed: false,
+              
               operationType: 'cumulative_sum',
             }),
           },
@@ -1529,7 +1529,7 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'terms',
@@ -1567,7 +1567,7 @@ describe('state_helpers', () => {
           label: 'Count',
           customLabel: true,
           dataType: 'number' as const,
-          isBucketed: false,
+          
           sourceField: '___records___',
           operationType: 'count' as const,
         };
@@ -1608,7 +1608,7 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: 'bytes',
               operationType: 'count' as const,
             },
@@ -1640,7 +1640,7 @@ describe('state_helpers', () => {
           label: 'Count',
           customLabel: true,
           dataType: 'number' as const,
-          isBucketed: false,
+          
           sourceField: '___records___',
           operationType: 'count' as const,
         };
@@ -1693,7 +1693,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Avg',
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: 'bytes',
               operationType: 'average' as const,
             },
@@ -1734,7 +1734,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Max',
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: 'bytes',
               operationType: 'max' as const,
             },
@@ -1775,7 +1775,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Count',
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count' as const,
             },
@@ -1815,7 +1815,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Count',
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count' as const,
             },
@@ -1857,7 +1857,7 @@ describe('state_helpers', () => {
           buildColumn: jest.fn((args) => {
             return {
               label: 'Test reference',
-              isBucketed: false,
+              
               dataType: 'number',
 
               operationType: 'secondTest',
@@ -1886,7 +1886,7 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              isBucketed: false,
+              
 
               operationType: 'count' as const,
               sourceField: '___records___',
@@ -1894,7 +1894,7 @@ describe('state_helpers', () => {
             invalid: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: [],
@@ -1902,7 +1902,7 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
@@ -1938,7 +1938,7 @@ describe('state_helpers', () => {
               label: 'Count',
               customLabel: true,
               dataType: 'number' as const,
-              isBucketed: false,
+              
 
               operationType: 'count' as const,
               sourceField: '___records___',
@@ -1946,7 +1946,7 @@ describe('state_helpers', () => {
             invalid: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: [],
@@ -1954,7 +1954,7 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
@@ -1977,7 +1977,7 @@ describe('state_helpers', () => {
         const math = {
           customLabel: true,
           dataType: 'number' as const,
-          isBucketed: false,
+          
           label: 'math',
           operationType: 'math' as const,
         };
@@ -1987,7 +1987,7 @@ describe('state_helpers', () => {
           columns: {
             source: {
               dataType: 'number' as const,
-              isBucketed: false,
+              
               label: 'Formula',
               operationType: 'formula' as const,
               params: {
@@ -1999,7 +1999,7 @@ describe('state_helpers', () => {
             formulaX0: {
               customLabel: true,
               dataType: 'number' as const,
-              isBucketed: false,
+              
               label: 'formulaX0',
               operationType: 'sum' as const,
               sourceField: 'bytes',
@@ -2013,7 +2013,7 @@ describe('state_helpers', () => {
             formulaX2: {
               customLabel: true,
               dataType: 'number' as const,
-              isBucketed: false,
+              
               label: 'formulaX2',
               operationType: 'moving_average' as const,
               params: { window: 5 },
@@ -2057,7 +2057,7 @@ describe('state_helpers', () => {
             fieldReused: {
               label: 'Date histogram',
               dataType: 'date' as const,
-              isBucketed: true,
+              
               operationType: 'date_histogram' as const,
               sourceField: 'timestamp',
               params: { interval: 'auto' },
@@ -2065,7 +2065,7 @@ describe('state_helpers', () => {
             output: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
               operationType: 'testReference',
               references: ['fieldReused'],
             },
@@ -2108,7 +2108,7 @@ describe('state_helpers', () => {
           label: 'Custom label',
           customLabel: true,
           dataType: 'string' as const,
-          isBucketed: true,
+          
 
           operationType: 'filters' as const,
           params: {
@@ -2126,7 +2126,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Test reference',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: ['col1'],
@@ -2155,7 +2155,7 @@ describe('state_helpers', () => {
         const expectedCol = {
           label: 'Count of records -3h',
           dataType: 'number' as const,
-          isBucketed: false,
+          
 
           operationType: 'count' as const,
           sourceField: '___records___',
@@ -2170,7 +2170,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Default label',
               dataType: 'number',
-              isBucketed: false,
+              
 
               operationType: 'testReference',
               references: ['col1'],
@@ -2201,7 +2201,7 @@ describe('state_helpers', () => {
       it('should promote only the field when going from reference to field-based operation (case a3)', () => {
         const expectedColumn = {
           dataType: 'number' as const,
-          isBucketed: false,
+          
           sourceField: 'bytes',
           operationType: 'average' as const,
           filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2216,7 +2216,7 @@ describe('state_helpers', () => {
             ref: {
               label: 'Reference',
               dataType: 'number',
-              isBucketed: false,
+              
               operationType: 'differences',
               references: ['metric'],
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2247,7 +2247,7 @@ describe('state_helpers', () => {
           columns: {
             metric: {
               dataType: 'number' as const,
-              isBucketed: false,
+              
               sourceField: 'source',
               operationType: 'unique_count' as const,
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2258,7 +2258,7 @@ describe('state_helpers', () => {
             ref: {
               label: 'Reference',
               dataType: 'number',
-              isBucketed: false,
+              
               operationType: 'differences',
               references: ['metric'],
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2299,7 +2299,7 @@ describe('state_helpers', () => {
                 customLabel: true,
                 dataType: 'number',
                 operationType: 'formula',
-                isBucketed: false,
+                
                 params: {
                   isFormulaBroken: false,
                   formula: 'average(bytes)',
@@ -2352,7 +2352,7 @@ describe('state_helpers', () => {
             label: 'Asdf',
             customLabel: true,
             dataType: 'number' as const,
-            isBucketed: false,
+            
 
             operationType: 'sum' as const,
             sourceField: 'bytes',
@@ -2360,7 +2360,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2418,7 +2418,7 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top 5 values of source',
         dataType: 'string',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'terms',
@@ -2440,7 +2440,7 @@ describe('state_helpers', () => {
               col2: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
+                
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -2473,7 +2473,7 @@ describe('state_helpers', () => {
       const termsColumn: TermsIndexPatternColumn = {
         label: 'Top values of source',
         dataType: 'string',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'terms',
@@ -2494,7 +2494,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Count',
               dataType: 'number',
-              isBucketed: false,
+              
               sourceField: '___records___',
               operationType: 'count',
             },
@@ -2518,7 +2518,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2526,7 +2526,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2546,7 +2546,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2554,7 +2554,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Changed label',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2566,7 +2566,7 @@ describe('state_helpers', () => {
         {
           label: 'Changed label',
           dataType: 'number',
-          isBucketed: false,
+          
           operationType: 'testReference',
           references: ['col1'],
         },
@@ -2574,7 +2574,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Default label',
             dataType: 'number',
-            isBucketed: false,
+            
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2591,7 +2591,7 @@ describe('state_helpers', () => {
           col1: {
             label: 'Count',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'count',
             sourceField: '___records___',
@@ -2599,7 +2599,7 @@ describe('state_helpers', () => {
           col2: {
             label: 'Test reference',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'testReference',
             references: ['col1'],
@@ -2607,7 +2607,7 @@ describe('state_helpers', () => {
           col3: {
             label: 'Test reference 2',
             dataType: 'number',
-            isBucketed: false,
+            
 
             operationType: 'testReference',
             references: ['col2'],
@@ -2625,7 +2625,7 @@ describe('state_helpers', () => {
       const currentColumn: DateHistogramIndexPatternColumn = {
         label: 'Value of timestamp',
         dataType: 'date',
-        isBucketed: true,
+        
 
         // Private
         operationType: 'date_histogram',
@@ -2658,7 +2658,7 @@ describe('state_helpers', () => {
       const currentColumn: AvgIndexPatternColumn = {
         label: 'Avg of bytes',
         dataType: 'number',
-        isBucketed: false,
+        
         // Private
         operationType: 'average',
         sourceField: 'bytes',
@@ -2704,7 +2704,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Value of timestamp',
               dataType: 'string',
-              isBucketed: false,
+              
 
               // Private
               operationType: 'date_histogram',
@@ -2727,7 +2727,7 @@ describe('state_helpers', () => {
             col1: {
               label: 'Top values of category',
               dataType: 'string',
-              isBucketed: true,
+              
 
               // Private
               operationType: 'terms',
@@ -2743,7 +2743,7 @@ describe('state_helpers', () => {
             col2: {
               label: 'Average of bytes',
               dataType: 'number',
-              isBucketed: false,
+              
 
               // Private
               operationType: 'average',
@@ -2752,7 +2752,7 @@ describe('state_helpers', () => {
             col3: {
               label: 'Date histogram of timestamp',
               dataType: 'date',
-              isBucketed: true,
+              
 
               // Private
               operationType: 'date_histogram',
@@ -2776,7 +2776,7 @@ describe('state_helpers', () => {
               label: 'count',
               dataType: 'number',
               operationType: 'count',
-              isBucketed: false,
+              
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2785,7 +2785,7 @@ describe('state_helpers', () => {
               dataType: 'date',
               operationType: 'date_histogram',
               sourceField: 'timestamp',
-              isBucketed: true,
+              
               params: {
                 interval: 'auto',
               },
@@ -2794,7 +2794,7 @@ describe('state_helpers', () => {
               label: 'Formula',
               dataType: 'number',
               operationType: 'formula',
-              isBucketed: false,
+              
               params: {
                 formula: 'count() + count()',
                 isFormulaBroken: false,
@@ -2805,7 +2805,7 @@ describe('state_helpers', () => {
               label: 'countX0',
               dataType: 'number',
               operationType: 'count',
-              isBucketed: false,
+              
               sourceField: '___records___',
               customLabel: true,
             },
@@ -2813,7 +2813,7 @@ describe('state_helpers', () => {
               label: 'math',
               dataType: 'number',
               operationType: 'math',
-              isBucketed: false,
+              
               params: {
                 tinymathAst: {
                   type: 'function',
@@ -2910,7 +2910,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            isBucketed: true,
+            
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -2922,7 +2922,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
+            
             label: '',
             operationType: 'average',
             sourceField: 'xxx',
@@ -2945,7 +2945,7 @@ describe('state_helpers', () => {
             label: '',
             dataType: 'number',
             operationType: 'moving_average',
-            isBucketed: false,
+            
             references: ['col2'],
             timeScale: undefined,
             filter: undefined,
@@ -2955,7 +2955,7 @@ describe('state_helpers', () => {
           } as MovingAverageIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
+            
             label: '',
             operationType: 'average',
             sourceField: 'xxx',
@@ -2974,7 +2974,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            isBucketed: true,
+            
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldC',
@@ -2984,7 +2984,7 @@ describe('state_helpers', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
+            
             label: '',
             operationType: 'average',
             sourceField: 'fieldB',
@@ -3013,7 +3013,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'date',
-            isBucketed: true,
+            
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldD',
@@ -3043,7 +3043,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            isBucketed: true,
+            
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -3055,7 +3055,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
+            
             label: '',
             operationType: 'average',
             sourceField: 'fieldD',
@@ -3076,7 +3076,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'string',
-            isBucketed: true,
+            
             label: '',
             operationType: 'terms',
             sourceField: 'fieldA',
@@ -3088,7 +3088,7 @@ describe('state_helpers', () => {
           } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
+            
             label: '',
             operationType: 'min',
             sourceField: 'fieldC',
@@ -3140,7 +3140,7 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              isBucketed: false,
+              
             },
           },
         },
@@ -3169,14 +3169,14 @@ describe('state_helpers', () => {
               references: ['col2'],
               label: '',
               dataType: 'number',
-              isBucketed: false,
+              
             },
             col2: {
               operationType: 'testReference',
               references: [],
               label: '',
               dataType: 'number',
-              isBucketed: false,
+              
             },
           },
         },
@@ -3210,7 +3210,7 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              isBucketed: false,
+              
             },
           },
           incompleteColumns: {
@@ -3243,7 +3243,7 @@ describe('state_helpers', () => {
               references: [],
               label: '',
               dataType: 'number',
-              isBucketed: false,
+              
             },
           },
         },
@@ -3262,7 +3262,7 @@ describe('state_helpers', () => {
               operationType: 'testReference',
               references: [],
               dataType: 'number',
-              isBucketed: false,
+              
               label: '',
             },
           },
@@ -3286,7 +3286,7 @@ describe('state_helpers', () => {
         columns: {
           col1: {
             dataType: 'date',
-            isBucketed: true,
+            
             label: '',
             operationType: 'date_histogram',
             sourceField: 'fieldD',
@@ -3309,7 +3309,7 @@ describe('state_helpers', () => {
             label: 'My Op',
             customLabel: true,
             dataType: 'string',
-            isBucketed: true,
+            
 
             // Private
             operationType: 'terms',
@@ -3335,7 +3335,7 @@ describe('state_helpers', () => {
             label: 'My Op',
             customLabel: true,
             dataType: 'string',
-            isBucketed: true,
+            
 
             // Private
             operationType: 'terms',
@@ -3365,14 +3365,14 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
         },
       };
@@ -3389,14 +3389,14 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
         },
       };
@@ -3415,14 +3415,14 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
         },
       };
@@ -3439,14 +3439,14 @@ describe('state_helpers', () => {
             references: ['col2'],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
           col2: {
             operationType: 'testReference',
             references: [],
             label: '',
             dataType: 'number',
-            isBucketed: false,
+            
           },
         },
       };
@@ -3457,7 +3457,7 @@ describe('state_helpers', () => {
       const math = {
         customLabel: true,
         dataType: 'number' as const,
-        isBucketed: false,
+        
         label: 'math',
         operationType: 'math' as const,
       };
@@ -3467,7 +3467,7 @@ describe('state_helpers', () => {
         columns: {
           source: {
             dataType: 'number' as const,
-            isBucketed: false,
+            
             label: 'Formula',
             operationType: 'formula' as const,
             params: {
@@ -3479,7 +3479,7 @@ describe('state_helpers', () => {
           formulaX0: {
             customLabel: true,
             dataType: 'number' as const,
-            isBucketed: false,
+            
             label: 'formulaX0',
             operationType: 'sum' as const,
             sourceField: 'bytes',
@@ -3493,7 +3493,7 @@ describe('state_helpers', () => {
           formulaX2: {
             customLabel: true,
             dataType: 'number' as const,
-            isBucketed: false,
+            
             label: 'formulaX2',
             operationType: 'moving_average' as const,
             params: { window: 5 },

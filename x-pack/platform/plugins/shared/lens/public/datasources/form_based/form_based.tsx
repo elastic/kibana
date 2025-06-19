@@ -69,6 +69,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  isBucketed,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -840,7 +841,7 @@ export function getFormBasedDatasource({
           return (
             Boolean(indexPatterns[layer.indexPatternId]?.timeFieldName) ||
             layer.columnOrder
-              .filter((colId) => layer.columns[colId].isBucketed)
+              .filter((colId) => isBucketed(layer.columns[colId]))
               .some((colId) => {
                 const column = layer.columns[colId];
                 return (
@@ -896,7 +897,7 @@ export function getFormBasedDatasource({
           const fields = hasField(col) ? getCurrentFieldsForOperation(col) : undefined;
           return {
             id: colId,
-            role: col.isBucketed ? ('split' as const) : ('metric' as const),
+            role: isBucketed(col) ? ('split' as const) : ('metric' as const),
             operation: {
               ...columnToOperation(col, undefined, dataView),
               type: col.operationType,

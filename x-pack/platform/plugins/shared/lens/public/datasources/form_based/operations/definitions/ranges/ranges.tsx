@@ -82,6 +82,7 @@ export const rangeOperation: OperationDefinition<
   }),
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
+  isBucketed: true,
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer, columnId, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
@@ -109,7 +110,6 @@ export const rangeOperation: OperationDefinition<
       dataType: type === MODES.Histogram ? 'number' : 'string', // string for Range
       operationType: 'range',
       sourceField: field.name,
-      isBucketed: true,
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,

@@ -156,7 +156,6 @@ const expectedIndexPatterns = {
 const bytesColumn: GenericIndexPatternColumn = {
   label: 'Sum of bytes',
   dataType: 'number',
-  isBucketed: false,
 
   // Private
   operationType: 'sum',
@@ -197,7 +196,6 @@ describe('FormBasedDimensionEditor', () => {
               label: 'Date histogram of timestamp',
               customLabel: true,
               dataType: 'date',
-              isBucketed: true,
 
               // Private
               operationType: 'date_histogram',
@@ -310,7 +308,6 @@ describe('FormBasedDimensionEditor', () => {
         col1: {
           label: 'Filters',
           dataType: 'string',
-          isBucketed: false,
 
           // Private
           operationType: 'filters',
@@ -419,7 +416,6 @@ describe('FormBasedDimensionEditor', () => {
           col1: {
             label: 'Unique count of source',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'unique_count',
             sourceField: 'source,',
           },
@@ -454,7 +450,6 @@ describe('FormBasedDimensionEditor', () => {
           date: {
             label: 'Date',
             dataType: 'date',
-            isBucketed: true,
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
@@ -462,7 +457,6 @@ describe('FormBasedDimensionEditor', () => {
           col1: {
             label: 'Counter rate',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'counter_rate',
             references: ['ref'],
           },
@@ -491,7 +485,6 @@ describe('FormBasedDimensionEditor', () => {
           date: {
             label: 'Date',
             dataType: 'date',
-            isBucketed: true,
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
@@ -499,14 +492,12 @@ describe('FormBasedDimensionEditor', () => {
           col1: {
             label: 'Cumulative sum',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'cumulative_sum',
             references: ['ref'],
           },
           ref: {
             label: 'Count',
             dataType: 'number',
-            isBucketed: false,
             operationType: 'count',
             sourceField: '___records___',
           },
@@ -873,7 +864,6 @@ describe('FormBasedDimensionEditor', () => {
             col1: {
               label: 'Filter',
               dataType: 'string',
-              isBucketed: true,
               // Private
               operationType: 'filters',
               params: { filters: [] },
@@ -982,7 +972,6 @@ describe('FormBasedDimensionEditor', () => {
         col2: {
           label: 'Counter rate',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'counter_rate',
           references: ['ref'],
         },
@@ -1040,7 +1029,6 @@ describe('FormBasedDimensionEditor', () => {
           state={getStateWithColumns({
             col2: {
               dataType: 'number',
-              isBucketed: false,
               label: '',
               operationType: 'count',
               sourceField: '___records___',
@@ -1107,7 +1095,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           datecolumn: {
             dataType: 'date',
-            isBucketed: true,
             label: '',
             customLabel: true,
             operationType: 'date_histogram',
@@ -1118,7 +1105,6 @@ describe('FormBasedDimensionEditor', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1319,7 +1305,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1336,7 +1321,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           datecolumn: {
             dataType: 'date',
-            isBucketed: true,
             label: '',
             customLabel: true,
             operationType: 'date_histogram',
@@ -1347,7 +1331,6 @@ describe('FormBasedDimensionEditor', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1476,7 +1459,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           datecolumn: {
             dataType: 'date',
-            isBucketed: true,
             label: '',
             customLabel: true,
             operationType: 'date_histogram',
@@ -1487,7 +1469,6 @@ describe('FormBasedDimensionEditor', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1504,7 +1485,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1667,7 +1647,6 @@ describe('FormBasedDimensionEditor', () => {
         state: getStateWithColumns({
           datecolumn: {
             dataType: 'date',
-            isBucketed: true,
             label: '',
             customLabel: true,
             operationType: 'date_histogram',
@@ -1678,7 +1657,6 @@ describe('FormBasedDimensionEditor', () => {
           } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
             sourceField: '___records___',
@@ -1986,7 +1964,6 @@ describe('FormBasedDimensionEditor', () => {
         state={getStateWithColumns({
           col2: {
             dataType: 'number',
-            isBucketed: false,
             label: '',
             operationType: 'count',
             sourceField: '___records___',
@@ -2127,7 +2104,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Average of memory',
         dataType: 'number',
-        isBucketed: false,
         // Private
         operationType: 'average',
         sourceField: 'memory',
@@ -2169,7 +2145,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Average of memory',
         dataType: 'number',
-        isBucketed: false,
         // Private
         operationType: 'average',
         sourceField: 'memory',
@@ -2209,7 +2184,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Average of memory',
         dataType: 'number',
-        isBucketed: false,
         // Private
         operationType: 'average',
         sourceField: 'memory',
@@ -2269,7 +2243,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Differences of (incomplete)',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'differences',
         references: ['col2'],
         params: {},
@@ -2296,7 +2269,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Invalid differences',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'differences',
         references: ['ref1'],
       },
@@ -2320,7 +2292,6 @@ describe('FormBasedDimensionEditor', () => {
         col1: {
           label: 'Avg',
           dataType: 'number',
-          isBucketed: false,
           operationType: 'average',
           sourceField: 'bytes',
         },
@@ -2372,7 +2343,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Average of memory',
         dataType: 'number',
-        isBucketed: false,
         // Private
         operationType: 'average',
         sourceField: 'memory',
@@ -2402,7 +2372,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Formula',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'formula',
         references: ['ref1'],
         params: {},
@@ -2423,7 +2392,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Formula',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'formula',
         references: ['ref1'],
         params: {},
@@ -2442,7 +2410,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Formula',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'formula',
         references: ['ref1'],
         params: {},
@@ -2498,7 +2465,6 @@ describe('FormBasedDimensionEditor', () => {
       col1: {
         label: 'Formula',
         dataType: 'number',
-        isBucketed: false,
         operationType: 'formula',
         references: ['ref1'],
         params: {},

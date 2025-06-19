@@ -45,6 +45,7 @@ import type { FormBasedPrivateState, FormBasedLayer } from './types';
 import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
+import { isBucketed } from './utils';
 
 export type IndexPatternSuggestion = DatasourceSuggestion<FormBasedPrivateState>;
 
@@ -93,7 +94,7 @@ function buildSuggestion({
 
   const columnOrder = layers[layerId].columnOrder;
   const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
-  const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
+  const isMultiRow = Object.values(columnMap).some((column) => isBucketed(column));
 
   return {
     state: {
@@ -659,7 +660,7 @@ export function getDatasourceSuggestionsFromCurrentState(
         const [buckets, metrics, references] = getExistingColumnGroups(layer);
         const timeDimension = layer.columnOrder.find(
           (columnId) =>
-            layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
+            isBucketed(layer.columns[columnId]) && layer.columns[columnId].dataType === 'date'
         );
         const timeField =
           indexPattern?.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
@@ -867,7 +868,7 @@ function createSimplifiedTableSuggestions(state: FormBasedPrivateState, layerId:
 
   const [availableBucketedColumns, availableMetricColumns] = partition(
     layer.columnOrder,
-    (colId) => layer.columns[colId].isBucketed
+    (colId) => isBucketed(layer.columns[colId])
   );
   const topLevelMetricColumns = availableMetricColumns.filter(
     (columnId) => !isReferenced(layer, columnId)
