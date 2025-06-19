@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RelatedIntegration, RuleResponse } from '../../../../../common/api/detection_engine';
 import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/rules/utils';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -92,6 +93,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const { data: prebuiltRules = {}, isLoading: isPrebuiltRulesLoading } =
       useGetMigrationPrebuiltRules(migrationId);
 
+    const filters = useMemo<RuleMigrationFilters>(
+      () => ({ searchTerm, ...convertFilterOptions(filterOptions) }),
+      [searchTerm, filterOptions]
+    );
+
     const {
       data: { migrationRules, total } = { migrationRules: [], total: 0 },
       isLoading: isDataLoading,
@@ -101,10 +107,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       perPage: pageSize,
       sortField,
       sortDirection,
-      filters: {
-        searchTerm,
-        ...convertFilterOptions(filterOptions),
-      },
+      filters,
     });
 
     const [selectedMigrationRules, setSelectedMigrationRules] = useState<RuleMigrationRule[]>([]);
