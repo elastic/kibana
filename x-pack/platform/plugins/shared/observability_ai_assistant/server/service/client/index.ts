@@ -508,7 +508,11 @@ export class ObservabilityAIAssistantClient {
                 .chatComplete({
                   ...options,
                   stream: true,
-                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+                  messages: convertMessagesForInference(
+                    redactedMessages,
+                    this.dependencies.logger,
+                    tools
+                  ),
                 })
                 // unredact complete assistant response event
                 .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
@@ -532,7 +536,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
-        messages: convertMessagesForInference(messages, this.dependencies.logger),
+        messages: convertMessagesForInference(messages, this.dependencies.logger, tools),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }

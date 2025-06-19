@@ -28,23 +28,27 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
 
 export function convertMessagesForInference(
   messages: Message[],
-  logger: Pick<Logger, 'error'>
+  logger: Pick<Logger, 'error'>,
+  tools: Record<string, { description: string; schema: any }> | undefined
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
-  const toolCalls: InferenceMessage[] = [];
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
-      toolCalls.push({
+      const functionCall = message.message.function_call;
+      const isToolAvailable = !!(functionCall?.name && tools?.[functionCall.name]);
+      inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
-        content: message.message.content ?? null,
-        ...(message.message.function_call?.name
+        content:
+          message.message.content ??
+          '' + (!isToolAvailable ? ` the tool ${functionCall?.name} is not available` : ''),
+        ...(functionCall?.name
           ? {
               toolCalls: [
                 {
                   function: {
-                    name: message.message.function_call.name,
-                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
+                    name: functionCall.name,
+                    arguments: safeJsonParse(functionCall?.arguments, logger),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },
@@ -59,7 +63,7 @@ export function convertMessagesForInference(
     const isUserMessageWithToolCall = isUserMessage && !!message.message.name;
 
     if (isUserMessageWithToolCall) {
-      const toolCallRequest = toolCalls.findLast(
+      const toolCallRequest = inferenceMessages.findLast(
         (msg) =>
           msg.role === InferenceMessageRole.Assistant &&
           msg.toolCalls?.[0]?.function.name === message.message.name
@@ -70,12 +74,10 @@ export function convertMessagesForInference(
       }
 
       inferenceMessages.push({
-        role: InferenceMessageRole.User,
-        content: `The ${
-          toolCallRequest.toolCalls![0].function.name
-        } tool was previously invoked. Below is the response returned by the tool:\n\n ${
-          message.message.content
-        }`,
+        name: message.message.name!,
+        role: InferenceMessageRole.Tool,
+        response: JSON.parse(message.message.content ?? '{}'),
+        toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 
       return;
