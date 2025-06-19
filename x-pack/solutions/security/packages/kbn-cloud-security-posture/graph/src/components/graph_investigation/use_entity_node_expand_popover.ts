@@ -117,13 +117,13 @@ export const useEntityNodeExpandPopover = (
           label:
             actionsOnEntityAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsOnEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
                   {
                     defaultMessage: 'Show actions done to this entity',
                   }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsOnEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
                   {
                     defaultMessage: 'Hide actions done to this entity',
                   }
