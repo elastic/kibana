@@ -130,7 +130,6 @@ export const HeaderDataCards = ({
               { assignAssetCriticality.error?.body?.message || i18n.translate('xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorText', {
                 defaultMessage: 'Something went wrong during validation. Please try again.',
               })}
-              />
             </p>
           </EuiCallOut>
           <EuiSpacer />
