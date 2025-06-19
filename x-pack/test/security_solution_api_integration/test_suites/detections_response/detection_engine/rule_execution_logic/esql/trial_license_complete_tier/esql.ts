@@ -2247,10 +2247,12 @@ export default ({ getService }: FtrProviderContext) => {
           from: 'now-100000h',
         };
 
-        const { logs } = await previewRule({
+        const { logs, previewId } = await previewRule({
           supertest,
           rule,
         });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
 
         expect(logs).toEqual(
           expect.arrayContaining([
@@ -2261,6 +2263,8 @@ export default ({ getService }: FtrProviderContext) => {
             }),
           ])
         );
+
+        expect(previewAlerts).toHaveLength(0);
       });
     });
 
