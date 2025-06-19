@@ -21,7 +21,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
-import type { Owner } from '../../../../common/constants/types';
+import type { ServerlessProjectType } from '../../../../common/constants/types';
 import * as i18n from './translations';
 import type { CasesActionParams } from './types';
 import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
@@ -48,7 +48,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   } = useKibana().services;
 
   const serverlessProjectType = cloud?.isServerlessEnabled
-    ? (cloud.serverless.projectType as Owner)
+    ? (cloud.serverless.projectType as ServerlessProjectType)
     : undefined;
 
   const owner = getOwnerFromRuleConsumerProducer({
