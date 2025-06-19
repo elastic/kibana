@@ -5,36 +5,25 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiForm } from '@elastic/eui';
 import * as i18n from './translations';
 
 export interface MigrationNameInputProps {
   migrationName: string;
   setMigrationName: (migrationName: string) => void;
-  subStep: number;
-  defaultMigrationName: string;
 }
 
 export const MigrationNameInput = React.memo<MigrationNameInputProps>(
-  ({ migrationName, setMigrationName, subStep, defaultMigrationName }) => {
-    const [name, setName] = useState<string>(defaultMigrationName);
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }, []);
+  ({ migrationName, setMigrationName }) => {
+    const [name, setName] = useState<string>(migrationName);
 
     const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       setName(e.target.value);
     }, []);
 
     const handleNameSave = useCallback(() => {
-      if (name.length > 0) {
-        setMigrationName(name);
-      }
+      setMigrationName(name);
     }, [name, setMigrationName]);
 
     const isInvalid = name.length === 0;
@@ -63,8 +52,8 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="stretch">
         <EuiFlexItem grow={true}>
-          <EuiForm isInvalid={isInvalid} error={errors}>
-            <EuiFormRow isInvalid={isInvalid} fullWidth>
+          <EuiForm>
+            <EuiFormRow isInvalid={isInvalid} error={errors} fullWidth>
               <EuiFieldText
                 placeholder={i18n.MIGRATION_NAME_INPUT_DESCRIPTION}
                 value={name}
@@ -73,7 +62,7 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
                 onBlur={onBlur}
                 onKeyDown={onEnter}
                 fullWidth
-                inputRef={inputRef}
+                autoFocus
               />
             </EuiFormRow>
           </EuiForm>

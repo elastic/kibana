@@ -17,11 +17,6 @@ export const MIGRATION_NAME_INPUT_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Name your migration' }
 );
 
-export const MIGRATION_NAME_INPUT_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.migrationName.button',
-  { defaultMessage: 'Next' }
-);
-
 export const MIGRATION_NAME_INPUT_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.migrationName.error',
   { defaultMessage: 'Migration name is required' }

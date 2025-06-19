@@ -88,7 +88,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
 
     // Upload macros step
     const onMacrosCreatedStep = useCallback<OnResourcesCreated>(() => {
-      setSubStep(END);
+      setSubStep(3);
     }, []);
     const uploadStep = useMacrosFileUploadStep({
       status: getStatus(2, subStep),
@@ -106,7 +106,7 @@ export const MacrosDataInputSubSteps = React.memo<MacrosDataInputSubStepsProps>(
       [onMissingResourcesFetched]
     );
     const resourcesStep = useCheckResourcesStep({
-      status: getStatus(4, subStep),
+      status: getStatus(3, subStep),
       migrationStats,
       onMissingResourcesFetched: onMissingResourcesFetchedStep,
     });

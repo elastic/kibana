@@ -64,7 +64,7 @@ paths:
   /internal/siem_migrations/rules:
     put:
       summary: Creates a new rule migration
-      operationId: "CreateRuleMigration"
+      operationId: 'CreateRuleMigration'
       x-codegen-enabled: true
       x-internal: true
       description: Creates a new rule migration and returns the corresponding migration_id
@@ -91,14 +91,10 @@ paths:
                 type: object
                 required:
                   - migration_id
-                  - name
                 properties:
-                    migration_id:
-                      description: The migration id created.
-                      $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-                    name:
-                      description: The rule migration name
-                      $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                  migration_id:
+                    description: The migration id created.
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
 
   ## Specific rule migration APIs
   /internal/siem_migrations/rules/{migration_id}:

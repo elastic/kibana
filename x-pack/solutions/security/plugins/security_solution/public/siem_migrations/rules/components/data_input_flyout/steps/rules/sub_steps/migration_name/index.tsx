@@ -14,35 +14,32 @@ import { useGetCurrentUserProfile } from '../../../../../../../../common/compone
 
 export interface MigrationNameStepProps {
   status: EuiStepStatus;
-  migrationName: string;
   setMigrationName: (migrationName: string) => void;
-  subStep: number;
+  migrationName?: string;
 }
 export const useMigrationNameStep = ({
   status,
-  migrationName,
   setMigrationName,
-  subStep,
+  migrationName: storedMigrationName,
 }: MigrationNameStepProps): EuiStepProps => {
   const { data: currentUserProfile } = useGetCurrentUserProfile();
-  const currentUserName = useMemo(() => {
-    return currentUserProfile?.user.username;
-  }, [currentUserProfile?.user.username]);
-  const defaultMigrationName = useMemo(() => {
-    return `${currentUserName}'s migration ${moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a')}`;
-  }, [currentUserName]);
+
+  const migrationName = useMemo(() => {
+    if (storedMigrationName) {
+      return storedMigrationName;
+    }
+    if (currentUserProfile?.user.username) {
+      const datetime = moment(Date.now()).format('llll'); // localized date and time (e.g., "Wed, 01 Jan 2025 12:00 PM")
+      return `${currentUserProfile.user.username}'s migration on ${datetime}`;
+    }
+    return undefined; // profile loading
+  }, [storedMigrationName, currentUserProfile?.user.username]);
 
   return {
     title: i18n.MIGRATION_NAME_INPUT_TITLE,
     status,
-    children:
-      currentUserName != null ? (
-        <MigrationNameInput
-          defaultMigrationName={defaultMigrationName}
-          migrationName={migrationName}
-          setMigrationName={setMigrationName}
-          subStep={subStep}
-        />
-      ) : null,
+    children: migrationName ? (
+      <MigrationNameInput migrationName={migrationName} setMigrationName={setMigrationName} />
+    ) : null,
   };
 };

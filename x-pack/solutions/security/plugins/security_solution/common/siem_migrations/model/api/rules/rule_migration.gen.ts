@@ -52,10 +52,6 @@ export const CreateRuleMigrationResponse = z.object({
    * The migration id created.
    */
   migration_id: NonEmptyString,
-  /**
-   * The rule migration name
-   */
-  name: NonEmptyString,
 });
 
 export type CreateRuleMigrationRulesRequestParams = z.infer<
