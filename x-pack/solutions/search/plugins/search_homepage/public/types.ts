@@ -42,6 +42,7 @@ export interface SearchHomepagePluginStart {
 }
 
 export interface SearchHomepageAppPluginStartDependencies {
+  application: CoreStart['application'];
   console?: ConsolePluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;

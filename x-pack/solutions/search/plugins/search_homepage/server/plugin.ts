@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
+import { defineRoutes } from './routes';
 
 export interface RouteDependencies {
   http: CoreSetup<SearchHomepagePluginSetup>['http'];
@@ -32,6 +33,10 @@ export class SearchHomepagePlugin
 
   public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
     this.logger.debug('searchHomepage: Setup');
+    const router = core.http.createRouter();
+
+    // Register server side APIs
+    defineRoutes(router, this.logger);
     return {};
   }
 

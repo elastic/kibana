@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../plugin';
+import type { IRouter } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { errorHandler } from '../utils/error_handler';
 
-export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDependencies) => {
+export const registerApiKeyRoutes = (router: IRouter, logger: Logger) => {
   router.get(
     {
       path: '/internal/search_homepage/api_keys',
