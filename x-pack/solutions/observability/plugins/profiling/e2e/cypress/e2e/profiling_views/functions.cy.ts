@@ -11,6 +11,7 @@ import {
 } from '@kbn/observability-plugin/common';
 
 // Failing: See https://github.com/elastic/kibana/issues/224515
+// Failing: See https://github.com/elastic/kibana/issues/224516
 describe.skip('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
