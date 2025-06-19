@@ -7,17 +7,16 @@
 
 import { useEffect, useState } from 'react';
 
-import type { IndicesStatusResponse } from '../../common/types';
+import type { IndicesStatusResponse } from '../../common';
 
 import { useKibana } from './use_kibana';
-import type { UserStartPrivilegesResponse } from '../../common/types';
+import type { UserStartPrivilegesResponse } from '../../common';
 
 export const useSearchHomePageRedirect = (
   indicesStatus?: IndicesStatusResponse,
   userPrivileges?: UserStartPrivilegesResponse
 ) => {
   const { application, http } = useKibana().services;
-  const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   return useEffect(() => {
     if (hasDoneRedirect) {
@@ -29,7 +28,6 @@ export const useSearchHomePageRedirect = (
     }
 
     if (userPrivileges?.privileges?.canManageIndex === false) {
-      application.navigateToApp('discover');
       setHasDoneRedirect(true);
       return;
     }
@@ -38,24 +36,11 @@ export const useSearchHomePageRedirect = (
       return;
     }
     if (indicesStatus.indexNames.length === 0) {
-      setLastStatus(indicesStatus);
-      return;
-    }
-    if (lastStatus === undefined && indicesStatus.indexNames.length > 0) {
-      application.navigateToApp('elasticsearchIndexManagement');
+      application.navigateToApp('elasticsearchStart');
       setHasDoneRedirect(true);
       return;
     }
 
-    application.navigateToApp('elasticsearchIndexManagement');
     setHasDoneRedirect(true);
-  }, [
-    application,
-    http,
-    indicesStatus,
-    lastStatus,
-    setHasDoneRedirect,
-    hasDoneRedirect,
-    userPrivileges,
-  ]);
+  }, [application, http, indicesStatus, setHasDoneRedirect, hasDoneRedirect, userPrivileges]);
 };
