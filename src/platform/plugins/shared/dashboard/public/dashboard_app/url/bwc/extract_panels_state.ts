@@ -62,7 +62,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       panel.panelConfig.savedObjectId = panel.id;
       delete panel.id;
     }
-    
+
     // <8.19 'title' stored as siblings to panelConfig
     if (panel.title && panel.panelConfig && typeof panel.panelConfig === 'object') {
       panel.panelConfig.title = panel.title;
