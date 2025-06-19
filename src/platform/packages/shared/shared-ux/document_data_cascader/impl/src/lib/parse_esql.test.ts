@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getStatsGroupByColumnsFromQuery } from './parse_esql';
+import { getESQLStatsGroupByColumnsFromQuery } from './parse_esql';
 
 describe('esql query utils', () => {
   describe('getStatsGroupByColumnsFromQuery', () => {
@@ -22,7 +22,7 @@ describe('esql query utils', () => {
     | DROP count_4xx, count_rest, total_records
     | LIMIT 123`;
 
-      const result = getStatsGroupByColumnsFromQuery(queryString);
+      const result = getESQLStatsGroupByColumnsFromQuery(queryString);
       expect(result).toEqual(['type', 'url.keyword']);
     });
   });
