@@ -460,6 +460,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   panelIndex: '8db7a201-95c8-4211-89b5-1288e18c8f2e',
                   type: 'lens',
                   panelConfig: {
+                    title: '',
                     enhancements: { dynamicActions: { events: [] } },
                     syncColors: false,
                     syncCursor: true,
