@@ -38,6 +38,7 @@ export const ValueInput = ({ value = '', placeholder = '', onBlur, onEnter }: Va
     <EuiFieldText
       name="test123"
       autoFocus
+      compressed
       placeholder={placeholder}
       value={editValue}
       aria-label="Use aria labels when no actual label is in use"

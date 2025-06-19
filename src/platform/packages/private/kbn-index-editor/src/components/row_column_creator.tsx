@@ -6,9 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { useState } from 'react';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  useEuiTheme,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ValueInput } from './value_input';
@@ -16,6 +24,8 @@ import { ValueInput } from './value_input';
 type ToggleMode = 'add-row' | 'add-column';
 
 export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) => {
+  const { euiTheme } = useEuiTheme();
+
   const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
 
   const toggleAddRow = () => {
@@ -26,15 +36,23 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     setActiveMode('add-column');
   };
 
-  const inputs = columns.map((column) => {
-    return <ValueInput placeholder={column.name} />;
-  });
+  const cancelAction = () => {
+    setActiveMode(null);
+  };
+
+  const inputs = useMemo(
+    () =>
+      columns.map((column) => {
+        return <ValueInput placeholder={column.name} />;
+      }),
+    [columns]
+  );
 
   return (
     <>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             onClick={toggleAddRow}
             iconType="plusInCircle"
             size="s"
@@ -43,10 +61,10 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             {i18n.translate('indexEditor.addRow', {
               defaultMessage: 'Add row',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             onClick={toggleAddColumn}
             iconType="plusInCircle"
             size="s"
@@ -55,27 +73,37 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             {i18n.translate('indexEditor.addColumn', {
               defaultMessage: 'Add column',
             })}
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexGroup gutterSize="s">{inputs}</EuiFlexGroup>
-        <EuiButtonIcon
-          onClick={() => {}}
-          iconType="check"
-          display="base"
-          color="success"
-          aria-label="Save"
-        />
-        <EuiButtonIcon
-          onClick={() => {}}
-          iconType="cross"
-          display="base"
-          color="danger"
-          aria-label="Cancel"
-        />
-      </EuiFlexGroup>
+      {activeMode === 'add-row' && (
+        <EuiPanel
+          paddingSize="s"
+          css={css`
+            background: ${euiTheme.colors.backgroundBaseSubdued};
+            margin-bottom: ${euiTheme.size.xs};
+          `}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s">{inputs}</EuiFlexGroup>
+            <EuiButtonIcon
+              onClick={() => {}}
+              iconType="check"
+              display="base"
+              color="success"
+              aria-label="Save"
+            />
+            <EuiButtonIcon
+              onClick={cancelAction}
+              iconType="cross"
+              display="base"
+              color="danger"
+              aria-label="Cancel"
+            />
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
     </>
   );
 };
