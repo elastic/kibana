@@ -133,8 +133,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
+    setPopover((current) => !current);
+  }, []);
 
   const closePopover = useCallback((): void => {
     setPopover(false);
@@ -272,7 +272,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const button = useMemo(() => {
     const hasItems = !!items.length;
-    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.NOT_ENOUGH_PRIVILEGES;
+    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
@@ -303,30 +303,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {items.length > 0 ? (
-        <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiPopover
-              id="singlePanel"
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                size="s"
-                initialPanelId={0}
-                panels={panels}
-                data-test-subj="actions-context-menu"
-              />
-            </EuiPopover>
-          </EventsTdContent>
-        </div>
-      ) : (
-        button
-      )}
+      <div key="actions-context-menu">
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+          <EuiPopover
+            id="singlePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={panels}
+              data-test-subj="actions-context-menu"
+            />
+          </EuiPopover>
+        </EventsTdContent>
+      </div>
       {openAddExceptionFlyout &&
         ruleId &&
         ruleRuleId &&

@@ -419,8 +419,8 @@ export const EVENT_RENDERED_VIEW_COLUMNS = {
   }),
 };
 
-export const NOT_ENOUGH_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.notEnoughPrivileges',
+export const INSUFFICIENT_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
   {
     defaultMessage: 'Insufficient privileges',
   }
