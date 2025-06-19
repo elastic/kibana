@@ -612,6 +612,7 @@ describe('ES deprecations table', () => {
           index: 0,
           action: 'unfreeze',
         });
+        await actions.reindexDeprecationFlyout.clickUnfreezeButton();
 
         expect(find('reindexTableCell-actions').length).toBe(1);
 

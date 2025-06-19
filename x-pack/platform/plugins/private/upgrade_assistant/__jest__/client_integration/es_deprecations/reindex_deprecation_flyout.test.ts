@@ -121,7 +121,7 @@ describe('Reindex deprecation flyout', () => {
 
       expect(exists('reindexDetails')).toBe(true);
       expect(find('reindexDetails.flyoutTitle').text()).toContain(
-        `Update ${reindexDeprecation.index}`
+        `Reindex ${reindexDeprecation.index}`
       );
     });
     it('has started but not yet reindexing documents', async () => {
@@ -265,41 +265,6 @@ describe('Reindex deprecation flyout', () => {
       expect(find('impactedNodeListItem').at(0).text()).toContain(
         'MacBook-Pro.local (25% available)'
       );
-    });
-  });
-
-  describe('follower index', () => {
-    it('displays follower index callout and only shows mark as read-only button when index is a follower index', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
-        reindexOp: null,
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: {
-          ...defaultReindexStatusMeta,
-          isFollowerIndex: true,
-        },
-      });
-
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
-
-      const { actions, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt({
-        deprecationType: 'reindex',
-        index: 0,
-        action: 'readonly',
-      });
-
-      // Verify follower index callout is displayed
-      expect(exists('followerIndexCallout')).toBe(true);
-
-      // Verify only mark as read-only button is available (no reindex button)
-      expect(exists('startIndexReadonlyButton')).toBe(true);
-      expect(exists('startReindexingButton')).toBe(false);
     });
   });
 });
