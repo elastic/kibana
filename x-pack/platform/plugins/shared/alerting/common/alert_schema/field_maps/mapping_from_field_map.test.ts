@@ -192,11 +192,13 @@ describe('mappingFromFieldMap', () => {
           type: 'date',
         },
         actor: {
-          entity: {
-            id: {
-              array: true,
-              required: false,
-              type: 'keyword',
+          properties: {
+            entity: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+              },
             },
           },
         },
@@ -361,21 +363,23 @@ describe('mappingFromFieldMap', () => {
           },
         },
         related: {
-          entity: {
-            array: true,
-            required: false,
-            type: 'keyword',
+          properties: {
+            entity: {
+              type: 'keyword',
+            },
           },
         },
         tags: {
           type: 'keyword',
         },
         target: {
-          entity: {
-            id: {
-              array: true,
-              required: false,
-              type: 'keyword',
+          properties: {
+            entity: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+              },
             },
           },
         },
