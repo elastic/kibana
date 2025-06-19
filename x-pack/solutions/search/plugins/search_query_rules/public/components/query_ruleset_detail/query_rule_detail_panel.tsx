@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
@@ -15,13 +15,14 @@ import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_d
 import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 import { useGenerateRuleId } from '../../hooks/use_generate_rule_id';
 import { SearchQueryRulesQueryRule } from '../../types';
+import { RulesetDetailEmptyPrompt } from '../empty_prompt/ruleset_detail_empty_prompt';
 
 interface QueryRuleDetailPanelProps {
   rules: SearchQueryRulesQueryRule[];
   setNewRules: (newRules: SearchQueryRulesQueryRule[]) => void;
   setIsFormDirty?: (isDirty: boolean) => void;
   updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
-  addNewRule: (newRuleId: string) => void;
+  addNewRule: (newRule: SearchQueryRulesQueryRule) => void;
   deleteRule?: (ruleId: string) => void;
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
   tourInfo?: {
@@ -29,6 +30,7 @@ interface QueryRuleDetailPanelProps {
     content: string;
     tourTargetRef?: React.RefObject<HTMLDivElement>;
   };
+  createMode?: boolean;
 }
 export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   rulesetId,
@@ -39,10 +41,22 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   updateRule,
   addNewRule,
   deleteRule,
+  createMode = false,
 }) => {
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
+  const [flyoutMode, setFlyoutMode] = React.useState<'create' | 'edit'>('edit');
 
   const { mutate: generateRuleId } = useGenerateRuleId(rulesetId);
+  useEffect(() => {
+    if (createMode && rules.length === 0) {
+      generateRuleId(undefined, {
+        onSuccess: (newRuleId) => {
+          setFlyoutMode('create');
+          setRuleIdToEdit(newRuleId);
+        },
+      });
+    }
+  }, [createMode, rules.length, addNewRule, generateRuleId, rulesetId]);
 
   return (
     <KibanaPageTemplate.Section restrictWidth>
@@ -52,13 +66,20 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           rulesetId={rulesetId}
           ruleId={ruleIdToEdit}
           onSave={(rule) => {
-            updateRule(rule);
+            if (flyoutMode === 'create') {
+              addNewRule(rule);
+            } else {
+              updateRule(rule);
+            }
             setRuleIdToEdit(null);
+            setFlyoutMode('edit');
           }}
           onClose={() => {
             setRuleIdToEdit(null);
+            setFlyoutMode('edit');
           }}
           setIsFormDirty={setIsFormDirty}
+          createMode={flyoutMode === 'create'}
         />
       )}
 
@@ -75,7 +96,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                     onClick={() => {
                       generateRuleId(undefined, {
                         onSuccess: (newRuleId) => {
-                          addNewRule(newRuleId);
+                          setFlyoutMode('create');
                           setRuleIdToEdit(newRuleId);
                         },
                       });
@@ -102,19 +123,25 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryRuleDraggableList
-            rules={rules}
-            rulesetId={rulesetId}
-            onReorder={(newRules) => {
-              setNewRules(newRules);
-              if (setIsFormDirty) {
-                setIsFormDirty(true);
-              }
-            }}
-            onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
-            tourInfo={tourInfo}
-            deleteRule={deleteRule}
-          />
+          {rules.length === 0 && <RulesetDetailEmptyPrompt />}
+          {rules.length > 0 && (
+            <QueryRuleDraggableList
+              rules={rules}
+              rulesetId={rulesetId}
+              onReorder={(newRules) => {
+                setNewRules(newRules);
+                if (setIsFormDirty) {
+                  setIsFormDirty(true);
+                }
+              }}
+              onEditRuleFlyoutOpen={(ruleId: string) => {
+                setFlyoutMode('edit');
+                setRuleIdToEdit(ruleId);
+              }}
+              tourInfo={tourInfo}
+              deleteRule={deleteRule}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
