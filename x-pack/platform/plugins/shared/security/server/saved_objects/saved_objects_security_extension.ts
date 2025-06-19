@@ -556,6 +556,33 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   /**
+   * Check if user has access control permissions for objects
+   * @param objects The objects to check
+   * @param action The security action being performed
+   * @param spaces The spaces to check authorization for
+   * @returns An array of objects that can be modified
+   */
+  private checkAccessControl(
+    objects: AuthorizeObject[],
+    action: SecurityAction,
+    spaces: Set<string>
+  ): AuthorizeObject[] {
+    // If not an update action, no access control check needed
+    if (action !== SecurityAction.UPDATE && action !== SecurityAction.BULK_UPDATE) {
+      return objects;
+    }
+
+    // Filter objects to only those the user can modify
+    return objects.filter((obj) =>
+      this.accessControlService.canModifyObject({
+        type: obj.type,
+        object: obj,
+        spacesToAuthorize: spaces,
+      })
+    );
+  }
+
+  /*
    * The enforce method uses the result of an authorization check authorization map) and a map
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
    * within the type map. If unauthorized for any type this method will throw.
@@ -571,6 +598,37 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     } = (auditOptions as AuditOptions) ?? {};
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
+
+    // Perform access control checks if we have objects to check
+    if (auditObjects && auditObjects.length > 0) {
+      // Collect all spaces from typesAndSpaces to pass to access control
+      const allSpaces = new Set<string>();
+      for (const spaces of typesAndSpaces.values()) {
+        for (const space of spaces) {
+          allSpaces.add(space);
+        }
+      }
+
+      // Filter objects based on access control
+      const filteredObjects = this.checkAccessControl(auditObjects, action, allSpaces);
+
+      // If all objects were filtered out by access control, throw a forbidden error
+      if (filteredObjects.length === 0) {
+        const msg = 'Access control denied: No modifiable objects';
+        const error = this.errors.decorateForbiddenError(new Error(msg));
+        if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
+          this.auditHelper({
+            action: auditAction,
+            objects: auditObjects,
+            useSuccessOutcome,
+            addToSpaces,
+            deleteFromSpaces,
+            error,
+          });
+        }
+        throw error;
+      }
+    }
 
     const unauthorizedTypes = new Set<string>();
 
