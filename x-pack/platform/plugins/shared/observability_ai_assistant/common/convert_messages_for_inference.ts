@@ -31,10 +31,11 @@ export function convertMessagesForInference(
   logger: Pick<Logger, 'error'>
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
+  const toolCalls: InferenceMessage[] = [];
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
-      inferenceMessages.push({
+      toolCalls.push({
         role: InferenceMessageRole.Assistant,
         content: message.message.content ?? null,
         ...(message.message.function_call?.name
@@ -58,7 +59,7 @@ export function convertMessagesForInference(
     const isUserMessageWithToolCall = isUserMessage && !!message.message.name;
 
     if (isUserMessageWithToolCall) {
-      const toolCallRequest = inferenceMessages.findLast(
+      const toolCallRequest = toolCalls.findLast(
         (msg) =>
           msg.role === InferenceMessageRole.Assistant &&
           msg.toolCalls?.[0]?.function.name === message.message.name
@@ -69,10 +70,12 @@ export function convertMessagesForInference(
       }
 
       inferenceMessages.push({
-        name: message.message.name!,
-        role: InferenceMessageRole.Tool,
-        response: JSON.parse(message.message.content ?? '{}'),
-        toolCallId: toolCallRequest.toolCalls![0].toolCallId,
+        role: InferenceMessageRole.User,
+        content: `The ${
+          toolCallRequest.toolCalls![0].function.name
+        } tool was previously invoked. Below is the response returned by the tool:\n\n ${
+          message.message.content
+        }`,
       });
 
       return;
