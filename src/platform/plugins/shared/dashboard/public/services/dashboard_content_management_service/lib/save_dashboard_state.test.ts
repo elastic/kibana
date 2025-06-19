@@ -86,7 +86,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: [{ type: 'boop' } as DashboardPanel],
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
@@ -112,7 +112,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooFour',
-        panels: [{ type: 'boop' } as DashboardPanel],
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
       },
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
@@ -140,7 +140,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: [{ type: 'boop' } as DashboardPanel],
+        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
