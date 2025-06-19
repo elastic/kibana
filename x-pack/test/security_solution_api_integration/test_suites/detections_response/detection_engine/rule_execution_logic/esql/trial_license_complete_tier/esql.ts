@@ -2243,7 +2243,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock(),
-          query: `from packetbeat-* | stats _count=count(non_existing) by @timestamp`,
+          query: `from packetbeat-* | stats _count=count(broken) by @timestamp`,
           from: 'now-100000h',
         };
 
@@ -2256,7 +2256,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect.arrayContaining([
             expect.objectContaining({
               errors: expect.arrayContaining([
-                expect.stringContaining('Unknown column [non_existing]'),
+                expect.stringContaining('No field found for [non_existing] in mapping'),
               ]),
             }),
           ])
