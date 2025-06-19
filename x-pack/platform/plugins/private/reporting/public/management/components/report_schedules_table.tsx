@@ -39,6 +39,7 @@ import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 import { ScheduledReportFlyout } from './scheduled_report_flyout';
 import { ScheduledReport } from '../../types';
+import { TruncatedTitle } from './truncated_title';
 
 interface QueryParams {
   index: number;
@@ -86,7 +87,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       width: '20%',
       render: (_title: string, item: ScheduledReportApiJSON) => (
         <EuiLink data-test-subj={`reportTitle`} onClick={() => setSelectedReport(item)}>
-          {_title}
+          <TruncatedTitle text={_title} />
         </EuiLink>
       ),
       mobileOptions: {

@@ -31,6 +31,7 @@ import { Poller } from '../../../common/poller';
 import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from '.';
 import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
+import { TruncatedTitle } from './truncated_title';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -266,10 +267,14 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
                 data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
               >
-                {objectTitle ||
-                  i18n.translate('xpack.reporting.exports.table.noTitleLabel', {
-                    defaultMessage: 'Untitled',
-                  })}
+                <TruncatedTitle
+                  text={
+                    objectTitle ||
+                    i18n.translate('xpack.reporting.exports.table.noTitleLabel', {
+                      defaultMessage: 'Untitled',
+                    })
+                  }
+                />
               </EuiLink>
             </div>
           );
