@@ -15,7 +15,10 @@ import type { DocumentProfileProvider } from '../../../../..';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
 export const createGetDocViewer =
-  (tracesIndexPattern: string): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (indexes: {
+    apm: { errors: string; traces: string };
+    logs: string;
+  }): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
@@ -36,7 +39,7 @@ export const createGetDocViewer =
             return (
               <UnifiedDocViewerObservabilityTracesTransactionOverview
                 {...props}
-                tracesIndexPattern={tracesIndexPattern}
+                indexes={indexes}
               />
             );
           },
