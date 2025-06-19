@@ -42,7 +42,7 @@ const styles = {
 };
 
 export interface CustomRecurringScheduleProps {
-  startDate: string;
+  startDate?: string;
   readOnly?: boolean;
   compressed?: boolean;
   minFrequency?: Frequency;
@@ -168,7 +168,7 @@ export const CustomRecurringSchedule = memo(
                 'data-test-subj': 'customRecurringScheduleByWeekdayButtonGroup',
                 legend: 'Repeat on weekday',
                 options: WEEKDAY_OPTIONS,
-                disabled: readOnly,
+                isDisabled: readOnly,
               },
             }}
           />

@@ -271,8 +271,8 @@ export const ScheduledReportFlyoutContent = ({
             >
               {isRecurring && (
                 <RecurringScheduleFormFields
-                  startDate={startDate}
-                  timezone={timezone ? [timezone] : [defaultTimezone]}
+                  startDate={!readOnly ? startDate : undefined}
+                  timezone={!readOnly ? (timezone ? [timezone] : [defaultTimezone]) : undefined}
                   hideTimezone
                   readOnly={readOnly}
                   supportsEndOptions={false}

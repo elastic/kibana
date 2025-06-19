@@ -57,12 +57,18 @@ export interface ScheduledReport {
   title: string;
   reportTypeId: ReportTypeId;
   optimizedForPrinting?: boolean;
-  startDate: string;
-  timezone: string;
   recurring: boolean;
   recurringSchedule: RecurringSchedule;
   sendByEmail: boolean;
   emailRecipients: string[];
+  /**
+   * @internal Still unsupported by the schedule API
+   */
+  startDate?: string;
+  /**
+   * @internal Still unsupported by the schedule API
+   */
+  timezone?: string;
 }
 
 export interface ReportTypeData {

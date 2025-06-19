@@ -50,7 +50,7 @@ export const toMoment = (value?: string): Moment | undefined => (value ? moment(
 export const toString = (value?: Moment): string => value?.toISOString() ?? '';
 
 export interface RecurringScheduleFieldsProps {
-  startDate: string;
+  startDate?: string;
   endDate?: string;
   timezone?: string[];
   hideTimezone?: boolean;
@@ -165,6 +165,7 @@ export const RecurringScheduleFormFields = memo(
               startDate={startDate}
               compressed={compressed}
               minFrequency={minFrequency}
+              readOnly={readOnly}
             />
           )}
 
@@ -278,7 +279,12 @@ export const RecurringScheduleFormFields = memo(
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner>
           {i18n.RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY_PREFIX(
-            recurringSummary(moment(startDate), parsedSchedule, presets, showTimeInSummary)
+            recurringSummary({
+              startDate: startDate ? moment(startDate) : undefined,
+              recurringSchedule: parsedSchedule,
+              presets,
+              showTime: showTimeInSummary,
+            })
           )}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
