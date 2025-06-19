@@ -6,9 +6,9 @@
  */
 
 import {
-  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import {
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -23,7 +23,7 @@ const alertsSecurityUserIndices = [
     privileges: ['read'],
   },
   {
-    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS],
     privileges: ['read'],
   },
   {
@@ -46,7 +46,7 @@ const securityUserIndinces = [
     privileges: ['read'],
   },
   {
-    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN],
+    names: [CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS],
     privileges: ['read'],
   },
   {

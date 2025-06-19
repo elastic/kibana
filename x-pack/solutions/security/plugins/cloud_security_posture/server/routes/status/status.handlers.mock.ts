@@ -27,7 +27,7 @@ export const notInstalledHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'empty',
       },
       {
@@ -68,7 +68,7 @@ export const notInstalledHasMisconfigurationsFindingsHandler = http.get(STATUS_U
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'empty',
       },
       {
@@ -108,7 +108,7 @@ export const notDeployedHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'empty',
       },
       {
@@ -149,7 +149,7 @@ export const indexingHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'empty',
       },
       {
@@ -189,7 +189,7 @@ export const indexTimeoutHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'empty',
       },
       {
@@ -229,7 +229,7 @@ export const unprivilegedHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'unprivileged',
       },
       {
@@ -269,7 +269,7 @@ export const indexedHandler = http.get(STATUS_URL, () => {
     },
     indicesDetails: [
       {
-        index: 'logs-cloud_security_posture.findings_latest-default',
+        index: 'security_solution-cloud_security_posture.misconfiguration_latest',
         status: 'not-empty',
       },
       {
