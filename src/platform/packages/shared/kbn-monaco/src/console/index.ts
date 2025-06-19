@@ -14,6 +14,7 @@ import { MutableRefObject } from 'react';
  */
 import './language';
 
+import { monaco } from '../monaco_imports';
 import type { LangModuleType } from '../types';
 import { CONSOLE_LANG_ID, CONSOLE_OUTPUT_LANG_ID } from './constants';
 import {
