@@ -151,11 +151,6 @@ describe('createInitialState', () => {
                   "type": "deprecated-type-3",
                 },
               },
-              Object {
-                "term": Object {
-                  "type": "investigation",
-                },
-              },
             ],
           },
         },
