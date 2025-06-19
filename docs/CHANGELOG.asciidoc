@@ -141,25 +141,25 @@ Data ingestion and Fleet::
 * Fixes an issue that could prevent some integrations from correctly showing as installed ({kibana-pull}221624[#221624]).
 
 Discover::
-* Fixes an issue with CSV Post URLs incorrectly using an absolute time range instead of a relative one ({kibana-pull}223249[#223249]).
+* In version 8.18.0, we changed the way time ranges are handled for Discover ES|QL CSV exports ({kibana-pull}216792[#216792]). We realized that this change caused an issue with CSV Post URLs now using an absolute time range instead of a relative one, leading to duplicate reports being generated. We've reverted this change while we investigate different solutions ({kibana-pull}223249[#223249]).
 
 Elastic Observability solution::
-* Fixes an issue in Synthetics that could cause the screenshot of the first step to show for each step of the last successful test run ({kibana-pull}224220[#224220]).
+* Fixes an issue causing the screenshot of the first step to appear for each step of the last successful test run in Synthetics ({kibana-pull}224220[#224220]).
 * Fixes an issue that could cause losing unsaved changes after manually running a Synthetics test ({kibana-pull}222503[#222503]).
 * Fixes an accessibility issue in Synthetics settings, causing the focus to move out of the page when using `cc` and `bcc` elements in the email connector form ({kibana-pull}223828[#223828]).
 * Avoids adding tool instructions to the system messages when tools are disabled ({kibana-pull}223278[#223278]).
-* Fixes an APM error count waterfall navigation reload issue ({kibana-pull}221664[#221664]).
-* Fixes an issue preventing metrics graphs from correctly showing in the Services Inventory page ({kibana-pull}222439[#222439]).
-* Fixes pagination not working on Service Inventory page when progressive loading is enabled ({kibana-pull}220514[#220514]).
+* Fixes a navigation issue where clicking the error count on an APM waterfall item triggers a full page reload ({kibana-pull}221664[#221664]).
+* Fixes an issue preventing metrics graphs from correctly showing in the Services **Inventory** page ({kibana-pull}222439[#222439]).
+* Fixes pagination not working on the Services **Inventory** page when progressive loading is enabled ({kibana-pull}220514[#220514]).
 
 Elastic Security solution::
 For the Elastic Security 8.18.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 Machine Learning::
 * Fixes an issue with the Bedrock connector not using the action proxy configuration ({kibana-pull}224130[#224130]).
-* Anomaly Explorer: Correctly respect the selected overall swimlane bucket for view by `jobId` ({kibana-pull}222845[#222845]).
+* Fixes an issue with **Anomaly Explorer** where the selected overall swimlane bucket is not respected for `viewBy jobId` ({kibana-pull}222845[#222845]).
 * File upload: Fixes adding additional field when a pipeline is blank ({kibana-pull}222775[#222775]).
-* Trained Models: Fixes inference endpoints assignment ({kibana-pull}222076[#222076]).
+* Fixes the inference endpoint assignment to the trained model object ({kibana-pull}222076[#222076]).
 * File upload: Correctly restricts auto-deployment to Elastic models ({kibana-pull}221357[#221357]).
 * Ensures the OpenAI connector respects the action proxy configuration for all sub-actions ({kibana-pull}219617[#219617]).
 
