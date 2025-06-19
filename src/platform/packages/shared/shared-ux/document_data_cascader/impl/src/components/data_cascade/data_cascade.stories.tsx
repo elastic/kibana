@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import { DataCascade } from '..';
+import { getStatsGroupByColumnsFromQuery } from '../../lib/parse_esql';
 
 /**
  * @description story for dropdown component which allows selecting options based of provided ES|QL query',
@@ -36,15 +37,15 @@ export const GridImplementation: StoryObj<{ query: string }> = {
         <EuiFlexItem grow={false}>
           <EuiText>
             <div>
-              <h1>ESQL Data Cascade</h1>
-              <p>Query: {args.query}</p>
+              <h1>Data Cascade</h1>
+              <p>ES|QL Query: {args.query}</p>
             </div>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <DataCascade
             data={initData}
-            query={args.query}
+            cascadeGroups={getStatsGroupByColumnsFromQuery(args.query)}
             tableTitleSlot={({ rows }) => (
               <EuiText>
                 {i18n.translate('sharedUXPackages.data_cascade.toolbar.query_string', {
@@ -83,10 +84,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            onGroupNodeExpanded={async ({ row, nodePath }) => {
-              // eslint-disable-next-line no-console -- Handle row expansion if needed
-              console.log({ row, nodePath });
-
+            onGroupNodeExpanded={async ({ row }) => {
               // Simulate a data fetch on row expansion
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -102,10 +100,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                 }, 3000);
               });
             }}
-            onGroupLeafExpanded={async ({ row, nodePathMap: pathValue, nodePath }) => {
-              // eslint-disable-next-line no-console -- Handle leaf expansion if needed
-              console.log({ row, pathValue, nodePath });
-
+            onGroupLeafExpanded={async ({ row, nodePathMap }) => {
               // Simulate a data fetch for the expanded leaf, ideally we'd want to use nodePath information to fetch this data
               return new Promise((resolve) => {
                 setTimeout(() => {
@@ -113,7 +108,7 @@ export const GridImplementation: StoryObj<{ query: string }> = {
                     new Array(row.original.count).fill(null).map(() => {
                       return {
                         id: faker.string.uuid(),
-                        ...pathValue,
+                        ...nodePathMap,
                       };
                     })
                   );

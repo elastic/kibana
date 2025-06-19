@@ -286,7 +286,8 @@ function CascadeRowCell<G extends GroupNode, L extends LeafNode>({
 
   React.useEffect(() => {
     if (!leafData && isLeafNode && row.getIsExpanded() && !isPendingRowLeafDataFetch) {
-      flushSync(() => setRowLeafDataFetch(true)); // immediately mark as pending to avoid multiple re-renders
+      // sync mark request as pending to avoid multiple re-renders and multiple requests
+      flushSync(() => setRowLeafDataFetch(true));
       populateGroupLeafDataFn({ row }).finally(() => {
         setRowLeafDataFetch(false);
       });
@@ -463,7 +464,7 @@ function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
       },
       [state.currentGroupByColumns.length]
     ),
-    getSubRows: (row) => row.children,
+    getSubRows: (row) => row.children as T[],
     getExpandedRowModel: getExpandedRowModel(),
     onExpandedChange: setExpanded,
   });
@@ -528,11 +529,11 @@ function DataCascadeImpl<T extends GroupNode, L extends LeafNode>({
 }
 
 export function DataCascade<N extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
-  query,
+  cascadeGroups,
   ...props
 }: DataCascadeProps<N, L> & ComponentProps<typeof DataCascadeProvider>) {
   return (
-    <DataCascadeProvider query={query}>
+    <DataCascadeProvider cascadeGroups={cascadeGroups}>
       <DataCascadeImpl<N, L> {...props} />
     </DataCascadeProvider>
   );
