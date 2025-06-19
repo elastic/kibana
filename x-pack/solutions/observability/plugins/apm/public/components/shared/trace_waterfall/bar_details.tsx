@@ -98,7 +98,6 @@ export function BarDetails({
                 }}
               />
             ) : getRelatedErrorsHref ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
                 iconType="arrowRight"
