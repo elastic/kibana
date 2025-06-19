@@ -120,7 +120,14 @@ export function collectUserDefinedColumns(
     })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
     .on('visitRenameExpression', (ctx) => {
-      const [oldArg, newArg] = ctx.node.args;
+      let oldArg;
+      let newArg;
+      // oldArg AS newArg vs newArg = oldArg
+      if (ctx.node.name === 'as') {
+        [oldArg, newArg] = ctx.node.args;
+      } else {
+        [newArg, oldArg] = ctx.node.args;
+      }
       addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
     })
     .on('visitFunctionCallExpression', (ctx) => {
