@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
@@ -206,6 +207,19 @@ export const DiscoverTopNav = ({
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
 
+  const onSearchQueryChange = useCallback(
+    ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
+      console.log(nextQuery);
+      if (!isEqual(query, nextQuery)) {
+        // stateContainer.actions.onUpdateQuery({
+        //   query: nextQuery,
+        //   dateRange,
+        // });
+      }
+    },
+    [query]
+  );
+
   const SearchBar = useMemo(
     () => searchBarCustomization?.CustomSearchBar ?? navigation.ui.AggregateQueryTopNavMenu,
     [searchBarCustomization?.CustomSearchBar, navigation.ui.AggregateQueryTopNavMenu]
@@ -231,6 +245,7 @@ export const DiscoverTopNav = ({
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
+        onQueryChange={onSearchQueryChange}
         dataViewPickerOverride={
           searchBarCustomization?.CustomDataViewPicker ? (
             <searchBarCustomization.CustomDataViewPicker />
