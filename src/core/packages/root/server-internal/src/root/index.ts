@@ -166,6 +166,10 @@ export class Root {
   }
 }
 
+// Error.prepareStackTrace = (_, stack) => {
+//   return stack.map(callSite => callSite.toString()).join('\n');
+// };
+
 const formatShutdownReason = (reason: any): string => {
   let message = `Reason: ${reason.message ?? reason}`;
   if (reason.stack) {

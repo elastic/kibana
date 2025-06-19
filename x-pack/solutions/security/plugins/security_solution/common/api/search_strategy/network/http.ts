@@ -13,7 +13,7 @@ import { sort } from '../model/sort';
 import { timerange } from '../model/timerange';
 
 export const networkHttpSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip().optional(),
+  ip: z.string().ipv4().optional(),
   defaultIndex: z.array(z.string()).min(1).optional(),
   timerange,
   sort,

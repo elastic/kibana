@@ -11,8 +11,8 @@ import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
-import * as z4 from 'zod/v4';
-import { createDocument, createSchema } from 'zod-openapi';
+import * as z4 from '@kbn/zod';
+import { createDocument } from 'zod-openapi';
 import type { OasConverter } from './oas_converter';
 import {
   getXsrfHeaderForMethod,
@@ -138,6 +138,7 @@ export const processRouter = async ({
       if (route.path.includes('z4')) {
         if (z4Converter && responseValidationSchema) {
           const z4Responses = z4Converter.convertResponses(responseValidationSchema);
+          // console.log('z4Converter', z4Responses);
           Object.entries(z4Responses).forEach(([statusCode, response]) => {
             operation.responses![statusCode] = {
               ...operation.responses![statusCode],

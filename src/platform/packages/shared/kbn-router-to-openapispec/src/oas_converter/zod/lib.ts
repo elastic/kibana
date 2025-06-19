@@ -8,12 +8,10 @@
  */
 
 import { z, isZod } from '@kbn/zod';
-import { isPassThroughAny } from '@kbn/zod-helpers';
 import zodToJsonSchema from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
 import { KnownParameters } from '../../type';
-import { validatePathParameters } from '../common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
@@ -241,56 +239,79 @@ const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter =
 };
 
 export const convertQuery = (schema: unknown) => {
-  assertInstanceOfZodType(schema);
-  const unwrappedSchema = unwrapZodType(schema, true);
-
-  if (isPassThroughAny(unwrappedSchema)) {
-    return {
-      query: convertObjectMembersToParameterObjects(getPassThroughShape({}, false), true),
-      shared: {},
-    };
-  }
-
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw createError('Query schema must be an _object_ schema validator!');
-  }
-  const shape = unwrappedSchema.shape;
   return {
-    query: convertObjectMembersToParameterObjects(shape, false),
+    query: [
+      z.toJSONSchema(schema, {
+        unrepresentable: 'any',
+        // TODO: Check how to make this work
+        transform: (zodSchema) => {
+          if (zodSchema._def?.coerce === true && zodSchema._def?.schema instanceof z.ZodDate) {
+            return {
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO 8601 date string',
+            };
+          }
+          return undefined;
+        },
+      }),
+    ],
     shared: {},
   };
+  // assertInstanceOfZodType(schema);
+  // const unwrappedSchema = unwrapZodType(schema, true);
+  //
+  // if (isPassThroughAny(unwrappedSchema)) {
+  //   return {
+  //     query: convertObjectMembersToParameterObjects(getPassThroughShape({}, false), true),
+  //     shared: {},
+  //   };
+  // }
+  //
+  // if (!instanceofZodTypeObject(unwrappedSchema)) {
+  //   throw createError('Query schema must be an _object_ schema validator!');
+  // }
+  // const shape = unwrappedSchema.shape;
+  // return {
+  //   query: convertObjectMembersToParameterObjects(shape, false),
+  //   shared: {},
+  // };
 };
 
-export const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
-  assertInstanceOfZodType(schema);
-  const unwrappedSchema = unwrapZodType(schema, true);
-  const paramKeys = Object.keys(knownParameters);
-  const paramsCount = paramKeys.length;
-
-  if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
-    return { params: [], shared: {} };
-  }
-
-  if (isPassThroughAny(unwrappedSchema)) {
-    return {
-      params: convertObjectMembersToParameterObjects(
-        getPassThroughShape(knownParameters, true),
-        true
-      ),
-      shared: {},
-    };
-  }
-
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw createError('Parameters schema must be an _object_ schema validator!');
-  }
-  const shape = unwrappedSchema.shape;
-  const schemaKeys = Object.keys(shape);
-  validatePathParameters(paramKeys, schemaKeys);
+export const convertPathParameters = (schema: any, knownParameters: KnownParameters) => {
   return {
-    params: convertObjectMembersToParameterObjects(shape, true),
+    params: [z.toJSONSchema(schema)],
     shared: {},
   };
+  // assertInstanceOfZodType(schema);
+  // const unwrappedSchema = unwrapZodType(schema, true);
+  // const paramKeys = Object.keys(knownParameters);
+  // const paramsCount = paramKeys.length;
+  //
+  // if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
+  //   return { params: [], shared: {} };
+  // }
+  //
+  // if (isPassThroughAny(unwrappedSchema)) {
+  //   return {
+  //     params: convertObjectMembersToParameterObjects(
+  //       getPassThroughShape(knownParameters, true),
+  //       true
+  //     ),
+  //     shared: {},
+  //   };
+  // }
+  //
+  // if (!instanceofZodTypeObject(unwrappedSchema)) {
+  //   throw createError('Parameters schema must be an _object_ schema validator!');
+  // }
+  // const shape = unwrappedSchema.shape;
+  // const schemaKeys = Object.keys(shape);
+  // validatePathParameters(paramKeys, schemaKeys);
+  // return {
+  //   params: convertObjectMembersToParameterObjects(shape, true),
+  //   shared: {},
+  // };
 };
 
 export const convert = (schema: z.ZodTypeAny) => {

@@ -109,6 +109,7 @@
     "@apidevtools/json-schema-ref-parser": "^11.9.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-crypto/util": "^5.2.0",
     "@aws-sdk/client-bedrock-runtime": "^3.744.0",

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '.';
+import { z, ZodType } from '.';
 
 export function isZod(value: unknown): value is z.ZodType<any> {
-  return value instanceof z.Schema;
+  return value instanceof ZodType;
 }
