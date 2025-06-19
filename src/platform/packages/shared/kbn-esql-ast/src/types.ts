@@ -135,7 +135,7 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
  * RENAME command.
  */
 export interface ESQLAstRenameExpression extends ESQLCommandOption {
-  name: 'as';
+  name: 'as' | '=';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
