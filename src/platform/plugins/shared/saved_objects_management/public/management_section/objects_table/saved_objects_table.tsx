@@ -93,6 +93,7 @@ export interface SavedObjectsTableState {
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
   hasCustomBranding: boolean;
+  liveRegionMessage: string;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -107,6 +108,7 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
   private hasCustomBrandingSubscription?: Subscription;
+  private liveRegionTimeout?: number;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -138,6 +140,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
       hasCustomBranding: false,
+      liveRegionMessage: '',
     };
   }
 
@@ -157,6 +160,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.debouncedFindObjects.cancel();
     this.debouncedBulkGetObjects.cancel();
     this.hasCustomBrandingSubscription?.unsubscribe();
+    if (this.liveRegionTimeout) {
+      clearTimeout(this.liveRegionTimeout);
+    }
   }
 
   fetchCounts = async () => {
@@ -394,9 +400,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, http } = this.props;
     const objectsToExport = selectedSavedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
 
-    let blob;
+    let blob: Blob;
+    let exportDetails: SavedObjectsExportResultDetails | undefined;
+
     try {
-      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep);
+      blob = await fetchExportObjects(http, objectsToExport, includeReferencesDeep); // replace objectsToExport for null to see error toast
+      exportDetails = await extractExportDetails(blob);
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
@@ -409,10 +418,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       throw e;
     }
 
-    saveAs(blob, 'export.ndjson');
+    // Announce completion before download
+    const completionMessage = this.getExportCompletionMessage(exportDetails);
+    this.announceToScreenReader(completionMessage);
 
-    const exportDetails = await extractExportDetails(blob);
-    this.showExportCompleteMessage(exportDetails);
+    // Wait a moment for the announcement, then trigger download
+    setTimeout(() => {
+      saveAs(blob, 'export.ndjson');
+
+      // Show visual toast after download starts
+      setTimeout(() => {
+        this.showExportCompleteMessage(exportDetails);
+      }, 500);
+    }, 1000);
   };
 
   onExportAll = async () => {
@@ -428,15 +446,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const references = getTagFindReferences({ selectedTags, taggingApi });
 
-    let blob;
+    let blob: Blob;
+    let exportDetails: SavedObjectsExportResultDetails | undefined;
+
     try {
       blob = await fetchExportByTypeAndSearch({
         http,
         search: queryText ? `${queryText}*` : undefined,
         types: exportTypes,
-        references,
+        references, // replace this with null to test warning toast
         includeReferencesDeep: isIncludeReferencesDeepChecked,
       });
+      exportDetails = await extractExportDetails(blob);
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.export.toastErrorMessage', {
@@ -449,11 +470,66 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       throw e;
     }
 
-    saveAs(blob, 'export.ndjson');
+    // Announce completion before download
+    const completionMessage = this.getExportCompletionMessage(exportDetails);
+    this.announceToScreenReader(completionMessage);
 
-    const exportDetails = await extractExportDetails(blob);
-    this.showExportCompleteMessage(exportDetails);
-    this.setState({ isShowingExportAllOptionsModal: false });
+    // Wait a moment for the announcement, then trigger download
+    setTimeout(() => {
+      saveAs(blob, 'export.ndjson');
+
+      // Show visual toast and close modal after download starts
+      setTimeout(() => {
+        this.showExportCompleteMessage(exportDetails);
+        this.setState({ isShowingExportAllOptionsModal: false });
+      }, 500);
+    }, 1000);
+  };
+
+  // Utility method to announce a message for screen readers
+  announceToScreenReader = (message: string, clearDelay = 2000) => {
+    // Clear any existing timeouts
+    if (this.liveRegionTimeout) clearTimeout(this.liveRegionTimeout);
+
+    // Clear the region, then set the new message after a short delay
+    this.setState({ liveRegionMessage: '' }, () => {
+      setTimeout(() => {
+        this.setState({ liveRegionMessage: message });
+
+        // Clear the message after the specified delay
+        this.liveRegionTimeout = window.setTimeout(() => {
+          this.setState({ liveRegionMessage: '' });
+        }, clearDelay);
+      }, 10);
+    });
+  };
+
+  getExportCompletionMessage = (
+    exportDetails: SavedObjectsExportResultDetails | undefined
+  ): string => {
+    if (exportDetails) {
+      if (exportDetails.missingReferences.length > 0) {
+        return i18n.translate(
+          'savedObjectsManagement.objectsTable.export.successWithMissingRefsAnnouncement',
+          {
+            defaultMessage:
+              'Export completed with missing references. Download will start now. Some related objects could not be found.',
+          }
+        );
+      }
+      if (exportDetails.excludedObjects.length > 0) {
+        return i18n.translate(
+          'savedObjectsManagement.objectsTable.export.successWithExcludedObjectsAnnouncement',
+          {
+            defaultMessage:
+              'Export completed with excluded objects. Download will start now. Some objects were excluded from the export.',
+          }
+        );
+      }
+    }
+    return i18n.translate('savedObjectsManagement.objectsTable.export.successAnnouncement', {
+      defaultMessage: 'Export completed successfully. Download will start now.',
+    });
   };
 
   showExportCompleteMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
@@ -470,6 +546,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 'Please see the last line in the exported file for a list of missing objects.',
             }
           ),
+          // toastLifeTimeMs: 10000,
         });
       }
       if (exportDetails.excludedObjects.length > 0) {
@@ -483,13 +560,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 'Please see the last line in the exported file for a list of excluded objects.',
             }
           ),
+          // toastLifeTimeMs: 8000,
         });
       }
     }
     return notifications.toasts.addSuccess({
       title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
-        defaultMessage: 'Your file is downloading in the background',
+        defaultMessage: 'Export completed. Your file has downloaded.',
       }),
+      // toastLifeTimeMs: 5000,
     });
   };
 
@@ -699,6 +778,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <div>
+        {/* Workaround: Dedicated live region for screen reader status messages. It is updated via the `announceToScreenReader` method, which sets the message and then clears it after a short delay. This pattern ensures that screen readers reliably announce the message even if the same message is triggered multiple times in a row. Do not remove or repurpose this region unless you are replacing it with an equivalent accessibility mechanism.*/}
+        <div aria-live="polite" aria-atomic="true" className="euiScreenReaderOnly">
+          {this.state.liveRegionMessage}
+        </div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
