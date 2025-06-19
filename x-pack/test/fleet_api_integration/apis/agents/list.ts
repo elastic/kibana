@@ -19,7 +19,8 @@ export default function ({ getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
   let elasticAgentpkgVersion: string;
 
-  describe('fleet_list_agent', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170690
+  describe.skip('fleet_list_agent', () => {
     let mockApiServer: http.Server;
 
     before(async () => {
