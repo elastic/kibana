@@ -9,8 +9,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { BehaviorSubject, skip } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { isEqual } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { type PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -56,9 +57,12 @@ type UpdateProfilesContextWith = (
   discoverProfiles: DiscoverEBTContextProps['discoverProfiles']
 ) => void;
 
+type SetAsActiveManager = () => void;
+
 export class DiscoverEBTManager {
   private isCustomContextEnabled: boolean = false;
   private customContext$: DiscoverEBTContext | undefined;
+  private activeScopedManagerId: string | undefined;
   private reportEvent: ReportEvent | undefined;
   private reportPerformanceEvent: ReportPerformanceEvent | undefined;
 
@@ -95,6 +99,7 @@ export class DiscoverEBTManager {
   public onDiscoverAppUnmounted() {
     this.updateProfilesContextWith([]);
     this.isCustomContextEnabled = false;
+    this.activeScopedManagerId = undefined;
   }
 
   public getProfilesContext() {
@@ -102,43 +107,41 @@ export class DiscoverEBTManager {
   }
 
   public createScopedEBTManager() {
-    const scopedContext$: DiscoverEBTContext = new BehaviorSubject<DiscoverEBTContextProps>({
-      discoverProfiles: [],
-    });
+    const scopedManagerId = uuidv4();
+    let scopedDiscoverProfiles: string[] = [];
 
     const withScopedContext =
       <T extends (...params: Parameters<T>) => void>(callback: T) =>
       (...params: Parameters<T>) => {
         const currentDiscoverProfiles = this.customContext$?.getValue().discoverProfiles ?? [];
-        const scopedDiscoverProfiles = scopedContext$.getValue().discoverProfiles;
-
         this.updateProfilesContextWith(scopedDiscoverProfiles);
         callback(...params);
         this.updateProfilesContextWith(currentDiscoverProfiles);
       };
 
-    let scopedReportEvent: ReportEvent | undefined;
-    if (this.reportEvent) {
-      scopedReportEvent = withScopedContext(this.reportEvent);
-    }
+    const scopedReportEvent = this.reportEvent ? withScopedContext(this.reportEvent) : undefined;
 
-    let scopedReportPerformanceEvent: ReportPerformanceEvent | undefined;
-    if (this.reportPerformanceEvent) {
-      scopedReportPerformanceEvent = withScopedContext(this.reportPerformanceEvent);
-    }
+    const scopedReportPerformanceEvent = this.reportPerformanceEvent
+      ? withScopedContext(this.reportPerformanceEvent)
+      : undefined;
 
     const scopedUpdateProfilesContextWith: UpdateProfilesContextWith = (discoverProfiles) => {
-      scopedContext$.next({ discoverProfiles });
+      scopedDiscoverProfiles = discoverProfiles;
+      if (this.activeScopedManagerId === scopedManagerId) {
+        this.updateProfilesContextWith(discoverProfiles);
+      }
     };
 
-    scopedContext$
-      .pipe(skip(1))
-      .subscribe(({ discoverProfiles }) => this.updateProfilesContextWith(discoverProfiles));
+    const scopedSetAsActiveManager: SetAsActiveManager = () => {
+      this.activeScopedManagerId = scopedManagerId;
+      this.updateProfilesContextWith(scopedDiscoverProfiles);
+    };
 
     return new ScopedDiscoverEBTManager(
       scopedReportEvent,
       scopedReportPerformanceEvent,
-      scopedUpdateProfilesContextWith
+      scopedUpdateProfilesContextWith,
+      scopedSetAsActiveManager
     );
   }
 }
@@ -157,7 +160,8 @@ export class ScopedDiscoverEBTManager {
   constructor(
     private readonly reportEvent: ReportEvent | undefined,
     private readonly reportPerformanceEvent: ReportPerformanceEvent | undefined,
-    public readonly updateProfilesContextWith: UpdateProfilesContextWith
+    public readonly updateProfilesContextWith: UpdateProfilesContextWith,
+    public readonly setAsActiveManager: SetAsActiveManager
   ) {}
 
   private async trackFieldUsageEvent({
