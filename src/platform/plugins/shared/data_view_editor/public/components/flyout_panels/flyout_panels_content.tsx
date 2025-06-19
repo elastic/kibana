@@ -8,10 +8,14 @@
  */
 
 import React, { useEffect, FC, PropsWithChildren } from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelContent: FC<PropsWithChildren<unknown>> = (props) => {
+  const styles = useMemoizedStyles(componentStyles);
   const { registerContent } = useFlyoutPanelContext();
 
   useEffect(() => {
@@ -19,4 +23,13 @@ export const PanelContent: FC<PropsWithChildren<unknown>> = (props) => {
   }, [registerContent]);
 
   return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+};
+
+const componentStyles = {
+  content: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      overflowY: 'auto',
+      padding: euiTheme.size.l,
+    }),
 };

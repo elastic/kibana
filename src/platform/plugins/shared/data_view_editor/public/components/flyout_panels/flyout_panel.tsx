@@ -15,8 +15,9 @@ import React, {
   createContext,
   useContext,
 } from 'react';
-import classnames from 'classnames';
-import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
+import { useMemoizedStyles } from '@kbn/core/public';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
 
@@ -47,17 +48,10 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   border,
   ...rest
 }) => {
+  const styles = useMemoizedStyles(componentStyles);
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({
     hasContent: false,
     hasFooter: false,
-  });
-
-  const classes = classnames('fieldEditor__flyoutPanel', 'eui-scrollBar', className, {
-    'fieldEditor__flyoutPanel--pageBackground': backgroundColor === 'euiPageBackground',
-    'fieldEditor__flyoutPanel--emptyShade': backgroundColor === 'euiEmptyShade',
-    'fieldEditor__flyoutPanel--leftBorder': border === 'left',
-    'fieldEditor__flyoutPanel--rightBorder': border === 'right',
-    'fieldEditor__flyoutPanel--withContent': config.hasContent,
   });
 
   const { addPanel } = useFlyoutPanelsContext();
@@ -91,16 +85,28 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
     return removePanel;
   }, [width, addPanel]);
 
-  const styles: CSSProperties = {};
+  const dynamicStyles: CSSProperties = {};
 
   if (width) {
-    styles.flexBasis = `${width}%`;
+    dynamicStyles.flexBasis = `${width}%`;
   }
 
   return (
-    <EuiFlexItem style={styles}>
+    // dynamic styles should be set in `style` prop - https://github.com/elastic/eui/discussions/6828#discussioncomment-12867545
+    // eslint-disable-next-line @elastic/eui/prefer-css-prop-for-static-styles
+    <EuiFlexItem css={styles.flyoutColumn} style={dynamicStyles}>
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
-        <div className={classes} {...rest}>
+        <div
+          css={[
+            styles.flyoutPanel,
+            backgroundColor === 'euiPageBackground' && styles.pageBackground,
+            backgroundColor === 'euiEmptyShade' && styles.emptyShade,
+            border === 'left' && styles.leftBorder,
+            border === 'right' && styles.rightBorder,
+            config.hasContent && styles.withContent,
+          ]}
+          {...rest}
+        >
           {children}
         </div>
       </flyoutPanelContext.Provider>
@@ -116,4 +122,39 @@ export const useFlyoutPanelContext = (): Context => {
   }
 
   return ctx;
+};
+
+const componentStyles = {
+  flyoutColumn: css({
+    height: '100%',
+    overflow: 'hidden',
+  }),
+  flyoutPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: '100%',
+      overflowY: 'auto',
+      padding: euiTheme.size.l,
+    }),
+  pageBackground: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.body,
+    }),
+  emptyShade: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.emptyShade,
+    }),
+  leftBorder: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderLeft: euiTheme.border.thin,
+    }),
+  rightBorder: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRight: euiTheme.border.thin,
+    }),
+  withContent: css({
+    padding: 0,
+    overflowY: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
 };
