@@ -52,11 +52,10 @@ export default ({ getService }: FtrProviderContext): void => {
         CURRENT_PREBUILT_RULE_VERSION + 1,
       ]) {
         it(`imports a prebuilt rule with a missing base version where curr version = ${version} and available version = ${CURRENT_PREBUILT_RULE_VERSION}`, async () => {
-          const VERSION = CURRENT_PREBUILT_RULE_VERSION - 1;
           const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
             ...PREBUILT_RULE_ASSET['security-rule'],
             description: 'Some old value',
-            version: VERSION,
+            version,
             immutable: true,
             rule_source: {
               type: 'external',
@@ -74,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getService,
             expectedRule: {
               ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
-              version: VERSION,
+              version,
               immutable: true,
               rule_source: {
                 type: 'external',
