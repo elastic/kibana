@@ -16,8 +16,6 @@ import type { Adapters, StoredSiemMigration } from '../types';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export class RuleMigrationSpaceIndexMigrator {
-  private namesMap?: Map<string, string>;
-
   constructor(
     private spaceId: string,
     private esClient: ElasticsearchClient,
@@ -61,22 +59,19 @@ export class RuleMigrationSpaceIndexMigrator {
       await this.ruleMigrationIndexAdapters.migrations.createIndex(this.spaceId);
     }
 
-    const existingMigrationsFromRulesIndex = await this.getExistingMigrationFromRulesIndex();
-    const existingMigrationsFromMigrationsIndex =
-      await this.getExistingMigrationIdsFromMigrationsIndex();
+    const migrationsFromRulesIndex = await this.getMigrationFromRulesIndex();
+    const migrationsFromMigrationsIndex = await this.getMigrationIdsFromMigrationsIndex();
 
-    const migrationsToIndex = existingMigrationsFromRulesIndex.filter(
-      (migration) => !existingMigrationsFromMigrationsIndex.some((id) => id === migration.id)
+    const migrationsToIndex = migrationsFromRulesIndex.filter(
+      (migration) => !migrationsFromMigrationsIndex.some((id) => id === migration.id)
     );
 
     if (migrationsToIndex.length > 0) {
-      const getMigrationName = await this.createGetMigrationsName();
       await this.createMigrationDocs(
         migrationsToIndex.map((migration) => ({
           ...migration,
           created_by: migration.created_by ?? '',
           created_at: migration.created_at ?? new Date().toISOString(),
-          name: getMigrationName(migration.id),
         }))
       );
       this.logger.debug(`Created ${migrationsToIndex.length} migration documents missing.`);
@@ -91,10 +86,11 @@ export class RuleMigrationSpaceIndexMigrator {
     const migrationIdsWithoutName = await this.getMigrationIdsWithoutName();
 
     if (migrationIdsWithoutName.length > 0) {
-      const getMigrationName = await this.createGetMigrationsName();
+      const namesMap = await this.getMigrationsNamesMap();
 
       const migrationsToUpdate = migrationIdsWithoutName.map((id) => {
-        return { id, name: getMigrationName(id) };
+        const name = namesMap.get(id) ?? `SIEM Migration ${id}`; // Fallback name using the ID (should never happen, but just in case)
+        return { id, name };
       });
 
       await this.updateMigrationDocs(migrationsToUpdate);
@@ -105,7 +101,7 @@ export class RuleMigrationSpaceIndexMigrator {
   /**
    * Creates migration documents in the migrations index.
    */
-  private async createMigrationDocs(docs: StoredSiemMigration[]) {
+  private async createMigrationDocs(docs: Array<Partial<StoredSiemMigration>>) {
     const _index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
     const operations = docs.flatMap(({ id: _id, ...doc }) => [
       { create: { _id, _index } },
@@ -129,8 +125,9 @@ export class RuleMigrationSpaceIndexMigrator {
   /**
    * Retrieves existing migrations from the rules index.
    * It aggregates by migration_id and returns the earliest created_at and created_by for each migration.
+   * Results are ordered by `@timestamp` in ascending order. This is important for name generation
    */
-  private async getExistingMigrationFromRulesIndex() {
+  private async getMigrationFromRulesIndex() {
     const index = this.ruleMigrationIndexAdapters.rules.getIndexName(this.spaceId);
     const aggregations: Record<string, AggregationsAggregationContainer> = {
       migrationIds: {
@@ -160,7 +157,7 @@ export class RuleMigrationSpaceIndexMigrator {
    * Retrieves existing migrations from the migrations index.
    * It returns the IDs of all migration documents.
    */
-  private async getExistingMigrationIdsFromMigrationsIndex(): Promise<string[]> {
+  private async getMigrationIdsFromMigrationsIndex(): Promise<string[]> {
     const index = this.ruleMigrationIndexAdapters.migrations.getIndexName(this.spaceId);
     const result = await this.esClient.search<StoredSiemMigration>({
       index,
@@ -195,42 +192,18 @@ export class RuleMigrationSpaceIndexMigrator {
   }
 
   /**
-   * Retrieves the names of all migrations from the migrations index.
-   * The names are generated based on the migration the creation order.
+   * Creates the mapping of names by id for all the migrations from the rules index.
+   * The names are generated based in creation order.
    */
-  private async createGetMigrationsName(): Promise<(id: string) => string> {
+  private async getMigrationsNamesMap(): Promise<Map<string, string>> {
     // Cache the names map to avoid repeat the aggregation query
-    if (!this.namesMap) {
-      const index = this.ruleMigrationIndexAdapters.rules.getIndexName(this.spaceId);
+    const migrations = await this.getMigrationFromRulesIndex();
 
-      // Same migrationIds aggregation as the getAllStats method of the data client
-      const aggregations: { migrationIds: AggregationsAggregationContainer } = {
-        migrationIds: {
-          terms: { field: 'migration_id', order: { createdAt: 'asc' }, size: MAX_ES_SEARCH_SIZE },
-          aggregations: { createdAt: { min: { field: '@timestamp' } } },
-        },
-      };
-      const result = await this.esClient
-        .search({ index, aggregations, _source: false })
-        .catch((error) => {
-          this.logger.error(`Error getting all rule migrations stats: ${error.message}`);
-          throw error;
-        });
+    const namesMap = migrations.reduce((acc, migration, i) => {
+      acc.set(migration.id, `SIEM rules migration #${i + 1}`);
+      return acc;
+    }, new Map<string, string>());
 
-      const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
-      const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
-      const migrationsNames = buckets.map((bucket, i) => ({
-        id: `${bucket.key}`,
-        name: `SIEM rules migration #${i + 1}`, // the same naming pattern as in older versions
-      }));
-
-      this.namesMap = new Map<string, string>(migrationsNames.map(({ id, name }) => [id, name]));
-    }
-
-    const getMigrationName = (migrationId: string): string => {
-      return this.namesMap?.get(migrationId) ?? `SIEM Migration ${migrationId}`; // Fallback name using the ID (should never happen, but just in case)
-    };
-
-    return getMigrationName;
+    return namesMap;
   }
 }
