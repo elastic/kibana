@@ -35,3 +35,10 @@ export const RULE_GAPS_CALLOUT_READ_DOCS = i18n.translate(
     defaultMessage: 'Read docs',
   }
 );
+
+export const RULES_MONITORING = i18n.translate(
+  'xpack.securitySolution.ruleGaps.callout.rulesMonitoring',
+  {
+    defaultMessage: 'Rules Monitoring',
+  }
+);

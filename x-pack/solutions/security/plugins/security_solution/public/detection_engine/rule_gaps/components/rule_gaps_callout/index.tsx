@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiButton, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { gapStatus } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
@@ -14,6 +14,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useKibana } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
 import * as i18n from './translations';
 
 const DISMISSAL_STORAGE_KEY = 'rule-gaps-callout-dismissed';
@@ -86,28 +87,33 @@ export const RuleGapsCallout = () => {
         <>
           <p>{i18n.RULE_GAPS_CALLOUT_MESSAGE}</p>
           <EuiFlexGroup>
+            <EuiButton
+              href={getSecuritySolutionUrl({
+                deepLinkId: SecurityPageName.rules,
+                path: AllRulesTabs.monitoring,
+              })}
+              fill
+              color="warning"
+              target="_blank"
+              size="s"
+            >
+              {i18n.RULES_MONITORING}
+            </EuiButton>
             {spaceId && (
               <EuiButton
                 href={getSecuritySolutionUrl({
                   deepLinkId: SecurityPageName.dashboards,
                   path: `security-detection-rule-monitoring-${spaceId}`,
                 })}
-                fill
                 color="warning"
-                target="_blank"
                 size="s"
               >
                 {i18n.RULE_GAPS_CALLOUT_DASHBOARD}
               </EuiButton>
             )}
-            <EuiButton
-              href={`${docLinks.links.siem.gapsTable}`}
-              color="warning"
-              target="_blank"
-              size="s"
-            >
+            <EuiButtonEmpty href={`${docLinks.links.siem.gapsTable}`} color="warning" size="s">
               {i18n.RULE_GAPS_CALLOUT_READ_DOCS}
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexGroup>
         </>
       </EuiCallOut>
