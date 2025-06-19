@@ -9,14 +9,13 @@ import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { sharedStateSelector } from '../redux/selectors';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
 export const useSavedDataViews = () => {
-  const { dataViews } = useSelector(sharedStateSelector);
+  const { dataViews, defaultDataViewId } = useSelector(sharedStateSelector);
 
   return useMemo(() => {
     const savedViewsAsListItems: DataViewListItem[] = dataViews
-      .filter((dv) => dv.id !== DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
+      .filter((dv) => dv.id !== defaultDataViewId)
       .map((spec) => ({
         id: spec.id ?? '',
         title: spec.title ?? '',
@@ -24,5 +23,5 @@ export const useSavedDataViews = () => {
       }));
 
     return savedViewsAsListItems;
-  }, [dataViews]);
+  }, [dataViews, defaultDataViewId]);
 };
