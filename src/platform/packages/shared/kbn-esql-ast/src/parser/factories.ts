@@ -448,21 +448,17 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
 const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
-  if (unquotedCtx) {
-    const valueUnquoted = unquotedCtx.getText();
-    const quotedString = LeafPrinter.string({ valueUnquoted });
+  const valueUnquoted = unquotedCtx.getText();
+  const quotedString = LeafPrinter.string({ valueUnquoted });
 
-    return Builder.expression.literal.string(
-      valueUnquoted,
-      {
-        name: quotedString,
-        unquoted: true,
-      },
-      createParserFieldsFromTerminalNode(unquotedCtx)
-    );
-  }
-
-  return createLiteralString(ctx);
+  return Builder.expression.literal.string(
+    valueUnquoted,
+    {
+      name: quotedString,
+      unquoted: true,
+    },
+    createParserFieldsFromTerminalNode(unquotedCtx)
+  );
 };
 
 export function visitSource(

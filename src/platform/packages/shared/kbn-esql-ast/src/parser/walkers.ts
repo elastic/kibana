@@ -40,7 +40,6 @@ import {
   OperatorExpressionDefaultContext,
   ParenthesizedExpressionContext,
   QualifiedIntegerLiteralContext,
-  RegexBooleanExpressionContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
@@ -60,6 +59,8 @@ import {
   type RenameClauseContext,
   type StatsCommandContext,
   type ValueExpressionContext,
+  LikeExpressionContext,
+  RlikeExpressionContext,
 } from '../antlr/esql_parser';
 import {
   computeLocationExtends,
@@ -91,7 +92,6 @@ import {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLCommandOption,
-  ESQLFunction,
   ESQLInlineCast,
   ESQLLiteral,
   ESQLMap,
@@ -498,26 +498,40 @@ export function collectLogicalExpression(ctx: BooleanExpressionContext) {
   return [];
 }
 
-function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
-  const regexes = ctx.getTypedRuleContexts(RegexBooleanExpressionContext);
-  const ret: ESQLFunction[] = [];
-  return ret.concat(
-    regexes.map((regex) => {
-      const negate = regex.NOT();
-      const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not ' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
-      const arg = visitValueExpression(regex.valueExpression());
-      if (arg) {
-        fn.args.push(arg);
+function collectLikeExpressionContextExpression(ctx: BooleanExpressionContext) {
+  if (!(ctx instanceof LikeExpressionContext)) {
+    return [];
+  }
+  const negate = ctx.NOT();
+  const fnName = `${negate ? 'not ' : ''}like`;
+  const fn = createFunction(fnName, ctx, undefined, 'binary-expression');
+  const arg = visitValueExpression(ctx.valueExpression());
+  if (arg) {
+    fn.args.push(arg);
 
-        const literal = createLiteralString(regex._pattern);
+    const literal = createLiteralString(ctx.string_());
 
-        fn.args.push(literal);
-      }
-      return fn;
-    })
-  );
+    fn.args.push(literal);
+  }
+  return fn;
+}
+
+function collectRLikeExpressionContextExpression(ctx: BooleanExpressionContext) {
+  if (!(ctx instanceof RlikeExpressionContext)) {
+    return [];
+  }
+  const negate = ctx.NOT();
+  const fnName = `${negate ? 'not ' : ''}rlike`;
+  const fn = createFunction(fnName, ctx, undefined, 'binary-expression');
+  const arg = visitValueExpression(ctx.valueExpression());
+  if (arg) {
+    fn.args.push(arg);
+
+    const literal = createLiteralString(ctx.string_());
+
+    fn.args.push(literal);
+  }
+  return fn;
 }
 
 function collectIsNullExpression(ctx: BooleanExpressionContext) {
@@ -556,7 +570,8 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   return ast
     .concat(
       collectLogicalExpression(ctx),
-      collectRegexExpression(ctx),
+      collectLikeExpressionContextExpression(ctx),
+      collectRLikeExpressionContextExpression(ctx),
       collectIsNullExpression(ctx),
       collectDefaultExpression(ctx)
     )
