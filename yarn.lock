@@ -4375,6 +4375,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-concurrent-react@link:src/platform/test/plugin_functional/plugins/core_concurrent_react":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:src/core/packages/config/server-internal":
   version "0.0.0"
   uid ""
@@ -6724,6 +6728,10 @@
   uid ""
 
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
+  version "0.0.0"
+  uid ""
+
+"@kbn/react-dom-swap@link:src/platform/packages/private/kbn-react-dom-swap":
   version "0.0.0"
   uid ""
 
