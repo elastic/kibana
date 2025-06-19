@@ -6,7 +6,6 @@
  */
 
 import { updateGaps } from './update_gaps';
-import { findGapsSearchAfter } from '../find_gaps';
 import { mgetGaps } from '../mget_gaps';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
@@ -19,11 +18,13 @@ import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { processAllGapsInTimeRange } from '../process_all_gaps_in_time_range';
 
 jest.mock('../find_gaps');
 jest.mock('../mget_gaps');
 jest.mock('./update_gap_from_schedule');
 jest.mock('./calculate_gaps_state');
+jest.mock('../process_all_gaps_in_time_range');
 
 describe('updateGaps', () => {
   const mockLogger = loggerMock.create();
@@ -32,6 +33,9 @@ describe('updateGaps', () => {
   const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const mockBackfillClient = backfillClientMock.create();
   const mockActionsClient = actionsClientMock.create();
+
+  const processAllGapsInTimeRangeMock = processAllGapsInTimeRange as jest.Mock;
+  const mgetGapsMock = mgetGaps as jest.Mock;
 
   const createTestGap = () =>
     new Gap({
@@ -49,22 +53,17 @@ describe('updateGaps', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-      data: [],
-      total: 0,
-      pitId: 'test-pit-id',
-      searchAfter: undefined,
+    processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+      return processGapsBatch([]);
     });
-    (mgetGaps as jest.Mock).mockResolvedValue([]);
+    mgetGapsMock.mockResolvedValue([]);
   });
 
   describe('updateGaps', () => {
     it('should orchestrate the gap update process', async () => {
       const testGap = createTestGap();
-      (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-        data: [testGap],
-        pitId: 'test-pit-id',
-        searchAfter: undefined,
+      processAllGapsInTimeRangeMock.mockImplementationOnce((callback) => {
+        return callback([testGap]);
       });
 
       await updateGaps({
@@ -79,97 +78,37 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
       });
 
-      expect(findGapsSearchAfter).toHaveBeenCalledWith({
+      expect(processAllGapsInTimeRangeMock).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        params: {
-          ruleId: 'test-rule-id',
-          start: '2024-01-01T00:00:00.000Z',
-          end: '2024-01-01T01:00:00.000Z',
-          perPage: 500,
-          statuses: ['partially_filled', 'unfilled'],
-          sortField: '@timestamp',
-          sortOrder: 'asc',
-          searchAfter: undefined,
-          pitId: undefined,
-        },
+        ruleId: 'test-rule-id',
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-01T01:00:00.000Z',
+        processGapsBatch: expect.any(Function),
       });
-      expect(mockEventLogger.updateEvents).toHaveBeenCalled();
-      expect(mockEventLogClient.closePointInTime).toHaveBeenCalledWith('test-pit-id');
     });
 
-    it('should handle pagination with search_after', async () => {
-      const gaps = [
-        createTestGap(),
-        new Gap({
-          range: {
-            gte: '2024-01-01T01:00:00.000Z',
-            lte: '2024-01-01T02:00:00.000Z',
-          },
-          internalFields: {
-            _id: 'test-id-2',
-            _index: 'test-index',
-            _seq_no: 2,
-            _primary_term: 1,
-          },
-        }),
-      ];
-
-      // Mock first page with search_after
-      const firstPageGaps = Array(500).fill(gaps[0]);
-      const secondPageGaps = [gaps[1]];
-
-      (findGapsSearchAfter as jest.Mock)
-        .mockResolvedValueOnce({
-          data: firstPageGaps,
-          pitId: 'test-pit-id',
-          searchAfter: ['2024-01-01T01:00:00.000Z'],
-        })
-        .mockResolvedValueOnce({
-          data: secondPageGaps,
-          pitId: 'test-pit-id',
-          searchAfter: undefined,
-        });
-
+    it('should skip fetching gaps when they are passed in as a param', async () => {
+      const testGap = createTestGap();
       await updateGaps({
         ruleId: 'test-rule-id',
         start: new Date('2024-01-01T00:00:00.000Z'),
-        end: new Date('2024-01-01T02:00:00.000Z'),
+        end: new Date('2024-01-01T01:00:00.000Z'),
         eventLogger: mockEventLogger,
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         savedObjectsRepository: mockSavedObjectsRepository,
         backfillClient: mockBackfillClient,
         actionsClient: mockActionsClient,
+        gaps: [testGap],
       });
-
-      expect(findGapsSearchAfter).toHaveBeenCalledTimes(2);
-      expect(findGapsSearchAfter).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          params: expect.objectContaining({
-            searchAfter: undefined,
-            pitId: undefined,
-          }),
-        })
-      );
-      expect(findGapsSearchAfter).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          params: expect.objectContaining({
-            searchAfter: ['2024-01-01T01:00:00.000Z'],
-            pitId: 'test-pit-id',
-          }),
-        })
-      );
-      expect(mockEventLogger.updateEvents).toHaveBeenCalledTimes(2);
-      expect(mockEventLogClient.closePointInTime).toHaveBeenCalledWith('test-pit-id');
+      expect(processAllGapsInTimeRangeMock).not.toHaveBeenCalled();
     });
   });
 
   describe('error handling', () => {
     it('should handle findGaps errors', async () => {
-      (findGapsSearchAfter as jest.Mock).mockRejectedValue(new Error('Find gaps failed'));
+      processAllGapsInTimeRangeMock.mockRejectedValue(new Error('Find gaps failed'));
 
       await updateGaps({
         ruleId: 'test-rule-id',
@@ -191,13 +130,10 @@ describe('updateGaps', () => {
     it('should retry on conflict errors and refetch gap', async () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
-      (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-        data: [testGap],
-        total: 1,
-        pitId: 'test-pit-id',
-        searchAfter: undefined,
+      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+        return processGapsBatch([testGap]);
       });
-      (mgetGaps as jest.Mock).mockResolvedValue([updatedGap]);
+      mgetGapsMock.mockResolvedValue([updatedGap]);
 
       if (!testGap.internalFields?._id) {
         throw new Error('Test gap should have internalFields._id');
@@ -243,13 +179,10 @@ describe('updateGaps', () => {
     it('should stop retrying after max attempts', async () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
-      (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-        data: [testGap],
-        total: 1,
-        pitId: 'test-pit-id',
-        searchAfter: undefined,
+      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+        return processGapsBatch([testGap]);
       });
-      (mgetGaps as jest.Mock).mockResolvedValue([updatedGap]);
+      mgetGapsMock.mockResolvedValue([updatedGap]);
 
       if (!testGap.internalFields?._id) {
         throw new Error('Test gap should have internalFields._id');
@@ -291,20 +224,9 @@ describe('updateGaps', () => {
 
     it('should handle direct schedule updates', async () => {
       const testGap = createTestGap();
-      (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-        data: [testGap],
-        total: 1,
-        pitId: 'test-pit-id',
-        searchAfter: undefined,
+      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+        return processGapsBatch([testGap]);
       });
-
-      const backfillSchedule = [
-        {
-          runAt: '2024-01-01T00:30:00.000Z',
-          interval: '30m',
-          status: adHocRunStatus.COMPLETE,
-        },
-      ];
 
       await updateGaps({
         ruleId: 'test-rule-id',
@@ -314,25 +236,90 @@ describe('updateGaps', () => {
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         savedObjectsRepository: mockSavedObjectsRepository,
-        backfillSchedule,
+        backfillSchedule: [
+          {
+            runAt: '2024-01-01T00:30:00.000Z',
+            interval: '30m',
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
         backfillClient: mockBackfillClient,
         actionsClient: mockActionsClient,
       });
 
       expect(updateGapFromSchedule).toHaveBeenCalledWith({
         gap: testGap,
-        backfillSchedule,
+        scheduledItems: [
+          {
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:30:00.000Z'),
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
       });
+      expect(calculateGapStateFromAllBackfills).not.toHaveBeenCalled();
+    });
+
+    it('should handle invalid scheduled items', async () => {
+      const testGap = createTestGap();
+      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+        return processGapsBatch([testGap]);
+      });
+
+      await updateGaps({
+        ruleId: 'test-rule-id',
+        start: new Date('2024-01-01T00:00:00.000Z'),
+        end: new Date('2024-01-01T01:00:00.000Z'),
+        eventLogger: mockEventLogger,
+        eventLogClient: mockEventLogClient,
+        logger: mockLogger,
+        savedObjectsRepository: mockSavedObjectsRepository,
+        backfillSchedule: [
+          {
+            runAt: '2024-01-01T00:30:00.000Z',
+            interval: '30m',
+            status: adHocRunStatus.COMPLETE,
+          },
+          {
+            runAt: '2024-01-01T00:35:00.000Z',
+            interval: 'INVALID',
+            status: adHocRunStatus.COMPLETE,
+          },
+          {
+            runAt: '2024-01-01T00:40:00.000Z',
+            interval: '10m',
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
+        backfillClient: mockBackfillClient,
+        actionsClient: mockActionsClient,
+      });
+
+      expect(updateGapFromSchedule).toHaveBeenCalledWith({
+        gap: testGap,
+        scheduledItems: [
+          {
+            from: new Date('2024-01-01T00:00:00.000Z'),
+            to: new Date('2024-01-01T00:30:00.000Z'),
+            status: adHocRunStatus.COMPLETE,
+          },
+          {
+            from: new Date('2024-01-01T00:30:00.000Z'),
+            to: new Date('2024-01-01T00:40:00.000Z'),
+            status: adHocRunStatus.COMPLETE,
+          },
+        ],
+      });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error processing a scheduled item while updating gaps: Invalid duration "INVALID". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"'
+      );
       expect(calculateGapStateFromAllBackfills).not.toHaveBeenCalled();
     });
 
     it('should trigger refetch when shouldRefetchAllBackfills is true', async () => {
       const testGap = createTestGap();
-      (findGapsSearchAfter as jest.Mock).mockResolvedValue({
-        data: [testGap],
-        total: 1,
-        pitId: 'test-pit-id',
-        searchAfter: undefined,
+      processAllGapsInTimeRangeMock.mockImplementation(({ processGapsBatch }) => {
+        return processGapsBatch([testGap]);
       });
 
       await updateGaps({

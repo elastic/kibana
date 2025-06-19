@@ -7,6 +7,7 @@
 
 import type { Filter } from '@kbn/es-query';
 
+import type { ESBoolQuery } from '../../../../common/typed_json';
 import { SecurityPageName } from '../../../../common/constants';
 import type { Request } from './types';
 
@@ -164,6 +165,24 @@ export const getIndexFilters = (selectedPatterns: string[]) =>
         },
       ]
     : [];
+
+export const getESQLGlobalFilters = (globalFilterQuery: ESBoolQuery | undefined) => [
+  {
+    meta: {
+      alias: null,
+      disabled: false,
+      key: 'globalFilterKey',
+      negate: false,
+      params: {},
+      type: 'string',
+    },
+    query: {
+      bool: {
+        filter: globalFilterQuery,
+      },
+    },
+  },
+];
 
 export const getRequestsAndResponses = (requests: Request[] | null | undefined) => {
   return (requests ?? []).reduce(

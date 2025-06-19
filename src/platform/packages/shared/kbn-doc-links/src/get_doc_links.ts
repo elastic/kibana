@@ -309,6 +309,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       docsBase: `${ELASTIC_DOCS}solutions/search`,
       asyncSearch: `${ELASTIC_DOCS}solutions/search/async-search-api`,
       dataStreams: `${ELASTIC_DOCS}manage-data/data-store/data-streams`,
+      dataStreamsFailureStore: `${ELASTIC_DOCS}manage-data/data-store/data-streams/failure-store`,
       deprecationLogging: `${ELASTIC_DOCS}deploy-manage/monitor/logging-configuration/update-elasticsearch-logging-levels#deprecation-logging`,
       createEnrichPolicy: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
@@ -435,6 +436,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/third-party-response-actions`,
       trustedApps: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-applications`,
+      elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
       eventFilters: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/event-filters`,
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
@@ -462,6 +464,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `https://www.elastic.co/blog/security-prebuilt-rules-editing`,
       createEsqlRuleType: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#create-esql-rule`,
       ruleUiAdvancedParams: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params`,
+      thirdPartyLlmProviders: `${ELASTIC_DOCS}solutions/security/ai/set-up-connectors-for-large-language-models-llm`,
       entityAnalytics: {
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
@@ -591,6 +594,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slo: `${ELASTIC_DOCS}solutions/observability/incident-management/service-level-objectives-slos`,
       sloBurnRateRule: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-slo-burn-rate-rule`,
       aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
+      elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
+      elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,

@@ -91,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
+        'alert-deletion',
         'alerting:.es-query',
         'alerting:.geo-containment',
         'alerting:.index-threshold',
@@ -165,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
+        'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
@@ -188,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'unusedUrlsCleanupTask',
       ]);
     });
   });

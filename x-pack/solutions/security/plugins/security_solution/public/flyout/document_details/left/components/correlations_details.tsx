@@ -29,7 +29,7 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isPreview } =
+  const { dataAsNestedObject, eventId, getFieldsData, scopeId, isRulePreview } =
     useDocumentDetailsContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
@@ -38,7 +38,7 @@ export const CorrelationsDetails: React.FC = () => {
     getFieldsData,
     dataAsNestedObject,
     eventId,
-    isPreview,
+    isRulePreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     eventId,
@@ -66,7 +66,7 @@ export const CorrelationsDetails: React.FC = () => {
               <SuppressedAlerts
                 alertSuppressionCount={alertSuppressionCount}
                 dataAsNestedObject={dataAsNestedObject}
-                isPreview={isPreview}
+                showInvestigateInTimeline={!isRulePreview}
               />
             </EuiFlexItem>
           )}

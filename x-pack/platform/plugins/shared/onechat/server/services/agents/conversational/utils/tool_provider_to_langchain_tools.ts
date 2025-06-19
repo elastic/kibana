@@ -8,53 +8,70 @@
 import { StructuredTool, tool as toTool } from '@langchain/core/tools';
 import { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { toolDescriptorToIdentifier, toSerializedToolIdentifier } from '@kbn/onechat-common';
-import type { ToolProvider, ExecutableTool, ScopedRunner } from '@kbn/onechat-server';
+import {
+  toolDescriptorToIdentifier,
+  toStructuredToolIdentifier,
+  type ToolIdentifier,
+  type StructuredToolIdentifier,
+} from '@kbn/onechat-common';
+import type { ToolProvider, ExecutableTool } from '@kbn/onechat-server';
 
 export const providerToLangchainTools = async ({
   request,
   toolProvider,
   logger,
-  runner,
 }: {
   request: KibanaRequest;
   toolProvider: ToolProvider;
   logger: Logger;
-  runner: ScopedRunner;
 }): Promise<StructuredTool[]> => {
   const allTools = await toolProvider.list({ request });
   return Promise.all(
     allTools.map((tool) => {
-      return toLangchainTool({ tool, logger, runner });
+      return toLangchainTool({ tool, logger });
     })
   );
+};
+
+/**
+ * LLM provider have a specific format for toolIds, to we must convert to use allowed characters.
+ */
+export const toolIdToLangchain = (toolIdentifier: ToolIdentifier): string => {
+  const { toolId, providerId } = toStructuredToolIdentifier(toolIdentifier);
+  return `${toolId}__${providerId}`;
+};
+
+export const toolIdFromLangchain = (toolId: string): StructuredToolIdentifier => {
+  const splits = toolId.split('__');
+  if (splits.length !== 2) {
+    throw new Error('Tool id must be in the format of <toolId>__<providerId>');
+  }
+  return {
+    toolId: splits[0],
+    providerId: splits[1],
+  };
 };
 
 export const toLangchainTool = ({
   tool,
   logger,
-  runner,
 }: {
   tool: ExecutableTool;
-  runner: ScopedRunner;
   logger: Logger;
 }): StructuredTool => {
   const toolId = toolDescriptorToIdentifier(tool);
   return toTool(
     async (input) => {
       try {
-        const toolReturn = await runner.runTool({
-          toolId,
-          toolParams: input,
-        });
+        const toolReturn = await tool.execute({ toolParams: input });
         return JSON.stringify(toolReturn.result);
       } catch (e) {
-        logger.warn(`error calling tool ${tool.name}: ${e.message}`);
+        logger.warn(`error calling tool ${tool.id}: ${e.message}`);
         throw e;
       }
     },
     {
-      name: toSerializedToolIdentifier(toolId),
+      name: toolIdToLangchain(toolId),
       description: tool.description,
       schema: tool.schema,
     }

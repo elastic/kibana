@@ -253,6 +253,34 @@ describe('function AST nodes', () => {
       }
     });
 
+    it('logical IN', () => {
+      const query = 'FROM a | STATS a IN (1, 2, 3)';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'in');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: 'in',
+        args: [expect.any(Object), expect.any(Object)],
+      });
+    });
+
+    it('logical NOT IN', () => {
+      const query = 'FROM a | STATS a NOT IN (1, 2, 3)';
+      const { ast, errors } = parse(query);
+      const fn = Walker.findFunction(ast, ({ name }) => name === 'not in');
+
+      expect(errors.length).toBe(0);
+      expect(fn).toMatchObject({
+        type: 'function',
+        subtype: 'binary-expression',
+        name: 'not in',
+        args: [expect.any(Object), expect.any(Object)],
+      });
+    });
+
     it('regex expression', () => {
       const query = 'FROM a | STATS a LIKE "adsf"';
       const { ast, errors } = parse(query);
