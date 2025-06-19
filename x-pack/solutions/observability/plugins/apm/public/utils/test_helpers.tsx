@@ -9,11 +9,6 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
-import type { MountRendererProps, ReactWrapper } from 'enzyme';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { mount } from 'enzyme';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import enzymeToJson from 'enzyme-to-json';
 import type { Location } from 'history';
 import moment from 'moment';
 import type { Moment } from 'moment-timezone';
@@ -35,13 +30,6 @@ export function disableConsoleWarning(messageToDisable: string) {
     if (!message.startsWith(messageToDisable)) {
       originalConsoleWarn(message);
     }
-  });
-}
-
-export function toJson(wrapper: ReactWrapper) {
-  return enzymeToJson(wrapper, {
-    noKey: true,
-    mode: 'deep',
   });
 }
 
@@ -113,20 +101,19 @@ export function expectTextsInDocument(output: any, texts: string[]) {
   });
 }
 
-export function renderWithTheme(
-  component: React.ReactNode,
-  params?: any,
-  { darkMode = false } = {}
-) {
-  return render(<EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>, params);
+export function renderWithContext(component: React.ReactNode, params?: any) {
+  return render(
+    <MockApmPluginContextWrapper>
+      <KibanaContextProvider>
+        <UrlParamsProvider>
+          <EuiThemeProvider>{component}</EuiThemeProvider>
+        </UrlParamsProvider>
+      </KibanaContextProvider>
+    </MockApmPluginContextWrapper>,
+    params
+  );
 }
 
-export function mountWithTheme(tree: React.ReactElement<any>, { darkMode = false } = {}) {
-  function WrappingThemeProvider(props: any) {
-    return <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>;
-  }
-
-  return mount(tree, {
-    wrappingComponent: WrappingThemeProvider,
-  } as MountRendererProps);
+export function renderWithTheme(component: React.ReactNode, params?: any) {
+  return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);
 }

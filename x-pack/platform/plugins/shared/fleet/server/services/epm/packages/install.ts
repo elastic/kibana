@@ -50,6 +50,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
   DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
   GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
@@ -106,6 +107,8 @@ import { removeInstallation } from './remove';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+const MAX_INSTALL_RETRIES = 5;
+const BASE_RETRY_DELAY_MS = 1000; // 1s
 
 const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
@@ -212,16 +215,32 @@ export async function ensureInstalledPackage(options: {
     };
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  const installResult = await installPackage({
-    installSource: 'registry',
-    savedObjectsClient,
-    pkgkey,
-    spaceId,
-    esClient,
-    neverIgnoreVerificationError: !force,
-    force: true, // Always force outdated packages to be installed if a later version isn't installed
-    authorizationHeader,
-  });
+
+  const installPackageWithRetries = async (attempt: number): Promise<InstallResult> => {
+    const installResult = await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      spaceId,
+      esClient,
+      neverIgnoreVerificationError: !force,
+      force: true, // Always force outdated packages to be installed if a later version isn't installed
+      authorizationHeader,
+    });
+
+    if (
+      attempt < MAX_INSTALL_RETRIES &&
+      installResult.error?.message.includes('version_conflict_engine_exception')
+    ) {
+      const delayMs = BASE_RETRY_DELAY_MS * 2 ** attempt; // Exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return await installPackageWithRetries(++attempt);
+    } else {
+      return installResult;
+    }
+  };
+
+  const installResult = await installPackageWithRetries(0);
 
   if (installResult.error) {
     const errorPrefix =
@@ -1288,7 +1307,11 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const dataStreamType =
+    packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+    packagePolicy.inputs[0].streams[0].data_stream?.type ||
+    'logs';
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,

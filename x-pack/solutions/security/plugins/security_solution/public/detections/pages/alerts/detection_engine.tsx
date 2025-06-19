@@ -34,7 +34,6 @@ import {
 import { isEqual } from 'lodash';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useGroupTakeActionsItems } from '../../hooks/alerts_table/use_group_take_action_items';
 import {
   defaultGroupingOptions,
@@ -42,6 +41,7 @@ import {
   defaultGroupStatsRenderer,
   defaultGroupTitleRenderers,
 } from '../../components/alerts_table/grouping_settings';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -93,6 +93,7 @@ import type { Status } from '../../../../common/api/detection_engine';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { DetectionEngineAlertsTable } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -158,9 +159,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
-  const sourcererDataViewSpec: DataViewSpec = sourcererDataView.sourcererDataView as DataViewSpec;
-  const isLoadingIndexPattern = sourcererDataView.loading;
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec, status: dataViewSpecStatus } = useDataViewSpec(
+    SourcererScopeName.detections
+  );
+
+  const sourcererDataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? dataViewSpecStatus !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 

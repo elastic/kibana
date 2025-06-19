@@ -51,6 +51,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -92,8 +93,8 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
+  getActionsColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 
@@ -822,21 +823,28 @@ export const UnifiedDataTable = ({
     [displayedRows]
   );
 
-  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
-    () =>
-      cellActionsTriggerId
-        ? visibleColumns.map(
-            (columnName) =>
-              dataView.getFieldByName(columnName)?.toSpec() ?? {
-                name: '',
-                type: '',
-                aggregatable: false,
-                searchable: false,
-              }
-          )
-        : undefined,
-    [cellActionsTriggerId, visibleColumns, dataView]
-  );
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
+    if (!cellActionsTriggerId) {
+      return undefined;
+    }
+
+    return visibleColumns.map((columnName) => {
+      const field = getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName: columnName,
+        columnMeta: columnsMeta?.[columnName],
+      });
+      return (
+        field?.toSpec() ?? {
+          name: '',
+          type: '',
+          aggregatable: false,
+          searchable: false,
+        }
+      );
+    });
+  }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
     [dataView, cellActionsMetadata]
@@ -952,34 +960,32 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
-    const internalControlColumns = controlColumnIds
-      ? // reorder the default controls as per controlColumnIds
-        controlColumnIds.reduce((acc, id) => {
-          const controlColumn = defaultControlColumns.find((col) => col.id === id);
-          if (controlColumn) {
-            acc.push(controlColumn);
-          }
-          return acc;
-        }, [] as EuiDataGridControlColumn[])
-      : defaultControlColumns;
+    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+      rows: displayedRows,
+      canSetExpandedDoc,
+    });
 
-    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    const filteredLeadColumns = leadColumns.filter((column) =>
+      controlColumnIds.includes(column.id)
+    );
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadingColumns.unshift(colorIndicatorControlColumn);
+      filteredLeadColumns.unshift(colorIndicatorControlColumn);
     }
 
-    if (rowAdditionalLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+    const actionsColumn = getActionsColumn({
+      baseColumns: leadColumnsExtraContent,
+      rowAdditionalLeadingControls,
+      externalControlColumns,
+    });
+    if (actionsColumn) {
+      filteredLeadColumns.push(actionsColumn);
     }
 
-    return leadingColumns;
+    return filteredLeadColumns;
   }, [
     canSetExpandedDoc,
     controlColumnIds,

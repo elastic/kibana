@@ -67,6 +67,10 @@ export const updateMaintenanceWindowRoute = (
         access: 'public',
         summary: 'Update a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        availability: {
+          since: '8.19.0',
+          stability: 'stable',
+        },
       },
     },
     router.handleLegacyErrors(

@@ -19,6 +19,7 @@ describe('Eql Header', () => {
     timelineId: TimelineId.test,
     timelineFullScreen: false,
     setTimelineFullScreen: jest.fn(),
+    newDataViewPickerEnabled: false,
   } as EqlTabHeaderProps;
 
   describe('rendering', () => {

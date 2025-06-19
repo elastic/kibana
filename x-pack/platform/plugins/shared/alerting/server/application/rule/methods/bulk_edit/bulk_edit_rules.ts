@@ -62,7 +62,7 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -311,6 +311,8 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
     prevInterval.concat(intervals);
 
+    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+
     await pMap(
       response.saved_objects,
       async (rule: SavedObjectsFindResult<RawRule>) =>
@@ -458,20 +460,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
-
-    // migrate legacy actions only for SIEM rules
-    // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions as RawRuleAction[],
-      references: rule.references,
-      attributes: rule.attributes as RawRule,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
-    }
 
     const ruleActions = injectReferencesIntoActions(
       rule.id,

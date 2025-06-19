@@ -64,7 +64,9 @@ export const IndexSettingsResolutionCell: React.FunctionComponent<Props> = ({ st
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.deleteInProgressText}</EuiText>
+          <EuiText size="s" color="subdued">
+            <em>{i18nTexts.deleteInProgressText}</em>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

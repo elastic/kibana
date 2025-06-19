@@ -357,6 +357,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly trustedApps: string;
+    readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
     readonly blocklist: string;
@@ -470,6 +471,8 @@ export interface DocLinks {
     slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
+    elasticManagedLlm: string;
+    elasticManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;

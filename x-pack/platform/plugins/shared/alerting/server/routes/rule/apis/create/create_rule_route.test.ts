@@ -19,6 +19,8 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
+import type { AlertingPluginsStart } from '../../../../plugin';
 
 const rulesClient = rulesClientMock.create();
 
@@ -192,6 +194,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -307,6 +310,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -426,6 +430,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -546,6 +551,7 @@ describe('createRuleRoute', () => {
       usageCounter: mockUsageCounter,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -659,6 +665,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -687,6 +694,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -711,6 +719,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       docLinks,
       alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
     });
 
     const [, handler] = router.post.mock.calls[0];
@@ -744,6 +753,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -828,6 +838,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -886,6 +897,7 @@ describe('createRuleRoute', () => {
         usageCounter: mockUsageCounter,
         docLinks,
         alertingConfig: alertingConfigMock,
+        core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
       });
 
       const [_, handler] = router.post.mock.calls[0];

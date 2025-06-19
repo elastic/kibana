@@ -226,7 +226,7 @@ describe('FROM', () => {
                     valueUnquoted: 'index',
                   },
                   sourceType: 'index',
-                  cluster: {
+                  prefix: {
                     type: 'literal',
                     literalType: 'keyword',
                     valueUnquoted: 'cluster',
@@ -254,7 +254,7 @@ describe('FROM', () => {
                     valueUnquoted: 'index',
                   },
                   sourceType: 'index',
-                  cluster: {
+                  prefix: {
                     type: 'literal',
                     literalType: 'keyword',
                     valueUnquoted: 'cluster',
@@ -281,7 +281,7 @@ describe('FROM', () => {
                     valueUnquoted: 'index',
                   },
                   sourceType: 'index',
-                  cluster: {
+                  prefix: {
                     type: 'literal',
                     literalType: 'keyword',
                     valueUnquoted: 'cluster',
