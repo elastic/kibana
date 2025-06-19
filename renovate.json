@@ -1043,7 +1043,6 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
         "cronstrue",
         "immer"
       ],

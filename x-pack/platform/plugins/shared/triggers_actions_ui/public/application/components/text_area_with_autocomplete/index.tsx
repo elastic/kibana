@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, CSSProperties } from 'react';
 import getCaretCoordinates from 'textarea-caret';
-import { Properties } from 'csstype';
 import {
   EuiTextArea,
   EuiFormRow,
@@ -262,7 +261,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     return option.label;
   };
 
-  const selectableStyle: Properties<string | number> = useMemo(
+  const selectableStyle: CSSProperties = useMemo(
     () => ({
       position: 'absolute',
       top: popupPosition.top,
