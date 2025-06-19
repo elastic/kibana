@@ -44,7 +44,7 @@ Mapping resource-oriented APIs to a declarative model means users can describe t
 
 #### Ideal
 
-The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/{policy}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
+The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/\{policy\}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
 
 ```terraform
 resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
@@ -69,7 +69,7 @@ resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
 
 #### API imposed challenges
 
-API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (\`PUT /{index}/\_settings\`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront. 
+API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (\`PUT /\{index\}/\_settings\`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront. 
 
 ```bash
 {
