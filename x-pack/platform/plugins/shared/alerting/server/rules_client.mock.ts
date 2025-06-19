@@ -62,6 +62,7 @@ const createRulesClientMock = () => {
     fillGapById: jest.fn(),
     getRuleIdsWithGaps: jest.fn(),
     getGapsSummaryByRuleIds: jest.fn(),
+    bulkFillGapsByRuleIds: jest.fn(),
   };
   return mocked;
 };

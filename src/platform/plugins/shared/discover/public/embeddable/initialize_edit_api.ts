@@ -36,13 +36,17 @@ export async function getAppTarget(
   // We need to use a redirect URL if this is a by value saved search using
   // an ad hoc data view to ensure the data view spec gets encoded in the URL
   const useRedirect = !savedObjectId && !dataViews?.[0]?.isPersisted();
+
+  const urlWithoutLocationState = await discoverServices.locator.getUrl({});
+
   const editUrl = useRedirect
     ? discoverServices.locator.getRedirectUrl(locatorParams)
     : await discoverServices.locator.getUrl(locatorParams);
+
   const editPath = discoverServices.core.http.basePath.remove(editUrl);
   const editApp = useRedirect ? 'r' : 'discover';
 
-  return { path: editPath, app: editApp, editUrl };
+  return { path: editPath, app: editApp, editUrl, urlWithoutLocationState };
 }
 
 export function initializeEditApi<
