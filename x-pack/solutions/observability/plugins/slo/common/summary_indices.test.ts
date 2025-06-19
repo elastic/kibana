@@ -48,8 +48,9 @@ describe('getListOfSloSummaryIndices', () => {
       { name: 'cluster3', isConnected: false },
     ];
     const result = getListOfSloSummaryIndices(settings, clustersByName);
-    expect(result).toStrictEqual(
-      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`
-    );
+    expect(result).toStrictEqual([
+      SUMMARY_DESTINATION_INDEX_PATTERN,
+      `cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+    ]);
   });
 });
