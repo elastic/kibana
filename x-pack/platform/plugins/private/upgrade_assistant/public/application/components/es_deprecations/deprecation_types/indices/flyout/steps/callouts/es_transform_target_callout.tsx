@@ -27,7 +27,6 @@ export const ESTransformsTargetCallout = ({ deprecation }: Props) => {
           { defaultMessage: 'Transforms detected' }
         )}
         data-test-subj="esTransformsGuidance"
-        color="warning"
       >
         {deprecation.details}
       </EuiCallOut>
