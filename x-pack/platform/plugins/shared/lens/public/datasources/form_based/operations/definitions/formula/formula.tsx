@@ -129,7 +129,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         const col = layer.columns[colId];
         return (
           !col.isBucketed &&
-          !col.isStaticValue &&
+          col.operationType !== 'static_value' &&
           col.operationType !== 'math' &&
           col.operationType !== 'formula'
         );
