@@ -34,8 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openExportPopover();
+    await PageObjects.exports.clickExportTopNavButton();
+    await PageObjects.reporting.selectExportItem('CSV');
     await PageObjects.reporting.clickGenerateReportButton();
+    await PageObjects.exports.closeExportFlyout();
+    await PageObjects.exports.clickExportTopNavButton();
 
     const url = await PageObjects.reporting.getReportURL(timeout);
     // TODO: Fetch CSV client side in Serverless since `PageObjects.reporting.getResponse()`
@@ -91,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
         await PageObjects.exports.clickPopoverItem('CSV');
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
       });
 
       it('becomes available when saved', async () => {
@@ -100,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           true
         );
         await PageObjects.reporting.openExportPopover();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
       });
     });
 
