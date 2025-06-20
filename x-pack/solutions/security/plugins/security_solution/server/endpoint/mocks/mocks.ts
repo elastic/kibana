@@ -103,7 +103,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  const { esClient, fleetStartServices, savedObjectsServiceStart } =
+  const { esClient, fleetStartServices, savedObjectsServiceStart, exceptionListsClient } =
     createMockEndpointAppContextServiceStartContract();
   const fleetServices = createEndpointFleetServicesFactoryMock({
     fleetDependencies: fleetStartServices,
@@ -139,7 +139,8 @@ export const createMockEndpointAppContextService = (
     setup: jest.fn(),
     getLicenseService: jest.fn().mockReturnValue(licenseServiceMock),
     getFeatureUsageService: jest.fn().mockReturnValue(featureUsageMock),
-    getExceptionListsClient: jest.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    getExceptionListsClient: jest.fn().mockReturnValue(exceptionListsClient!),
     getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
     getTelemetryService: jest.fn(),
@@ -187,6 +188,36 @@ export const createMockEndpointAppContextServiceStartContract =
     const security =
       securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
     const fleetStartServices = createFleetStartContractMock();
+    const esClientMock = elasticsearchClientMock.createElasticsearchClient();
+
+    // Mock some ES client methods that may be invoked through out most tests
+    esClientMock.indices.getFieldMapping.mockResolvedValue({
+      'some-index-name': { mappings: {} },
+    });
+
+    esClientMock.cluster.existsComponentTemplate.mockResolvedValue(true);
+
+    esClientMock.cluster.getComponentTemplate.mockResolvedValue({
+      component_templates: [
+        {
+          name: 'some-component-name',
+          component_template: {
+            template: {
+              settings: {},
+              mappings: {
+                dynamic: false,
+                properties: {},
+              },
+            },
+            _meta: {
+              package: { name: 'some-package-name' },
+              managed_by: 'fleet',
+              managed: true,
+            },
+          },
+        },
+      ],
+    });
 
     // Ensure the agent service always returns the same agent service instance
     fleetStartServices.agentService.asInternalScopedUser.mockReturnValue(
@@ -227,7 +258,7 @@ export const createMockEndpointAppContextServiceStartContract =
       licenseService: createLicenseServiceMock(),
       exceptionListsClient: listMock.getExceptionListClient(),
       featureUsageService: createFeatureUsageServiceMock(),
-      esClient: elasticsearchClientMock.createElasticsearchClient(),
+      esClient: esClientMock,
       savedObjectsServiceStart: savedObjectsServiceMock.createStartContract(),
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),

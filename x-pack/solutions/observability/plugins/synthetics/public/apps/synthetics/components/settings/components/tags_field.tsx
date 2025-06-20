@@ -15,10 +15,12 @@ export function TagsField({
   tagsList,
   control,
   errors,
+  isDisabled,
 }: {
   tagsList: string[];
   errors: FieldErrors;
   control: Control<PrivateLocation, any>;
+  isDisabled?: boolean;
 }) {
   return (
     <EuiFormRow fullWidth label={TAGS_LABEL}>
@@ -27,6 +29,7 @@ export function TagsField({
         control={control}
         render={({ field }) => (
           <EuiComboBox
+            isDisabled={isDisabled}
             fullWidth
             aria-label={TAGS_LABEL}
             placeholder={TAGS_LABEL}

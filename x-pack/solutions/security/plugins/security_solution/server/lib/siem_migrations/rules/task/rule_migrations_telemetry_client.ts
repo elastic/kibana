@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
@@ -91,7 +92,7 @@ export class SiemMigrationTelemetryClient {
               duration: Date.now() - ruleStartTime,
               model: this.modelName,
               prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
-              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSucess],
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
             });
           },
           failure: (error: Error) => {
@@ -128,6 +129,19 @@ export class SiemMigrationTelemetryClient {
           duration,
           error: error.message,
           eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
+        });
+      },
+      aborted: (error: Error) => {
+        const duration = Date.now() - startTime;
+        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_ABORTED, {
+          migrationId: this.migrationId,
+          model: this.modelName || '',
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
+          duration,
+          reason: error.message,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationAborted],
         });
       },
     };
