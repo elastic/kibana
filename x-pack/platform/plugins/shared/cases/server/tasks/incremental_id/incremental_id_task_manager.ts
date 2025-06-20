@@ -22,7 +22,7 @@ export const CasesIncrementIdTaskVersion = '1.0.0';
 export class IncrementalIdTaskManager {
   private config: ConfigType['incrementalIdService'];
   private logger: Logger;
-  private casesIncrementService?: CasesIncrementalIdService;
+  private internalSavedObjectsClient?: SavedObjectsClient;
   private taskManager?: TaskManagerStartContract;
 
   constructor(
@@ -40,21 +40,24 @@ export class IncrementalIdTaskManager {
         description: 'Applying incremental numeric ids to cases',
         timeout: '10m',
         createTaskRunner: () => {
+          if (!this.internalSavedObjectsClient) {
+            throw new Error('Missing internal saved objects client.');
+          }
+          const casesIncrementService = new CasesIncrementalIdService(
+            this.internalSavedObjectsClient,
+            this.logger
+          );
           return {
             run: async () => {
               const initializedTime = new Date().toISOString();
               const startTime = performance.now();
               this.logger.debug(`Increment id task started at: ${initializedTime}`);
 
-              if (!this.casesIncrementService) {
-                this.logger.error('Missing increment service necessary for task');
-                return undefined;
-              }
-              this.casesIncrementService.startService();
+              casesIncrementService.startService();
 
               // Fetch all cases without an incremental id
               const casesWithoutIncrementalIdResponse =
-                await this.casesIncrementService.getCasesWithoutIncrementalId();
+                await casesIncrementService.getCasesWithoutIncrementalId();
               const { saved_objects: casesWithoutIncrementalId } =
                 casesWithoutIncrementalIdResponse;
 
@@ -62,7 +65,7 @@ export class IncrementalIdTaskManager {
                 `${casesWithoutIncrementalId.length} cases without incremental ids`
               );
               // Increment the case ids
-              const processedAmount = await this.casesIncrementService.incrementCaseIds(
+              const processedAmount = await casesIncrementService.incrementCaseIds(
                 casesWithoutIncrementalId
               );
               this.logger.debug(
@@ -77,7 +80,7 @@ export class IncrementalIdTaskManager {
               );
             },
             cancel: async () => {
-              this.casesIncrementService?.stopService();
+              casesIncrementService.stopService();
               this.logger.debug(`${CASES_INCREMENTAL_ID_SYNC_TASK_ID} task run was canceled`);
             },
           };
@@ -94,12 +97,7 @@ export class IncrementalIdTaskManager {
       CASE_SAVED_OBJECT,
       CASE_ID_INCREMENTER_SAVED_OBJECT,
     ]);
-    const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
-
-    this.casesIncrementService = new CasesIncrementalIdService(
-      internalSavedObjectsClient,
-      this.logger
-    );
+    this.internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
 
     try {
       const taskDoc = await this.taskManager.get(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
