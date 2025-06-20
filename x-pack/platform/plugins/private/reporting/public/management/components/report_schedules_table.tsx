@@ -163,7 +163,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={_createdBy} />
+              <EuiAvatar name={_createdBy} size="s" />
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="eui-textTruncate">
               <EuiText size="s" className="eui-textTruncate">
