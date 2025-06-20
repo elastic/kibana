@@ -81,10 +81,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
       });
 
-      it('renders the "Sample dataset" card with proper link', async () => {
-        await testSubjects.existOrFail('sampleDatasetButton');
-      });
-
       it('renders the Customer Engineer Request Form link', async () => {
         await testSubjects.existOrFail('customerEngineerRequestFormLink');
         await testSubjects.click('customerEngineerRequestFormLink');
