@@ -47,7 +47,7 @@ export type OnCellValueChange = (docId: string, update: any) => void;
 export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
-    columns: DatatableColumn[], // pass column name   //HD
+    columns: DatatableColumn[],
     editingCell: { row: number | null; col: string | null },
     savingDocs: PendingSave | undefined,
     onEditStart: (update: { row: number | null; col: number | null }) => void,
