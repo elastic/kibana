@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
@@ -22,8 +21,11 @@ import {
 import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
+import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { ExitFullScreenButton } from './exit_full_screen_button';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -31,7 +33,7 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   tracesIndexPattern: string;
-  onCloseFullScreen: () => void;
+  onExitFullScreen: () => void;
 }
 
 export const FullScreenWaterfall = ({
@@ -40,12 +42,45 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   tracesIndexPattern,
-  onCloseFullScreen,
+  onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
+  const {
+    share: {
+      url: { locators },
+    },
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = getUnifiedDocViewerServices();
+  const { indexes } = useDataSourcesContext();
+
+  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+
+  const generateRelatedErrorsDiscoverUrl = useCallback(
+    (docId: string) => {
+      if (!discoverLocator) {
+        return null;
+      }
+
+      const url = discoverLocator.getRedirectUrl({
+        timeRange: timefilter.getAbsoluteTime(),
+        filters: [],
+        query: {
+          language: 'kuery',
+          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE QSTR("trace.id:${traceId} AND span.id:${docId}")`,
+        },
+      });
+
+      return url;
+    },
+    [discoverLocator, timefilter, indexes.apm.errors, indexes.logs, traceId]
+  );
 
   const getParentApi = useCallback(
     () => ({
@@ -57,6 +92,7 @@ export const FullScreenWaterfall = ({
           serviceName: transaction?.[SERVICE_NAME_FIELD],
           entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
           scrollElement: overlayMaskRef.current,
+          getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
           onNodeClick: (nodeSpanId: string) => {
             setSpanId(nodeSpanId);
             setIsFlyoutVisible(true);
@@ -64,7 +100,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, transaction]
+    [traceId, rangeFrom, rangeTo, transaction, generateRelatedErrorsDiscoverUrl]
   );
 
   return (
@@ -89,18 +125,15 @@ export const FullScreenWaterfall = ({
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={1} css={{ alignItems: 'end' }}>
-                <EuiButtonIcon
-                  data-test-subj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
-                  display="base"
-                  iconSize="m"
-                  iconType="fullScreenExit"
-                  aria-label={i18n.translate(
+                <ExitFullScreenButton
+                  onExitFullScreen={onExitFullScreen}
+                  dataTestSubj="unifiedDocViewerObservabilityTracesFullScreenWaterfallExitFullScreenButton"
+                  ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
                       defaultMessage: 'Exit full screen waterfall',
                     }
                   )}
-                  onClick={onCloseFullScreen}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -119,14 +152,16 @@ export const FullScreenWaterfall = ({
       </EuiOverlayMask>
 
       {isFlyoutVisible && spanId && (
-        <SpanFlyout
-          tracesIndexPattern={tracesIndexPattern}
-          spanId={spanId}
-          dataView={dataView}
-          onCloseFlyout={() => {
-            setIsFlyoutVisible(false);
-          }}
-        />
+        <EuiFocusTrap>
+          <SpanFlyout
+            tracesIndexPattern={tracesIndexPattern}
+            spanId={spanId}
+            dataView={dataView}
+            onCloseFlyout={() => {
+              setIsFlyoutVisible(false);
+            }}
+          />
+        </EuiFocusTrap>
       )}
     </>
   );

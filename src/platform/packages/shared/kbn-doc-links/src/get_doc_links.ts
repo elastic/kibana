@@ -31,7 +31,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
-  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
+  const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
@@ -309,6 +309,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       docsBase: `${ELASTIC_DOCS}solutions/search`,
       asyncSearch: `${ELASTIC_DOCS}solutions/search/async-search-api`,
       dataStreams: `${ELASTIC_DOCS}manage-data/data-store/data-streams`,
+      dataStreamsFailureStore: `${ELASTIC_DOCS}manage-data/data-store/data-streams/failure-store`,
       deprecationLogging: `${ELASTIC_DOCS}deploy-manage/monitor/logging-configuration/update-elasticsearch-logging-levels#deprecation-logging`,
       createEnrichPolicy: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
@@ -582,6 +583,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tlsCertificate: `${ELASTIC_DOCS}solutions/observability/incident-management/create-tls-certificate-rule`,
       uptimeDurationAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-uptime-duration-anomaly-rule`,
       monitorLogs: `${ELASTIC_DOCS}solutions/observability/logs/explore-logs`,
+      logsStreams: `${ELASTIC_DOCS}solutions/observability/logs/streams/streams`,
       analyzeMetrics: `${ELASTIC_DOCS}solutions/observability/infra-and-hosts/analyze-infrastructure-host-metrics`,
       monitorUptimeSynthetics: `${ELASTIC_DOCS}solutions/observability/synthetics`,
       userExperience: `${ELASTIC_DOCS}solutions/observability/applications/user-experience`,
