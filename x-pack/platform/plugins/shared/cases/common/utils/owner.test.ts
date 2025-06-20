@@ -6,8 +6,9 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_OWNER, OWNER_INFO } from '../constants';
+import { OWNER_INFO } from '../constants';
 import { getCaseOwnerByAppId, getOwnerFromRuleConsumerProducer, isValidOwner } from './owner';
+import type { ServerlessProjectType } from '../constants/types';
 
 describe('owner utils', () => {
   describe('isValidOwner', () => {
@@ -71,16 +72,6 @@ describe('owner utils', () => {
       expect(owner).toBe(OWNER_INFO.securitySolution.id);
     });
 
-    it('returns securitySolution owner if project isServerlessSecurity', () => {
-      const owner = getOwnerFromRuleConsumerProducer({
-        consumer: AlertConsumers.OBSERVABILITY,
-        producer: AlertConsumers.OBSERVABILITY,
-        serverlessProjectType: OBSERVABILITY_OWNER,
-      });
-
-      expect(owner).toBe(OWNER_INFO.observability.id);
-    });
-
     it('fallbacks to producer when the consumer is alerts', () => {
       const owner = getOwnerFromRuleConsumerProducer({
         consumer: AlertConsumers.ALERTS,
@@ -90,13 +81,28 @@ describe('owner utils', () => {
       expect(owner).toBe(OWNER_INFO.observability.id);
     });
 
-    it('returns cases owner when serverlessProjectType is defined but is unknown', () => {
-      const owner = getOwnerFromRuleConsumerProducer({
-        // @ts-expect-error
-        serverlessProjectType: 'unknown',
-      });
+    describe('cloud projects', () => {
+      const cloudProjects = [
+        [OWNER_INFO.observability.serverlessProjectType as string, OWNER_INFO.observability.id],
+        [
+          OWNER_INFO.securitySolution.serverlessProjectType as string,
+          OWNER_INFO.securitySolution.id,
+        ],
+        ['unknown-by-us', OWNER_INFO.cases.id],
+      ];
 
-      expect(owner).toBe(OWNER_INFO.cases.id);
+      it.each(cloudProjects)(
+        'when the project type is %j, the owner should be %j',
+        (cloudProjectType, expectedOwner) => {
+          const owner = getOwnerFromRuleConsumerProducer({
+            consumer: 'should be ignored',
+            producer: 'should be ignored',
+            serverlessProjectType: cloudProjectType as ServerlessProjectType,
+          });
+
+          expect(owner).toBe(expectedOwner);
+        }
+      );
     });
   });
 });
