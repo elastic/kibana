@@ -503,10 +503,15 @@ describe('MonitorConfigRepository', () => {
 
       const result = await repository.bulkDelete(ids);
 
-      expect(soClient.bulkDelete).toHaveBeenCalledWith([
-        { type: syntheticsMonitorSavedObjectType, id: 'test-id-1' },
-        { type: syntheticsMonitorSavedObjectType, id: 'test-id-2' },
-      ]);
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [
+          { type: syntheticsMonitorSavedObjectType, id: 'test-id-1' },
+          { type: syntheticsMonitorSavedObjectType, id: 'test-id-2' },
+        ],
+        {
+          force: true,
+        }
+      );
 
       expect(result).toBe(mockBulkDeleteResult);
     });

@@ -6,7 +6,7 @@
  */
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE } from '../../synthetics_monitor';
+import { LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE } from '../../synthetics_monitor/legacy_synthetics_monitor';
 import {
   ConfigKey,
   SyntheticsMonitorWithSecretsAttributes,

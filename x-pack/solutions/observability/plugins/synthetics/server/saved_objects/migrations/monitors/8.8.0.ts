@@ -26,7 +26,7 @@ import {
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
-} from '../../synthetics_monitor';
+} from '../../synthetics_monitor/legacy_synthetics_monitor';
 import { validateMonitor } from '../../../routes/monitor_cruds/monitor_validation';
 import {
   formatSecrets,
