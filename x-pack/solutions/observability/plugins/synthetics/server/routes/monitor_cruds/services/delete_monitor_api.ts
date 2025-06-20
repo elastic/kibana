@@ -15,9 +15,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
-import { normalizeSecrets } from '../../../synthetics_service/utils';
 import {
   formatTelemetryDeleteEvent,
   sendErrorTelemetryEvents,
@@ -50,19 +48,11 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorToDelete(monitorId: string) {
-    const { spaceId, savedObjectsClient, server } = this.routeContext;
+    const { spaceId, savedObjectsClient, server, monitorConfigRepository } = this.routeContext;
     try {
-      const encryptedSOClient = server.encryptedSavedObjects.getClient();
+      const { normalizedMonitor } = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
 
-      const monitor =
-        await encryptedSOClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-          syntheticsMonitorSavedObjectType,
-          monitorId,
-          {
-            namespace: spaceId,
-          }
-        );
-      return normalizeSecrets(monitor);
+      return normalizedMonitor;
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.result.push({
@@ -146,7 +136,7 @@ export class DeleteMonitorAPI {
       );
 
       const deletePromise = this.routeContext.monitorConfigRepository.bulkDelete(
-        monitors.map((monitor) => monitor.id)
+        monitors.map((monitor) => ({ id: monitor.id, type: monitor.type }))
       );
 
       const [errors, result] = await Promise.all([deleteSyncPromise, deletePromise]);

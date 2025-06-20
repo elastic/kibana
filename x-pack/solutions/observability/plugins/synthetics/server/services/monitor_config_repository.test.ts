@@ -496,7 +496,10 @@ describe('MonitorConfigRepository', () => {
 
   describe('bulkDelete', () => {
     it('should delete multiple monitors by ids', async () => {
-      const ids = ['test-id-1', 'test-id-2'];
+      const ids = [
+        { id: 'test-id-1', type: syntheticsMonitorSavedObjectType },
+        { id: 'test-id-2', type: syntheticsMonitorSavedObjectType },
+      ];
       const mockBulkDeleteResult = { success: true } as any;
 
       soClient.bulkDelete.mockResolvedValue(mockBulkDeleteResult);
