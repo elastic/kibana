@@ -31,6 +31,7 @@ import {
   LogicalNotContext,
   MapExpressionContext,
   MatchBooleanExpressionContext,
+  RegexBooleanExpressionContext,
   MatchExpressionContext,
   MetadataContext,
   MvExpandCommandContext,
@@ -40,7 +41,6 @@ import {
   OperatorExpressionDefaultContext,
   ParenthesizedExpressionContext,
   QualifiedIntegerLiteralContext,
-  RegexBooleanExpressionContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
@@ -60,6 +60,8 @@ import {
   type RenameClauseContext,
   type StatsCommandContext,
   type ValueExpressionContext,
+  LikeExpressionContext,
+  RlikeExpressionContext,
 } from '../antlr/esql_parser';
 import {
   computeLocationExtends,
@@ -567,21 +569,26 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
   const regexes = ctx.getTypedRuleContexts(RegexBooleanExpressionContext);
   const ret: ESQLFunction[] = [];
   return ret.concat(
-    regexes.map((regex) => {
-      const negate = regex.NOT();
-      const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not ' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
-      const arg = visitValueExpression(regex.valueExpression());
-      if (arg) {
-        fn.args.push(arg);
+    regexes
+      .map((regex) => {
+        if (regex instanceof RlikeExpressionContext || regex instanceof LikeExpressionContext) {
+          const negate = regex.NOT();
+          const likeType = regex instanceof RlikeExpressionContext ? 'rlike' : 'like';
+          const fnName = `${negate ? 'not ' : ''}${likeType}`;
+          const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+          const arg = visitValueExpression(regex.valueExpression());
+          if (arg) {
+            fn.args.push(arg);
 
-        const literal = createLiteralString(regex._pattern);
+            const literal = createLiteralString(regex.string_());
 
-        fn.args.push(literal);
-      }
-      return fn;
-    })
+            fn.args.push(literal);
+          }
+          return fn;
+        }
+        return undefined;
+      })
+      .filter(nonNullable)
   );
 }
 
