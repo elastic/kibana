@@ -217,7 +217,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-      this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
     }
 
     this.userProfileService.initialize({

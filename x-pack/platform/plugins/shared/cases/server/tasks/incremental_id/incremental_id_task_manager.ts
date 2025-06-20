@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { SavedObjectsClient, type CoreStart, type Logger } from '@kbn/core/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+import {
+  TaskStatus,
+  type TaskManagerSetupContract,
+  type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import { CasesIncrementalIdService } from '../../services/incremental_id';
@@ -44,6 +45,7 @@ export class IncrementalIdTaskManager {
               const initializedTime = new Date().toISOString();
               const startTime = performance.now();
               this.logger.debug(`Increment id task started at: ${initializedTime}`);
+
               if (!this.casesIncrementService) {
                 this.logger.error('Missing increment service necessary for task');
                 return undefined;
@@ -73,6 +75,7 @@ export class IncrementalIdTaskManager {
                   endTime - startTime
                 }ms [ started: ${initializedTime}, ended: ${new Date().toISOString()} ]`
               );
+              this.casesIncrementService?.stopService();
             },
             cancel: async () => {
               this.casesIncrementService?.stopService();
@@ -84,7 +87,7 @@ export class IncrementalIdTaskManager {
     });
   }
 
-  public setupIncrementIdTask(taskManager: TaskManagerStartContract, core: CoreStart) {
+  public async setupIncrementIdTask(taskManager: TaskManagerStartContract, core: CoreStart) {
     this.taskManager = taskManager;
     try {
       // Instantiate saved objects client
@@ -98,6 +101,14 @@ export class IncrementalIdTaskManager {
         internalSavedObjectsClient,
         this.logger
       );
+
+      const taskDoc = await this.taskManager.get(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
+      if (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running) {
+        this.logger.info(
+          `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} is already running (status: ${taskDoc.status}). No need to schedule it again.`
+        );
+        return;
+      }
 
       this.taskManager
         .ensureScheduled({
