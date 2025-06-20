@@ -600,6 +600,9 @@
           }
         }
       },
+      "incremental_id": {
+        "type": "unsigned_long"
+      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -730,6 +733,20 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-incrementing-id": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "last_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },
@@ -906,6 +923,7 @@
     }
   },
   "dashboard": {
+    "dynamic": false,
     "properties": {
       "controlGroupInput": {
         "properties": {
@@ -1041,6 +1059,37 @@
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "entity-analytics-monitoring-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "error": {
+        "type": "keyword"
+      },
+      "filter": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "integrationName": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "matchers": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
   },
   "entity-definition": {
     "dynamic": false,
@@ -1206,6 +1255,9 @@
       "package_assets": {
         "dynamic": false,
         "properties": {}
+      },
+      "previous_version": {
+        "type": "keyword"
       },
       "verification_key_id": {
         "type": "keyword"
@@ -1784,6 +1836,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -2387,6 +2442,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -3070,6 +3128,14 @@
       }
     }
   },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "search": {
     "dynamic": false,
     "properties": {
@@ -3167,6 +3233,20 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:reference-data": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
@@ -3685,6 +3765,9 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {

@@ -23,7 +23,12 @@ export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBase
     schema.literal(SyncStatus.WARNING),
   ]),
   error: schema.maybe(schema.string()),
-  warning: schema.maybe(schema.string()),
+  warning: schema.maybe(
+    schema.object({
+      title: schema.string(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
   updated_at: schema.maybe(schema.string()),
   install_status: schema.object({
     main: schema.string(),
@@ -50,5 +55,10 @@ export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
   integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
   custom_assets: schema.maybe(schema.recordOf(schema.string(), CustomAssetsDataSchema)),
   error: schema.maybe(schema.string()),
-  warning: schema.maybe(schema.string()),
+  warning: schema.maybe(
+    schema.object({
+      title: schema.string(),
+      message: schema.maybe(schema.string()),
+    })
+  ),
 });

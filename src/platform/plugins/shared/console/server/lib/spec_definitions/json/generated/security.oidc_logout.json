@@ -12,7 +12,7 @@
     "patterns": [
       "_security/oidc/logout"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-oidc-logout.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-oidc-logout",
     "availability": {
       "stack": true,
       "serverless": false

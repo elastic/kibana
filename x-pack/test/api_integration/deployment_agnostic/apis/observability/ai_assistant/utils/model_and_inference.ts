@@ -13,8 +13,6 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_c
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
-export const LEGACY_CUSTOM_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
-
 // tiny models
 export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
 export const TINY_TEXT_EMBEDDING_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_TEXT_EMBEDDING.name;

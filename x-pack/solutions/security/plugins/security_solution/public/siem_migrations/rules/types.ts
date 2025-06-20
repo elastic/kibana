@@ -31,3 +31,8 @@ export interface FilterOptions {
   status?: StatusFilter;
   author?: AuthorFilter;
 }
+
+export interface RuleMigrationSettings {
+  connectorId: string;
+  skipPrebuiltRulesMatching: boolean;
+}

@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { RowControlColumn } from '@kbn/discover-utils';
 import { getRowControlColumn } from './row_control_column';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 
-export const getAdditionalRowControlColumns = (
-  rowControlColumns: RowControlColumn[]
-): EuiDataGridControlColumn[] => {
+export const getAdditionalRowControlColumns = (rowControlColumns: RowControlColumn[]) => {
   if (rowControlColumns.length <= 2) {
     return rowControlColumns.map(getRowControlColumn);
   }

@@ -258,6 +258,7 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
@@ -273,10 +274,6 @@ import type {
   DeletePrivMonUserResponse,
 } from './entity_analytics/privilege_monitoring/users/delete.gen';
 import type {
-  GetPrivMonUserRequestParamsInput,
-  GetPrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/get.gen';
-import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
 } from './entity_analytics/privilege_monitoring/users/list.gen';
@@ -285,8 +282,7 @@ import type {
   UpdatePrivMonUserRequestBodyInput,
   UpdatePrivMonUserResponse,
 } from './entity_analytics/privilege_monitoring/users/update.gen';
-import type { BulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
-import type { BulkUploadUsersJSONResponse } from './entity_analytics/privilege_monitoring/users/upload_json.gen';
+import type { PrivmonBulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -484,30 +480,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async bulkUploadUsersCsv() {
-    this.log.info(`${new Date().toISOString()} Calling API BulkUploadUsersCSV`);
-    return this.kbnClient
-      .request<BulkUploadUsersCSVResponse>({
-        path: '/api/entity_analytics/monitoring/users/_csv',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async bulkUploadUsersJson() {
-    this.log.info(`${new Date().toISOString()} Calling API BulkUploadUsersJSON`);
-    return this.kbnClient
-      .request<BulkUploadUsersJSONResponse>({
-        path: '/api/entity_analytics/monitoring/users/_json',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
       })
@@ -1455,18 +1427,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getPrivMonUser(props: GetPrivMonUserProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrivMonUser`);
-    return this.kbnClient
-      .request<GetPrivMonUserResponse>({
-        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -2089,6 +2049,19 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
+    this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
+    return this.kbnClient
+      .request<PrivmonBulkUploadUsersCSVResponse>({
+        path: '/api/entity_analytics/monitoring/users/_csv',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
     return this.kbnClient
@@ -2256,6 +2229,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'POST',
         body: props.body,
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async runEntityAnalyticsMigrations() {
+    this.log.info(`${new Date().toISOString()} Calling API RunEntityAnalyticsMigrations`);
+    return this.kbnClient
+      .request<RunEntityAnalyticsMigrationsResponse>({
+        path: '/internal/entity_analytics/migrations/run',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2723,9 +2708,6 @@ export interface GetNotesProps {
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
-}
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
@@ -2820,6 +2802,9 @@ export interface PersistPinnedEventRouteProps {
 }
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
+}
+export interface PrivmonBulkUploadUsersCSVProps {
+  attachment: FormData;
 }
 export interface ReadAlertsMigrationStatusProps {
   query: ReadAlertsMigrationStatusRequestQueryInput;

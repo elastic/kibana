@@ -82,6 +82,7 @@
     "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/code-editor",
+    "@kbn/core-test-helpers-model-versions",
   ],
   "exclude": [
     "target/**/*",

@@ -38,16 +38,16 @@ export const getRecommendedQueries = ({
       label: i18n.translate(
         'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.label',
         {
-          defaultMessage: 'Search with WHERE',
+          defaultMessage: 'Search all fields',
         }
       ),
       description: i18n.translate(
         'kbn-esql-validation-autocomplete.recommendedQueries.searchExample.description',
         {
-          defaultMessage: 'Use WHERE to filter data',
+          defaultMessage: 'Use WHERE to filter/search data',
         }
       ),
-      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* e.g. WHERE QSTR("""debug""") */`,
+      queryString: `${fromCommand}\n  | WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
       sortText: 'D',
     },
     ...(timeField

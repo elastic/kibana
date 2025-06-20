@@ -44,7 +44,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
   });
 
   it('renders the panel with the correct title', () => {
-    render(<RiskLevelsPrivilegedUsersPanel />, { wrapper: TestProviders });
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     expect(screen.getByText('Risk levels of privileged users')).toBeInTheDocument();
   });
@@ -58,7 +58,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       isError: true,
     });
 
-    render(<RiskLevelsPrivilegedUsersPanel />, { wrapper: TestProviders });
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     expect(screen.getByText('Error loading data')).toBeInTheDocument();
   });
@@ -75,7 +75,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       isError: false,
     });
 
-    render(<RiskLevelsPrivilegedUsersPanel />, { wrapper: TestProviders });
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('donut-chart')).toBeInTheDocument();
   });
@@ -92,7 +92,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       isError: false,
     });
 
-    render(<RiskLevelsPrivilegedUsersPanel />, { wrapper: TestProviders });
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     const table = screen.getByTestId('severity-level-table');
     expect(table).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
       setToggleStatus: jest.fn(),
     });
 
-    render(<RiskLevelsPrivilegedUsersPanel />, { wrapper: TestProviders });
+    render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
     expect(screen.queryByTestId('severity-level-table')).not.toBeInTheDocument();
     expect(screen.queryByTestId('donut-chart')).not.toBeInTheDocument();

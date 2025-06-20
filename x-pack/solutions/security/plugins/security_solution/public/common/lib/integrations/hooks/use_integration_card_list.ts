@@ -20,7 +20,7 @@ import {
 import { useIntegrationContext } from './integration_context';
 import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../utils/integrations';
-import { useSelectedTab } from './use_selected_tab';
+import type { UseSelectedTabReturn } from './use_selected_tab';
 
 export type GetCardItemExtraProps = (card: IntegrationCardItem) => Partial<IntegrationCardItem>;
 
@@ -69,12 +69,13 @@ const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['i
 interface UseIntegrationCardListProps {
   integrationsList: IntegrationCardItem[];
   activeIntegrations: GetInstalledPackagesResponse['items'];
+  selectedTab: UseSelectedTabReturn['selectedTab'];
 }
 export const useIntegrationCardList = ({
   integrationsList,
   activeIntegrations,
+  selectedTab,
 }: UseIntegrationCardListProps): IntegrationCardItem[] => {
-  const { selectedTab } = useSelectedTab();
   const featuredCardIds = selectedTab?.featuredCardIds;
 
   const addSecurityProps = useAddSecurityProps(activeIntegrations);

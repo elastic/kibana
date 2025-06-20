@@ -8,7 +8,7 @@
       "currentMinor": true
     },
     {
-      "version": "9.0.2",
+      "version": "9.0.3",
       "branch": "9.0",
       "currentMajor": true,
       "previousMinor": true
@@ -24,7 +24,7 @@
       "previousMajor": true
     },
     {
-      "version": "8.17.7",
+      "version": "8.17.8",
       "branch": "8.17",
       "previousMajor": true
     },

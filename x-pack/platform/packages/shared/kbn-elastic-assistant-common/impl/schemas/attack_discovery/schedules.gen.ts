@@ -140,7 +140,7 @@ export const AttackDiscoveryScheduleAction = z.object({
    * The action type used for sending notifications.
    */
   actionTypeId: z.string(),
-  group: AttackDiscoveryScheduleActionGroup,
+  group: AttackDiscoveryScheduleActionGroup.optional(),
   id: AttackDiscoveryScheduleActionId,
   params: AttackDiscoveryScheduleActionParams,
   uuid: NonEmptyString.optional(),

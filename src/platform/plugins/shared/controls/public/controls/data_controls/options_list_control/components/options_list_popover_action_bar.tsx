@@ -18,7 +18,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -27,6 +27,7 @@ import {
 
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -39,11 +40,37 @@ interface OptionsListPopoverProps {
   setShowOnlySelected: (value: boolean) => void;
 }
 
+const optionsListPopoverStyles = {
+  actions: ({ euiTheme }: UseEuiTheme) => css`
+    padding: 0 ${euiTheme.size.s};
+    border-bottom: ${euiTheme.border.thin};
+    border-color: ${euiTheme.colors.backgroundLightText};
+  `,
+  searchInputRow: ({ euiTheme }: UseEuiTheme) => css`
+    padding-top: ${euiTheme.size.s};
+  `,
+  cardinalityRow: ({ euiTheme }: UseEuiTheme) => css`
+    margin: ${euiTheme.size.xs} 0 !important;
+  `,
+  borderDiv: ({ euiTheme }: UseEuiTheme) => css`
+    height: ${euiTheme.size.base};
+    border-right: ${euiTheme.border.thin};
+  `,
+  selectAllCheckbox: ({ euiTheme }: UseEuiTheme) => css`
+    .euiCheckbox__square {
+      margin-block-start: 0;
+    }
+    .euiCheckbox__label {
+      align-items: center;
+      padding-inline-start: ${euiTheme.size.xs};
+    }
+  `,
+};
+
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  const { euiTheme } = useEuiTheme();
   const { componentApi, displaySettings } = useOptionsListContext();
   const [areAllSelected, setAllSelected] = useState<boolean>(false);
 
@@ -119,11 +146,12 @@ export const OptionsListPopoverActionBar = ({
       }
     }
   }, [availableOptions, selectedOptions, areAllSelected]);
+  const styles = useMemoizedStyles(optionsListPopoverStyles);
 
   return (
-    <div className="optionsList__actions">
+    <div className="optionsList__actions" css={styles.actions}>
       {compatibleSearchTechniques.length > 0 && (
-        <EuiFormRow className="optionsList__searchRow" fullWidth>
+        <EuiFormRow fullWidth css={styles.searchInputRow}>
           <EuiFieldSearch
             isInvalid={!searchStringValid}
             compressed
@@ -141,7 +169,7 @@ export const OptionsListPopoverActionBar = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow className="optionsList__actionsRow" fullWidth>
+      <EuiFormRow fullWidth css={styles.cardinalityRow}>
         <EuiFlexGroup
           justifyContent="spaceBetween"
           alignItems="center"
@@ -155,8 +183,8 @@ export const OptionsListPopoverActionBar = ({
                   {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <div className="optionsList__actionBarDivider" />
+             <EuiFlexItem grow={false}>
+                <div css={styles.borderDiv} />
               </EuiFlexItem>
             </>
           )}
@@ -183,15 +211,7 @@ export const OptionsListPopoverActionBar = ({
                     setAllSelected(true);
                   }
                 }}
-                css={css`
-                  .euiCheckbox__square {
-                    margin-block-start: 0;
-                  }
-                  .euiCheckbox__label {
-                    align-items: center;
-                    padding-inline-start: ${euiTheme.size.xs};
-                  }
-                `}
+                css={styles.selectAllCheckbox}
                 label={
                   <EuiText size="xs">
                     {OptionsListStrings.popover.getSelectAllButtonLabel()}

@@ -10,17 +10,15 @@ import React, { Suspense, lazy } from 'react';
 import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
 import { from } from 'rxjs';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { EuiFlyoutHeader, EuiSkeletonText, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataVisualizerStartDependencies } from '../../application/common/types/data_visualizer_plugin';
 
 export function createFlyout(
   coreStart: CoreStart,
-  share: SharePluginStart,
-  data: DataPublicPluginStart,
+  plugins: DataVisualizerStartDependencies,
   props: OpenFileUploadLiteContext
 ) {
   const {
@@ -31,26 +29,18 @@ export function createFlyout(
   } = coreStart;
 
   const LazyFlyoutContents = lazy(async () => {
-    const { FlyoutContents } = await import('./flyout_contents');
+    const { FileDataVisualizerLite } = await import('../file_upload_lite');
     return {
-      default: FlyoutContents,
+      default: FileDataVisualizerLite,
     };
   });
 
   let results: FileUploadResults | null = null;
-  const {
-    onUploadComplete,
-    autoAddInference,
-    autoCreateDataView,
-    indexSettings,
-    initialIndexName,
-    flyoutContent,
-  } = props;
 
   const onFlyoutClose = () => {
     flyoutSession.close();
-    if (results !== null && typeof onUploadComplete === 'function') {
-      onUploadComplete(results);
+    if (results !== null && typeof props.onUploadComplete === 'function') {
+      props.onUploadComplete(results);
     }
   };
 
@@ -59,21 +49,16 @@ export function createFlyout(
       <Suspense fallback={<LoadingContents />}>
         <LazyFlyoutContents
           coreStart={coreStart}
-          share={share}
-          data={data}
+          plugins={plugins}
           props={{
-            autoAddInference,
-            autoCreateDataView,
-            indexSettings,
-            initialIndexName,
-            flyoutContent,
+            ...props,
+            onUploadComplete: (res) => {
+              if (res) {
+                results = res;
+              }
+            },
           }}
-          onFlyoutClose={onFlyoutClose}
-          setUploadResults={(res) => {
-            if (res) {
-              results = res;
-            }
-          }}
+          onClose={onFlyoutClose}
         />
       </Suspense>,
       startServices

@@ -11,6 +11,7 @@ import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/ser
 
 import type { BuildFlavor } from '@kbn/config';
 import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/monitoring_entity_source_data_client';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import type { Immutable } from '../common/endpoint/types';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
@@ -255,7 +256,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           })
       ),
       getPrivilegeMonitoringDataClient: memoize(() => {
-        // TODO:add soClient with ApiKeyType as with getEntityStoreDataClient
         return new PrivilegeMonitoringDataClient({
           logger: options.logger,
           clusterClient: coreContext.elasticsearch.client,
@@ -265,7 +265,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
-          // TODO: add apiKeyManager
+        });
+      }),
+      getMonitoringEntitySourceDataClient: memoize(() => {
+        return new MonitoringEntitySourceDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient: coreContext.savedObjects.client,
         });
       }),
       getEntityStoreDataClient: memoize(() => {

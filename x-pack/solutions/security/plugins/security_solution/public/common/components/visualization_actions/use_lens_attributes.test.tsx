@@ -15,6 +15,7 @@ import {
   getIndexFilters,
   sourceOrDestinationIpExistsFilter,
   getNetworkDetailsPageFilter,
+  getESQLGlobalFilters,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
@@ -34,6 +35,13 @@ jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
+
+jest.mock('../../hooks/use_global_filter_query', () => ({
+  useGlobalFilterQuery: () => () => ({
+    filterQuery: undefined,
+  }),
+}));
+
 const params = {
   euiTheme: {} as EuiThemeComputed,
 };
@@ -160,6 +168,35 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes(params).state.filters,
       ...getIndexFilters(['auditbeat-*']),
+    ]);
+  });
+
+  it('should apply esql query and filter', () => {
+    const esql = 'SELECT * FROM test-*';
+    (useRouteSpy as jest.Mock).mockReturnValue([
+      {
+        detailName: undefined,
+        pageName: SecurityPageName.entityAnalytics,
+        tabName: undefined,
+      },
+    ]);
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'event.dataset',
+          applyGlobalQueriesAndFilters: true,
+          esql,
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current?.state.query as Query).toEqual({ esql });
+
+    expect(result?.current?.state.filters).toEqual([
+      ...getExternalAlertLensAttributes(params).state.filters,
+      ...getIndexFilters(['auditbeat-*']),
+      ...getESQLGlobalFilters(undefined),
     ]);
   });
 

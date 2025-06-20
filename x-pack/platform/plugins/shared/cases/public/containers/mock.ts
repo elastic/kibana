@@ -256,6 +256,7 @@ export const basicCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  incrementalId: undefined,
 };
 
 export const basicFileMock: FileJSON = {
@@ -380,6 +381,7 @@ export const mockCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
+  incrementalId: undefined,
 };
 
 export const basicCasePost: CaseUI = {
@@ -565,6 +567,7 @@ export const basicCaseSnake: Case = {
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
   customFields: [],
+  incremental_id: undefined,
 } as Case;
 
 export const caseWithAlertsSnake = {

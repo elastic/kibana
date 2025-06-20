@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
+import {
+  createBuiltinToolId,
+  toSerializedToolIdentifier,
+  toSerializedAgentIdentifier,
+  type AgentIdentifier,
+} from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
-import { createEmptyRunContext, forkContextForToolRun } from './run_context';
+import {
+  createEmptyRunContext,
+  forkContextForToolRun,
+  forkContextForAgentRun,
+} from './run_context';
 
 describe('RunContext utilities', () => {
   describe('creatEmptyRunContext', () => {
@@ -77,6 +86,69 @@ describe('RunContext utilities', () => {
           {
             type: 'tool',
             toolId: toSerializedToolIdentifier(newToolId),
+          },
+        ],
+      });
+    });
+  });
+
+  describe('forkContextForAgentRun', () => {
+    it('should fork context and add agent to stack', () => {
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [],
+      };
+
+      const agentId: AgentIdentifier = {
+        agentId: 'test-agent',
+        providerId: 'test-provider',
+      };
+      const expectedSerializedAgentId = toSerializedAgentIdentifier(agentId);
+      const forkedContext = forkContextForAgentRun({ agentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: expectedSerializedAgentId,
+          },
+        ],
+      });
+    });
+
+    it('should preserve existing stack entries when forking', () => {
+      const existingAgentId: AgentIdentifier = {
+        agentId: 'existing-agent',
+        providerId: 'test-provider',
+      };
+      const newAgentId: AgentIdentifier = {
+        agentId: 'new-agent',
+        providerId: 'test-provider',
+      };
+
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: toSerializedAgentIdentifier(existingAgentId),
+          },
+        ],
+      };
+
+      const forkedContext = forkContextForAgentRun({ agentId: newAgentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: toSerializedAgentIdentifier(existingAgentId),
+          },
+          {
+            type: 'agent',
+            agentId: toSerializedAgentIdentifier(newAgentId),
           },
         ],
       });

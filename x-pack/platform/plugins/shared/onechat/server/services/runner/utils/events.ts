@@ -6,28 +6,30 @@
  */
 
 import type {
-  OnechatRunEvent,
-  InternalRunEvent,
   RunContext,
-  OnechatRunEventMeta,
-  RunEventHandlerFn,
-  RunEventEmitter,
+  ToolEventHandlerFn,
+  ToolEventEmitter,
+  AgentEventEmitter,
+  RunAgentOnEventFn,
 } from '@kbn/onechat-server';
 
 /**
  * Creates a run event emitter sending events to the provided event handler.
  */
-export const createEventEmitter = ({
+export const createAgentEventEmitter = ({
   eventHandler,
   context,
 }: {
-  eventHandler: RunEventHandlerFn;
+  eventHandler: RunAgentOnEventFn | undefined;
   context: RunContext;
-}): RunEventEmitter => {
+}): AgentEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopEventEmitter();
+  }
+
   return {
     emit: (internalEvent) => {
-      const event = convertInternalEvent({ event: internalEvent, context });
-      eventHandler(event);
+      eventHandler(internalEvent);
     },
   };
 };
@@ -35,33 +37,26 @@ export const createEventEmitter = ({
 /**
  * Creates a run event emitter sending events to the provided event handler.
  */
-export const createNoopEventEmitter = (): RunEventEmitter => {
+export const createToolEventEmitter = ({
+  eventHandler,
+  context,
+}: {
+  eventHandler: ToolEventHandlerFn | undefined;
+  context: RunContext;
+}): ToolEventEmitter => {
+  if (eventHandler === undefined) {
+    return createNoopEventEmitter();
+  }
+
   return {
-    emit: () => {},
+    emit: (event) => {
+      eventHandler(event);
+    },
   };
 };
 
-/**
- * Convert an internal onechat run event to its public-facing format.
- */
-export const convertInternalEvent = <
-  TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends Record<string, any> = Record<string, any>
->({
-  event: { type, data, meta },
-  context,
-}: {
-  event: InternalRunEvent<TEventType, TData, TMeta>;
-  context: RunContext;
-}): OnechatRunEvent<TEventType, TData, TMeta & OnechatRunEventMeta> => {
+const createNoopEventEmitter = () => {
   return {
-    type,
-    data,
-    meta: {
-      ...((meta ?? {}) as TMeta),
-      runId: context.runId,
-      stack: context.stack,
-    },
+    emit: () => {},
   };
 };

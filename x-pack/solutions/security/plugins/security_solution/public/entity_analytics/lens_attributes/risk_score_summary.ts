@@ -18,15 +18,11 @@ interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
-  // TODO: add riskColors in when severityPalette available
-  // riskColors: { [k in RiskSeverity]: string };
   riskEntity: EntityType;
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
-  // TODO: may need to pass riskColors in props, here, when severity palette agreed and hook created
-  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
 ) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
   const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
   const internalReferenceId = `internal-reference-id-${uuidv4()}`;

@@ -97,6 +97,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storage-adapter",
+                "id": "def-server.StorageIndexAdapter.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "StorageIndexAdapterOptions",
+                  "<TApplicationType>"
+                ],
+                "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []

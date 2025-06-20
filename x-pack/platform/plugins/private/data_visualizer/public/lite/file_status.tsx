@@ -21,9 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from './file_manager/file_wrapper';
-import { STATUS, type UploadStatus } from './file_manager/file_manager';
-import { CLASH_TYPE } from './file_manager/merge_tools';
+import { type UploadStatus, type FileAnalysis, CLASH_TYPE } from '@kbn/file-upload';
+import { STATUS } from '@kbn/file-upload';
 import { AnalysisSummary } from '../application/file_data_visualizer/components/analysis_summary';
 import { FileContents } from '../application/file_data_visualizer/components/file_contents';
 
@@ -95,7 +94,7 @@ export const FileStatus: FC<Props> = ({
                   <EuiFlexItem grow={8}>
                     <EuiText size="xs">
                       <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>&nbsp;
-                      <span>{fileStatus.fileSize}</span>
+                      <span>{fileStatus.fileSizeInfo.fileSizeFormatted}</span>
                     </EuiText>
                   </EuiFlexItem>
 

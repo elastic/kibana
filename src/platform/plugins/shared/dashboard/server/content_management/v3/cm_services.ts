@@ -261,29 +261,7 @@ export const panelGridDataSchema = schema.object({
 
 export const panelSchema = schema.object({
   panelConfig: schema.object(
-    {
-      version: schema.maybe(
-        schema.string({
-          meta: { description: 'The version of the embeddable in the panel.' },
-        })
-      ),
-      title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-      description: schema.maybe(
-        schema.string({ meta: { description: 'The description of the panel' } })
-      ),
-      savedObjectId: schema.maybe(
-        schema.string({
-          meta: { description: 'The unique id of the library item to construct the embeddable.' },
-        })
-      ),
-      hidePanelTitles: schema.maybe(
-        schema.boolean({
-          defaultValue: false,
-          meta: { description: 'Set to true to hide the panel title in its container.' },
-        })
-      ),
-      enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    },
+    {},
     {
       unknowns: 'allow',
     }
