@@ -49,6 +49,16 @@ describe('check_license', () => {
     it('should set management.jobTypes to undefined', () => {
       expect(checkLicense(exportTypesRegistry, undefined).management.jobTypes).toEqual(undefined);
     });
+
+    it('should set scheduledReports.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).scheduledReports.showLinks).toEqual(true);
+    });
+
+    it('should set scheduledReports.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).scheduledReports.enableLinks).toEqual(
+        false
+      );
+    });
   });
 
   describe('license information is not available', () => {
@@ -81,6 +91,16 @@ describe('check_license', () => {
 
     it('should set management.jobTypes to undefined', () => {
       expect(checkLicense(exportTypesRegistry, license).management.jobTypes).toEqual(undefined);
+    });
+
+    it('should set scheduledReports.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, license).scheduledReports.showLinks).toEqual(true);
+    });
+
+    it('should set scheduledReports.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, license).scheduledReports.enableLinks).toEqual(
+        false
+      );
     });
   });
 
@@ -121,6 +141,18 @@ describe('check_license', () => {
             'printable_pdf'
           );
         });
+
+        it('should set scheduledReports.showLinks to true', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.showLinks).toEqual(
+            true
+          );
+        });
+
+        it('should set scheduledReports.enableLinks to true', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.enableLinks).toEqual(
+            true
+          );
+        });
       });
 
       describe('& license is expired', () => {
@@ -146,6 +178,18 @@ describe('check_license', () => {
 
         it('should set management.jobTypes to undefined', () => {
           expect(checkLicense(exportTypesRegistry, license).management.jobTypes).toEqual(undefined);
+        });
+
+        it('should set scheduledReports.showLinks to true', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.showLinks).toEqual(
+            true
+          );
+        });
+
+        it('should set scheduledReports.enableLinks to false', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.enableLinks).toEqual(
+            false
+          );
         });
       });
     });
@@ -175,6 +219,12 @@ describe('check_license', () => {
           expect(checkLicense(exportTypesRegistry, license).management.jobTypes).toEqual([]);
           expect(checkLicense(exportTypesRegistry, license).management.jobTypes).toHaveLength(0);
         });
+
+        it('should set scheduledReports.showLinks to false', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.showLinks).toEqual(
+            false
+          );
+        });
       });
 
       describe('& license is expired', () => {
@@ -192,6 +242,12 @@ describe('check_license', () => {
 
         it('should set management.jobTypes to undefined', () => {
           expect(checkLicense(exportTypesRegistry, license).management.jobTypes).toEqual(undefined);
+        });
+
+        it('should set scheduledReports.showLinks to true', () => {
+          expect(checkLicense(exportTypesRegistry, license).scheduledReports.showLinks).toEqual(
+            true
+          );
         });
       });
     });

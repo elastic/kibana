@@ -112,11 +112,40 @@ describe('validateTypeMigrations', () => {
       expect(() => validate({ type })).not.toThrow();
     });
 
-    describe('when switchToModelVersionAt is specified', () => {
-      it('throws if a migration is specified for a version superior to switchToModelVersionAt', () => {
+    describe('effect of globalSwitchToModelVersionAt', () => {
+      it('throws if a migration is specified for a version superior to globalSwitchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
-          switchToModelVersionAt: '8.9.0',
+          migrations: {
+            '8.11.0': jest.fn(),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.11.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Migration for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+        );
+      });
+
+      it('throws if a schema is specified for a version superior to globalSwitchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
+          schemas: {
+            '8.11.0': schema.object({ name: schema.string() }),
+          },
+        });
+
+        expect(() =>
+          validate({ type, kibanaVersion: '8.11.0' })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Schema for type foo for version 8.11.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
+        );
+      });
+
+      it('throws if a migration is specified for a version equal to globalSwitchToModelVersionAt', () => {
+        const type = createType({
+          name: 'foo',
           migrations: {
             '8.10.0': jest.fn(),
           },
@@ -125,14 +154,13 @@ describe('validateTypeMigrations', () => {
         expect(() =>
           validate({ type, kibanaVersion: '8.10.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Migration for type foo for version 8.10.0 registered after switchToModelVersionAt (8.9.0)"`
+          `"Migration for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
         );
       });
 
-      it('throws if a schema is specified for a version superior to switchToModelVersionAt', () => {
+      it('throws if a schema is specified for a version equal to globalSwitchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
-          switchToModelVersionAt: '8.9.0',
           schemas: {
             '8.10.0': schema.object({ name: schema.string() }),
           },
@@ -141,46 +169,13 @@ describe('validateTypeMigrations', () => {
         expect(() =>
           validate({ type, kibanaVersion: '8.10.0' })
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Schema for type foo for version 8.10.0 registered after switchToModelVersionAt (8.9.0)"`
+          `"Schema for type foo for version 8.10.0 registered after globalSwitchToModelVersionAt (8.10.0)"`
         );
       });
 
-      it('throws if a migration is specified for a version equal to switchToModelVersionAt', () => {
+      it('does not throw if a migration is specified for a version inferior to globalSwitchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
-          switchToModelVersionAt: '8.9.0',
-          migrations: {
-            '8.9.0': jest.fn(),
-          },
-        });
-
-        expect(() =>
-          validate({ type, kibanaVersion: '8.10.0' })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Migration for type foo for version 8.9.0 registered after switchToModelVersionAt (8.9.0)"`
-        );
-      });
-
-      it('throws if a schema is specified for a version equal to switchToModelVersionAt', () => {
-        const type = createType({
-          name: 'foo',
-          switchToModelVersionAt: '8.9.0',
-          schemas: {
-            '8.9.0': schema.object({ name: schema.string() }),
-          },
-        });
-
-        expect(() =>
-          validate({ type, kibanaVersion: '8.10.0' })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Schema for type foo for version 8.9.0 registered after switchToModelVersionAt (8.9.0)"`
-        );
-      });
-
-      it('does not throw if a migration is specified for a version inferior to switchToModelVersionAt', () => {
-        const type = createType({
-          name: 'foo',
-          switchToModelVersionAt: '8.9.0',
           migrations: {
             '8.7.0': jest.fn(),
           },
@@ -189,10 +184,9 @@ describe('validateTypeMigrations', () => {
         expect(() => validate({ type, kibanaVersion: '8.10.0' })).not.toThrow();
       });
 
-      it('does not throw if a schema is specified for a version inferior to switchToModelVersionAt', () => {
+      it('does not throw if a schema is specified for a version inferior to globalSwitchToModelVersionAt', () => {
         const type = createType({
           name: 'foo',
-          switchToModelVersionAt: '8.9.0',
           schemas: {
             '8.7.0': schema.object({ name: schema.string() }),
           },
@@ -203,32 +197,8 @@ describe('validateTypeMigrations', () => {
     });
   });
 
-  describe('switchToModelVersionAt', () => {
-    it('throws if the specified version is not a valid semver', () => {
-      const type = createType({
-        name: 'foo',
-        switchToModelVersionAt: 'foo',
-      });
-
-      expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: invalid version specified for switchToModelVersionAt: foo"`
-      );
-    });
-
-    it('throws if the specified version defines a patch version > 0', () => {
-      const type = createType({
-        name: 'foo',
-        switchToModelVersionAt: '8.9.3',
-      });
-
-      expect(() => validate({ type })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: can't use a patch version for switchToModelVersionAt"`
-      );
-    });
-  });
-
   describe('modelVersions', () => {
-    it('throws if used without specifying switchToModelVersionAt', () => {
+    it('does not throw if used without migrations defined', () => {
       const type = createType({
         name: 'foo',
         modelVersions: {
@@ -236,16 +206,14 @@ describe('validateTypeMigrations', () => {
         },
       });
 
-      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: Using modelVersions requires to specify switchToModelVersionAt"`
-      );
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
     });
 
     it('throws if the version number is invalid', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '3.1.0',
         modelVersions: {
+          // @ts-expect-error
           '1.1': someModelVersion,
         },
       });
@@ -258,7 +226,6 @@ describe('validateTypeMigrations', () => {
     it('throws when starting with a version higher than 1', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '3.1.0',
         modelVersions: {
           '2': someModelVersion,
         },
@@ -272,7 +239,6 @@ describe('validateTypeMigrations', () => {
     it('throws when there is a gap in versions', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '3.1.0',
         modelVersions: {
           '1': someModelVersion,
           '3': someModelVersion,
@@ -298,7 +264,7 @@ describe('validateTypeMigrations', () => {
   describe('modelVersions with schemas', () => {
     const baseSchema = schema.object({ name: schema.string() }, { unknowns: 'ignore' });
 
-    it('throws if used without specifying switchToModelVersionAt', () => {
+    it('does not throw without specifying migrations', () => {
       const type = createType({
         name: 'foo',
         modelVersions: {
@@ -317,9 +283,7 @@ describe('validateTypeMigrations', () => {
         },
       });
 
-      expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: Using modelVersions requires to specify switchToModelVersionAt"`
-      );
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
     });
 
     it('does not throw passing a model version schema map', () => {
@@ -332,7 +296,6 @@ describe('validateTypeMigrations', () => {
       };
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '3.1.0',
         modelVersions: {
           '1': someModelVersionWithSchema,
         },
@@ -350,7 +313,6 @@ describe('validateTypeMigrations', () => {
       const someModelVersionWithSchema = { changes: [], schemas: {} };
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '3.1.0',
         modelVersions: {
           '1': someModelVersionWithSchema,
         },
@@ -364,7 +326,6 @@ describe('validateTypeMigrations', () => {
     it('throws when registering mapping additions not present in the global mappings', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           '1': {
             changes: [
@@ -392,7 +353,6 @@ describe('validateTypeMigrations', () => {
     it('does not throw when registering mapping additions are present in the global mappings with a schema', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           '1': {
             changes: [
@@ -431,7 +391,6 @@ describe('validateTypeMigrations', () => {
     it('throws when registering mapping additions different than the global mappings', () => {
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '8.8.0',
         modelVersions: {
           '1': {
             changes: [
@@ -461,7 +420,6 @@ describe('validateTypeMigrations', () => {
       const baseSchema = schema.object({ name: schema.string() });
       const type = createType({
         name: 'foo',
-        switchToModelVersionAt: '8.10.0',
         modelVersions: {
           1: {
             changes: [],
