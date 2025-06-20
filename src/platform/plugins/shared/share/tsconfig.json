@@ -27,6 +27,12 @@
     "@kbn/core-test-helpers-test-utils",
     "@kbn/std",
     "@kbn/core-rendering-browser",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging",
+    "@kbn/core-rendering-browser",
+    "@kbn/std",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": [
     "target/**/*",

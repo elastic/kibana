@@ -73,5 +73,16 @@
     "@kbn/utils",
     "@kbn/core",
     "@kbn/integration-assistant-plugin",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/event-log-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/alerting-state-types",
+    "@kbn/std",
+    "@kbn/entities-schema",
+    "@kbn/data-forge",
+    "@kbn/entityManager-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-anomaly-utils",
   ]
 }

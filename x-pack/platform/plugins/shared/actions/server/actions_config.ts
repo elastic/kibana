@@ -55,6 +55,13 @@ export interface ActionsConfigurationUtilities {
   ): string | undefined;
   enableFooterInEmail: () => boolean;
   getMaxQueued: () => number;
+  getWebhookSettings(): {
+    ssl: {
+      pfx: {
+        enabled: boolean;
+      };
+    };
+  };
   getAwsSesConfig: () => AwsSesConfig;
 }
 
@@ -230,6 +237,15 @@ export function getActionsConfigurationUtilities(
     },
     enableFooterInEmail: () => config.enableFooterInEmail,
     getMaxQueued: () => config.queued?.max || DEFAULT_QUEUED_MAX,
+    getWebhookSettings: () => {
+      return {
+        ssl: {
+          pfx: {
+            enabled: config.webhook?.ssl.pfx.enabled ?? true,
+          },
+        },
+      };
+    },
     getAwsSesConfig: () => {
       if (config.email?.services?.ses.host && config.email?.services?.ses.port) {
         return {

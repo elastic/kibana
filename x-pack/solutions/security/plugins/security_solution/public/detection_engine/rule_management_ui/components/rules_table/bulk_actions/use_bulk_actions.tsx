@@ -11,7 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ML_RULES_UNAVAILABLE } from './translations';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
@@ -19,6 +19,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
+import { defaultRangeValue } from '../../../../rule_gaps/constants';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
@@ -47,6 +49,10 @@ import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useUpsellingMessage } from '../../../../../common/hooks/use_upselling';
+import { useLicense } from '../../../../../common/hooks/use_license';
+import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../../common/detection_engine/constants';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -92,6 +98,23 @@ export const useBulkActions = ({
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
+  const globalQuery = useMemo(() => {
+    const gapRange = filterOptions?.showRulesWithGaps
+      ? getGapRange(filterOptions.gapSearchRange ?? defaultRangeValue)
+      : undefined;
+
+    return {
+      query: kql,
+      ...(gapRange && { gapRange }),
+    };
+  }, [kql, filterOptions]);
+
+  const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'bulkEditAlertSuppressionEnabled'
+  );
+  const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
+  const license = useLicense();
+  const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
@@ -123,7 +146,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.enable,
-          ...(isAllSelected ? { query: kql } : { ids: ruleIds }),
+          ...(isAllSelected ? globalQuery : { ids: ruleIds }),
         });
       };
 
@@ -135,7 +158,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.disable,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
         });
       };
 
@@ -159,7 +182,7 @@ export const useBulkActions = ({
               DuplicateOptions.withExceptionsExcludeExpiredExceptions
             ),
           },
-          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -176,7 +199,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.delete,
-          ...(isAllSelected ? { query: kql } : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
         });
       };
 
@@ -184,9 +207,7 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        const response = await bulkExport(
-          isAllSelected ? { query: kql } : { ids: selectedRuleIds }
-        );
+        const response = await bulkExport(isAllSelected ? globalQuery : { ids: selectedRuleIds });
 
         // if response null, likely network error happened and export rules haven't been received
         if (!response) {
@@ -216,9 +237,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.run,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
           runPayload: {
             start_date: new Date(Date.now() - 1000).toISOString(),
             end_date: new Date().toISOString(),
@@ -253,7 +272,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkActionTypeEnum.run,
-          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          ...(isAllSelected ? globalQuery : { ids: enabledIds }),
           runPayload: {
             start_date: modalManualRuleRunConfirmationResult.startDate.toISOString(),
             end_date: modalManualRuleRunConfirmationResult.endDate.toISOString(),
@@ -279,9 +298,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkActionTypeEnum.edit,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          ...(isAllSelected ? globalQuery : { ids: selectedRuleIds }),
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
@@ -344,7 +361,9 @@ export const useBulkActions = ({
         await executeBulkAction({
           type: BulkActionTypeEnum.edit,
           ...prepareSearchParams({
-            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+            ...(isAllSelected
+              ? { filterOptions, gapRange: globalQuery.gapRange }
+              : { selectedRuleIds }),
             dryRunResult,
           }),
           editPayload: [editPayload],
@@ -358,6 +377,7 @@ export const useBulkActions = ({
       const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
       const isEditDisabled =
         missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
+      const isAlertSuppressionDisabled = isEditDisabled || !isAlertSuppressionLicenseValid;
 
       return [
         {
@@ -410,6 +430,20 @@ export const useBulkActions = ({
               disabled: isEditDisabled,
               panel: 3,
             },
+            ...(isBulkEditAlertSuppressionFeatureEnabled
+              ? [
+                  {
+                    key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
+                    'data-test-subj': 'alertSuppressionBulkEditRule',
+                    disabled: isAlertSuppressionDisabled,
+                    toolTipContent: isAlertSuppressionLicenseValid
+                      ? undefined
+                      : alertSuppressionUpsellingMessage,
+                    panel: 4,
+                  },
+                ]
+              : []),
             {
               key: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
               name: i18n.BULK_ACTION_ADD_RULE_ACTIONS,
@@ -576,6 +610,36 @@ export const useBulkActions = ({
             },
           ],
         },
+        {
+          id: 4,
+          title: i18n.BULK_ACTION_MENU_TITLE,
+          items: [
+            {
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION,
+              'data-test-subj': 'setAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              name: i18n.BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD,
+              'data-test-subj': 'setAlertSuppressionForThresholdBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.set_alert_suppression_for_threshold),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+            {
+              key: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              name: i18n.BULK_ACTION_DELETE_ALERT_SUPPRESSION,
+              'data-test-subj': 'deleteAlertSuppressionBulkEditRule',
+              onClick: handleBulkEdit(BulkActionEditTypeEnum.delete_alert_suppression),
+              disabled: isAlertSuppressionDisabled,
+              toolTipProps: { position: 'right' },
+            },
+          ],
+        },
       ];
     },
     [
@@ -587,7 +651,6 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      kql,
       toasts,
       showBulkDuplicateConfirmation,
       showManualRuleRunConfirmation,
@@ -601,8 +664,12 @@ export const useBulkActions = ({
       executeBulkActionsDryRun,
       filterOptions,
       completeBulkEditForm,
+      isBulkEditAlertSuppressionFeatureEnabled,
       startServices,
       canCreateTimelines,
+      isAlertSuppressionLicenseValid,
+      alertSuppressionUpsellingMessage,
+      globalQuery,
     ]
   );
 
