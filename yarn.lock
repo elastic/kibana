@@ -6031,10 +6031,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
-  version "0.0.0"
-  uid ""
-
 "@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""

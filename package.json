@@ -1532,7 +1532,6 @@
     "@kbn/import-locator": "link:packages/kbn-import-locator",
     "@kbn/import-resolver": "link:src/platform/packages/private/kbn-import-resolver",
     "@kbn/inference-cli": "link:x-pack/platform/packages/shared/kbn-inference-cli",
-    "@kbn/inventory-e2e": "link:x-pack/solutions/observability/plugins/inventory/e2e",
     "@kbn/jest-serializers": "link:src/platform/packages/private/kbn-jest-serializers",
     "@kbn/journeys": "link:src/platform/packages/private/kbn-journeys",
     "@kbn/json-ast": "link:packages/kbn-json-ast",
