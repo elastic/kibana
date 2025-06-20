@@ -18,34 +18,34 @@ import path from 'path';
  * @returns The package directory path or the original path if no package found
  */
 function findPackageDirectory(filePath: string): string {
-    let currentDir = path.dirname(filePath);
-    const rootDir = path.parse(currentDir).root;
+  let currentDir = path.dirname(filePath);
+  const rootDir = path.parse(currentDir).root;
 
-    // Traverse up the directory tree until we find a kibana.jsonc file or hit the root
-    while (true) {
-        // Check if current directory has kibana.jsonc
-        if (fs.existsSync(path.join(currentDir, 'kibana.jsonc'))) {
-            return currentDir;
-        }
-
-        // If we've reached the root and haven't found kibana.jsonc, break the loop
-        if (currentDir === rootDir) {
-            break;
-        }
-
-        // Move up to parent directory
-        const parentDir = path.dirname(currentDir);
-
-        // Break if we can't go up any further (safety check)
-        if (parentDir === currentDir) {
-            break;
-        }
-
-        currentDir = parentDir;
+  // Traverse up the directory tree until we find a kibana.jsonc file or hit the root
+  while (true) {
+    // Check if current directory has kibana.jsonc
+    if (fs.existsSync(path.join(currentDir, 'kibana.jsonc'))) {
+      return currentDir;
     }
 
-    // If no package directory found, return the directory of the original path
-    return path.dirname(filePath);
+    // If we've reached the root and haven't found kibana.jsonc, break the loop
+    if (currentDir === rootDir) {
+      break;
+    }
+
+    // Move up to parent directory
+    const parentDir = path.dirname(currentDir);
+
+    // Break if we can't go up any further (safety check)
+    if (parentDir === currentDir) {
+      break;
+    }
+
+    currentDir = parentDir;
+  }
+
+  // If no package directory found, return the directory of the original path
+  return path.dirname(filePath);
 }
 
 /**
@@ -55,26 +55,26 @@ function findPackageDirectory(filePath: string): string {
  * @returns Record mapping package paths to their dependencies
  */
 export function groupByPackage(dependencies: Array<{ from: string; to: string }>) {
-    const packageMap = new Map<string, Set<string>>();
+  const packageMap = new Map<string, Set<string>>();
 
-    for (const dep of dependencies) {
-        const { from, to } = dep;
+  for (const dep of dependencies) {
+    const { from, to } = dep;
 
-        // Find the package directory for the source file
-        const packageDir = findPackageDirectory(from);
+    // Find the package directory for the source file
+    const packageDir = findPackageDirectory(from);
 
-        if (!packageMap.has(packageDir)) {
-            packageMap.set(packageDir, new Set());
-        }
-
-        packageMap.get(packageDir)!.add(to.replace(/^node_modules\//, ''));
+    if (!packageMap.has(packageDir)) {
+      packageMap.set(packageDir, new Set());
     }
 
-    // Convert the map to a record
-    const result: Record<string, string[]> = {};
-    for (const [packageDir, deps] of packageMap.entries()) {
-        result[packageDir] = Array.from(deps);
-    }
+    packageMap.get(packageDir)!.add(to.replace(/^node_modules\//, ''));
+  }
 
-    return result;
+  // Convert the map to a record
+  const result: Record<string, string[]> = {};
+  for (const [packageDir, deps] of packageMap.entries()) {
+    result[packageDir] = Array.from(deps);
+  }
+
+  return result;
 }
