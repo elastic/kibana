@@ -9,7 +9,6 @@ import {
   EuiPageTemplate,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   useEuiTheme,
   EuiPanel,
   EuiText,
@@ -57,44 +56,8 @@ export const SearchHomepageHeader: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="xl" />
-            <EuiFlexGroup gutterSize="xl">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="checkInCircleFilled" color="primary" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
-                      defaultMessage: 'Feature update',
-                    })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="checkInCircleFilled" color="primary" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
-                      defaultMessage: 'Feature update',
-                    })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="checkInCircleFilled" color="primary" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
-                      defaultMessage: 'Feature update',
-                    })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {/* To DO: Enable the following once we have text content ready
+            <FeatureUpdateGroup updates={['Feature update', 'Feature update', 'Feature update']} /> */}
           </EuiPanel>
         </EuiFlexItem>
 
