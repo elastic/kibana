@@ -14,7 +14,6 @@ import type {
   ESQLAstCompletionCommand,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
-  ESQLAstRenameExpression,
   ESQLAstRerankCommand,
   ESQLColumn,
   ESQLFunction,
@@ -531,18 +530,6 @@ export class GlobalVisitorContext<
         if (!this.methods.visitMapEntryExpression) break;
         return this.visitMapEntryExpression(parent, expressionNode, input as any);
       }
-      case 'option': {
-        switch (expressionNode.name) {
-          case 'as': {
-            if (!this.methods.visitRenameExpression) break;
-            return this.visitRenameExpression(
-              parent,
-              expressionNode as ESQLAstRenameExpression,
-              input as any
-            );
-          }
-        }
-      }
       case 'query': {
         if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
         return this.visitQuery(parent, expressionNode, input as any);
@@ -621,15 +608,6 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitInlineCastExpression'> {
     const context = new contexts.InlineCastExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitInlineCastExpression', context, input);
-  }
-
-  public visitRenameExpression(
-    parent: contexts.VisitorContext | null,
-    node: ESQLAstRenameExpression,
-    input: types.VisitorInput<Methods, 'visitRenameExpression'>
-  ): types.VisitorOutput<Methods, 'visitRenameExpression'> {
-    const context = new contexts.RenameExpressionVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitRenameExpression', context, input);
   }
 
   public visitOrderExpression(

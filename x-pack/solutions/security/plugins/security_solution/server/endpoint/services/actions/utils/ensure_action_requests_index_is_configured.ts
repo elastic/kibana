@@ -58,6 +58,11 @@ export const ensureActionRequestsIndexIsConfigured = async (
       )}`
   );
 
+  const newRootMappings: MappingPropertyBase['properties'] = {
+    originSpaceId: { type: 'keyword', ignore_above: 1024 },
+    tags: { type: 'keyword' },
+  };
+
   const newAgentPolicyMappings: MappingPropertyBase['properties'] = {
     agentId: { type: 'keyword', ignore_above: 1024 },
     elasticAgentId: { type: 'keyword', ignore_above: 1024 },
@@ -75,7 +80,7 @@ export const ensureActionRequestsIndexIsConfigured = async (
       .putMapping({
         index: ENDPOINT_ACTIONS_INDEX,
         properties: {
-          originSpaceId: { type: 'keyword', ignore_above: 1024 },
+          ...newRootMappings,
           agent: {
             properties: {
               policy: {
@@ -121,7 +126,7 @@ export const ensureActionRequestsIndexIsConfigured = async (
     ) {
       logger.debug(`Adding mappings to component template [${COMPONENT_TEMPLATE_NAME}]`);
 
-      componentMappings.properties.originSpaceId = { type: 'keyword', ignore_above: 1024 };
+      Object.assign(componentMappings.properties, newRootMappings);
 
       if (
         componentMappings.properties.agent &&

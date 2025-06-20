@@ -18,6 +18,7 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
 import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
 import { ensureActionRequestsIndexIsConfigured } from '../services';
 import { CROWDSTRIKE_HOST_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/crowdstrike';
@@ -54,6 +55,7 @@ export const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 export type MigrationStateReferenceData = ReferenceDataSavedObject<MigrationMetadata>;
 
 type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
+  tags?: LogsEndpointAction['tags'];
   agent: Pick<LogsEndpointAction['agent'], 'policy'>;
 };
 
@@ -503,6 +505,13 @@ class AgentPolicyInfoBuilder {
         }
 
         response.policyUpdate.agent.policy.push(agentPolicyInfo.agentInfo);
+
+        if (agentPolicyInfo.agentInfo.integrationPolicyId === NOT_FOUND_VALUE) {
+          response.policyUpdate.tags = [
+            ...(actionRequest.tags || []),
+            ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
+          ];
+        }
       }
     });
 
