@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord, PARENT_ID_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import { DataTableRecord, OTEL_SPAN_KIND, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 
 export const isSpanHit = (hit: DataTableRecord | null): boolean => {
-  return !!hit?.flattened[PARENT_ID_FIELD] && !hit?.flattened[TRANSACTION_NAME_FIELD];
+  if (!hit?.flattened) {
+    return false;
+  }
+
+  const processorEvent = hit.flattened[PROCESSOR_EVENT_FIELD];
+  const spanKind = hit.flattened[OTEL_SPAN_KIND];
+
+  const isOtelSpan = spanKind != null || processorEvent == null;
+  const isApmSpan = processorEvent === 'span';
+
+  return isApmSpan || isOtelSpan;
 };

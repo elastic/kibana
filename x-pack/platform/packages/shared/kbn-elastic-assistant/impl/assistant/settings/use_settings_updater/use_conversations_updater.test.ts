@@ -10,9 +10,13 @@ import { useConversationsUpdater } from './use_conversations_updater';
 import { useAssistantContext } from '../../../assistant_context';
 import { bulkUpdateConversations } from '../../api/conversations/bulk_update_actions_conversations';
 import { Conversation } from '../../../..';
+import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 
 jest.mock('../../../assistant_context');
 jest.mock('../../api/conversations/bulk_update_actions_conversations');
+jest.mock('../../api/conversations/delete_all_conversations', () => ({
+  deleteAllConversations: jest.fn(),
+}));
 
 const mockConversations: Record<string, Conversation> = {
   '03a2ef3c-3aec-4f13-8f18-bb31b47b2df1': {
@@ -199,5 +203,39 @@ describe('useConversationsUpdater', () => {
 
     expect(result.current.conversationSettings).toEqual(mockConversations);
     expect(result.current.conversationsSettingsBulkActions).toEqual({});
+  });
+
+  it('should call deleteAllConversations when isDeleteAll is true', async () => {
+    const { result } = renderHook(() => useConversationsUpdater(mockConversations, true));
+
+    act(() => {
+      result.current.saveConversationsSettings({
+        isDeleteAll: true,
+        excludedIds: [],
+      });
+    });
+
+    expect(deleteAllConversations as jest.Mock).toHaveBeenCalledWith({
+      excludedIds: [],
+      http: mockAssistantContext.http,
+      toasts: mockAssistantContext.toasts,
+    });
+  });
+
+  it('should call deleteAllConversations when excludedIds is not empty', async () => {
+    const { result } = renderHook(() => useConversationsUpdater(mockConversations, true));
+
+    act(() => {
+      result.current.saveConversationsSettings({
+        isDeleteAll: true,
+        excludedIds: ['1'],
+      });
+    });
+
+    expect(deleteAllConversations as jest.Mock).toHaveBeenCalledWith({
+      excludedIds: ['1'],
+      http: mockAssistantContext.http,
+      toasts: mockAssistantContext.toasts,
+    });
   });
 });

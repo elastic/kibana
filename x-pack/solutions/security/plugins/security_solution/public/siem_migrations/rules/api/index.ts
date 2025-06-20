@@ -28,13 +28,13 @@ import {
   SIEM_RULE_MIGRATION_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_PATH,
+  SIEM_RULE_MIGRATION_STOP_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationResponse,
   GetRuleMigrationTranslationStatsResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
-  GetRuleMigrationStatsResponse,
   GetRuleMigrationResourcesMissingResponse,
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesResponse,
@@ -47,6 +47,7 @@ import type {
   GetRuleMigrationIntegrationsStatsResponse,
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
+  StopRuleMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 
@@ -60,8 +61,9 @@ export interface GetRuleMigrationStatsParams {
 export const getRuleMigrationStats = async ({
   migrationId,
   signal,
-}: GetRuleMigrationStatsParams): Promise<GetRuleMigrationStatsResponse> => {
-  return KibanaServices.get().http.get<GetRuleMigrationStatsResponse>(
+}: GetRuleMigrationStatsParams): Promise<RuleMigrationStats> => {
+  // Typed with `RuleMigrationStats` instead of `GetRuleMigrationStatsResponse` to use native enums instead of the zod enum
+  return KibanaServices.get().http.get<RuleMigrationStats>(
     replaceParams(SIEM_RULE_MIGRATION_STATS_PATH, { migration_id: migrationId }),
     { version: '1', signal }
   );
@@ -193,6 +195,23 @@ export const startRuleMigration = async ({
   return KibanaServices.get().http.post<StartRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
+  );
+};
+
+export interface StopRuleMigrationParams {
+  /** `id` of the migration to stop */
+  migrationId: string;
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Stops a new migration with the provided rules. */
+export const stopRuleMigration = async ({
+  migrationId,
+  signal,
+}: StopRuleMigrationParams): Promise<StopRuleMigrationResponse> => {
+  return KibanaServices.get().http.post<StopRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_STOP_PATH, { migration_id: migrationId }),
+    { version: '1', signal }
   );
 };
 

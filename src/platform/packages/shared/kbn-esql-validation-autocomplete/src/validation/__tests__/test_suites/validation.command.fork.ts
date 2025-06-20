@@ -115,8 +115,8 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
     (EVAL TO_UPPER(keywordField) | LIMIT 100)
     (FORK (WHERE 1))`,
               [
-                "SyntaxError: mismatched input 'FORK' expecting {'change_point', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where'}",
-                "SyntaxError: token recognition error at: ')'",
+                '[FORK] Must include at least two branches.',
+                '[FORK] a query cannot have more than one FORK command.',
               ]
             );
           });

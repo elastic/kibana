@@ -191,12 +191,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the rule's bulk action to manage alert suppression
+   */
+  bulkEditAlertSuppressionEnabled: false,
 
   /**
    * Enables the new data ingestion hub
