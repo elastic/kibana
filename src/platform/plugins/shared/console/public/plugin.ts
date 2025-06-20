@@ -20,6 +20,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddedConsoleView,
+  AppPluginSetupDependencies,
 } from './types';
 import {
   AutocompleteInfo,
@@ -31,7 +32,13 @@ import {
 } from './services';
 
 export class ConsoleUIPlugin
-  implements Plugin<ConsolePluginSetup, ConsolePluginStart, AppSetupUIPluginDependencies>
+  implements
+    Plugin<
+      ConsolePluginSetup,
+      ConsolePluginStart,
+      AppSetupUIPluginDependencies,
+      AppPluginSetupDependencies
+    >
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
@@ -46,7 +53,7 @@ export class ConsoleUIPlugin
   }
 
   public setup(
-    { notifications, getStartServices, http }: CoreSetup,
+    { notifications, getStartServices, http }: CoreSetup<AppPluginSetupDependencies>,
     { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
   ): ConsolePluginSetup {
     const {
@@ -82,12 +89,14 @@ export class ConsoleUIPlugin
         }),
         enableRouting: true,
         mount: async ({ element, history }) => {
-          const [core] = await getStartServices();
+          const [core, deps] = await getStartServices();
 
           const {
             docLinks: { DOC_LINK_VERSION, links },
+            application,
             ...startServices
           } = core;
+          const { dataViews, data, licensing } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -96,6 +105,10 @@ export class ConsoleUIPlugin
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
+            application,
+            dataViews,
+            data,
+            licensing,
             notifications,
             usageCollection,
             element,
@@ -143,6 +156,9 @@ export class ConsoleUIPlugin
       consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
           core,
+          dataViews: deps.dataViews,
+          data: deps.data,
+          licensing: deps.licensing,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);

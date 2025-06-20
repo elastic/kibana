@@ -20,7 +20,6 @@ import type {
   ESQLAstItem,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
-  ESQLAstRenameExpression,
   ESQLAstRerankCommand,
   ESQLColumn,
   ESQLCommandOption,
@@ -34,7 +33,6 @@ import type {
   ESQLMap,
   ESQLMapEntry,
   ESQLOrderExpression,
-  ESQLProperNode,
   ESQLSource,
   ESQLStringLiteral,
   ESQLTimeInterval,
@@ -52,18 +50,6 @@ import type {
 } from './types';
 import { Builder } from '../builder';
 import { isProperNode } from '../ast/helpers';
-
-const isRenameExpression = (
-  parent: ESQLProperNode,
-  node: ESQLAstExpression
-): node is ESQLAstRenameExpression => {
-  return (
-    parent.type === 'command' &&
-    parent.name === 'rename' &&
-    node.type === 'option' &&
-    node.name === 'as'
-  );
-};
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -97,7 +83,7 @@ export class VisitorContext<
 
     for (const arg of this.arguments()) {
       if (!arg) continue;
-      if (arg.type === 'option' && !isRenameExpression(this.node as ESQLProperNode, arg)) {
+      if (arg.type === 'option') {
         continue;
       }
       yield this.visitExpression(
@@ -201,8 +187,6 @@ export class CommandVisitorContext<
       if (!arg || Array.isArray(arg)) {
         continue;
       }
-      // We treat "AS" options as rename expressions, not as command options.
-      if (isRenameExpression(this.node, arg)) continue;
       if (arg.type === 'option') {
         yield arg;
       }
@@ -235,9 +219,6 @@ export class CommandVisitorContext<
           continue;
         }
         if (arg.type !== 'option') {
-          yield arg;
-        } else if (isRenameExpression(this.node, arg)) {
-          // We treat "AS" options as rename expressions, not as command options.
           yield arg;
         }
       }
@@ -628,11 +609,6 @@ export class InlineCastExpressionVisitorContext<
     return this.visitExpression(this.value(), input as any);
   }
 }
-
-export class RenameExpressionVisitorContext<
-  Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
-> extends VisitorContext<Methods, Data, ESQLAstRenameExpression> {}
 
 export class OrderExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,

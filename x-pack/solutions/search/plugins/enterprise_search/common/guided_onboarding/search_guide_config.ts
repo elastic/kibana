@@ -8,15 +8,13 @@
 import type { GuideConfig, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
-export const websiteSearchGuideId = 'websiteSearch';
 export const databaseSearchGuideId = 'databaseSearch';
 
 const apiRoutes = {
   [databaseSearchGuideId]: '/connectors/select_connector',
-  [websiteSearchGuideId]: '/crawlers',
 };
 
-export type EnterpriseSearchGuideIds = typeof websiteSearchGuideId | typeof databaseSearchGuideId;
+export type EnterpriseSearchGuideIds = typeof databaseSearchGuideId;
 
 const getAddDataStep: (method?: EnterpriseSearchGuideIds) => StepConfig = (method) => {
   return {
@@ -82,7 +80,5 @@ const getGuideConfig: (telemetryId: EnterpriseSearchGuideIds) => GuideConfig = (
     steps: [getAddDataStep(telemetryId), getSearchExperienceStep()],
   };
 };
-
-export const websiteSearchGuideConfig: GuideConfig = getGuideConfig(websiteSearchGuideId);
 
 export const databaseSearchGuideConfig: GuideConfig = getGuideConfig(databaseSearchGuideId);

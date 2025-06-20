@@ -18,7 +18,7 @@ export function registerExecuteConnectorFunction({
     {
       name: EXECUTE_CONNECTOR_FUNCTION_NAME,
       description: 'Use this function when user explicitly asks to call a kibana connector.',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
       parameters: {
         type: 'object',
         properties: {

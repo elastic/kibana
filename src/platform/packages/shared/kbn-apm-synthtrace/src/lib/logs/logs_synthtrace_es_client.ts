@@ -180,8 +180,8 @@ function logsPipeline({ includeSerialization = true }: Pipeline) {
       : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getRoutingTransform('logs'),
       (err: unknown) => {

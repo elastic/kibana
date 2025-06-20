@@ -14,6 +14,7 @@ import {
   clearOverviewStatusState,
   fetchOverviewStatusAction,
   quietFetchOverviewStatusAction,
+  initialLoadReported,
 } from './actions';
 
 export interface OverviewStatusStateReducer {
@@ -23,6 +24,7 @@ export interface OverviewStatusStateReducer {
   allConfigs?: OverviewStatusMetaData[];
   disabledConfigs?: OverviewStatusMetaData[];
   error: IHttpSerializedFetchError | null;
+  isInitialLoad: boolean;
 }
 
 const initialState: OverviewStatusStateReducer = {
@@ -30,6 +32,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  isInitialLoad: true,
 };
 
 export const overviewStatusReducer = createReducer(initialState, (builder) => {
@@ -65,6 +68,9 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.error = null;
+    })
+    .addCase(initialLoadReported, (state) => {
+      state.isInitialLoad = false;
     });
 });
 

@@ -51,7 +51,9 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
       if (onFailureProcessors) {
         await testSubjects.click('onFailureToggle');
-        await aceEditor.setValue('onFailureEditor', processors);
+        if (processors) {
+          await aceEditor.setValue('onFailureEditor', processors);
+        }
       }
 
       await testSubjects.click('submitButton');

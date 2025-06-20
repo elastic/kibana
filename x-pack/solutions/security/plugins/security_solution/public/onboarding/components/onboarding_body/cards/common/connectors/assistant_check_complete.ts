@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { loadAiConnectors } from '../../../../../../common/utils/connectors/ai_connectors';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
-import { loadAiConnectors } from './ai_connectors';
 import { getConnectorsAuthz } from './authz';
 import type { AssistantCardMetadata } from '../../assistant/types';
 

@@ -17,6 +17,7 @@ export interface UseRunQueryRulesetProps {
   content?: string;
   color?: EuiButtonColor;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export const UseRunQueryRuleset = ({
@@ -25,9 +26,10 @@ export const UseRunQueryRuleset = ({
   content,
   color,
   onClick,
+  disabled = false,
 }: UseRunQueryRulesetProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
-  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId);
+  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId, !disabled);
 
   // Loop through all actions children to gather unique _index values
   const { indices, matchCriteria } = useMemo((): { indices: string; matchCriteria: string } => {

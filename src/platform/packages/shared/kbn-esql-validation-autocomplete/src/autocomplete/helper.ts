@@ -670,7 +670,11 @@ export function checkFunctionInvocationComplete(
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };
   }
-  if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(func.args[1]) &&
+    !func.args[1].length
+  ) {
     return { complete: false, reason: 'tooFewArgs' };
   }
 

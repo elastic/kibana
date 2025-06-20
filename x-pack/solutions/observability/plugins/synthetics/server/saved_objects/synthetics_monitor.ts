@@ -246,6 +246,9 @@ export const getSyntheticsMonitorSavedObjectType = (
             },
           },
         },
+        maintenance_windows: {
+          type: 'keyword',
+        },
       },
     },
     management: {
@@ -265,6 +268,16 @@ export const getSyntheticsMonitorSavedObjectType = (
             type: 'mappings_addition',
             addedMappings: {
               config_id: { type: 'keyword' },
+            },
+          },
+        ],
+      },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              maintenance_windows: { type: 'keyword' },
             },
           },
         ],

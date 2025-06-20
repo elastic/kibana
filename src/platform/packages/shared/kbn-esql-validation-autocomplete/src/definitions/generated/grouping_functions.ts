@@ -1532,7 +1532,7 @@ const categorizeDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.categorize', {
     defaultMessage: 'Groups text messages into categories of similarly formatted text values.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

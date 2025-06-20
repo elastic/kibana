@@ -20,7 +20,7 @@ export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
   const { euiTheme } = useEuiTheme();
   const zIndex =
     typeof euiTheme.levels.header === 'number'
-      ? euiTheme.levels.header - 1 // We want it to appear right below the header
+      ? euiTheme.levels.header - 10 // We want it to appear right below the header
       : euiTheme.levels.header;
 
   return (

@@ -1,58 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Marker renders agent marker 1`] = `
-<MarkerContainer
-  style={
-    Object {
-      "left": 4.5,
-    }
-  }
->
-  <AgentMarker
-    mark={
-      Object {
-        "id": "agent",
-        "offset": 1000,
-        "type": "agentMark",
-        "verticalLine": true,
-      }
-    }
-  />
-</MarkerContainer>
+exports[`Marker renders agent marker correctly 1`] = `
+<div>
+  <div
+    class="css-1oyht0a-MarkerContainer eoof5b20"
+    style="left: 4.5px;"
+  >
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    >
+      <div
+        class="css-1ejn3a9-Container en0jakt1"
+      >
+        <span
+          class="css-xbgcmn-Indicator en0jakt0"
+          color="#8E9FBC"
+          shape="circle"
+        />
+      </div>
+    </span>
+  </div>
+</div>
 `;
 
-exports[`Marker renders error marker 1`] = `
-<MarkerContainer
-  style={
-    Object {
-      "left": 4.5,
-    }
-  }
->
-  <ErrorMarker
-    mark={
-      Object {
-        "error": Object {
-          "error": Object {
-            "grouping_key": "123",
-          },
-          "service": Object {
-            "name": "bar",
-          },
-          "trace": Object {
-            "id": "123",
-          },
-          "transaction": Object {
-            "id": "456",
-          },
-        },
-        "id": "agent",
-        "offset": 1000,
-        "serviceColor": "#fff",
-        "type": "errorMark",
-        "verticalLine": true,
-      }
-    }
-  />
-</MarkerContainer>
+exports[`Marker renders error marker correctly 1`] = `
+<div>
+  <div
+    class="css-1oyht0a-MarkerContainer eoof5b20"
+    style="left: 4.5px;"
+  >
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="popover"
+    >
+      <div
+        class="e1tl8a5o0 css-lzkl4t-Container-Button en0jakt1"
+        data-test-subj="popover"
+      >
+        <span
+          class="css-1p2bud6-Indicator en0jakt0"
+          color="#C61E25"
+          shape="square"
+        />
+      </div>
+    </div>
+  </div>
+</div>
 `;

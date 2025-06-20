@@ -12,5 +12,4 @@ export const getPrivilegedMonitorUsersJoin = (
 ) => `| RENAME @timestamp AS event_timestamp
   | LOOKUP JOIN ${getPrivilegedMonitorUsersIndex(namespace)} ON user.name
   | RENAME event_timestamp AS @timestamp
-  | EVAL is_privileged = labels.monitoring.privileged_users == "monitored"
-  | WHERE is_privileged == true`;
+  | WHERE user.is_privileged == true`;

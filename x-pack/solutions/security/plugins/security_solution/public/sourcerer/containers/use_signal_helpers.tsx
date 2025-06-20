@@ -11,10 +11,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { sourcererSelectors, sourcererActions } from '../store';
 import { useSourcererDataView } from '.';
 import { SourcererScopeName } from '../store/model';
-import { useDataView } from '../../common/containers/source/use_data_view';
+import { useDataView as useOldDataView } from '../../common/containers/source/use_data_view';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */
@@ -22,8 +25,16 @@ export const useSignalHelpers = (): {
   /* when false, signal index has been initiated */
   signalIndexNeedsInit: boolean;
 } => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.detections);
-  const { indexFieldsSearch } = useDataView();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { indicesExist, dataViewId: oldDataViewId } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
+  const { dataView: detectionsDataView } = useDataView(SourcererScopeName.detections);
+
+  const dataViewId = newDataViewPickerEnabled ? oldDataViewId : detectionsDataView?.id ?? null;
+
+  const { indexFieldsSearch } = useOldDataView();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
@@ -32,10 +43,24 @@ export const useSignalHelpers = (): {
   } = useKibana().services;
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
-  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+
+  const experimentalSignalIndexName = useSignalIndexName();
+
+  const oldDefaultDataView = useSelector(sourcererSelectors.defaultDataView);
+
+  const signalIndexName = newDataViewPickerEnabled
+    ? experimentalSignalIndexName
+    : signalIndexNameSourcerer;
+
+  const { dataView: experimentalDefaultDataView } = useDataView(SourcererScopeName.default);
+
+  const defaultDataViewPattern = newDataViewPickerEnabled
+    ? experimentalDefaultDataView?.getIndexPattern() ?? ''
+    : oldDefaultDataView.title;
+
   const signalIndexNeedsInit = useMemo(
-    () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
-    [defaultDataView.title, signalIndexNameSourcerer]
+    () => !defaultDataViewPattern.includes(`${signalIndexName}`),
+    [defaultDataViewPattern, signalIndexName]
   );
   const shouldWePollForIndex = useMemo(
     () => !indicesExist && !signalIndexNeedsInit,
@@ -47,15 +72,15 @@ export const useSignalHelpers = (): {
       abortCtrl.current = new AbortController();
       try {
         const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataView.title.split(',') },
+          body: { patternList: defaultDataViewPattern.split(',') },
           signal: abortCtrl.current.signal,
           dataViewId,
           dataViewService: dataViews,
         });
 
         if (
-          signalIndexNameSourcerer !== null &&
-          sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer)
+          signalIndexName !== null &&
+          sourcererDataView?.defaultDataView.patternList.includes(signalIndexName)
         ) {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
@@ -78,7 +103,7 @@ export const useSignalHelpers = (): {
       }
     };
 
-    if (signalIndexNameSourcerer !== null) {
+    if (signalIndexName !== null) {
       abortCtrl.current.abort();
       asyncSearch();
     }
@@ -86,10 +111,10 @@ export const useSignalHelpers = (): {
     addError,
     dataViewId,
     dataViews,
-    defaultDataView.title,
+    defaultDataViewPattern,
     dispatch,
     indexFieldsSearch,
-    signalIndexNameSourcerer,
+    signalIndexName,
   ]);
 
   return {

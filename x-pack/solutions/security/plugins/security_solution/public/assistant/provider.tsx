@@ -135,12 +135,12 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    application: { navigateToApp, currentAppId$ },
+    application: { navigateToApp, getUrlForApp, currentAppId$ },
     http,
     notifications,
     storage,
     triggersActionsUi: { actionTypeRegistry },
-    docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    docLinks,
     userProfile,
     chrome,
     productDocBase,
@@ -226,9 +226,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
-      docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
+      docLinks={docLinks}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
+      getUrlForApp={getUrlForApp}
       getComments={getComments}
       http={http}
       inferenceEnabled={inferenceEnabled}

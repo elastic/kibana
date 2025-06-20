@@ -285,6 +285,9 @@ const dashboardGridStyles = {
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
         },
+        '.embPanel__content, .embPanel__header': {
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
+        },
       },
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
       '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':

@@ -44,6 +44,10 @@ export enum SiemMigrationsEventTypes {
    */
   StartMigration = 'siem_migrations_start_rules_migration',
   /**
+   * When the translation of rules is stopped
+   */
+  StopMigration = 'siem_migrations_stop_rules_migration',
+  /**
    * When a translated rule is updated
    */
   TranslatedRuleUpdate = 'siem_migrations_translated_rule_update',
@@ -107,8 +111,14 @@ export interface ReportStartMigrationActionParams extends BaseResultActionParams
   eventName: string;
   migrationId: string;
   connectorId: string;
+  skipPrebuiltRulesMatching: boolean;
   isRetry: boolean;
   retryFilter?: SiemMigrationRetryFilter;
+}
+
+export interface ReportStopMigrationActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
 }
 
 // Translated rule actions
@@ -148,6 +158,7 @@ export interface SiemMigrationsTelemetryEventsMap {
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
   [SiemMigrationsEventTypes.StartMigration]: ReportStartMigrationActionParams;
+  [SiemMigrationsEventTypes.StopMigration]: ReportStopMigrationActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleUpdate]: ReportTranslatedRuleUpdateActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleInstall]: ReportTranslatedRuleInstallActionParams;
   [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: ReportTranslatedRuleBulkInstallActionParams;

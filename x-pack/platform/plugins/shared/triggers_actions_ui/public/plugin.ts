@@ -205,6 +205,7 @@ export class Plugin
     const ruleTypeRegistry = this.ruleTypeRegistry;
     this.connectorServices = {
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      enabledEmailServices: plugins.actions.enabledEmailServices,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });

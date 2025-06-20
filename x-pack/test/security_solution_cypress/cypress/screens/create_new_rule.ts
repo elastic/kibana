@@ -311,6 +311,9 @@ export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticse
 export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
   '[data-test-subj="preview-logged-requests-accordion"] button';
 
+export const PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-page-accordion"] button';
+
 export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
   '[data-test-subj="preview-logged-requests-item-accordion"] button';
 

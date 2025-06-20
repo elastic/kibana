@@ -35,14 +35,20 @@ export class ExportPageObject extends FtrService {
     return isEnabled;
   }
 
-  async clickPopoverItem(label: string) {
+  async clickPopoverItem(
+    label: string,
+    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+  ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
     await this.retry.waitFor('ascertain that export popover is open', async () => {
-      const isExportPopoverOpen = await this.isExportPopoverOpen();
+      let isExportPopoverOpen = await this.isExportPopoverOpen();
+
       if (!isExportPopoverOpen) {
-        await this.clickExportTopNavButton();
+        await exportPopoverOpener();
+        isExportPopoverOpen = await this.isExportPopoverOpen();
       }
+
       return isExportPopoverOpen;
     });
 

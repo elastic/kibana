@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {
+      it(`Return kspm status indexing when security_solution-cloud_security_posture.misconfiguration_latest doesn't contain new kspm documents, but has newly connected agents`, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
+      it(`Return cspm status indexing when security_solution-cloud_security_posture.misconfiguration_latest doesn't contain new cspm documents, but has newly connected agents  `, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,

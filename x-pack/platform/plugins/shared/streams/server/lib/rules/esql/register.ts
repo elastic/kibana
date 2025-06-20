@@ -55,5 +55,6 @@ export function esqlRuleType(): PersistenceAlertType<
       shouldWrite: false,
       isSpaceAware: false,
     },
+    internallyManaged: true,
   };
 }

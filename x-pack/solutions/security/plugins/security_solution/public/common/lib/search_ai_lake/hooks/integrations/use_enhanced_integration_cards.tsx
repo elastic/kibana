@@ -60,7 +60,6 @@ export const applyCategoryBadgeAndStyling = (
     showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
-    isUnverified: false, // temporarily hiding the 'unverified' badge from the integration card
     extraLabelsBadges: categoryBadge
       ? ([
           <EuiFlexItem grow={false}>

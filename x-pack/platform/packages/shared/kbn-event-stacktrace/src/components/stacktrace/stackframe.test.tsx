@@ -6,60 +6,58 @@
  */
 
 import React from 'react';
-import { ReactWrapper, shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
 import type { Stackframe } from '@kbn/apm-types';
-import { mountWithTheme } from '../../utils/test_helpers';
+import { renderWithTheme } from '../../utils/test_helpers';
 import { Stackframe as StackframeComponent } from './stackframe';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 
 describe('Stackframe', () => {
-  describe('when stackframe has source lines', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      const stackframe = stacktracesMock[0];
-      wrapper = mountWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
-    });
+  it('renders without errors when has source lines', () => {
+    const stackframe = stacktracesMock[0];
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
 
-    it('renders', () => {
-      expect(() =>
-        mountWithTheme(<StackframeComponent id="test" stackframe={stacktracesMock[0]} />)
-      ).not.toThrowError();
-    });
-
-    it('should render FrameHeading, Context and Variables', () => {
-      expect(wrapper.find('FrameHeading').length).toBe(1);
-      expect(wrapper.find('Context').length).toBe(1);
-      expect(wrapper.find('Variables').length).toBe(1);
-    });
-
-    it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(false);
-    });
+    expect(screen.getByTestId('FrameHeading')).toBeInTheDocument();
   });
 
-  describe('when stackframe does not have source lines', () => {
-    let wrapper: ReactWrapper;
-    beforeEach(() => {
-      const stackframe = { line: {} } as Stackframe;
-      wrapper = mountWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
-    });
+  it('renders Context and Variables when has source lines', () => {
+    const stackframe = stacktracesMock[0];
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
 
-    it('should render only FrameHeading', () => {
-      expect(wrapper.find('FrameHeading').length).toBe(1);
-      expect(wrapper.find('Context').length).toBe(0);
-      expect(wrapper.find('Variables').length).toBe(0);
-    });
-
-    it('should have isLibraryFrame=false as default', () => {
-      expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(false);
-    });
+    expect(screen.getByTestId('stacktraceContext')).toBeInTheDocument();
+    expect(screen.getByTestId('stacktraceLocalVariables')).toBeInTheDocument();
   });
 
-  it('should respect isLibraryFrame', () => {
+  it('has isLibraryFrame=false by default when has source lines', () => {
+    const stackframe = stacktracesMock[0];
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
+
+    const heading = screen.getByTestId('FrameHeading');
+    expect(heading).toHaveAttribute('data-library-frame', 'false');
+  });
+
+  it('renders only FrameHeading when has no source lines', () => {
     const stackframe = { line: {} } as Stackframe;
-    const wrapper = shallow(
-      <StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />
-    );
-    expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
+
+    expect(screen.getByTestId('FrameHeading')).toBeInTheDocument();
+    expect(screen.queryByTestId('stacktraceContext')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('stacktraceLocalVariables')).not.toBeInTheDocument();
+  });
+
+  it('has isLibraryFrame=false by default when has no source lines', () => {
+    const stackframe = { line: {} } as Stackframe;
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} />);
+
+    const heading = screen.getByTestId('FrameHeading');
+    expect(heading).toHaveAttribute('data-library-frame', 'false');
+  });
+
+  it('respects isLibraryFrame prop', () => {
+    const stackframe = { line: {} } as Stackframe;
+    renderWithTheme(<StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />);
+
+    const heading = screen.getByTestId('FrameHeading');
+    expect(heading).toHaveAttribute('data-library-frame', 'true');
   });
 });

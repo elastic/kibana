@@ -17,7 +17,7 @@ import { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');

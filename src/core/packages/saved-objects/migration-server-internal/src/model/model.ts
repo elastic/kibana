@@ -10,7 +10,9 @@
 import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionsFromMappings } from '@kbn/core-saved-objects-base-server-internal';
 
+import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
@@ -137,10 +139,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The target index .kibana WILL be pointing to if we reindex. E.g: ".kibana_8.8.0_001"
     const newVersionTarget = stateP.versionIndex;
 
+    let mappings = source ? indices[source]?.mappings : undefined;
+
+    if (mappings) {
+      const mappingVersions = getVirtualVersionsFromMappings({
+        mappings,
+        source: 'mappingVersions',
+        minimumVirtualVersion: initialModelVersion,
+      });
+
+      if (mappingVersions) {
+        mappings = {
+          ...mappings,
+          _meta: {
+            ...mappings._meta,
+            mappingVersions,
+          },
+        };
+      }
+    }
+
     const postInitState = {
       aliases,
       sourceIndex: Option.fromNullable(source),
-      sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
+      sourceIndexMappings: Option.fromNullable(mappings),
       versionIndexReadyActions: Option.none,
     };
 

@@ -56,6 +56,7 @@ viewer:
         - '.asset-criticality.asset-criticality-*'
         - '.entities.v1.latest.security_*'
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
@@ -106,6 +107,7 @@ editor:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -195,6 +197,7 @@ t1_analyst:
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
   applications:
@@ -249,6 +252,7 @@ t2_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -294,6 +298,7 @@ t3_analyst:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -368,6 +373,7 @@ threat_intelligence_analyst:
         - logs-*
         - packetbeat-*
         - winlogbeat-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -430,6 +436,7 @@ rule_author:
         - packetbeat-*
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -506,6 +513,7 @@ soc_manager:
         - winlogbeat-*
         - .asset-criticality.asset-criticality-*
         - .entities.v1.latest.security_*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -594,6 +602,7 @@ detections_admin:
         - .internal.preview.alerts-security*
         - .adhoc.alerts-security*
         - .internal.adhoc.alerts-security*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
         - write
@@ -661,6 +670,7 @@ platform_engineer:
         - .adhoc.alerts-security*
         - .internal.adhoc.alerts-security*
         - risk-score.risk-score-*
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - all
     - names:
@@ -731,6 +741,7 @@ endpoint_operations_analyst:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:
@@ -809,6 +820,7 @@ endpoint_policy_manager:
         - risk-score.risk-score-*
         - .entities.v1.latest.security_*
         - '.ml-anomalies-*'
+        - security_solution-*.misconfiguration_latest*
       privileges:
         - read
     - names:

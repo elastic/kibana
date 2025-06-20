@@ -20,6 +20,7 @@ export const Field = memo<Props>(
     component: Component,
     helpText,
     label,
+    labelAppend,
     ariaLabel,
     props,
     fieldKey,
@@ -57,6 +58,7 @@ export const Field = memo<Props>(
       'aria-label': ariaLabel,
       helpText,
       fullWidth: true,
+      labelAppend,
     };
 
     return controlled ? (

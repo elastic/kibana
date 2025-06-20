@@ -291,6 +291,7 @@ interface GetMigratorParams {
   kibanaBranch: string;
   buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
+  kibanaVersionCheck?: string;
 }
 
 const getMigrator = async ({
@@ -305,6 +306,7 @@ const getMigrator = async ({
   kibanaBranch,
   buildFlavor = 'traditional',
   nodeRoles,
+  kibanaVersionCheck = '8.18.0',
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
     configService.atPath<SavedObjectsConfigType>('savedObjects')
@@ -334,6 +336,7 @@ const getMigrator = async ({
     waitForMigrationCompletion: false, // ensure we have an active role in the migration
     nodeRoles,
     esCapabilities,
+    kibanaVersionCheck,
   });
 };
 

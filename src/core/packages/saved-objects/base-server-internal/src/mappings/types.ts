@@ -11,6 +11,7 @@ import type {
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
 } from '@kbn/core-saved-objects-server';
+import type { VirtualVersionMap } from '../model_version';
 
 /**
  * A map of {@link SavedObjectsTypeMappingDefinition | saved object type mappings}
@@ -60,7 +61,15 @@ export interface IndexMapping {
 export type IndexTypesMap = Record<string, string[]>;
 
 /** @internal */
-export interface V2AlgoIndexMappingMeta {
+export interface CommonAlgoIndexMappingMeta {
+  /**
+   * The current virtual version of the mapping of the index.
+   */
+  mappingVersions?: VirtualVersionMap;
+}
+
+/** @internal */
+export interface V2AlgoIndexMappingMeta extends CommonAlgoIndexMappingMeta {
   /**
    * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
    * with each key being a root-level mapping property, and each value being
@@ -76,22 +85,14 @@ export interface V2AlgoIndexMappingMeta {
    * @remark: Only defined for indices using the v2 migration algorithm.
    */
   indexTypesMap?: IndexTypesMap;
-  /**
-   * The current virtual version of the mapping of the index.
-   */
-  mappingVersions?: { [k: string]: string };
 }
 
 /** @internal */
-export interface ZdtAlgoIndexMappingMeta {
-  /**
-   * The current virtual version of the mapping of the index.
-   */
-  mappingVersions?: { [k: string]: string };
+export interface ZdtAlgoIndexMappingMeta extends CommonAlgoIndexMappingMeta {
   /**
    * The current virtual versions of the documents of the index.
    */
-  docVersions?: { [k: string]: string };
+  docVersions?: VirtualVersionMap;
   /**
    * Info about the current state of the migration.
    * Should only be present if a migration is in progress or was interrupted.

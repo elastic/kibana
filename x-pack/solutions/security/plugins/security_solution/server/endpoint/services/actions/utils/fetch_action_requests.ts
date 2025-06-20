@@ -172,6 +172,11 @@ export const fetchActionRequests = async ({
         action.agent.policy = action.agent.policy ? [action.agent.policy] : [];
       }
 
+      // Ensure `tags` is an array
+      if (!Array.isArray(action.tags)) {
+        action.tags = action.tags ? [action.tags] : [];
+      }
+
       // Ensure that `originSpaceId` is populated (associated with spaces)
       if (!action.originSpaceId) {
         action.originSpaceId = DEFAULT_SPACE_ID;

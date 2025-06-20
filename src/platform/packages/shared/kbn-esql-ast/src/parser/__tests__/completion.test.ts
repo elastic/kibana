@@ -8,7 +8,12 @@
  */
 
 import { EsqlQuery } from '../../query';
-import { ESQLAstCompletionCommand, ESQLCommandOption } from '../../types';
+import {
+  ESQLAstCompletionCommand,
+  ESQLAstItem,
+  ESQLCommandOption,
+  ESQLFunction,
+} from '../../types';
 
 describe('COMPLETION command', () => {
   describe('correctly formatted', () => {
@@ -38,13 +43,13 @@ describe('COMPLETION command', () => {
         const text = `FROM index | COMPLETION ? WITH inferenceId`;
         const query = EsqlQuery.fromSrc(text);
 
-        expect(query.ast.commands[1].args[0]).toMatchObject([
-          {
-            type: 'literal',
-            literalType: 'param',
-            paramType: 'unnamed',
-          },
-        ]);
+        const promptArg = query.ast.commands[1].args[0] as ESQLAstItem[];
+
+        expect(promptArg[0]).toMatchObject({
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'unnamed',
+        });
       });
 
       it('parses the WITH command option as the second argument', () => {
@@ -109,30 +114,61 @@ describe('COMPLETION command', () => {
       });
     });
 
-    describe('... AS <targetField>', () => {
-      it('parses the AS command option as the third argument', () => {
-        const text = `FROM index | COMPLETION prompt WITH inferenceId AS targetField`;
+    describe('COMPLETION <targetField> = <prompt> WITH <inferenceId>', () => {
+      it('parses the assignment as the first argument of COMPLETION', () => {
+        const text = `FROM index | COMPLETION targetField = "prompt" WITH inferenceId`;
         const query = EsqlQuery.fromSrc(text);
-
-        expect(query.ast.commands[1].args[2]).toMatchObject({
-          type: 'option',
-          name: 'as',
+        expect(query.ast.commands[1].args[0]).toMatchObject({
+          type: 'function',
+          name: '=',
         });
       });
 
-      it('parses targetField as AS option argument', () => {
-        const text = `FROM index | COMPLETION prompt WITH inferenceId AS targetField`;
+      it('parses the targetField as the first argument of the assignment', () => {
+        const text = `FROM index | COMPLETION targetField1 = "prompt" WITH inferenceId`;
         const query = EsqlQuery.fromSrc(text);
 
-        const asOption = query.ast.commands[1].args[2] as ESQLCommandOption;
+        const completionCommand = query.ast.commands[1] as ESQLAstCompletionCommand;
 
-        expect(asOption).toMatchObject({
-          args: [
-            {
-              type: 'column',
-              name: 'targetField',
-            },
-          ],
+        const assignment = completionCommand.args[0] as ESQLFunction;
+        expect(assignment.args[0]).toMatchObject({
+          type: 'column',
+          name: 'targetField1',
+        });
+
+        expect(completionCommand.targetField).toMatchObject({
+          type: 'column',
+          name: 'targetField1',
+        });
+      });
+
+      it('parses the prompt as the second argument of the assignment', () => {
+        const text = `FROM index | COMPLETION targetField = "prompt" WITH inferenceId`;
+        const query = EsqlQuery.fromSrc(text);
+
+        const completionCommand = query.ast.commands[1] as ESQLAstCompletionCommand;
+
+        const assignment = completionCommand.args[0] as ESQLFunction;
+        expect(assignment.args[1]).toMatchObject({
+          type: 'literal',
+          literalType: 'keyword',
+          value: '"prompt"',
+        });
+
+        expect(completionCommand.prompt).toMatchObject({
+          type: 'literal',
+          literalType: 'keyword',
+          value: '"prompt"',
+        });
+      });
+
+      it('parses the WITH command option as the second argument', () => {
+        const text = `FROM index | COMPLETION targetField = "prompt" WITH inferenceId`;
+        const query = EsqlQuery.fromSrc(text);
+
+        expect(query.ast.commands[1].args[1]).toMatchObject({
+          type: 'option',
+          name: 'with',
         });
       });
     });
@@ -173,6 +209,13 @@ describe('COMPLETION command', () => {
       expect(errors.length).toBe(1);
 
       expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args[0]).toMatchObject({
+        name: 'unknown',
+        type: 'unknown',
+        incomplete: true,
+      });
     });
 
     test('just the command keyword and a prompt', () => {
@@ -195,6 +238,50 @@ describe('COMPLETION command', () => {
         type: 'literal',
         literalType: 'keyword',
         value: '"prompt"',
+      });
+    });
+
+    test('just the new column assignment', () => {
+      const text = `FROM index | COMPLETION targetField = `;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(1);
+
+      expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args).toHaveLength(2);
+
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.targetField).toMatchObject({
+        type: 'column',
+        name: 'targetField',
+      });
+    });
+
+    it('uses an unknown node if the command is ambiguous, its not clear if the user is using a column as a prompt or trying to define a new one ', () => {
+      const text = `FROM index | COMPLETION columnName`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(1);
+
+      expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.args).toHaveLength(2);
+
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.prompt).toMatchObject({
+        type: 'unknown',
+        name: 'unknown',
       });
     });
 

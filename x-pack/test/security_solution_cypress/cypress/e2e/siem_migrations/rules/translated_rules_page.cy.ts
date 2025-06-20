@@ -19,11 +19,12 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   editTranslatedRuleByRow,
-  reprocessFailedRules,
   saveUpdatedTranslatedRuleQuery,
   selectMigrationConnector,
   updateTranslatedRuleQuery,
   navigateToTranslatedRulesPage,
+  openReprocessDialog,
+  reprocessWithoutPrebuiltRulesMatching,
 } from '../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../urls/navigation';
 
@@ -80,7 +81,15 @@ describe(
     });
 
     it('should be able to reprocess a failed Rule', () => {
-      reprocessFailedRules();
+      cy.intercept({
+        url: '**/start',
+      }).as('reprocessFailedRules');
+      openReprocessDialog();
+      // cy.wait(50000);
+      reprocessWithoutPrebuiltRulesMatching();
+      cy.wait('@reprocessFailedRules')
+        .its('request.body.settings')
+        .should('have.property', 'skip_prebuilt_rules_matching', true);
       cy.get(RULE_MIGRATION_PROGRESS_BAR).should('be.visible');
       cy.get(RULE_MIGRATION_PROGRESS_BAR_TEXT).should('contain.text', '83%');
     });

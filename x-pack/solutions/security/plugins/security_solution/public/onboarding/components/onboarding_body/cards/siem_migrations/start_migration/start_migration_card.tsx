@@ -7,6 +7,10 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  MissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../../../../../common/missing_privileges';
 import { useUpsellingComponent } from '../../../../../../common/hooks/use_upselling';
 import { PanelText } from '../../../../../../common/components/panel_text';
 import { RuleMigrationDataInputWrapper } from '../../../../../../siem_migrations/rules/components/data_input_flyout/data_input_wrapper';
@@ -20,10 +24,6 @@ import type { StartMigrationCardMetadata } from './types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
-import {
-  MissingPrivilegesCallOut,
-  MissingPrivilegesDescription,
-} from '../../common/missing_privileges';
 import { UploadRulesSectionPanel } from './upload_rules_panel';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
