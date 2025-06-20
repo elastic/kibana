@@ -6,9 +6,6 @@ pricing.tiers.products:
   - name: observability
     tier: complete  # Accepted values for this tier are: complete, logs_essentials
 
-# Make sure the plugins belonging to this project type are loaded
-plugins.allowlistPluginGroups: ['platform', 'observability']
-
 # Disabled Observability plugins
 xpack.ux.enabled: false
 xpack.legacy_uptime.enabled: false
