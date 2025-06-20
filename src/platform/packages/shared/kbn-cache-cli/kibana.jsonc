@@ -3,5 +3,6 @@
   "id": "@kbn/cache-cli",
   "owner": "@elastic/kibana-operations",
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "shared",
+  "devOnly": true
 }

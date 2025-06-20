@@ -3,5 +3,6 @@
   "id": "@kbn/ai-tools-cli",
   "owner": "@elastic/appex-ai-infra",
   "group": "platform",
-  "visibility": "shared"
+  "visibility": "shared",
+  "devOnly": true
 }
