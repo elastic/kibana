@@ -49,14 +49,13 @@ export const bulkBatchUpsertFromCSV =
       onDocument: (row) => {
         const id = batch.existingUsers[row.username];
         const labels = {
-          monitoring: { privileged_users: 'monitored' },
           sources: ['csv'],
         };
         if (!id) {
           return [
             { create: {} },
             {
-              user: { name: row.username },
+              user: { name: row.username, is_privileged: true },
               labels,
             },
           ];
