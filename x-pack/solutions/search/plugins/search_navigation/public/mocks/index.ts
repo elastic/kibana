@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import type { SearchNavigationPluginStart } from '../types';
 import { BaseClassicNavItems } from '../base_classic_navigation_items';
 
-function createStartMock() {
+function createStartMock(): SearchNavigationPluginStart {
   return {
+    registerOnAppMountHandler: (onAppMount: () => Promise<void>) => {},
+    handleOnAppMount: () => Promise.resolve(undefined),
     getBaseClassicNavItems: () => BaseClassicNavItems,
+    useClassicNavigation: () => undefined,
+    breadcrumbs: {
+      setSearchBreadCrumbs: () => {},
+      clearBreadcrumbs: () => {},
+    },
   };
 }
 
