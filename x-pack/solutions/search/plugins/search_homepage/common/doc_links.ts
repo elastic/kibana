@@ -10,7 +10,7 @@ import { DocLinks } from '@kbn/doc-links';
 class ESDocLinks {
   public kibanaFeedback: string = '';
   public elasticCommunity: string = '';
-  public elasticsearchGettingStarted: string = '';
+  public elasticsearchDocs: string = '';
   public visitSearchLabs: string = '';
   public notebooksExamples: string = '';
   public customerEngineerRequestForm: string = '';
