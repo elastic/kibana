@@ -9,24 +9,25 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 
 interface ValueInputProps {
   value?: string;
-  placeholder?: string;
+  columnName?: string;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
   autoFocus: boolean;
+  className?: string;
 }
 
 export const ValueInput = ({
   value = '',
-  placeholder = '',
+  columnName = '',
   onBlur,
   onEnter,
   onChange,
   autoFocus = false,
+  className = '',
 }: ValueInputProps) => {
   const [editValue, setEditValue] = useState(value);
 
@@ -46,21 +47,18 @@ export const ValueInput = ({
 
   return (
     <EuiFieldText
-      name="test123"
       autoFocus={autoFocus}
       compressed
-      placeholder={placeholder}
+      placeholder={columnName}
       value={editValue}
-      aria-label="Use aria labels when no actual label is in use"
+      aria-label={`Value for ${columnName}`}
       onChange={(e) => {
         setEditValue(e.target.value);
         onChange?.(e.target.value);
       }}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}
-      css={css`
-        min-width: ${230}px; //HD
-      `}
+      className={className}
     />
   );
 };

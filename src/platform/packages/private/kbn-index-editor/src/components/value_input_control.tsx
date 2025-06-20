@@ -85,6 +85,7 @@ export const getCellValueRenderer =
             onEnter={(value) => {
               onValueChange(docId!, { [columnId]: value });
             }}
+            columnName={columnId}
             value={cellValue}
             autoFocus
           />

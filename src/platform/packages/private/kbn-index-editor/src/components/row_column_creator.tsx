@@ -64,9 +64,12 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
         return (
           <ValueInput
             key={column.id}
-            placeholder={column.name}
+            columnName={column.name}
             onChange={updateRow(column.id)}
             autoFocus={index === 0}
+            css={css`
+              min-width: ${230}px;
+            `}
           />
         );
       }),
