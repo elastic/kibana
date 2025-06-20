@@ -44,8 +44,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
   describe('create', () => {
     test('should create a new migration', async () => {
       const index = '.kibana-siem-rule-migrations';
+      const name = 'test name';
 
-      const result = await ruleMigrationsDataMigrationClient.create();
+      const result = await ruleMigrationsDataMigrationClient.create(name);
 
       expect(result).not.toBeFalsy();
       expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
@@ -55,6 +56,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         document: {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
+          name,
         },
       });
     });
@@ -64,7 +66,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
+      await expect(ruleMigrationsDataMigrationClient.create('test')).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();

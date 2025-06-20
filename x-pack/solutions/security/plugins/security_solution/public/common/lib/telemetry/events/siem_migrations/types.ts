@@ -20,6 +20,10 @@ export enum SiemMigrationsEventTypes {
    */
   SetupMigrationCreated = 'siem_migrations_setup_rules_migration_created',
   /**
+   * When a rules migration is deleted
+   */
+  SetupMigrationDeleted = 'siem_migrations_setup_rules_migration_deleted',
+  /**
    * When new rules are uploaded to create a new migration
    */
   SetupResourcesUploaded = 'siem_migrations_setup_rules_resources_uploaded',
@@ -92,6 +96,10 @@ export interface ReportSetupMigrationCreatedActionParams extends BaseResultActio
   migrationId?: string;
   rulesCount: number;
 }
+export interface ReportSetupMigrationDeletedActionParams extends BaseResultActionParams {
+  eventName: string;
+  migrationId: string;
+}
 export interface ReportSetupMacrosQueryCopiedActionParams {
   eventName: string;
   migrationId: string;
@@ -154,6 +162,7 @@ export interface SiemMigrationsTelemetryEventsMap {
   [SiemMigrationsEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
   [SiemMigrationsEventTypes.SetupRulesQueryCopied]: ReportSetupRulesQueryCopiedActionParams;
   [SiemMigrationsEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
+  [SiemMigrationsEventTypes.SetupMigrationDeleted]: ReportSetupMigrationDeletedActionParams;
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;

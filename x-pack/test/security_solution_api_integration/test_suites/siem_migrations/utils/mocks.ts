@@ -154,6 +154,7 @@ export const statsOverrideCallbackFactory = ({
 };
 
 const getDefaultMigrationDoc: () => Omit<StoredSiemMigration, 'id'> = () => ({
+  name: 'Default Migration',
   created_by: SOME_USER_ID,
   created_at: new Date().toISOString(),
   last_execution: {
