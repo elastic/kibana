@@ -321,6 +321,14 @@ export class RequestContextFactory implements IRequestContextFactory {
             uiSettingsClient: coreContext.uiSettings.client,
           })
       ),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
     };
   }
 }

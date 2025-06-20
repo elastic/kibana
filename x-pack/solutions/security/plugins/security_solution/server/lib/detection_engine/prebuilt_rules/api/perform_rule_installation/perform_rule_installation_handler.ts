@@ -22,6 +22,7 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
+import { excludeLicenseRestrictedRules } from '../../logic/rule_versions/rule_version_specifier';
 
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -38,6 +39,7 @@ export const performRuleInstallationHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
+    const mlAuthz = ctx.securitySolution.getMlAuthz();
 
     const { mode } = request.body;
 
@@ -94,7 +96,7 @@ export const performRuleInstallationHandler = async (
         ruleInstallQueue.push(rule);
       });
     } else if (mode === 'ALL_RULES') {
-      ruleInstallQueue.push(...allInstallableRules);
+      ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
     const BATCH_SIZE = 100;
