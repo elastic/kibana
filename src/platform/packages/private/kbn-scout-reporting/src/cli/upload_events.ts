@@ -32,9 +32,9 @@ export const uploadEvents: Command<void> = {
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
     },
     help: `
-    --eventLogPath    (optional)  Path to the event log to upload. If no path is provided, all events within the Scout reports output directory will be uploaded.
     --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --eventLogPath    (optional)  Path to the event log to upload. If no path is provided, all events within the Scout reports output directory will be uploaded.
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     `,
   },
