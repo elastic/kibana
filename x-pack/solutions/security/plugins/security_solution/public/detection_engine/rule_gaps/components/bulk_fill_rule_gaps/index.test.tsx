@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { BulkFillRuleGapsModal } from '.';
-import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
@@ -70,7 +70,7 @@ describe('BulkFillRuleGapsModal', () => {
     expect(confirmModalConfirmButton).toBeEnabled();
 
     const now = moment();
-    const startDate = now.clone().subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS, 'd');
+    const startDate = now.clone().subtract(MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS, 'd');
 
     fireEvent.change(startDatePicker, {
       target: {

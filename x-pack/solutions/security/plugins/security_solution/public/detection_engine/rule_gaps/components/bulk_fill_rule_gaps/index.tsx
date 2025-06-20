@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
-import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
 import * as i18n from './translations';
 
@@ -45,7 +45,7 @@ const BulkFillRuleGapsModalComponent = ({
 
   const isStartDateOutOfRange = now
     .clone()
-    .subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS, 'd')
+    .subtract(MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS, 'd')
     .isAfter(startDate);
   const isEndDateInFuture = endDate.isAfter(now);
   const isInvalidTimeRange = startDate.isSameOrAfter(endDate);
@@ -53,7 +53,7 @@ const BulkFillRuleGapsModalComponent = ({
   const errorMessage = useMemo(() => {
     if (isStartDateOutOfRange) {
       return i18n.BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR(
-        MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS
+        MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS
       );
     }
     if (isEndDateInFuture) {
