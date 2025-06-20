@@ -212,10 +212,12 @@ describe('CasesIncrementalIdService', () => {
       ];
     }
     let cases: ReturnType<typeof getTestCases> = [];
-    const defaultIncIdSo = { attributes: { last_id: 100 } };
-    const secondLifeIncIdSo = { attributes: { last_id: 10 } };
+    let defaultIncIdSo = { attributes: { last_id: 100 } };
+    let secondLifeIncIdSo = { attributes: { last_id: 10 } };
 
     beforeEach(() => {
+      defaultIncIdSo = { attributes: { last_id: 100 } };
+      secondLifeIncIdSo = { attributes: { last_id: 10 } };
       cases = getTestCases();
       service.getOrCreateCaseIdIncrementerSo = jest.fn().mockImplementation((namespace) => {
         switch (namespace) {
@@ -271,11 +273,36 @@ describe('CasesIncrementalIdService', () => {
       expect(service.incrementCounterSO).toHaveBeenCalledWith(secondLifeIncIdSo, 13, 'second-life');
     });
 
-    it('should stop processing when the service has been stopped', async () => {
+    it('should not start processing when the service was stopped', async () => {
       service.stopService();
       // @ts-expect-error: case SO types are not correct
       await service.incrementCaseIds(cases);
       expect(service.applyIncrementalIdToCaseSo).not.toHaveBeenCalled();
+      expect(service.incrementCounterSO).not.toHaveBeenCalled();
+    });
+
+    it('should stop processing when service was stopped mid-processing', async () => {
+      // This test simulates the service being stopped while it's processing.
+      // Each `mockImplementationOnce` represents the processing step of one of the cases.
+      // The first resolves, the second one is started, then the service is stopped and it resolves.
+      // The third one is not reached.
+      service.applyIncrementalIdToCaseSo = jest
+        .fn()
+        .mockImplementationOnce(() => Promise.resolve(null))
+        .mockImplementationOnce(() => {
+          // up until this point, only one case should have been processed
+          expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(1);
+          // the service is stopped before this case could be written
+          service.stopService();
+          return Promise.resolve();
+        })
+        .mockImplementationOnce(() => Promise.resolve(null));
+
+      // @ts-expect-error: case SO types are not correct
+      await service.incrementCaseIds([cases[0], cases[1], cases[2]]);
+      // The service was stopped asynchronously while the second case was writing.
+      // Therefore it should have stopped, and not processed the third case
+      expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(2);
       expect(service.incrementCounterSO).not.toHaveBeenCalled();
     });
 
