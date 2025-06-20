@@ -175,8 +175,8 @@ export class RuleMigrationTaskRunner {
               await this.saveRuleCompleted(ruleMigration, migrationResult);
               ruleTranslationTelemetry.success(migrationResult);
             } catch (error) {
-              if (error instanceof AbortError) {
-                throw error;
+              if (this.abortController.signal.aborted) {
+                throw new AbortError();
               }
               ruleTranslationTelemetry.failure(error);
               await this.saveRuleFailed(ruleMigration, error);
@@ -196,11 +196,11 @@ export class RuleMigrationTaskRunner {
     } catch (error) {
       await this.data.rules.releaseProcessing(migrationId);
 
-      migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
+        migrationTaskTelemetry.aborted(error);
         this.logger.info('Abort signal received, stopping migration');
-        return;
       } else {
+        migrationTaskTelemetry.failure(error);
         throw new Error(`Error processing migration: ${error}`);
       }
     } finally {
@@ -213,14 +213,13 @@ export class RuleMigrationTaskRunner {
     const { agent } = this;
     const config: MigrateRuleGraphConfig = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
-      // signal: abortController.signal, // not working properly https://github.com/langchain-ai/langgraphjs/issues/319
       ...invocationConfig,
+      signal: this.abortController.signal,
     };
 
-    const invoke = async (input: RuleMigrationInput): Promise<MigrateRuleState> => {
-      // using withAbort in the agent invocation is not ideal but is a workaround for the issue with the langGraph signal not working properly
-      return this.withAbort<MigrateRuleState>(agent.invoke(input, config));
-    };
+    // Prepare the invocation with specific config
+    const invoke = async (input: RuleMigrationInput): Promise<MigrateRuleState> =>
+      agent.invoke(input, config);
 
     // Invokes the rule translation with exponential backoff, should be called only when the rate limit has been hit
     const invokeWithBackoff = async (

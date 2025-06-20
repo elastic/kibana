@@ -7,24 +7,23 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
-  EuiFlexItem,
   EuiSpacer,
   EuiProgress,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -38,10 +37,7 @@ import { WithUIAttributes } from './types';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (snapshot) =>
-      snapshot.matches('debouncingChanges') ||
-      snapshot.matches('loadingSamples') ||
-      snapshot.matches('runningSimulation')
+    (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
   );
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
@@ -79,7 +75,7 @@ export const ProcessorOutcomePreview = () => {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <OutcomeControls />
+        <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
@@ -90,13 +86,13 @@ export const ProcessorOutcomePreview = () => {
 
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
-  maximumFractionDigits: 0,
+  maximumFractionDigits: 1,
 });
 
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
-const OutcomeControls = () => {
+const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -166,7 +162,6 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-      <StreamsAppSearchBar showDatePicker />
     </EuiFlexGroup>
   );
 };
@@ -203,11 +198,11 @@ const OutcomePreviewTable = () => {
     return Array.from(fields);
   }, [previewDocuments]);
 
-  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)
   );
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
