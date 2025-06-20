@@ -50,7 +50,7 @@ jest.mock('../hooks/use_integrations', () => ({
 
 describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {
-    render(<AddDataSourcePanel />, { wrapper: TestProviders });
+    render(<AddDataSourcePanel onComplete={() => {}} />, { wrapper: TestProviders });
 
     expect(screen.getByText('Add data source of your privileged users')).toBeInTheDocument();
     expect(
@@ -66,7 +66,7 @@ describe('AddDataSourcePanel', () => {
       navigateTo: mockNavigateTo,
     });
 
-    render(<AddDataSourcePanel />, { wrapper: TestProviders });
+    render(<AddDataSourcePanel onComplete={() => {}} />, { wrapper: TestProviders });
 
     const integrationCards = await screen.findAllByTestId('entity_analytics-integration-card');
     expect(integrationCards.length).toBe(3);
@@ -77,7 +77,7 @@ describe('AddDataSourcePanel', () => {
   });
 
   it('renders the file import card', () => {
-    render(<AddDataSourcePanel />, { wrapper: TestProviders });
+    render(<AddDataSourcePanel onComplete={() => {}} />, { wrapper: TestProviders });
 
     const fileCard = screen.getByRole('button', { name: /file/i });
     expect(fileCard).toBeInTheDocument();

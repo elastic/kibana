@@ -99,7 +99,9 @@ describe('esArchiver createParseArchiveStreams', () => {
           ] as [Readable, ...Writable[]]);
           throw new Error('should have failed');
         } catch (err) {
-          expect(err.message).toEqual(`Expected property name or '}' in JSON at position 1`);
+          expect(err.message).toEqual(
+            `Expected property name or '}' in JSON at position 1 (line 1 column 2)`
+          );
         }
       });
     });

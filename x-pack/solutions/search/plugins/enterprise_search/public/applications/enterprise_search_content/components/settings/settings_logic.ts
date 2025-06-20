@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import isDeepEqual from 'fast-deep-equal/react';
 import { kea, MakeLogicType } from 'kea';
-
-import { isDeepEqual } from 'react-use/lib/util';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
