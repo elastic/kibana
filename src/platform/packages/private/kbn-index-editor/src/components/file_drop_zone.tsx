@@ -75,7 +75,7 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
         }}
       >
         <EuiLoadingSpinner size="xl" />
-        <p>
+        <div>
           {isAnalyzing ? (
             <FormattedMessage
               id="indexEditor.fileUpload.analyzingIndicator"
@@ -88,7 +88,7 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
               defaultMessage={'Uploading...'}
             />
           ) : null}
-        </p>
+        </div>
       </div>
     </div>
   );
