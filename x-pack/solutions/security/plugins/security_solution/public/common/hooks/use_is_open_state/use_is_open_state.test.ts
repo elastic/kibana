@@ -6,9 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import { useIsVisible } from '.';
+import { useIsOpenState } from './use_is_open_state';
 
-describe('useVisibility', () => {
+describe('useIsOpenState', () => {
   let initialState: boolean;
   let onOpen: jest.Mock;
   let onClose: jest.Mock;
@@ -22,40 +22,40 @@ describe('useVisibility', () => {
   });
 
   it('should initialize with the correct state', () => {
-    const { result } = renderHook(() => useIsVisible(initialState));
-    expect(result.current.isVisible).toBe(initialState);
+    const { result } = renderHook(() => useIsOpenState(initialState));
+    expect(result.current.isOpen).toBe(initialState);
   });
 
-  it('should call onOpen when opening visibility', () => {
-    const { result } = renderHook(() => useIsVisible(initialState, { onOpen }));
+  it('should call onOpen when opening', () => {
+    const { result } = renderHook(() => useIsOpenState(initialState, { onOpen }));
     act(() => {
       result.current.open();
     });
-    expect(result.current.isVisible).toBe(true);
+    expect(result.current.isOpen).toBe(true);
     expect(onOpen).toHaveBeenCalled();
   });
 
-  it('should call onClose when closing visibility', () => {
-    const { result } = renderHook(() => useIsVisible(true, { onClose }));
+  it('should call onClose when closing', () => {
+    const { result } = renderHook(() => useIsOpenState(true, { onClose }));
     act(() => {
       result.current.close();
     });
-    expect(result.current.isVisible).toBe(false);
+    expect(result.current.isOpen).toBe(false);
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('should call onToggle when toggling visibility', () => {
-    const { result } = renderHook(() => useIsVisible(true, { onToggle }));
+  it('should call onToggle when toggling', () => {
+    const { result } = renderHook(() => useIsOpenState(true, { onToggle }));
     act(() => {
       result.current.toggle();
     });
-    expect(result.current.isVisible).toBe(false);
+    expect(result.current.isOpen).toBe(false);
     expect(onToggle).toHaveBeenCalledTimes(1);
 
     act(() => {
       result.current.toggle();
     });
-    expect(result.current.isVisible).toBe(true);
+    expect(result.current.isOpen).toBe(true);
     expect(onToggle).toHaveBeenCalledTimes(2);
   });
 });

@@ -6,28 +6,28 @@
  */
 import { useState, useCallback } from 'react';
 
-export type UseIsVisible = (
+export type UseIsOpen = (
   defaultValue: boolean,
   callbacks?: { onOpen?: () => void; onClose?: () => void; onToggle?: () => void }
-) => { isVisible: boolean; open: () => void; close: () => void; toggle: () => void };
+) => { isOpen: boolean; open: () => void; close: () => void; toggle: () => void };
 
-export const useIsVisible: UseIsVisible = (defaultValue, { onOpen, onClose, onToggle } = {}) => {
-  const [isVisible, setIsVisible] = useState(defaultValue);
+export const useIsOpenState: UseIsOpen = (defaultValue, { onOpen, onClose, onToggle } = {}) => {
+  const [isOpen, setIsOpen] = useState(defaultValue);
 
   const open = useCallback(() => {
-    setIsVisible(true);
+    setIsOpen(true);
     onOpen?.();
   }, [onOpen]);
 
   const close = useCallback(() => {
-    setIsVisible(false);
+    setIsOpen(false);
     onClose?.();
   }, [onClose]);
 
   const toggle = useCallback(() => {
-    setIsVisible((prev) => !prev);
+    setIsOpen((prev) => !prev);
     onToggle?.();
   }, [onToggle]);
 
-  return { isVisible, open, close, toggle };
+  return { isOpen, open, close, toggle };
 };

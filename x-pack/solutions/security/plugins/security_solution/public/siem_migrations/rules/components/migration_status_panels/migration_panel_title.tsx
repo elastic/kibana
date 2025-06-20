@@ -15,20 +15,23 @@ import {
   EuiInlineEditText,
   EuiPopover,
 } from '@elastic/eui';
-import { useIsVisible } from '../../../../common/hooks/use_visibility';
+import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import { PanelText } from '../../../../common/components/panel_text';
-import type { MigrationReadyPanelProps } from './migration_ready_panel';
 import { useUpdateMigration } from '../../logic/use_update_migration';
+import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 
-export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
+interface MigrationPanelTitleProps {
+  migrationStats: RuleMigrationStats;
+}
+export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migrationStats }) => {
   const [name, setName] = useState<string>(migrationStats.name);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const {
-    isVisible: isPopoverOpen,
+    isOpen: isPopoverOpen,
     close: closePopover,
     toggle: togglePopover,
-  } = useIsVisible(false);
+  } = useIsOpenState(false);
 
   const onRenameError = useCallback(() => {
     setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
@@ -117,4 +120,4 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
     </EuiFlexGroup>
   );
 });
-MigrationName.displayName = 'MigrationName';
+MigrationPanelTitle.displayName = 'MigrationPanelTitle';
