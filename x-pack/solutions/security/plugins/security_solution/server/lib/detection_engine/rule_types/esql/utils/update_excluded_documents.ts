@@ -20,8 +20,8 @@ export const updateExcludedDocuments = ({
   isRuleAggregating,
   aggregatableTimestampField,
 }: {
-  excludedDocuments: ExcludedDocument[];
-  sourceDocuments: Record<string, FetchedDocument>;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
+  sourceDocuments: Record<string, FetchedDocument[]>;
   results: Array<Record<string, string>>;
   isRuleAggregating: boolean;
   aggregatableTimestampField: string;
@@ -42,17 +42,23 @@ export const updateExcludedDocuments = ({
 };
 
 const addToExcludedDocuments = (
-  excludedDocuments: ExcludedDocument[],
-  sourceDocuments: Record<string, FetchedDocument>,
+  excludedDocuments: Record<string, ExcludedDocument[]>,
+  sourceDocuments: Record<string, FetchedDocument[]>,
   documentIds: string[],
   aggregatableTimestampField: string
 ): void => {
   for (const documentId of documentIds) {
-    const document = sourceDocuments[documentId];
+    const documents = sourceDocuments[documentId];
 
-    excludedDocuments.push({
-      id: documentId,
-      timestamp: document.fields?.[aggregatableTimestampField]?.[0],
+    documents.forEach((document) => {
+      if (!excludedDocuments[document._index]) {
+        excludedDocuments[document._index] = [];
+      }
+
+      excludedDocuments[document._index].push({
+        id: documentId,
+        timestamp: document.fields?.[aggregatableTimestampField]?.[0],
+      });
     });
   }
 };

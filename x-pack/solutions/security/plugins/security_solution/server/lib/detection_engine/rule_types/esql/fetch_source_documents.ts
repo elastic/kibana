@@ -17,6 +17,7 @@ export interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
   _source?: SignalSource;
   _index: estypes.SearchHit['_index'];
+  _id: estypes.SearchHit['_id'];
   _version: estypes.SearchHit['_version'];
 }
 
@@ -42,7 +43,7 @@ export const fetchSourceDocuments = async ({
   loggedRequests,
   hasLoggedRequestsReachedLimit,
   runtimeMappings,
-}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
+}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
       acc.push(doc._id);
@@ -96,14 +97,18 @@ export const fetchSourceDocuments = async ({
     );
   }
 
-  return response.hits.hits.reduce<Record<string, FetchedDocument>>((acc, hit) => {
+  return response.hits.hits.reduce<Record<string, FetchedDocument[]>>((acc, hit) => {
     if (hit._id) {
-      acc[hit._id] = {
+      if (!acc[hit._id]) {
+        acc[hit._id] = [];
+      }
+      acc[hit._id].push({
         fields: hit.fields,
         _source: hit._source,
+        _id: hit._id,
         _index: hit._index,
         _version: hit._version,
-      };
+      });
     }
     return acc;
   }, {});

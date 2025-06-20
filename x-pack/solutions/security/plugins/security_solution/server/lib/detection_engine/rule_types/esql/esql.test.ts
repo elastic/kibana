@@ -110,10 +110,16 @@ describe('esqlExecutor', () => {
   describe('rule state', () => {
     it('should add a warning message when excluded documents exceed 100,000', async () => {
       mockedArguments.state = {
-        excludedDocuments: Array.from({ length: 100001 }, (_, i) => ({
-          id: `doc${i + 1}`,
-          timestamp: `2025-04-28T10:00:00Z`,
-        })),
+        excludedDocuments: {
+          test_index_1: Array.from({ length: 50000 }, (_, i) => ({
+            id: `doc${i + 1}`,
+            timestamp: `2025-04-28T10:00:00Z`,
+          })),
+          test_index_2: Array.from({ length: 50001 }, (_, i) => ({
+            id: `doc${i + 1}`,
+            timestamp: `2025-04-28T10:00:00Z`,
+          })),
+        },
       };
       mockedArguments.sharedParams.tuple = {
         from: moment('2025-04-28T09:00:00Z'),
@@ -133,10 +139,12 @@ describe('esqlExecutor', () => {
 
     it('should include documents ids from state in ES|QL request', async () => {
       mockedArguments.state = {
-        excludedDocuments: [
-          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-          { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
-        ],
+        excludedDocuments: {
+          test_index_1: [
+            { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+            { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
+          ],
+        },
       };
       mockedArguments.sharedParams.tuple = {
         from: moment('2025-04-28T09:00:00Z'),
@@ -148,18 +156,25 @@ describe('esqlExecutor', () => {
       const transportRequestArgs =
         ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
 
-      expect(transportRequestArgs).toHaveProperty('body.filter.bool.must_not.ids.values', [
-        'doc1',
-        'doc2',
-      ]);
+      expect(transportRequestArgs).toHaveProperty(
+        'body.filter.bool.must_not.0.bool.filter.0.ids.values',
+        ['doc1', 'doc2']
+      );
+      expect(transportRequestArgs).toHaveProperty(
+        'body.filter.bool.must_not.0.bool.filter.1.term._index',
+        'test_index_1'
+      );
     });
 
     it('should include documents ids from state in ES|QL request when query has mv_expand', async () => {
       mockedArguments.state = {
-        excludedDocuments: [
-          { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
-          { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
-        ],
+        excludedDocuments: {
+          test_index_1: [
+            { id: 'doc1', timestamp: '2025-04-28T10:00:00Z' },
+            { id: 'doc2', timestamp: '2025-04-28T11:00:00Z' },
+          ],
+        },
+        lastQuery: params.query,
       };
       (getMvExpandFields as jest.Mock).mockReturnValue(['agent.name']);
       mockedArguments.sharedParams.tuple = {
@@ -172,7 +187,10 @@ describe('esqlExecutor', () => {
       const transportRequestArgs =
         ruleServices.scopedClusterClient.asCurrentUser.transport.request.mock.calls[0][0];
 
-      expect(transportRequestArgs).not.toHaveProperty('body.filter.bool.must_not.ids.values');
+      expect(transportRequestArgs).toHaveProperty(
+        'body.filter.bool.must_not.0.bool.filter.0.ids.values',
+        ['doc1', 'doc2']
+      );
     });
   });
 });
