@@ -83,9 +83,15 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.reportTitle', {
         defaultMessage: 'Title',
       }),
-      width: '17%',
+      width: '22%',
       render: (_title: string, item: ScheduledReportApiJSON) => (
-        <EuiLink data-test-subj={`reportTitle`} onClick={() => setSelectedReport(item)}>
+        <EuiLink
+          data-test-subj={`reportTitle`}
+          onClick={() => {
+            setSelectedReport(item);
+            setConfigFlyOut(true);
+          }}
+        >
           <TruncatedTitle text={_title} />
         </EuiLink>
       ),
@@ -122,7 +128,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       name: i18n.translate('xpack.reporting.schedules.tableColumns.scheduleTitle', {
         defaultMessage: 'Schedule',
       }),
-      width: '15%',
+      width: '10%',
       render: (_schedule: ScheduledReportApiJSON['schedule']) => (
         <ReportScheduleIndicator schedule={_schedule} />
       ),

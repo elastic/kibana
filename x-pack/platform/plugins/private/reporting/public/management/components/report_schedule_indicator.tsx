@@ -15,34 +15,24 @@ interface ReportScheduleIndicatorProps {
   schedule: ScheduledReportApiJSON['schedule'];
 }
 
+const translations = {
+  [Frequency.DAILY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.daily', {
+    defaultMessage: 'Daily',
+  }),
+  [Frequency.WEEKLY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.weekly', {
+    defaultMessage: 'Weekly',
+  }),
+  [Frequency.MONTHLY]: i18n.translate('xpack.reporting.schedules.scheduleIndicator.monthly', {
+    defaultMessage: 'Monthly',
+  }),
+};
+
 export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ schedule }) => {
   if (!schedule || !schedule.rrule) {
     return null;
   }
 
-  let statusText: string;
-
-  switch (schedule.rrule.freq) {
-    case Frequency.DAILY:
-      statusText = i18n.translate('xpack.reporting.schedules.scheduleIndicator.daily', {
-        defaultMessage: 'Daily',
-      });
-      break;
-    case Frequency.WEEKLY:
-      statusText = i18n.translate('xpack.reporting.schedules.scheduleIndicator.weekly', {
-        defaultMessage: 'Weekly',
-      });
-      break;
-    case Frequency.MONTHLY:
-      statusText = i18n.translate('xpack.reporting.schedules.scheduleIndicator.monthly', {
-        defaultMessage: 'Monthly',
-      });
-      break;
-    default:
-      statusText = i18n.translate('xpack.reporting.schedules.scheduleIndicator.unknown', {
-        defaultMessage: 'Unknown',
-      });
-  }
+  const statusText = translations[schedule.rrule.freq];
 
   return (
     <EuiBadge
