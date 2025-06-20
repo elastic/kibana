@@ -28,7 +28,6 @@ export {
   getUrlParamsCompletionItems,
   getBodyCompletionItems,
   shouldTriggerSuggestions,
-  isInsideTripleQuotes,
 } from './autocomplete_utils';
 export { getLineTokens, containsUrlParams } from './tokens_utils';
 export { getStatusCodeDecorations } from './status_code_decoration_utils';

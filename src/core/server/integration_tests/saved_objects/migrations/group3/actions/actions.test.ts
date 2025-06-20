@@ -46,14 +46,14 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import { BASELINE_TEST_ARCHIVE_1K } from '../../kibana_migrator_archive_utils';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
 import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
-      dataArchive: BASELINE_TEST_ARCHIVE_1K,
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
       license: 'basic',
       esArgs: ['http.max_content_length=10Kb'],
     },

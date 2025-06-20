@@ -17,7 +17,6 @@ import {
   listUsersRoute,
   updateUserRoute,
   uploadUsersCSVRoute,
-  uploadUsersJSONRoute,
 } from './users';
 
 export const registerPrivilegeMonitoringRoutes = ({
@@ -33,6 +32,5 @@ export const registerPrivilegeMonitoringRoutes = ({
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
-  uploadUsersCSVRoute(router, logger);
-  uploadUsersJSONRoute(router, logger);
+  uploadUsersCSVRoute(router, logger, config);
 };
