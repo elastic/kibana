@@ -109,6 +109,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   defaultMessage: 'Playground',
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
+                breadcrumbStatus: 'hidden' as 'hidden',
               }),
             ],
           },

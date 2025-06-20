@@ -50,7 +50,7 @@ export interface AiopsPluginStartDeps {
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
-  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => Promise<boolean>>;
+  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => boolean>;
   PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
   ChangePointDetectionComponent: ChangePointDetectionSharedComponent;
 }
