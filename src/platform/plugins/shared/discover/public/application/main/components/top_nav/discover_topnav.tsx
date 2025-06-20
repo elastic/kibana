@@ -12,7 +12,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -54,15 +54,20 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
-  const [actualQuery, setActualQuery] = useState(query);
+  const [actualQuery, setActualQuery] = useState<Query | AggregateQuery>(query as Query);
   // Note, this is just experimental, if we want to store the edited / dirty state of the query
   // is should be done I guess in out internal state container
-  const onQueryChange = useCallback((q: { dateRange: TimeRange; query?: Query }) => {
+  const onQueryChange = useCallback((q: { dateRange: TimeRange; query?: Query | AggregateQuery | undefined }) => {
     // console.log('onQueryChange', q);
-    setActualQuery(q);
+    if( q.query) {
+      setActualQuery(q.query);
+    } 
   }, []);
   useEffect(() => {
-    setActualQuery(query);
+    if (query) {
+      setActualQuery(query);
+    }
+
   }, [query]);
 
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
@@ -101,19 +106,19 @@ export const DiscoverTopNav = ({
     () =>
       canEditDataView
         ? async (fieldName?: string) => {
-            if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
-              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
-                ctx: {
-                  dataView: dataViewInstance,
-                },
-                fieldName,
-                onSave: async () => {
-                  await onFieldEdited();
-                },
-              });
-            }
+          if (dataView?.id) {
+            const dataViewInstance = await data.dataViews.get(dataView.id);
+            closeFieldEditor.current = await dataViewFieldEditor.openEditor({
+              ctx: {
+                dataView: dataViewInstance,
+              },
+              fieldName,
+              onSave: async () => {
+                await onFieldEdited();
+              },
+            });
           }
+        }
         : undefined,
     [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
   );
