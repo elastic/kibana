@@ -53,7 +53,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 **Machine Learning**:
 * Ensures the {{bedrock}} connector respects the action proxy configuration [#224130]({{kib-pull}}224130).
 * Ensures the OpenAI connector respects the action proxy configuration for all sub-actions [#219617]({{kib-pull}}219617).
-* Allows you to add additional fields even if your ingest pipeline is empty [#222775]({{kib-pull}}222775).
+* Allows you to add additional fields even if your ingest pipeline is empty when uploading a file [#222775]({{kib-pull}}222775).
 * Resolves multiple issues in the Watcher UI that were introduced in 8.18.0, 8.18.1, 9.0.0, and 9.1.0. This includes the table not displaying more than 10 watches, an error banner appearing unexpectedly in certain scenarios, and the search bar functionality not working as expected [#223898]({{kib-pull}}223898).
 
 ## 9.0.2 [kibana-9.0.2-release-notes]
