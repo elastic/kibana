@@ -16,6 +16,7 @@ export interface LogsRoute {
 export interface LogsAppRoutes {
   logsAnomalies: LogsRoute;
   logsCategories: LogsRoute;
+  settings: LogsRoute;
 }
 
 export const getLogsAppRoutes = () => {
