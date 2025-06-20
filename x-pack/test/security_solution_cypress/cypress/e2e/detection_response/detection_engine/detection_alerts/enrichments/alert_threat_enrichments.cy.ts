@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../../../objects/rule';
 import { login } from '../../../../../tasks/login';
 import {
@@ -44,6 +45,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
 
   beforeEach(() => {
     login();
+    deleteAlertsAndRules();
     createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
       (rule) => visitRuleDetailsPage(rule.body.id)
     );
@@ -154,11 +156,17 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
   });
 
   describe('with additional indicators', () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
+
+      createRule({
+        ...getNewThreatIndicatorRule(),
+        rule_id: 'rule_testing_with_additional_indicators',
+        enabled: true,
+      }).then((rule) => visitRuleDetailsPage(rule.body.id));
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', { archiveName: 'threat_indicator2' });
     });
 
