@@ -8,7 +8,8 @@
  */
 
 import type { ContextWithProfileId } from '../profile_service';
-import { DocumentType, type DocumentContext } from '../profiles';
+import type { DataSourceContext, RootContext } from '../profiles';
+import { DocumentType, type DocumentContext, SolutionType, DataSourceCategory } from '../profiles';
 
 export function getContextWithProfileIdMock<T extends object = {}>(
   params: Partial<ContextWithProfileId<T>> = {}
@@ -17,6 +18,24 @@ export function getContextWithProfileIdMock<T extends object = {}>(
     profileId: 'test-profile-id',
     ...params,
   } as ContextWithProfileId<T>;
+}
+
+export function getRootContextMock(
+  params: Partial<ContextWithProfileId<RootContext>> = {}
+): ContextWithProfileId<RootContext> {
+  return getContextWithProfileIdMock<RootContext>({
+    solutionType: SolutionType.Default,
+    ...params,
+  });
+}
+
+export function getDataSourceContextMock(
+  params: Partial<ContextWithProfileId<DataSourceContext>> = {}
+): ContextWithProfileId<DataSourceContext> {
+  return getContextWithProfileIdMock<DataSourceContext>({
+    category: DataSourceCategory.Default,
+    ...params,
+  });
 }
 
 export function getDocumentContextMock(
