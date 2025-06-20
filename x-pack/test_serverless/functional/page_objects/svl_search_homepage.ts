@@ -69,7 +69,7 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
     async expectToBeOnSpacesCreatePage() {
       expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
     },
-    async expectToBeOnSearchLabsTutorialsPage() {
+    async expectToBeOnSearchLabsPage() {
       expect(await browser.getCurrentUrl()).contain('search-labs');
     },
     async expectToBeOnNotebooksExamplesPage() {
