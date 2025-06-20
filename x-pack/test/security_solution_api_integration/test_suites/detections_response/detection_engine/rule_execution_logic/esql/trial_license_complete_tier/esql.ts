@@ -690,7 +690,6 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
             // re-trigger rule execution
-
             runSoonRule(supertest, createdRule.id);
 
             const alertsResponse = await getOpenAlerts(
@@ -762,7 +761,7 @@ export default ({ getService }: FtrProviderContext) => {
               new Date()
             );
 
-            expect(alertsResponse.hits.hits.length).toBe(120);
+            expect(alertsResponse.hits.hits.length).toBe(200);
           });
 
           it('should create alerts from all events(2 x max_signals) when used timestamp override', async () => {
@@ -1526,6 +1525,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const createdRule = await createRule(supertest, log, rule);
 
+        // first rule run should generate 100 alerts from first 3 batches of index documents
         const alertsResponseFromFirstRuleExecution = await getAlerts(
           supertest,
           log,
