@@ -105,7 +105,10 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
             <EuiImage
               src={privilegedUserMonitoringOnboardingPageIllustration}
               hasShadow={false}
-              alt={'Privileged user monitoring dashboard illustration'}
+              alt={i18n.translate(
+                'xpack.securitySolution.privilegedUserMonitoring.onboarding.dashboardIllustrationAltText',
+                { defaultMessage: 'Privileged user monitoring dashboard illustration' }
+              )}
               size="l"
             />
           </EuiFlexItem>
