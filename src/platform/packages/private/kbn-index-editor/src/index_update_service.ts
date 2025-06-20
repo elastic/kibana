@@ -210,7 +210,7 @@ export class IndexUpdateService {
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) => {
-            return from(this.saveDocsImmediately(updates)).pipe(
+            return from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
               map(([response, rows, dataView]) => {
                 return { updates, response, rows, dataView };
@@ -341,7 +341,7 @@ export class IndexUpdateService {
    * Saves documents immediately to the index.
    * @param updates
    */
-  public saveDocsImmediately(updates: DocUpdate[]): Promise<BulkResponse> {
+  public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
     const body = JSON.stringify({
       operations: (
         updates.map((update) => {

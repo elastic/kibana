@@ -97,7 +97,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           return;
         }
 
-        const response = await indexUpdateService.saveDocsImmediately([{ value: newRow }]);
+        const response = await indexUpdateService.bulkUpdate([{ value: newRow }]);
 
         if (!response.errors) {
           setActiveMode(null);
