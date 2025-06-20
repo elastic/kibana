@@ -8,7 +8,7 @@
 import { separate } from 'fp-ts/Array';
 import type { BulkProcessingResults, BulkPrivMonUser, BulkBatchProcessingResults } from './types';
 
-interface Accumulator {
+export interface Accumulator {
   failed: number;
   successful: number;
   errors: BulkProcessingResults['errors'];
