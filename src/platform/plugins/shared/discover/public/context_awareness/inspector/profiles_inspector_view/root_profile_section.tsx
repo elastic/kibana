@@ -26,7 +26,7 @@ export function RootProfileSection({ rootProfile }: { rootProfile: Profiles['roo
             title: i18n.translate('discover.inspector.profilesInspectorView.rootProfileIdTitle', {
               defaultMessage: 'Profile ID',
             }),
-            description: rootProfile?.profileId || '',
+            description: rootProfile.profileId,
           },
           {
             title: i18n.translate(
@@ -35,7 +35,7 @@ export function RootProfileSection({ rootProfile }: { rootProfile: Profiles['roo
                 defaultMessage: 'Solution type',
               }
             ),
-            description: rootProfile?.solutionType || '',
+            description: rootProfile.solutionType,
           },
         ]}
       />

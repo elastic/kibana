@@ -33,7 +33,7 @@ export function DataSourceProfileSection({
                 defaultMessage: 'Profile ID',
               }
             ),
-            description: dataSourceProfile?.profileId || '',
+            description: dataSourceProfile.profileId,
           },
           {
             title: i18n.translate(
@@ -42,7 +42,7 @@ export function DataSourceProfileSection({
                 defaultMessage: 'Category',
               }
             ),
-            description: dataSourceProfile?.category || '',
+            description: dataSourceProfile.category,
           },
         ]}
       />
