@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 
 const READ_ONLY_TYPE = 'read_only_type';
+const NON_READ_ONLY_TYPE = 'non_read_only_type';
 
 export class ReadOnlyObjectsPlugin implements Plugin {
   public setup(core: CoreSetup) {
@@ -19,7 +21,19 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       mappings: {
         dynamic: false,
         properties: {
-          description: { type: 'text', dynamic: false },
+          description: { type: 'text' },
+        },
+      },
+    });
+
+    core.savedObjects.registerType({
+      name: NON_READ_ONLY_TYPE,
+      hidden: false,
+      namespaceType: 'multiple-isolated',
+      mappings: {
+        dynamic: false,
+        properties: {
+          description: { type: 'text' },
         },
       },
     });
@@ -35,23 +49,27 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             reason: 'This route is opted out from authorization',
           },
         },
-        validate: false,
+        validate: {
+          body: schema.object({
+            type: schema.maybe(
+              schema.oneOf([schema.literal(READ_ONLY_TYPE), schema.literal(NON_READ_ONLY_TYPE)])
+            ),
+            isReadOnly: schema.maybe(schema.boolean()),
+          }),
+        },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.getClient();
-        const currentUser = (await context.core).security?.authc.getCurrentUser();
-        console.log({ currentUser, soClient });
+        const objType = request.body.type || READ_ONLY_TYPE;
+        const { isReadOnly } = request.body;
         try {
           await soClient.create(
-            READ_ONLY_TYPE,
+            objType,
             {
               description: 'test',
             },
             {
-              accessControl: {
-                owner: currentUser?.username!,
-                accessMode: 'read_only',
-              },
+              ...(isReadOnly ? { accessControl: { accessMode: 'read_only' } } : {}),
             }
           );
           return response.ok({
@@ -80,7 +98,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const result = await soClient.find({
           type: READ_ONLY_TYPE,
         });
-
         return response.ok({
           body: result,
         });
@@ -95,13 +112,24 @@ export class ReadOnlyObjectsPlugin implements Plugin {
             reason: 'This route is opted out from authorization',
           },
         },
-        validate: false,
+        validate: {
+          body: schema.object({
+            type: schema.oneOf([
+              schema.literal(READ_ONLY_TYPE),
+              schema.literal(NON_READ_ONLY_TYPE),
+            ]),
+            objectId: schema.string(),
+          }),
+        },
       },
       async (context, request, response) => {
         const soClient = (await context.core).savedObjects.client;
         try {
-          const result = await soClient.update(READ_ONLY_TYPE, 'some_id', {
-            attributes: {},
+          const objectType = request.body.type || READ_ONLY_TYPE;
+          const result = await soClient.update(objectType, request.body.objectId, {
+            attributes: {
+              description: 'updated description',
+            },
           });
           return response.ok({
             body: result,

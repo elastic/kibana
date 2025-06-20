@@ -96,6 +96,15 @@ export function getBaseMappings(): IndexMappingSafe {
       managed: {
         type: 'boolean',
       },
+      accessControl: {
+        type: 'object',
+        dynamic: false,
+        properties: {
+          owner: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   };
 }

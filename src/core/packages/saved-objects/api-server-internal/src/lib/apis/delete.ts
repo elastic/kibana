@@ -50,6 +50,7 @@ export const performDelete = async <T>(
 
   if (securityExtension) {
     let name;
+    let accessControl: SavedObjectsRawDocSource['accessControl'] | undefined;
 
     if (securityExtension.includeSavedObjectNames()) {
       const nameAttribute = registry.getNameAttribute(type);
@@ -62,7 +63,7 @@ export const performDelete = async <T>(
         },
         { ignore: [404], meta: true }
       );
-
+      accessControl = savedObjectResponse.body._source?.accessControl;
       const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
 
       name = SavedObjectsUtils.getName(nameAttribute, saveObject);
@@ -72,7 +73,7 @@ export const performDelete = async <T>(
     // the current space. This saves us from performing the preflight check if we're unauthorized
     await securityExtension?.authorizeDelete({
       namespace,
-      object: { type, id, name },
+      object: { type, id, name, accessControl },
     });
   }
 
