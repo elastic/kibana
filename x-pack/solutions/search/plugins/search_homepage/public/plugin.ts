@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { QueryClient, QueryCache } from '@tanstack/react-query';
 import { PLUGIN_ID } from '../common';
 
-import { SearchHomepage } from './embeddable';
 import { docLinks } from '../common/doc_links';
+import { SearchHomepage } from './embeddable';
+import { initQueryClient } from './services/query_client';
 import {
+  SearchHomepageAppInfo,
+  SearchHomepageAppPluginStartDependencies,
   SearchHomepagePluginSetup,
   SearchHomepagePluginStart,
-  SearchHomepageAppPluginStartDependencies,
-  SearchHomepageAppInfo,
   SearchHomepageServicesContextDeps,
 } from './types';
-import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 
 const appInfo: SearchHomepageAppInfo = {
   id: PLUGIN_ID,
@@ -30,28 +29,10 @@ const appInfo: SearchHomepageAppInfo = {
 export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
-  constructor() {}
-
   public setup(
     core: CoreSetup<SearchHomepageAppPluginStartDependencies, SearchHomepagePluginStart>
   ) {
-    const queryClient = new QueryClient({
-      queryCache: new QueryCache({
-        onError: (error) => {
-          // 404s are often functionally okay and shouldn't show toasts by default
-          if (getErrorCode(error) === 404) {
-            return;
-          }
-          if (isKibanaServerError(error) && !error.skipToast) {
-            core.notifications.toasts.addError(error, {
-              title: error.name,
-              toastMessage: getErrorMessage(error),
-              toastLifeTimeMs: 1000,
-            });
-          }
-        },
-      }),
-    });
+    const queryClient = initQueryClient(core.notifications.toasts);
     const result: SearchHomepagePluginSetup = {
       app: appInfo,
     };
