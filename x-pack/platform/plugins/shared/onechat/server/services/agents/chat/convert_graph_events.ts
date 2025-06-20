@@ -21,7 +21,14 @@ import {
 } from '@kbn/onechat-common/agents';
 import { RoundInput, ConversationRoundStepType } from '@kbn/onechat-common/chat';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
-import { extractTextContent, getToolCalls } from './utils/from_langchain_messages';
+import {
+  matchGraphName,
+  matchEvent,
+  matchName,
+  createTextChunkEvent,
+  extractTextContent,
+} from '@kbn/onechat-genai-utils/langchain';
+import { getToolCalls } from './utils/from_langchain_messages';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -90,21 +97,13 @@ export const convertGraphEvents = ({
         }
 
         // stream text chunks for the UI
-        if (event.event === 'on_chat_model_stream') {
+        if (matchEvent(event, 'on_chat_model_stream')) {
           const chunk: AIMessageChunk = event.data.chunk;
-          const chunkEvent: MessageChunkEvent = {
-            type: ChatAgentEventType.messageChunk,
-            data: {
-              messageId: chunk.id ?? 'todo',
-              textChunk: extractTextContent(chunk),
-            },
-          };
-
-          return of(chunkEvent);
+          return of(createTextChunkEvent(chunk));
         }
 
         // emit tool calls or full message on each agent step
-        if (event.event === 'on_chain_end' && event.name === 'agent') {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
@@ -139,7 +138,7 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events
-        if (event.event === 'on_chain_end' && event.name === 'tools') {
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
           const toolMessages: ToolMessage[] = event.data.output.addedMessages ?? [];
 
           const toolResultEvents: ToolResultEvent[] = [];
@@ -165,8 +164,4 @@ export const convertGraphEvents = ({
       })
     );
   };
-};
-
-const matchGraphName = (event: LangchainStreamEvent, graphName: string): boolean => {
-  return event.metadata.graphName === graphName;
 };

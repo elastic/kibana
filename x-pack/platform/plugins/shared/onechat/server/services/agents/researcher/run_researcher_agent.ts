@@ -9,20 +9,26 @@ import { from, filter, shareReplay, lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ChatAgentEvent, BuiltinToolIds, builtinToolProviderId } from '@kbn/onechat-common';
+import {
+  ChatAgentEvent,
+  BuiltinToolIds,
+  builtinToolProviderId,
+  isMessageCompleteEvent,
+} from '@kbn/onechat-common';
 import type { ModelProvider, ScopedRunner, ToolProvider } from '@kbn/onechat-server';
 import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
 import { toLangchainTool } from '../chat/utils';
 import { createResearcherAgentGraph } from './graph';
+import { convertGraphEvents } from './convert_graph_events';
 
-export interface RunSearchAgentContext {
+export interface RunResearcherAgentContext {
   logger: Logger;
   request: KibanaRequest;
   modelProvider: ModelProvider;
   runner: ScopedRunner;
 }
 
-export interface RunSearchAgentParams {
+export interface RunResearcherAgentParams {
   /**
    * The search instructions
    */
@@ -48,8 +54,8 @@ export interface RunResearcherAgentResponse {
 }
 
 export type RunResearcherAgentFn = (
-  params: RunSearchAgentParams,
-  context: RunSearchAgentContext
+  params: RunResearcherAgentParams,
+  context: RunResearcherAgentContext
 ) => Promise<RunResearcherAgentResponse>;
 
 const agentGraphName = 'researcher-agent';
@@ -60,7 +66,7 @@ const noopOnEvent = () => {};
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runSearchAgent: RunResearcherAgentFn = async (
+export const runResearcherAgent: RunResearcherAgentFn = async (
   { instructions, cycleBudget = defaultCycleBudget, toolProvider, onEvent = noopOnEvent },
   { logger, request, modelProvider }
 ) => {
@@ -107,15 +113,18 @@ export const runSearchAgent: RunResearcherAgentFn = async (
     }
   );
 
-  const events$ = from(eventStream).pipe(filter(isStreamEvent), shareReplay());
+  const events$ = from(eventStream).pipe(
+    filter(isStreamEvent),
+    convertGraphEvents({ graphName: agentGraphName }),
+    shareReplay()
+  );
 
-  events$.subscribe((event) => {
+  events$.pipe().subscribe((event) => {
     // later we should emit reasoning events from there.
   });
 
-  //  event: 'on_chain_end', name: 'researcher-agent'
-  const lastEvent = await lastValueFrom(events$);
-  const generatedAnswer = lastEvent.data.output.generatedAnswer;
+  const lastEvent = await lastValueFrom(events$.pipe(filter(isMessageCompleteEvent)));
+  const generatedAnswer = lastEvent.data.messageContent;
 
   return {
     answer: generatedAnswer,

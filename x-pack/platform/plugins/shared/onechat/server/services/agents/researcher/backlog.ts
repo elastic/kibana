@@ -15,7 +15,7 @@ export interface ActionResult {
 export interface ReflectionResult {
   isSufficient: boolean;
   nextQuestions: string[];
-  reasoning?: string;
+  reasoning: string;
 }
 
 export type BacklogItem = ActionResult | ReflectionResult;

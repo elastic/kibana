@@ -17,6 +17,40 @@ import { getReflectionPrompt, getExecutionPrompt, getAnswerPrompt } from './prom
 import { extractToolResults } from './utils';
 import { ActionResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
 
+const StateAnnotation = Annotation.Root({
+  // inputs
+  initialQuery: Annotation<string>(), // the search query
+  cycleBudget: Annotation<number>(), // budget in number of cycles
+  // internal state
+  remainingCycles: Annotation<number>(),
+  actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
+    reducer: (state, actions) => {
+      return actions ?? state;
+    },
+    default: () => [],
+  }),
+  pendingActions: Annotation<ActionResult[], ActionResult[] | 'clear'>({
+    reducer: (state, actions) => {
+      return actions === 'clear' ? [] : [...state, ...actions];
+    },
+    default: () => [],
+  }),
+  backlog: Annotation<BacklogItem[]>({
+    reducer: (current, next) => {
+      return [...current, ...next];
+    },
+    default: () => [],
+  }),
+  // outputs
+  generatedAnswer: Annotation<string>(),
+});
+
+export type StateType = typeof StateAnnotation.State;
+
+type ResearchStepState = StateType & {
+  researchGoal: ResearchGoal;
+};
+
 export interface ResearchGoal {
   question: string;
 }
@@ -30,40 +64,6 @@ export const createResearcherAgentGraph = async ({
   tools: StructuredTool[];
   logger: Logger;
 }) => {
-  const StateAnnotation = Annotation.Root({
-    // inputs
-    initialQuery: Annotation<string>(), // the search query
-    cycleBudget: Annotation<number>(), // budget in number of cycles
-    // internal state
-    remainingCycles: Annotation<number>(),
-    actionsQueue: Annotation<ResearchGoal[], ResearchGoal[]>({
-      reducer: (state, actions) => {
-        return actions ?? state;
-      },
-      default: () => [],
-    }),
-    pendingActions: Annotation<ActionResult[], ActionResult[] | 'clear'>({
-      reducer: (state, actions) => {
-        return actions === 'clear' ? [] : [...state, ...actions];
-      },
-      default: () => [],
-    }),
-    backlog: Annotation<BacklogItem[]>({
-      reducer: (current, next) => {
-        return [...current, ...next];
-      },
-      default: () => [],
-    }),
-    // outputs
-    generatedAnswer: Annotation<string>(),
-  });
-
-  type StateType = typeof StateAnnotation.State;
-
-  type ResearchStepState = StateType & {
-    researchGoal: ResearchGoal;
-  };
-
   const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
 
   /**
@@ -145,26 +145,27 @@ export const createResearcherAgentGraph = async ({
   };
 
   const reflection = async (state: StateType) => {
-    const reflectModel = chatModel.withStructuredOutput(
-      z.object({
-        isSufficient: z.boolean().describe(
-          `Set to true if the current information fully answers the user question without requiring further research.
+    const reflectModel = chatModel
+      .withStructuredOutput(
+        z.object({
+          isSufficient: z.boolean().describe(
+            `Set to true if the current information fully answers the user question without requiring further research.
            Set to false if any knowledge gaps or unresolved sub-problems remain.`
-        ),
-        nextQuestions: z.array(z.string()).describe(
-          `A list of self-contained, actionable research questions or sub-problems that need to be explored
+          ),
+          nextQuestions: z.array(z.string()).describe(
+            `A list of self-contained, actionable research questions or sub-problems that need to be explored
           further to fully answer the user question. Leave empty if isSufficient is true.`
-        ),
-        reasoning: z
-          .string()
-          .optional()
-          .describe(
+          ),
+          reasoning: z.string().describe(
             `Brief internal reasoning explaining why the current information is sufficient or not.
             You may list what was already answered, what gaps exist, or whether decomposition was necessary.
             Use this as your thought process or scratchpad before producing the final output.`
           ),
-      })
-    );
+        })
+      )
+      .withConfig({
+        tags: ['researcher-reflection'],
+      });
 
     const response: ReflectionResult = await reflectModel.invoke(
       getReflectionPrompt({

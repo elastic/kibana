@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import type { RegisteredTool } from '@kbn/onechat-server';
 import { BuiltinToolIds, BuiltinTags } from '@kbn/onechat-common';
-import { runSearchAgent } from './run_researcher_agent';
+import { runResearcherAgent } from './run_researcher_agent';
 
 const researcherSchema = z.object({
   instructions: z.string().describe('Research instructions for the agent'),
@@ -39,7 +39,7 @@ export const researcherTool = (): RegisteredTool<typeof researcherSchema, Resear
         - Please include all useful information in the instructions, as the agent has no other context. `,
     schema: researcherSchema,
     handler: async ({ instructions }, { toolProvider, request, modelProvider, runner, logger }) => {
-      const searchAgentResult = await runSearchAgent(
+      const searchAgentResult = await runResearcherAgent(
         {
           instructions,
           toolProvider,
