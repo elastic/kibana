@@ -51,9 +51,6 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
 
-  # They will be moved to enabled once the first test is added, the first two initial configs are in disabled section
-  - x-pack/platform/test/functional/config.firefox.ts
-  - x-pack/platform/test/functional/config_security_basic.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -250,9 +247,10 @@ enabled:
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
-  - x-pack/test/functional/apps/security/config.ts
+  - x-pack/test/functional/apps/saved_query_management/config.v2.ts
+  - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
-  - x-pack/test/functional/apps/spaces/config.ts
+  - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -264,9 +262,10 @@ enabled:
   - x-pack/test/functional/apps/user_profiles/config.ts
   - x-pack/test/functional/apps/visualize/config.ts
   - x-pack/test/functional/apps/watcher/config.ts
-  - x-pack/test/functional/config_security_basic.ts
+  - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
+  - x-pack/platform/test/functional/config.firefox.ts
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
