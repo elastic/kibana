@@ -153,10 +153,19 @@ export class CasesIncrementalIdService {
         const newId = incIdSo.attributes.last_id + 1;
         // Apply the new ID to the case
         await this.applyIncrementalIdToCaseSo(caseSo, newId, namespaceOfCase);
-        // Apply the new ID to the local incrementer SO, it will persist later
-        incIdSo.attributes.last_id = newId;
-        hasAppliedAnId = true;
-        countProcessedCases++;
+
+        if (this.isStopped) {
+          // The service was stopped while the last write was happening,
+          // we need to reset the previous incremental id, in order to avoid
+          // double-assigned id.
+          this.logger.warn('Need to reset incremental case id because service was stopped');
+          await this.applyIncrementalIdToCaseSo(caseSo, null, namespaceOfCase);
+        } else {
+          // Apply the new ID to the local incrementer SO, it will persist later
+          incIdSo.attributes.last_id = newId;
+          hasAppliedAnId = true;
+          countProcessedCases++;
+        }
       } catch (error) {
         this.logger.error(`ID incrementing paused due to error: ${error}`);
         break;
@@ -362,7 +371,7 @@ export class CasesIncrementalIdService {
 
   public async applyIncrementalIdToCaseSo(
     currentCaseSo: SavedObjectsFindResult<CasePersistedAttributes>,
-    newIncrementalId: number,
+    newIncrementalId: number | null,
     namespace: string
   ) {
     // We shouldn't have to worry about version conflicts, as we're not modifying any existing fields

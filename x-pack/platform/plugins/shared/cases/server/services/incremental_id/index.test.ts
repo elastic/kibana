@@ -299,8 +299,28 @@ describe('CasesIncrementalIdService', () => {
       // @ts-expect-error: case SO types are not correct
       await service.incrementCaseIds([cases[0], cases[1], cases[2]]);
       // The service was stopped asynchronously while the second case was writing.
-      // Therefore it should have stopped, and not processed the third case
-      expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(2);
+      // Therefore it should have stopped, and not processed the third case.
+      expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(3);
+      expect(service.applyIncrementalIdToCaseSo).toHaveBeenNthCalledWith(
+        1,
+        cases[0],
+        101,
+        'default'
+      );
+      expect(service.applyIncrementalIdToCaseSo).toHaveBeenNthCalledWith(
+        2,
+        cases[1],
+        11,
+        'second-life'
+      );
+      // The third call is to reset the incremental ID of the previous write
+      expect(service.applyIncrementalIdToCaseSo).toHaveBeenNthCalledWith(
+        3,
+        cases[1],
+        null,
+        'second-life'
+      );
+      // The service is stopped and increment counter SOs are not updated
       expect(service.incrementCounterSO).not.toHaveBeenCalled();
     });
 
