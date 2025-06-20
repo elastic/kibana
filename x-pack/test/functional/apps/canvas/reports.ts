@@ -66,6 +66,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.get('content-disposition')).to.equal(
           'attachment; filename=The%20Very%20Cool%20Workpad%20for%20PDF%20Tests.pdf'
         );
+
+        const jobId = await PageObjects.reporting.getReportJobId(60000);
+        const reportInfo = await PageObjects.reporting.getReportInfo(jobId);
+
+        // verify "completed" status (no warnings)
+        expect(reportInfo).to.have.property('status', 'completed');
       });
     });
   });

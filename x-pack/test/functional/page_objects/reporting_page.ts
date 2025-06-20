@@ -12,7 +12,7 @@ import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
 
-import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
+import { INTERNAL_ROUTES, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';
 
 const writeFileAsync = promisify(fs.writeFile);
@@ -35,6 +35,30 @@ export class ReportingPageObject extends FtrService {
       el.style.flex="none";
       el.style.width="${width}px";
     `);
+  }
+
+  async getReportJobId(timeout: number): Promise<string> {
+    this.log.debug('getReportJobId');
+
+    try {
+      // get the report job id from a data attribute on the download button
+      const jobIdElement = await this.find.byCssSelector('[data-test-jobId]', timeout);
+      if (!jobIdElement) {
+        throw new Error('Failed to find report job id.');
+      }
+      const jobId = await jobIdElement.getAttribute('data-test-jobId');
+      if (!jobId) {
+        throw new Error('Failed to find report job id.');
+      }
+      return jobId;
+    } catch (err) {
+      let errorText = 'Unknown error';
+      if (await this.find.existsByCssSelector('[data-test-errorText]')) {
+        const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+        errorText = (await errorTextEl.getAttribute('data-test-errorText')) ?? errorText;
+      }
+      throw new Error(`Test report failed: ${errorText}: ${err}`, { cause: err });
+    }
   }
 
   async getReportURL(timeout: number) {
@@ -75,6 +99,12 @@ export class ReportingPageObject extends FtrService {
     const urlWithoutBase = fullUrl.replace(baseURL, '');
     const res = await this.security.testUserSupertest.get(urlWithoutBase);
     return res ?? '';
+  }
+
+  async getReportInfo(jobId: string) {
+    this.log.debug(`getReportInfo for ${jobId}`);
+    const response = await this.getResponse(INTERNAL_ROUTES.JOBS.INFO_PREFIX + `/${jobId}`);
+    return response.body;
   }
 
   async getRawReportData(url: string): Promise<Buffer> {
