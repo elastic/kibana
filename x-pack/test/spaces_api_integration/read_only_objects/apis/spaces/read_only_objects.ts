@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { type Cookie, parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -15,10 +17,25 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
-  const createObject = async (type: string, isReadOnly: boolean) => {
+  const login = async (username: string, password: string | undefined) => {
+    const response = await supertestWithoutAuth
+      .post('/internal/security/login')
+      .set('kbn-xsrf', 'xxx')
+      .send({
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: '/',
+        params: { username, password },
+      })
+      .expect(200);
+    return parseCookie(response.headers['set-cookie'][0])!;
+  };
+
+  const createObject = async (type: string, isReadOnly: boolean, cookie: Cookie) => {
     return supertest
       .post('/read_only_objects/create')
       .set('kbn-xsrf', 'true')
+      .set('Cookie', cookie.cookieString())
       .send({ type, isReadOnly })
       .expect(200);
   };
@@ -28,9 +45,14 @@ export default function ({ getService }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
-      it('should create a read only object', async () => {
-        const response = await createObject('read_only_type', true);
+      it.only('should create a read only object', async () => {
+        const adminCookie = await login(adminTestUser.username, adminTestUser.username);
+        const response = await createObject('read_only_type', true, adminCookie);
+        console.log(response.body);
         expect(response.body.type).to.eql('read_only_type');
+        expect(response.body).to.have.property('accessControl');
+        expect(response.body.accessControl).to.have.property('readOnly', true);
+        expect(response.body.accessControl).to.have.property('owner');
       });
 
       it('should update read only objects owned by the same user', async () => {

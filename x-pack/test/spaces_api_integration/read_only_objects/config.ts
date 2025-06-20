@@ -42,6 +42,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${readOnlyObjectsPlugin}`,
+        `--xpack.security.authc.providers=${JSON.stringify({
+          basic: { basic1: { order: 0 } },
+        })}`,
       ],
     },
     security: {
