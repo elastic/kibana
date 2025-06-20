@@ -47,7 +47,6 @@
     "@kbn/rollup",
     "@kbn/share-plugin",
     "@kbn/shared-ux-table-persist",
-    "@kbn/discover-plugin",
   ],
   "exclude": [
     "target/**/*",
