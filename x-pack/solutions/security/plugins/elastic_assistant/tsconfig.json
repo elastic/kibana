@@ -76,11 +76,10 @@
     "@kbn/rison",
     "@kbn/search-errors",
     "@kbn/securitysolution-t-grid",
-    "@kbn/core-notifications-browser",
-    "@kbn/core-http-browser",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/discover-plugin",
-    "@kbn/elastic-assistant-shared-state-plugin"
+    "@kbn/elastic-assistant-shared-state-plugin",
+    "@kbn/core-notifications-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

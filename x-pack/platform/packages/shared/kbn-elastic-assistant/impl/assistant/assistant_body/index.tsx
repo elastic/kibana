@@ -107,8 +107,6 @@ export const AssistantBody: FunctionComponent<Props> = ({
     return <UpgradeLicenseCallToAction http={http} />;
   }
 
-  console.log(isWelcomeSetup)
-
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>

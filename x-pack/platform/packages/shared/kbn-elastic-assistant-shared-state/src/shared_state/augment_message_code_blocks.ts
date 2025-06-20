@@ -17,7 +17,7 @@ export interface AugmentMessageCodeBlocks {
   }) => UnmountCallback;
 }
 
-const defaultValue: AugmentMessageCodeBlocks = {
+export const defaultValue: AugmentMessageCodeBlocks = {
   mount: () => () => {},
 };
 

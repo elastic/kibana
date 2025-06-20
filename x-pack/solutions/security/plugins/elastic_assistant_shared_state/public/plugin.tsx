@@ -70,6 +70,10 @@ export class ElasticAssistantSharedStatePublicPlugin
   }
 
   public stop() {
-    // Cleanup when plugin is stopped
+    this.commentService.stop();
+    this.promptContextService.stop();
+    this.assistantContextValueService.stop();
+    this.augmentMessageCodeBlocksService.stop();
+    this.signalIndexService.stop();
   }
 }

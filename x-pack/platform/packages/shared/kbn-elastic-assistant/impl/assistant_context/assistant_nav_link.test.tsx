@@ -41,7 +41,6 @@ describe('AssistantNavLink', () => {
   });
 
   it('button has transparent background in project navigation', () => {
-
     mockGetChromeStyle.mockReturnValue(of('project'));
 
     const { queryByTestId } = render(
@@ -66,7 +65,6 @@ describe('AssistantNavLink', () => {
   });
 
   it('should render the header link text', () => {
-
     const { queryByText, queryByTestId } = render(
       <>
         <AssistantNavLink />
@@ -77,7 +75,6 @@ describe('AssistantNavLink', () => {
   });
 
   it('should not render the header link if not authorized', () => {
-
     (useAssistantContext as jest.Mock).mockReturnValue({
       ...mockAssistantContext,
       assistantAvailability: {

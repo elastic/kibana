@@ -40,7 +40,6 @@ const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
 };
 
 describe('CommentActions', () => {
-  
   it('content added to timeline is correct', () => {
     const message: ClientMessage = {
       content: `Only this should be copied! {reference(exampleReferenceId)}`,

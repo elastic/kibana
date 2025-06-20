@@ -8,10 +8,11 @@
 import { once } from 'lodash';
 import { useEffect } from 'react';
 import { getUserConversationsExist } from '@kbn/elastic-assistant';
-import { licenseService } from '../licence/use_licence';
-import { useAssistantAvailability } from '../assistant_availability/use_assistant_availability';
-import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
-import { createConversations } from '../../utils/create_conversation';
+import { createConversations } from './create_conversation';
+import { useKibana } from '../../common/lib/kibana';
+import { licenseService } from '../../common/hooks/use_license';
+import { useAssistantAvailability } from '../use_assistant_availability';
+
 
 export const useMigrateConversationsFromLocalStorage = () => {
   const hasEnterpriseLicense = licenseService.isEnterprise();

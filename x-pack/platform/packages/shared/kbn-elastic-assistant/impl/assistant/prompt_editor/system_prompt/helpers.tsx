@@ -8,15 +8,10 @@
 import { EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
-import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
-
-const Strong = styled.strong`
-  margin-right: ${(props) => props.theme.euiTheme.size.s};
-`;
 
 interface GetOptionFromPromptProps extends PromptResponse {
   content: string;
@@ -39,6 +34,21 @@ const InputDisplay = ({ name }: { name: string }) => {
   );
 };
 
+const StrongText = ({ children, ...rest }: React.HTMLAttributes<HTMLElement>) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <strong
+      css={css`
+        margin-right: ${euiTheme.size.s};
+      `}
+      {...rest}
+    >
+      {children}
+    </strong>
+  );
+};
+
 export const getOptionFromPrompt = ({
   content,
   id,
@@ -48,7 +58,7 @@ export const getOptionFromPrompt = ({
   inputDisplay: <InputDisplay name={name} />,
   dropdownDisplay: (
     <>
-      <Strong data-test-subj={`systemPrompt-${name}`}>{name}</Strong>
+      <StrongText data-test-subj={`systemPrompt-${name}`}>{name}</StrongText>
 
       {/* Empty content tooltip gets around :hover styles from SuperSelectOptionButton */}
       <EuiToolTip content={undefined}>

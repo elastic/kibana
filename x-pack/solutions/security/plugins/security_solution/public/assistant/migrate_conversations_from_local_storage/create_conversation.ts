@@ -13,10 +13,11 @@ import { bulkUpdateConversations, type Conversation } from '@kbn/elastic-assista
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import { i18n } from '@kbn/i18n';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { APP_ID, LOCAL_STORAGE_KEY } from '../common/constants';
+import { APP_ID } from '../../../common';
+import { LOCAL_STORAGE_KEY } from '../helpers';
 
 const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
-  'xpack.elasticAssistantPlugin.assistant.conversationMigrationStatus.title',
+  'xpack.securitySolution.assistant.conversationMigrationStatus.title',
   {
     defaultMessage: 'Local storage conversations persisted successfully.',
   }

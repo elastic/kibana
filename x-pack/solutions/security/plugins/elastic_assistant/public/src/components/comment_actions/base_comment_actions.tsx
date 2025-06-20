@@ -39,7 +39,7 @@ const BaseCommentActionsComponent: React.FC<Props> = ({ message, children }) => 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {children}
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="copy-to-clipboard-action">
         <EuiToolTip position="top" content={COPY_TO_CLIPBOARD}>
           <EuiCopy textToCopy={getSelfContainedContent(content)}>
             {(copy) => (

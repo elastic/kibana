@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { ClientMessage } from '@kbn/elastic-assistant';
-import { EuiCopy } from '@elastic/eui';
+import { EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { BaseCommentActions } from './base_comment_actions';
 
 jest.mock('@elastic/eui', () => ({
@@ -35,7 +35,13 @@ describe('CommentActions', () => {
       role: 'assistant',
       timestamp: '2025-01-08T10:47:34.578Z',
     };
-    render(<BaseCommentActions message={message}><></></BaseCommentActions>);
+    render(
+      <BaseCommentActions message={message}>
+        <EuiFlexItem grow={false} data-test-subj="placeholder_actions">
+          <div>{'Other actions'}</div>
+        </EuiFlexItem>
+      </BaseCommentActions>
+    );
 
     expect(EuiCopy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -43,5 +49,8 @@ describe('CommentActions', () => {
       }),
       expect.anything()
     );
+
+    expect(screen.getByTestId('copy-to-clipboard-action')).toBeInTheDocument();
+    expect(screen.getByTestId('placeholder_actions')).toBeInTheDocument();
   });
 });

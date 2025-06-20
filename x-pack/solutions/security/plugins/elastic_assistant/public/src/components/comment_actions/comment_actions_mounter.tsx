@@ -10,6 +10,7 @@ import { CommentServiceActions } from '@kbn/elastic-assistant-shared-state';
 import { ClientMessage } from '@kbn/elastic-assistant';
 import useObservable from 'react-use/lib/useObservable';
 import React, { useEffect, useRef } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { BaseCommentActions } from './base_comment_actions';
 
 interface Props {
@@ -34,7 +35,7 @@ export const CommentActionsMounter = ({ message, getActions$ }: Props) => {
 
   return (
     <BaseCommentActions message={message}>
-      <span ref={actionMountPointRef} />
+      <EuiFlexGroup alignItems="center" gutterSize="none" ref={actionMountPointRef} />
     </BaseCommentActions>
   );
 };

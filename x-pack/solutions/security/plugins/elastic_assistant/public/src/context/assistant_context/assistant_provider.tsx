@@ -15,7 +15,6 @@ import type { IToasts } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
 import { getComments } from '../../components/get_comments';
-import { useMigrateConversationsFromLocalStorage } from '../../hooks/migrate_conversations_from_local_storage/use_migrate_conversations_from_local_storage';
 import { useKibana } from '../typed_kibana_context/typed_kibana_context';
 import { useInferenceEnabled } from '../../hooks/inference_enabled/use_inference_enabled';
 import { useAppToasts } from '../../hooks/toasts/use_app_toasts';
@@ -33,7 +32,7 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
  */
 export function AssistantProvider({ children }: { children: React.ReactElement }) {
   const {
-    application: { navigateToApp, currentAppId$ },
+    application: { navigateToApp, currentAppId$},
     http,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
@@ -64,8 +63,6 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
       mount: () => () => {},
     }
   );
-
-  useMigrateConversationsFromLocalStorage();
 
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 

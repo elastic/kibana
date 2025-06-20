@@ -17,13 +17,14 @@ import {
   ElasticAssistantPublicPluginStartDependencies,
   StartServices,
 } from './types';
-import { EuiThemeProvider } from './src/context/eui_them_context/eui_them_provider';
 import { AssistantProvider } from './src/context/assistant_context/assistant_provider';
 import { KibanaContextProvider } from './src/context/typed_kibana_context/typed_kibana_context';
 import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
+import { EuiThemeProvider } from './src/context/eui_theme_context/eui_theme_provider';
+import { isSecuritySolutionAccessible } from './helpers_access';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -35,7 +36,8 @@ export class ElasticAssistantPublicPlugin
     ElasticAssistantPublicPluginStart,
     ElasticAssistantPublicPluginSetupDependencies,
     ElasticAssistantPublicPluginStartDependencies
-  > {
+  >
+{
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
 
@@ -45,6 +47,8 @@ export class ElasticAssistantPublicPlugin
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
+    const { capabilities } = coreStart.application;
+
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
@@ -66,14 +70,16 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    // Return any functionality that should be available to other plugins at runtime
-    coreStart.chrome.navControls.registerRight({
-      order: 1001,
-      mount: (target) => {
-        const startService = startServices();
-        return this.mountAIAssistantButton(target, coreStart, startService);
-      },
-    });
+    if (isSecuritySolutionAccessible(capabilities)) {
+      // Only register the assistant button if the user has access to Security Solution
+      coreStart.chrome.navControls.registerRight({
+        order: 1001,
+        mount: (target) => {
+          const startService = startServices();
+          return this.mountAIAssistantButton(target, coreStart, startService);
+        },
+      });
+    }
 
     return {};
   }
