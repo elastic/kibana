@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/213784
   describe.skip('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
-      await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
