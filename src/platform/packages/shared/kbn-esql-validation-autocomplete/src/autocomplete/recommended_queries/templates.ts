@@ -188,7 +188,7 @@ export const getRecommendedQueries = ({
             description: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.description',
               {
-                defaultMessage: 'Identify patterns in my logs',
+                defaultMessage: 'Use the CATEGORIZE function to identify patterns in your logs',
               }
             ),
             queryString: `${fromCommand}\n  | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(${categorizationField})\n  | SORT Count DESC`,

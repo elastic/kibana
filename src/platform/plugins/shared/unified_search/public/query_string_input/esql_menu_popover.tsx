@@ -43,7 +43,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { docLinks, http, chrome, application } = kibana.services;
+  const { docLinks, http, chrome } = kibana.services;
 
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
@@ -57,7 +57,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     if (adHocDataview && typeof adHocDataview !== 'string') {
       const textFields = adHocDataview.fields?.getByType('string') ?? [];
       let tempCategorizationField;
-      if (textFields.length && application.capabilities.ml.canUseAiops) {
+      if (textFields.length) {
         tempCategorizationField = getCategorizationField(textFields.map((field) => field.name));
       }
 
@@ -73,7 +73,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       timeFieldName: undefined,
       categorizationField: undefined,
     };
-  }, [adHocDataview, application]);
+  }, [adHocDataview]);
 
   // Use a ref to store the *previous* fetched recommended queries
   const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
