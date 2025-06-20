@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FileUploadManager } from '@kbn/file-upload';
+import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
@@ -29,6 +30,8 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open file upload UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
+      // TODO consider async imports
+
       const { coreStart, data, fileUpload } = dependencies;
 
       const indexUpdateService = new IndexUpdateService(coreStart.http, data);
@@ -45,8 +48,13 @@ export function createEditLookupIndexContentAction(
         { index: { mode: 'lookup' } }
       );
 
+      const messageImporter = new MessageImporter({});
+
       try {
-        createFlyout({ ...dependencies, indexUpdateService, fileManager }, context);
+        createFlyout(
+          { ...dependencies, indexUpdateService, fileManager, messageImporter },
+          context
+        );
       } catch (e) {
         return Promise.reject(e);
       }
