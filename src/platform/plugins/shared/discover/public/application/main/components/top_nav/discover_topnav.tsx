@@ -57,7 +57,7 @@ export const DiscoverTopNav = ({
   const [actualQuery, setActualQuery] = useState(query);
   // Note, this is just experimental, if we want to store the edited / dirty state of the query
   // is should be done I guess in out internal state container
-  const onQueryChange = useCallback((q: { dateRange: TimeRange; query?: QT | Query }) => {
+  const onQueryChange = useCallback((q: { dateRange: TimeRange; query?: Query }) => {
     // console.log('onQueryChange', q);
     setActualQuery(q);
   }, []);
