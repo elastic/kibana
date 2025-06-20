@@ -110,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Threat detection', function () {
+    describe('Alternate Solutions', function () {
       it('renders Observability content', async () => {
         await testSubjects.existOrFail('observabilitySection');
         await testSubjects.existOrFail('exploreLogstashAndBeatsLink');

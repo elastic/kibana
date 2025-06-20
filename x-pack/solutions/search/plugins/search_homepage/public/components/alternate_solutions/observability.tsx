@@ -25,7 +25,7 @@ export const Observability: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { http } = useKibana().services;
   return (
-    <EuiFlexGroup gutterSize="m">
+    <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
         <EuiAvatar
           size="xl"
