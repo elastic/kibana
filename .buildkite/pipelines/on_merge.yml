@@ -457,7 +457,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
     timeout_in_minutes: 60
-    parallelism: 22
+    parallelism: 20
     retry:
       automatic:
         - exit_status: '-1'
@@ -569,7 +569,8 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    artifact_paths: 'target/plugin_so_types_snapshot.json'
+    artifact_paths:
+      "target/plugin_so_types_snapshot.json"
     timeout_in_minutes: 30
     retry:
       automatic:
