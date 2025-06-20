@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('with overwriting', () => {
+    describe('with overwriting (prebuilt rules installed)', () => {
       // This scenario checks 4 cases:
       // A) outdated non-customized prebuilt rule gets imported over outdated non-customized prebuilt rule installed from historical version
       // B) outdated non-customized prebuilt rule gets imported over outdated customized prebuilt rule installed from historical version

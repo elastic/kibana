@@ -169,7 +169,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('with overwriting', () => {
+    describe('with overwriting (prebuilt rules installed)', () => {
       it('imports a mixture of new prebuilt and custom rules', async () => {
         await installPrebuiltRules(es, supertest);
 
