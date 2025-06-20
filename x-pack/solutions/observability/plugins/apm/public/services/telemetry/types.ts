@@ -44,7 +44,6 @@ export interface ITelemetryClient {
 
 export enum TelemetryEventTypes {
   SEARCH_QUERY_SUBMITTED = 'Search Query Submitted',
-  ENTITY_INVENTORY_ADD_DATA = 'entity_inventory_add_data',
   TRY_IT_CLICK = 'try_it_click',
   LEARN_MORE_CLICK = 'learn_more_click',
 }

@@ -6,12 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type {
-  ITelemetryClient,
-  SearchQuerySubmittedParams,
-  EntityInventoryAddDataParams,
-  EmptyStateClickParams,
-} from './types';
+import type { ITelemetryClient, SearchQuerySubmittedParams, EmptyStateClickParams } from './types';
 import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -27,10 +22,6 @@ export class TelemetryClient implements ITelemetryClient {
       timerange,
       action,
     });
-  };
-
-  public reportEntityInventoryAddData = (params: EntityInventoryAddDataParams) => {
-    this.analytics.reportEvent(TelemetryEventTypes.ENTITY_INVENTORY_ADD_DATA, params);
   };
 
   public reportTryItClick = (params: EmptyStateClickParams) => {
