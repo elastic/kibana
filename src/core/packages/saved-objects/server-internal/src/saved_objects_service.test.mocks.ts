@@ -51,12 +51,3 @@ export const registerRoutesMock = jest.fn();
 jest.doMock('./routes', () => ({
   registerRoutes: registerRoutesMock,
 }));
-
-export const applyTypeDefaultsMock = jest.fn();
-jest.doMock('./apply_type_defaults', () => {
-  const actual = jest.requireActual('./apply_type_defaults');
-  return {
-    ...actual,
-    applyTypeDefaults: applyTypeDefaultsMock,
-  };
-});

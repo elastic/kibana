@@ -440,6 +440,34 @@ ROW
     });
   });
 
+  describe('list tuple expressions', () => {
+    test('numeric list literal, surrounded from three sides', () => {
+      assertReprint(`FROM a | WHERE b IN ()`);
+      assertReprint(`FROM a | WHERE b IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */ // 3
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */,
+          /* 5 */ 123456789 /* 6 */ // 7
+        )`);
+    });
+  });
+
   describe('rename expressions', () => {
     test('rename expression, surrounded from three sides', () => {
       const query = `
