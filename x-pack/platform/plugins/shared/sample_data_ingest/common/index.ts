@@ -12,5 +12,5 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
  */
 export const internalElserInferenceId = defaultInferenceEndpoints.ELSER;
 
-export type { StatusResponse, InstallResponse } from './types';
+export { type StatusResponse, type InstallResponse, DatasetSampleType } from './types';
 export { STATUS_API_PATH, INSTALL_API_PATH } from './routes';

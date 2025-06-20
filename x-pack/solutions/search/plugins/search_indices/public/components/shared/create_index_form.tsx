@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,16 +25,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { SampleDataPanel } from './sample_data_panel';
+import { useIngestSampleData } from '../../hooks/use_ingest_data';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface CreateIndexFormProps {
   indexName: string;
   indexNameHasError: boolean;
   isLoading: boolean;
-  isCreateIndexDisabled: boolean;
-  isIngestingSampleData: boolean;
   onCreateIndex: (e: React.FormEvent<HTMLFormElement>) => void;
   onFileUpload: () => void;
-  onIngestSampleData: () => void;
   onIndexNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   showAPIKeyCreateLabel: boolean;
   userPrivileges?: UserStartPrivilegesResponse;
@@ -44,15 +45,19 @@ export const CreateIndexForm = ({
   indexName,
   indexNameHasError,
   isLoading,
-  isCreateIndexDisabled,
-  isIngestingSampleData,
   onCreateIndex,
   onFileUpload,
   onIndexNameChange,
-  onIngestSampleData,
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
+  const usageTracker = useUsageTracker();
+  const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
+  const onIngestSampleData = useCallback(() => {
+    usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
+    ingestSampleData();
+  }, [usageTracker, ingestSampleData]);
+
   return (
     <>
       <EuiForm
@@ -110,7 +115,7 @@ export const CreateIndexForm = ({
                   userPrivileges?.privileges?.canManageIndex === false ||
                   indexNameHasError ||
                   isLoading ||
-                  isCreateIndexDisabled
+                  isIngestingSampleData
                 }
                 isLoading={isLoading}
                 type="submit"
@@ -173,35 +178,10 @@ export const CreateIndexForm = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="s">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.searchIndices.shared.createIndex.sampleData.text"
-                      defaultMessage="Want to try sample data?"
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="primary"
-                  iconSide="left"
-                  iconType="download"
-                  size="s"
-                  data-test-subj="instalSampleBtn"
-                  isLoading={isIngestingSampleData}
-                  onClick={onIngestSampleData}
-                >
-                  <FormattedMessage
-                    id="xpack.searchIndices.shared.createIndex.ingestSampleData.btn"
-                    defaultMessage="Install a sample dataset"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <SampleDataPanel
+              isLoading={isIngestingSampleData}
+              onIngestSampleData={onIngestSampleData}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

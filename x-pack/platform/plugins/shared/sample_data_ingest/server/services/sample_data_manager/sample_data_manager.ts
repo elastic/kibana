@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { DatasetSampleType } from '../../types';
+import { DatasetSampleType, type StatusResponse } from '../../../common/types';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 
@@ -87,14 +87,17 @@ export class SampleDataManager {
     await this.indexManager.deleteIndex(indexName);
   }
 
-  async getSampleDataStatus(sampleType: DatasetSampleType): Promise<boolean> {
+  async getSampleDataStatus(sampleType: DatasetSampleType): Promise<StatusResponse> {
     const indexName = this.getSampleDataIndexName(sampleType);
     try {
-      const exists = await this.esClient.indices.exists({ index: indexName });
-      return exists;
+      const isIndexExists = await this.esClient.indices.exists({ index: indexName });
+      return {
+        status: isIndexExists ? 'installed' : 'uninstalled',
+        indexName: isIndexExists ? indexName : undefined,
+      };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
-      return false;
+      return { status: 'uninstalled' };
     }
   }
 

@@ -7,9 +7,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { InstallResponse } from '../../common';
-import { INSTALL_API_PATH } from '../../common';
-import { DatasetSampleType, InternalServices } from '../types';
+import {
+  INSTALL_API_PATH,
+  STATUS_API_PATH,
+  DatasetSampleType,
+  type StatusResponse,
+  type InstallResponse,
+} from '../../common';
+import { InternalServices } from '../types';
 
 export const registerInstallationRoutes = ({
   router,
@@ -65,8 +70,55 @@ export const registerInstallationRoutes = ({
         return res.customError({
           statusCode: e?.meta && e.meta?.statusCode ? e.meta?.statusCode : 500,
           body: {
-            message: i18n.translate('xpack.searchIndices.server.createIndex.errorMessage', {
+            message: i18n.translate('xpack.sampleDataIngest.server.installSample.errorMessage', {
               defaultMessage: 'Failed to create index due to an exception.\n{errorMessage}',
+              values: {
+                errorMessage: e.message,
+              },
+            }),
+          },
+        });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: STATUS_API_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: false,
+      options: {
+        access: 'internal',
+        timeout: { idleSocket: 2 * 60 * 1000 }, // install can take time.
+      },
+    },
+    async (ctx, req, res) => {
+      const core = await ctx.core;
+      const client = core.elasticsearch.client.asCurrentUser;
+
+      const { sampleDataManager } = getServices();
+
+      sampleDataManager.setESClient(client);
+
+      try {
+        const statusData = await sampleDataManager.getSampleDataStatus(
+          DatasetSampleType.elasticsearch
+        );
+
+        return res.ok<StatusResponse>({
+          body: statusData,
+        });
+      } catch (e) {
+        return res.customError({
+          statusCode: e?.meta && e.meta?.statusCode ? e.meta?.statusCode : 500,
+          body: {
+            message: i18n.translate('xpack.sampleDataIngest.server.getStatus.errorMessage', {
+              defaultMessage: 'Failed to get status due to an exception.\n{errorMessage}',
               values: {
                 errorMessage: e.message,
               },

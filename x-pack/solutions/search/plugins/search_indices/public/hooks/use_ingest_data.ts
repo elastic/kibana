@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { InstallResponse } from '@kbn/sample-data-ingest/common';
 import { useKibana } from './use_kibana';
-import { navigateToIndexDetails } from '../components/utils';
+
+import { QueryKeys } from '../constants';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useIngestSampleData() {
   const {
-    application,
-    http,
     sampleDataIngest,
     notifications: { toasts },
   } = useKibana().services;
+  const queryClient = useQueryClient();
 
   const { mutate: ingestSampleData, isLoading } = useMutation<InstallResponse, ServerError, void>(
-    ['ingestSampleData'],
+    [QueryKeys.IngestSampleData],
     () => {
       return sampleDataIngest.install();
     },
@@ -38,7 +38,7 @@ export function useIngestSampleData() {
           )
         );
 
-        navigateToIndexDetails(application, http, indexName);
+        queryClient.invalidateQueries([QueryKeys.FetchSampleDataStatus]);
       },
       onError: (error) => {
         toasts?.addError(new Error(error.body?.message ?? error.message), {

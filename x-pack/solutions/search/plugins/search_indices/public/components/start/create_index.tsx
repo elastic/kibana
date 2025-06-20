@@ -17,7 +17,6 @@ import { useCreateIndex } from '../shared/hooks/use_create_index';
 import { CreateIndexForm } from '../shared/create_index_form';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { useIngestSampleData } from '../../hooks/use_ingest_data';
 
 export interface CreateIndexUIViewProps {
   formState: CreateIndexFormState;
@@ -34,7 +33,6 @@ export const CreateIndexUIView = ({
   const [indexNameHasError, setIndexNameHasError] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
   const { createIndex, isLoading } = useCreateIndex();
-  const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
   const onCreateIndex = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -64,21 +62,13 @@ export const CreateIndexUIView = ({
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [usageTracker, application]);
 
-  const onIngestSampleData = useCallback(() => {
-    usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
-    ingestSampleData();
-  }, [usageTracker, ingestSampleData]);
-
   return (
     <CreateIndexForm
       indexName={formState.indexName}
       indexNameHasError={indexNameHasError}
       isLoading={isLoading}
-      isCreateIndexDisabled={isIngestingSampleData}
-      isIngestingSampleData={isIngestingSampleData}
       onCreateIndex={onCreateIndex}
       onFileUpload={onFileUpload}
-      onIngestSampleData={onIngestSampleData}
       onIndexNameChange={onIndexNameChange}
       showAPIKeyCreateLabel={userPrivileges?.privileges.canCreateApiKeys ?? false}
       userPrivileges={userPrivileges}

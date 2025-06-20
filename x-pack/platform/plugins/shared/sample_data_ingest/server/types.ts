@@ -8,10 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { SampleDataManager } from './services/sample_data_manager';
 
-export enum DatasetSampleType {
-  elasticsearch = 'elasticsearch',
-}
-
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface SampleDataSetupDependencies {}

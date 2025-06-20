@@ -7,11 +7,8 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { InstallationService } from './installation_service';
-import {
-  INSTALLATION_STATUS_API_PATH,
-  INSTALL_ALL_API_PATH,
-  UNINSTALL_ALL_API_PATH,
-} from '../../../common/http_api/installation';
+import { STATUS_API_PATH, INSTALL_API_PATH } from '../../../common';
+import expect from '@kbn/expect';
 
 describe('InstallationService', () => {
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -26,7 +23,7 @@ describe('InstallationService', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.getInstallationStatus();
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(INSTALLATION_STATUS_API_PATH);
+      expect(http.get).toHaveBeenCalledWith(STATUS_API_PATH);
     });
     it('returns the value from the server', async () => {
       const expected = { stubbed: true };
@@ -44,7 +41,7 @@ describe('InstallationService', () => {
     it('calls the endpoint with the right parameters', async () => {
       await service.install();
       expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(INSTALL_ALL_API_PATH);
+      expect(http.post).toHaveBeenCalledWith(INSTALL_API_PATH);
     });
     it('returns the value from the server', async () => {
       const expected = { installed: true };
@@ -60,20 +57,6 @@ describe('InstallationService', () => {
       await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Installation did not complete successfully"`
       );
-    });
-  });
-  describe('#uninstall', () => {
-    it('calls the endpoint with the right parameters', async () => {
-      await service.uninstall();
-      expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(UNINSTALL_ALL_API_PATH);
-    });
-    it('returns the value from the server', async () => {
-      const expected = { stubbed: true };
-      http.post.mockResolvedValue(expected);
-
-      const response = await service.uninstall();
-      expect(response).toEqual(expected);
     });
   });
 });

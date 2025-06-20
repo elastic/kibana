@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { getArtifactName } from '@kbn/product-doc-common';
-import { DatasetSampleType } from '../../types';
+import { DatasetSampleType } from '../../../common';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
   fetchArtifactVersions,

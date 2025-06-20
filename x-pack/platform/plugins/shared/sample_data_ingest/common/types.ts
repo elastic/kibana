@@ -9,18 +9,9 @@ import { DocumentationProduct } from '@kbn/product-doc-common';
 
 export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
 
-export interface InstallStatus {
-  id: string;
-  productVersion: string;
-  installationStatus: InstallationStatus;
-  lastInstallationDate: Date | undefined;
-  lastInstallationFailureReason: string | undefined;
-  indexName: string;
-}
-
 export interface StatusResponse {
   status: InstallationStatus;
-  version?: string;
+  indexName?: string;
 }
 
 export interface InstallResponse {
