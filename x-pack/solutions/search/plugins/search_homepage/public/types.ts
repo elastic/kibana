@@ -49,6 +49,11 @@ export interface SearchHomepageAppPluginStartDependencies {
   cloud?: CloudStart;
 }
 
+export interface SearchHomepageServicesContextDeps {
+  history: AppMountParameters['history'];
+  usageCollection?: UsageCollectionStart;
+}
+
 export type SearchHomepageServicesContext = CoreStart &
   SearchHomepageAppPluginStartDependencies & {
     history: AppMountParameters['history'];

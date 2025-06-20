@@ -17,7 +17,7 @@ import {
   SearchHomepagePluginStart,
   SearchHomepageAppPluginStartDependencies,
   SearchHomepageAppInfo,
-  SearchHomepageServicesContext,
+  SearchHomepageServicesContextDeps,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 
@@ -62,10 +62,9 @@ export class SearchHomepagePlugin
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
         docLinks.setDocLinks(coreStart.docLinks.links);
-        const startDeps: SearchHomepageServicesContext = {
+        const startDeps: SearchHomepageServicesContextDeps = {
           ...depsStart,
           history,
-          http: coreStart.http,
         };
 
         return renderApp(coreStart, startDeps, element, queryClient);
