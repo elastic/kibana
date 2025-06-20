@@ -51,7 +51,7 @@
     "@kbn/field-utils",
     "@kbn/language-documentation",
     "@kbn/esql-types",
-    "@kbn/aiops-common",
+    "@kbn/aiops-utils",
   ],
   "exclude": [
     "target/**/*",
