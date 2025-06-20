@@ -14,6 +14,7 @@ class ESDocLinks {
   public visitSearchLabs: string = '';
   public notebooksExamples: string = '';
   public customerEngineerRequestForm: string = '';
+  public analyzeLogs: string = '';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -22,6 +23,7 @@ class ESDocLinks {
     this.elasticsearchDocs = newDocLinks.elasticsearch.gettingStarted;
     this.visitSearchLabs = newDocLinks.searchHomepage.visitSearchLabs;
     this.notebooksExamples = newDocLinks.searchHomepage.notebooksExamples;
+    this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
     this.customerEngineerRequestForm = newDocLinks.searchHomepage.customerEngineerRequestForm;
   }
 }

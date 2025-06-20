@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-const EXPLORE_LOGSTASH_AND_BEATS = '/app/integrations/browse/observability';
+import { docLinks } from '../../../common/doc_links';
 
 export const Observability: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -82,7 +82,7 @@ export const Observability: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      href={http.basePath.prepend(EXPLORE_LOGSTASH_AND_BEATS)}
+                      href={docLinks.analyzeLogs}
                       data-test-subj="exploreLogstashAndBeatsLink"
                     >
                       {i18n.translate('xpack.searchHomepage.observability.exploreLogstashBeats', {
