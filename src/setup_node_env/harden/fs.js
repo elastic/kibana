@@ -41,7 +41,11 @@ const {
 const fsPromises = require('fs/promises');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
-const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
+const baseSafePaths = [
+  join(REPO_ROOT, 'data'),
+  join(REPO_ROOT, '.es'),
+  join(REPO_ROOT, 'oas_docs'),
+];
 
 const tmpPath = tmpdir();
 
