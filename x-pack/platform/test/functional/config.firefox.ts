@@ -13,7 +13,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...chromeConfig.getAll(),
 
-    testFiles: [],
+    testFiles: [require.resolve('./apps/security'), require.resolve('./apps/spaces')],
 
     browser: {
       type: 'firefox',

@@ -21,7 +21,7 @@ import {
 import React, { Fragment, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '@kbn/discover-utils';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT = 110;
 
@@ -111,7 +111,7 @@ export const TableFieldValue = ({
   isDetails,
   isHighlighted,
 }: TableFieldValueProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const truncationHeight = DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT;
 

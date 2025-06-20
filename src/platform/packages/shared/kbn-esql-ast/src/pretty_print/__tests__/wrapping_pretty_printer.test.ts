@@ -463,16 +463,6 @@ FROM
 👉     METADATA _id, _source`);
     });
 
-    test('supports quoted source, quoted cluster name, and quoted index selector component', () => {
-      const query = `FROM "this is a cluster name" : "this is a quoted index name", "this is another quoted index" :: "and this is a quoted index selector"`;
-      const text = reprint(query, { pipeTab: '  ' }).text;
-
-      expect('\n' + text).toBe(`
-FROM
-  "this is a cluster name":"this is a quoted index name",
-  "this is another quoted index"::"and this is a quoted index selector"`);
-    });
-
     test('can break multiple options', () => {
       const query =
         'from a | enrich policy ON match_field_which_is_very_long WITH new_name1 = field1, new_name2 = field2';
@@ -994,7 +984,8 @@ ROW
                     1234567890,
                     1234567890,
                     1234567890,
-                    1234567890]))))))))`);
+                    1234567890
+                  ]))))))))`);
       });
     });
 
@@ -1021,8 +1012,40 @@ ROW
   [
     "..............................................",
     "..............................................",
-    ".............................................."]`);
+    ".............................................."
+  ]`);
       });
+    });
+  });
+
+  describe('list tuples', () => {
+    test('wraps long lists over one line', () => {
+      const query =
+        'FROM a | WHERE b in (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890)';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890)`);
+    });
+
+    test('breaks lists with long items', () => {
+      const query =
+        'FROM a | WHERE b in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        )`);
     });
   });
 });

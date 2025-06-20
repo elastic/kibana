@@ -13,7 +13,7 @@ import {
 import type { FleetAuthz } from '@kbn/fleet-plugin/common';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
-import type { EndpointAuthzKeyList } from '../../types/authz';
+import type { EndpointAuthz, EndpointAuthzKeyList } from '../../types/authz';
 import {
   CONSOLE_RESPONSE_ACTION_COMMANDS,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
@@ -311,6 +311,23 @@ describe('Endpoint Authz service', () => {
         }
       }
     );
+
+    it.each`
+      privilege              | expectedResult | roles                      | description
+      ${'canReadAdminData'}  | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canWriteAdminData'} | ${true}        | ${['superuser', 'role-2']} | ${'user has superuser role'}
+      ${'canReadAdminData'}  | ${false}       | ${['role-2']}              | ${'user does NOT have superuser role'}
+      ${'canWriteAdminData'} | ${false}       | ${['role-2']}              | ${'user does NOT superuser role'}
+    `(
+      'should set `$privilege` to `$expectedResult` when $description',
+      ({ privilege, expectedResult, roles }) => {
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, roles)[
+            privilege as keyof EndpointAuthz
+          ]
+        ).toEqual(expectedResult);
+      }
+    );
   });
 
   describe('getEndpointAuthzInitialState()', () => {
@@ -356,6 +373,8 @@ describe('Endpoint Authz service', () => {
         canReadEventFilters: false,
         canReadEndpointExceptions: false,
         canWriteEndpointExceptions: false,
+        canReadAdminData: false,
+        canWriteAdminData: false,
       });
     });
   });
