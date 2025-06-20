@@ -188,6 +188,7 @@ export class StreamsPlugin
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
+          const licensing = pluginsStart.licensing;
 
           return {
             scopedClusterClient,
@@ -197,6 +198,7 @@ export class StreamsPlugin
             inferenceClient,
             contentClient,
             queryClient,
+            licensing,
           };
         },
       },
