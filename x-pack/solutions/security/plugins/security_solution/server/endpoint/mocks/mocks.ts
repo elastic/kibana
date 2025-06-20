@@ -51,6 +51,7 @@ import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { referenceDataMocks } from '../lib/reference_data/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
@@ -156,6 +157,7 @@ export const createMockEndpointAppContextService = (
       disabledFeatures: [],
     })),
     getSpaceId: jest.fn().mockReturnValue('default'),
+    getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
