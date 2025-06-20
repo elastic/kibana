@@ -77,8 +77,9 @@ export function registerFeatures({
     );
     // trigger application to register Reporting as a subfeature
     features.enableReportingUiCapabilities();
+  }
 
-    features.registerKibanaFeature({
+  features.registerKibanaFeature({
       id: 'manageReporting',
       name: i18n.translate('xpack.reporting.features.manageScheduledReportsFeatureName', {
         defaultMessage: 'Manage Scheduled Reports',
@@ -102,5 +103,4 @@ export function registerFeatures({
         read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
       },
     });
-  }
 }
