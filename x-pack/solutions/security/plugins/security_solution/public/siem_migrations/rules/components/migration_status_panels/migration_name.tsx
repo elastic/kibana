@@ -18,7 +18,7 @@ import {
 import { useIsVisible } from '../../../../common/hooks/use_visibility';
 import { PanelText } from '../../../../common/components/panel_text';
 import type { MigrationReadyPanelProps } from './migration_ready_panel';
-import { useUpdateMigrationName } from '../../logic/use_update_migration_name';
+import { useUpdateMigration } from '../../logic/use_update_migration';
 import * as i18n from './translations';
 
 export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
@@ -31,11 +31,13 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
   } = useIsVisible(false);
 
   const onRenameError = useCallback(() => {
-    setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the mutation hook
+    setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
   }, [migrationStats.name]);
 
-  const { mutate: updateMigrationName, isLoading: isUpdatingMigrationName } =
-    useUpdateMigrationName({ onError: onRenameError });
+  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
+    migrationStats.id,
+    { onError: onRenameError }
+  );
 
   const cancelEdit = useCallback(() => {
     setIsEditing(false);
@@ -44,10 +46,10 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
   const saveName = useCallback(
     (value: string) => {
       setName(value);
-      updateMigrationName({ migrationId: migrationStats.id, name: value });
+      updateMigration({ name: value });
       setIsEditing(false);
     },
-    [updateMigrationName, migrationStats.id]
+    [updateMigration]
   );
 
   const items = useMemo(
