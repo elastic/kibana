@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { conversationLangchainMessages } from './to_langchain_messages';
-export { toLangchainTool, providerToLangchainTools } from './tool_provider_to_langchain_tools';
-export { extractTextContent } from './from_langchain_messages';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/onechat/onechat-genai-utils'],
+};
