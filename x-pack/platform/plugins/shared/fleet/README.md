@@ -26,10 +26,9 @@ Running a [self-managed stack](https://www.elastic.co/guide/en/fleet/current/add
 
 Refer to the [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation for getting started with developing for Kibana. As detailed under the Contributing section of the documentation, we follow the pattern of developing feature branches under your personal fork of Kibana.
 
-Fleet development usually requires running Kibana from source alongside a snapshot of Elasticsearch, as detailed in the [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation. The next section provides an overview of this process.
+Fleet development usually requires running Kibana from source alongside a snapshot of Elasticsearch, as detailed in the  [Contributing to Kibana](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) documentation. The next section provides an overview of this process.
 
 In addition, it is typically needed to set up a Fleet Server and enroll Elastic Agents in Fleet. Refer to one of the following guides depending on your requirements for details:
-
 - [Running a local Fleet Server and enrolling Elastic Agents](dev_docs/local_setup/enrolling_agents.md) for developing Kibana in stateful (not serverless) mode
 - [Developing Kibana in serverless mode](dev_docs/local_setup/developing_kibana_in_serverless.md) for developing Kibana in serverless mode
 - [Developing Kibana and Fleet Server simultaneously](dev_docs/local_setup/developing_kibana_and_fleet_server.md) for doing simultaneous Kibana and Fleet Server development
@@ -38,12 +37,10 @@ In addition, it is typically needed to set up a Fleet Server and enroll Elastic 
 ### Running Fleet locally in stateful mode
 
 Prerequisites:
-
 - Fork the Kibana repository and clone it locally
 - Install the `node` and `yarn` versions required by `.nvmrc`
 
 Once that is set up, the high level steps are:
-
 - Run Elasticsearch from snapshot
 - Configure Kibana settings
 - Run Kibana from source
@@ -55,7 +52,6 @@ Once that is set up, the high level steps are:
 As detailed in [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html), there are different ways to run Elasticsearch when developing Kibana, with snapshot being the most common.
 
 To do this, run the following from the Kibana root folder:
-
 ```sh
 yarn es snapshot --license trial
 ```
@@ -63,7 +59,6 @@ yarn es snapshot --license trial
 The `--license trial` flag provides the equivalent of a Platinum license (defaults to Basic).
 
 In addition, it can be useful to set a folder for preserving data between runs (by default, data is stored inside the snapshot and lost on exit) with the `-E path.data=<pathToSavedData>` setting. Common path choices are:
-
 - `../data` (or any other name, e.g. `../mycluster`), which saves the data in the `.es` folder (in the Kibana root folder)
 - `/tmp/es-data`
 
@@ -72,7 +67,6 @@ Note: the required API key service and token service (cf. [Security settings in 
 Finally, setting up a Fleet Server requires setting the HTTP host to Fleet Server default host with `-E http.host=0.0.0.0`.
 
 The complete command usually looks like:
-
 ```sh
 yarn es snapshot --license trial -E path.data=../data -E http.host=0.0.0.0
 ```
@@ -84,21 +78,17 @@ Create a `config/kibana.dev.yml` file if you don't have one by copying the exist
 To get started, it is recommended to set the following settings:
 
 1\. The URL at which Kibana is available for end users: unless explicitly specified, this path is randomized in dev mode (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To set it, add the following to your `kibana.dev.yml`:
-
 ```yml
 server.basePath: /yourPath
 ```
-
 where `yourPath` is a path of your choice (e.g. your name; must not end with a slash).
 
 2\. The API version resolution: in dev mode, a version is required for all API requests. In other environements (e.g. production), the version falls back to `oldest` in stateful mode and `newest` in serverless mode for public APIs, while internal APIs always require a version. Set the API version resolution with:
-
 ```yml
 server.versioned.versionResolution: oldest
 ```
 
 3\. Fleet logging:
-
 ```yml
 logging:
   loggers:
@@ -150,7 +140,6 @@ yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pac
 ```
 
 Or alternatively:
-
 ```sh
 yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
@@ -163,29 +152,28 @@ Note: Docker needs to be running to run these tests.
 
 1\. In one terminal, run the server from the Kibana root folder with
 
-```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
-```
+   ```sh
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
+   ```
 
-where `configFile` is the relevant config file relevant from the following:
-
-- config.agent.ts
-- config.agent_policy.ts
-- config.epm.ts
-- config.fleet.ts
-- config.package_policy.ts
+   where `configFile` is the relevant config file relevant from the following:
+   - config.agent.ts
+   - config.agent_policy.ts
+   - config.epm.ts
+   - config.fleet.ts
+   - config.package_policy.ts
 
 2\. In a second terminal, run the tests from the Kibana root folder with
 
-```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
-```
+   ```sh
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
+   ```
 
-Optionally, you can filter which tests you want to run using `--grep`
+   Optionally, you can filter which tests you want to run using `--grep`
 
-```sh
-FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='my filter string'
-```
+   ```sh
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='my filter string'
+   ```
 
 Note: you can supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
 
@@ -204,14 +192,12 @@ FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 yarn 
 The process for running serverless API integration tests is similar to above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
 
 Security:
-
 ```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 ```
 
 Observability:
-
 ```sh
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
@@ -232,13 +218,13 @@ Note: Docker needs to be running to run these tests.
 Run the tests from the Kibana root folder with:
 
 ```sh
-node scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node scripts/jest_integration.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 Running the tests with [Node Inspector](https://nodejs.org/en/learn/getting-started/debugging) allows inspecting Elasticsearch indices. To do this, add a `debugger;` statement in the test (cf. [Jest documentation](https://jestjs.io/docs/troubleshooting)) and run `node` with `--inspect` or `--inspect-brk`:
 
 ```sh
-node --inspect scripts/jest_integration.js --config x-pack/platform/plugins/shared/fleet/jest.integration.config.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
+node --inspect scripts/jest_integration.js x-pack/platform/plugins/shared/fleet/server/integration_tests/<YOUR_TEST_FILE>
 ```
 
 ### Storybook
