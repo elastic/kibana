@@ -34,12 +34,12 @@ export const usePadTopAnomalousUsersEsqlSource = ({
     | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
     ${getHiddenBandsFilters(anomalyBands)}
     ${getPrivilegedMonitorUsersJoin(spaceId)}
-    | STATS max_record_score = MAX(record_score), is_privileged = TOP(is_privileged, 1, "desc") by user.name
-    | WHERE is_privileged == true
+    | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 1, "desc") by user.name
+    | WHERE user.is_privileged == true
     | SORT max_record_score DESC
     | KEEP user.name
     | LIMIT ${usersLimit}`;
-  // NOTE: the final `WHERE is_privileged == true` should not be necessary, as we've already performed the join and filtered by privileged users by that point. I believe this is a bug in ES|QL. The workaround doesn't cause any issues, however.
+  // NOTE: the final `WHERE user.is_privileged == true` should not be necessary, as we've already performed the join and filtered by privileged users by that point. I believe this is a bug in ES|QL. This workaround doesn't cause any issues, however.
 };
 
 export const usePadAnomalyDataEsqlSource = ({
