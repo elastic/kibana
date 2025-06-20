@@ -2444,7 +2444,8 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2452,7 +2453,7 @@
       "query": "from a_index | rename missingField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [missingField]"
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2491,7 +2492,9 @@
       "error": [
         "Unknown column [a]"
       ],
-      "warning": []
+      "warning": [
+        "Column [textField] of type text has been overwritten as new type: unknown"
+      ]
     },
     {
       "query": "from a_index | rename fn() as a",
@@ -2516,7 +2519,8 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
