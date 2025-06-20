@@ -18,6 +18,7 @@ import {
   analyticsServiceMock,
   coreMock,
   docLinksServiceMock,
+  notificationServiceMock,
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
@@ -172,7 +173,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       FieldStatisticsTable: jest.fn(() => createElement('div')),
     },
     aiops: {
-      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn().mockResolvedValue(true)),
+      getPatternAnalysisAvailable: jest.fn().mockResolvedValue(jest.fn(() => true)),
       PatternAnalysisComponent: jest.fn(() => createElement('div')),
     },
     docLinks: docLinksServiceMock.createStartContract(),
@@ -185,6 +186,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
         save: false,
       },
       advancedSettings: {
+        save: true,
+      },
+      management: {
+        insightsAndAlerting: {
+          triggersActions: true,
+        },
+      },
+      indexPatterns: {
         save: true,
       },
     },
@@ -224,6 +233,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addWarning: jest.fn(),
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
+    },
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
     },
     expressions: expressionsPlugin,
     savedObjectsTagging: {

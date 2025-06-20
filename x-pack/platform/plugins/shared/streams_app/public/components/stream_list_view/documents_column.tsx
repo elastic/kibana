@@ -6,8 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiI18nNumber, EuiSkeletonRectangle } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiI18nNumber,
+  EuiLoadingChart,
+  EuiIcon,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import {
   BarSeries,
@@ -40,6 +46,43 @@ export function DocumentsColumn({
     },
   } = useKibana();
   const chartBaseTheme = useElasticChartsTheme();
+  const { euiTheme } = useEuiTheme();
+
+  const LoadingPlaceholder: React.FC = React.useCallback(
+    () => (
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="flexEnd"
+        gutterSize="m"
+        className={css`
+          height: ${euiTheme.size.xl};
+          white-space: nowrap;
+          padding-right: ${euiTheme.size.xl};
+        `}
+      >
+        <EuiFlexGroup>
+          <EuiFlexItem
+            className={css`
+              text-align: center;
+            `}
+          >
+            -
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            className={css`
+              display: flex;
+              padding-right: ${euiTheme.size.xl};
+              justify-content: center;
+            `}
+          >
+            <EuiLoadingChart size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexGroup>
+    ),
+    [euiTheme]
+  );
 
   const { timeState } = useTimefilter();
 
@@ -59,7 +102,7 @@ export function DocumentsColumn({
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, , minInterval],
+    [streamsRepositoryClient, indexPattern, minInterval],
     {
       withTimeRange: true,
     }
@@ -74,10 +117,16 @@ export function DocumentsColumn({
     [histogramQueryFetch]
   );
 
-  const docCount = allTimeseries.reduce(
-    (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
-    0
+  const docCount = React.useMemo(
+    () =>
+      allTimeseries.reduce(
+        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
+        0
+      ),
+    [allTimeseries]
   );
+
+  const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
@@ -86,57 +135,65 @@ export function DocumentsColumn({
       alignItems="center"
       gutterSize="m"
       className={css`
-        height: ${euiThemeVars.euiSizeXL};
+        height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
     >
       {histogramQueryFetch.loading ? (
-        <>
-          <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
-          </EuiFlexItem>
-        </>
+        <LoadingPlaceholder />
       ) : (
         <>
           <EuiFlexItem
+            grow={2}
             className={css`
               text-align: right;
             `}
           >
-            <EuiI18nNumber value={docCount} />
+            {hasData ? (
+              <EuiI18nNumber value={docCount} />
+            ) : (
+              i18n.translate('xpack.streams.documentsColumn.noDataLabel', {
+                defaultMessage: 'N/A',
+              })
+            )}
           </EuiFlexItem>
           <EuiFlexItem
+            grow={3}
             className={css`
-              border-bottom: 1px solid ${euiThemeVars.euiColorLightestShade};
+              border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
+              display: flex;
+              justify-content: center;
+              align-items: center;
             `}
           >
-            <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
-              <Settings
-                locale={i18n.getLocale()}
-                baseTheme={chartBaseTheme}
-                theme={{ background: { color: 'transparent' } }}
-                xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
-                noResults={<div />}
-              />
-              <Tooltip
-                stickTo={TooltipStickTo.Middle}
-                headerFormatter={({ value }) => xFormatter(value)}
-              />
-              {allTimeseries.map((serie) => (
-                <BarSeries
-                  key={serie.id}
-                  id={serie.id}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor="x"
-                  yAccessors={['doc_count']}
-                  data={serie.data}
+            {hasData ? (
+              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+                <Settings
+                  locale={i18n.getLocale()}
+                  baseTheme={chartBaseTheme}
+                  theme={{ background: { color: 'transparent' } }}
+                  xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
+                  noResults={<div />}
                 />
-              ))}
-            </Chart>
+                <Tooltip
+                  stickTo={TooltipStickTo.Middle}
+                  headerFormatter={({ value }) => xFormatter(value)}
+                />
+                {allTimeseries.map((serie) => (
+                  <BarSeries
+                    key={serie.id}
+                    id={serie.id}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['doc_count']}
+                    data={serie.data}
+                  />
+                ))}
+              </Chart>
+            ) : (
+              <EuiIcon type="visLine" size="m" />
+            )}
           </EuiFlexItem>
         </>
       )}

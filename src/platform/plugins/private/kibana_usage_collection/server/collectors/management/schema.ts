@@ -499,6 +499,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'onechat:mcpServer:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -566,10 +570,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmDefaultServiceEnvironment': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'observability:apmLabsButton': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmProgressiveLoading': {
     type: 'keyword',
@@ -654,6 +654,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'observability:enableStreamsUI': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams UI.',
     },
   },
 };

@@ -22,6 +22,8 @@ export interface FieldNameSearchProps {
   nameFilter: string;
   screenReaderDescriptionId?: string;
   onChange: (nameFilter: string) => unknown;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 /**
@@ -41,6 +43,8 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
   nameFilter,
   screenReaderDescriptionId,
   onChange,
+  onFocus,
+  onBlur,
 }) => {
   const searchPlaceholder = i18n.translate('unifiedFieldList.fieldNameSearch.filterByNameLabel', {
     defaultMessage: 'Search field names',
@@ -61,6 +65,8 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
       onChange={(e) => {
         handleInputChange(e.target.value);
       }}
+      onFocus={onFocus}
+      onBlur={onBlur}
       placeholder={searchPlaceholder}
       value={inputValue}
       append={append}

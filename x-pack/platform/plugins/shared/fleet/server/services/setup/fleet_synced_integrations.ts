@@ -67,14 +67,12 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
 
 export const canEnableSyncIntegrations = () => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
-  return enableSyncIntegrationsOnRemote && licenseService.isEnterprise();
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  return enableSyncIntegrationsOnRemote && licenseService.isEnterprise() && !isServerless;
 };
 
 export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
-  if (!canEnableSyncIntegrations()) {
-    return;
-  }
-
+  appContextService.getLogger().debug('Create or update fleet-synced-integrations index');
   await createOrUpdateIndex(
     esClient,
     FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,

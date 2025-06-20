@@ -52,7 +52,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/fields-metadata-plugin",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/actions-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/object-utils",
@@ -71,6 +70,11 @@
     "@kbn/content-packs-schema",
     "@kbn/charts-theme",
     "@kbn/grok-ui",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/zod",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/field-types",
+    "@kbn/field-formats-plugin",
+    "@kbn/test"
   ]
 }

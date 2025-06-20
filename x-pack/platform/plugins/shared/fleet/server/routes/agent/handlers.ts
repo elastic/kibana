@@ -203,6 +203,7 @@ export const getAgentsHandler: FleetRequestHandler<
   const agentRes = await agentClient.asCurrentUser.listAgents({
     page: request.query.page,
     perPage: request.query.perPage,
+    showAgentless: request.query.showAgentless,
     showInactive: request.query.showInactive,
     showUpgradeable: request.query.showUpgradeable,
     kuery: request.query.kuery,

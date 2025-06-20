@@ -8,6 +8,7 @@
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
 import { initPrivilegeMonitoringEngineRoute } from './init';
+import { monitoringEntitySourceRoute } from './monitoring_entity_source';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import {
@@ -17,7 +18,6 @@ import {
   listUsersRoute,
   updateUserRoute,
   uploadUsersCSVRoute,
-  uploadUsersJSONRoute,
 } from './users';
 
 export const registerPrivilegeMonitoringRoutes = ({
@@ -28,11 +28,11 @@ export const registerPrivilegeMonitoringRoutes = ({
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
+  monitoringEntitySourceRoute(router, logger, config);
   getUserRoute(router, logger);
   createUserRoute(router, logger);
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
-  uploadUsersCSVRoute(router, logger);
-  uploadUsersJSONRoute(router, logger);
+  uploadUsersCSVRoute(router, logger, config);
 };

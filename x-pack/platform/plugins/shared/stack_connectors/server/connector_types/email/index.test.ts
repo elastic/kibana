@@ -33,6 +33,8 @@ import type {
 import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { AdditionalEmailServices } from '../../../common';
+import { serviceParamValueToKbnSettingMap } from '../../../common/email/constants';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -484,6 +486,92 @@ describe('params validation', () => {
     expect(configUtils.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
       treatMustacheTemplatesAsValid: true,
     });
+  });
+
+  test('doesnt throws if both host and port do not match AWS SES config', () => {
+    expect(() => {
+      validateConfig(
+        connectorType,
+        {
+          service: AdditionalEmailServices.AWS_SES,
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities }
+      );
+    }).not.toThrowError();
+  });
+
+  test('error when using a service that is not enabled', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest
+      .fn()
+      .mockReturnValue([
+        serviceParamValueToKbnSettingMap.gmail,
+        serviceParamValueToKbnSettingMap.elastic_cloud,
+      ]);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [service]: \\"other\\" is not in the list of enabled email services: google-mail,elastic-cloud"`
+    );
+  });
+
+  test('no error using enabled services = *', async () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest.fn().mockReturnValue(['*']);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'other',
+          from: 'bob@example.com',
+          host: 'wrong-host',
+          port: 123,
+          secure: true,
+          hasAuth: true,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).not.toThrowError();
+  });
+
+  test('does not throw when fetching service enabled in config', () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.getEnabledEmailServices = jest
+      .fn()
+      .mockReturnValue([serviceParamValueToKbnSettingMap.elastic_cloud]);
+
+    expect(() =>
+      validateConfig(
+        connectorType,
+        {
+          service: 'elastic_cloud',
+          from: 'bob@example.com',
+          host: 'dockerhost',
+          port: 10025,
+          secure: false,
+          hasAuth: false,
+        },
+        { configurationUtilities: configUtils }
+      )
+    ).not.toThrowError();
   });
 });
 
@@ -1259,6 +1347,144 @@ describe('execute()', () => {
         ],
       ]
     `);
+  });
+
+  test('parameters are as expected when using ses service without ses kbn config', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: mockedActionsConfig,
+      config: {
+        ...config,
+        service: 'ses',
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+    expect(sendEmailMock.mock.calls[0][1].transport).toStrictEqual({
+      service: 'ses',
+    });
+  });
+
+  test('parameters are as expected when using ses service and ses kbn config', async () => {
+    const mockedActionsConfig = actionsConfigMock.create();
+    mockedActionsConfig.getAwsSesConfig = jest.fn().mockReturnValue({
+      host: 'aws-ses-host',
+      port: 5555,
+      secure: true,
+    });
+    const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
+      ...executorOptions,
+      configurationUtilities: mockedActionsConfig,
+      config: {
+        ...config,
+        service: 'ses',
+        hasAuth: false,
+      },
+      secrets: {
+        ...secrets,
+        user: null,
+        password: null,
+      },
+    };
+
+    sendEmailMock.mockReset();
+    await connectorType.executor(customExecutorOptions);
+    expect(sendEmailMock.mock.calls[0][1].transport).toStrictEqual({
+      host: 'aws-ses-host',
+      port: 5555,
+      secure: true,
+    });
+  });
+});
+
+describe('validateConfig AWS SES specific checks', () => {
+  const awsSesHost = 'email-smtp.us-east-1.amazonaws.com';
+  const awsSesPort = 465;
+  const awsSesConfig = {
+    host: awsSesHost,
+    port: awsSesPort,
+    secure: true,
+  };
+
+  let configUtilsWithSes: jest.Mocked<ActionsConfigurationUtilities>;
+
+  beforeEach(() => {
+    configUtilsWithSes = {
+      ...actionsConfigMock.create(),
+      getAwsSesConfig: jest.fn(() => awsSesConfig),
+    } as unknown as jest.Mocked<ActionsConfigurationUtilities>;
+  });
+
+  test('throws if both host and port do not match AWS SES config', () => {
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.host]/[ses.port] does not match with the configured AWS SES host/port combination"`
+    );
+  });
+
+  test('throws if host does not match AWS SES config', () => {
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: 'wrong-host',
+      port: awsSesPort,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.host] does not match with the configured AWS SES host"`
+    );
+  });
+
+  test('throws if port does not match AWS SES config', () => {
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: 123,
+      secure: true,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.port] does not match with the configured AWS SES port"`
+    );
+  });
+
+  test('throws if secure is not true for AWS SES', () => {
+    const config = {
+      service: AdditionalEmailServices.AWS_SES,
+      from: 'bob@example.com',
+      host: awsSesHost,
+      port: awsSesPort,
+      secure: false,
+      hasAuth: true,
+    };
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities: configUtilsWithSes });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [ses.secure] must be true for AWS SES"`
+    );
   });
 });
 

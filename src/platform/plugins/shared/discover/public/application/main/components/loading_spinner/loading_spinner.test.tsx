@@ -8,20 +8,20 @@
  */
 
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import { LoadingSpinner } from './loading_spinner';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('LoadingSpinner renders a Searching text and a spinner', () => {
     component = mountWithIntl(
-      <EuiProvider>
+      <DiscoverTestProvider>
         <LoadingSpinner />
-      </EuiProvider>
+      </DiscoverTestProvider>
     );
     expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
     expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);

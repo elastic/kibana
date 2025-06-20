@@ -48,7 +48,15 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS ', 'EVAL '];
+        const FORK_SUBCOMMANDS = [
+          'WHERE ',
+          'SORT ',
+          'LIMIT ',
+          'DISSECT ',
+          'STATS ',
+          'EVAL ',
+          'GROK ',
+        ];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -121,8 +129,6 @@ describe('autocomplete.suggest', () => {
                   [...AVG_TYPES, 'unsigned_long'],
                   {
                     scalar: true,
-                    // grouping functions are a bug: https://github.com/elastic/kibana/issues/218319
-                    grouping: true,
                   },
                   undefined,
                   ['acos']
