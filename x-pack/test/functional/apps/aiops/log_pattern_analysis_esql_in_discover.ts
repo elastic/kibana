@@ -92,10 +92,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // get the first pattern cell and ensure it has the correct number of tokens
       const cell = await dataGrid.getCellElement(0, 3);
-      const spans = await cell.findAllByCssSelector('.unifiedDataTable__cellValue span');
+      const tokens = await cell.findAllByCssSelector('.unifiedDataTable__cellValue code');
 
       // join the tokens and ensure the text is correct
-      const text = (await Promise.all(spans.map((span) => span.getVisibleText()))).join(' ');
+      const text = (await Promise.all(tokens.map((span) => span.getVisibleText()))).join(' ');
       expect(text).to.eql(
         'GET HTTP/1.1 Mozilla/5.0 X11 Linux x86_64 rv Gecko/20110421 Firefox/6.0a1'
       );
