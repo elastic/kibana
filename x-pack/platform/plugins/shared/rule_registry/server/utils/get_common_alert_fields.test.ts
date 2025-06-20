@@ -24,26 +24,23 @@ import { getCommonAlertFields } from './get_common_alert_fields';
 describe('getCommonAlertFields', () => {
   test('should correctly return common alert fields', () => {
     expect(
-      getCommonAlertFields(
-        {
-          executionId: '1234',
-          params: { foo: 'bar' },
-          // @ts-expect-error - incomplete rule definition for testing
-          rule: {
-            ruleTypeName: 'Test Rule',
-            consumer: 'test-consumer',
-            name: 'Test Rule Name',
-            producer: 'test-producer',
-            revision: 1,
-            ruleTypeId: 'test.rule-type',
-            id: 'rule-id',
-            tags: ['test-tag'],
-          },
-          startedAt: new Date('2023-10-01T00:00:00Z'),
-          spaceId: 'default',
+      getCommonAlertFields({
+        executionId: '1234',
+        params: { foo: 'bar' },
+        // @ts-expect-error - incomplete rule definition for testing
+        rule: {
+          ruleTypeName: 'Test Rule',
+          consumer: 'test-consumer',
+          name: 'Test Rule Name',
+          producer: 'test-producer',
+          revision: 1,
+          ruleTypeId: 'test.rule-type',
+          id: 'rule-id',
+          tags: ['test-tag'],
         },
-        false
-      )
+        startedAt: new Date('2023-10-01T00:00:00Z'),
+        spaceId: 'default',
+      })
     ).toEqual({
       [ALERT_RULE_PARAMETERS]: { foo: 'bar' },
       [ALERT_RULE_CATEGORY]: 'Test Rule',

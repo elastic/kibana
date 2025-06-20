@@ -25,7 +25,7 @@ import type { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
   options: RuleExecutorOptions<any, any, any, any, any>,
-  dangerouslyCreateAlertsInAllSpaces: boolean
+  dangerouslyCreateAlertsInAllSpaces?: boolean
 ): CommonAlertFieldsLatest => {
   return {
     [ALERT_RULE_PARAMETERS]: options.params,

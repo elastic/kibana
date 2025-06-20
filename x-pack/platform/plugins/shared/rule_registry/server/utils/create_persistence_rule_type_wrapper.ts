@@ -8,7 +8,10 @@
 import { sortBy } from 'lodash';
 import dateMath from '@elastic/datemath';
 import type { estypes } from '@elastic/elasticsearch';
-import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import {
+  shouldCreateAlertsInAllSpaces,
+  type RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -28,6 +31,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
+import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -62,7 +66,7 @@ const augmentAlerts = async <T>({
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
-  dangerouslyCreateAlertsInAllSpaces: boolean;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }) => {
   const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
@@ -248,8 +252,11 @@ export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
-    const dangerouslyCreateAlertsInAllSpaces =
-      type.alerts?.dangerouslyCreateAlertsInAllSpaces ?? false;
+    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
+      ruleTypeId: type.id,
+      ruleTypeAlertDef: type.alerts as unknown as UntypedRuleTypeAlerts,
+      logger,
+    });
     return {
       ...type,
       executor: async (options) => {
@@ -311,7 +318,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
-                  dangerouslyCreateAlertsInAllSpaces,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -578,7 +585,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
-                  dangerouslyCreateAlertsInAllSpaces: false,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({
