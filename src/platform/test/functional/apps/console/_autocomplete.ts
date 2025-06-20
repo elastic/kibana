@@ -402,6 +402,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('ESQL queries', () => {
+      beforeEach(async () => {
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('autocompletes ESQL inside triple quotes query', async () => {
+        await PageObjects.console.enterText(`POST _query\n`);
+        await PageObjects.console.enterText(`{\n\t"query": """`);
+        await PageObjects.console.sleepForDebouncePeriod();
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        const suggestions = await PageObjects.console.getAllAutocompleteSuggestions();
+        expect(suggestions).to.contain('FROM');
+        expect(suggestions).to.contain('ROW');
+        expect(suggestions).to.contain('SHOW');
+      });
+
+      it('does not suggest ESQL when inside non-query triple quotes', async () => {
+        await PageObjects.console.enterText(`POST _query\n`);
+        await PageObjects.console.enterText(`{\n\t"script": """`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('does not suggest ESQL in other parts of the request', async () => {
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        const suggestions = PageObjects.console.getAllAutocompleteSuggestions();
+        expect(suggestions).to.not.contain('FROM');
+        expect(suggestions).to.not.contain('ROW');
+        expect(suggestions).to.not.contain('SHOW');
+      });
+    });
+
     describe('Autocomplete shouldnt trigger within', () => {
       beforeEach(async () => {
         await PageObjects.console.skipTourIfExists();
