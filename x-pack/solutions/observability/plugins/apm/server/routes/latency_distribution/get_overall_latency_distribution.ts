@@ -27,7 +27,7 @@ export async function getOverallLatencyDistribution({
   durationMinOverride,
   durationMaxOverride,
   searchMetrics,
-  isOtel,
+  isOtel = false,
 }: {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
@@ -40,7 +40,7 @@ export async function getOverallLatencyDistribution({
   durationMinOverride?: number;
   durationMaxOverride?: number;
   searchMetrics: boolean;
-  isOtel: boolean;
+  isOtel?: boolean;
 }) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
