@@ -5203,6 +5203,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/css-utils@link:src/platform/packages/shared/kbn-css-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
   version "0.0.0"
   uid ""
@@ -6572,6 +6576,10 @@
   uid ""
 
 "@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-genai-utils@link:x-pack/platform/packages/shared/onechat/onechat-genai-utils":
   version "0.0.0"
   uid ""
 

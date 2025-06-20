@@ -38,7 +38,7 @@ describe('SAMPLE', () => {
     it('wrong data type for probability', () => {
       const { errors } = Parser.parse(`
         FROM employees
-        | SAMPLE 25
+        | SAMPLE test
         `);
 
       expect(errors.length).toBe(1);
