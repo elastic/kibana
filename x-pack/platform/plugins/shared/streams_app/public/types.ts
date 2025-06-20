@@ -16,6 +16,7 @@ import {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
 } from '@kbn/discover-shared-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
@@ -55,6 +56,7 @@ export interface StreamsAppStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
+  fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
