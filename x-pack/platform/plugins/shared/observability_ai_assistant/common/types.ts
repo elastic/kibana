@@ -99,8 +99,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -108,6 +106,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
@@ -186,13 +186,17 @@ export interface InferenceChunk {
   charStartOffset: number;
 }
 
-export interface AnonymizationRule {
-  id: string;
-  entityClass: string;
-  type: 'regex' | 'ner';
-  pattern?: string;
+export interface NerAnonymizationRule {
+  type: 'ner';
   enabled: boolean;
-  builtIn: boolean;
-  description?: string;
-  normalize?: boolean;
+  modelId?: string;
 }
+
+export interface RegexAnonymizationRule {
+  type: 'regex';
+  entityClass: string;
+  pattern: string;
+  enabled: boolean;
+}
+
+export type AnonymizationRule = NerAnonymizationRule | RegexAnonymizationRule;

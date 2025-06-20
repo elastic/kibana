@@ -18,9 +18,9 @@ import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_tabl
 
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
-export function QuickLinks({ definition }: { definition?: Streams.ingest.all.GetResponse }) {
+export function QuickLinks({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const router = useStreamsAppRouter();
-  const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
+  const dashboardsFetch = useDashboardsFetch(definition.stream.name);
 
   if (definition && !dashboardsFetch.loading && dashboardsFetch.value?.dashboards.length === 0) {
     return (
@@ -33,7 +33,7 @@ export function QuickLinks({ definition }: { definition?: Streams.ingest.all.Get
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <AssetImage type="welcome" />
+              <AssetImage type="quickLinksEmpty" />
               <EuiText size="xs" textAlign="center" color="subdued">
                 {i18n.translate('xpack.streams.entityDetailOverview.linkDashboardsText', {
                   defaultMessage: 'Link dashboards to this stream for quick access',
@@ -43,7 +43,7 @@ export function QuickLinks({ definition }: { definition?: Streams.ingest.all.Get
                 <EuiLink
                   href={router.link('/{key}/{tab}', {
                     path: {
-                      key: definition?.stream.name,
+                      key: definition.stream.name,
                       tab: 'dashboards',
                     },
                   })}
