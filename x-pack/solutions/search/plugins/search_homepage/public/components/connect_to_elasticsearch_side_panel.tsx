@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
 import { docLinks } from '../../common/doc_links';
 
-const UPLOAD_FILE_URL = '/app/home#/tutorial_directory/fileDataViz';
-
 export const ConnectToElasticsearchSidePanel = () => {
-  const { http } = useKibana().services;
+  const { application } = useKibana().services;
+
+  const onFileUpload = useCallback(() => {
+    application.navigateToApp('ml', { path: 'filedatavisualizer' });
+  }, [application]);
 
   return (
     <EuiPanel color="subdued" grow={false}>
@@ -35,7 +37,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           }
           footer={
             <EuiButtonEmpty
-              href={http.basePath.prepend(UPLOAD_FILE_URL)}
+              onClick={onFileUpload}
               iconType="importAction"
               data-test-subj="uploadFileButton"
             >
