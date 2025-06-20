@@ -31,6 +31,7 @@ import {
   LogicalNotContext,
   MapExpressionContext,
   MatchBooleanExpressionContext,
+  RegexBooleanExpressionContext,
   MatchExpressionContext,
   MetadataContext,
   MvExpandCommandContext,
@@ -92,6 +93,7 @@ import {
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLFunction,
   ESQLInlineCast,
   ESQLLiteral,
   ESQLMap,
@@ -498,40 +500,31 @@ export function collectLogicalExpression(ctx: BooleanExpressionContext) {
   return [];
 }
 
-function collectLikeExpressionContextExpression(ctx: BooleanExpressionContext) {
-  if (!(ctx instanceof LikeExpressionContext)) {
-    return [];
-  }
-  const negate = ctx.NOT();
-  const fnName = `${negate ? 'not ' : ''}like`;
-  const fn = createFunction(fnName, ctx, undefined, 'binary-expression');
-  const arg = visitValueExpression(ctx.valueExpression());
-  if (arg) {
-    fn.args.push(arg);
+function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
+  const regexes = ctx.getTypedRuleContexts(RegexBooleanExpressionContext);
+  const ret: ESQLFunction[] = [];
+  return ret.concat(
+    regexes
+      .map((regex) => {
+        if (regex instanceof RlikeExpressionContext || regex instanceof LikeExpressionContext) {
+          const negate = regex.NOT();
+          const likeType = regex instanceof RlikeExpressionContext ? 'rlike' : 'like';
+          const fnName = `${negate ? 'not ' : ''}${likeType}`;
+          const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+          const arg = visitValueExpression(regex.valueExpression());
+          if (arg) {
+            fn.args.push(arg);
 
-    const literal = createLiteralString(ctx.string_());
+            const literal = createLiteralString(regex.string_());
 
-    fn.args.push(literal);
-  }
-  return fn;
-}
-
-function collectRLikeExpressionContextExpression(ctx: BooleanExpressionContext) {
-  if (!(ctx instanceof RlikeExpressionContext)) {
-    return [];
-  }
-  const negate = ctx.NOT();
-  const fnName = `${negate ? 'not ' : ''}rlike`;
-  const fn = createFunction(fnName, ctx, undefined, 'binary-expression');
-  const arg = visitValueExpression(ctx.valueExpression());
-  if (arg) {
-    fn.args.push(arg);
-
-    const literal = createLiteralString(ctx.string_());
-
-    fn.args.push(literal);
-  }
-  return fn;
+            fn.args.push(literal);
+          }
+          return fn;
+        }
+        return undefined;
+      })
+      .filter(nonNullable)
+  );
 }
 
 function collectIsNullExpression(ctx: BooleanExpressionContext) {
@@ -570,8 +563,7 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   return ast
     .concat(
       collectLogicalExpression(ctx),
-      collectLikeExpressionContextExpression(ctx),
-      collectRLikeExpressionContextExpression(ctx),
+      collectRegexExpression(ctx),
       collectIsNullExpression(ctx),
       collectDefaultExpression(ctx)
     )

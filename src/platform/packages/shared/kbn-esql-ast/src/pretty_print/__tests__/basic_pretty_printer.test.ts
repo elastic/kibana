@@ -358,16 +358,10 @@ describe('single line query', () => {
         expect(text).toBe('FROM index::selector');
       });
 
-      test('single-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"selector"');
+      test('single-double quoted pair source selector', () => {
+        const { text } = reprint('FROM "index::selector"');
 
-        expect(text).toBe('FROM index::"selector"');
-      });
-
-      test('triple-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"""say "jump"!"""');
-
-        expect(text).toBe('FROM index::"say \\"jump\\"!"');
+        expect(text).toBe('FROM "index::selector"');
       });
     });
 

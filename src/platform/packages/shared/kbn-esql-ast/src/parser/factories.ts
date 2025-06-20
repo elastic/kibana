@@ -30,6 +30,7 @@ import {
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
+  IndexStringContext,
 } from '../antlr/esql_parser';
 import { Builder, type AstNodeParserFields } from '../builder';
 import { LeafPrinter } from '../pretty_print';
@@ -445,7 +446,7 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
   return Array.isArray(identifierCtx) ? identifierCtx : [identifierCtx];
 }
 
-const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+const visitQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
   const unquotedCtx = ctx.UNQUOTED_SOURCE();
 
   const valueUnquoted = unquotedCtx.getText();
@@ -461,6 +462,26 @@ const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLite
   );
 };
 
+const visitUnquotedOrQuotedString = (ctx: IndexStringContext): ESQLStringLiteral => {
+  const unquotedCtx = ctx.UNQUOTED_SOURCE();
+
+  if (unquotedCtx) {
+    const valueUnquoted = unquotedCtx.getText();
+    const quotedString = LeafPrinter.string({ valueUnquoted });
+
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+        unquoted: true,
+      },
+      createParserFieldsFromTerminalNode(unquotedCtx)
+    );
+  }
+
+  return createLiteralString(ctx);
+};
+
 export function visitSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
@@ -473,17 +494,21 @@ export function visitSource(
 
   if (ctx instanceof IndexPatternContext) {
     const clusterStringCtx = ctx.clusterString();
+    const unquotedIndexString = ctx.unquotedIndexString();
     const indexStringCtx = ctx.indexString();
     const selectorStringCtx = ctx.selectorString();
 
     if (clusterStringCtx) {
-      prefix = visitUnquotedOrQuotedString(clusterStringCtx);
+      prefix = visitQuotedString(clusterStringCtx);
+    }
+    if (unquotedIndexString) {
+      index = visitQuotedString(unquotedIndexString);
     }
     if (indexStringCtx) {
       index = visitUnquotedOrQuotedString(indexStringCtx);
     }
     if (selectorStringCtx) {
-      selector = visitUnquotedOrQuotedString(selectorStringCtx);
+      selector = visitQuotedString(selectorStringCtx);
     }
   }
 
