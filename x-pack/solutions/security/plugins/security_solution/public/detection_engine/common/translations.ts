@@ -187,6 +187,34 @@ export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.alertSuppressionTitle',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
+  {
+    defaultMessage: 'Apply alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
+  {
+    defaultMessage: 'Apply alert suppression to threshold rules',
+  }
+);
+
+export const BULK_ACTION_DELETE_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteAlertSuppression',
+  {
+    defaultMessage: 'Remove alert suppression',
+  }
+);
+
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
@@ -1328,6 +1356,44 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
       values: { failedRulesCount },
       defaultMessage:
         '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule manual rule run.',
+    }
+  );
+
+/**
+ * Bulk fill gaps for rules
+ */
+
+export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
+  {
+    defaultMessage: 'Gaps filling for rules scheduled',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling gaps filling for rules',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled gaps filling for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        'Failed to schedule gaps filling for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
     }
   );
 

@@ -19,6 +19,9 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../services/actions/constants';
+import { GLOBAL_ARTIFACT_TAG } from '../../../common/endpoint/service/artifacts';
+import { ensureActionRequestsIndexIsConfigured } from '../services';
 import { CROWDSTRIKE_HOST_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/crowdstrike';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/sentinel_one';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../common/endpoint/service/response_actions/microsoft_defender';
@@ -35,6 +38,7 @@ import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
+  hasGlobalOrPerPolicyTag,
 } from '../../../common/endpoint/service/artifacts/utils';
 import { catchAndWrapError, wrapErrorIfNeeded } from '../utils';
 import { QueueProcessor } from '../utils/queue_processor';
@@ -56,6 +60,7 @@ export type MigrationStateReferenceData = ReferenceDataSavedObject<{
 }>;
 
 type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
+  tags?: LogsEndpointAction['tags'];
   agent: Pick<LogsEndpointAction['agent'], 'policy'>;
 };
 
@@ -211,6 +216,7 @@ const migrateArtifactsToSpaceAware = async (
       listId: listIds,
       namespaceType: listIds.map(() => 'agnostic'),
       filter: listIds.map(
+        // Find all artifacts that do NOT have a space owner id tag
         () => `NOT exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag('*')}"`
       ),
       perPage: undefined,
@@ -228,7 +234,7 @@ const migrateArtifactsToSpaceAware = async (
 
         for (const artifact of data) {
           if (!hasArtifactOwnerSpaceId(artifact)) {
-            updateProcessor.addToQueue({
+            const artifactUpdate: UpdateExceptionListItemOptions & { listId: string } = {
               _version: undefined,
               comments: artifact.comments,
               description: artifact.description,
@@ -243,7 +249,15 @@ const migrateArtifactsToSpaceAware = async (
               osTypes: artifact.os_types,
               type: artifact.type,
               tags: [...(artifact.tags ?? []), buildSpaceOwnerIdTag(DEFAULT_SPACE_ID)],
-            });
+            };
+
+            // Ensure that Endpoint Exceptions all have the `global` tag if no assignment tag is currently assigned to the artifact
+            if (artifact.list_id === ENDPOINT_LIST_ID && !hasGlobalOrPerPolicyTag(artifact)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              artifactUpdate.tags!.push(GLOBAL_ARTIFACT_TAG);
+            }
+
+            updateProcessor.addToQueue(artifactUpdate);
           }
         }
       },
@@ -268,8 +282,6 @@ const migrateArtifactsToSpaceAware = async (
 const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
-  // FIXME:PT how do we ensure that the new endpoint package is installed first - since we need the index mappings to be applied
-
   const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
   const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
   const migrationState = await getMigrationState(
@@ -301,7 +313,31 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.data = migrationStats;
   await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
-  // FIXME:PT need to ensure that 9.1 package is installed OR that the index has  mappings
+  const indexInfo = await ensureResponseActionsIndexHasRequiredMappings(endpointService);
+
+  if (indexInfo.error) {
+    migrationStats.errors.push(indexInfo.error);
+  }
+
+  if (!indexInfo.successful) {
+    migrationState.metadata.status = 'complete';
+    migrationState.metadata.finished = new Date().toISOString();
+    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+    return;
+  }
+
+  if (!indexInfo.indexExists) {
+    const exitMessage = `Response actions index [${ENDPOINT_ACTIONS_INDEX}] does not exist. Nothing to migrate`;
+
+    logger.debug(exitMessage);
+    migrationState.metadata.status = 'complete';
+    migrationState.metadata.finished = new Date().toISOString();
+    migrationStats.warnings.push(exitMessage);
+    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+
+    return;
+  }
 
   const policyInfoBuilder = new AgentPolicyInfoBuilder(endpointService, logger);
   const esClient = endpointService.getInternalEsClient();
@@ -503,6 +539,13 @@ class AgentPolicyInfoBuilder {
         }
 
         response.policyUpdate.agent.policy.push(agentPolicyInfo.agentInfo);
+
+        if (agentPolicyInfo.agentInfo.integrationPolicyId === NOT_FOUND_VALUE) {
+          response.policyUpdate.tags = [
+            ...(actionRequest.tags || []),
+            ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted,
+          ];
+        }
       }
     });
 
@@ -757,3 +800,80 @@ class AgentPolicyInfoBuilder {
     return this.externalEdrAgentIdToElasticAgentIdMapCache.get(externalEdrAgentId)!;
   }
 }
+
+interface EnsureResponseActionsIndexHasRequiredMappingsResponse {
+  successful: boolean;
+  indexExists: boolean;
+  error: string | undefined;
+}
+
+const ensureResponseActionsIndexHasRequiredMappings = async (
+  endpointService: EndpointAppContextService
+): Promise<EnsureResponseActionsIndexHasRequiredMappingsResponse> => {
+  const logger = endpointService.createLogger(
+    LOGGER_KEY,
+    'ensureResponseActionsIndexHasRequiredMappings'
+  );
+
+  logger.debug(`Checking index [${ENDPOINT_ACTIONS_INDEX}] mappings`);
+
+  const response: EnsureResponseActionsIndexHasRequiredMappingsResponse = {
+    successful: true,
+    indexExists: true,
+    error: undefined,
+  };
+  const esClient = endpointService.getInternalEsClient();
+  const fleetServices = endpointService.getInternalFleetServices();
+  const [indexExists, installedEndpointPackages] = await Promise.all([
+    esClient.indices.exists({ index: ENDPOINT_ACTIONS_INDEX }).catch(catchAndWrapError),
+
+    fleetServices.packages.getInstalledPackages({
+      perPage: 100,
+      sortOrder: 'desc',
+      nameQuery: 'endpoint',
+    }),
+  ]);
+
+  response.indexExists = indexExists;
+
+  logger.debug(
+    () =>
+      `Index already exists [${indexExists}]. Currently installed endpoint package:${stringify(
+        installedEndpointPackages
+      )}`
+  );
+
+  // If current installed package is 9.1, then nothing to do. Mapping are included in that package version.
+  if (
+    installedEndpointPackages.items.some((endpointPackage) =>
+      endpointPackage.version.startsWith('9.1')
+    )
+  ) {
+    logger.debug(`Endpoint package version 9.1.* already installed. Nothing to do.`);
+    return response;
+  }
+
+  // If the index does not exist and Endpoint package is not installed, then this must be an env.
+  // where the use of security and/or Fleet is not being utilized.
+  if (!indexExists && installedEndpointPackages.total === 0) {
+    logger.debug(
+      `Index [${ENDPOINT_ACTIONS_INDEX}] does not yet exist and no endpoint package installed. Nothing to do.`
+    );
+    return response;
+  }
+
+  // if we got this far, then endpoint package is installed. Ensure index exists and add mappings
+  await ensureActionRequestsIndexIsConfigured(endpointService).catch((error) => {
+    response.error = `Attempt to add new mappings to [${ENDPOINT_ACTIONS_INDEX}] index failed with:${stringify(
+      error
+    )}`;
+    response.successful = false;
+    return response;
+  });
+
+  response.indexExists = true;
+
+  logger.debug(`New mappings to index [${ENDPOINT_ACTIONS_INDEX}] have been added successfully.`);
+
+  return response;
+};

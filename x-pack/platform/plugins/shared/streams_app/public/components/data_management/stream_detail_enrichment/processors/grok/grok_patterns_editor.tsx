@@ -34,7 +34,7 @@ import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
 import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
+import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
 import { GrokPatternSuggestion } from './grok_pattern_suggestion';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
@@ -52,7 +52,7 @@ export const GrokPatternsEditor = () => {
     setValue,
   } = useFormContext();
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
