@@ -12,23 +12,15 @@ import { useGetMissingResources } from '../../service/hooks/use_get_missing_reso
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { TestProviders } from '../../../../common/mock';
+import type { RuleMigrationStats } from '../../types';
+
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../data_input_flyout/context', () => ({
   useRuleMigrationDataInputContext: () => ({
     openFlyout: jest.fn(),
   }),
-}));
-
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          telemetry: jest.fn(),
-        },
-      },
-    },
-  })),
 }));
 
 jest.mock('../../service/hooks/use_start_migration');
@@ -57,7 +49,7 @@ const mockMigrationStatsStopped = {
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
 
-const mockMigrationStatsReady = {
+const mockMigrationStatsReady: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
@@ -78,6 +70,12 @@ const missingLookup: RuleMigrationResourceBase = {
 jest.mock('../../service/hooks/use_get_missing_resources');
 const useGetMissingResourcesMock = useGetMissingResources as jest.Mock;
 
+const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
+  return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
+    wrapper: TestProviders,
+  });
+};
+
 describe('MigrationReadyPanel', () => {
   beforeEach(() => {
     useGetMissingResourcesMock.mockReturnValue({
@@ -94,14 +92,14 @@ describe('MigrationReadyPanel', () => {
 
   describe('Ready Migration', () => {
     it('should render description text correctly', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      renderReadyPanel(mockMigrationStatsReady);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         `Migration of 6 rules is created but the translation has not started yet.`
       );
     });
 
     it('should render start migration button', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      renderReadyPanel(mockMigrationStatsReady);
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start translation');
     });
@@ -109,7 +107,7 @@ describe('MigrationReadyPanel', () => {
 
   describe('Migration with Error', () => {
     it('should render error message when migration has an error', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStateWithError} />);
+      renderReadyPanel(mockMigrationStateWithError);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         'Migration of 6 rules failed. Please correct the below error and try again.'
       );
@@ -119,21 +117,21 @@ describe('MigrationReadyPanel', () => {
     });
 
     it('should render start migration button when there is an error', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStateWithError} />);
+      renderReadyPanel(mockMigrationStateWithError);
       expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start translation');
     });
   });
 
   describe('Aborted Migration', () => {
     it('should render aborted migration message', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
+      renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         'Migration of 6 rules was stopped. You can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
+      renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
     });
   });
@@ -153,7 +151,7 @@ describe('MigrationReadyPanel', () => {
     });
 
     it('should render missing resources warning when there are missing resources', async () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      renderReadyPanel(mockMigrationStatsReady);
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
           'Migration of 6 rules is created but the translation has not started yet. Upload macros & lookups and start the translation process.'
@@ -162,7 +160,7 @@ describe('MigrationReadyPanel', () => {
     });
 
     it('should render missing resources button', async () => {
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      renderReadyPanel(mockMigrationStatsReady);
       expect(screen.getByTestId('ruleMigrationMissingResourcesButton')).toBeVisible();
     });
   });

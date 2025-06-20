@@ -23,7 +23,7 @@ import { PanelText } from '../../../../common/components/panel_text';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { RuleMigrationsReadMore } from './read_more';
-import { MigrationName } from './migration_name';
+import { MigrationPanelTitle } from './migration_panel_title';
 
 export interface MigrationProgressPanelProps {
   migrationStats: RuleMigrationStats;
@@ -40,7 +40,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
       <EuiPanel data-test-subj="migrationProgressPanel" hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <MigrationName migrationStats={migrationStats} />
+            <MigrationPanelTitle migrationStats={migrationStats} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">

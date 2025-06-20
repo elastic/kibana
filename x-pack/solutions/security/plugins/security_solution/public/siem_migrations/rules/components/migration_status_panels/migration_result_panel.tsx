@@ -43,7 +43,7 @@ import { RuleTranslationResult } from '../../../../../common/siem_migrations/con
 import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { RuleMigrationsLastError } from './last_error';
-import { MigrationName } from './migration_name';
+import { MigrationPanelTitle } from './migration_panel_title';
 
 const headerStyle = css`
   &:hover {
@@ -89,7 +89,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
             <EuiFlexItem onClick={toggleCollapsed} css={headerStyle}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <MigrationName migrationStats={migrationStats} />
+                  <MigrationPanelTitle migrationStats={migrationStats} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <PanelText size="s" subdued>

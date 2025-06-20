@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { RuleMigrationStats } from '../../types';
@@ -17,7 +17,7 @@ import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import * as i18n from './translations';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { RuleMigrationsLastError } from './last_error';
-import { MigrationName } from './migration_name';
+import { MigrationPanelTitle } from './migration_panel_title';
 import { PanelText } from '../../../../common/components/panel_text';
 
 export interface MigrationReadyPanelProps {
@@ -65,7 +65,7 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <MigrationName migrationStats={migrationStats} />
+              <MigrationPanelTitle migrationStats={migrationStats} />
             </EuiFlexItem>
             <EuiFlexItem>
               <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
