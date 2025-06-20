@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Observable } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
+import { isEqual } from 'lodash';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type {
@@ -74,7 +75,7 @@ export class SiemRulesMigrationsService {
   }
 
   public getLatestStats$(): Observable<RuleMigrationStats[] | null> {
-    return this.latestStats$.asObservable();
+    return this.latestStats$.asObservable().pipe(distinctUntilChanged(isEqual));
   }
 
   public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
@@ -260,9 +261,9 @@ export class SiemRulesMigrationsService {
       if (pendingMigrationIds.length > 0) {
         // send notifications for finished migrations
         pendingMigrationIds.forEach((pendingMigrationId) => {
-          const migration = results.find((item) => item.id === pendingMigrationId);
-          if (migration?.status === SiemMigrationTaskStatus.FINISHED) {
-            this.core.notifications.toasts.addSuccess(getSuccessToast(migration, this.core));
+          const migrationStats = results.find((item) => item.id === pendingMigrationId);
+          if (migrationStats?.status === SiemMigrationTaskStatus.FINISHED) {
+            this.core.notifications.toasts.addSuccess(getSuccessToast(migrationStats, this.core));
           }
         });
       }
@@ -274,17 +275,17 @@ export class SiemRulesMigrationsService {
           pendingMigrationIds.push(result.id);
         }
 
-        // automatically resume stopped migrations when all conditions are met
-        if (result.status === SiemMigrationTaskStatus.STOPPED && !result.last_execution?.error) {
+        // automatically resume interrupted migrations when the proper conditions are met
+        if (
+          result.status === SiemMigrationTaskStatus.INTERRUPTED &&
+          !result.last_execution?.error
+        ) {
           const connectorId = result.last_execution?.connector_id ?? this.connectorIdStorage.get();
           const skipPrebuiltRulesMatching = result.last_execution?.skip_prebuilt_rules_matching;
           if (connectorId && !this.hasMissingCapabilities('all')) {
             await api.startRuleMigration({
               migrationId: result.id,
-              settings: {
-                connectorId,
-                skipPrebuiltRulesMatching,
-              },
+              settings: { connectorId, skipPrebuiltRulesMatching },
             });
             pendingMigrationIds.push(result.id);
           }
