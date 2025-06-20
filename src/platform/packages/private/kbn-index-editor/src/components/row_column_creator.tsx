@@ -157,10 +157,10 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
       {activeMode === 'add-row' && (
         <EuiPanel
           paddingSize="s"
-          css={css`
-            background: ${euiTheme.colors.backgroundBaseSubdued};
-            margin-bottom: ${euiTheme.size.xs};
-          `}
+          css={{
+            background: euiTheme.colors.backgroundBaseSubdued,
+            marginBottom: euiTheme.size.xs,
+          }}
         >
           <EuiForm component="form" onSubmit={saveNewRow}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -171,7 +171,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
                 css={css`
                   &.hide-scrollbar {
                     scrollbar-width: none;
-                    padding: 0 4px;
+                    padding: 0 ${euiTheme.size.xxs};
                   }
                 `}
               >
