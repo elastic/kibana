@@ -19,6 +19,7 @@ paths:
   /api/observability_ai_assistant/chat/complete:
     post:
       summary: Generate a chat completion
+      operationId: observability-ai-assistant-chat-complete
       description: |
         Create a new chat completion by using the Observability AI Assistant. 
 

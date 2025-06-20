@@ -41088,6 +41088,7 @@ paths:
         It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      operationId: observability-ai-assistant-chat-complete
       requestBody:
         content:
           application/json:
