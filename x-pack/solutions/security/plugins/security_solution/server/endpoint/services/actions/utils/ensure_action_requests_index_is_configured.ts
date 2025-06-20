@@ -60,7 +60,7 @@ export const ensureActionRequestsIndexIsConfigured = async (
 
   const newRootMappings: MappingPropertyBase['properties'] = {
     originSpaceId: { type: 'keyword', ignore_above: 1024 },
-    tags: { type: 'keyword' },
+    tags: { type: 'keyword', ignore_above: 1024 },
   };
 
   const newAgentPolicyMappings: MappingPropertyBase['properties'] = {
