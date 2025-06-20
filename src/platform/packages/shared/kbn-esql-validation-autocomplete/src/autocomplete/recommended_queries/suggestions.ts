@@ -109,6 +109,16 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
   return recommendedQueriesTemplates;
 };
 
+export const METADATA_FIELDS = [
+  '_version',
+  '_id',
+  '_index',
+  '_source',
+  '_ignored',
+  '_index_mode',
+  '_score',
+];
+
 /**
  * This function returns the categorization field from the list of fields.
  * It checks for the presence of 'message', 'error.message', or 'event.original' in that order.
@@ -129,5 +139,7 @@ export function getCategorizationField(fields: string[]): string | undefined {
     }
   }
 
-  return fields[0] ?? undefined;
+  // Filter out metadata fields
+  const filteredFields = fields.filter((field) => !METADATA_FIELDS.includes(field));
+  return filteredFields[0] ?? undefined;
 }

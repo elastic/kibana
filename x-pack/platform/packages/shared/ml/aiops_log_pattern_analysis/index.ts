@@ -7,4 +7,3 @@
 
 export { categorizeSchema } from './schema';
 export type { CategorizeSchema } from './schema';
-export { extractKeywordsFromRegex } from './extract_keywords';

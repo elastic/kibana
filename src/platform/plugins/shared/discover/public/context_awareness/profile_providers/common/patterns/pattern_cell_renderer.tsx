@@ -9,21 +9,18 @@
 
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
-import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { extractKeywordsFromRegex } from '@kbn/aiops-log-pattern-analysis';
+import { extractCategorizeTokens } from '@kbn/esql-utils';
 
 interface Props {
-  row: DataTableRecord;
-  columnId: string;
+  pattern: string;
   isDetails: boolean;
   defaultRowHeight?: number;
 }
 
-export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defaultRowHeight }) => {
+export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
   const { euiTheme } = useEuiTheme();
-
-  const pattern = useMemo(() => String(row.flattened[columnId]), [columnId, row.flattened]);
 
   const keywordStyle = useMemo(
     () => ({
@@ -34,19 +31,20 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
       backgroundColor: euiTheme.colors.lightestShade,
       borderRadius: euiTheme.border.radius.small,
       color: euiTheme.colors.textPrimary,
+      fontSize: euiTheme.size.m,
     }),
     [euiTheme]
   );
 
-  const keywords = useMemo(() => extractKeywordsFromRegex(pattern), [pattern]);
+  const keywords = useMemo(() => extractCategorizeTokens(pattern), [pattern]);
 
   const formattedTokens = useMemo(
     () =>
       keywords.map((keyword, index) => {
         return (
-          <span key={index} css={keywordStyle}>
-            <code>{keyword}</code>
-          </span>
+          <EuiCode key={index} css={keywordStyle}>
+            {keyword}
+          </EuiCode>
         );
       }),
     [keywordStyle, keywords]
@@ -95,18 +93,19 @@ export const PatternCellRenderer: FC<Props> = ({ row, columnId, isDetails, defau
   return <div css={containerStyle}>{formattedTokens}</div>;
 };
 
-export function getPatternCellRenderer({
-  row,
-  columnId,
-  isDetails,
-  defaultRowHeight,
-}: Props & {
-  defaultRowHeight?: number;
-}) {
+export function getPatternCellRenderer(
+  row: DataTableRecord,
+  columnId: string,
+  isDetails: boolean,
+  defaultRowHeight?: number
+) {
+  const pattern = row.flattened[columnId];
+  if (pattern === undefined) {
+    return '-';
+  }
   return (
     <PatternCellRenderer
-      row={row}
-      columnId={columnId}
+      pattern={String(pattern)}
       isDetails={isDetails}
       defaultRowHeight={defaultRowHeight}
     />

@@ -8,10 +8,9 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getCategorizeColumns } from '@kbn/esql-utils';
+import { extractCategorizeTokens, getCategorizeColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { extractKeywordsFromRegex } from '@kbn/aiops-log-pattern-analysis';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -42,7 +41,7 @@ export const createPatternDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getPatternCellRenderer({ ...props, defaultRowHeight: rowHeight }),
+                getPatternCellRenderer(props.row, props.columnId, props.isDetails, rowHeight),
             }),
           {}
         );
@@ -68,7 +67,7 @@ export const createPatternDataSourceProfileProvider = (
               return;
             }
 
-            const pattern = extractKeywordsFromRegex(context.value as string).join(' ');
+            const pattern = extractCategorizeTokens(context.value as string).join(' ');
             const categorizeField = context.query.esql.match(/CATEGORIZE\((.*)\)/)?.[1]?.trim();
 
             if (!categorizeField || !pattern) {

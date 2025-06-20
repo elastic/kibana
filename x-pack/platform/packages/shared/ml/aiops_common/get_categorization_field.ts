@@ -10,6 +10,16 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const fieldPriority = ['message', 'error.message', 'event.original'];
 
+export const METADATA_FIELDS = [
+  '_version',
+  '_id',
+  '_index',
+  '_source',
+  '_ignored',
+  '_index_mode',
+  '_score',
+];
+
 export function getCategorizationField(fields: string[]): string | undefined {
   const fieldSet = new Set(fields);
   for (const field of fieldPriority) {
@@ -17,8 +27,10 @@ export function getCategorizationField(fields: string[]): string | undefined {
       return field;
     }
   }
-  // If no prioritized field is found, return the first field in the list
-  return fields[0] ?? undefined;
+
+  // Filter out metadata fields
+  const filteredFields = fields.filter((field) => !METADATA_FIELDS.includes(field));
+  return filteredFields[0] ?? undefined;
 }
 
 export function getCategorizationDataViewField(dataView: DataView): {

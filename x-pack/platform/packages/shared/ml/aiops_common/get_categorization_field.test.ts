@@ -26,9 +26,14 @@ describe('get_categorization_field utils', () => {
       expect(getCategorizationField(fields)).toBe('event.original');
     });
 
-    it('returns undefined if none of the priority fields are present', () => {
+    it('returns first field if none of the priority fields are present', () => {
       const fields = ['foo', 'bar', 'baz'];
-      expect(getCategorizationField(fields)).toBeUndefined();
+      expect(getCategorizationField(fields)).toBe('foo');
+    });
+
+    it('returns first field, skipping meta data fields, if none of the priority fields are present', () => {
+      const fields = ['_id', 'foo', 'bar', 'baz'];
+      expect(getCategorizationField(fields)).toBe('foo');
     });
 
     it('returns the first matching field according to priority', () => {
