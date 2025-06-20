@@ -41,8 +41,7 @@ import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
-import type { BasicRuleInfo } from '../../logic/rule_versions/rule_version_specifier';
-import { excludeLicenseRestrictedRules } from '../../logic/rule_versions/rule_version_specifier';
+import { getAllUpgradableRules } from '../../logic/utils';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -95,21 +94,13 @@ export const performRuleUpgradeHandler = async (
         filter,
       });
 
-      const upgradeableRules = allCurrentVersions.reduce<BasicRuleInfo[]>(
-        (_upgradeableRules, current) => {
-          const latest = latestVersionsMap.get(current.rule_id);
-          if (latest && latest.version > current.version) {
-            _upgradeableRules.push({
-              rule_id: current.rule_id,
-              version: latest.version,
-              type: latest.type,
-            });
-          }
-          return _upgradeableRules;
-        },
-        []
+      const upgradableRules = await getAllUpgradableRules(
+        allCurrentVersions,
+        latestVersionsMap,
+        mlAuthz
       );
-      ruleUpgradeQueue.push(...(await excludeLicenseRestrictedRules(upgradeableRules, mlAuthz)));
+
+      ruleUpgradeQueue.push(...upgradableRules);
     } else if (mode === ModeEnum.SPECIFIC_RULES) {
       ruleUpgradeQueue.push(...request.body.rules);
     }

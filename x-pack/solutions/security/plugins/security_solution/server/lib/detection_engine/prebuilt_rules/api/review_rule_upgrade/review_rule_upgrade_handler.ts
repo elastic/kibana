@@ -20,14 +20,11 @@ import type { IPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import type { BasicRuleInfo } from '../../logic/rule_versions/rule_version_specifier';
-import {
-  excludeLicenseRestrictedRules,
-  type RuleVersionSpecifier,
-} from '../../logic/rule_versions/rule_version_specifier';
+import { type RuleVersionSpecifier } from '../../logic/rule_versions/rule_version_specifier';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleUpgradeInfo } from './calculate_rule_upgrade_info';
 import type { MlAuthz } from '../../../../machine_learning/authz';
+import { getAllUpgradableRules } from '../../logic/utils';
 
 const DEFAULT_SORT: ReviewRuleUpgradeSort = {
   field: 'name',
@@ -117,27 +114,15 @@ async function calculateUpgradeableRulesDiff({
         sortOrder: sort.order,
       });
 
-  const upgradeableRuleVersionSpecifiers = currentRuleVersions
-    .filter((rule) => {
-      const targetVersion = latestVersionsMap.get(rule.rule_id);
-      return targetVersion != null && rule.version < targetVersion.version;
-    })
-    .reduce<BasicRuleInfo[]>((upgradeableVersionSpecifiers, ruleSummary) => {
-      const versionSpecifier = latestVersionsMap.get(ruleSummary.rule_id);
-      if (versionSpecifier) {
-        upgradeableVersionSpecifiers.push(versionSpecifier);
-      }
-      return upgradeableVersionSpecifiers;
-    }, []);
-
-  const upgradeableRules = await excludeLicenseRestrictedRules(
-    upgradeableRuleVersionSpecifiers,
+  const upgradableRules = await getAllUpgradableRules(
+    currentRuleVersions,
+    latestVersionsMap,
     mlAuthz
   );
 
-  const totalUpgradeableRules = upgradeableRules.length;
+  const totalUpgradeableRules = upgradableRules.length;
 
-  const pagedRuleIds = upgradeableRules
+  const pagedRuleIds = upgradableRules
     .slice((page - 1) * perPage, page * perPage)
     .map((rule) => rule.rule_id);
 
