@@ -25,8 +25,9 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import type { DashboardPanel } from '../../server';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializeLayoutManager } from './layout_manager';
+import { initializeLayoutManager } from './layout_manager/layout_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
@@ -137,7 +138,7 @@ export function initializeUnsavedChangesManager({
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
-          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
+          dashboardStateToBackup.references = [...(references ?? []), ...controlGroupReferences];
           if (hasPanelChanges) dashboardStateToBackup.panels = panels;
           if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
         }
@@ -158,11 +159,16 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    if (!lastSavedDashboardState.panels[childId]) return;
-    return {
-      rawState: lastSavedDashboardState.panels[childId].explicitInput,
-      references: getReferences(childId),
-    };
+    const targetPanel = lastSavedDashboardState.panels.find((panel) => {
+      return (panel as DashboardPanel).panelIndex === childId;
+    });
+
+    return targetPanel
+      ? {
+          rawState: (targetPanel as DashboardPanel).panelConfig ?? {},
+          references: getReferences(childId),
+        }
+      : undefined;
   };
 
   return {
