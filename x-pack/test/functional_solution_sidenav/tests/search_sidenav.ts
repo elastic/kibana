@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'elasticsearchIndexManagement',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           text: 'Indices',
