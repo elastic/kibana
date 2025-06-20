@@ -111,6 +111,13 @@ export function AttributesOverview({
       title: attributesTitle,
       ariaLabel: attributesTitle,
       fields: groupedFields.attributesFields,
+      tooltipMessage: i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
+        {
+          defaultMessage:
+            'Metadata added by the instrumentation library to describe the telemetry data (e.g., HTTP method, user agent).',
+        }
+      ),
     },
     {
       id: 'resource_attributes',
@@ -122,6 +129,13 @@ export function AttributesOverview({
         { defaultMessage: 'Resource attributes' }
       ),
       fields: groupedFields.resourceAttributesFields,
+      tooltipMessage: i18n.translate(
+        'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
+        {
+          defaultMessage:
+            'Metadata originally set at the source of the telemetry, such as in the SDK or agent that generated the data.',
+        }
+      ),
     },
     {
       id: 'scope_attributes',
@@ -133,6 +147,10 @@ export function AttributesOverview({
         { defaultMessage: 'Scope attributes' }
       ),
       fields: groupedFields.scopeAttributesFields,
+      tooltipMessage: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTooltip', {
+        defaultMessage:
+          'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
+      }),
     },
   ];
 
@@ -212,13 +230,14 @@ export function AttributesOverview({
         `}
       >
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {accordionConfigs.map(({ id, title, ariaLabel, fields }) => (
+          {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
             <React.Fragment key={id}>
               <EuiFlexItem grow={false}>
                 <AttributesAccordion
                   id={id}
                   title={title}
                   ariaLabel={ariaLabel}
+                  tooltipMessage={tooltipMessage}
                   fields={fields}
                   hit={hit}
                   dataView={dataView}
