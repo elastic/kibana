@@ -17,7 +17,7 @@ export const ConnectToElasticsearchSidePanel = () => {
   const { http } = useKibana().services;
 
   return (
-    <EuiPanel color="subdued">
+    <EuiPanel color="subdued" grow={false}>
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiCard
           display="plain"
@@ -45,7 +45,9 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-        <EuiCard
+
+        {/* TODO:   Enable The “Sample Data” section when the one-click sample data ingestion feature is complete. */}
+        {/* <EuiCard
           display="plain"
           hasBorder
           textAlign="left"
@@ -69,7 +71,7 @@ export const ConnectToElasticsearchSidePanel = () => {
               })}
             </EuiButtonEmpty>
           }
-        />
+        /> */}
         <EuiCard
           display="transparent"
           textAlign="left"
