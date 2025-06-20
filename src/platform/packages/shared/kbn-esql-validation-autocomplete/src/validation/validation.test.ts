@@ -643,10 +643,11 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename missingField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        'Unknown column [missingField]',
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename textField as b', []);
       testErrorsAndWarnings('from a_index | rename textField AS b', []);
@@ -654,7 +655,11 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | rename textField As b, b AS c', []);
       testErrorsAndWarnings('from a_index | rename b = textField', []);
       testErrorsAndWarnings('from a_index | rename b = textField, b AS c', []);
-      testErrorsAndWarnings('from a_index | rename textField = a', ['Unknown column [a]']);
+      testErrorsAndWarnings(
+        'from a_index | rename textField = a',
+        ['Unknown column [a]'],
+        ['Column [textField] of type text has been overwritten as new type: unknown']
+      );
       testErrorsAndWarnings('from a_index | rename fn() as a', [
         "SyntaxError: token recognition error at: '('",
         "SyntaxError: token recognition error at: ')'",
@@ -671,6 +676,7 @@ describe('validation logic', () => {
       );
       testErrorsAndWarnings('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Error: [as] function expects exactly 2 arguments, got 1.',
       ]);
       testErrorsAndWarnings('from a_index | rename key* as keywords', [
         'Unknown column [keywords]',
