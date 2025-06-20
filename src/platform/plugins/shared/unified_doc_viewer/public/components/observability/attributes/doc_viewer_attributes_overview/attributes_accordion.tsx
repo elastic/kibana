@@ -87,28 +87,40 @@ export const AttributesAccordion = ({
           body={
             <EuiText size="s" color="subdued">
               <p>
-                {i18n.translate('attributesAccordion.noFieldsMessage.noFieldsLabel', {
-                  defaultMessage: 'No attributes fields found.',
-                })}
+                {i18n.translate(
+                  'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.noFieldsLabel',
+                  {
+                    defaultMessage: 'No attributes fields found.',
+                  }
+                )}
               </p>
 
               <>
                 <strong>
-                  {i18n.translate('attributesAccordion.noFieldsMessage.tryText', {
-                    defaultMessage: 'Try:',
-                  })}
+                  {i18n.translate(
+                    'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.tryText',
+                    {
+                      defaultMessage: 'Try:',
+                    }
+                  )}
                 </strong>
                 <ul>
                   <li>
-                    {i18n.translate('attributesAccordion.noFieldsMessage.extendTimeBullet', {
-                      defaultMessage: 'Extending the time range',
-                    })}
+                    {i18n.translate(
+                      'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.extendTimeBullet',
+                      {
+                        defaultMessage: 'Extending the time range',
+                      }
+                    )}
                   </li>
 
                   <li>
-                    {i18n.translate('attributesAccordion.noFieldsMessage.fieldTypeFilterBullet', {
-                      defaultMessage: 'Using different field filters',
-                    })}
+                    {i18n.translate(
+                      'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.fieldTypeFilterBullet',
+                      {
+                        defaultMessage: 'Using different field filters',
+                      }
+                    )}
                   </li>
                 </ul>
               </>
