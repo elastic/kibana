@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
-import { useTraceContext } from '../../hooks/use_trace';
+import { useRootSpanContext } from '../../hooks/use_root_span';
 import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 import { FieldWithoutActions } from '../../../components/field_without_actions';
 import { Section } from '../../../components/section';
@@ -30,7 +30,7 @@ export function SpanDurationSummary({
   serviceName,
   isOtelSpan,
 }: SpanDurationSummaryProps) {
-  const { trace, loading } = useTraceContext();
+  const { trace, loading } = useRootSpanContext();
   const {
     data: latencyChartData,
     loading: latencyChartLoading,

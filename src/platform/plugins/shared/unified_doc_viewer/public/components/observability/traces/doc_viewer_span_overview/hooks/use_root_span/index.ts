@@ -20,23 +20,32 @@ import {
   SPAN_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface UseTransactionPrams {
   traceId?: string;
+  transactionId?: string;
   indexPattern: string;
 }
 
 interface GetTransactionParams {
   traceId: string;
+  transactionId?: string;
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
 }
 
-async function getTraceData({ traceId, indexPattern, data, signal }: GetTransactionParams) {
+async function getTraceData({
+  traceId,
+  transactionId,
+  indexPattern,
+  data,
+  signal,
+}: GetTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -53,32 +62,34 @@ async function getTraceData({ traceId, indexPattern, data, signal }: GetTransact
               OTEL_DURATION,
             ],
             query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      [TRACE_ID_FIELD]: traceId,
-                    },
+              bool: transactionId
+                ? {
+                    must: [
+                      {
+                        term: {
+                          [TRANSACTION_ID_FIELD]: transactionId,
+                        },
+                      },
+                      {
+                        term: {
+                          [PROCESSOR_EVENT_FIELD]: 'transaction',
+                        },
+                      },
+                    ],
+                  }
+                : {
+                    must: [
+                      {
+                        term: {
+                          [TRACE_ID_FIELD]: traceId,
+                        },
+                      },
+                    ],
+                    must_not: [
+                      { exists: { field: PARENT_ID_FIELD } },
+                      { exists: { field: 'parent_span_id' } },
+                    ],
                   },
-                ],
-                should: [
-                  {
-                    term: {
-                      [PROCESSOR_EVENT_FIELD]: 'transaction',
-                    },
-                  },
-                  {
-                    bool: {
-                      must_not: [
-                        { exists: { field: PROCESSOR_EVENT_FIELD } },
-                        { exists: { field: PARENT_ID_FIELD } },
-                        { exists: { field: 'parent_span_id' } },
-                      ],
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
             },
           },
         },
@@ -93,7 +104,7 @@ export interface Trace {
   duration: number;
 }
 
-const useTrace = ({ traceId, indexPattern }: UseTransactionPrams) => {
+const useRootSpan = ({ traceId, transactionId, indexPattern }: UseTransactionPrams) => {
   const { data, core } = getUnifiedDocViewerServices();
   const [trace, setTrace] = useState<Trace | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -111,7 +122,7 @@ const useTrace = ({ traceId, indexPattern }: UseTransactionPrams) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getTraceData({ traceId, indexPattern, data, signal });
+        const result = await getTraceData({ traceId, transactionId, indexPattern, data, signal });
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
         const name = fields?.[TRANSACTION_NAME_FIELD] || fields?.[SPAN_NAME_FIELD];
@@ -144,12 +155,12 @@ const useTrace = ({ traceId, indexPattern }: UseTransactionPrams) => {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, indexPattern, traceId]);
+  }, [core.notifications.toasts, data, indexPattern, traceId, transactionId]);
 
   return { loading, trace };
 };
 
-export const [TraceProvider, useTraceContext] = createContainer(useTrace);
+export const [RootSpanProvider, useRootSpanContext] = createContainer(useRootSpan);
 
 function resolveDuration(fields?: Record<string, any>): number | null {
   const duration = fields?.[TRANSACTION_DURATION_FIELD];

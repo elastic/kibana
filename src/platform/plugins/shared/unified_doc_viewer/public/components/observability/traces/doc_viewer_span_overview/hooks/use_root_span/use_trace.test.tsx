@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { TraceProvider, useTraceContext } from '.';
+import { RootSpanProvider, useRootSpanContext } from '.';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../../plugin', () => ({
@@ -52,15 +52,15 @@ beforeEach(() => {
 
 describe('useTrace hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TraceProvider traceId="test-trace" indexPattern="test-index">
+    <RootSpanProvider traceId="test-trace" transactionId="transaction-id" indexPattern="test-index">
       {children}
-    </TraceProvider>
+    </RootSpanProvider>
   );
 
   it('should start with loading true and trace as null', async () => {
     lastValueFromMock.mockResolvedValue({});
 
-    const { result } = renderHook(() => useTraceContext(), { wrapper });
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
@@ -84,7 +84,41 @@ describe('useTrace hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useTraceContext(), { wrapper });
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.trace?.name).toBe(transactionName);
+    expect(result.current.trace?.duration).toBe(transactionDuration);
+    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should update trace when OTEL data is fetched successfully', async () => {
+    const newWrapper = ({ children }: { children: React.ReactNode }) => (
+      <RootSpanProvider traceId="test-trace" indexPattern="test-index">
+        {children}
+      </RootSpanProvider>
+    );
+
+    const transactionName = 'Test Trace';
+    const transactionDuration = 1;
+    lastValueFromMock.mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                [TRANSACTION_NAME_FIELD]: transactionName,
+                [TRANSACTION_DURATION_FIELD]: transactionDuration,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper: newWrapper });
 
     await waitFor(() => !result.current.loading);
 
@@ -98,7 +132,7 @@ describe('useTrace hook', () => {
     const errorMessage = 'Search error';
     lastValueFromMock.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useTraceContext(), { wrapper });
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
@@ -115,12 +149,12 @@ describe('useTrace hook', () => {
 
   it('should set trace to null and stop loading when traceId is not provided', async () => {
     const wrapperWithoutTraceId = ({ children }: { children: React.ReactNode }) => (
-      <TraceProvider traceId={undefined} indexPattern="test-index">
+      <RootSpanProvider traceId={undefined} indexPattern="test-index">
         {children}
-      </TraceProvider>
+      </RootSpanProvider>
     );
 
-    const { result } = renderHook(() => useTraceContext(), {
+    const { result } = renderHook(() => useRootSpanContext(), {
       wrapper: wrapperWithoutTraceId,
     });
 

@@ -15,6 +15,7 @@ import {
   SPAN_ID_FIELD,
   SPAN_NAME_FIELD,
   TRACE_ID_FIELD,
+  TRANSACTION_ID_FIELD,
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
@@ -23,7 +24,7 @@ import React, { useMemo } from 'react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { Trace } from '../components/trace';
-import { TraceProvider } from './hooks/use_trace';
+import { RootSpanProvider } from './hooks/use_root_span';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
@@ -76,11 +77,16 @@ export function SpanOverview({
     : flattenedDoc[SPAN_DURATION_FIELD];
 
   const traceId = flattenedDoc[TRACE_ID_FIELD];
+  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
     <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
-        <TraceProvider traceId={traceId} indexPattern={indexes.apm.traces}>
+        <RootSpanProvider
+          traceId={traceId}
+          transactionId={transactionId}
+          indexPattern={indexes.apm.traces}
+        >
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -136,7 +142,7 @@ export function SpanOverview({
               </EuiFlexGroup>
             </EuiPanel>
           </FieldActionsProvider>
-        </TraceProvider>
+        </RootSpanProvider>
       </RootTransactionProvider>
     </DataSourcesProvider>
   );
