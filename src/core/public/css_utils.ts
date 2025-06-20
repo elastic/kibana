@@ -81,6 +81,28 @@ export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEu
   });
 };
 
+export const removeEuiFocusRing = css`
+  outline: none;
+  &:focus-visible {
+    outline-style: none;
+  }
+`;
+
+export const passDownFocusRing = (euiTheme: UseEuiTheme['euiTheme'], target: string) => css`
+  ${removeEuiFocusRing}
+  ${target} {
+    /* Safari & Firefox */
+    outline: ${euiTheme.focus.width} solid currentColor;
+  }
+  &:focus-visible ${target} {
+    /* Chrome */
+    outline-style: auto;
+  }
+  &:not(:focus-visible) ${target} {
+    outline: none;
+  }
+`;
+
 export type EmotionStyles = Record<
   string,
   CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)
