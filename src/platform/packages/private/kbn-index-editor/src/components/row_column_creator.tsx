@@ -29,7 +29,7 @@ type ToggleMode = 'add-row' | 'add-column';
 export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { indexUpdateService },
+    services: { indexUpdateService, notifications },
   } = useKibana<KibanaContextExtra>();
 
   const [activeMode, setActiveMode] = useState<ToggleMode | null>(null);
@@ -79,7 +79,16 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
   const saveNewRow = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await indexUpdateService.saveDocsImmediately([{ value: newRow }]);
+
     setActiveMode(null);
+    notifications.toasts.addSuccess({
+      title: i18n.translate('indexEditor.addRowSuccessTitle', {
+        defaultMessage: 'Row added successfully',
+      }),
+      text: i18n.translate('indexEditor.addRowSuccessContent', {
+        defaultMessage: 'Refresh the table to see the new row.',
+      }),
+    });
   };
 
   return (
