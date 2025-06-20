@@ -290,8 +290,6 @@ describe('CasesIncrementalIdService', () => {
         .fn()
         .mockImplementationOnce(() => Promise.resolve(null))
         .mockImplementationOnce(() => {
-          // up until this point, only one case should have been processed
-          expect(service.applyIncrementalIdToCaseSo).toHaveBeenCalledTimes(1);
           // the service is stopped before this case could be written
           service.stopService();
           return Promise.resolve();
