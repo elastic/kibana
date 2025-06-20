@@ -8,6 +8,7 @@
 import { buildStreamRows } from './utils';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { Direction } from '@elastic/eui';
+import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {
   const lifecycle = retention ? { dsl: { data_retention: retention } } : ({} as any);
@@ -89,40 +90,40 @@ describe('buildStreamRows', () => {
 
   it('sorts by retention ascending', () => {
     const expected = [
-      'logs-a',
-      'logs-a.child2',
-      'logs-a.child3',
-      'logs-a.child1',
-      'metrics-c',
-      'metrics-c.child2',
-      'metrics-c.child3',
-      'metrics-c.child1',
-      'logs-b',
-      'logs-b.child1',
-      'logs-b.child2',
-      'logs-b.child3',
+      'logs-a (1.0d)',
+      'logs-a.child2 (4.0h)',
+      'logs-a.child3 (6.0h)',
+      'logs-a.child1 (8.0h)',
+      'metrics-c (1.0d)',
+      'metrics-c.child2 (30.0m)',
+      'metrics-c.child3 (45.0m)',
+      'metrics-c.child1 (2.0h)',
+      'logs-b (2.0d)',
+      'logs-b.child1 (1.0h)',
+      'logs-b.child2 (3.0h)',
+      'logs-b.child3 (5.0h)',
     ];
     const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
-    expect(rows.map((r) => r.name)).toEqual(expected);
+    expect(rows.map((r) => `${r.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('sorts by retention descending', () => {
     const expected = [
-      'logs-b',
-      'logs-b.child3',
-      'logs-b.child2',
-      'logs-b.child1',
-      'metrics-c',
-      'metrics-c.child1',
-      'metrics-c.child3',
-      'metrics-c.child2',
-      'logs-a',
-      'logs-a.child1',
-      'logs-a.child3',
-      'logs-a.child2',
+      'logs-b (2.0d)',
+      'logs-b.child3 (5.0h)',
+      'logs-b.child2 (3.0h)',
+      'logs-b.child1 (1.0h)',
+      'metrics-c (1.0d)',
+      'metrics-c.child1 (2.0h)',
+      'metrics-c.child3 (45.0m)',
+      'metrics-c.child2 (30.0m)',
+      'logs-a (1.0d)',
+      'logs-a.child1 (8.0h)',
+      'logs-a.child3 (6.0h)',
+      'logs-a.child2 (4.0h)',
     ];
     const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
-    expect(rows.map((r) => r.name)).toEqual(expected);
+    expect(rows.map((r) => `${r.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('always lists a child immediately after its parent', () => {
