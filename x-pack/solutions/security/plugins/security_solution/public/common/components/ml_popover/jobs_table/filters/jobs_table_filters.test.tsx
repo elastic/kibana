@@ -22,19 +22,7 @@ describe('JobsTableFilters', () => {
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent
-        hideSearchBar={false}
-        hideGroupsFilter={false}
-        hideElasticAndCustomJobsFilter={false}
-        defaultFilters={{
-          filterQuery: '',
-          showCustomJobs: false,
-          showElasticJobs: false,
-          selectedGroups: [],
-        }}
-        securityJobs={securityJobs}
-        onFilterChanged={onFilterChanged}
-      />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -54,19 +42,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent
-        hideSearchBar={false}
-        hideGroupsFilter={false}
-        hideElasticAndCustomJobsFilter={false}
-        defaultFilters={{
-          filterQuery: '',
-          showCustomJobs: false,
-          showElasticJobs: false,
-          selectedGroups: [],
-        }}
-        securityJobs={securityJobs}
-        onFilterChanged={onFilterChanged}
-      />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -86,19 +62,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent
-        hideSearchBar={false}
-        hideGroupsFilter={false}
-        hideElasticAndCustomJobsFilter={false}
-        defaultFilters={{
-          filterQuery: '',
-          showCustomJobs: false,
-          showElasticJobs: false,
-          selectedGroups: [],
-        }}
-        securityJobs={securityJobs}
-        onFilterChanged={onFilterChanged}
-      />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper
@@ -130,19 +94,7 @@ describe('JobsTableFilters', () => {
   test('when you click Custom Jobs filter twice, state is updated and it is revert', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
-      <JobsTableFiltersComponent
-        hideSearchBar={false}
-        hideGroupsFilter={false}
-        hideElasticAndCustomJobsFilter={false}
-        defaultFilters={{
-          filterQuery: '',
-          showCustomJobs: false,
-          showElasticJobs: false,
-          selectedGroups: [],
-        }}
-        securityJobs={securityJobs}
-        onFilterChanged={onFilterChanged}
-      />
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
     );
 
     wrapper

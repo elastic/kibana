@@ -17,11 +17,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import type { JobsFilters, SecurityJob } from '../../types';
+import type { SecurityJob } from '../../types';
 import { toggleSelectedGroup } from './toggle_selected_group';
 
 interface GroupsFilterPopoverProps {
-  defaultFilters: JobsFilters;
   securityJobs: SecurityJob[];
   onSelectedGroupsChanged: Dispatch<SetStateAction<string[]>>;
 }
@@ -31,17 +30,15 @@ interface GroupsFilterPopoverProps {
  * their counts from the provided SecurityJobs. The 'siem' & 'security' groups are filtered out as all jobs will be
  * siem/security jobs
  *
- * @param defaultFilters the filters that are set on this component by default
  * @param securityJobs jobs to fetch groups from to display for filtering
  * @param onSelectedGroupsChanged change listener to be notified when group selection changes
  */
 export const GroupsFilterPopoverComponent = ({
-  defaultFilters,
   securityJobs,
   onSelectedGroupsChanged,
 }: GroupsFilterPopoverProps) => {
   const [isGroupPopoverOpen, setIsGroupPopoverOpen] = useState(false);
-  const [selectedGroups, setSelectedGroups] = useState<string[]>(defaultFilters.selectedGroups);
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
   const groups = securityJobs
     .map((j) => j.groups)
