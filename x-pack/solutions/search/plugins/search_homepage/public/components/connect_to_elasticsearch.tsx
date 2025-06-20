@@ -24,14 +24,15 @@ import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useKibana } from '../hooks/use_kibana';
 import { useGetApiKeys } from '../hooks/api/use_api_key';
+import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 
-const LOCALHOST_URL = 'http://localhost:9200/';
 const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
 const CREATE_API_KEY = '/app/management/security/api_keys/create';
 
 export const ConnectToElasticsearch = () => {
   const { http } = useKibana().services;
   const { data } = useGetApiKeys();
+  const elasticsearchUrl = useElasticsearchUrl();
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -79,7 +80,7 @@ export const ConnectToElasticsearch = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiCopy textToCopy={LOCALHOST_URL}>
+                        <EuiCopy textToCopy={elasticsearchUrl}>
                           {(copy) => (
                             <EuiButtonIcon
                               onClick={copy}
@@ -92,7 +93,7 @@ export const ConnectToElasticsearch = () => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiFieldText
-                          value={LOCALHOST_URL}
+                          value={elasticsearchUrl}
                           readOnly
                           data-test-subj="endpointValueField"
                         />

@@ -13,3 +13,5 @@ export enum QueryKeys {
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
   SearchDocuments = 'searchDocuments',
 }
+
+export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
