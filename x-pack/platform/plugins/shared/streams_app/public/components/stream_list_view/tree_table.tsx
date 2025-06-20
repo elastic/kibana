@@ -17,28 +17,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { getSegments } from '@kbn/streams-schema';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { StreamTree, asTrees } from './utils';
+import { buildStreamRows, TableRow, SortableField } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers';
 
-interface EnrichedStreamTree extends Omit<StreamTree, 'children'> {
-  children: EnrichedStreamTree[];
-  nameSortKey: string;
-  documentsCount: number;
-  retentionMs: number;
-}
-type TableRow = EnrichedStreamTree & {
-  level: number;
-  rootNameSortKey: string;
-  rootDocumentsCount: number;
-  rootRetentionMs: number;
-};
 export function StreamsTreeTable({
   loading,
   streams,
@@ -49,72 +34,13 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
 
-  type SortableField = 'nameSortKey' | 'retentionMs';
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const enrichedTree = React.useMemo(() => {
-    const enrich = (node: StreamTree): EnrichedStreamTree => {
-      let retentionMs = 0;
-      const lc = node.effective_lifecycle;
-      if (isDslLifecycle(lc)) {
-        retentionMs = parseDurationInSeconds(lc.dsl.data_retention ?? '') * 1000;
-      } else if (isIlmLifecycle(lc)) {
-        retentionMs = Number.POSITIVE_INFINITY;
-      }
-      const nameSortKey = `${getSegments(node.name).length}_${node.name.toLowerCase()}`;
-      return {
-        ...node,
-        nameSortKey,
-        documentsCount: 0,
-        retentionMs,
-        children: node.children.map(enrich),
-      } as EnrichedStreamTree;
-    };
-    return asTrees(streams ?? []).map(enrich);
-  }, [streams]);
-
-  const items = React.useMemo(() => {
-    if (!enrichedTree.length) return [];
-
-    const compare = (a: EnrichedStreamTree, b: EnrichedStreamTree) => {
-      const av = a[sortField];
-      const bv = b[sortField];
-      if (typeof av === 'string' && typeof bv === 'string') {
-        return sortDirection === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
-      }
-      if (typeof av === 'number' && typeof bv === 'number') {
-        return sortDirection === 'asc' ? av - bv : bv - av;
-      }
-      return 0;
-    };
-
-    const shouldSortChildren = sortField === 'nameSortKey' || sortField === 'retentionMs';
-
-    const result: TableRow[] = [];
-
-    const pushNode = (
-      node: EnrichedStreamTree,
-      level: number,
-      rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
-    ) => {
-      result.push({ ...node, level, ...rootMeta });
-
-      const children = shouldSortChildren ? [...node.children].sort(compare) : node.children;
-      children.forEach((child) => pushNode(child, level + 1, rootMeta));
-    };
-
-    [...enrichedTree].sort(compare).forEach((root) => {
-      const rootMeta = {
-        rootNameSortKey: root.nameSortKey,
-        rootDocumentsCount: root.documentsCount,
-        rootRetentionMs: root.retentionMs,
-      } as const;
-      pushNode(root, 0, rootMeta);
-    });
-
-    return result;
-  }, [enrichedTree, sortField, sortDirection]);
+  const items = React.useMemo(
+    () => buildStreamRows(streams ?? [], sortField, sortDirection),
+    [streams, sortField, sortDirection]
+  );
 
   const onTableChange = useCallback(({ sort }: Criteria<TableRow>) => {
     if (sort && (sort.field === 'nameSortKey' || sort.field === 'retentionMs')) {
