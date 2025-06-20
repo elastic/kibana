@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useRestorableState } from '../restorable_state';
 
 export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;
@@ -29,44 +30,56 @@ export interface UseSelectedDocsState {
 export const useSelectedDocs = (
   docMap: Map<string, { doc: DataTableRecord; docIndex: number }>
 ): UseSelectedDocsState => {
-  const [selectedDocsSet, setSelectedDocsSet] = useState<Set<string>>(new Set());
+  const [selectedDocsSet, setSelectedDocsSet] = useRestorableState('selectedDocsSet', new Set());
   const lastCheckboxToggledDocId = useRef<string | undefined>();
 
-  const toggleDocSelection = useCallback((docId: string) => {
-    setSelectedDocsSet((prevSelectedRowsSet) => {
-      const newSelectedRowsSet = new Set(prevSelectedRowsSet);
-      if (newSelectedRowsSet.has(docId)) {
-        newSelectedRowsSet.delete(docId);
-      } else {
-        newSelectedRowsSet.add(docId);
-      }
-      return newSelectedRowsSet;
-    });
-    lastCheckboxToggledDocId.current = docId;
-  }, []);
+  const toggleDocSelection = useCallback(
+    (docId: string) => {
+      setSelectedDocsSet((prevSelectedRowsSet) => {
+        const newSelectedRowsSet = new Set(prevSelectedRowsSet);
+        if (newSelectedRowsSet.has(docId)) {
+          newSelectedRowsSet.delete(docId);
+        } else {
+          newSelectedRowsSet.add(docId);
+        }
+        return newSelectedRowsSet;
+      });
+      lastCheckboxToggledDocId.current = docId;
+    },
+    [setSelectedDocsSet]
+  );
 
-  const replaceSelectedDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet(new Set(docIds));
-  }, []);
+  const replaceSelectedDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsSet(new Set(docIds));
+    },
+    [setSelectedDocsSet]
+  );
 
   const selectAllDocs = useCallback(() => {
     setSelectedDocsSet(new Set(docMap.keys()));
-  }, [docMap]);
+  }, [docMap, setSelectedDocsSet]);
 
-  const selectMoreDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet((prevSelectedRowsSet) => new Set([...prevSelectedRowsSet, ...docIds]));
-  }, []);
+  const selectMoreDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsSet((prevSelectedRowsSet) => new Set([...prevSelectedRowsSet, ...docIds]));
+    },
+    [setSelectedDocsSet]
+  );
 
-  const deselectSomeDocs = useCallback((docIds: string[]) => {
-    setSelectedDocsSet(
-      (prevSelectedRowsSet) =>
-        new Set([...prevSelectedRowsSet].filter((docId) => !docIds.includes(docId)))
-    );
-  }, []);
+  const deselectSomeDocs = useCallback(
+    (docIds: string[]) => {
+      setSelectedDocsSet(
+        (prevSelectedRowsSet) =>
+          new Set([...prevSelectedRowsSet].filter((docId) => !docIds.includes(docId)))
+      );
+    },
+    [setSelectedDocsSet]
+  );
 
   const clearAllSelectedDocs = useCallback(() => {
     setSelectedDocsSet(new Set());
-  }, []);
+  }, [setSelectedDocsSet]);
 
   const selectedDocIds = useMemo(
     () => Array.from(selectedDocsSet).filter((docId) => docMap.has(docId)),
