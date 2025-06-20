@@ -23,7 +23,7 @@ import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin
 import { DEPRECATED_ALERTING_CONSUMERS, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
-import { getSloClientWithRequest } from './client';
+import { sloClientFactory } from './client/slo_client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import {
@@ -219,7 +219,7 @@ export class SLOPlugin
 
     this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
-    const scopedClients = getScopedClientsStartFactory({
+    const getScopedClients = getScopedClientsStartFactory({
       coreStart: core,
       pluginsStart: plugins,
       logger: this.logger,
@@ -228,10 +228,9 @@ export class SLOPlugin
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {
-        return getSloClientWithRequest({
+        return sloClientFactory({
           request,
-          soClient: core.savedObjects.getScopedClient(request),
-          esClient: internalEsClient,
+          getScopedClients,
         });
       },
     };

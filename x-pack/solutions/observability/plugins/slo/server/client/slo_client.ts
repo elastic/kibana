@@ -4,31 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { once } from 'lodash';
+import { GetScopedClients } from '../routes/types';
 import { getSloSettings, getSummaryIndices } from '../services/slo_settings';
+import { SLOClient } from './types';
 
-export interface SloClient {
-  getSummaryIndices(): Promise<string[]>;
-}
-
-export function getSloClientWithRequest({
-  esClient,
-  soClient,
+export async function sloClientFactory({
+  request,
+  getScopedClients,
 }: {
   request: KibanaRequest;
-  esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
-}): SloClient {
+  getScopedClients: GetScopedClients;
+}): Promise<SLOClient> {
+  const { scopedClusterClient, soClient } = await getScopedClients(request);
+
   const getSummaryIndicesOnce = once(async () => {
     const settings = await getSloSettings(soClient);
-
-    const { indices } = await getSummaryIndices(esClient, settings);
-
+    const { indices } = await getSummaryIndices(scopedClusterClient.asInternalUser, settings);
     return indices;
   });
 
