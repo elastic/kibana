@@ -1,6 +1,6 @@
 # TO_INTEGER
 
-The TO_INTEGER function converts an input value into an integer.
+Converts an input value to an integer. If the input is a date type, it is interpreted as milliseconds since the Unix epoch and converted to an integer. Boolean values are converted to `1` for `true` and `0` for `false`.
 
 ## Syntax
 
@@ -8,21 +8,36 @@ The TO_INTEGER function converts an input value into an integer.
 
 ### Parameters
 
-#### field
+#### `field`
 
-The input value. This can be a single or multi-valued column or an expression.
-
-## Description
-
-The TO_INTEGER function converts an input value into an integer.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
+
+### Example 1: Converting a multi-valued column to integers
 
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]
 | EVAL int = TO_INTEGER(long)
 ```
 
-## Notes
+In this example:
+- The function attempts to convert each value in the multi-valued column `long` to an integer.
+- If a value cannot be converted (e.g., it exceeds the integer range), the result is `null`. 
 
--  If the input parameter is of a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an integer. A boolean value of true is converted to integer 1, and false is converted to 0.
+When a conversion fails, a **Warning** header is added to the response. The header provides details about the failure, including the source of the issue:
+
+```plaintext
+"Line 1:61: evaluation of [TO_INTEGER(long)] failed, treating result as null. Only first 20 failures recorded."
+```
+
+Another header specifies the failure reason and the problematic value:
+
+```plaintext
+"org.elasticsearch.xpack.esql.core.InvalidArgumentException: [501379200000] out of [integer] range"
+```
+
+## Limitations
+
+- If a value exceeds the integer range, it cannot be converted, and the result is `null`.
+- A warning is generated for failed conversions, with details provided in the response headers.

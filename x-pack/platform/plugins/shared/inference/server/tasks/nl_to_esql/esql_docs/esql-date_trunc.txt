@@ -1,6 +1,6 @@
-# DATE_TRUNC
+## DATE_TRUNC
 
-The DATE_TRUNC function rounds down a date to the nearest specified interval.
+The `DATE_TRUNC` function rounds down a date to the closest specified interval.
 
 ## Syntax
 
@@ -8,25 +8,19 @@ The DATE_TRUNC function rounds down a date to the nearest specified interval.
 
 ### Parameters
 
-#### interval
+#### `interval`
 
-This is the interval to which the date will be rounded down. It is expressed using the timespan literal syntax.
+The interval to which the date is rounded down, expressed using the timespan literal syntax.
 
-#### date
+#### `date`
 
-This is the date expression that will be rounded down.
-
-## Important notes
-
-The *interval* parameter of DATE_TRUNC is a timespan literal, NOT a string.
-  - GOOD: `DATE_TRUNC(1 year, date)`
-  - BAD: `DATE_TRUNC("year", date)`
-
-When grouping data by time interval, it is recommended to use BUCKET instead of DATE_TRUNC.
+The date expression to be truncated.
 
 ## Examples
 
-The following example rounds down the hire_date to the nearest year:
+### Example 1: Truncate hire dates to the year
+
+Truncate the `hire_date` field to the beginning of the year:
 
 ```esql
 FROM employees
@@ -34,7 +28,9 @@ FROM employees
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-You can combine DATE_TRUNC with STATS ... BY to create date histograms. For example, the number of hires per year:
+### Example 2: Number of hires per year
+
+Combine `DATE_TRUNC` with the `STATS` command to create a histogram of hires per year:
 
 ```esql
 FROM employees
@@ -43,7 +39,9 @@ FROM employees
 | SORT year
 ```
 
-Or, you can calculate an hourly error rate:
+### Example 3: Hourly error rate
+
+Calculate the hourly error rate by truncating timestamps to the hour and aggregating error occurrences:
 
 ```esql
 FROM sample_data

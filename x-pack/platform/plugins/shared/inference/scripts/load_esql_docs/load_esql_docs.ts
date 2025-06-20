@@ -133,6 +133,11 @@ yargs(process.argv.slice(2))
             await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
           ).flat();
 
+          if (syntaxErrors.length > 0) {
+            const syntaxErrorsFile = Path.join(outDir, '__tmp__/syntax-errors.json');
+            await Fs.writeFile(syntaxErrorsFile, JSON.stringify(syntaxErrors, null, 2));
+            log.info(`Syntax errors written to ${syntaxErrorsFile}`);
+          }
           log.warning(
             `Please verify the following queries that had syntax errors\n${JSON.stringify(
               syntaxErrors,

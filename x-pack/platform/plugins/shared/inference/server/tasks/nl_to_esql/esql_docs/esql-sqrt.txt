@@ -1,6 +1,6 @@
 # SQRT
 
-The SQRT function calculates the square root of a given number.
+The `SQRT` function calculates the square root of a given numeric value. The result is always a double. If the input is negative, infinite, or `null`, the function returns `null`.
 
 ## Syntax
 
@@ -8,20 +8,17 @@ The SQRT function calculates the square root of a given number.
 
 ### Parameters
 
-#### number
+#### `number`
 
-This is a numeric expression.
+A numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
+### Example 1: Calculating the square root of a number
 
 ```esql
 ROW d = 100.0
 | EVAL s = SQRT(d)
 ```
 
-```esql
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL sqrt_height = SQRT(height)
-```
+This example calculates the square root of `100.0` and stores the result in the column `s`.

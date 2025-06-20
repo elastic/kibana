@@ -1,6 +1,6 @@
 # MV_MEDIAN
 
-The MV_MEDIAN function converts a multivalued field into a single valued field containing the median value.
+Converts a multivalued field into a single-valued field containing the median value.
 
 ## Syntax
 
@@ -8,18 +8,24 @@ The MV_MEDIAN function converts a multivalued field into a single valued field c
 
 ### Parameters
 
-#### number
+#### `number`
 
 A multivalue expression.
 
 ## Examples
+
+### Example 1
+
+Calculate the median of a multivalued column:
 
 ```esql
 ROW a=[3, 5, 1]
 | EVAL median_a = MV_MEDIAN(a)
 ```
 
-If the row has an even number of values for a column, the result will be the average of the middle two entries. If the column is not floating point, the average rounds **down**:
+### Example 2
+
+When the column has an even number of values, the result is the average of the middle two entries. If the column is not a floating-point type, the average rounds **down**:
 
 ```esql
 ROW a=[3, 7, 1, 6]

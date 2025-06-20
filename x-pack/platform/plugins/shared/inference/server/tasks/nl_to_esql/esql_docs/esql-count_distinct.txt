@@ -1,6 +1,6 @@
-# COUNT_DISTINCT
+## COUNT_DISTINCT
 
-The COUNT_DISTINCT function calculates the approximate number of distinct values in a specified field.
+The `COUNT_DISTINCT` function returns the approximate number of distinct values in a column or expression.
 
 ## Syntax
 
@@ -8,39 +8,44 @@ The COUNT_DISTINCT function calculates the approximate number of distinct values
 
 ### Parameters
 
-#### field
+#### `field`
 
 The column or literal for which to count the number of distinct values.
 
-#### precision
+#### `precision`
 
-(Optional) The precision threshold. The counts are approximate. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.
+(Optional) Precision threshold. The maximum supported value is 40,000. Thresholds above this number will behave as if set to 40,000. The default value is 3,000. Higher precision thresholds may increase memory usage and processing time.
 
 ## Examples
 
-The following example calculates the number of distinct values in the `ip0` and `ip1` fields:
+### Example 1: Counting distinct values in columns
+
+Count the number of distinct values in the `ip0` and `ip1` columns.
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
 ```
 
-You can also specify a precision threshold. In the following example, the precision threshold for `ip0` is set to 80000 and for `ip1` to 5:
+### Example 2: Configuring the precision threshold
+
+Specify a custom precision threshold for distinct value counting. In this example, the precision for `ip0` is set to 80,000 (capped at 40,000), and for `ip1`, it is set to 5.
 
 ```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
 ```
 
-The COUNT_DISTINCT function can also be used with inline functions. This example splits a string into multiple values using the `SPLIT` function and counts the unique values:
+### Example 3: Counting distinct values from a split string
+
+Use the `SPLIT` function to break a string into multiple values and count the unique values.
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS distinct_word_count = COUNT_DISTINCT(SPLIT(words, ";"))
 ```
 
-### Notes
+## Limitations
 
-- Computing exact counts requires loading values into a set and returning its size, which doesn't scale well for high-cardinality sets or large values due to memory usage and communication overhead.
-- The HyperLogLog++ algorithm's accuracy depends on the leading zeros of hashed values, and the exact distributions of hashes in a dataset can affect the accuracy of the cardinality.
-- Even with a low threshold, the error remains very low (1-6%) even when counting millions of items.
+- The `COUNT_DISTINCT` function provides approximate results, especially when using lower precision thresholds.
+- The maximum precision threshold is 40,000, and values above this limit will not increase accuracy further.

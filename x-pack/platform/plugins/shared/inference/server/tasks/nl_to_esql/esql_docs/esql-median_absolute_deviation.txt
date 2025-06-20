@@ -1,6 +1,6 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, a measure of variability. It is particularly useful for describing data that may have outliers or may not follow a normal distribution. In such cases, it can be more descriptive than standard deviation. The function computes the median of each data point’s deviation from the median of the entire sample.
+The `MEDIAN_ABSOLUTE_DEVIATION` function calculates the median absolute deviation, a robust measure of variability. It is particularly useful for datasets with outliers or non-normal distributions, as it can provide a more descriptive measure of variability than standard deviation. The calculation involves finding the median of the absolute deviations from the median of the dataset.
 
 ## Syntax
 
@@ -8,27 +8,31 @@ The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation,
 
 ### Parameters
 
-#### number
+#### `number`
 
-The numeric expression for which the median absolute deviation is to be calculated.
+The input numeric values for which the median absolute deviation is calculated.
 
 ## Examples
 
-Calculate the median salary and the median absolute deviation of salaries:
+### Example 1: Basic Usage
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-Calculate the median absolute deviation of the maximum values of a multivalued column:
+Calculate the median and the median absolute deviation of employee salaries.
+
+### Example 2: Using Inline Functions
 
 ```esql
 FROM employees
 | STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
 ```
 
+Calculate the median absolute deviation of the maximum values in a multivalued column by first using `MV_MAX` to extract the maximum value per row.
+
 ## Limitations
 
-- The `MEDIAN_ABSOLUTE_DEVIATION` function is non-deterministic, which means you can get slightly different results using the same data.
-- The `MEDIAN_ABSOLUTE_DEVIATION` function is usually approximate, which means the results may not be exact.
+- The `MEDIAN_ABSOLUTE_DEVIATION` function is non-deterministic, meaning that repeated calculations on the same dataset may yield slightly different results.
+- Like the `PERCENTILE` function, `MEDIAN_ABSOLUTE_DEVIATION` typically provides approximate results.

@@ -1,6 +1,6 @@
 # ST_XMIN
 
-ST_XMIN retrieves the minimum 'x' coordinate from the provided geometry.
+Extracts the minimum value of the `x` coordinates from the supplied geometry. For geometries of type `geo_point` or `geo_shape`, this corresponds to the minimum `longitude` value.
 
 ## Syntax
 
@@ -8,17 +8,15 @@ ST_XMIN retrieves the minimum 'x' coordinate from the provided geometry.
 
 ### Parameters
 
-#### point
+#### `point`
 
-This is an expression of either `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape` type. If this parameter is null, the function will return null.
-
-## Explanation
-
-ST_XMIN function extracts the minimum value of the 'x' coordinates from the provided geometry data. In cases where the geometry is either of type `geo_point` or `geo_shape`, this is equivalent to extracting the minimum longitude value.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-This example query returns the bounding envelope coordinates of Copenhagen Airport:
+### Example 1: Extracting the minimum and maximum coordinates of a city boundary
+
+The following query calculates the minimum and maximum `x` and `y` coordinates of the city boundary for the airport with the abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -28,4 +26,9 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-In this query, the `ST_XMIN` function is used to extract the smallest 'x' value from the geometric 'envelope' surrounding the airport.
+## Supported Types
+
+- `geo_point`
+- `geo_shape`
+- `cartesian_point`
+- `cartesian_shape`

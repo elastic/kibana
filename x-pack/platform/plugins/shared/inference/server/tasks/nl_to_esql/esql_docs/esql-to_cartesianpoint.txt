@@ -1,6 +1,6 @@
 # TO_CARTESIANPOINT
 
-The TO_CARTESIANPOINT function converts an input value into a `cartesian_point` value.
+Converts an input value to a `cartesian_point` value. A string will only be successfully converted if it adheres to the WKT Point format.
 
 ## Syntax
 
@@ -8,20 +8,16 @@ The TO_CARTESIANPOINT function converts an input value into a `cartesian_point` 
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is the input value. It can be a single or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
 
-```esql
-ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
-| MV_EXPAND wkt
-| EVAL pt = TO_CARTESIANPOINT(wkt)
-```
+Convert a list of WKT Point strings into `cartesian_point` values:
 
 ```esql
-ROW wkt = ["POINT(1000.0 2000.0)", "POINT(3000.0 4000.0)"]
+ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
 | MV_EXPAND wkt
 | EVAL pt = TO_CARTESIANPOINT(wkt)
 ```

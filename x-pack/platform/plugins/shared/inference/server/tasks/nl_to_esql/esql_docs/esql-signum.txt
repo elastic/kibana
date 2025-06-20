@@ -1,6 +1,6 @@
 # SIGNUM
 
-The SIGNUM function returns the sign of a given number. It outputs `-1` for negative numbers, `0` for `0`, and `1` for positive numbers.
+Returns the sign of a given number. It outputs `-1` for negative numbers, `0` for `0`, and `1` for positive numbers.
 
 ## Syntax
 
@@ -8,18 +8,17 @@ The SIGNUM function returns the sign of a given number. It outputs `-1` for nega
 
 ### Parameters
 
-#### number
+#### `number`
 
-A numeric expression.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
+
+### Example 1
 
 ```esql
 ROW d = 100.0
 | EVAL s = SIGNUM(d)
 ```
 
-```esql
-ROW d = -50.0
-| EVAL s = SIGNUM(d)
-```
+Determines the sign of the number `100.0`.

@@ -1,6 +1,6 @@
 # CBRT
 
-The CBRT function calculates the cube root of a given number.
+The `CBRT` function calculates the cube root of a given numeric value. The result is always returned as a double.
 
 ## Syntax
 
@@ -8,9 +8,9 @@ The CBRT function calculates the cube root of a given number.
 
 ### Parameters
 
-#### number
+#### `number`
 
-This is a numeric expression. If the parameter is `null`, the function will also return `null`.
+A numeric expression. If the input is `null`, the function returns `null`.
 
 ## Examples
 
@@ -18,3 +18,5 @@ This is a numeric expression. If the parameter is `null`, the function will also
 ROW d = 1000.0
 | EVAL c = cbrt(d)
 ```
+
+Calculate the cube root of the value `1000.0`.

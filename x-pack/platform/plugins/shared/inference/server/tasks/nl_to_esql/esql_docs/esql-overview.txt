@@ -1,103 +1,117 @@
-## ES|QL Overview
+```markdown
+# Elasticsearch Query Language (ES|QL)
 
-### ES|QL
+## Overview
 
-The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch. It is designed to be easy to learn and use by all types of end users.
+The Elasticsearch Query Language (ES|QL) is a powerful and intuitive language designed for filtering, transforming, and analyzing data stored in Elasticsearch. It is built to be easy to learn and use, catering to a wide range of users, including end users, SRE teams, application developers, and administrators. ES|QL enables users to author queries for finding specific events, performing statistical analysis, and generating visualizations.
 
-Users can author ES|QL queries to find specific events, perform statistical analysis, and generate visualizations. It supports a wide range of commands and functions that enable users to perform various data operations, such as filtering, aggregation, time-series analysis, and more.
+ES|QL employs a piped syntax (`|`) to chain operations, where the output of one operation becomes the input for the next. This step-by-step approach allows for complex data transformations and analysis in a clear and modular fashion.
 
-ES|QL makes use of "pipes" (`|`) to manipulate and transform data in a step-by-step fashion. This approach allows users to compose a series of operations, where the output of one operation becomes the input for the next, enabling complex data transformations and analysis.
+## Key Features
 
-### Known Limitations
+- **Data Operations**: ES|QL supports filtering, aggregation, time-series analysis, and other data operations.
+- **Commands and Functions**: A wide range of commands and functions are available for manipulating and analyzing data.
+- **Metadata Access**: ES|QL can access metadata fields such as `_index`, `_id`, `_version`, and `_score`.
+- **Cross-Cluster Queries**: ES|QL can query data across multiple clusters.
+- **Integration with Kibana**: ES|QL is integrated into Kibana for querying, visualizing, and alerting.
+- **REST API**: ES|QL queries can be executed via the Elasticsearch REST API.
 
-#### Result Set Size Limit
+## Known Limitations
 
-By default, an ES|QL query returns up to 1000 rows. You can increase the number of rows up to 10,000 using the `LIMIT` command. Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This limit only applies to the number of rows that are retrieved by the query. Queries and aggregations run on the full data set.
+While ES|QL is a powerful tool, it has some limitations:
 
-To overcome this limitation:
-- Reduce the result set size by modifying the query to only return relevant data. Use `WHERE` to select a smaller subset of the data.
-- Shift any post-query processing to the query itself. You can use the ES|QL `STATS ... BY` command to aggregate data in the query.
+### Result Set Size
+- By default, ES|QL queries return up to 1,000 rows. This limit can be increased to a maximum of 10,000 rows using the `LIMIT` command.
+- The upper limit applies only to the number of rows returned, not to the number of documents processed.
 
-The default and maximum limits can be changed using these dynamic cluster settings:
-- `esql.query.result_truncation_default_size`
-- `esql.query.result_truncation_max_size`
+### Field Types
+- ES|QL supports a wide range of field types, including `boolean`, `date`, `double`, `keyword`, `text`, and spatial types like `geo_point` and `geo_shape`.
+- Unsupported field types include `binary`, `nested`, `rank_feature`, and `aggregate_metric_double`.
+- Queries on unsupported field types return errors or `null` values.
 
-#### Field Types
+### Full-Text Search
+- Full-text search is in technical preview and must be used directly after the `FROM` command or close to it.
+- Disjunctions (`OR`) in full-text search are limited unless all clauses use full-text functions.
 
-ES|QL currently supports the following field types:
-- `alias`
-- `boolean`
-- `date`
-- `double` (`float`, `half_float`, `scaled_float` are represented as `double`)
-- `ip`
-- `keyword` family including `keyword`, `constant_keyword`, and `wildcard`
-- `int` (`short` and `byte` are represented as `int`)
-- `long`
-- `null`
-- `text`
-- `unsigned_long` (preview)
-- `version`
+### Multivalue Fields
+- Functions applied to multivalued fields return `null` unless explicitly converted to single values using multivalue functions.
 
-Spatial types:
-- `geo_point`
-- `geo_shape`
-- `point`
-- `shape`
+### Timezone Support
+- ES|QL only supports the UTC timezone.
 
-Unsupported types:
-- TSDB metrics: `counter`, `position`, `aggregate_metric_double`
-- Date/time: `date_nanos`, `date_range`
-- Other types: `binary`, `completion`, `dense_vector`, `double_range`, `flattened`, `float_range`, `histogram`, `integer_range`, `ip_range`, `long_range`, `nested`, `rank_feature`, `rank_features`, `search_as_you_type`
+### Kibana Integration
+- Discover in Kibana shows no more than 10,000 rows and 50 columns.
+- CSV export from Discover is limited to 10,000 rows.
 
-Querying a column with an unsupported type returns an error. If a column with an unsupported type is not explicitly used in a query, it is returned with `null` values, with the exception of nested fields. Nested fields are not returned at all.
+### Cross-Cluster Queries
+- All underlying indices and shards must be active. Queries fail if any index or shard is paused or in an `UNASSIGNED` state.
+- Fields with conflicting types across indices must be explicitly converted to a single type.
 
-#### _source Availability
+### Time Series Data Streams
+- ES|QL does not support querying time series data streams (TSDS).
 
-ES|QL does not support configurations where the `_source` field is disabled. ES|QL’s support for synthetic `_source` is currently experimental.
+### Date Math
+- Date math expressions work well when the leftmost expression is a datetime. However, subtracting two datetimes or using parentheses in date math is not fully supported.
 
-#### Full-Text Search
+## Using ES|QL in Kibana
 
-Because of the way ES|QL treats `text` values, queries on `text` fields are like queries on `keyword` fields: they are case-sensitive and need to match the full string.
-To perform full-text search on `text` fields, search functions such as `MATCH` should be used.
+ES|QL is integrated into Kibana, enabling users to query and aggregate data, create visualizations, and set up alerts. It is enabled by default in Kibana and can be disabled via the `enableESQL` setting in Advanced Settings.
 
-#### Time Series Data Streams
+### Key Features in Kibana
+- **Query Bar**: Switch to ES|QL mode to write queries. Auto-complete suggestions help users write queries efficiently.
+- **Visualization**: ES|QL queries can generate visualizations, such as bar charts and histograms, which can be saved to dashboards.
+- **Alerts**: Create alerting rules based on ES|QL queries to monitor data thresholds.
 
-ES|QL does not support querying time series data streams (TSDS).
-
-#### Date Math Limitations
-
-Date math expressions work well when the leftmost expression is a datetime. However, using parentheses or putting the datetime to the right is not always supported yet. Date math does not allow subtracting two datetimes.
-
-#### Timezone Support
-
-ES|QL only supports the UTC timezone.
-
-### Cross-Cluster Querying
-
-Using ES|QL across clusters allows you to execute a single query across multiple clusters. This feature is in technical preview and may be changed or removed in a future release.
-
-#### Prerequisites
-
-- Remote clusters must be configured.
-- The local coordinating node must have the `remote_cluster_client` node role.
-- Security privileges must be configured appropriately.
-
-#### Querying Across Clusters
-
-In the `FROM` command, specify data streams and indices on remote clusters using the format `<remote_cluster_name>:<target>`. For example:
-
+### Example Query in Kibana
+To retrieve the top 10 countries by total bytes in the `kibana_sample_data_logs` index:
 ```esql
-FROM cluster_one:my-index-000001
+FROM kibana_sample_data_logs
+| STATS total_bytes = SUM(bytes) BY geo.dest
+| SORT total_bytes DESC
 | LIMIT 10
 ```
 
-### Using ES|QL in Kibana
+## Using ES|QL Across Clusters
 
-ES|QL can be used in Kibana to query and aggregate data, create visualizations, and set up alerts.
+ES|QL supports querying data across multiple clusters using the format `<remote_cluster_name>:<target>`. This allows users to execute a single query across indices, data streams, or aliases in different clusters.
 
-#### Important Information
+### Example Cross-Cluster Query
+To query data from two clusters:
+```esql
+FROM cluster_one:employees-00001,cluster_two:other-employees-*
+```
 
-- ES|QL is enabled by default in Kibana.
-- The query bar in Discover allows you to write and execute ES|QL queries.
-- The results table shows up to 10,000 rows, and Discover shows no more than 50 columns.
-- You can create visualizations and alerts based on ES|QL queries.
+### Important Notes
+- Ensure all indices and shards are active.
+- Fields with conflicting types across clusters must be explicitly converted to a single type using type conversion functions.
+
+## Using the REST API
+
+ES|QL queries can be executed via the Elasticsearch REST API. This provides flexibility for integrating ES|QL into applications and workflows.
+
+### Example REST API Query
+To execute an ES|QL query via the REST API:
+```json
+POST /_query
+{
+  "query": "FROM employees | WHERE height > 2 | LIMIT 5"
+}
+```
+
+### Important Notes
+- The REST API supports query parameters for dynamic values.
+- Named parameters can be used for functions, enabling additional options.
+
+### Example with Query Parameters
+```json
+POST /_query
+{
+  "query": "FROM library | WHERE match(author, ?, {\"minimum_should_match\": ?}) | LIMIT 5",
+  "params": ["Frank Herbert", 2]
+}
+```
+
+## Conclusion
+
+ES|QL is a versatile and user-friendly query language for Elasticsearch, offering powerful capabilities for data analysis and visualization. While it has some limitations, its integration with Kibana, support for cross-cluster queries, and REST API compatibility make it a valuable tool for users across various domains.
+```

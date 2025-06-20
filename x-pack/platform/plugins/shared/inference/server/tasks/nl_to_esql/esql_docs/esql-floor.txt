@@ -1,6 +1,6 @@
 # FLOOR
 
-The FLOOR function rounds a number down to the nearest integer.
+Rounds a number down to the nearest integer.
 
 ## Syntax
 
@@ -8,23 +8,17 @@ The FLOOR function rounds a number down to the nearest integer.
 
 ### Parameters
 
-#### number
+#### `number`
 
-This is a numeric expression. If the parameter is `null`, the function will return `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
+### Example 1: Rounding down a floating-point number
+
 ```esql
 ROW a=1.8
-| EVAL a=FLOOR(a)
+| EVAL a = FLOOR(a)
 ```
 
-```esql
-FROM employees
-| KEEP first_name, last_name, height
-| EVAL height_floor = FLOOR(height)
-```
-
-## Notes
-
-- The FLOOR function is a no-operation for `long` (including unsigned) and `integer` types. For `double` type, this function picks the closest `double` value to the integer, similar to the Math.floor method in programming languages.
+This example rounds the value `1.8` down to the nearest integer, resulting in `1`.
