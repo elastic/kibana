@@ -71,11 +71,17 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useAssistantContext();
   const [totalItemCount, setTotalItemCount] = useState(5);
 
-  const onFetchedConversations = useCallback((conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const mergedConversations = mergeBaseWithPersistedConversations(baseConversations, conversationsData);
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
+      const mergedConversations = mergeBaseWithPersistedConversations(
+        baseConversations,
+        conversationsData
+      );
       setTotalItemCount(Object.keys(mergedConversations).length);
       return mergedConversations;
-  }, [baseConversations]);
+    },
+    [baseConversations]
+  );
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
 
   const {

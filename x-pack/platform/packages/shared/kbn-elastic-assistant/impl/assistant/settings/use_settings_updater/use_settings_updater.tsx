@@ -143,7 +143,6 @@ export const useSettingsUpdater = (
   const hasBulkPrompts =
     promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
 
-
   const onConversationsBulkDeleted = useCallback(
     (cIds: string[]) => {
       let updatedConversationSettings: Record<string, Conversation> = {};
