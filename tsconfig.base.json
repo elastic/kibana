@@ -304,6 +304,8 @@
       "@kbn/core-chrome-browser-internal/*": ["src/core/packages/chrome/browser-internal/*"],
       "@kbn/core-chrome-browser-mocks": ["src/core/packages/chrome/browser-mocks"],
       "@kbn/core-chrome-browser-mocks/*": ["src/core/packages/chrome/browser-mocks/*"],
+      "@kbn/core-chrome-layout-components": ["src/core/packages/chrome/layout/core-chrome-layout-components"],
+      "@kbn/core-chrome-layout-components/*": ["src/core/packages/chrome/layout/core-chrome-layout-components/*"],
       "@kbn/core-config-server-internal": ["src/core/packages/config/server-internal"],
       "@kbn/core-config-server-internal/*": ["src/core/packages/config/server-internal/*"],
       "@kbn/core-custom-branding-browser": ["src/core/packages/custom-branding/browser"],
