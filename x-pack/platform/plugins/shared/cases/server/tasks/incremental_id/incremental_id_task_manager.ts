@@ -75,7 +75,6 @@ export class IncrementalIdTaskManager {
                   endTime - startTime
                 }ms [ started: ${initializedTime}, ended: ${new Date().toISOString()} ]`
               );
-              this.casesIncrementService?.stopService();
             },
             cancel: async () => {
               this.casesIncrementService?.stopService();
@@ -89,59 +88,65 @@ export class IncrementalIdTaskManager {
 
   public async setupIncrementIdTask(taskManager: TaskManagerStartContract, core: CoreStart) {
     this.taskManager = taskManager;
+
+    // Instantiate saved objects client
+    const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+      CASE_SAVED_OBJECT,
+      CASE_ID_INCREMENTER_SAVED_OBJECT,
+    ]);
+    const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
+
+    this.casesIncrementService = new CasesIncrementalIdService(
+      internalSavedObjectsClient,
+      this.logger
+    );
+
     try {
-      // Instantiate saved objects client
-      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
-        CASE_SAVED_OBJECT,
-        CASE_ID_INCREMENTER_SAVED_OBJECT,
-      ]);
-      const internalSavedObjectsClient = new SavedObjectsClient(internalSavedObjectsRepository);
-
-      this.casesIncrementService = new CasesIncrementalIdService(
-        internalSavedObjectsClient,
-        this.logger
-      );
-
       const taskDoc = await this.taskManager.get(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
-      if (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running) {
+      const scheduledToRunInTheFuture = taskDoc.runAt.getTime() >= new Date().getTime();
+      const running =
+        taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running;
+      if (scheduledToRunInTheFuture || running) {
         this.logger.info(
-          `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} is already running (status: ${taskDoc.status}). No need to schedule it again.`
+          `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} is already ${
+            scheduledToRunInTheFuture
+              ? `scheduled (time: ${taskDoc.runAt})`
+              : `running (status: ${taskDoc.status})`
+          }. No need to schedule it again.`
         );
         return;
       }
-
-      this.taskManager
-        .ensureScheduled({
-          id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
-          taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
-          // start delayed to give the system some time to start up properly
-          runAt: new Date(new Date().getTime() + this.config.taskInterValMinutes * 60 * 1000),
-          schedule: {
-            interval: `${this.config.taskInterValMinutes}m`,
-          },
-          params: {},
-          state: {},
-          scope: ['cases'],
-        })
-        .then(
-          (taskInstance) => {
-            this.logger.info(
-              `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
-            );
-          },
-          (e) => {
-            this.logger.error(
-              `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
-              e?.message ?? e
-            );
-          }
-        );
     } catch (e) {
-      this.logger.error(
-        `Error running task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
-        e?.message ?? e
+      this.logger.warn(
+        `Could not check status of ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}, will continue scheduling it.`
       );
-      return null;
     }
+
+    this.taskManager
+      .ensureScheduled({
+        id: CASES_INCREMENTAL_ID_SYNC_TASK_ID,
+        taskType: CASES_INCREMENTAL_ID_SYNC_TASK_TYPE,
+        // start delayed to give the system some time to start up properly
+        runAt: new Date(new Date().getTime() + this.config.taskInterValMinutes * 60 * 1000),
+        schedule: {
+          interval: `${this.config.taskInterValMinutes}m`,
+        },
+        params: {},
+        state: {},
+        scope: ['cases'],
+      })
+      .then(
+        (taskInstance) => {
+          this.logger.info(
+            `${CASES_INCREMENTAL_ID_SYNC_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}`
+          );
+        },
+        (e) => {
+          this.logger.error(
+            `Error scheduling task: ${CASES_INCREMENTAL_ID_SYNC_TASK_ID}: ${e}`,
+            e?.message ?? e
+          );
+        }
+      );
   }
 }
