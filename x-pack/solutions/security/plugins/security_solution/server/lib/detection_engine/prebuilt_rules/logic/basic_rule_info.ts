@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  RuleSignatureId,
-  RuleVersion,
-} from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleVersionSpecifier } from './rule_versions/rule_version_specifier';
 
-export interface RuleVersionSpecifier {
-  rule_id: RuleSignatureId;
-  version: RuleVersion;
+export interface BasicRuleInfo extends RuleVersionSpecifier {
+  type: Type;
 }

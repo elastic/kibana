@@ -22,7 +22,7 @@ import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_ru
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import type { RuleSignatureId, RuleVersion } from '../../../../../../common/api/detection_engine';
-import { excludeLicenseRestrictedRules } from '../../logic/rule_versions/rule_version_specifier';
+import { excludeLicenseRestrictedRules } from '../../logic/utils';
 
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -56,10 +56,9 @@ export const performRuleInstallationHandler = async (
       currentRuleVersions.map((version) => [version.rule_id, version])
     );
 
-    const allInstallableRules = allLatestVersions.filter((latestVersion) => {
-      const currentVersion = currentRuleVersionsMap.get(latestVersion.rule_id);
-      return !currentVersion;
-    });
+    const allInstallableRules = allLatestVersions.filter(
+      (latestVersion) => !currentRuleVersionsMap.has(latestVersion.rule_id)
+    );
 
     const ruleInstallQueue: Array<{
       rule_id: RuleSignatureId;
