@@ -116,7 +116,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const popover = await testSubjects.find('euiDataGridExpansionPopover');
       const buttons = await popover.findAllByTagName('button');
       expect(buttons.length).to.eql(4);
-      buttons[3].click(); // Click the last button which is the "View docs in Discover" button
+      // Click the last button which is the "View docs in Discover" button
+      await buttons[3].click();
 
       await retrySwitchTab(1, 10);
       tabsCount++;
