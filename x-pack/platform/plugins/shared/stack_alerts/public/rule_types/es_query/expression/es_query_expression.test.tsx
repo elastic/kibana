@@ -226,7 +226,7 @@ describe('EsQueryRuleTypeExpression', () => {
   });
 
   test('should render EsQueryRuleTypeExpression with chosen runtime group field', async () => {
-    const result = await setup({
+    const wrapper = await setup({
       ...defaultEsQueryExpressionParams,
       esQuery:
         '{\n    "query":{\n      "match_all" : {}\n    },\n    "runtime_mappings": {\n      "day_of_week": {\n        "type": "keyword",\n        "script": {\n          "source": "emit(doc[\'@timestamp\'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ENGLISH))"\n        }\n      }\n    }\n  }',
@@ -235,10 +235,17 @@ describe('EsQueryRuleTypeExpression', () => {
       termSize: 3,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    fireEvent.click(screen.getByTestId('groupByExpression'));
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    const groupByButton = wrapper.find('button[data-test-subj="groupByExpression"]');
+    groupByButton.simulate('click');
 
-    expect(result.getByTestId('fieldsExpressionSelect')).toHaveTextContent('day_of_week');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('EuiComboBox[data-test-subj="fieldsExpressionSelect"]').text()).toEqual(
+      'day_of_week'
+    );
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {
