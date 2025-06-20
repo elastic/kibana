@@ -1227,9 +1227,10 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(logs[0].requests).equal(undefined);
       });
       it('should return requests property when enable_logged_requests set to true', async () => {
+        const eqlRule = getEqlRuleForAlertTesting(['auditbeat-*']);
         const { logs } = await previewRule({
           supertest,
-          rule: getEqlRuleForAlertTesting(['auditbeat-*']),
+          rule: eqlRule,
           enableLoggedRequests: true,
         });
 
@@ -1240,6 +1241,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(requests![0].request).to.contain(
           'POST /auditbeat-*/_eql/search?allow_no_indices=true'
         );
+        kbnExpect(requests![0].request).to.contain(eqlRule.query);
       });
     });
   });

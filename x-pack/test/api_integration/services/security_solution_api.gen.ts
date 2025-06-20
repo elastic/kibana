@@ -29,6 +29,7 @@ import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-pl
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -84,7 +85,6 @@ import { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin
 import { GetEntityStoreStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { GetNotesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_notes/get_notes_route.gen';
 import { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
-import { GetPrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/get.gen';
 import { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import {
   GetRuleExecutionEventsRequestQueryInput,
@@ -161,7 +161,10 @@ import {
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/update.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
-import { UpdateRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  UpdateRuleMigrationRequestParamsInput,
+  UpdateRuleMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
@@ -405,12 +408,13 @@ For detailed information on Kibana actions and alerting, and additional API call
     /**
      * Creates a new rule migration and returns the corresponding migration_id
      */
-    createRuleMigration(kibanaSpace: string = 'default') {
+    createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
@@ -974,18 +978,6 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getPrivMonUser(props: GetPrivMonUserProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          routeWithNamespace(
-            replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     getProtectionUpdatesNote(
       props: GetProtectionUpdatesNoteProps,
       kibanaSpace: string = 'default'
@@ -1329,14 +1321,14 @@ finalize it.
     /**
       * Install and update all Elastic prebuilt detection rules and Timelines.
 
-This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic.
 When you call this endpoint, it will:
 - Install any new prebuilt detection rules that are not currently installed in your system.
 - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
 - Install any new prebuilt Timelines that are not currently installed in your system.
 - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
 
-This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines,
 providing you with the most current and effective threat detection capabilities.
 
       */
@@ -1438,7 +1430,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     /**
       * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
 > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -1535,7 +1527,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
         .query(props.query);
     },
     /**
-      * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
+      * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
 
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 
@@ -1831,7 +1823,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Updates rules migrations attributes
@@ -1920,6 +1913,9 @@ export interface CreatePrivMonUserProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
@@ -2037,9 +2033,6 @@ export interface GetNotesProps {
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
-}
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
@@ -2191,6 +2184,7 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;

@@ -21,14 +21,6 @@ export const useEntityAnalyticsIntegrations = () => {
       suspense: true, // Make query suspend, it needs tu be wrapped by <Suspense />
     }
   );
-  const { data: entra } = useGetPackageInfoByKeyQuery(
-    'entityanalytics_entra_id',
-    undefined, // When package version is undefined it gets the latest version
-    undefined, // No options required
-    {
-      suspense: true,
-    }
-  );
   const { data: ad } = useGetPackageInfoByKeyQuery(
     'entityanalytics_ad',
     undefined, // When package version is undefined it gets the latest version
@@ -40,7 +32,7 @@ export const useEntityAnalyticsIntegrations = () => {
     }
   );
 
-  return [okta, entra, ad].filter<GetInfoResponse>(isGetInfoResponse).map(({ item }) => item);
+  return [okta, ad].filter<GetInfoResponse>(isGetInfoResponse).map(({ item }) => item);
 };
 
 export const usePrivilegedAccessDetectionIntegration = () => {
