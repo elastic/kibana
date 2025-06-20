@@ -20,7 +20,6 @@ const useStopMigrationMock = useStopMigration as jest.Mock;
 const mockStopMigration = jest.fn();
 
 const inProgressMigrationStats: RuleMigrationStats = {
-  name: 'test-migration',
   status: SiemMigrationTaskStatus.RUNNING,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'test migration',
