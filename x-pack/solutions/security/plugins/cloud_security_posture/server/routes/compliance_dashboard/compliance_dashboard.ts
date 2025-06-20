@@ -180,9 +180,16 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           // runtime mappings create the `safe_posture_type` field, which equals to `kspm` or `cspm` based on the value and existence of the `posture_type` field which was introduced at 8.7
           // the `query` is then being passed to our getter functions to filter per posture type even for older findings before 8.7
           const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+          const filter = namespace
+            ? [
+                { term: { safe_posture_type: policyTemplate } },
+                { term: { 'data_stream.namespace': namespace } },
+              ]
+            : [{ term: { safe_posture_type: policyTemplate } }];
+
           const query: QueryDslQueryContainer = {
             bool: {
-              filter: [{ term: { safe_posture_type: policyTemplate } }],
+              filter,
               must_not: filteredRules,
             },
           };
