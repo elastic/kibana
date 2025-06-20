@@ -74,7 +74,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
                   'Learn about Elasticsearch APIs, query languages, and common use cases.',
               }
             )}
-            buttonHref={docLinks.elasticsearchGettingStarted}
+            buttonHref={docLinks.elasticsearchDocs}
             buttonLabel={i18n.translate(
               'xpack.searchHomepage.elasticsearchDocumentation.buttonText',
               {
