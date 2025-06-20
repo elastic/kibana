@@ -36,13 +36,7 @@ interface MainProps {
   notifications: CoreStart['notifications'];
 }
 
-const exampleGuideIds: GuideId[] = [
-  'websiteSearch',
-  'databaseSearch',
-  'siem',
-  'kubernetes',
-  'testGuide',
-];
+const exampleGuideIds: GuideId[] = ['databaseSearch', 'siem', 'kubernetes', 'testGuide'];
 const selectOptions: EuiSelectOption[] = exampleGuideIds.map((guideId) => ({
   value: guideId,
   text: guideId,
