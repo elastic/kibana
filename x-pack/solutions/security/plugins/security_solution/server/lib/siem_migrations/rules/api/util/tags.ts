@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type { StoredRuleMigration } from '../../types';
+import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 
-const vendorCodeMap: Record<StoredRuleMigration['original_rule']['vendor'], string> = {
-  splunk: 'SPL',
-};
-
-export const getTagsByVendor = (
-  vendor: StoredRuleMigration['original_rule']['vendor']
-): string[] => {
-  if (!(vendor in vendorCodeMap)) {
-    throw new Error(`Unsupported vendor for tagging rules: ${vendor}`);
-  }
-  return [`Migrated from ${vendorCodeMap[vendor]}`];
+export const getVendorTag = (originalRule: OriginalRule): string => {
+  const { vendor } = originalRule;
+  const capitalizedVendor = `${vendor.charAt(0).toUpperCase()}${vendor.slice(1)}`;
+  return `Migrated from ${capitalizedVendor}`;
 };
