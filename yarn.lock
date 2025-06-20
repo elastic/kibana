@@ -6035,10 +6035,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
-  version "0.0.0"
-  uid ""
-
 "@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""
