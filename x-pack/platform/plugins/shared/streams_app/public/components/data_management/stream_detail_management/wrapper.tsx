@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
@@ -18,7 +20,7 @@ export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode;
   }
 >;
 
@@ -49,10 +51,27 @@ export function Wrapper({
     })
   );
 
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      <EuiPageHeader
+        paddingSize="l"
         bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
@@ -65,13 +84,11 @@ export function Wrapper({
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          return {
-            label,
-            href,
-            isSelected: tab === tabKey,
-          };
-        })}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+          label,
+          href,
+          isSelected: tab === tabKey,
+        }))}
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
     </>
