@@ -71,7 +71,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
               'xpack.searchHomepage.elasticsearchDocumentation.description',
               {
                 defaultMessage:
-                  'A range of executable Python notebooks available to easily test features in a virtual environment.',
+                  'Learn about Elasticsearch APIs, query languages, and common use cases.',
               }
             )}
             buttonHref={docLinks.elasticsearchGettingStarted}
