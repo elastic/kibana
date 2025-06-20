@@ -28,7 +28,6 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
-  ESQLAstRenameExpression,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
 } from './src/types';
