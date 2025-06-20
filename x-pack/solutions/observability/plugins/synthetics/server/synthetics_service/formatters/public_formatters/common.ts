@@ -56,4 +56,5 @@ export const commonFormatters: CommonFormatMap = {
     `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`,
   [ConfigKey.TAGS]: arrayFormatter,
   [ConfigKey.LABELS]: null,
+  [ConfigKey.MAINTENANCE_WINDOWS]: null,
 };
