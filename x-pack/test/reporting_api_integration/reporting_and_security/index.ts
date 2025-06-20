@@ -17,6 +17,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await reportingAPI.createTestReportingUserRole();
       await reportingAPI.createDataAnalyst();
       await reportingAPI.createTestReportingUser();
+      await reportingAPI.createManageReportingUserRole();
+      await reportingAPI.createManageReportingUser();
     });
 
     loadTestFile(require.resolve('./bwc_existing_indexes'));
@@ -25,6 +27,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ilm_migration_apis'));
     loadTestFile(require.resolve('./security_roles_privileges'));
     loadTestFile(require.resolve('./spaces'));
+    loadTestFile(require.resolve('./list_scheduled_reports'));
+    loadTestFile(require.resolve('./disable_scheduled_reports'));
     loadTestFile(require.resolve('./list_jobs'));
 
     // CSV-specific
