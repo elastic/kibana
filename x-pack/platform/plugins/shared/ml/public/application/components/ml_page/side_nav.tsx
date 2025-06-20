@@ -17,10 +17,10 @@ import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { isFullLicense } from '@kbn/ml-license';
 
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import type { MlRoute } from '../../routing';
 import { useEnabledFeatures } from '../../contexts/ml';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;

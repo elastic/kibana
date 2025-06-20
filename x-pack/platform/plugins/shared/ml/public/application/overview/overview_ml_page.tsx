@@ -35,6 +35,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlKibana } from '@kbn/ml-kibana-context';
 
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useNavigateToPath } from '../contexts/kibana';
@@ -47,7 +48,6 @@ import { DataVisualizerGrid } from './data_visualizer_grid';
 import { OverviewFooterItem } from './components/overview_ml_footer_item';
 import bannerImageLight from './components/welcome--light.png';
 import bannerImageDark from './components/welcome--dark.png';
-import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
