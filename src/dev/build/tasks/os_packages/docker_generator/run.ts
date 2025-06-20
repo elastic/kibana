@@ -41,7 +41,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:24.04';
   if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
    * Renovate config contains a regex manager to automatically updates this Chainguard reference
@@ -51,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:3d19648819612728a676ab4061edfb3283bd7117a22c6c4479ee1c1d51831832';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:fdfd7f357a09f933ab22143273849f8b247360f2f94f4dc2ea473001c59f9f0b';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
@@ -72,6 +72,7 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
+  build.setBuildArch(artifactArchitecture);
   let artifactVariant = '';
   if (flags.serverless) artifactVariant = '-serverless';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
@@ -198,6 +199,7 @@ export async function runDockerGenerator(
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',
+      build,
     });
   }
 

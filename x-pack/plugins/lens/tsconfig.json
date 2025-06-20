@@ -114,6 +114,7 @@
     "@kbn/es-types",
     "@kbn/esql-datagrid",
     "@kbn/transpose-utils",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": ["target/**/*"]
 }
