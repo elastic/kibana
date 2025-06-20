@@ -90,7 +90,7 @@ describe('spanDocumentProfileProvider', () => {
       ).toEqual(RESOLUTION_MISMATCH);
     });
 
-    it('matches records with the correct data stream type and any OTEL `kind` field', () => {
+    it('matches records with the correct data stream type and any OTEL `kind` field (unprocessed spans)', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
@@ -103,7 +103,7 @@ describe('spanDocumentProfileProvider', () => {
       ).toEqual(RESOLUTION_MATCH);
     });
 
-    it('defaults to matching records with the correct data stream type but no processor event field', () => {
+    it('defaults to matching records with the correct data stream type but no processor event field (unprocessed spans)', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
