@@ -61,7 +61,7 @@ export const getUpdateOrphanActionsSpaceHandler = (
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof UpdateOrphanActionsSpaceSchema.body>,
+  UpdateOrphanActionsSpaceBody,
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointService.createLogger('UpdateOrphanActionsSpaceHandler');
@@ -153,8 +153,10 @@ export const registerOrphanActionsSpaceRoute = (
     );
 };
 
-const UpdateOrphanActionsSpaceSchema = {
+export const UpdateOrphanActionsSpaceSchema = {
   body: schema.object({
     spaceId: schema.string({ minLength: 1, defaultValue: '' }),
   }),
 };
+
+export type UpdateOrphanActionsSpaceBody = TypeOf<typeof UpdateOrphanActionsSpaceSchema.body>;
