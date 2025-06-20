@@ -89,6 +89,8 @@ export class BackfillTaskRunner implements CancellableTask {
         },
         /** If `true`, the request refreshes affected shards to make this operation visible to search. */
         refresh: true,
+        /** We do not wait for the es reindex operation to be completed. */
+        wait_for_completion: false,
       });
     } else {
       throw createTaskRunError(

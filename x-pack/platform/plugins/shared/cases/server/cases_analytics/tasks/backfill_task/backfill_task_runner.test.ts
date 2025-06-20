@@ -83,6 +83,7 @@ describe('BackfillTaskRunner', () => {
         id: painlessScriptId,
       },
       refresh: true,
+      wait_for_completion: false,
     });
     expect(result).toEqual({ state: {} });
   });
