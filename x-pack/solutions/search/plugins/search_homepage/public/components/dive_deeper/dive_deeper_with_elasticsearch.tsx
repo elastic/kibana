@@ -24,7 +24,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
       <EuiTitle size="xxs">
         <h4>
           {i18n.translate('xpack.searchHomepage.diveDeeper.title', {
-            defaultMessage: 'Dive Deeper with Elasticsearch',
+            defaultMessage: 'Dive deeper with Elasticsearch',
           })}
         </h4>
       </EuiTitle>
