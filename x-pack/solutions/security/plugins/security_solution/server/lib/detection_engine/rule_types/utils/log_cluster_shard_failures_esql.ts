@@ -19,7 +19,12 @@ export const logClusterShardFailuresEsql = ({
   const clusters = response?._clusters?.details ?? {};
   const shardFailures = Object.keys(clusters).reduce<EsqlEsqlShardFailure[]>((acc, cluster) => {
     const failures = clusters[cluster]?.failures ?? [];
-    return [...acc, ...failures];
+
+    if (failures.length > 0) {
+      acc.push(...failures);
+    }
+
+    return acc;
   }, []);
 
   if (shardFailures.length > 0) {
