@@ -336,6 +336,7 @@ export const getReasonMessageForTimeWindow = ({
 }) => {
   const status = statusMap[reason];
   const { timeWindow, locationsThreshold, downThreshold } = getConditionType(params?.condition);
+
   return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.timeBased', {
     defaultMessage: `Monitor "{name}" from {location} is {status}. Alert when {downThreshold} checks are down within the last {size} {unitLabel} from at least {locationsThreshold} {locationsThreshold, plural, one {location} other {locations}}.`,
     values: {
