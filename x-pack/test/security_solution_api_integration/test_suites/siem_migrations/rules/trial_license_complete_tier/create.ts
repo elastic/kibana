@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create migrations without any issues', async () => {
         const {
           body: { migration_id: migrationId },
-        } = await ruleMigrationRoutes.create({});
+        } = await ruleMigrationRoutes.create({ body: { name: 'test-migration' } });
 
         expect(migrationId).not.toBeNull();
 
