@@ -40,6 +40,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  uploadServiceMapsToApm: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
@@ -91,6 +92,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // before DeletePackagesFromBuildRoot
     await globalRun(Tasks.CreateNoticeFile);
     await globalRun(Tasks.CreateXPackNoticeFile);
+
+    if (options.uploadServiceMapsToApm) {
+      await globalRun(Tasks.UploadSourcemapsToApm);
+    }
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
     await globalRun(Tasks.UpdateLicenseFile);
