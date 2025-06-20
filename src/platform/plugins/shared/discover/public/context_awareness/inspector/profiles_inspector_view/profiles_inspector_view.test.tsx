@@ -10,10 +10,11 @@
 import { render, screen } from '@testing-library/react';
 import { ProfilesInspectorView } from './profiles_inspector_view';
 import React from 'react';
+import { getRootContextMock, getDataSourceContextMock } from '../../__mocks__';
 
 const mockProfilesAdapter = {
-  getRootProfile: jest.fn().mockReturnValue(null),
-  getDataSourceProfile: jest.fn().mockReturnValue(null),
+  getRootProfile: jest.fn().mockReturnValue(getRootContextMock()),
+  getDataSourceProfile: jest.fn().mockReturnValue(getDataSourceContextMock()),
   getDocumentsProfiles: jest.fn().mockReturnValue({}),
   openDocDetails: jest.fn(),
 };
