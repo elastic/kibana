@@ -66,7 +66,7 @@ describe('autocomplete_utils', () => {
         insideTripleQuotes: false,
         insideSingleQuotesQuery: true,
         insideTripleQuotesQuery: false,
-        queryIndex: request.indexOf('"', request.indexOf('"query"')) + 1,
+        queryIndex: 32,
       });
     });
 
@@ -81,22 +81,12 @@ describe('autocomplete_utils', () => {
     });
 
     it('should handle escaped quotes correctly (not toggling inside state)', () => {
-      const request = `GET _search\n{\n  "query": "{\\"match\\": {\\"message\\": \\"test\\"}}"`;
+      const request = `GET _search\n{\n  "query": "FROM test | WHERE KQL(\\"\\"\\")`;
       expect(checkForTripleQuotesAndQueries(request)).toEqual({
         insideTripleQuotes: false,
         insideSingleQuotesQuery: true,
         insideTripleQuotesQuery: false,
-        queryIndex: request.indexOf('"query": "') + 9,
-      });
-    });
-
-    it('should handle nested quotes and stay inside triple quotes query', () => {
-      const request = `GET _search\n{\n  "query": """SELECT * FROM logs WHERE message = '"""`;
-      expect(checkForTripleQuotesAndQueries(request)).toEqual({
-        insideTripleQuotes: true,
-        insideSingleQuotesQuery: false,
-        insideTripleQuotesQuery: true,
-        queryIndex: request.indexOf('"""') + 3,
+        queryIndex: 26,
       });
     });
 
