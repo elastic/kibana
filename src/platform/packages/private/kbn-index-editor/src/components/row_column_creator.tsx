@@ -63,6 +63,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
       columns.map((column, index) => {
         return (
           <ValueInput
+            key={column.id}
             placeholder={column.name}
             onChange={updateRow(column.id)}
             autoFocus={index === 0}
@@ -72,9 +73,9 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     [columns, updateRow]
   );
 
-  const saveNewRow = (event: React.FormEvent<HTMLFormElement>) => {
+  const saveNewRow = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    indexUpdateService.addDoc(newRow);
+    await indexUpdateService.saveDocsImmediately([{ value: newRow }]);
     setActiveMode(null);
   };
 
