@@ -34,7 +34,7 @@ export const KeywordSearch: React.FC = () => {
         defaultMessage: 'Enhanced query flexibility to create complex search functionalities.',
       }),
       i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.secondLine', {
-        defaultMessage: 'Scalable architecture accommodates growing datasets.',
+        defaultMessage: 'Scalable architecture accommodates growing data sets.',
       }),
       i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.thirdLine', {
         defaultMessage: 'Enable precise results by targeting for users or other query conditions.',
