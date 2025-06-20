@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/document-data-cascader",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
