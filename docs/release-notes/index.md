@@ -38,7 +38,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 * Fixes an issue that caused {{kib}} to repeatedly restart when `xpack.alerting.cancelAlertsOnRuleTimeout` was set to `false` in the `kibana.yml` file [#222263]({{kib-pull}}222263).
 
 **Dashboards and Visualizations**:
-* Prevents data tables from breaking if Lens visualizations are missing data [#217937]({{kib-pull}}217937).
+* Fixes an issue that prevented navigating through pages when inspecting a chart's data  [#217937]({{kib-pull}}217937).
 
 **Discover**:
 * Ensures the absolute time range is used when exporting a report from Discover in the CSV format [#223249]({{kib-pull}}223249).
