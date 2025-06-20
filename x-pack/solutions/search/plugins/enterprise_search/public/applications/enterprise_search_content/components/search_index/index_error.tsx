@@ -88,11 +88,13 @@ export const IndexError: React.FC<IndexErrorProps> = ({ indexName }) => {
 
     const semanticTextFields = parseMapping(mappings);
     const fetchErrors = async () => {
-      const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-      const endpoints = await ml?.mlApi?.inferenceModels.getAllInferenceEndpoints();
-      if (!trainedModelStats || !endpoints) {
+      if (!ml) {
         return [];
       }
+
+      const mlApi = await ml.getMlApi();
+      const trainedModelStats = await mlApi.trainedModels.getTrainedModelStats();
+      const endpoints = await mlApi.inferenceModels.getAllInferenceEndpoints();
 
       const semanticTextFieldsWithErrors = semanticTextFields
         .map((field) => {
