@@ -127,6 +127,8 @@ export const createActionHandler = async (
           agents: selectedAgents,
           osqueryContext,
           error,
+          spaceId: options.space?.id ?? DEFAULT_SPACE_ID,
+          spaceScopedClient: spaceScopedInternalSavedObjectsClient,
         }),
   };
 

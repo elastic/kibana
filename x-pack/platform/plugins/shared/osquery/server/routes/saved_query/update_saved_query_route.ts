@@ -8,6 +8,7 @@
 import { filter, some } from 'lodash';
 
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -60,6 +61,9 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           request
         );
 
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
         const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         const {
@@ -78,7 +82,9 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
         const isPrebuilt = await isSavedQueryPrebuilt(
           osqueryContext.service.getPackageService()?.asInternalUser,
-          request.params.id
+          request.params.id,
+          spaceScopedClient,
+          spaceId
         );
 
         if (isPrebuilt) {
