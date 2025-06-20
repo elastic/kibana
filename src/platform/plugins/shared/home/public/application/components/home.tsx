@@ -24,6 +24,8 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
+import { PersonalizedRecentlyViewed } from './personalization/RecentlyViewedTable';
+import { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -35,6 +37,7 @@ export interface HomeProps {
   urlBasePath: string;
   hasUserDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
+  recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
 }
 
 interface State {
@@ -128,7 +131,7 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled } = this.props;
+    const { addBasePath, solutions, isCloudEnabled, recentlyAccessed } = this.props;
     const { application, trackUiMetric } = getServices();
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
@@ -149,6 +152,7 @@ export class Home extends Component<HomeProps, State> {
         panelled={false}
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+        <PersonalizedRecentlyViewed recentlyAccessed={recentlyAccessed} addBasePath={addBasePath} />
 
         <AddData
           addBasePath={addBasePath}

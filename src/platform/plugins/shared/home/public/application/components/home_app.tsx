@@ -30,6 +30,7 @@ export interface HomeAppProps {
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
   const {
+    chrome,
     application,
     getBasePath,
     addBasePath,
@@ -40,6 +41,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
+  const recentlyAccessed = chrome.recentlyAccessed.get();
   const renderTutorialDirectory = (props: RouteComponentProps<{ tab: string }>) => {
     // Redirect to integrations app unless a specific tab that is still supported was specified.
     const tabId = props.match.params.tab;
@@ -82,6 +84,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
           )}
           <Route exact path="/">
             <Home
+              recentlyAccessed={recentlyAccessed}
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}
