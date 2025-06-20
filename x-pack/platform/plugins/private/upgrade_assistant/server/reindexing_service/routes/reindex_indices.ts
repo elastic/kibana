@@ -13,9 +13,9 @@ import { ReindexStatusResponse, REINDEX_OP_TYPE } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../../lib/reindexing';
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
-import { RouteDependencies } from '../../types';
+import { RouteDependencies } from '../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from './reindex_handler';
+import { reindexHandler } from '../lib/reindex_handler';
 
 export function registerReindexIndicesRoutes(
   {

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { createReindexWorker } from './create_reindex_worker';
-export { registerReindexIndicesRoutes } from './reindex_indices';
-export { registerBatchReindexIndicesRoutes } from './batch_reindex_indices';
+export { reindexHandler } from './reindex_handler';
