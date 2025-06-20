@@ -9,14 +9,13 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { FormatEditorSamples } from './samples';
-
-import { DiscoverTestProvider } from '@kbn/discover-plugin/public/__mocks__/test_provider';
 
 describe('FormatEditorSamples', () => {
   it('should render normally', () => {
     render(
-      <DiscoverTestProvider>
+      <I18nProvider>
         <FormatEditorSamples
           samples={[
             { input: 'test', output: 'TEST' },
@@ -24,7 +23,7 @@ describe('FormatEditorSamples', () => {
             { input: ['foo', 'bar'], output: '<span>foo</span>, <span>bar</span>' },
           ]}
         />
-      </DiscoverTestProvider>
+      </I18nProvider>
     );
 
     expect(screen.getByRole('table')).toBeInTheDocument();
@@ -41,9 +40,9 @@ describe('FormatEditorSamples', () => {
 
   it('should render nothing if there are no samples', () => {
     const { container } = render(
-      <DiscoverTestProvider>
+      <I18nProvider>
         <FormatEditorSamples samples={[]} />
-      </DiscoverTestProvider>
+      </I18nProvider>
     );
 
     expect(container).toBeEmptyDOMElement();

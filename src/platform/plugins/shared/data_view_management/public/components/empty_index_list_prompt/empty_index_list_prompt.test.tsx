@@ -11,13 +11,12 @@ import React from 'react';
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-
-import { DiscoverTestProvider } from '@kbn/discover-plugin/public/__mocks__/test_provider';
+import { I18nProvider } from '@kbn/i18n-react';
 
 describe('EmptyIndexListPrompt', () => {
   it('should render normally', async () => {
     render(
-      <DiscoverTestProvider>
+      <I18nProvider>
         <EmptyIndexListPrompt
           onRefresh={jest.fn()}
           createAnyway={jest.fn()}
@@ -25,7 +24,7 @@ describe('EmptyIndexListPrompt', () => {
           navigateToApp={jest.fn()}
           canSaveIndexPattern
         />
-      </DiscoverTestProvider>
+      </I18nProvider>
     );
 
     const emptyStatePanel = screen.getByTestId('indexPatternEmptyState');
@@ -38,7 +37,7 @@ describe('EmptyIndexListPrompt', () => {
   it('calls onRefresh when refresh button is clicked', async () => {
     const onRefresh = jest.fn();
     render(
-      <DiscoverTestProvider>
+      <I18nProvider>
         <EmptyIndexListPrompt
           onRefresh={onRefresh}
           createAnyway={jest.fn()}
@@ -46,7 +45,7 @@ describe('EmptyIndexListPrompt', () => {
           navigateToApp={jest.fn()}
           canSaveIndexPattern
         />
-      </DiscoverTestProvider>
+      </I18nProvider>
     );
 
     const refreshButton = screen.getByTestId('refreshIndicesButton');

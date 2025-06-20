@@ -1,14 +1,14 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
     "__jest__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*",
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -27,10 +27,7 @@
     "@kbn/utility-types",
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
-    "@kbn/code-editor",
-    "@kbn/discover-plugin",
+    "@kbn/code-editor"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }
