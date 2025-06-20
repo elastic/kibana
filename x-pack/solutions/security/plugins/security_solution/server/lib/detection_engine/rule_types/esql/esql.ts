@@ -111,7 +111,6 @@ export const esqlExecutor = async ({
      * Since aggregating queries do not produce event ids, we will not exclude them.
      * All alerts for aggregating queries are unique anyway
      */
-    const excludedDocumentIds: Record<string, Set<string>> = {};
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
@@ -130,12 +129,12 @@ export const esqlExecutor = async ({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          size: tuple.maxSignals,
+          size,
           filters: dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
-          excludedDocumentIds,
+          excludedDocuments,
           ruleExecutionTimeout,
         });
 

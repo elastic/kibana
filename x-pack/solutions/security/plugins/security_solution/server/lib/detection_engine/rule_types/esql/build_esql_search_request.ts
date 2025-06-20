@@ -13,6 +13,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildTimeRangeFilter } from '../utils/build_events_query';
 import { getQueryFilter } from '../utils/get_query_filter';
+import type { ExcludedDocument } from './types';
 
 export interface BuildEqlSearchRequestParams {
   query: string;
@@ -23,7 +24,7 @@ export interface BuildEqlSearchRequestParams {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
-  excludedDocumentIds: Record<string, Set<string>>;
+  excludedDocuments: Record<string, ExcludedDocument[]>;
   ruleExecutionTimeout: string | undefined;
 }
 
@@ -36,7 +37,7 @@ export const buildEsqlSearchRequest = ({
   secondaryTimestamp,
   exceptionFilter,
   size,
-  excludedDocumentIds,
+  excludedDocuments,
   ruleExecutionTimeout,
 }: BuildEqlSearchRequestParams) => {
   const esFilter = getQueryFilter({
@@ -61,9 +62,9 @@ export const buildEsqlSearchRequest = ({
     filter: {
       bool: {
         filter: requestFilter,
-        ...(Object.keys(excludedDocumentIds).length > 0
+        ...(Object.keys(excludedDocuments).length > 0
           ? {
-              must_not: convertExternalIdsToDSL(excludedDocumentIds),
+              must_not: convertExternalIdsToDSL(excludedDocuments),
             }
           : {}),
       },
@@ -74,20 +75,20 @@ export const buildEsqlSearchRequest = ({
 };
 
 const convertExternalIdsToDSL = (
-  excludedDocumentIds: Record<string, Set<string>>
+  excludedDocuments: Record<string, ExcludedDocument[]>
 ): estypes.QueryDslQueryContainer[] => {
-  const indices = Object.keys(excludedDocumentIds);
+  const indices = Object.keys(excludedDocuments);
   const queries: estypes.QueryDslQueryContainer[] = [];
 
   for (const index of indices) {
-    const ids = excludedDocumentIds[index];
+    const documents = excludedDocuments[index];
 
     queries.push({
       bool: {
         filter: [
           {
             ids: {
-              values: [...ids],
+              values: documents.map((doc) => doc.id),
             },
           },
           ...(index
