@@ -135,7 +135,9 @@ const deleteQueryRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing, assetClient } = await getScopedClients({
+      request,
+    });
     await assertEnterpriseLicense(licensing);
 
     const {
