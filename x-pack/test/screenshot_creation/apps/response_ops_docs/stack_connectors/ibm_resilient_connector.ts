@@ -8,7 +8,7 @@
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '@kbn/actions-simulators-plugin/server/plugin';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
