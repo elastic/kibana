@@ -39,13 +39,14 @@ import type {
   UpsertRuleMigrationResourcesRequestBody,
   UpsertRuleMigrationResourcesResponse,
   GetRuleMigrationPrebuiltRulesResponse,
-  UpdateRuleMigrationResponse,
   StartRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationRulesResponse,
   CreateRuleMigrationRulesRequestBody,
   GetRuleMigrationIntegrationsStatsResponse,
+  UpdateRuleMigrationRulesResponse,
+  UpdateRuleMigrationRequestBody,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationStats } from '../types';
 
@@ -358,33 +359,29 @@ export const updateMigrationRules = async ({
   migrationId,
   rulesToUpdate,
   signal,
-}: UpdateRulesParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.patch<UpdateRuleMigrationResponse>(
+}: UpdateRulesParams): Promise<UpdateRuleMigrationRulesResponse> => {
+  return KibanaServices.get().http.patch<UpdateRuleMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify(rulesToUpdate), signal }
   );
 };
 
-export interface UpdateMigrationNameParams {
+export interface UpdateMigrationParams {
   /** `id` of the migration to update the name for */
   migrationId: string;
-  /** The name of the migration */
-  name: string;
+  /** The migration fields to update */
+  body: UpdateRuleMigrationRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-export const updateMigrationName = async ({
+export const updateMigration = async ({
   migrationId,
   signal,
-  name,
-}: UpdateMigrationNameParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.patch<UpdateRuleMigrationResponse>(
+  body,
+}: UpdateMigrationParams): Promise<void> => {
+  return KibanaServices.get().http.patch<void>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
-    {
-      version: '1',
-      body: JSON.stringify({ name }),
-      signal,
-    }
+    { version: '1', body: JSON.stringify(body), signal }
   );
 };
 

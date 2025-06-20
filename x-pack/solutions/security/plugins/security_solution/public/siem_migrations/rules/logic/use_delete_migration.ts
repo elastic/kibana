@@ -13,12 +13,12 @@ import * as i18n from './translations';
 
 export const DELETE_MIGRATION_RULE_MUTATION_KEY = ['DELETE', SIEM_RULE_MIGRATION_PATH];
 
-export const useDeleteMigration = () => {
+export const useDeleteMigration = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
   const rulesMigrationService = useKibana().services.siemMigrations.rules;
 
   return useMutation({
-    mutationFn: rulesMigrationService.deleteMigration.bind(rulesMigrationService),
+    mutationFn: () => rulesMigrationService.deleteMigration(migrationId),
     mutationKey: DELETE_MIGRATION_RULE_MUTATION_KEY,
     onSuccess: () => {
       addSuccess(i18n.DELETE_MIGRATION_SUCCESS);

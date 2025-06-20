@@ -9,7 +9,6 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
 import {
-  type UpdateRuleMigrationResponse,
   UpdateRuleMigrationRequestBody,
   UpdateRuleMigrationRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -38,27 +37,25 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           },
         },
       },
-      withLicense(
-        async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
-          const { migration_id: migrationId } = req.params;
-          try {
-            const ctx = await context.resolve(['securitySolution']);
-            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
-            // TODO: Update this to log an update action
-            await siemMigrationAuditLogger.logCreateMigration();
-            await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
+      withLicense(async (context, req, res): Promise<IKibanaResponse> => {
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+        const { migration_id: migrationId } = req.params;
+        try {
+          const ctx = await context.resolve(['securitySolution']);
+          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+          // TODO: Update this to log an update action
+          await siemMigrationAuditLogger.logCreateMigration();
+          await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
 
-            return res.ok();
-          } catch (error) {
-            logger.error(error);
-            // TODO: Update this to log an update action
-            await siemMigrationAuditLogger.logCreateMigration({
-              error,
-            });
-            return res.badRequest({ body: error.message });
-          }
+          return res.ok();
+        } catch (error) {
+          logger.error(error);
+          // TODO: Update this to log an update action
+          await siemMigrationAuditLogger.logCreateMigration({
+            error,
+          });
+          return res.badRequest({ body: error.message });
         }
-      )
+      })
     );
 };

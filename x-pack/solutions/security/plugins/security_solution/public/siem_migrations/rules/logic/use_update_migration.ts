@@ -6,18 +6,22 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
+import type { UpdateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { updateMigrationName } from '../api';
+import { updateMigration } from '../api';
 import * as i18n from './translations';
 
 export interface UseUpdateMigrationNameProps {
   onError?: (error: Error) => void;
 }
 
-export const useUpdateMigrationName = ({ onError }: UseUpdateMigrationNameProps = {}) => {
+export const useUpdateMigration = (
+  migrationId: string,
+  { onError }: UseUpdateMigrationNameProps = {}
+) => {
   const { addError, addSuccess } = useAppToasts();
   return useMutation({
-    mutationFn: updateMigrationName,
+    mutationFn: (body: UpdateRuleMigrationRequestBody) => updateMigration({ migrationId, body }),
     onError: (error: Error) => {
       addError(error, { title: i18n.UPDATE_MIGRATION_NAME_FAILURE });
       onError?.(error);

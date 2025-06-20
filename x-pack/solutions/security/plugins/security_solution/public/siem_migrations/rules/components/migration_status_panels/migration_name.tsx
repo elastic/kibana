@@ -22,7 +22,7 @@ import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/c
 import { useIsVisible } from '../../../../common/hooks/use_visibility';
 import { PanelText } from '../../../../common/components/panel_text';
 import type { MigrationReadyPanelProps } from './migration_ready_panel';
-import { useUpdateMigrationName } from '../../logic/use_update_migration_name';
+import { useUpdateMigration } from '../../logic/use_update_migration';
 import * as i18n from './translations';
 import { useDeleteMigration } from '../../logic/use_delete_migration';
 
@@ -42,13 +42,16 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
   } = useIsVisible(false);
 
   const onRenameError = useCallback(() => {
-    setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the mutation hook
+    setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
   }, [migrationStats.name]);
 
-  const { mutate: renameMigration, isLoading: isRenamingMigration } = useUpdateMigrationName({
-    onError: onRenameError,
-  });
-  const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration();
+  const { mutate: updateMigration, isLoading: isUpdatingMigration } = useUpdateMigration(
+    migrationStats.id,
+    { onError: onRenameError }
+  );
+  const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
+    migrationStats.id
+  );
 
   const cancelEdit = useCallback(() => {
     setIsEditing(false);
@@ -57,28 +60,28 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
   const saveName = useCallback(
     (value: string) => {
       setName(value);
-      renameMigration({ migrationId: migrationStats.id, name: value });
+      updateMigration({ name: value });
       setIsEditing(false);
     },
-    [renameMigration, migrationStats.id]
+    [updateMigration]
   );
 
   const confirmDeleteMigration = useCallback(() => {
-    deleteMigration(migrationStats.id);
+    deleteMigration();
     closeDeleteModal();
-  }, [migrationStats.id, deleteMigration, closeDeleteModal]);
+  }, [deleteMigration, closeDeleteModal]);
 
   const isDeletable = useMemo(
     () => migrationStats.status !== SiemMigrationTaskStatus.RUNNING,
     [migrationStats.status]
   );
 
-  const onRenameButtonClick = useCallback(() => {
+  const showRename = useCallback(() => {
     closePopover();
     setIsEditing(true);
   }, [closePopover]);
 
-  const onDeleteButtonClick = useCallback(() => {
+  const showDelete = useCallback(() => {
     closePopover();
     openDeleteModal();
   }, [closePopover, openDeleteModal]);
@@ -115,7 +118,7 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
                   onClick={togglePopover}
                   aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
                   data-test-subj="openMigrationOptionsButton"
-                  isLoading={isRenamingMigration || isDeletingMigration}
+                  isLoading={isUpdatingMigration || isDeletingMigration}
                 />
               }
               isOpen={isPopoverOpen}
@@ -126,14 +129,14 @@ export const MigrationName = React.memo<MigrationReadyPanelProps>(({ migrationSt
               <EuiContextMenuPanel size="s">
                 <EuiContextMenuItem
                   icon="pencil"
-                  onClick={onRenameButtonClick}
+                  onClick={showRename}
                   data-test-subj="renameMigrationItem"
                 >
                   {i18n.RENAME_MIGRATION_TEXT}
                 </EuiContextMenuItem>
                 <EuiContextMenuItem
                   icon="trash"
-                  onClick={onDeleteButtonClick}
+                  onClick={showDelete}
                   disabled={!isDeletable}
                   css={{ color: isDeletable ? euiTheme.colors.danger : undefined }}
                   data-test-subj="deleteMigrationItem"
