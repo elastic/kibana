@@ -32,10 +32,11 @@ export const reportSyntaxErrors = async (
   log: ToolingLog,
   docsToCheck?: FileToWrite[]
 ) => {
-  log.info(`Checking syntax...`);
-
   let docFiles: FileToWrite[] | undefined = docsToCheck;
-  if (!docFiles) {
+  if (docsToCheck) {
+    log.info(`Checking syntax for ${docsToCheck.length} provided files`);
+  } else {
+    log.info(`Checking syntax for files in ${outDir}`);
     docFiles = await Fs.readdir(outDir).then(async (files) => {
       return await Promise.all(
         files
@@ -49,11 +50,10 @@ export const reportSyntaxErrors = async (
           })
       );
     });
+    log.info(`Found ${(docFiles ?? []).length} files to check in ${outDir}`);
   }
-  if (!docFiles) {
-    log.error(`No files in '${outDir}' to check for syntax errors`);
-    return;
-  }
+
+  if (!docFiles) return;
 
   const syntaxErrors = (
     await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
@@ -118,8 +118,6 @@ yargs(process.argv.slice(2))
       run(
         async ({ log }) => {
           const outDir = argv.outDir as string;
-
-          log.info(`Checking syntax for files in ${outDir}`);
           await reportSyntaxErrors(outDir, log);
         },
         { log: { defaultLevel: argv.logLevel as any }, flags: { allowUnexpected: true } }

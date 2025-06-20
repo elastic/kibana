@@ -21,6 +21,7 @@ import { selectConnector } from '../util/select_connector';
 import { syncBuiltDocs } from './sync_built_docs_repo';
 import { extractDocEntries } from './extract_doc_entries';
 import { generateDoc, FileToWrite } from './generate_doc';
+import { reportSyntaxErrors } from '../report_syntax_errors/report_syntax_errors';
 
 yargs(process.argv.slice(2))
   .command(
@@ -128,23 +129,7 @@ yargs(process.argv.slice(2))
             );
           }
 
-          log.info(`Checking syntax...`);
-          const syntaxErrors = (
-            await Promise.all(docFiles.map(async (file) => await findEsqlSyntaxError(file)))
-          ).flat();
-
-          if (syntaxErrors.length > 0) {
-            const syntaxErrorsFile = Path.join(outDir, '__tmp__/syntax-errors.json');
-            await Fs.writeFile(syntaxErrorsFile, JSON.stringify(syntaxErrors, null, 2));
-            log.info(`Syntax errors written to ${syntaxErrorsFile}`);
-          }
-          log.warning(
-            `Please verify the following queries that had syntax errors\n${JSON.stringify(
-              syntaxErrors,
-              null,
-              2
-            )}`
-          );
+          await reportSyntaxErrors(outDir, log, docFiles);
         },
         { log: { defaultLevel: argv.logLevel as any }, flags: { allowUnexpected: true } }
       );
