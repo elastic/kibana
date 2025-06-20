@@ -24,16 +24,16 @@ export function SpanSummaryField({
   fieldId,
   showActions = true,
 }: SpanSummaryFieldProps) {
-  const { transaction, loading } = useTraceContext();
+  const { trace, loading } = useTraceContext();
   const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
   const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
   const isTransactionNameFieldWithoutValue = isTransactionNameField && !fieldValue;
 
   useEffect(() => {
-    if (isTransactionNameField && !fieldValue && transaction?.name && !loading) {
-      setFieldValue(transaction.name);
+    if (isTransactionNameField && !fieldValue && trace?.name && !loading) {
+      setFieldValue(trace.name);
     }
-  }, [transaction?.name, loading, fieldValue, isTransactionNameField]);
+  }, [trace?.name, loading, fieldValue, isTransactionNameField]);
 
   if (
     (!isTransactionNameFieldWithoutValue && !fieldValue) ||
