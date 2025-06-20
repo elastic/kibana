@@ -92,11 +92,8 @@
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
     "@kbn/journeys",
-<<<<<<< HEAD
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
-=======
->>>>>>> 6aafb4f7f4c ([SKA] relocate alerting_api_integration tests (#222603))
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
@@ -174,13 +171,10 @@
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-platform",
-<<<<<<< HEAD
     "@kbn/test-suites-xpack-observability",
     "@kbn/management-settings-ids",
     "@kbn/apm-sources-access-plugin",
-=======
     "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",
->>>>>>> 6aafb4f7f4c ([SKA] relocate alerting_api_integration tests (#222603))
   ]
 }
