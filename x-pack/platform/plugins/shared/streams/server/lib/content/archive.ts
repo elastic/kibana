@@ -10,8 +10,11 @@ import {
   ContentPack,
   ContentPackDashboard,
   ContentPackEntry,
+  ContentPackFields,
   ContentPackManifest,
+  ContentPackProcessors,
   ContentPackSavedObject,
+  SUPPORTED_ENTRY_TYPE,
   SUPPORTED_SAVED_OBJECT_TYPE,
   contentPackManifestSchema,
   getEntryTypeByFile,
@@ -19,6 +22,7 @@ import {
   isSupportedFile,
   isSupportedReferenceType,
 } from '@kbn/content-packs-schema';
+import { FieldDefinition, ProcessorDefinition } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import { Readable } from 'stream';
@@ -59,13 +63,24 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
       switch (type) {
         case 'dashboard':
         case 'index-pattern':
-        case 'lens':
-          const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
+        case 'lens': {
+          const subDirs = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
           zip.addFile(
-            path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
+            path.join(rootDir, ...subDirs, `${object.id}.json`),
             Buffer.from(JSON.stringify(object, null, 2))
           );
           return;
+        }
+
+        case 'fields':
+        case 'processors': {
+          const subDirs = SUPPORTED_ENTRY_TYPE[type];
+          zip.addFile(
+            path.join(rootDir, ...subDirs, type + '.json'),
+            Buffer.from(JSON.stringify(object.content, null, 2))
+          );
+          return;
+        }
 
         default:
           missingEntryTypeImpl(type);
@@ -129,6 +144,12 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
         case 'dashboard':
           return resolveDashboard(rootDir, zip, entry);
 
+        case 'fields':
+          return resolveFields(entry);
+
+        case 'processors':
+          return resolveProcessors(entry);
+
         default:
           missingEntryTypeImpl(type);
       }
@@ -152,17 +173,15 @@ async function resolveDashboard(
     throw new InvalidContentPackError(
       `Dashboard [${
         dashboard.id
-      }] references saved object types not supported by content packs: ${uniqReferences.filter(
-        ({ type }) => !isSupportedReferenceType(type)
-      )}`
+      }] references saved object types not supported by content packs: ${uniqReferences
+        .filter(({ type }) => !isSupportedReferenceType(type))
+        .map(({ type }) => type)}`
     );
   }
 
   const includedReferences = compact(
     (uniqReferences as Array<{ type: ContentPackSavedObject['type']; id: string }>).map((ref) =>
-      zip.getEntry(
-        path.join(rootDir, 'kibana', SUPPORTED_SAVED_OBJECT_TYPE[ref.type], `${ref.id}.json`)
-      )
+      zip.getEntry(path.join(rootDir, ...SUPPORTED_SAVED_OBJECT_TYPE[ref.type], `${ref.id}.json`))
     )
   );
 
@@ -173,6 +192,16 @@ async function resolveDashboard(
   );
 
   return [dashboard, ...resolvedReferences];
+}
+
+async function resolveFields(entry: AdmZip.IZipEntry): Promise<ContentPackFields> {
+  const fields = JSON.parse((await readEntry(entry)).toString()) as FieldDefinition;
+  return { id: 'Fields', type: 'fields', content: fields };
+}
+
+async function resolveProcessors(entry: AdmZip.IZipEntry): Promise<ContentPackProcessors> {
+  const processors = JSON.parse((await readEntry(entry)).toString()) as ProcessorDefinition[];
+  return { id: 'Processors', type: 'processors', content: processors };
 }
 
 function getRootDir(entries: AdmZip.IZipEntry[]) {

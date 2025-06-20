@@ -192,6 +192,7 @@ export async function importContent(
         body: {
           include: JSON.stringify(body.include),
           content: body.content,
+          filename: body.filename,
         },
       },
       file: { key: 'content', filename: body.filename },

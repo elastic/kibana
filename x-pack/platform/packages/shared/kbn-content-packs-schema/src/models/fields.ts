@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './archive';
-export * from './saved_object';
-export * from './configuration';
+import { FieldDefinition } from '@kbn/streams-schema';
+
+export type ContentPackFields = {
+  id: string;
+  type: 'fields';
+  content: FieldDefinition;
+};

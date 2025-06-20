@@ -112,6 +112,7 @@ export function ImportContentPackFlyout({
 
             <ContentPackObjectsList
               objects={contentPackObjects}
+              selectedObjects={[]}
               onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>

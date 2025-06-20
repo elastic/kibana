@@ -10,7 +10,9 @@ import {
 } from '@kbn/content-packs-schema';
 import { IStorageClient, IndexStorageSettings, types } from '@kbn/storage-adapter';
 import objectHash from 'object-hash';
-import { CONTENT_NAME, STREAM_NAME } from './fields';
+
+export const STREAM_NAME = 'stream.name';
+export const CONTENT_NAME = 'content.name';
 
 export const contentStorageSettings = {
   name: '.kibana_streams_content_packs',

@@ -41,10 +41,12 @@ import { ContentPackMetadata } from './content_pack_manifest';
 
 export function ExportContentPackFlyout({
   definition,
+  selectedObjects,
   onExport,
   onClose,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  selectedObjects: { id: string; type: string }[];
   onClose: () => void;
   onExport: () => void;
 }) {
@@ -58,6 +60,9 @@ export function ExportContentPackFlyout({
   } = useKibana();
 
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
+  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
+    []
+  );
 
   const { value: exportResponse, loading: isLoadingContentPack } = useStreamsAppFetch(
     async ({ signal }) => {
@@ -102,14 +107,17 @@ export function ExportContentPackFlyout({
         description: contentPack.description,
       });
 
+      setSelectedContentPackObjects(
+        contentPack.entries.filter((entry) =>
+          selectedObjects.some(({ id, type }) => entry.id === id && entry.type === type)
+        )
+      );
+
       return { contentPack, indexPatterns };
     },
     [definition, streamsRepositoryClient, http]
   );
 
-  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
-    []
-  );
   const [replacedIndexPatterns, setReplacedIndexPatterns] = useState<Record<string, boolean>>({});
   const [isExporting, setIsExporting] = useState(false);
 
@@ -184,6 +192,7 @@ export function ExportContentPackFlyout({
 
             <ContentPackObjectsList
               objects={exportResponse.contentPack.entries}
+              selectedObjects={selectedObjects}
               onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>

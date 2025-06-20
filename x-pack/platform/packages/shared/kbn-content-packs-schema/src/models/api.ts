@@ -7,24 +7,41 @@
 
 import { z } from '@kbn/zod';
 
-export interface ContentPackIncludeObjects {
-  objects: {
-    dashboards: string[];
-  };
-}
-
 export interface ContentPackIncludeAll {
   all: {};
 }
 
+export interface ContentPackIncludeNone {
+  none: {};
+}
+
+export interface ContentPackIncludeObjects {
+  objects: {
+    dashboards: string[];
+    fields: ContentPackIncludeAll | ContentPackIncludeNone;
+    processors: ContentPackIncludeAll | ContentPackIncludeNone;
+  };
+}
+
 export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
 
-const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ dashboards: z.array(z.string()) }),
-});
+const contentPackIncludeNoneSchema = z.object({ none: z.strictObject({}) });
 const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
 
-export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
+const contentPackIncludeObjectsSchema = z.object({
+  objects: z.object({
+    dashboards: z.array(z.string()),
+    fields: z.union([contentPackIncludeAllSchema, contentPackIncludeNoneSchema]),
+    processors: z.union([contentPackIncludeAllSchema, contentPackIncludeNoneSchema]),
+  }),
+});
+
+export const isIncludeAll = (
+  value:
+    | ContentPackIncludedObjects
+    | ContentPackIncludeObjects['objects']['fields']
+    | ContentPackIncludeObjects['objects']['processors']
+): value is ContentPackIncludeAll => {
   return contentPackIncludeAllSchema.safeParse(value).success;
 };
 

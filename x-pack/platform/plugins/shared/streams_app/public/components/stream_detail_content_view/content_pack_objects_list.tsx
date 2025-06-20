@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBadge, EuiBasicTable } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { capitalize } from 'lodash';
@@ -13,9 +13,11 @@ import { isViewableEntry } from './content/util';
 
 export function ContentPackObjectsList({
   objects,
+  selectedObjects,
   onSelectionChange,
 }: {
   objects: ContentPackEntry[];
+  selectedObjects: { id: string; type: string }[];
   onSelectionChange: (objects: ContentPackEntry[]) => void;
 }) {
   return (
@@ -24,13 +26,23 @@ export function ContentPackObjectsList({
       itemId={(entry: ContentPackEntry) => entry.id}
       columns={[
         {
-          name: 'Asset name',
+          name: 'Name',
           render: (entry: ContentPackEntry) => {
-            if (entry.type === 'dashboard') {
-              return (entry.attributes as DashboardAttributes).title;
+            const title = entry.type === 'dashboard' ? entry.attributes.title : entry.id;
+            const href =
+              entry.type === 'processors'
+                ? './management/enrich'
+                : entry.type === 'fields'
+                ? './management/schemaEditor'
+                : '';
+            if (href) {
+              return (
+                <EuiLink href={href} external target="_blank">
+                  {title}
+                </EuiLink>
+              );
             }
-
-            return entry.id;
+            return title;
           },
           truncateText: true,
         },
@@ -42,6 +54,8 @@ export function ContentPackObjectsList({
                 ? 'dashboardApp'
                 : entry.type === 'fields'
                 ? 'indexMapping'
+                : entry.type === 'processors'
+                ? 'grokApp'
                 : 'questionInCircle';
             return (
               <EuiBadge color="hollow" iconType={iconType} iconSide="left">
@@ -53,6 +67,9 @@ export function ContentPackObjectsList({
       ]}
       rowHeader="objectName"
       selection={{
+        initialSelected: objects.filter((entry) =>
+          selectedObjects.some(({ id, type }) => entry.id === id && entry.type === type)
+        ),
         onSelectionChange: (selectedObjects: ContentPackEntry[]) => {
           onSelectionChange(selectedObjects);
         },
