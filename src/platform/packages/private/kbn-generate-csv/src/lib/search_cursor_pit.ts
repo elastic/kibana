@@ -124,6 +124,8 @@ export class SearchCursorPit extends SearchCursor {
       throw new Error('Could not retrieve the search body!');
     }
 
+    console.log(`searchBody ${JSON.stringify(searchBody)}`);
+
     const response = await this.searchWithPit(searchBody);
 
     if (!response) {
