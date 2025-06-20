@@ -7,6 +7,7 @@
 
 import { uniq } from 'lodash';
 
+import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
 import { ApiOperation } from '@kbn/core-security-server';
 import type {
   FeatureKibanaPrivileges,
@@ -36,13 +37,18 @@ interface ComposablePrivilege {
   }>;
 }
 
-export function privilegesFactory(
+export async function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
-  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>,
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
 ) {
+  const typeRegistry = await getTypeRegistry();
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
-
+  const typesSupportingAccessControl = typeRegistry
+    .getAllTypes()
+    .filter((type) => typeRegistry.supportsAccessControl(type.name))
+    .map((type) => type.name);
   return {
     get(respectLicenseLevel: boolean = true) {
       const features = featuresService.getKibanaFeatures();
@@ -215,6 +221,9 @@ export function privilegesFactory(
 
       const allActions = [...allActionsSet];
       const readActions = [...readActionsSet];
+      const allSavedObjectsManageOwnershipActions = typesSupportingAccessControl.map((type) =>
+        actions.savedObject.get(type, 'manageOwnership')
+      );
       return {
         features: featurePrivileges,
         global: {
@@ -231,7 +240,7 @@ export function privilegesFactory(
             actions.ui.get('enterpriseSearch', 'all'),
             actions.ui.get('globalSettings', 'save'),
             actions.ui.get('globalSettings', 'show'),
-            actions.savedObject.get('dashboard', 'manageOwnership'),
+            ...allSavedObjectsManageOwnershipActions,
             ...allActions,
           ],
           read: [

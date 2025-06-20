@@ -67,6 +67,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
+
         const options = isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {};
         try {
           const result = await soClient.create(
@@ -80,9 +81,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
             body: result,
           });
         } catch (error) {
-          return response.badRequest({
-            body: error.message,
-          });
+          return error;
         }
       }
     );
@@ -133,6 +132,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
           const result = await soClient.update(objectType, request.body.objectId, {
             description: 'updated description',
           });
+
           return response.ok({
             body: result,
           });
