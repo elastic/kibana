@@ -25,6 +25,8 @@ import { _joinFilters } from '../agents';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
+import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
+
 import { invalidateAPIKeys } from './security';
 
 const uuidRegex =
@@ -58,8 +60,7 @@ export async function listEnrollmentApiKeys(
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     if (useSpaceAwareness && spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
-        // TODO use constant
-        filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+        filters.push(DEFAULT_NAMESPACES_FILTER);
       } else {
         filters.push(`namespaces:"${spaceId}"`);
       }
