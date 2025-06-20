@@ -7,11 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiCallOut, EuiFlexItem, EuiSpacer, OnRefreshProps } from '@elastic/eui';
-import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
+import { EuiFlexItem, EuiSpacer, OnRefreshProps } from '@elastic/eui';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
@@ -41,11 +41,7 @@ export function Overview() {
       <EuiSpacer size="m" />
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
-          <EuiCallOut
-            title={noAccessToFailureStoreWarningDescription}
-            color="warning"
-            iconType="warning"
-          />
+          <FailureStoreWarning />
           <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
