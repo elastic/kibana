@@ -5,6 +5,7 @@
   "plugin": {
     "id": "readOnlyObjectsTestPlugin",
     "server": true,
-    "browser": false
+    "browser": false,
+    "requiredPlugins": ["features"]
   }
 }
