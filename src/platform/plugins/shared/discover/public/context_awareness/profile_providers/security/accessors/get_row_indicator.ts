@@ -18,7 +18,6 @@ export const getAlertEventRowIndicator: NonNullable<UnifiedDataTableProps['getRo
   let rowLabel = 'event';
 
   if (getFieldValue(row, 'event.kind') === 'signal') {
-    // alert
     eventColor = euiTheme.colors.warning;
     rowLabel = 'alert';
   }
