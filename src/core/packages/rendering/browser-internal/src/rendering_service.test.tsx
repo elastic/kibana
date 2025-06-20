@@ -56,7 +56,7 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
+    chrome.getLegacyHeaderComponentForFixedLayout.mockReturnValue(<div>Hello chrome!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
