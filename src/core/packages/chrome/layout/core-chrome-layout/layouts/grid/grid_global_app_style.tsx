@@ -121,8 +121,8 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     ${logicalCSS('padding-right', `var(${euiPushFlyoutPaddingInlineEnd}, 0px)`)};
   }
 
-  // overlay mask should only cover the application area
-  .kbnBody .euiOverlayMask {
+  // overlay mask "belowHeader" should only cover the application area
+  .kbnBody .euiOverlayMask[class*='belowHeader'] {
     ${logicalCSS('top', 'var(--kbn-layout--application-top, 0px)')};
     ${logicalCSS('left', 'var(--kbn-layout--application-left, 0px)')};
     ${logicalCSS('right', 'var(--kbn-layout--application-right, 0px)')};

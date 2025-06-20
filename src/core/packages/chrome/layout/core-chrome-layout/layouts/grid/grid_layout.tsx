@@ -22,6 +22,7 @@ import type {
 } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+import useObservable from 'react-use/lib/useObservable';
 
 const layoutConfig: ChromeLayoutConfig = {
   headerHeight: 96,
@@ -54,16 +55,22 @@ export class GridLayout implements LayoutService {
     const debug = this.params.debug ?? false;
 
     return React.memo(() => {
+      const chromeVisible = useObservable(chromeVisible$, false);
+
       return (
         <>
           <GridLayoutGlobalStyles />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
-              header={chromeHeader}
-              sidebar={debug ? <SimpleDebugOverlay label="Debug Sidebar" /> : undefined}
-              footer={debug ? <SimpleDebugOverlay label="Debug Footer" /> : undefined}
+              header={chromeVisible && chromeHeader}
+              sidebar={
+                chromeVisible && debug ? <SimpleDebugOverlay label="Debug Sidebar" /> : undefined
+              }
+              footer={
+                chromeVisible && debug ? <SimpleDebugOverlay label="Debug Footer" /> : undefined
+              }
               navigation={
-                debug ? (
+                chromeVisible && debug ? (
                   <SimpleDebugOverlay label="Debug Nav" style={{ transform: 'rotate(180deg)' }} />
                 ) : undefined
               }
