@@ -30,7 +30,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction={currentBreakpoint === 'xl' ? 'row' : 'column'}>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="searchLabsSection">
           <DocCallouts
             title={i18n.translate('xpack.searchHomepage.searchLabs.title', {
               defaultMessage: 'Elasticsearch Labs',
@@ -46,14 +46,13 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             dataTestSubj="searchLabsButton"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="pythonNotebooksSection">
           <DocCallouts
             title={i18n.translate('xpack.searchHomepage.pythonNotebooks.title', {
               defaultMessage: 'Python notebooks',
             })}
             description={i18n.translate('xpack.searchHomepage.pythonNotebooks.description', {
-              defaultMessage:
-                'Test features in a virtual environment with executable notebooks.',
+              defaultMessage: 'Test features in a virtual environment with executable notebooks.',
             })}
             buttonHref={docLinks.notebooksExamples}
             buttonLabel={i18n.translate('xpack.searchHomepage.pythonNotebooks.buttonText', {
@@ -62,7 +61,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             dataTestSubj="openNotebooksButton"
           />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="elasticsearchDocumentationSection">
           <DocCallouts
             title={i18n.translate('xpack.searchHomepage.searchLabs.title', {
               defaultMessage: 'Elasticsearch documentation',
