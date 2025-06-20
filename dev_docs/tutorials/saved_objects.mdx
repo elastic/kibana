@@ -19,7 +19,6 @@ import { SavedObjectsType } from 'src/core/server';
 export const dashboardVisualization: SavedObjectsType = {
   name: 'dashboard_visualization', [1]
   hidden: true, [3]
-  switchToModelVersionAt: '8.10.0', // this is the default, feel free to omit it unless you intend to switch to using model versions before 8.10.0
   namespaceType: 'multiple-isolated', [2]
   mappings: {
     dynamic: false,
