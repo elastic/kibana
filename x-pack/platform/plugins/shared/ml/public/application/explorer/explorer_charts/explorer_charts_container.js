@@ -16,6 +16,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { CHART_TYPE } from '@kbn/ml-common-constants/explorer';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
@@ -28,7 +29,6 @@ import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import { BarSeries, Chart, Settings } from '@elastic/charts';
 import { escapeKueryForFieldValuePair } from '@kbn/ml-common-utils/string_utils';
 
 import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
