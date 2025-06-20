@@ -3,6 +3,7 @@
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
+xpack.observabilityAIAssistant.enabled: false
 xpack.apm.enabled: false
 uiSettings.overrides.defaultRoute: /app/discover
 
