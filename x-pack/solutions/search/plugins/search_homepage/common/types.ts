@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ApiKey } from '@kbn/security-plugin-types-common';
+
 export interface IndicesStatusResponse {
   indexNames: string[];
 }
@@ -15,4 +17,9 @@ export interface UserStartPrivilegesResponse {
     canManageIndex: boolean;
     canDeleteDocuments: boolean;
   };
+}
+
+export interface ApiKeysResponse {
+  apiKeys: ApiKey[];
+  canManageOwnApiKey: boolean;
 }

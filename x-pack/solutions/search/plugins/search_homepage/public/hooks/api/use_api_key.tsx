@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useQuery } from '@tanstack/react-query';
+import type { ApiKeysResponse } from '../../../common/types';
 import { useKibana } from '../use_kibana';
+import { GET_API_KEYS_ROUTE } from '../../../common/routes';
 
 export const useGetApiKeys = () => {
   const { http } = useKibana().services;
   return useQuery({
     queryKey: ['apiKey'],
-    queryFn: () =>
-      http.fetch<{ apiKeys: ApiKey[]; canManageOwnApiKey: boolean }>(
-        '/internal/search_homepage/api_keys'
-      ),
+    queryFn: () => http.fetch<ApiKeysResponse>(GET_API_KEYS_ROUTE),
   });
 };
