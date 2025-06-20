@@ -10,12 +10,12 @@ import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../../../common';
 import type { CasesActionContextProps, Services } from './types';
-import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
-import CasesProvider from '../../cases_context';
-import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { KibanaContextProvider, useKibana } from '../../../../common/lib/kibana';
+import CasesProvider from '../../../cases_context';
+import { getCaseOwnerByAppId } from '../../../../../common/utils/owner';
+import { canUseCases } from '../../../../client/helpers/can_use_cases';
 
 export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 

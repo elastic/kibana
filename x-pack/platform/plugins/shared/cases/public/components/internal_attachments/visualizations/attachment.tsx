@@ -8,14 +8,14 @@
 import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
-import { LENS_ATTACHMENT_TYPE } from '../../../common/constants/visualizations';
+import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
 import * as i18n from './translations';
 
 import type {
   PersistableStateAttachmentType,
   PersistableStateAttachmentViewProps,
-} from '../../client/attachment_framework/types';
-import { AttachmentActionType } from '../../client/attachment_framework/types';
+} from '../../../client/attachment_framework/types';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
 import { OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { securityMock } from '@kbn/security-plugin/public/mocks';
-import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { bulkGetUserProfiles, getCurrentUserProfile, suggestUserProfiles } from './api';
@@ -49,17 +48,18 @@ describe('User profiles API', () => {
   });
 
   describe('bulkGetUserProfiles', () => {
-    let security: SecurityPluginStart;
+    let userProfileService: UserProfileService;
 
     beforeEach(() => {
       jest.clearAllMocks();
-      security = securityMock.createStart();
-      security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
+      userProfileService = {
+        bulkGet: jest.fn().mockResolvedValue(userProfiles),
+      } as unknown as UserProfileService;
     });
 
     it('returns the user profiles correctly', async () => {
       const res = await bulkGetUserProfiles({
-        security,
+        userProfile: userProfileService,
         uids: userProfilesIds,
       });
 
@@ -68,7 +68,7 @@ describe('User profiles API', () => {
 
     it('should filter out empty user profiles', async () => {
       const res = await bulkGetUserProfiles({
-        security,
+        userProfile: userProfileService,
         uids: [...userProfilesIds, ''],
       });
 
@@ -77,11 +77,11 @@ describe('User profiles API', () => {
 
     it('calls bulkGet correctly', async () => {
       await bulkGetUserProfiles({
-        security,
+        userProfile: userProfileService,
         uids: userProfilesIds,
       });
 
-      expect(security.userProfiles.bulkGet).toHaveBeenCalledWith({
+      expect(userProfileService.bulkGet).toHaveBeenCalledWith({
         dataPath: 'avatar',
         uids: new Set([
           'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -93,19 +93,20 @@ describe('User profiles API', () => {
   });
 
   describe('getCurrentUserProfile', () => {
-    let security: SecurityPluginStart;
+    let userProfileService: UserProfileService;
 
     const currentProfile = userProfiles[0];
 
     beforeEach(() => {
       jest.clearAllMocks();
-      security = securityMock.createStart();
-      security.userProfiles.getCurrent = jest.fn().mockResolvedValue(currentProfile);
+      userProfileService = {
+        getCurrent: jest.fn().mockResolvedValue(currentProfile),
+      } as unknown as UserProfileService;
     });
 
     it('returns the current user profile correctly', async () => {
       const res = await getCurrentUserProfile({
-        security,
+        userProfile: userProfileService,
       });
 
       expect(res).toEqual(currentProfile);
@@ -113,10 +114,10 @@ describe('User profiles API', () => {
 
     it('calls getCurrent correctly', async () => {
       await getCurrentUserProfile({
-        security,
+        userProfile: userProfileService,
       });
 
-      expect(security.userProfiles.getCurrent).toHaveBeenCalledWith({
+      expect(userProfileService.getCurrent).toHaveBeenCalledWith({
         dataPath: 'avatar',
       });
     });

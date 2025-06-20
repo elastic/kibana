@@ -44,7 +44,7 @@ describe('useBulkGetUserProfiles', () => {
     await waitFor(() =>
       expect(spyOnBulkGetUserProfiles).toBeCalledWith({
         ...props,
-        security: expect.anything(),
+        userProfile: expect.anything(),
       })
     );
   });

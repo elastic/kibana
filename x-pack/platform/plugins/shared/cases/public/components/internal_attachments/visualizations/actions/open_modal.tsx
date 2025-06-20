@@ -13,9 +13,9 @@ import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/prese
 import { BehaviorSubject } from 'rxjs';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
-import type { CaseUI } from '../../../../common';
+import type { CaseUI } from '../../../../../common';
 import { getLensCaseAttachment } from './utils';
-import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesAddToExistingCaseModal } from '../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { convertToAbsoluteTimeRange } from './convert_to_absolute_time_range';
 
 interface Props {

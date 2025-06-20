@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
-import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
-import type { PersistableStateAttachmentPayload } from '../../../../common/types/domain';
-import { AttachmentType } from '../../../../common/types/domain';
+import { LENS_ATTACHMENT_TYPE } from '../../../../../common/constants/visualizations';
+import type { PersistableStateAttachmentPayload } from '../../../../../common/types/domain';
+import { AttachmentType } from '../../../../../common/types/domain';
 import type { LensProps } from '../types';
 
 type PersistableStateAttachmentWithoutOwner = Omit<PersistableStateAttachmentPayload, 'owner'>;

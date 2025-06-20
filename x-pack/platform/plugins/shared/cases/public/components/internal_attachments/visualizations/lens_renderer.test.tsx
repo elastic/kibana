@@ -10,8 +10,8 @@ import { screen } from '@testing-library/react';
 
 import { LensRenderer } from './lens_renderer';
 import { lensVisualization } from './index.mock';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('LensRenderer', () => {
   const mockEmbeddableComponent = jest
