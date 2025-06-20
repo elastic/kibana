@@ -17,14 +17,6 @@ export const useEntityAnalyticsIntegrations = () => {
       suspense: true, // Make query suspend, it needs tu be wrapped by <Suspense />
     }
   );
-  const { data: entra } = useGetPackageInfoByKeyQuery(
-    'entityanalytics_entra_id',
-    undefined, // When package version is undefined it gets the latest version
-    undefined, // No options required
-    {
-      suspense: true,
-    }
-  );
   const { data: ad } = useGetPackageInfoByKeyQuery(
     'entityanalytics_ad',
     undefined, // When package version is undefined it gets the latest version
@@ -36,7 +28,7 @@ export const useEntityAnalyticsIntegrations = () => {
     }
   );
 
-  const integrations = [okta, entra, ad]
+  const integrations = [okta, ad]
     .filter<GetInfoResponse>(
       (integration): integration is GetInfoResponse => integration !== undefined
     )

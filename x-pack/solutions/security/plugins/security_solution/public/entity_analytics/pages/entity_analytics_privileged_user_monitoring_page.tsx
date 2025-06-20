@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
+import { i18n } from '@kbn/i18n';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -186,6 +187,15 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         {state.type === 'dashboard' && (
           <>
             <HeaderPage
+              badgeOptions={{
+                beta: true,
+                text: i18n.translate(
+                  'xpack.securitySolution.privilegedUserMonitoring.dashboards.betaStatus',
+                  {
+                    defaultMessage: 'TECHNICAL PREVIEW',
+                  }
+                ),
+              }}
               title={
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboards.pageTitle"
