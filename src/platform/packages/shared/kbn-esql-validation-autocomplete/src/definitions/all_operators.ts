@@ -92,6 +92,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.ENRICH_WITH,
       Location.DISSECT,
       Location.COMPLETION,
+      Location.RENAME,
     ],
     signatures: [
       {
