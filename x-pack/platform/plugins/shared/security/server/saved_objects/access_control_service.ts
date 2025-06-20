@@ -15,6 +15,7 @@ export class AccessControlService {
   // private isUserAdmin: boolean;
   private readonly checkPrivilegesFunc: CheckSavedObjectsPrivileges;
   private userForOperation: AuthenticatedUser | null = null;
+  private cachedTypeRegistry: ISavedObjectTypeRegistry | null = null;
 
   constructor({
     getTypeRegistry,
@@ -40,9 +41,10 @@ export class AccessControlService {
     object: AuthorizeObject;
     spacesToAuthorize: Set<string>;
   }): Promise<boolean> {
-    const typeSupportsAccessControl = (await this.getTypeRegistryFunc())?.supportsAccessControl(
-      type
-    );
+    if (!this.cachedTypeRegistry) {
+      this.cachedTypeRegistry = await this.getTypeRegistryFunc();
+    }
+    const typeSupportsAccessControl = this.cachedTypeRegistry?.supportsAccessControl(type);
 
     const accessControl = object.accessControl;
     const currentUser = this.userForOperation;
