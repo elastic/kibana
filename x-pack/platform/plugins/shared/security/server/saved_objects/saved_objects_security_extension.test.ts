@@ -121,6 +121,7 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
     errors,
     checkPrivileges,
     getCurrentUser,
+    getTypeRegistry: jest.fn(),
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }
