@@ -72,7 +72,13 @@ export const getSecurityTimelineRedirectUrl = ({
   const encodedTimelineTimerangeParam = encode(timelineTimerangeSearchParam);
   const encodedTimelineFlyoutParam = encode(timelineFlyoutSearchParam);
 
-  return `${baseURL}?timeline=${encodedTimelineParam}&timerange=${encodedTimelineTimerangeParam}&timelineFlyout=${encodedTimelineFlyoutParam}`;
+  const urlParams = new URLSearchParams({
+    timeline: encodedTimelineParam,
+    timerange: encodedTimelineTimerangeParam,
+    timelineFlyout: encodedTimelineFlyoutParam,
+  });
+
+  return `${baseURL}?${urlParams.toString()}`;
 };
 
 /**
