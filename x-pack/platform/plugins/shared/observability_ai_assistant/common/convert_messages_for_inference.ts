@@ -37,12 +37,9 @@ export function convertMessagesForInference(
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
       const functionCall = message.message.function_call;
-      const isToolAvailable = !!(functionCall?.name && tools?.[functionCall.name]);
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
-        content:
-          message.message.content ??
-          '' + (!isToolAvailable ? ` the tool ${functionCall?.name} is not available` : ''),
+        content: message.message.content ?? null,
         ...(functionCall?.name
           ? {
               toolCalls: [
@@ -74,10 +71,20 @@ export function convertMessagesForInference(
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
 
+      const isToolAvailable = !!tools?.[toolCallRequest.toolCalls![0].function.name];
+
+      const toolResponseWithWarning = {
+        ...JSON.parse(message.message.content ?? '{}'),
+        ...(isToolAvailable
+          ? {}
+          : {
+              _systemWarning: `The tool "${message.message.name}" used to generate this response is no longer available. Do not call this tool again.`,
+            }),
+      };
       inferenceMessages.push({
         name: message.message.name!,
         role: InferenceMessageRole.Tool,
-        response: JSON.parse(message.message.content ?? '{}'),
+        response: toolResponseWithWarning,
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 
