@@ -20,6 +20,8 @@ const reportParamsProviders = {
   csv_searchsource: getCsvReportParams,
 } as const;
 
+export const supportedReportTypes = Object.keys(reportParamsProviders) as ReportTypeId[];
+
 export interface GetReportParamsOptions {
   apiClient: ReportingAPIClient;
   reportTypeId: ReportTypeId;

@@ -11,6 +11,7 @@ import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
 import type { ReportingPublicPluginSetupDependencies } from '../../plugin';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
@@ -39,10 +40,12 @@ export const ScheduledReportFlyoutShareWrapper = ({
   const { shareMenuItems, objectType } = useShareTypeContext('integration', 'export');
 
   const availableReportTypes = useMemo(() => {
-    return shareMenuItems.map((item) => ({
-      id: item.config.exportType,
-      label: item.config.label,
-    }));
+    return shareMenuItems
+      .filter((item) => supportedReportTypes.includes(item.config.exportType))
+      .map((item) => ({
+        id: item.config.exportType,
+        label: item.config.label,
+      }));
   }, [shareMenuItems]);
 
   const scheduledReport = useMemo(
