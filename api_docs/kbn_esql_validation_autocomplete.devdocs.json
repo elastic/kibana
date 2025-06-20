@@ -747,6 +747,68 @@
       },
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.getRecommendedQueriesTemplatesFromExtensions",
+        "type": "Function",
+        "tags": [],
+        "label": "getRecommendedQueriesTemplatesFromExtensions",
+        "description": [
+          "\nThis function extracts the templates from the recommended queries extensions.\nThe templates are the recommended queries without the source command (FROM).\nThis is useful for showing the templates in the autocomplete suggestions when the users have already typed the FROM command."
+        ],
+        "signature": [
+          "(recommendedQueriesExtensions: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.RecommendedQuery",
+            "text": "RecommendedQuery"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.SuggestionRawDefinition",
+            "text": "SuggestionRawDefinition"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/suggestions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.getRecommendedQueriesTemplatesFromExtensions.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "recommendedQueriesExtensions",
+            "description": [
+              ", the recommended queries extensions to extract the templates from"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.RecommendedQuery",
+                "text": "RecommendedQuery"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/suggestions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "SuggestionRawDefinition[], the templates extracted from the recommended queries extensions"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.getSourcesHelper",
         "type": "Function",
         "tags": [],
@@ -2180,7 +2242,7 @@
             "label": "getEditorExtensions",
             "description": [],
             "signature": [
-              "((queryString: string) => Promise<",
+              "((queryString: string) => Promise<{ recommendedQueries: ",
               {
                 "pluginId": "@kbn/esql-types",
                 "scope": "common",
@@ -2188,7 +2250,7 @@
                 "section": "def-common.RecommendedQuery",
                 "text": "RecommendedQuery"
               },
-              "[]>) | undefined"
+              "[]; }>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,

@@ -1622,7 +1622,7 @@ const stdDevDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.AGG,
   name: 'std_dev',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.std_dev', {
-    defaultMessage: 'The standard deviation of a numeric field.',
+    defaultMessage: 'The population standard deviation of a numeric field.',
   }),
   preview: false,
   alias: undefined,

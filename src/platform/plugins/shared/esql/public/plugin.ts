@@ -16,7 +16,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 
@@ -137,7 +137,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       activeSolutionId: SolutionId
     ) => {
       const result = await core.http.get(
-        `/internal/esql_registry/extensions/${activeSolutionId}/${queryString}`
+        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryString}`
       );
       return result;
     };

@@ -565,6 +565,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',
@@ -741,6 +742,7 @@ describe('features', () => {
     const alertingOperations = [
       ...[
         'get',
+        'bulkGet',
         'getRuleState',
         'getAlertSummary',
         'getExecutionLog',

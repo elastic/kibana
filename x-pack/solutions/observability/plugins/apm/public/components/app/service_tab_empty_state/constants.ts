@@ -124,7 +124,7 @@ export const addAPMCalloutDefinitions = (
         }),
         content: i18n.translate('xpack.apm.serviceTabEmptyState.transactionsContent', {
           defaultMessage:
-            "Troubleshoot your service's performance by analysing latency, throughput and errors down to the specific transaction.",
+            "Troubleshoot your service's performance by analyzing latency, throughput and errors down to the specific transaction.",
         }),
         img: {
           name: 'service_tab_empty_state_transactions.png',

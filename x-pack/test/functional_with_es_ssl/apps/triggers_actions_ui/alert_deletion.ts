@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   activeO11yAlertsNewerThan90,
   activeO11yAlertsOlderThan90,
@@ -22,7 +21,8 @@ import {
   inactiveSecurityAlertsOlderThan90,
   inactiveStackAlertsNewerThan90,
   inactiveStackAlertsOlderThan90,
-} from '../../../alerting_api_integration/security_and_spaces/group2/tests/alerting/alert_deletion/alert_deletion_test_utils';
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/security_and_spaces/group2/tests/alerting/alert_deletion/alert_deletion_test_utils';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
