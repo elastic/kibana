@@ -137,7 +137,31 @@ export const getDataViewRule = (
   ...rewrites,
 });
 
+/**
+ * @deprecated Use `getCustomQueryRuleParams()` instead
+ */
 export const getNewRule = (
+  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
+): QueryRuleCreateProps => ({
+  type: 'query',
+  query: 'host.name: *',
+  index: getIndexPatterns(),
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  severity: 'high',
+  risk_score: 17,
+  tags: ['test', 'newRule'],
+  references: ['http://example.com/', 'https://example.com/'],
+  false_positives: ['False1', 'False2'],
+  threat: [getMitre1(), getMitre2()],
+  note: '# test markdown',
+  interval: '100m',
+  from: '1900-01-01T00:00:00.000Z',
+  max_signals: 100,
+  ...rewrites,
+});
+
+export const getCustomQueryRuleParams = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
   type: 'query',

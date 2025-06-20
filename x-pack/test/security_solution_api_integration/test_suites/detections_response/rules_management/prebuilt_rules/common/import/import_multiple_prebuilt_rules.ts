@@ -60,10 +60,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = PREBUILT_RULE_ASSET_A['security-rule'];
+    const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
+      ...PREBUILT_RULE_ASSET_A['security-rule'],
+      immutable: true,
+      rule_source: { type: 'external', is_customized: false },
+    };
     const CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
       ...PREBUILT_RULE_ASSET_B['security-rule'],
       name: 'Customized Prebuilt Rule',
+      immutable: true,
+      rule_source: { type: 'external', is_customized: true },
     };
     const CUSTOM_RULE_TO_IMPORT = getCustomQueryRuleParams({
       rule_id: 'custom-rule',
