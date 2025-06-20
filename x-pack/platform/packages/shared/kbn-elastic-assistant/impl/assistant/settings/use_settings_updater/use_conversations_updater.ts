@@ -12,19 +12,28 @@ import {
   ConversationsBulkActions,
   bulkUpdateConversations,
 } from '../../api/conversations/bulk_update_actions_conversations';
+import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
 
+export type SaveConversationsSettingsParams =
+  | {
+      isDeleteAll?: boolean;
+      bulkActions?: ConversationsBulkActions;
+      excludedIds?: string[];
+    }
+  | undefined;
 interface UseConversationsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   onConversationDeleted: (cId: string) => void;
+  onConversationsBulkDeleted: (cIds: string[]) => void;
   resetConversationsSettings: () => void;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
   setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  saveConversationsSettings: (bulkActions?: ConversationsBulkActions) => Promise<boolean>;
+  saveConversationsSettings: (params?: SaveConversationsSettingsParams) => Promise<boolean>;
 }
 
 export const useConversationsUpdater = (
@@ -54,6 +63,37 @@ export const useConversationsUpdater = (
 
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
   }, [assistantStreamingEnabled, conversations]);
+
+  const onConversationsBulkDeleted = useCallback(
+    (cIds: string[]) => {
+      let updatedConversationSettings: Record<string, Conversation> = {};
+      const deletedConversations = new Set(conversationsSettingsBulkActions.delete?.ids ?? []);
+      Object.values(conversations).forEach((current) => {
+        const isConversationExist = cIds.includes(current.id);
+        if (isConversationExist) {
+          if (!deletedConversations.has(current.id)) {
+            deletedConversations.add(current.id);
+          } else {
+            updatedConversationSettings = { ...updatedConversationSettings, current };
+          }
+        }
+      });
+
+      setConversationSettings(updatedConversationSettings);
+      setConversationsSettingsBulkActions({
+        ...conversationsSettingsBulkActions,
+        delete: {
+          ids: Array.from(deletedConversations),
+        },
+      });
+    },
+    [
+      conversations,
+      conversationsSettingsBulkActions,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+    ]
+  );
 
   const onConversationDeleted = useCallback(
     (cId: string) => {
@@ -85,14 +125,18 @@ export const useConversationsUpdater = (
    * Save all pending settings
    */
   const saveConversationsSettings = useCallback(
-    async (bulkActions?: ConversationsBulkActions): Promise<boolean> => {
+    async (params?: SaveConversationsSettingsParams): Promise<boolean> => {
+      const { isDeleteAll, bulkActions, excludedIds = [] } = params ?? {};
       // had trouble with conversationsSettingsBulkActions not updating fast enough
       // from the setConversationsSettingsBulkActions in saveSystemPromptSettings
       const bulkUpdates = bulkActions ?? conversationsSettingsBulkActions;
       const hasBulkConversations = bulkUpdates.create || bulkUpdates.update || bulkUpdates.delete;
-      const bulkResult = hasBulkConversations
-        ? await bulkUpdateConversations(http, bulkUpdates, toasts)
-        : undefined;
+      const bulkResult =
+        isDeleteAll || excludedIds?.length > 0
+          ? await deleteAllConversations({ http, toasts, excludedIds })
+          : hasBulkConversations
+          ? await bulkUpdateConversations(http, bulkUpdates, toasts)
+          : undefined;
       const didUpdateAssistantStreamingEnabled =
         assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
 
@@ -107,9 +151,9 @@ export const useConversationsUpdater = (
       return bulkResult?.success ?? didUpdateAssistantStreamingEnabled ?? false;
     },
     [
+      conversationsSettingsBulkActions,
       http,
       toasts,
-      conversationsSettingsBulkActions,
       assistantStreamingEnabled,
       updatedAssistantStreamingEnabled,
       setAssistantStreamingEnabled,
@@ -129,6 +173,7 @@ export const useConversationsUpdater = (
     conversationSettings,
     conversationsSettingsBulkActions,
     onConversationDeleted,
+    onConversationsBulkDeleted,
     resetConversationsSettings,
     saveConversationsSettings,
     setUpdatedAssistantStreamingEnabled,

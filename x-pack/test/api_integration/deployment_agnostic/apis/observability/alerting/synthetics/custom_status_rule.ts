@@ -30,7 +30,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
 
-  describe('SyntheticsCustomStatusRule', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/224683
+  describe.skip('SyntheticsCustomStatusRule', function () {
     // Test failing on MKI and ECH
     this.tags(['skipCloud']);
 
