@@ -190,3 +190,81 @@ export const ML_RULES_UNAVAILABLE = (totalRules: number) =>
     defaultMessage:
       '{totalRules} {totalRules, plural, =1 {rule requires} other {rules require}} Machine Learning to enable.',
   });
+
+export const bulkAlertSuppression = {
+  SUPPRESSION_MAX_LENGTH_ERROR: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.alertSuppressionMaxLengthErrorMessage',
+    {
+      defaultMessage: 'Number of suppress by fields must be at most 3.',
+    }
+  ),
+  SET_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.addTitle',
+    {
+      defaultMessage: 'Apply alert suppression',
+    }
+  ),
+  SET_FOR_THRESHOLD_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.addTitle',
+    {
+      defaultMessage: 'Apply alert suppression to threshold rules',
+    }
+  ),
+  SUPPRESSION_REQUIRED_ERROR: i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.edit.alertSuppressionRequiredErrorMessage',
+    {
+      defaultMessage: 'A minimum of one suppression field is required.',
+    }
+  ),
+  SUPPRESSION_INFO_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.infoText',
+    {
+      defaultMessage:
+        'Existing alert suppression settings will be overwritten for all of the selected rules, except for threshold rules.',
+    }
+  ),
+  SUPPRESSION_FOR_THRESHOLD_INFO_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppressionForThreshold.infoText',
+    {
+      defaultMessage:
+        'Existing alert suppression settings will be overwritten for all of the selected threshold rules.',
+    }
+  ),
+  DELETE_CONFIRMATION_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.bulkDeleteConfirmationTitle',
+    {
+      defaultMessage: 'Confirm bulk removal of alert suppression',
+    }
+  ),
+  DELETE_CONFIRMATION_CONFIRM: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteConfirmationConfirm',
+    {
+      defaultMessage: 'Delete',
+    }
+  ),
+  DELETE_CONFIRMATION_CANCEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.deleteConfirmationCancel',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+  DURATION_PER_TIME_PERIOD_INPUT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodInput',
+    {
+      defaultMessage: 'Per time period',
+    }
+  ),
+  DURATION_PER_TIME_PERIOD_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodLabel',
+    {
+      defaultMessage: 'Suppression interval',
+    }
+  ),
+  DURATION_PER_TIME_PERIOD_HELP_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.alertSuppression.perTimePeriodHelpText',
+    {
+      defaultMessage:
+        'Suppress alerts for the selected rules within a repeating time interval. To ensure suppression is appropriately applied, avoid choosing an interval that’s shorter than the rule’s run schedule.',
+    }
+  ),
+};

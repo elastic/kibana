@@ -6,6 +6,7 @@
  */
 
 import { all, fork } from 'redux-saga/effects';
+import { getMaintenanceWindowsEffect } from './maintenance_windows';
 import { getCertsListEffect } from './certs';
 import {
   addGlobalParamEffect,
@@ -82,6 +83,7 @@ export const rootEffect = function* root(): Generator {
     fork(refreshOverviewTrendStats),
     fork(inspectStatusRuleEffect),
     fork(inspectTLSRuleEffect),
+    fork(getMaintenanceWindowsEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
   ]);
 };
