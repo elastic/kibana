@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
+
 export interface SLOClient {
   getSummaryIndices: () => Promise<string[]>;
+  getSlo: (id: string, params: GetSLOParams) => Promise<GetSLOResponse>;
 }
