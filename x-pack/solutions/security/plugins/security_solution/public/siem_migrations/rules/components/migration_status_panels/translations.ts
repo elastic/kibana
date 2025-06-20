@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const RULE_MIGRATION_READY_DESCRIPTION = (totalRules: number) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.ready.description', {
-    defaultMessage:
-      'Migration of {totalRules} rules is created but the translation has not started yet.',
+    defaultMessage: 'Migration of {totalRules} rules is created and ready to start.',
     values: { totalRules },
   });
 
@@ -24,24 +23,39 @@ export const RULE_MIGRATION_ERROR_DESCRIPTION = (totalRules: number) => {
 
 export const RULE_MIGRATION_STOPPED_DESCRIPTION = (totalRules: number) => {
   return i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.stopped.description', {
-    defaultMessage: 'Migration of {totalRules} rules was stopped. You can resume it any time.',
+    defaultMessage: 'Migration of {totalRules} rules was stopped, you can resume it any time.',
     values: { totalRules },
   });
 };
 
 export const RULE_MIGRATION_READY_MISSING_RESOURCES = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources',
-  { defaultMessage: 'Upload macros & lookups and start the translation process.' }
+  { defaultMessage: 'You can also upload the missing macros & lookups for more accurate results.' }
 );
 
 export const RULE_MIGRATION_START_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.button',
-  { defaultMessage: 'Start translation' }
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.startButton',
+  { defaultMessage: 'Start' }
 );
-
-export const RULE_MIGRATION_RESTART_TRANSLATION_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.panel.translate.restartButton',
-  { defaultMessage: 'Resume translation' }
+export const RULE_MIGRATION_STARTING_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.startingButton',
+  { defaultMessage: 'Starting' }
+);
+export const RULE_MIGRATION_STOP_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.stopButton',
+  { defaultMessage: 'Stop' }
+);
+export const RULE_MIGRATION_STOPPING_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.stoppingButton',
+  { defaultMessage: 'Stopping' }
+);
+export const RULE_MIGRATION_RESUME_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.resumeButton',
+  { defaultMessage: 'Resume' }
+);
+export const RULE_MIGRATION_RESUMING_TRANSLATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.translate.resumingButton',
+  { defaultMessage: 'Resuming' }
 );
 
 export const RULE_MIGRATION_TITLE = (number: number) =>

@@ -51,6 +51,7 @@
     "@kbn/zod-helpers",
     "@kbn/core-http-server-utils",
     "@kbn/inference-common",
-    "@kbn/lock-manager"
+    "@kbn/lock-manager",
+    "@kbn/management-settings-ids"
   ]
 }
