@@ -109,7 +109,9 @@ describe('MigrationReadyPanel', () => {
         startMigration: mockStartMigration,
         isLoading: true,
       });
-      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />, {
+        wrapper: TestProviders,
+      });
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');
     });
