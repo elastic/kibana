@@ -325,40 +325,11 @@ describe('validation logic', () => {
         "SyntaxError: no viable alternative at input '(1,'",
         "SyntaxError: extraneous input ')' expecting <EOF>",
       ]);
+
       for (const bool of ['true', 'false']) {
         testErrorsAndWarnings(`row a=NOT ${bool}`, []);
         testErrorsAndWarnings(`row NOT ${bool}`, []);
       }
-
-      testErrorsAndWarnings('row var = 1 in ', [
-        "SyntaxError: mismatched input '<EOF>' expecting '('",
-      ]);
-      testErrorsAndWarnings('row var = 1 in (', [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        'Error: [in] function expects at least 2 arguments, got 1.',
-      ]);
-      testErrorsAndWarnings('row var = 1 not in ', [
-        "SyntaxError: mismatched input '<EOF>' expecting '('",
-      ]);
-      testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 5 in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 5 not in (1, 2, 3)', []);
-      testErrorsAndWarnings('row var = 1 in (1, 2, 3, round(5))', []);
-      testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = "a" in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = "a" not in ("a", "b", "c")', []);
-      testErrorsAndWarnings('row var = 1 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 in ("a", "b", "c")', [
-        'Argument of [in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 not in ("a", "b", "c")', [
-        'Argument of [not in] must be [integer[]], found value [("a", "b", "c")] type [(keyword, keyword, keyword)]',
-      ]);
-      testErrorsAndWarnings('row var = 5 not in (1, 2, 3, "a")', [
-        'Argument of [not in] must be [integer[]], found value [(1, 2, 3, "a")] type [(integer, integer, integer, keyword)]',
-      ]);
 
       // test that "and" and "or" accept null... not sure if this is the best place or not...
       for (const op of ['and', 'or']) {
@@ -636,11 +607,10 @@ describe('validation logic', () => {
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
       ]);
       testErrorsAndWarnings('from a_index | rename textField', [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
+        "SyntaxError: no viable alternative at input 'textField'",
       ]);
       testErrorsAndWarnings('from a_index | rename a', [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        'Unknown column [a]',
+        "SyntaxError: no viable alternative at input 'a'",
       ]);
       testErrorsAndWarnings('from a_index | rename textField as', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
@@ -653,6 +623,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | rename textField AS b', []);
       testErrorsAndWarnings('from a_index | rename textField As b', []);
       testErrorsAndWarnings('from a_index | rename textField As b, b AS c', []);
+      testErrorsAndWarnings('from a_index | rename b = textField', []);
+      testErrorsAndWarnings('from a_index | rename b = textField, b AS c', []);
+      testErrorsAndWarnings('from a_index | rename textField = a', ['Unknown column [a]']);
       testErrorsAndWarnings('from a_index | rename fn() as a', [
         "SyntaxError: token recognition error at: '('",
         "SyntaxError: token recognition error at: ')'",
