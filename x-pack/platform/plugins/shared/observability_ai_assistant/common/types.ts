@@ -186,13 +186,17 @@ export interface InferenceChunk {
   charStartOffset: number;
 }
 
-export interface AnonymizationRule {
-  id: string;
-  entityClass: string;
-  type: 'regex' | 'ner';
-  pattern?: string;
+export interface NerAnonymizationRule {
+  type: 'ner';
   enabled: boolean;
-  builtIn: boolean;
-  description?: string;
-  normalize?: boolean;
+  modelId?: string;
 }
+
+export interface RegexAnonymizationRule {
+  type: 'regex';
+  entityClass: string;
+  pattern: string;
+  enabled: boolean;
+}
+
+export type AnonymizationRule = NerAnonymizationRule | RegexAnonymizationRule;

@@ -93,30 +93,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
           size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        key="3"
-      >
-        <GuideCard
-          activateGuide={[MockFunction]}
-          activeFilter="all"
-          card={
-            Object {
-              "guideId": "websiteSearch",
-              "icon": "search",
-              "order": 13,
-              "solution": "search",
-              "telemetryId": "onboarding--search--website",
-              "title": "Add search to my website",
-            }
-          }
-          guidesState={Array []}
-          navigateToApp={[MockFunction]}
-        />
-        <EuiSpacer
-          size="m"
-        />
-      </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
