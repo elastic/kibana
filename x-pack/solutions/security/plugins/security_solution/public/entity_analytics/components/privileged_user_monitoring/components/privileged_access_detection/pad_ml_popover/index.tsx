@@ -6,11 +6,10 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiHeaderSectionItemButton, EuiFlexGroup, EuiPopover, EuiFieldSearch } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { PrivilegedAccessDetectionMLPopoverHeader } from './pad_ml_popover_header';
 import { useEnableDataFeed } from '../../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../../../common/components/ml_popover/types';
@@ -55,7 +54,7 @@ export const PrivilegedAccessDetectionMLPopover: React.FC = () => {
         anchorPosition="downRight"
         id="privileged-access-detections-popover"
         button={
-          <EuiHeaderSectionItemButton
+          <EuiButtonEmpty
             aria-expanded={isPopoverOpen}
             aria-haspopup="true"
             aria-label={i18n.translate(
@@ -71,11 +70,11 @@ export const PrivilegedAccessDetectionMLPopover: React.FC = () => {
               refreshJobs();
             }}
           >
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.padMlJobsPopoverText"
-              defaultMessage="Privileged access detection ML Jobs"
-            />
-          </EuiHeaderSectionItemButton>
+            {i18n.translate(
+              'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedAccessDetection.padMlJobsPopoverText',
+              { defaultMessage: 'Privileged access detection ML Jobs' }
+            )}
+          </EuiButtonEmpty>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(!isPopoverOpen)}
