@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
 import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+
+jest.mock('@kbn/ebt-tools', () => ({
+  ...jest.requireActual('@kbn/ebt-tools'),
+  reportPerformanceMetricEvent: jest.fn(),
+}));
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
@@ -38,6 +44,8 @@ describe('DiscoverEBTManager', () => {
       discoverProfiles: [],
     });
     (coreSetupMock.analytics.reportEvent as jest.Mock).mockClear();
+    (reportPerformanceMetricEvent as jest.Mock).mockClear();
+    jest.spyOn(window.performance, 'now').mockRestore();
   });
 
   describe('register', () => {
@@ -103,11 +111,13 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
 
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
 
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles2);
+      scopedManager.updateProfilesContextWith(dscProfiles2);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles2);
     });
 
@@ -119,11 +129,13 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
 
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
 
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles2);
+      scopedManager.updateProfilesContextWith(dscProfiles2);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
     });
 
@@ -133,8 +145,10 @@ describe('DiscoverEBTManager', () => {
         core: coreSetupMock,
         discoverEbtContext$,
       });
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
 
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
     });
 
@@ -145,15 +159,105 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
       discoverEBTContextManager.onDiscoverAppMounted();
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
       discoverEBTContextManager.onDiscoverAppUnmounted();
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
       discoverEBTContextManager.onDiscoverAppMounted();
-      discoverEBTContextManager.updateProfilesContextWith(dscProfiles);
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
       expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+    });
+
+    it('should not update the profiles if there is no active scoped manager', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+    });
+
+    it('should update the profiles when activating a scoped manager', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+      scopedManager.setAsActiveManager();
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+    });
+
+    it('should update the profiles when changing the active scoped manager', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      const anotherScopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      anotherScopedManager.updateProfilesContextWith(dscProfiles2);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+      anotherScopedManager.setAsActiveManager();
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles2);
+    });
+
+    it('should not update the profiles for inactive scoped managers', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      const anotherScopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+      anotherScopedManager.setAsActiveManager();
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+      scopedManager.updateProfilesContextWith(dscProfiles2);
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+    });
+  });
+
+  describe('onDiscoverAppMounted/onDiscoverAppUnmounted', () => {
+    it('should clear the active scoped manager after unmounting and remounting', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+      discoverEBTContextManager.onDiscoverAppUnmounted();
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+      discoverEBTContextManager.onDiscoverAppMounted();
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+      scopedManager.updateProfilesContextWith(dscProfiles2);
+      expect(discoverEBTContextManager.getProfilesContext()).toEqual([]);
+      scopedManager.setAsActiveManager();
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles2);
     });
   });
 
@@ -164,7 +268,10 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
 
-      await discoverEBTContextManager.trackDataTableSelection({
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackDataTableSelection({
         fieldName: 'test',
         fieldsMetadata,
       });
@@ -174,7 +281,7 @@ describe('DiscoverEBTManager', () => {
         fieldName: 'test',
       });
 
-      await discoverEBTContextManager.trackDataTableSelection({
+      await scopedManager.trackDataTableSelection({
         fieldName: 'test2',
         fieldsMetadata,
       });
@@ -190,7 +297,10 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
 
-      await discoverEBTContextManager.trackDataTableRemoval({
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackDataTableRemoval({
         fieldName: 'test',
         fieldsMetadata,
       });
@@ -200,7 +310,7 @@ describe('DiscoverEBTManager', () => {
         fieldName: 'test',
       });
 
-      await discoverEBTContextManager.trackDataTableRemoval({
+      await scopedManager.trackDataTableRemoval({
         fieldName: 'test2',
         fieldsMetadata,
       });
@@ -216,7 +326,10 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
 
-      await discoverEBTContextManager.trackFilterAddition({
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      await scopedManager.trackFilterAddition({
         fieldName: 'test',
         fieldsMetadata,
         filterOperation: '+',
@@ -228,7 +341,7 @@ describe('DiscoverEBTManager', () => {
         filterOperation: '+',
       });
 
-      await discoverEBTContextManager.trackFilterAddition({
+      await scopedManager.trackFilterAddition({
         fieldName: 'test2',
         fieldsMetadata,
         filterOperation: '_exists_',
@@ -239,6 +352,83 @@ describe('DiscoverEBTManager', () => {
         filterOperation: '_exists_',
       });
     });
+
+    it('should temporarily update the discoverEbtContext$ when tracking field usage in an inactive scoped manager', async () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
+
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      const anotherScopedManager = discoverEBTContextManager.createScopedEBTManager();
+
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      anotherScopedManager.updateProfilesContextWith(dscProfiles2);
+
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+
+      const results: unknown[] = [];
+
+      discoverEbtContext$.pipe(skip(1)).subscribe(({ discoverProfiles }) => {
+        results.push(discoverProfiles);
+      });
+
+      jest
+        .spyOn(coreSetupMock.analytics, 'reportEvent')
+        .mockImplementation((eventType, eventData) => {
+          results.push({ eventType, eventData });
+        });
+
+      await anotherScopedManager.trackDataTableSelection({
+        fieldName: 'test',
+        fieldsMetadata,
+      });
+      await anotherScopedManager.trackDataTableRemoval({
+        fieldName: 'test',
+        fieldsMetadata,
+      });
+      await anotherScopedManager.trackFilterAddition({
+        fieldName: 'test',
+        fieldsMetadata,
+        filterOperation: '+',
+      });
+
+      expect(results).toEqual([
+        ['profile21', 'profile22'],
+        {
+          eventType: 'discover_field_usage',
+          eventData: {
+            eventName: 'dataTableSelection',
+            fieldName: 'test',
+          },
+        },
+        ['profile1', 'profile2'],
+        ['profile21', 'profile22'],
+        {
+          eventType: 'discover_field_usage',
+          eventData: {
+            eventName: 'dataTableRemoval',
+            fieldName: 'test',
+          },
+        },
+        ['profile1', 'profile2'],
+        ['profile21', 'profile22'],
+        {
+          eventType: 'discover_field_usage',
+          eventData: {
+            eventName: 'filterAddition',
+            fieldName: 'test',
+            filterOperation: '+',
+          },
+        },
+        ['profile1', 'profile2'],
+      ]);
+    });
   });
 
   describe('trackContextualProfileResolvedEvent', () => {
@@ -248,7 +438,10 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test',
       });
@@ -262,7 +455,7 @@ describe('DiscoverEBTManager', () => {
         }
       );
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.dataSourceLevel,
         profileId: 'data-source-test',
       });
@@ -276,7 +469,7 @@ describe('DiscoverEBTManager', () => {
         }
       );
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.documentLevel,
         profileId: 'document-test',
       });
@@ -297,21 +490,24 @@ describe('DiscoverEBTManager', () => {
         discoverEbtContext$,
       });
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test1',
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
+      scopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.rootLevel,
         profileId: 'test2',
       });
@@ -319,35 +515,121 @@ describe('DiscoverEBTManager', () => {
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(2);
     });
 
-    it('should trigger similar requests after remount', async () => {
+    it('should temporarily update the discoverEbtContext$ when a contextual profile is resolved in an inactive scoped manager', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
+
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+      discoverEBTContextManager.onDiscoverAppMounted();
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      const anotherScopedManager = discoverEBTContextManager.createScopedEBTManager();
+
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      anotherScopedManager.updateProfilesContextWith(dscProfiles2);
+
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+
+      const results: unknown[] = [];
+
+      discoverEbtContext$.pipe(skip(1)).subscribe(({ discoverProfiles }) => {
+        results.push(discoverProfiles);
+      });
+
+      jest
+        .spyOn(coreSetupMock.analytics, 'reportEvent')
+        .mockImplementation((eventType, eventData) => {
+          results.push({ eventType, eventData });
+        });
+
+      anotherScopedManager.trackContextualProfileResolvedEvent({
+        contextLevel: ContextualProfileLevel.rootLevel,
+        profileId: 'test',
+      });
+
+      expect(results).toEqual([
+        ['profile21', 'profile22'],
+        {
+          eventType: 'discover_profile_resolved',
+          eventData: {
+            contextLevel: 'rootLevel',
+            profileId: 'test',
+          },
+        },
+        ['profile1', 'profile2'],
+      ]);
+    });
+  });
+
+  describe('trackPerformanceEvent', () => {
+    it('should track performance events', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
       });
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        contextLevel: ContextualProfileLevel.rootLevel,
-        profileId: 'test1',
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackPerformanceEvent('testEvent');
+      tracker.reportEvent({ meta: { foo: 'bar' } });
+
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testEvent',
+        duration: 750,
+        meta: { foo: 'bar' },
       });
+    });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    it('should temporarily update the discoverEbtContext$ when tracking performance events in an inactive scoped manager', () => {
+      const dscProfiles = ['profile1', 'profile2'];
+      const dscProfiles2 = ['profile21', 'profile22'];
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        contextLevel: ContextualProfileLevel.rootLevel,
-        profileId: 'test1',
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
       });
-
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
-
-      discoverEBTContextManager.onDiscoverAppUnmounted();
       discoverEBTContextManager.onDiscoverAppMounted();
 
-      discoverEBTContextManager.trackContextualProfileResolvedEvent({
-        contextLevel: ContextualProfileLevel.rootLevel,
-        profileId: 'test1',
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      const anotherScopedManager = discoverEBTContextManager.createScopedEBTManager();
+
+      scopedManager.setAsActiveManager();
+      scopedManager.updateProfilesContextWith(dscProfiles);
+      anotherScopedManager.updateProfilesContextWith(dscProfiles2);
+
+      expect(discoverEBTContextManager.getProfilesContext()).toBe(dscProfiles);
+
+      const results: unknown[] = [];
+
+      discoverEbtContext$.pipe(skip(1)).subscribe(({ discoverProfiles }) => {
+        results.push(discoverProfiles);
       });
 
-      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(2);
+      (reportPerformanceMetricEvent as jest.Mock).mockImplementation((_, eventData) => {
+        results.push(eventData);
+      });
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = anotherScopedManager.trackPerformanceEvent('testEvent');
+      tracker.reportEvent({ meta: { foo: 'bar' } });
+
+      expect(results).toEqual([
+        ['profile21', 'profile22'],
+        {
+          eventName: 'testEvent',
+          duration: 750,
+          meta: { foo: 'bar' },
+        },
+        ['profile1', 'profile2'],
+      ]);
     });
   });
 });

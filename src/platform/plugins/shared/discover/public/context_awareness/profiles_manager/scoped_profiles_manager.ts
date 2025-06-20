@@ -24,7 +24,7 @@ import type {
   DocumentProfileService,
 } from '../profiles/document_profile';
 import type { RootContext } from '../profiles/root_profile';
-import type { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';
@@ -60,7 +60,7 @@ export class ScopedProfilesManager {
     private readonly getRootProfile: () => AppliedProfile,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService,
-    private readonly ebtManager: DiscoverEBTManager
+    private readonly ebtManager: ScopedDiscoverEBTManager
   ) {
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
     this.dataSourceProfile = dataSourceProfileService.getProfile({
