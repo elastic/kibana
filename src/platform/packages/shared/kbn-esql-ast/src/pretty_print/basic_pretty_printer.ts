@@ -274,7 +274,7 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = `[${elements}]`;
+      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -372,12 +372,6 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
       }
-    })
-
-    .on('visitRenameExpression', (ctx) => {
-      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
-
-      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitOrderExpression', (ctx) => {

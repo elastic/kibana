@@ -30,6 +30,7 @@ export const connectorTypes: string[] = [
   '.d3security',
   '.resilient',
   '.thehive',
+  '.xsoar',
   '.sentinelone',
   '.crowdstrike',
   '.inference',
