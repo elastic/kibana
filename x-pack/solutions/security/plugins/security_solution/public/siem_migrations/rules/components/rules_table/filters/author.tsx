@@ -65,6 +65,7 @@ export const AuthorFilterButton: React.FC<AuthorFilterButtonProps> = React.memo(
         }}
         isSelected={isPopoverOpen}
         hasActiveFilters={author !== undefined}
+        numActiveFilters={author ? 1 : 0}
         data-test-subj="authorFilterButton"
       >
         {i18n.AUTHOR_BUTTON_TITLE}

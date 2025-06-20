@@ -63,13 +63,12 @@ export const deserializeState = async ({
   } else {
     // by value
     const { byValueToSavedSearch } = discoverServices.savedSearch;
-    const savedSearch = await byValueToSavedSearch(
-      inject(
-        serializedState.rawState as unknown as EmbeddableStateWithType,
-        serializedState.references ?? []
-      ) as SavedSearchUnwrapResult,
-      true
-    );
+    const savedSearchUnwrappedResult = inject(
+      serializedState.rawState as unknown as EmbeddableStateWithType,
+      serializedState.references ?? []
+    ) as SavedSearchUnwrapResult;
+
+    const savedSearch = await byValueToSavedSearch(savedSearchUnwrappedResult, true);
     return {
       ...savedSearch,
       ...panelState,
