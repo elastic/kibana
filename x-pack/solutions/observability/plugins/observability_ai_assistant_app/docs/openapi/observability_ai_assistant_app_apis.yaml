@@ -18,7 +18,7 @@ servers:
 paths:
   /api/observability_ai_assistant/chat/complete:
     post:
-      summary: Generate a chat completion.
+      summary: Generate a chat completion
       description: |
         Create a new chat completion by using the Observability AI Assistant. 
 

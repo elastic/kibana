@@ -43560,7 +43560,7 @@ paths:
               schema:
                 type: object
           description: Successful response
-      summary: Generate a chat completion.
+      summary: Generate a chat completion
       tags:
         - observability_ai_assistant
       x-state: Technical Preview
