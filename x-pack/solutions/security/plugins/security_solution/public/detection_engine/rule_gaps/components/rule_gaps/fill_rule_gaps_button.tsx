@@ -101,11 +101,11 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
     if (hasActionBeenConfirmed === false) {
       return;
     }
-    const modalManualGapsFillingConfirmationResult = await showBulkFillRuleGapsConfirmation();
+    const modalBulkFillRuleGapsConfirmationResult = await showBulkFillRuleGapsConfirmation();
     startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsOpenModal, {
       type: 'single',
     });
-    if (modalManualGapsFillingConfirmationResult === null) {
+    if (modalBulkFillRuleGapsConfirmationResult === null) {
       return;
     }
 
@@ -148,8 +148,8 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       type: BulkActionTypeEnum.fill_gaps,
       ids: [ruleId],
       fillGapsPayload: {
-        start_date: modalManualGapsFillingConfirmationResult.startDate.toISOString(),
-        end_date: modalManualGapsFillingConfirmationResult.endDate.toISOString(),
+        start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
+        end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
       },
     });
 
@@ -162,8 +162,8 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
     invalidateFindBackfillsQuery();
 
     startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsExecute, {
-      rangeInMs: modalManualGapsFillingConfirmationResult.endDate.diff(
-        modalManualGapsFillingConfirmationResult.startDate
+      rangeInMs: modalBulkFillRuleGapsConfirmationResult.endDate.diff(
+        modalBulkFillRuleGapsConfirmationResult.startDate
       ),
       status: isSuccessful ? 'success' : 'error',
       rulesCount: 1,
