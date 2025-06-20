@@ -56,6 +56,13 @@ describe('autocomplete.suggest', () => {
           'STATS ',
           'EVAL ',
           'GROK ',
+          'CHANGE_POINT ',
+          'MV_EXPAND ',
+          'DROP ',
+          'KEEP ',
+          'RENAME ',
+          'SAMPLE ',
+          'LOOKUP JOIN ',
         ];
 
         it('suggests FORK sub commands in an open branch', async () => {
