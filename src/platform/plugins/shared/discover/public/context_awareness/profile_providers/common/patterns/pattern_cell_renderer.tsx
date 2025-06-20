@@ -25,7 +25,7 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
   const keywordStyle = useMemo(
     () => ({
       marginRight: euiTheme.size.xs,
-      marginBottom: '6px', // find a suitable eui variable for this
+      marginBottom: `calc(${euiTheme.size.m} / 2)`,
       display: 'inline-block',
       padding: `${euiTheme.size.xxs} ${euiTheme.size.s}`,
       backgroundColor: euiTheme.colors.lightestShade,

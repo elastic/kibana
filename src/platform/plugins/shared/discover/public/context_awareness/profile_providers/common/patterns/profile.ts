@@ -25,7 +25,6 @@ export const createPatternDataSourceProfileProvider = (
   patternColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
-  // isExperimental: true,
   profile: {
     getCellRenderers:
       (prev, { context }) =>
