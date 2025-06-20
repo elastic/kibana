@@ -10,8 +10,8 @@ import { StreamEnrichmentContextType } from './types';
 /**
  * Selects the processor marked as the draft processor.
  */
-export const selectDraftProcessor = (context: StreamEnrichmentContextType | undefined) => {
-  const draft = context?.processorsRefs?.find((p) => p.getSnapshot().matches('draft'));
+export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
+  const draft = context.processorsRefs.find((p) => p.getSnapshot().matches('draft'));
   return {
     processor: draft?.getSnapshot().context.processor,
     resources: draft?.getSnapshot().context.resources,
