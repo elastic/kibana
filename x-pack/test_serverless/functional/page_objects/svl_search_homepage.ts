@@ -55,7 +55,7 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).contain('/app/management/security/api_keys');
     },
     async expectToBeOnUploadDataPage() {
-      expect(await browser.getCurrentUrl()).contain('tutorial_directory/fileDataViz');
+      expect(await browser.getCurrentUrl()).contain('ml/filedatavisualizer');
     },
     async expectToBeOnCustomerEngineerPage() {
       expect(await browser.getCurrentUrl()).contain('contact/ce-help');
@@ -64,10 +64,10 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
       expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
     },
     async expectToBeOnObservabilityPage() {
-      expect(await browser.getCurrentUrl()).contain('app/integrations/browse/observability');
+      expect(await browser.getCurrentUrl()).contain('manage-data/ingest');
     },
     async expectToBeOnSpacesCreatePage() {
-      expect(await browser.getCurrentUrl()).contain('app/management/kibana/spaces/create');
+      expect(await browser.getCurrentUrl()).contain('observability/start');
     },
     async expectToBeOnSearchLabsPage() {
       expect(await browser.getCurrentUrl()).contain('search-labs');
