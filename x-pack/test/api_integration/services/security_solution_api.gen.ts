@@ -29,6 +29,7 @@ import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-pl
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
 import { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -160,7 +161,10 @@ import {
   UpdatePrivMonUserRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/update.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
-import { UpdateRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  UpdateRuleMigrationRequestParamsInput,
+  UpdateRuleMigrationRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
@@ -404,12 +408,13 @@ For detailed information on Kibana actions and alerting, and additional API call
     /**
      * Creates a new rule migration and returns the corresponding migration_id
      */
-    createRuleMigration(kibanaSpace: string = 'default') {
+    createRuleMigration(props: CreateRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
         .put(routeWithNamespace('/internal/siem_migrations/rules', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Adds original vendor rules to an already existing migration. Can be called multiple times to add more rules
@@ -1794,7 +1799,8 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Updates rules migrations attributes
@@ -1883,6 +1889,9 @@ export interface CreatePrivMonUserProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
@@ -2151,6 +2160,7 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;

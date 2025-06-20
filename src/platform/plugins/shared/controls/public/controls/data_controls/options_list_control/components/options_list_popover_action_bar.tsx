@@ -27,7 +27,7 @@ import {
 
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -146,7 +146,7 @@ export const OptionsListPopoverActionBar = ({
       }
     }
   }, [availableOptions, selectedOptions, areAllSelected]);
-  const styles = useMemoizedStyles(optionsListPopoverStyles);
+  const styles = useMemoCss(optionsListPopoverStyles);
 
   return (
     <div className="optionsList__actions" css={styles.actions}>
