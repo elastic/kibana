@@ -28,9 +28,16 @@ export interface BulkProcessingError {
   index: number | null;
 }
 
-export interface BulkProcessingResults {
+export interface BulkBatchProcessingResults {
   failed: number;
   successful: number;
   errors: BulkProcessingError[];
   batch: Batch;
+}
+
+export interface BulkProcessingResults {
+  users: BulkPrivMonUser[];
+  errors: BulkProcessingError[];
+  failed: number;
+  successful: number;
 }
