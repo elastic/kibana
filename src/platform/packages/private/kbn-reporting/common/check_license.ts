@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
+import type { ExportType } from '@kbn/reporting-server';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-} from '@kbn/reporting-common';
-import type { ExportType } from '.';
-import { ExportTypesRegistry } from './export_types_registry';
+} from '.';
 
 export interface LicenseCheckResult {
   showLinks: boolean;
@@ -25,7 +25,7 @@ export interface LicenseCheckResult {
   jobTypes?: string[];
 }
 
-const scheduledReportValidLicenses: LicenseType[] = [
+export const scheduledReportValidLicenses: LicenseType[] = [
   LICENSE_TYPE_TRIAL,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_GOLD,
