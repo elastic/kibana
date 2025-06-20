@@ -43,7 +43,7 @@ export const fetchSourceDocuments = async ({
   loggedRequests,
   hasLoggedRequestsReachedLimit,
   runtimeMappings,
-}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
+}: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument[]>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
       acc.push(doc._id);

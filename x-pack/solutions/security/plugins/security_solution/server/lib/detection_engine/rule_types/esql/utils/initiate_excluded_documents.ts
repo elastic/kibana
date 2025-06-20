@@ -20,18 +20,24 @@ export const initiateExcludedDocuments = ({
   tuple: RuleRangeTuple;
   hasMvExpand: boolean;
   query?: string;
-}): ExcludedDocument[] => {
+}): Record<string, ExcludedDocument[]> => {
   // exclude ids from store if mv_expand used and query has changed. this would allow to create alerts from changed mv_expand queries
   if (
     isRuleAggregating ||
     !state?.excludedDocuments ||
     (hasMvExpand && query !== state.lastQuery)
   ) {
-    return [];
+    return {};
   }
-  return (
-    state?.excludedDocuments?.filter(({ timestamp }) => {
-      return timestamp && timestamp >= tuple.from.toISOString();
-    }) ?? []
-  );
+
+  const excludedDocuments: Record<string, ExcludedDocument[]> = {};
+
+  for (const index of Object.keys(state.excludedDocuments)) {
+    excludedDocuments[index] =
+      state?.excludedDocuments?.[index]?.filter(({ timestamp }) => {
+        return timestamp && timestamp >= tuple.from.toISOString();
+      }) ?? [];
+  }
+
+  return excludedDocuments;
 };

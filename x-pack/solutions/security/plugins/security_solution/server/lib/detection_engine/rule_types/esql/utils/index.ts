@@ -12,3 +12,4 @@ export * from './get_mv_expand_usage';
 export * from './update_excluded_ids';
 export * from './get_source_document';
 export * from './initiate_excluded_documents';
+export * from './update_excluded_documents';

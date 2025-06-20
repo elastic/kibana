@@ -94,16 +94,7 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
-    /**
-     * ES|QL returns results as a single page, max size of 10,000
-     * To mitigate this, we will use the maxSignals as a page size
-     * Wll keep track of the earlier found document ids and will exclude them in subsequent requests
-     * to avoid duplicates.
-     * This is a workaround until pagination is supported in ES|QL
-     * Since aggregating queries do not produce event ids, we will not exclude them.
-     * All alerts for aggregating queries are unique anyway
-     */
-    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments({
+    const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
       state,
       isRuleAggregating,
       tuple,
@@ -124,7 +115,11 @@ export const esqlExecutor = async ({
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
-        if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
+        const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
+          (acc, docs) => acc + docs.length,
+          0
+        );
+        if (totalExcludedDocumentsLength > MAX_EXCLUDED_DOCUMENTS) {
           result.warningMessages.push(
             `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}, some alerts might not have been created. Consider reducing the lookback time for the rule.`
           );
@@ -295,9 +290,9 @@ export const esqlExecutor = async ({
         });
 
         // no more results will be found
-        if (response.values.length < tuple.maxSignals + 1) {
+        if (response.values.length < size) {
           ruleExecutionLogger.debug(
-            `End of search: Found ${response.values.length} results with page size ${tuple.maxSignals}`
+            `End of search: Found ${response.values.length} results with page size ${size}`
           );
           break;
         }
