@@ -26,6 +26,11 @@ jest.mock('../../hooks/use_monitor_name', () => ({
   useMonitorName: jest.fn().mockReturnValue({ nameAlreadyExists: false }),
 }));
 
+jest.mock('../../../../hooks/use_kibana_space', () => ({
+  ...jest.requireActual('../../../../hooks/use_kibana_space'),
+  useKibanaSpace: jest.fn().mockReturnValue({ id: 'default' }),
+}));
+
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
 
