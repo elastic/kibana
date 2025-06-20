@@ -224,7 +224,7 @@ export const OptionsListStrings = {
     getInvalidSelectionsSectionTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.popover.invalidSelectionsSectionTitle', {
         defaultMessage:
-          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}}',
+          'Invalid {invalidSelectionCount, plural, one {selection} other {selections}} ({invalidSelectionCount})',
         values: { invalidSelectionCount },
       }),
     getInvalidSelectionsLabel: (selectedOptions: number) =>
