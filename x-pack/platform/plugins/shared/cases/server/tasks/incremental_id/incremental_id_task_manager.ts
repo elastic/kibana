@@ -5,10 +5,9 @@
  * 2.0.
  */
 import { SavedObjectsClient, type CoreStart, type Logger } from '@kbn/core/server';
-import {
-  TaskStatus,
-  type TaskManagerSetupContract,
-  type TaskManagerStartContract,
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import { CasesIncrementalIdService } from '../../services/incremental_id';
@@ -132,20 +131,6 @@ export class IncrementalIdTaskManager {
         e?.message ?? e
       );
       return null;
-    }
-  }
-
-  /**
-   * Ensure the id incrementer task is running soon
-   */
-  public async scheduleIdCrementerTask() {
-    try {
-      const taskInstance = await this.taskManager?.get(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
-      if (taskInstance?.status === TaskStatus.Idle) {
-        await this.taskManager?.runSoon(CASES_INCREMENTAL_ID_SYNC_TASK_ID);
-      }
-    } catch (e) {
-      this.logger.debug(`Could not run case incremental id task: ${e}`);
     }
   }
 }

@@ -64,7 +64,6 @@ export interface CasesServerStartDependencies {
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
-  scheduleIdIncrementerTask: () => void;
 }
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
