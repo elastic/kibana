@@ -37,10 +37,14 @@ export const initiateExcludedDocuments = ({
     // we would discard this array and build a new structure aware of document indices
     Array.isArray(state.excludedDocuments) ? {} : state.excludedDocuments
   )) {
-    excludedDocuments[index] =
+    const indexDocuments =
       state?.excludedDocuments?.[index]?.filter(({ timestamp }) => {
         return timestamp && timestamp >= tuple.from.toISOString();
       }) ?? [];
+
+    if (indexDocuments.length) {
+      excludedDocuments[index] = indexDocuments;
+    }
   }
 
   return excludedDocuments;

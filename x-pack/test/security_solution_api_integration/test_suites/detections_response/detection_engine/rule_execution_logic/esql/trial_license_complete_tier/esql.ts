@@ -1539,6 +1539,7 @@ export default ({ getService }: FtrProviderContext) => {
         // should return 100 alerts
         expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
 
+        const dateRestart = new Date();
         // re-trigger rule execution with new interval
         await patchRule(supertest, log, {
           id: createdRule.id,
@@ -1558,7 +1559,7 @@ export default ({ getService }: FtrProviderContext) => {
           createdRule,
           RuleExecutionStatusEnum.succeeded,
           200,
-          new Date()
+          dateRestart
         );
 
         // should return 160 alerts
@@ -1692,6 +1693,8 @@ export default ({ getService }: FtrProviderContext) => {
             )
           );
 
+          const dateRestart = new Date();
+
           // re-trigger rule execution with new interval
           await patchRule(supertest, log, {
             id: createdRule.id,
@@ -1709,7 +1712,7 @@ export default ({ getService }: FtrProviderContext) => {
             createdRule,
             RuleExecutionStatusEnum.succeeded,
             200,
-            new Date()
+            dateRestart
           );
 
           // no alert should be missed
