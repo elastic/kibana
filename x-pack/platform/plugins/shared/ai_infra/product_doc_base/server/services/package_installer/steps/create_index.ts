@@ -17,20 +17,17 @@ export const createIndex = async ({
   manifestVersion,
   mappings,
   log,
-  inferenceId = internalElserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
   manifestVersion: string;
   mappings: MappingTypeMapping;
   log: Logger;
-  inferenceId?: string;
 }) => {
   log.debug(`Creating index ${indexName}`);
 
   const legacySemanticText = isLegacySemanticTextVersion(manifestVersion);
 
-  overrideInferenceId(mappings, inferenceId);
   await esClient.indices.create({
     index: indexName,
     mappings,
@@ -42,10 +39,25 @@ export const createIndex = async ({
   });
 };
 
-const overrideInferenceId = (mappings: MappingTypeMapping, inferenceId: string) => {
+export const overrideInferenceSettings = (
+  mappings: MappingTypeMapping,
+  inferenceId: string,
+  modelSettingsToOverride?: object
+) => {
   const recursiveOverride = (current: MappingTypeMapping | MappingProperty) => {
     if ('type' in current && current.type === 'semantic_text') {
       current.inference_id = inferenceId;
+      if (modelSettingsToOverride) {
+        // @TODO: replace with modelSettingsToOverride
+        // @ts-expect-error - model_settings is not typed, but exists for semantic_text field
+        current.model_settings = {
+          service: 'elasticsearch',
+          task_type: 'text_embedding',
+          dimensions: 384,
+          similarity: 'cosine',
+          element_type: 'float',
+        };
+      }
     }
     if ('properties' in current && current.properties) {
       for (const prop of Object.values(current.properties)) {

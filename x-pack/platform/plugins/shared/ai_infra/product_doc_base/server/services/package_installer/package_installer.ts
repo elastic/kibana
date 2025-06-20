@@ -14,6 +14,7 @@ import {
   type ProductName,
 } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { cloneDeep } from 'lodash';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   downloadToDisk,
@@ -31,6 +32,7 @@ import {
   createIndex,
   populateIndex,
 } from './steps';
+import { overrideInferenceSettings } from './steps/create_index';
 
 interface PackageInstallerOpts {
   artifactsFolder: string;
@@ -103,6 +105,7 @@ export class PackageInstaller {
     });
 
     for (const { productName, productVersion } of toUpdate) {
+      // @TODO: add inferenceId
       await this.installPackage({
         productName,
         productVersion,
@@ -116,6 +119,16 @@ export class PackageInstaller {
       artifactRepositoryUrl: this.artifactRepositoryUrl,
     });
     const allProducts = Object.values(DocumentationProduct) as ProductName[];
+    let inferenceInfo;
+    if (inferenceId) {
+      const inferenceEndpoints = await this.esClient.inference.get({
+        inference_id: inferenceId,
+      });
+      inferenceInfo = inferenceEndpoints.endpoints[0];
+    }
+    // @TODO: remove
+    console.log(`--@@inferenceInfo`, inferenceInfo);
+
     for (const productName of allProducts) {
       const availableVersions = repositoryVersions[productName];
       if (!availableVersions || !availableVersions.length) {
@@ -127,7 +140,7 @@ export class PackageInstaller {
       await this.installPackage({
         productName,
         productVersion: selectedVersion,
-        inferenceId,
+        customInference: inferenceInfo,
       });
     }
   }
@@ -135,11 +148,11 @@ export class PackageInstaller {
   async installPackage({
     productName,
     productVersion,
-    inferenceId,
+    customInference,
   }: {
     productName: ProductName;
     productVersion: string;
-    inferenceId?: string;
+    customInference?: string;
   }) {
     this.log.info(
       `Starting installing documentation for product [${productName}] and version [${productVersion}]`
@@ -156,8 +169,12 @@ export class PackageInstaller {
         productVersion,
       });
 
-      if (inferenceId || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
-        // @TODO: Verify if inference is appropriate type before ensure deployment?
+      if (customInference || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
+        if (customInference.task_type !== 'text_embedding') {
+          throw new Error(
+            `Inference [${inferenceId}]'s task type ${inferenceModelSettings.task_type} is not supported. Please use a model with task type 'text_embedding'.`
+          );
+        }
         await ensureInferenceDeployed({
           client: this.esClient,
           inferenceId,
@@ -189,9 +206,22 @@ export class PackageInstaller {
       const manifestVersion = manifest.formatVersion;
       const indexName = getProductDocIndexName(productName);
 
+      const modifiedMappings = cloneDeep(mappings);
+      const modelSettingsToOverride = customInference
+        ? {
+            service: customInference.service,
+            task_type: customInference.task_type,
+          }
+        : undefined;
+      overrideInferenceSettings(
+        modifiedMappings,
+        inferenceId ?? this.elserInferenceId,
+        customInference
+      );
+
       await createIndex({
         indexName,
-        mappings,
+        mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
         manifestVersion,
         esClient: this.esClient,
         inferenceId: inferenceId ?? this.elserInferenceId,
