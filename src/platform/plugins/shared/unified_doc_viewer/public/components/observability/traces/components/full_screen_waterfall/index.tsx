@@ -73,7 +73,7 @@ export const FullScreenWaterfall = ({
         filters: [],
         query: {
           language: 'kuery',
-          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE trace.id == "${traceId}" AND span.id == "${docId}"`,
+          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE QSTR("trace.id:${traceId} AND span.id:${docId}")`,
         },
       });
 
