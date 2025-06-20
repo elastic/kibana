@@ -17,6 +17,7 @@ interface AssertRuleUpgradePreviewParams {
   ruleType: string;
   fieldName: string;
   humanizedFieldName: string;
+  targetRuleFields?: { [key: string]: unknown };
   fieldVersions: {
     initial: unknown;
     customized: unknown;
@@ -28,6 +29,7 @@ interface AssertRuleUpgradePreviewParams {
 export function assertRuleUpgradePreview({
   ruleType,
   fieldName,
+  targetRuleFields,
   humanizedFieldName,
   fieldVersions: { initial, customized, upgrade },
 }: AssertRuleUpgradePreviewParams) {
@@ -36,6 +38,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: initial,
@@ -67,6 +70,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -97,6 +101,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: upgrade,
@@ -127,6 +132,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -156,6 +162,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -185,6 +192,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           current: customized,
           target: upgrade,
@@ -215,6 +223,7 @@ export function assertRuleUpgradePreview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
+        targetRuleFields,
         fieldVersions: {
           current: customized,
           target: upgrade,
