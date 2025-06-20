@@ -21,8 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
 
 export const SearchHomepageHeader: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const { colorMode } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const assetBasePath = useAssetBasePath();
 
   return (
