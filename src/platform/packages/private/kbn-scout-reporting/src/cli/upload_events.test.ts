@@ -104,31 +104,4 @@ describe('runUploadEvents', () => {
 
     expect(mockAddEventsFromFile).toHaveBeenCalledWith('existing_event_log.ndjson');
   });
-
-  /*
-  it('should upload multiple event log files', async () => {
-    flagsReader.string.mockImplementation((flag) => {
-      if (flag === 'eventLogPath') {
-        return 'directory/with/event/logs';
-      }
-    });
-
-    // assume the provided event log path exists
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-
-    // the provided event log path is a directory
-    jest.spyOn(fs, 'statSync').mockReturnValue({
-      isDirectory: () => true,
-    } as unknown as fs.Stats);
-
-    await runUploadEvents(flagsReader, log);
-
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
-      'directory/with/event/logs/event_log_1.ndjson'
-    );
-    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
-      'directory/with/event/logs/event_log_2.ndjson'
-    );
-  });
-  */
 });
