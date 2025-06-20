@@ -140,7 +140,7 @@ export const getEndpointSuggestionsRequestHandler = (
               spaceId,
             }
           );
-          let agentPolicyIdsInSpace: string[] = [];
+          const agentPolicyIdsInSpace: string[] = [];
           for await (const batch of agentPoliciesIterable) {
             agentPolicyIdsInSpace.push(...batch);
           }
