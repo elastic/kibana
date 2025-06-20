@@ -29,7 +29,7 @@ export const createSLORoute = createSloServerRoute({
       repository,
       transformManager,
       summaryTransformManager,
-    } = await getScopedClients({ request, logger });
+    } = await getScopedClients(request);
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username!;

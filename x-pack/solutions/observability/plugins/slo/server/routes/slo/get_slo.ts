@@ -22,10 +22,7 @@ export const getSLORoute = createSloServerRoute({
   params: getSLOParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, spaceId, repository } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, spaceId, repository } = await getScopedClients(request);
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
