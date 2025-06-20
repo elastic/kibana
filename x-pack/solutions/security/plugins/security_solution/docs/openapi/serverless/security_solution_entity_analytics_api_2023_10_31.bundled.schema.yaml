@@ -516,7 +516,7 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/privileged_user_monitoring/pad/status:
     get:
-      operationId: GetStatusPrivilegedAccessDetectionPackage
+      operationId: GetPrivilegedAccessDetectionPackageStatus
       responses:
         '200':
           content:
