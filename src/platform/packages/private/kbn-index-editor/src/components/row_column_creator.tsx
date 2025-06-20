@@ -66,10 +66,11 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           <ValueInput
             key={column.id}
             columnName={column.name}
+            columns={columns}
             onChange={updateRow(column.id)}
             autoFocus={index === 0}
             css={css`
-              min-width: ${230}px;
+              min-width: ${180}px;
             `}
           />
         );
@@ -166,7 +167,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
                 css={css`
                   &.hide-scrollbar {
                     scrollbar-width: none;
-                    padding: 0 ${euiTheme.size.xxs};
+                    padding: 0 ${euiTheme.size.xs};
                   }
                 `}
               >

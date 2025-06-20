@@ -8,12 +8,16 @@
  */
 
 import { EuiFieldText } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../types';
 
 interface ValueInputProps {
   value?: string;
   columnName?: string;
+  columns?: DatatableColumn[];
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
@@ -24,18 +28,63 @@ interface ValueInputProps {
 export const ValueInput = ({
   value = '',
   columnName = '',
+  columns,
   onBlur,
   onEnter,
   onChange,
   autoFocus = false,
   className = '',
 }: ValueInputProps) => {
+  const {
+    services: { notifications },
+  } = useKibana<KibanaContextExtra>();
   const [editValue, setEditValue] = useState(value);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  const columnType = useMemo(() => {
+    if (!columns || !columnName) return undefined;
+    const col = columns.find((c) => c.name === columnName);
+    return col?.meta?.type;
+  }, [columns, columnName]);
+
+  const validateValue = (val: string): string | undefined => {
+    if (!columnType) return undefined;
+
+    let validation;
+    switch (columnType) {
+      case 'number':
+        validation = isNaN(Number(val))
+          ? i18n.translate('indexEditor.cellValueInput.validation.number', {
+              defaultMessage: 'Value must be a number',
+            })
+          : undefined;
+        break;
+      case 'boolean':
+        validation =
+          val !== 'true' && val !== 'false'
+            ? i18n.translate('indexEditor.cellValueInput.validation.boolean', {
+                defaultMessage: 'Value must be true or false',
+              })
+            : undefined;
+        break;
+      default:
+        validation = undefined;
+    }
+    if (validation) {
+      notifications.toasts.addDanger({
+        title: validation,
+      });
+    }
+    return validation;
+  };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      // Perform Validations
-      onEnter?.(editValue);
+      const validationError = validateValue(editValue);
+      setError(validationError);
+      if (!validationError) {
+        onEnter?.(editValue);
+      }
     }
   };
 
@@ -43,7 +92,8 @@ export const ValueInput = ({
     if (onBlur) {
       onBlur(event);
     }
-    // Perform Validations ?
+    const validationError = validateValue(editValue);
+    setError(validationError);
   };
 
   return (
@@ -58,11 +108,13 @@ export const ValueInput = ({
       })}
       onChange={(e) => {
         setEditValue(e.target.value);
+        setError(undefined);
         onChange?.(e.target.value);
       }}
       onBlur={onBlurHandler}
       onKeyDown={onKeyDown}
       className={className}
+      isInvalid={!!error}
     />
   );
 };
