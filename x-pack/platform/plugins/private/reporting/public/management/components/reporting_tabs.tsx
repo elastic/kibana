@@ -11,16 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { RouteComponentProps } from 'react-router-dom';
 import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ILicense, LicenseType, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   ClientConfigType,
   ReportingAPIClient,
+  checkLicense,
   useInternalApiClient,
   useKibana,
 } from '@kbn/reporting-public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import { suspendedComponentWithProps } from './suspended_component_with_props';
 import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
 import ReportExportsTable from './report_exports_table';
@@ -29,6 +32,7 @@ import { ReportDiagnostic } from './report_diagnostic';
 import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import ReportSchedulesTable from './report_schedules_table';
+import { LicensePrompt } from './license_prompt';
 
 export interface MatchParams {
   section: Section;
@@ -62,6 +66,17 @@ export const ReportingTabs: React.FunctionComponent<
   const ilmPolicyContextValue = useIlmPolicyStatus(config.statefulSettings.enabled);
   const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
   const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
+  const license = useObservable<ILicense | null>(license$ ?? new Observable(), null);
+
+  const isAtLeast = useCallback(
+    (level: LicenseType) => {
+      if (!license) {
+        return { enableLinks: false, showLinks: false };
+      }
+      return checkLicense(license.check('reporting', level));
+    },
+    [license]
+  );
 
   const tabs = [
     {
@@ -77,6 +92,8 @@ export const ReportingTabs: React.FunctionComponent<
       }),
     },
   ];
+
+  const { enableLinks, showLinks } = isAtLeast('trial');
 
   const renderExportsList = useCallback(() => {
     return suspendedComponentWithProps(
@@ -107,22 +124,28 @@ export const ReportingTabs: React.FunctionComponent<
 
   const renderSchedulesList = useCallback(() => {
     return (
-      <EuiPageTemplate.Section grow={false} paddingSize="none">
-        {suspendedComponentWithProps(
-          ReportSchedulesTable,
-          'xl'
-        )({
-          apiClient,
-          toasts: notifications.toasts,
-          license$,
-          config,
-          capabilities,
-          redirect: navigateToApp,
-          navigateToUrl,
-          urlService: shareService.url,
-          http,
-        })}
-      </EuiPageTemplate.Section>
+      <>
+        {enableLinks && showLinks ? (
+          <EuiPageTemplate.Section grow={false} paddingSize="none">
+            {suspendedComponentWithProps(
+              ReportSchedulesTable,
+              'xl'
+            )({
+              apiClient,
+              toasts: notifications.toasts,
+              license$,
+              config,
+              capabilities,
+              redirect: navigateToApp,
+              navigateToUrl,
+              urlService: shareService.url,
+              http,
+            })}
+          </EuiPageTemplate.Section>
+        ) : (
+          <LicensePrompt />
+        )}
+      </>
     );
   }, [
     apiClient,
@@ -134,6 +157,8 @@ export const ReportingTabs: React.FunctionComponent<
     navigateToUrl,
     shareService.url,
     http,
+    enableLinks,
+    showLinks,
   ]);
 
   const onSectionChange = (newSection: Section) => {

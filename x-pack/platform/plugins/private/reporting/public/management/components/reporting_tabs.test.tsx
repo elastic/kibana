@@ -63,9 +63,12 @@ describe('Reporting tabs', () => {
       message: '',
     }),
   };
+  const mockUnsubscribe = jest.fn();
+  // @ts-expect-error we don't need to provide all props for the test
   const license$ = {
     subscribe: (handler: unknown) => {
-      return (handler as Function)(validCheck);
+      (handler as Function)(validCheck);
+      return { unsubscribe: mockUnsubscribe };
     },
   } as Observable<ILicense>;
 
@@ -145,6 +148,7 @@ describe('Reporting tabs', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUnsubscribe.mockClear();
   });
 
   it('renders exports components', async () => {
@@ -246,6 +250,7 @@ describe('Reporting tabs', () => {
 
       expect(await screen.findByTestId('screenshotDiagnosticLink')).toBeInTheDocument();
     });
+
     it('does not show when image reporting not set in config', async () => {
       const mockNoImageConfig = {
         ...mockConfig,
