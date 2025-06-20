@@ -172,17 +172,20 @@ export class MonitorConfigRepository {
 
   async bulkUpdate({
     monitors,
+    namespace,
   }: {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
     }>;
+    namespace?: string;
   }) {
-    return await this.soClient.bulkUpdate<MonitorFields>(
+    return this.soClient.bulkUpdate<MonitorFields>(
       monitors.map(({ attributes, id }) => ({
         type: syntheticsMonitorSavedObjectType,
         id,
         attributes,
+        namespace,
       }))
     );
   }

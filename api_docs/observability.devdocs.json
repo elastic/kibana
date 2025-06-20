@@ -3381,7 +3381,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
         ],
@@ -5667,7 +5667,7 @@
               "GridOnScrollProps",
               " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
               "EuiDataGridRowHeightsOptions",
-              " | undefined; ref?: React.LegacyRef<",
+              " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
               "AlertsTableImperativeApi",
               "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }"
             ],
@@ -11962,7 +11962,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey] extends null | undefined ? never : { id: string; columns?: ",
           "EuiDataGridColumn",
@@ -14234,7 +14234,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey]"
         ],
@@ -16591,7 +16591,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }"
         ],

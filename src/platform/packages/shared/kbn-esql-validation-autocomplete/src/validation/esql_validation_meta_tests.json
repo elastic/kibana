@@ -330,91 +330,6 @@
       "warning": []
     },
     {
-      "query": "row var = 1 in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, '[', '(', UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-        "Error: [in] function expects at least 2 arguments, got 1."
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 not in ",
-      "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '('"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (1, 2, 3, round(5))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = \"a\" not in (\"a\", \"b\", \"c\")",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "row var = 1 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (\"a\", \"b\", \"c\")",
-      "error": [
-        "Argument of [not in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "row var = 5 not in (1, 2, 3, \"a\")",
-      "error": [
-        "Argument of [not in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
-      ],
-      "warning": []
-    },
-    {
       "query": "row bool_var = true and false",
       "error": [],
       "warning": []
@@ -2529,7 +2444,8 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2537,7 +2453,7 @@
       "query": "from a_index | rename missingField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [missingField]"
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2576,7 +2492,9 @@
       "error": [
         "Unknown column [a]"
       ],
-      "warning": []
+      "warning": [
+        "Column [textField] of type text has been overwritten as new type: unknown"
+      ]
     },
     {
       "query": "from a_index | rename fn() as a",
@@ -2601,7 +2519,8 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },

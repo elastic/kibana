@@ -140,10 +140,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        const { duration, ...dataWithoutDuration } = data;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(dataWithoutDuration).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
@@ -177,9 +178,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
+          removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
-        expect(data).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...postCaseResp(),
           status: CaseStatuses['in-progress'],
           updated_by: defaultUser,
@@ -193,6 +196,61 @@ export default ({ getService }: FtrProviderContext): void => {
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
+      });
+
+      it('should set the in_progress_at when marking a case to in progress', async () => {
+        const originalCase = await createCase(supertest, postCaseReq);
+
+        expect(originalCase.in_progress_at).to.eql(undefined);
+
+        const [inProgressCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: originalCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        expect(inProgressCase.in_progress_at).to.be.a('string');
+      });
+
+      it('should not reset in_progress_at when the case is reopened', async () => {
+        const originalCase = await createCase(supertest, postCaseReq);
+
+        const [inProgressCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: originalCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        const previousInProgressAt = inProgressCase.in_progress_at;
+
+        const [reopenedCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: inProgressCase.version,
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+        });
+
+        expect(reopenedCase.in_progress_at).to.equal(previousInProgressAt);
       });
 
       it('should patch the severity of a case correctly', async () => {
@@ -525,6 +583,110 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(openCases[0].duration).to.be(null);
           });
         }
+      });
+
+      describe('metrics', () => {
+        it('should set the metrics correctly when the case is marked as in-progress', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          expect(inProgressCase.time_to_acknowledge).to.be.a('number');
+          expect(inProgressCase.time_to_investigate).to.equal(null);
+          expect(inProgressCase.time_to_resolve).to.equal(null);
+        });
+
+        it('sets all metrics when the case is closed', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          const [closedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: inProgressCase.id,
+                  version: inProgressCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          expect(closedCase.time_to_investigate).to.be.a('number');
+          expect(closedCase.time_to_resolve).to.be.a('number');
+          expect(closedCase.time_to_acknowledge).to.be.a('number');
+        });
+
+        it('should reset timing metrics when reopening a case', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          const [closedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: inProgressCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          const [reopenedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: closedCase.version,
+                  status: CaseStatuses.open,
+                },
+              ],
+            },
+          });
+
+          expect(reopenedCase.time_to_acknowledge).to.equal(null);
+          expect(reopenedCase.time_to_investigate).to.equal(null);
+          expect(reopenedCase.time_to_resolve).to.equal(null);
+        });
       });
 
       it('should return the expected total comments and alerts', async () => {
