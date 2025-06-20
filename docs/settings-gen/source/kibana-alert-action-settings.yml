@@ -326,6 +326,28 @@ groups:
             ess: all
          # example: |
 
+      - setting: xpack.actions.email.services.enabled
+        id: action-config-email-services-
+        description: |
+          An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: enum
+        default: ["*"]
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+            ess: all
+         # example: |
+
       - setting: xpack.actions.enableFooterInEmail
         # id:
         description: |

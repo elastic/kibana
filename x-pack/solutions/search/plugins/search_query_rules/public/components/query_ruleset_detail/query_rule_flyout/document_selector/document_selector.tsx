@@ -36,6 +36,8 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 }) => {
   const { data, error, isError, isLoading } = useFetchDocument(index, initialDocId);
   const { document, mappings } = data || {};
+  // Otherwise it will show loading until first document is fetched
+  const showLoading = Boolean(isLoading && index && initialDocId);
 
   return (
     <EditableResult
@@ -64,7 +66,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
       onIdSelectorChange={onIdSelectorChange}
       onIndexSelectorChange={onIndexSelectorChange}
       onDeleteDocument={onDeleteDocument}
-      isLoading={isLoading}
+      isLoading={showLoading}
       error={isError ? error?.body?.message : undefined}
     />
   );

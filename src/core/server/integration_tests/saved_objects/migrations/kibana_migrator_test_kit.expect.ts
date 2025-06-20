@@ -15,10 +15,11 @@ export async function expectDocumentsMigratedToHighestVersion(
   index: string | string[]
 ) {
   const typeMigrationVersions: Record<string, string> = {
-    basic: '10.1.0', // did not define any model versions
-    server: '10.1.0', // did not define any model versions
-    deprecated: '10.1.0', // did not define any model versions
+    basic: '10.1.0', // did not define any new model versions
+    server: '10.1.0', // did not define any new model versions
+    deprecated: '10.1.0', // did not define any new model versions
     complex: '10.2.0',
+    old: '8.9.0',
     task: '10.2.0',
   };
 

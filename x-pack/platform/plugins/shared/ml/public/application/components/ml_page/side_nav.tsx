@@ -17,6 +17,7 @@ import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 export interface Tab {
   id: string;
@@ -38,6 +39,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
   const mlFeaturesDisabled = !isFullLicense();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
+  const [canUseAiops] = usePermissionCheck(['canUseAiops']);
 
   const [globalState] = useUrlState('_g');
 
@@ -158,6 +160,10 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         : []),
     ];
 
+    if (canUseAiops === false) {
+      return mlTabs;
+    }
+
     mlTabs.push({
       id: 'aiops_section',
       name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
@@ -203,7 +209,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled, isADEnabled, isDFAEnabled]);
+  }, [mlFeaturesDisabled, isADEnabled, isDFAEnabled, canUseAiops]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
