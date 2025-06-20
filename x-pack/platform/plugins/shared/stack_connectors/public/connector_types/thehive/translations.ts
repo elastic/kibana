@@ -60,6 +60,13 @@ export const TLP_LABEL = i18n.translate(
   }
 );
 
+export const IS_RULE_SEVERITY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.isRuleSeverityToggleLabel',
+  {
+    defaultMessage: 'Use severity assigned to the rule',
+  }
+);
+
 export const SEVERITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.severitySelectFieldLabel',
   {
@@ -99,6 +106,34 @@ export const SOURCE_REF_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.sourceRefFieldLabel',
   {
     defaultMessage: 'Source reference',
+  }
+);
+
+export const TEMPLATE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.templateFieldLabel',
+  {
+    defaultMessage: 'Template',
+  }
+);
+
+export const BODY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldLabel',
+  {
+    defaultMessage: 'Body',
+  }
+);
+
+export const BODY_DESCRIPTION = i18n.translate(
+  'xpack.stackConnectors.components.thehive.bodyFieldDescription',
+  {
+    defaultMessage: 'Code Editor',
+  }
+);
+
+export const SELECT_BODY_TEMPLATE_POPOVER_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.thehive.selectBodyTemplatePopoverButton',
+  {
+    defaultMessage: 'Select body template',
   }
 );
 
