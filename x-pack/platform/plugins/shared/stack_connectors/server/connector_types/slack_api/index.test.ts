@@ -79,7 +79,7 @@ describe('validate params', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: undefined is not iterable (cannot read property Symbol(Symbol.iterator))"`
+      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
     );
 
     expect(() => {
