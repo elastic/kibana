@@ -50,7 +50,7 @@ beforeEach(() => {
   lastValueFromMock.mockReset();
 });
 
-describe('useTrace hook', () => {
+describe('useRootSpan hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <RootSpanProvider traceId="test-trace" transactionId="transaction-id" indexPattern="test-index">
       {children}

@@ -39,7 +39,7 @@ interface GetTransactionParams {
   signal: AbortSignal;
 }
 
-async function getTraceData({
+async function getRootSpanData({
   traceId,
   transactionId,
   indexPattern,
@@ -122,7 +122,13 @@ const useRootSpan = ({ traceId, transactionId, indexPattern }: UseTransactionPra
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getTraceData({ traceId, transactionId, indexPattern, data, signal });
+        const result = await getRootSpanData({
+          traceId,
+          transactionId,
+          indexPattern,
+          data,
+          signal,
+        });
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
         const name = fields?.[TRANSACTION_NAME_FIELD] || fields?.[SPAN_NAME_FIELD];
