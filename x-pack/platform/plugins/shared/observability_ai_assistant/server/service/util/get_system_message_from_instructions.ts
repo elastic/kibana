@@ -60,7 +60,7 @@ export function getSystemMessageFromInstructions({
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
 
     // anonymization instructions
-    anonymizationInstruction,
+    ...(anonymizationInstruction ? [anonymizationInstruction] : []),
   ]
     .map((instruction) => {
       return typeof instruction === 'string' ? instruction : instruction.text;
