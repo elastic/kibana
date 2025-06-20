@@ -77,8 +77,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await reportingFunctional.loginDataAnalyst();
 
         await PageObjects.common.navigateToApp('reporting');
-        await (await testSubjects.find('reportingTabs-schedules')).click();
-        await testSubjects.missingOrFail('reportSchedulesTable');
+        await testSubjects.missingOrFail('reportingTabs-schedules');
       });
     });
   });

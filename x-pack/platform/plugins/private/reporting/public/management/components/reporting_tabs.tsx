@@ -59,7 +59,7 @@ export const ReportingTabs: React.FunctionComponent<
   } = useKibana();
 
   const ilmLocator = shareService.url.locators.get('ILM_LOCATOR_ID');
-  const ilmPolicyContextValue = useIlmPolicyStatus();
+  const ilmPolicyContextValue = useIlmPolicyStatus(config.statefulSettings.enabled);
   const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
   const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
 
