@@ -37,3 +37,15 @@ export const buildUrl = (item?: ItemType) => {
     return undefined;
   }
 };
+
+const foo = () => {
+  return 'bar';
+};
+
+function bar() {
+  return 'foo';
+}
+
+export function baz() {
+  return 'baz';
+}
