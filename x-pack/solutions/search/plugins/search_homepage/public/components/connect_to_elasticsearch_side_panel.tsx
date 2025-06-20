@@ -53,7 +53,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           title={
             <FormattedMessage
               id="xpack.searchHomepage.connectToElasticsearch.sampleDatasetTitle"
-              defaultMessage="Sample dataset"
+              defaultMessage="Add sample data"
             />
           }
           description={
