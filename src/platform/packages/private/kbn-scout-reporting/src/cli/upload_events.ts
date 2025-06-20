@@ -9,8 +9,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { Command } from '@kbn/dev-cli-runner';
+
+import { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { ToolingLog } from '@kbn/tooling-log';
+
 import {
   SCOUT_REPORTER_ES_URL,
   SCOUT_REPORTER_ES_API_KEY,
@@ -33,6 +36,55 @@ const readFilesRecursively = (directory: string, callback: Function) => {
   });
 };
 
+export const runUploadEvents = async (flagsReader: FlagsReader, log: ToolingLog) => {
+  let eventLogPath = flagsReader.string('eventLogPath');
+
+  // Validate CLI options
+  if (eventLogPath && !fs.existsSync(eventLogPath)) {
+    throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
+  }
+
+  if (!eventLogPath) {
+    // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
+    eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
+
+    if (!fs.existsSync(eventLogPath)) {
+      log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
+      return;
+    }
+  }
+
+  // ES connection
+  const esURL = flagsReader.requiredString('esURL');
+  const esAPIKey = flagsReader.requiredString('esAPIKey');
+  const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
+
+  log.info(`Connecting to Elasticsearch at ${esURL}`);
+  const es = await getValidatedESClient(
+    {
+      node: esURL,
+      auth: { apiKey: esAPIKey },
+      tls: {
+        rejectUnauthorized: verifyTLSCerts,
+      },
+    },
+    { log, cli: true }
+  );
+
+  // Event log upload
+  const reportDataStream = new ScoutReportDataStream(es, log);
+
+  if (fs.statSync(eventLogPath).isDirectory()) {
+    readFilesRecursively(eventLogPath, (filePath: string) => {
+      if (filePath.endsWith('.ndjson')) {
+        reportDataStream.addEventsFromFile(filePath);
+      }
+    });
+  } else if (eventLogPath.endsWith('.ndjson')) {
+    reportDataStream.addEventsFromFile(eventLogPath);
+  }
+};
+
 export const uploadEvents: Command<void> = {
   name: 'upload-events',
   description: 'Upload events recorded by the Scout reporter to Elasticsearch',
@@ -52,50 +104,6 @@ export const uploadEvents: Command<void> = {
     `,
   },
   run: async ({ flagsReader, log }) => {
-    // Read & validate CLI options
-    let eventLogPath = flagsReader.string('eventLogPath');
-
-    if (eventLogPath && !fs.existsSync(eventLogPath)) {
-      throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
-    }
-
-    if (!eventLogPath) {
-      // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
-      eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
-
-      if (!fs.existsSync(eventLogPath)) {
-        log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
-        return;
-      }
-    }
-
-    const esURL = flagsReader.requiredString('esURL');
-    const esAPIKey = flagsReader.requiredString('esAPIKey');
-
-    // ES connection
-    log.info(`Connecting to Elasticsearch at ${esURL}`);
-    const es = await getValidatedESClient(
-      {
-        node: esURL,
-        auth: { apiKey: esAPIKey },
-        tls: {
-          rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
-        },
-      },
-      { log, cli: true }
-    );
-
-    // Event log upload
-    const reportDataStream = new ScoutReportDataStream(es, log);
-
-    if (fs.statSync(eventLogPath).isDirectory()) {
-      readFilesRecursively(eventLogPath, (filePath: string) => {
-        if (filePath.endsWith('.ndjson')) {
-          reportDataStream.addEventsFromFile(filePath);
-        }
-      });
-    } else if (eventLogPath.endsWith('.ndjson')) {
-      reportDataStream.addEventsFromFile(eventLogPath);
-    }
+    await runUploadEvents(flagsReader, log);
   },
 };
