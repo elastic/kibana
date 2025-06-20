@@ -162,7 +162,7 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId?: string):
 
   if (spaceId && !isEmpty(kSpaces)) {
     // we throw error if kSpaces is not empty and spaceId is not present
-    if (kSpaces && !kSpaces.includes(spaceId)) {
+    if (kSpaces && !kSpaces.includes(spaceId) && !kSpaces.includes('*')) {
       return {
         valid: false,
         reason: i18n.translate('xpack.synthetics.createMonitor.validation.invalidSpace', {
