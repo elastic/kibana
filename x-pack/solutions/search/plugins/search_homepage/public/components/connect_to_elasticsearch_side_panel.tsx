@@ -59,7 +59,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           description={
             <FormattedMessage
               id="xpack.searchHomepage.connectToElasticsearch.uploadFileDescription"
-              defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+              defaultMessage="Add data sets with sample visualizations, dashboards, and more." 
             />
           }
           footer={
