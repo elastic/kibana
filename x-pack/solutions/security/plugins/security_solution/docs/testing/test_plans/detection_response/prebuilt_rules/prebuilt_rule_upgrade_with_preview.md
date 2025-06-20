@@ -30,7 +30,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Scenarios](#scenarios)
   - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
     - [**Scenario: User can preview prebuilt rules having upgrades**](#scenario-user-can-preview-prebuilt-rules-having-upgrades)
-    - [**Scenario: User can switch between prebuilt rules previews having upgrades**](#scenario-user-can-switch-between-prebuilt-rules-previews-having-upgrades)
     - [**Scenario: User can upgrade a prebuilt rule using the rule preview**](#scenario-user-can-upgrade-a-prebuilt-rule-using-the-rule-preview)
     - [**Scenario: User can see correct rule information in the preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-the-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in the preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-the-preview-before-upgrading)
@@ -151,17 +150,6 @@ When user opens the rule preview for the prebuilt rule
 Then the preview should open
 When user closes the preview
 Then it should disappear
-```
-
-#### **Scenario: User can switch between prebuilt rules previews having upgrades**
-
-```Gherkin
-Given multiple prebuilt rule with upgrades
-And these prebuilt rules have upgrades
-When user opens the rule preview for a prebuilt rule
-Then the preview should open
-When the user selects another prebuilt rule without closing the preview
-Then the preview should display the changes for the newly selected rule
 ```
 
 #### **Scenario: User can upgrade a prebuilt rule using the rule preview**
