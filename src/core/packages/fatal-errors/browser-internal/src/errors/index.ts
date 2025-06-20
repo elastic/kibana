@@ -8,3 +8,4 @@
  */
 
 export { GenericError } from './generic_error';
+export { ServerOverloadedError } from './server_overloaded_error';

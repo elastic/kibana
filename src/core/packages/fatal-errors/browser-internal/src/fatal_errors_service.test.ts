@@ -16,6 +16,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 
+import { mockIsServerOverloadedError } from './fatal_errors_service.test.mocks';
 import { FatalErrorsService } from './fatal_errors_service';
 
 describe('FatalErrorsService', () => {
@@ -75,6 +76,18 @@ describe('FatalErrorsService', () => {
 
       it('should render a generic error screen', async () => {
         expect(render(element).queryByTestId('fatalErrorScreen')).toBeTruthy();
+      });
+
+      it('should render a server-overloaded screen', async () => {
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
+        mockIsServerOverloadedError.mockReturnValue(true);
+        expect(render(element).queryByTestId('serverOverloadedScreen')).toBeTruthy();
+      });
+
+      it('should not render a server-overloaded screen when errors are ambiguous', () => {
+        expect(() => fatalErrorsSetup.add(new Error('bar'))).toThrowError();
+        mockIsServerOverloadedError.mockReturnValueOnce(true);
+        expect(render(element).queryByTestId('serverOverloadedScreen')).toBeFalsy();
       });
     });
   });

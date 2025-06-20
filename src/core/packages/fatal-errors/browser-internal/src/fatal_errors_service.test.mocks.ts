@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const mockRender = jest.fn();
-jest.mock('react-dom', () => {
+export const mockIsServerOverloadedError = jest.fn(() => false);
+
+jest.mock('@kbn/core-http-browser', () => {
   return {
-    render: mockRender,
+    ...jest.requireActual('@kbn/core-http-browser'),
+    isServerOverloadedError: mockIsServerOverloadedError,
   };
 });

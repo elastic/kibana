@@ -17,10 +17,15 @@ import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { type IHttpFetchError, isServerOverloadedError } from '@kbn/core-http-browser';
 import { FatalErrorScreen } from './fatal_error_screen';
 import { formatError, formatStack } from './utils';
-import { GenericError } from './errors';
+import { GenericError, ServerOverloadedError } from './errors';
 import { FatalError } from './fatal_error';
+
+function isServerOverloaded(errors: FatalError[]): errors is Array<FatalError<IHttpFetchError>> {
+  return !!errors.length && errors.every((value) => isServerOverloadedError(value.error));
+}
 
 /** @internal */
 export interface FatalErrorsServiceSetupDeps {
@@ -103,13 +108,15 @@ export class FatalErrorsService {
         globalStyles={true}
       >
         <FatalErrorScreen error$={this.error$}>
-          {(errors) => (
-            <GenericError
-              buildNumber={injectedMetadata.getKibanaBuildNumber()}
-              errors={errors}
-              kibanaVersion={injectedMetadata.getKibanaVersion()}
-            />
-          )}
+          {(errors) =>
+            (isServerOverloaded(errors) && <ServerOverloadedError error={errors[0].error} />) || (
+              <GenericError
+                buildNumber={injectedMetadata.getKibanaBuildNumber()}
+                errors={errors}
+                kibanaVersion={injectedMetadata.getKibanaVersion()}
+              />
+            )
+          }
         </FatalErrorScreen>
       </KibanaRootContextProvider>,
       container
