@@ -52,7 +52,6 @@ import {
   setStorage,
 } from '../public/services';
 import { IntlProvider } from 'react-intl';
-import { createMemoryHistory } from 'history';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 // import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -238,7 +237,6 @@ export const OneConsole = ({ }: BootDependencies) => {
             esHostService,
             storage,
             history: storageHistory,
-            // routeHistory: createMemoryHistory(),
             settings,
             notifications: notificationServiceMock.createStartContract(),
             trackUiMetric: trackUiMetricMock,
