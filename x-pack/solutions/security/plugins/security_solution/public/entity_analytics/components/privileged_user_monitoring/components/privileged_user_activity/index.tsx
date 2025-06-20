@@ -7,6 +7,7 @@
 
 import {
   EuiButtonGroup,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -47,10 +48,14 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
     VisualizationToggleOptions.GRANTED_RIGHTS
   );
 
-  const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
-    usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
+  const {
+    getLensAttributes,
+    columns,
+    generateVisualizationQuery,
+    generateTableQuery,
+    hasLoadedDependencies,
+  } = usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
-
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -118,7 +123,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {generateVisualizationQuery && generateTableQuery && (
+          {generateVisualizationQuery && generateTableQuery ? (
             <EsqlDashboardPanel<TableItemType>
               title={TITLE}
               stackByField={selectedStackByOption.value}
@@ -130,6 +135,25 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
               pageSize={PAGE_SIZE}
               showInspectTable={true}
             />
+          ) : (
+            // If dependencies are loaded but the query generation functions are not available, show an error message
+            hasLoadedDependencies && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorTitle"
+                    defaultMessage="There was a problem rendering the visualization"
+                  />
+                }
+                color="warning"
+                iconType="error"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorMessage"
+                  defaultMessage="The required fields are not present in the data view."
+                />
+              </EuiCallOut>
+            )
           )}
         </>
       )}

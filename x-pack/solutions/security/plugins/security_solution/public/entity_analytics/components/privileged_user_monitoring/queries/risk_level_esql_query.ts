@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RiskScoreFields } from '../../../../../../common/search_strategy';
-import { getPrivilegedMonitorUsersJoin } from '../../helpers';
+import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { getPrivilegedMonitorUsersJoin } from './helpers';
 
 export const getRiskLevelsPrivilegedUsersQueryBody = (namespace: string) => `
 | WHERE ${RiskScoreFields.userName} IS NOT NULL
@@ -15,5 +15,3 @@ ${getPrivilegedMonitorUsersJoin(namespace)}
 | RENAME ${RiskScoreFields.userRisk} AS level`;
 
 export const RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID = 'risk_levels_privileged_users';
-
-export const DONUT_CHART_HEIGHT = 160;

@@ -23,13 +23,15 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../common';
 import { useRiskScoreFillColor } from '../../../risk_score_donut_chart/use_risk_score_fill_color';
-import { DONUT_CHART_HEIGHT, RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID } from './esql_query';
+import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID } from '../../queries/risk_level_esql_query';
 import { useRiskLevelsPrivilegedUserQuery, useRiskLevelsTableColumns } from './hooks';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.title',
   { defaultMessage: 'Risk levels of privileged users' }
 );
+
+export const DONUT_CHART_HEIGHT = 160;
 
 export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const fillColor = useRiskScoreFillColor();

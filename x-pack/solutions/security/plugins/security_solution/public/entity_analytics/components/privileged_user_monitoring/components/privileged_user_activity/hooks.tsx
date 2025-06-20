@@ -22,15 +22,13 @@ import {
 } from './columns';
 import { getLensAttributes } from './get_lens_attributes';
 import {
-  getAccountSwitchesEsqlSource,
-  getAuthenticationsEsqlSource,
-  getGrantedRightsEsqlSource,
-} from './esql_source_query';
-import {
   ACCOUNT_SWITCH_STACK_BY,
   AUTHENTICATIONS_STACK_BY,
   GRANTED_RIGHTS_STACK_BY,
 } from './constants';
+import { getAuthenticationsEsqlSource } from '../../queries/authentications_esql_query';
+import { getAccountSwitchesEsqlSource } from '../../queries/account_switches_esql_query';
+import { getGrantedRightsEsqlSource } from '../../queries/granted_rights_esql_query';
 
 const toggleOptionsConfig = {
   [VisualizationToggleOptions.GRANTED_RIGHTS]: {
@@ -87,11 +85,17 @@ export const usePrivilegedUserActivityParams = (
     [selectedToggleOption, openRightPanel]
   );
 
+  const hasLoadedDependencies = useMemo(
+    () => Boolean(spaceId && indexPattern && fields),
+    [spaceId, indexPattern, fields]
+  );
+
   return {
     getLensAttributes,
     generateVisualizationQuery,
     generateTableQuery,
     columns,
+    hasLoadedDependencies,
   };
 };
 
