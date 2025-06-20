@@ -93,13 +93,14 @@ import {
   ESQLCommandOption,
   ESQLFunction,
   ESQLInlineCast,
+  ESQLList,
   ESQLLiteral,
   ESQLMap,
   ESQLMapEntry,
   ESQLStringLiteral,
   InlineCastingType,
 } from '../types';
-import { firstItem, lastItem } from '../visitor/utils';
+import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { getPosition } from './helpers';
 
 function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
@@ -221,26 +222,82 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
   return fn;
 }
 
-function visitLogicalIns(ctx: LogicalInContext) {
-  const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx, undefined, 'binary-expression');
-  const [left, ...list] = ctx.valueExpression_list();
-  const leftArg = visitValueExpression(left);
-  if (leftArg) {
-    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
-    const values = list.map((ve) => visitValueExpression(ve));
-    const listArgs = values
-      .filter(nonNullable)
-      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
-    // distinguish between missing brackets (missing text error) and an empty list
-    if (textExistsAndIsValid(ctx.getText())) {
-      fn.args.push(listArgs);
+/**
+ * Constructs a tuple list (round parens):
+ *
+ * ```
+ * (1, 2, 3)
+ * ```
+ *
+ * Can be used in IN-expression:
+ *
+ * ```
+ * WHERE x IN (1, 2, 3)
+ * ```
+ */
+const visitTuple = (
+  ctxs: ValueExpressionContext[],
+  leftParen?: TerminalNode,
+  rightParen?: TerminalNode
+): ESQLList => {
+  const values: ESQLAstExpression[] = [];
+  let incomplete = false;
+
+  for (const elementCtx of ctxs) {
+    const element = visitValueExpression(elementCtx);
+
+    if (!element) {
+      continue;
+    }
+
+    const resolved = resolveItem(element) as ESQLAstExpression;
+
+    if (!resolved) {
+      continue;
+    }
+
+    values.push(resolved);
+
+    if (resolved.incomplete) {
+      incomplete = true;
     }
   }
-  // update the location of the assign based on arguments
-  const argsLocationExtends = computeLocationExtends(fn);
-  fn.location = argsLocationExtends;
-  return fn;
-}
+
+  if (!values.length) {
+    incomplete = true;
+  }
+
+  const node = Builder.expression.list.tuple(
+    { values },
+    {
+      incomplete,
+      location: getPosition(
+        leftParen?.symbol ?? ctxs[0]?.start,
+        rightParen?.symbol ?? ctxs[ctxs.length - 1]?.stop
+      ),
+    }
+  );
+
+  return node;
+};
+
+const visitLogicalIns = (ctx: LogicalInContext) => {
+  const [leftCtx, ...rightCtxs] = ctx.valueExpression_list();
+  const left = resolveItem(
+    visitValueExpression(leftCtx) ?? createUnknownItem(leftCtx)
+  ) as ESQLAstExpression;
+  const right = visitTuple(rightCtxs, ctx.LP(), ctx.RP());
+  const expression = createFunction(
+    ctx.NOT() ? 'not in' : 'in',
+    ctx,
+    { min: ctx.start.start, max: ctx.stop?.stop ?? ctx.RP().symbol.stop },
+    'binary-expression',
+    [left, right],
+    left.incomplete || right.incomplete
+  );
+
+  return expression;
+};
 
 function getMathOperation(ctx: ArithmeticBinaryContext) {
   return (
@@ -380,20 +437,36 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
   return clausesCtx
     .map((clause) => {
       const asToken = clause.getToken(esql_parser.AS, 0);
-      if (asToken && textExistsAndIsValid(asToken.getText())) {
-        const option = createOption(asToken.getText().toLowerCase(), clause);
-        for (const arg of [clause._oldName, clause._newName]) {
+      const assignToken = clause.getToken(esql_parser.ASSIGN, 0);
+
+      const renameToken = asToken || assignToken;
+
+      if (renameToken && textExistsAndIsValid(renameToken.getText())) {
+        const renameFunction = createFunction(
+          renameToken.getText().toLowerCase(),
+          clause,
+          undefined,
+          'binary-expression'
+        );
+
+        const renameArgsInOrder = asToken
+          ? [clause._oldName, clause._newName]
+          : [clause._newName, clause._oldName];
+
+        for (const arg of renameArgsInOrder) {
           if (textExistsAndIsValid(arg.getText())) {
-            option.args.push(createColumn(arg));
+            renameFunction.args.push(createColumn(arg));
           }
         }
-        const firstArg = firstItem(option.args);
-        const lastArg = lastItem(option.args);
-        const location = option.location;
+        const firstArg = firstItem(renameFunction.args);
+        const lastArg = lastItem(renameFunction.args);
+        const location = renameFunction.location;
         if (firstArg) location.min = firstArg.location.min;
         if (lastArg) location.max = lastArg.location.max;
-        return option;
-      } else if (textExistsAndIsValid(clause._oldName?.getText())) {
+        return renameFunction;
+      }
+
+      if (textExistsAndIsValid(clause._oldName?.getText())) {
         return createColumn(clause._oldName);
       }
     })
@@ -497,7 +570,7 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
     regexes.map((regex) => {
       const negate = regex.NOT();
       const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not_' : ''}${likeType}`;
+      const fnName = `${negate ? 'not ' : ''}${likeType}`;
       const fn = createFunction(fnName, regex, undefined, 'binary-expression');
       const arg = visitValueExpression(regex.valueExpression());
       if (arg) {
