@@ -22,10 +22,7 @@ export const findSLORoute = createSloServerRoute({
   params: findSLOParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, repository, soClient, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, repository, soClient, spaceId } = await getScopedClients(request);
 
     const summarySearchClient = new DefaultSummarySearchClient(
       scopedClusterClient,

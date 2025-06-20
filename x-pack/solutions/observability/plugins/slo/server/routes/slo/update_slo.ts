@@ -23,7 +23,7 @@ export const updateSLORoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
 
     const { scopedClusterClient, spaceId, repository, transformManager, summaryTransformManager } =
-      await getScopedClients({ request, logger });
+      await getScopedClients(request);
 
     const core = await context.core;
     const basePath = corePlugins.http.basePath;

@@ -19,13 +19,12 @@ export const disableSLORoute = createSloServerRoute({
     },
   },
   params: manageSLOParamsSchema,
-  handler: async ({ context, response, request, params, logger, plugins, getScopedClients }) => {
+  handler: async ({ context, response, request, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { repository, transformManager, summaryTransformManager } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { repository, transformManager, summaryTransformManager } = await getScopedClients(
+      request
+    );
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username!;
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager, userId);

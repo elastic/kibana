@@ -19,10 +19,10 @@ export const fetchSloHealthRoute = createSloServerRoute({
     },
   },
   params: fetchSLOHealthParamsSchema,
-  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+  handler: async ({ request, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { scopedClusterClient, repository } = await getScopedClients({ request, logger });
+    const { scopedClusterClient, repository } = await getScopedClients(request);
     const getSLOHealth = new GetSLOHealth(scopedClusterClient, repository);
 
     return await getSLOHealth.execute(params.body);

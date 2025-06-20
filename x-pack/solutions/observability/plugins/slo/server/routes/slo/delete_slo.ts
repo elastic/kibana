@@ -19,7 +19,7 @@ export const deleteSLORoute = createSloServerRoute({
     },
   },
   params: deleteSLOParamsSchema,
-  handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
+  handler: async ({ response, params, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
     const {
@@ -28,7 +28,7 @@ export const deleteSLORoute = createSloServerRoute({
       transformManager,
       summaryTransformManager,
       rulesClient,
-    } = await getScopedClients({ request, logger });
+    } = await getScopedClients(request);
 
     const deleteSLO = new DeleteSLO(
       repository,

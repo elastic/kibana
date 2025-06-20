@@ -24,12 +24,9 @@ export const putSloSettings = (isServerless?: boolean) =>
       },
     },
     params: isServerless ? putSLOServerlessSettingsParamsSchema : putSLOSettingsParamsSchema,
-    handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+    handler: async ({ request, params, plugins, getScopedClients }) => {
       await assertPlatinumLicense(plugins);
-      const { soClient } = await getScopedClients({
-        request,
-        logger,
-      });
+      const { soClient } = await getScopedClients(request);
 
       return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
     },
