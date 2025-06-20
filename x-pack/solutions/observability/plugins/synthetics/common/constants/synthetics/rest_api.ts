@@ -46,6 +46,7 @@ export enum SYNTHETICS_API_URLS {
   CERTS = '/internal/synthetics/certs',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
+  MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
 
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
