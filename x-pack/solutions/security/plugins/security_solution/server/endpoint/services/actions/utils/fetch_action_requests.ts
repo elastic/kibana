@@ -140,38 +140,6 @@ export const fetchActionRequests = async ({
     } else {
       must.push({ bool: { filter: matchIntegrationPolicyIds } });
     }
-
-    // FIXME:PT DO NOT COMMIT
-    // Before change:
-    // {
-    //   index: '.logs-endpoint.actions-default',
-    //   size: 10,
-    //   from: 0,
-    //   query: {
-    //     bool: {
-    //       must: [
-    //         {
-    //           bool: {
-    //             filter: {
-    //               terms: {
-    //                 'agent.policy.integrationPolicyId': [ '620cd5ea-9a5f-4e7e-b3a4-28f135b24aad' ]
-    //               }
-    //             }
-    //           }
-    //         },
-    //         {
-    //           bool: {
-    //             filter: [
-    //               { range: { '@timestamp': { gte: 'now-24h/h' } } },
-    //               { range: { '@timestamp': { lte: 'now' } } }
-    //             ]
-    //           }
-    //         }
-    //       ]
-    //     }
-    //   },
-    //   sort: [ { '@timestamp': { order: 'desc' } } ]
-    // }
   }
 
   // Add the date filters
