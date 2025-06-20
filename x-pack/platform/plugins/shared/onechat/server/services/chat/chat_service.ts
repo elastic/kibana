@@ -197,7 +197,8 @@ class ChatServiceImpl implements ChatService {
                     statusCode: 500,
                   })
             );
-          })
+          }),
+          shareReplay()
         );
       })
     );
@@ -321,8 +322,9 @@ const getExecutionEvents$ = ({
           );
 
         return () => {};
-      }).pipe(shareReplay());
-    })
+      });
+    }),
+    shareReplay(1)
   );
 };
 

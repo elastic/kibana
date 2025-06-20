@@ -42,6 +42,7 @@ import { defaultCustomizationContext } from './customizations/defaults';
 import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
   ACTION_VIEW_SAVED_SEARCH,
+  LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -424,6 +425,21 @@ export class DiscoverPlugin
       ]);
 
       return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
+
+    // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
+    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
+      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+        await Promise.all([
+          getStartServices(),
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+      return getLegacyLogStreamEmbeddableFactory({
         startServices,
         discoverServices,
       });
