@@ -22,10 +22,7 @@ function getVisibility(
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-
-    return ![
-        DEFAULT_APP_CATEGORIES.observability.id,
-    ].includes(categoryId);
+  return ![DEFAULT_APP_CATEGORIES.observability.id].includes(categoryId);
 }
 
 export function useIsNavControlVisible() {
