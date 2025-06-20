@@ -78,7 +78,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             buttonLabel={i18n.translate(
               'xpack.searchHomepage.elasticsearchDocumentation.buttonText',
               {
-                defaultMessage: 'View Documentation',
+                defaultMessage: 'View documentation',
               }
             )}
             dataTestSubj="viewDocumentationButton"
