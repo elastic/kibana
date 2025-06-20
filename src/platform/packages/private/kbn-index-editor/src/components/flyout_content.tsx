@@ -29,7 +29,6 @@ export interface FlyoutContentProps {
   props: EditLookupIndexContentContext;
 }
 
-// Does this need to be lazy loaded? flyout is already lazy loaded //HD
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
