@@ -8,7 +8,8 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import type { SavedSearch, SavedSearchAttributes } from '.';
+import type { DiscoverSessionAttributes } from '../server/saved_objects/schema';
+import type { SavedSearch } from '.';
 import type { SerializableSavedSearch } from './types';
 
 export const fromSavedSearchAttributes = <
@@ -16,7 +17,7 @@ export const fromSavedSearchAttributes = <
   ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
 >(
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  { title, description, tabs: [{ attributes }] }: DiscoverSessionAttributes,
   tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   managed: boolean,
@@ -27,10 +28,10 @@ export const fromSavedSearchAttributes = <
     ...(serialized
       ? { serializedSearchSource: searchSource as SerializedSearchSourceFields }
       : { searchSource }),
-    title: attributes.title,
+    title,
     sort: attributes.sort,
     columns: attributes.columns,
-    description: attributes.description,
+    description,
     tags,
     grid: attributes.grid,
     hideChart: attributes.hideChart,

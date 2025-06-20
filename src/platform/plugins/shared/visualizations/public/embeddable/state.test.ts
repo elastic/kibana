@@ -154,6 +154,7 @@ describe('visualize_embeddable state', () => {
                 language: 'kuery',
               },
               index: '456',
+              indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
               filter: [],
             },
           },
