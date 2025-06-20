@@ -5,26 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import { TelemetryServiceStart } from '../services/telemetry/types';
 import { HideableReactQueryDevTools } from './hideable_react_query_dev_tools';
 
 function App() {
@@ -51,6 +52,7 @@ export const renderApp = ({
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
+  telemetryClient,
   usageCollection,
   isDev,
   kibanaVersion,
@@ -62,6 +64,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  telemetryClient: TelemetryServiceStart;
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
@@ -99,6 +102,7 @@ export const renderApp = ({
                 isDev,
                 kibanaVersion,
                 isServerless,
+                telemetryClient,
               }}
             >
               <PluginContext.Provider

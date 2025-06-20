@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { type EuiDataGridColumn, EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Alert } from '@kbn/alerting-types';
-import { Table } from './table';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
+import React, { memo, useMemo } from 'react';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { Table } from './table';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -39,7 +39,7 @@ interface AiForSOCAlertsTableProps {
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * Query that contains the id of the alerts to display in the table
    */
