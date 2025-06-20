@@ -23,13 +23,13 @@ export const fetchDurationPercentiles = async ({
   query,
   percents,
   searchMetrics,
-  isOtel,
+  isOtel = false,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
   percents?: number[];
   searchMetrics: boolean;
-  isOtel: boolean;
+  isOtel?: boolean;
 }): Promise<{
   totalDocs: number;
   percentiles: Record<string, number>;

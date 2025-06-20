@@ -33,14 +33,14 @@ export const fetchDurationHistogramRangeSteps = async ({
   searchMetrics,
   durationMinOverride,
   durationMaxOverride,
-  isOtel,
+  isOtel = false,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
   searchMetrics: boolean;
   durationMinOverride?: number;
   durationMaxOverride?: number;
-  isOtel: boolean;
+  isOtel?: boolean;
 }): Promise<{
   durationMin?: number;
   durationMax?: number;

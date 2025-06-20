@@ -24,7 +24,7 @@ export const fetchDurationRanges = async ({
   query,
   chartType,
   searchMetrics,
-  isOtel,
+  isOtel = false,
 }: {
   rangeSteps: number[];
   apmEventClient: APMEventClient;
@@ -35,7 +35,7 @@ export const fetchDurationRanges = async ({
   query: estypes.QueryDslQueryContainer;
   chartType: LatencyDistributionChartType;
   searchMetrics: boolean;
-  isOtel: boolean;
+  isOtel?: boolean;
 }): Promise<{
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
