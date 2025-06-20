@@ -405,7 +405,7 @@ describe('when calling the Suggestions route handler', () => {
       beforeEach(() => {
         mockFleetServices = {
           agentPolicy: {
-            list: jest.fn(),
+            fetchAllAgentPolicyIds: jest.fn(),
           },
         };
 
@@ -454,7 +454,7 @@ describe('when calling the Suggestions route handler', () => {
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
           // Should not call fleet services when space awareness is disabled
-          expect(mockFleetServices.agentPolicy.list).not.toHaveBeenCalled();
+          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).not.toHaveBeenCalled();
 
           const expectedFilters = [
             { term: { 'some.field': 'some-value' } },
@@ -547,13 +547,13 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should use metadata united index and call termsAggSuggestions with agent policy filters', async () => {
-          const mockAgentPolicies = {
-            items: [
-              { id: 'policy-1', name: 'Policy 1' },
-              { id: 'policy-2', name: 'Policy 2' },
-            ],
+          const mockAgentPolicies = ['policy-1', 'policy-2'];
+          const mockAsyncIterable = {
+            async *[Symbol.asyncIterator]() {
+              yield mockAgentPolicies;
+            },
           };
-          mockFleetServices.agentPolicy.list.mockResolvedValue(mockAgentPolicies);
+          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -578,9 +578,12 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.list).toHaveBeenCalledWith(mockSavedObjectClient, {
-            spaceId: 'default',
-          });
+          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+            mockSavedObjectClient,
+            {
+              spaceId: 'default',
+            }
+          );
 
           const expectedFilters = [
             { term: { 'some.field': 'some-value' } },
@@ -615,10 +618,13 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle empty agent policies list when space awareness is enabled', async () => {
-          const mockAgentPolicies = {
-            items: [],
+          const mockAgentPolicies: string[] = [];
+          const mockAsyncIterable = {
+            async *[Symbol.asyncIterator]() {
+              yield mockAgentPolicies;
+            },
           };
-          mockFleetServices.agentPolicy.list.mockResolvedValue(mockAgentPolicies);
+          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -643,9 +649,12 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.list).toHaveBeenCalledWith(mockSavedObjectClient, {
-            spaceId: 'default',
-          });
+          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+            mockSavedObjectClient,
+            {
+              spaceId: 'default',
+            }
+          );
 
           const expectedFilters = [
             {
@@ -679,7 +688,9 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle fleet service errors gracefully when space awareness is enabled', async () => {
-          mockFleetServices.agentPolicy.list.mockRejectedValue(new Error('Fleet service error'));
+          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockRejectedValue(
+            new Error('Fleet service error')
+          );
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -715,10 +726,13 @@ describe('when calling the Suggestions route handler', () => {
           const customSpaceId = 'custom-space-123';
           mockSecuritySolutionContext.getSpaceId.mockReturnValue(customSpaceId);
 
-          const mockAgentPolicies = {
-            items: [{ id: 'space-policy-1', name: 'Space Policy 1' }],
+          const mockAgentPolicies = ['space-policy-1'];
+          const mockAsyncIterable = {
+            async *[Symbol.asyncIterator]() {
+              yield mockAgentPolicies;
+            },
           };
-          mockFleetServices.agentPolicy.list.mockResolvedValue(mockAgentPolicies);
+          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -743,9 +757,12 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.list).toHaveBeenCalledWith(mockSavedObjectClient, {
-            spaceId: customSpaceId,
-          });
+          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+            mockSavedObjectClient,
+            {
+              spaceId: customSpaceId,
+            }
+          );
 
           const expectedFilters = [
             { range: { '@timestamp': { gte: 'now-1d' } } },

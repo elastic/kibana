@@ -13,6 +13,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
@@ -83,7 +84,9 @@ export const getEndpointSuggestionsRequestHandler = (
       const spaceId = securitySolutionContext.getSpaceId();
       const isSpaceAwarenessEnabled =
         endpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
-      let fullFilters = filters ? [...filters] : [];
+      let fullFilters: QueryDslQueryContainer[] = filters
+        ? [...(filters as QueryDslQueryContainer[])]
+        : [];
       let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
         termsEnumSuggestions;
 
@@ -124,17 +127,23 @@ export const getEndpointSuggestionsRequestHandler = (
       } else if (request.params.suggestion_type === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
         index = METADATA_UNITED_INDEX;
-        let baseFilters: unknown[] = [
+        let baseFilters: QueryDslQueryContainer[] = [
           { exists: { field: 'united.endpoint.agent.id' } },
           { exists: { field: 'united.agent.agent.id' } },
         ];
 
         if (isSpaceAwarenessEnabled) {
           const fleetService = securitySolutionContext.getInternalFleetServices();
-          const agentPoliciesInSpace = await fleetService.agentPolicy.list(savedObjects.client, {
-            spaceId,
-          });
-          const agentPolicyIdsInSpace = agentPoliciesInSpace.items.map((policy) => policy.id);
+          const agentPoliciesIterable = await fleetService.agentPolicy.fetchAllAgentPolicyIds(
+            savedObjects.client,
+            {
+              spaceId,
+            }
+          );
+          let agentPolicyIdsInSpace: string[] = [];
+          for await (const batch of agentPoliciesIterable) {
+            agentPolicyIdsInSpace.push(...batch);
+          }
           baseFilters = [
             ...baseFilters,
             { terms: { 'united.agent.policy_id': agentPolicyIdsInSpace } },
