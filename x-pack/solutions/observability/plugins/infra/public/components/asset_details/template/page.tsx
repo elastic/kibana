@@ -8,9 +8,9 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { SupportedDataSources } from '../../../../common/metrics_sources/get_has_data';
 import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
 import { isPending } from '../../../hooks/use_fetcher';
-import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -29,8 +29,8 @@ import { useEntitySummary } from '../hooks/use_entity_summary';
 import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 
-const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
-  host: [SYSTEM_INTEGRATION],
+const DATA_SOURCE_PER_TYPE: Partial<Record<InventoryItemType, SupportedDataSources>> = {
+  host: 'host',
 };
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
@@ -101,7 +101,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
           ? OnboardingFlow.Hosts
           : OnboardingFlow.Infra
       }
-      dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
+      dataSourceAvailability={DATA_SOURCE_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />

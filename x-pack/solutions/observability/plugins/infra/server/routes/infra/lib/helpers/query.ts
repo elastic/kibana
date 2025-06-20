@@ -11,7 +11,12 @@ import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-pl
 import type { estypes } from '@elastic/elasticsearch';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import type { SYSTEM_INTEGRATION } from '../../../../../common/constants';
-import { EVENT_MODULE, METRICSET_MODULE } from '../../../../../common/constants';
+import {
+  EVENT_MODULE,
+  OTEL_RECEIVER_DATASET_VALUE,
+  METRICSET_MODULE,
+  DATASTREAM_DATASET,
+} from '../../../../../common/constants';
 import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
 export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
@@ -20,6 +25,19 @@ export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) =
       should: [
         ...termQuery(EVENT_MODULE, integration),
         ...termQuery(METRICSET_MODULE, integration),
+      ],
+      minimum_should_match: 1,
+    },
+  };
+};
+
+export const getOTelHostmetricsOrSystemIntegrationFilter = () => {
+  return {
+    bool: {
+      should: [
+        ...termQuery(EVENT_MODULE, 'system'),
+        ...termQuery(METRICSET_MODULE, 'system'),
+        ...termQuery(DATASTREAM_DATASET, OTEL_RECEIVER_DATASET_VALUE),
       ],
       minimum_should_match: 1,
     },
@@ -60,7 +78,7 @@ export const getDocumentsFilter = async ({
   from: number;
   to: number;
 }) => {
-  const filters: estypes.QueryDslQueryContainer[] = [getFilterByIntegration('system')];
+  const filters: estypes.QueryDslQueryContainer[] = [getOTelHostmetricsOrSystemIntegrationFilter()];
   const apmDocumentsFilter =
     apmDataAccessServices && apmDocumentSources
       ? await getApmDocumentsFilter({

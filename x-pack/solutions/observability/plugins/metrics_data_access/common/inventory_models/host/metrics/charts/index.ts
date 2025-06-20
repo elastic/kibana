@@ -13,12 +13,14 @@ import { logs } from './logs';
 import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
 
 export const charts = {
-  cpu,
-  disk,
-  memory,
-  network,
-  logs,
-  kibernetesNode: kubernetesNodeCharts.node,
-} as const;
+  get: ({ schemas }: { schemas: Array<'ecs' | 'semconv'> }) => ({
+    cpu: cpu.get({ schemas }),
+    disk: disk.get({ schemas }),
+    memory: memory.get({ schemas }),
+    network: network.get({ schemas }),
+    logs: logs.get({ schemas }),
+    kibernetesNode: kubernetesNodeCharts.node,
+  }),
+};
 
-export type HostCharts = typeof charts;
+export type HostCharts = ReturnType<typeof charts.get>;

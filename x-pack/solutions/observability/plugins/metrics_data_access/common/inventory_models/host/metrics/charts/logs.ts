@@ -13,25 +13,31 @@ import {
   DEFAULT_XY_HIDDEN_LEGEND,
 } from '../../../shared/charts/constants';
 
-const logRate: LensConfigWithId = {
-  id: 'logRate',
-  chartType: 'xy',
-  title: formulas.logRate.label ?? '',
-  layers: [
-    {
-      seriesType: 'line',
-      type: 'series',
-      xAxis: '@timestamp',
-      yAxis: [formulas.logRate],
-    },
-  ],
-  ...DEFAULT_XY_FITTING_FUNCTION,
-  ...DEFAULT_XY_HIDDEN_LEGEND,
-  ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
-};
-
 export const logs = {
-  xy: {
-    logRate,
+  get: ({ schemas }: { schemas: Array<'ecs' | 'semconv'> }) => {
+    const resolvedFormula = formulas.get({ schemas });
+
+    const logRate: LensConfigWithId = {
+      id: 'logRate',
+      chartType: 'xy',
+      title: resolvedFormula.logRate.label ?? '',
+      layers: [
+        {
+          seriesType: 'line',
+          type: 'series',
+          xAxis: '@timestamp',
+          yAxis: [resolvedFormula.logRate],
+        },
+      ],
+      ...DEFAULT_XY_FITTING_FUNCTION,
+      ...DEFAULT_XY_HIDDEN_LEGEND,
+      ...DEFAULT_XY_HIDDEN_AXIS_TITLE,
+    };
+
+    return {
+      xy: {
+        logRate,
+      },
+    };
   },
 };

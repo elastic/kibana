@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, values, first } from 'lodash';
+import { values, first } from 'lodash';
 import * as rt from 'io-ts';
 import type {
   MetricsAPIRequest,
@@ -75,8 +75,15 @@ export const convertBucketsToRows = (
   return buckets.map((bucket) => {
     const ids = options.metrics.map((metric) => metric.id);
     const metrics = ids.reduce((acc, id) => {
-      const valueObject = get(bucket, [id]);
-      acc[id] = ValueObjectTypeRT.is(valueObject) ? getValue(valueObject) : null;
+      const ecsValue = bucket[id];
+      const otelValue = bucket[`${id}Otel`];
+
+      if (ValueObjectTypeRT.is(ecsValue) && ValueObjectTypeRT.is(otelValue)) {
+        acc[id] = getValue(ecsValue) ?? getValue(otelValue);
+      } else {
+        acc[id] = null;
+      }
+
       return acc;
     }, {} as Record<string, number | null | object[]>);
 

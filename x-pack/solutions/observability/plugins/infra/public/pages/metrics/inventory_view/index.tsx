@@ -21,6 +21,7 @@ import { SurveySection } from './components/survey_section';
 import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
+import { InventoryTimeRangeMetadataProvider } from './hooks/use_inventory_timerange_metadata';
 
 export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
@@ -53,7 +54,9 @@ export const SnapshotPage = () => {
                   },
                 }}
               >
-                <SnapshotContainer />
+                <InventoryTimeRangeMetadataProvider>
+                  <SnapshotContainer />
+                </InventoryTimeRangeMetadataProvider>
               </InfraPageTemplate>
             </div>
           </WaffleFiltersProvider>

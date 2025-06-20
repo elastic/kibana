@@ -137,10 +137,15 @@ export const getAllHosts = async ({
       return {
         name: hostName,
         metadata,
-        metrics: metrics.map((metric) => ({
-          name: metric,
-          value: getMetricValue(bucket[metric]) || null,
-        })),
+        metrics: metrics.map((metric) => {
+          const bucketMetric =
+            getMetricValue(bucket[metric]) ?? getMetricValue((bucket as any)[`${metric}Otel`]);
+
+          return {
+            name: metric,
+            value: bucketMetric || null,
+          };
+        }),
         hasSystemMetrics: systemIntegrationHosts.has(hostName),
       };
     });

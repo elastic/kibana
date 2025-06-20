@@ -234,6 +234,7 @@ export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>
 export const SnapshotMetricTypeKeys = {
   count: null,
   cpuV2: null,
+  cpuV2OTel: null,
   cpu: null,
   diskLatency: null,
   diskSpaceUsage: null,
@@ -281,8 +282,8 @@ export interface InventoryMetricsWithCharts<
   TFormula extends Record<string, LensBaseLayer>,
   TChart extends Record<string, { [key in ChartType]?: Partial<Record<string, LensConfigWithId>> }>
 > extends InventoryMetrics {
-  getFormulas: () => Promise<TFormula>;
-  getCharts: () => Promise<TChart>;
+  getFormulas: ({ schemas }: { schemas: Array<'ecs' | 'semconv'> }) => Promise<TFormula>;
+  getCharts: ({ schemas }: { schemas: Array<'ecs' | 'semconv'> }) => Promise<TChart>;
 }
 
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
@@ -313,3 +314,8 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
 }
 
 export type LensConfigWithId = LensConfig & { id: string };
+export interface FormulaType {
+  ecs: LensBaseLayer['value'];
+  semconv: LensBaseLayer['value'];
+  hybrid: LensBaseLayer['value'];
+}

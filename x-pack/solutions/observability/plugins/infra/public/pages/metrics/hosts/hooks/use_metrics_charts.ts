@@ -13,21 +13,11 @@ import { PAGE_SIZE_OPTIONS } from '../constants';
 export const useMetricsCharts = ({ dataViewId }: { dataViewId?: string }) => {
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, disk, memory, network } = await model.metrics.getCharts();
+    const { cpu, disk, memory, network } = await model.metrics.getCharts({
+      schemas: ['ecs', 'semconv'],
+    });
 
-    return [
-      cpu.xy.cpuUsage,
-      cpu.xy.normalizedLoad1m,
-      memory.xy.memoryUsage,
-      memory.xy.memoryFree,
-      disk.xy.diskSpaceAvailable,
-      disk.xy.diskIORead,
-      disk.xy.diskIOWrite,
-      disk.xy.diskReadThroughput,
-      disk.xy.diskWriteThroughput,
-      network.xy.rx,
-      network.xy.tx,
-    ].map((chart) => ({
+    return [cpu.xy.cpuUsage].map((chart) => ({
       ...chart,
       layers: chart.layers.map((layer) =>
         layer.type === 'series'
