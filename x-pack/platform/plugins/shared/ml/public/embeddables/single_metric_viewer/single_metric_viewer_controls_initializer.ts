@@ -6,8 +6,7 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
   SingleMetricViewerEmbeddableState,
@@ -23,6 +22,14 @@ export type SingleMetricViewerControlsState = Pick<
   SingleMetricViewerEmbeddableState,
   'jobIds' | 'selectedDetectorIndex' | 'selectedEntities' | 'functionDescription' | 'forecastId'
 >;
+
+export const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
+  jobIds: 'deepEquality',
+  forecastId: 'referenceEquality',
+  selectedDetectorIndex: 'referenceEquality',
+  selectedEntities: 'deepEquality',
+  functionDescription: 'referenceEquality',
+};
 
 export const initializeSingleMetricViewerControls = (
   rawState: SingleMetricViewerEmbeddableState,
@@ -48,7 +55,7 @@ export const initializeSingleMetricViewerControls = (
     forecastId.next(id);
   };
 
-  const serializeSingleMetricViewerState = (): SingleMetricViewerControlsState => {
+  const getLatestState = (): SingleMetricViewerControlsState => {
     return {
       jobIds: jobIds.getValue(),
       forecastId: forecastId.getValue(),
@@ -58,19 +65,8 @@ export const initializeSingleMetricViewerControls = (
     };
   };
 
-  const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
-    jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
-    forecastId: [forecastId, (id) => forecastId.next(id)],
-    selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
-    selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
-    functionDescription: [
-      functionDescription,
-      (description) => functionDescription.next(description),
-    ],
-  };
-
   return {
-    singleMetricViewerControlsApi: {
+    api: {
       jobIds,
       forecastId,
       selectedDetectorIndex,
@@ -79,9 +75,22 @@ export const initializeSingleMetricViewerControls = (
       updateForecastId,
       updateUserInput,
     },
-    serializeSingleMetricViewerState,
-    singleMetricViewerComparators,
-    onSingleMetricViewerDestroy: () => {
+    anyStateChange$: merge(
+      jobIds,
+      forecastId,
+      selectedDetectorIndex,
+      selectedEntities,
+      functionDescription
+    ).pipe(map(() => undefined)),
+    getLatestState,
+    reinitializeState: (lastSavedState: SingleMetricViewerControlsState) => {
+      jobIds.next(lastSavedState.jobIds);
+      forecastId.next(lastSavedState.forecastId);
+      selectedDetectorIndex.next(lastSavedState.selectedDetectorIndex);
+      selectedEntities.next(lastSavedState.selectedEntities);
+      functionDescription.next(lastSavedState.functionDescription);
+    },
+    cleanup: () => {
       forecastId.complete();
       jobIds.complete();
       selectedDetectorIndex.complete();

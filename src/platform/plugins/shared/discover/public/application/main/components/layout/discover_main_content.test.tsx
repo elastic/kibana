@@ -22,8 +22,6 @@ import type {
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverMainContentProps } from './discover_main_content';
 import { DiscoverMainContent } from './discover_main_content';
@@ -34,11 +32,11 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { PatternAnalysisTab } from '../pattern_analysis';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 const mountComponent = async ({
   hideChart = false,
@@ -128,13 +126,9 @@ const mountComponent = async ({
   };
 
   const component = mountWithIntl(
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverMainContent {...props} />
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    <DiscoverTestProvider services={services} stateContainer={stateContainer}>
+      <DiscoverMainContent {...props} />
+    </DiscoverTestProvider>
   );
 
   await act(async () => {

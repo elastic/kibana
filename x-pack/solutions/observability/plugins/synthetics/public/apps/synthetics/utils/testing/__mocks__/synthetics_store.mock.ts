@@ -104,6 +104,7 @@ export const mockState: SyntheticsAppState = {
       field: 'none',
       order: 'asc',
     },
+    view: 'cardView',
   },
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
@@ -119,11 +120,6 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
     data: [],
-  },
-  settings: {
-    loading: false,
-    error: null,
-    success: null,
   },
   dynamicSettings: {
     loading: false,
@@ -146,6 +142,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    isInitialLoad: true,
   },
   globalParams: {
     addError: null,
@@ -166,6 +163,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
+  maintenanceWindows: {},
 };
 
 function getBrowserJourneyMockSlice() {

@@ -7,49 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useRef, useState } from 'react';
-import { pick } from 'lodash';
-import type { DiscoverSessionViewRef } from '../session_view';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import React, { useCallback } from 'react';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   createTabItem,
   internalStateActions,
   selectAllTabs,
-  selectCurrentTab,
+  selectRecentlyClosedTabs,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { usePreviewData } from './use_preview_data';
 
-export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessionViewProps }) => {
+export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const currentTab = useInternalStateSelector(selectCurrentTab);
-  const allTabs = useInternalStateSelector(selectAllTabs);
-  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
-  const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
+  const items = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+
+  const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
+    (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
+    [dispatch]
+  );
+
+  const createItem: UnifiedTabsProps['createItem'] = useCallback(
+    () => createTabItem(items),
+    [items]
+  );
+
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
+    () => <DiscoverSessionView key={currentTabId} {...props} />,
+    [currentTabId, props]
+  );
 
   return (
     <UnifiedTabs
       services={services}
-      initialItems={initialItems}
-      onChanged={(updateState) =>
-        dispatch(
-          internalStateActions.updateTabs({
-            updateState,
-            stopSyncing: sessionViewRef.current?.stopSyncing,
-          })
-        )
-      }
-      createItem={() => createTabItem(allTabs)}
-      getPreviewData={() => ({
-        query: { language: 'kuery', query: 'sample query' },
-        status: TabStatus.SUCCESS,
-      })}
-      renderContent={() => (
-        <DiscoverSessionView key={currentTab.id} ref={sessionViewRef} {...sessionViewProps} />
-      )}
+      items={items}
+      selectedItemId={currentTabId}
+      recentlyClosedItems={recentlyClosedItems}
+      createItem={createItem}
+      getPreviewData={getPreviewData}
+      renderContent={renderContent}
+      onChanged={onChanged}
     />
   );
 };

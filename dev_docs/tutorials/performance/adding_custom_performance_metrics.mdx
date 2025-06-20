@@ -294,6 +294,64 @@ This event will be indexed with the following structure:
 }
 ```
 
+#### Add context to render time events
+
+To provide additional context about what duration means for a particular reported event, a `description` to the `meta` field of `onPageReady()` can be added.
+
+This helps analysts understand exactly what the measurement represents in your specific implementation.
+
+```typescript
+onPageReady({
+  meta: {
+    description: '[ttfmp_onboarding] The UI with onboarding categories is rendered'
+  }
+});
+```
+
+#### Tracking Refreshes or Subsequent Loads
+
+The `meta` field supports an `isInitialLoad` boolean flag, which indicates whether the performance event was triggered during the application's initial load or as a result of a subsequent user interaction. This helps distinguish between first page loads and subsequent refreshes as subsequent refreshes may be quite different in terms of performance compared to the initial load.
+
+By default, when you call `onPageReady()` without first calling `onPageRefreshStart()`, the event will be recorded with `isInitialLoad: true`, indicating it was the initial page load.
+
+To track subsequent refreshes (after initial load):
+
+1. Call `onPageRefreshStart()` when a refresh action begins
+2. Call `onPageReady()` when the refresh completes
+
+When this pattern is followed, the performance event will be recorded with `isInitialLoad: false`.
+
+###### Code example
+
+```typescript
+// When a user initiates a refresh action
+const handleRefresh = useCallback(() => {
+  onPageRefreshStart(); // Mark the start of refresh
+  fetchData().then(() => {
+    // Once data is loaded and UI is updated
+    onPageReady(); // This will record with isInitialLoad: false
+  });
+}, [onPageRefreshStart, onPageReady]);
+```
+
+This will be indexed as:
+
+```typescript
+{
+  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",
+  "_source": {
+    "timestamp": "2024-08-13T11:29:58.275Z",
+    "event_type": "performance_metric",
+    "eventName": "kibana:plugin_render_time",
+    "duration": 736,
+    "meta": {
+      "is_initial_load": false  // Indicates this was a refresh, not initial load
+    },
+    ...
+  }
+}
+```
+
 #### Add time ranges
 
 The meta field supports telemetry on time ranges, providing calculated metrics for enhanced context. This includes:

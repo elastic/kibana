@@ -9,7 +9,7 @@ import { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { Indicator, indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { SLODefinition } from '../../domain/models';
 import { EsSummaryDocument } from '../summary_transform_generator/helpers/create_temp_summary';
 

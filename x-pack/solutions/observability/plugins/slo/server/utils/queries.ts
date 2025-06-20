@@ -56,7 +56,7 @@ export function termsQuery(
   field: string,
   ...values: Array<string | boolean | undefined | number | null>
 ): QueryDslQueryContainer[] {
-  const filtered = reject(values, isUndefinedOrNull);
+  const filtered = reject(values, isUndefinedOrNull) as Array<NonNullable<(typeof values)[number]>>;
 
   if (!filtered.length) {
     return [];

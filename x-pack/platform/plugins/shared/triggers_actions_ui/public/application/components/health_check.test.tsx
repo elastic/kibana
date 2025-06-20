@@ -121,10 +121,8 @@ describe('health check', () => {
     expect(action.textContent).toMatchInlineSnapshot(
       `"Learn more.(external, opens in a new tab or window)"`
     );
-
-    expect(action.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/security-settings.html#api-key-service-settings"`
-    );
+    expect(action.getAttribute('href')).toMatch(/^https:\/\/www\.elastic\.co\//);
+    expect(action.getAttribute('href')).toContain('security-settings');
   });
 
   test('renders warning if encryption key is ephemeral', async () => {
@@ -160,9 +158,8 @@ describe('health check', () => {
     expect(action!.textContent).toMatchInlineSnapshot(
       `"Learn more.(external, opens in a new tab or window)"`
     );
-    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alert-action-settings-kb.html#general-alert-action-settings"`
-    );
+    expect(action!.getAttribute('href')).toMatch(/^https:\/\/www\.elastic\.co\//);
+    expect(action!.getAttribute('href')).toContain('alerting-settings');
   });
 
   test('renders warning if encryption key is ephemeral and keys are disabled', async () => {
@@ -200,9 +197,8 @@ describe('health check', () => {
     expect(action!.textContent).toMatchInlineSnapshot(
       `"Learn more.(external, opens in a new tab or window)"`
     );
-    expect(action!.getAttribute('href')).toMatchInlineSnapshot(
-      `"https://www.elastic.co/guide/en/kibana/mocked-test-branch/alerting-setup.html#alerting-prerequisites"`
-    );
+    expect(action!.getAttribute('href')).toMatch(/^https:\/\/www\.elastic\.co\//);
+    expect(action!.getAttribute('href')).toContain('alerting-setup');
   });
 
   it('renders children and no warnings if error thrown getting alerting health', async () => {

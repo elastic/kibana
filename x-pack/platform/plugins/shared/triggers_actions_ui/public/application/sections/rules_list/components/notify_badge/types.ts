@@ -26,6 +26,7 @@ export interface RulesListNotifyBadgeProps {
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showTooltipInline?: boolean;
   showOnHover?: boolean;
+  isRuleEditable?: boolean;
 }
 
 export type RulesListNotifyBadgePropsWithApi = Pick<

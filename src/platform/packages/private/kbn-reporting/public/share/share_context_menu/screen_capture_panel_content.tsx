@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
-export interface Props extends ReportingPanelProps {
+export interface Props extends Omit<ReportingPanelProps, 'theme'> {
   layoutOption?: 'canvas' | 'print';
 }
 

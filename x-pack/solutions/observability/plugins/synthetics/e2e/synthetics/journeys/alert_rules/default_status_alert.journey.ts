@@ -111,7 +111,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -120,11 +120,12 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
+      await page.waitForTimeout(5000);
 
       const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 5 * 1000 });
       expect(await alerts.isVisible()).toBe(true);
 
-      const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
+      const text = await page.getByTestId('o11yGetRenderCellValueLink').textContent();
 
       expect(text).toBe(reasonMessage);
     });
@@ -175,7 +176,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,

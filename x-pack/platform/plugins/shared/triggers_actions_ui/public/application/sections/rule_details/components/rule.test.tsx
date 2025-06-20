@@ -300,7 +300,7 @@ describe('rules', () => {
       enabled: false,
     });
     const ruleType = mockRuleType({
-      hasFieldsForAAD: true,
+      hasAlertsMappings: true,
     });
     const ruleSummary = mockRuleSummary();
     jest.setSystemTime(fake2MinutesAgo);

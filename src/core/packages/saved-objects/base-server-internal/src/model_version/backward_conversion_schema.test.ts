@@ -88,7 +88,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const output = converted(doc);
 
       expect(validateSpy).toHaveBeenCalledTimes(1);
-      expect(validateSpy).toHaveBeenCalledWith({ foo: 'bar' }, {});
+      expect(validateSpy).toHaveBeenCalledWith({ foo: 'bar' });
       expect(output).toEqual(doc);
     });
 
@@ -127,6 +127,29 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(
         `"[hello]: definition for this key is missing"`
       );
+    });
+
+    it('returns the known subset of keys with their original values', () => {
+      const conversionSchema = schema.object(
+        {
+          durations: schema.arrayOf(schema.duration()),
+          byteSize: schema.byteSize(),
+        },
+        { unknowns: 'ignore' }
+      );
+
+      const doc = createDoc({
+        attributes: { durations: ['1m', '4d'], byteSize: '1gb', excluded: true },
+      });
+      const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
+
+      expect(converted(doc)).toEqual({
+        ...doc,
+        attributes: {
+          durations: ['1m', '4d'],
+          byteSize: '1gb',
+        },
+      });
     });
   });
 });

@@ -263,10 +263,10 @@ yarn test:jest x-pack/platform/plugins/shared/encrypted_saved_objects --watch
 
 In one shell, from `kibana-root-folder/x-pack`:
 ```bash
-$ node scripts/functional_tests_server.js --config test/encrypted_saved_objects_api_integration/config.ts
+$ node scripts/functional_tests_server.js --config platform/test/encrypted_saved_objects_api_integration/config.ts
 ```
 
 In another shell, from `kibana-root-folder/x-pack`:
 ```bash
-$ node ../scripts/functional_test_runner.js --config test/encrypted_saved_objects_api_integration/config.ts --grep="{TEST_NAME}"
+$ node ../scripts/functional_test_runner.js --config platform/test/encrypted_saved_objects_api_integration/config.ts --grep="{TEST_NAME}"
 ```

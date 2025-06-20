@@ -28,10 +28,36 @@ export const localToolPrompts: Prompt[] = [
   - breakdown or filter ES|QL queries that are displayed on the current page
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
-
   ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
     },
   },
+  {
+    promptId: 'GenerateESQLTool',
+    promptGroupId,
+    prompt: {
+      default: `You MUST use the "GenerateESQLTool" function when the user wants to:
+- generate an ES|QL query
+- convert queries from another language to ES|QL they can run on their cluster
+
+ALWAYS use this tool to generate ES|QL queries and never generate ES|QL any other way.`,
+    },
+  },
+  {
+    promptId: 'AskAboutEsqlTool',
+    promptGroupId,
+    prompt: {
+      default: `You MUST use the "AskAboutEsqlTool" function when the user:
+- asks for help with ES|QL
+- asks about ES|QL syntax
+- asks for ES|QL examples
+- asks for ES|QL documentation
+- asks for ES|QL best practices
+- asks for ES|QL optimization
+
+Never use this tool when they user wants to generate a ES|QL for their data.`,
+    },
+  },
+
   {
     promptId: 'ProductDocumentationTool',
     promptGroupId,

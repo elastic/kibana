@@ -12,7 +12,7 @@ import { extractReferences } from '../../common/persistable_state';
 import { LinksRuntimeState } from '../types';
 
 export const serializeLinksAttributes = (
-  state: LinksRuntimeState,
+  state: Pick<LinksRuntimeState, 'defaultDescription' | 'defaultTitle' | 'layout' | 'links'>,
   shouldExtractReferences: boolean = true
 ) => {
   const linksToSave: Link[] | undefined = state.links
@@ -25,8 +25,8 @@ export const serializeLinksAttributes = (
         ) as unknown as Link
     );
   const attributes = {
-    title: state.defaultPanelTitle,
-    description: state.defaultPanelDescription,
+    title: state.defaultTitle,
+    description: state.defaultDescription,
     layout: state.layout,
     links: linksToSave,
   };

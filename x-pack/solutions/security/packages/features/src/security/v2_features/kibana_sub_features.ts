@@ -616,19 +616,19 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
   privilegesTooltip: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.privilegesTooltip',
     {
-      defaultMessage: 'All Spaces is required for Endpoint Insights access.',
+      defaultMessage: 'All Spaces is required for Automatic Troubleshooting access.',
     }
   ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights',
     {
-      defaultMessage: 'Endpoint Insights',
+      defaultMessage: 'Automatic Troubleshooting',
     }
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.description',
     {
-      defaultMessage: 'Access the endpoint insights.',
+      defaultMessage: 'Access to the automatic troubleshooting.',
     }
   ),
 
@@ -756,7 +756,7 @@ const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
  */
 export const getSecurityV2BaseKibanaSubFeatureIds = (
   { experimentalFeatures }: SecurityFeatureParams // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => [SecuritySubFeatureId.hostIsolation];
+): SecuritySubFeatureId[] => [];
 
 /**
  * Defines all the Security Assistant subFeatures available.

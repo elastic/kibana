@@ -53,6 +53,13 @@ function validateCPU(s: string) {
   }
 }
 
+function validateCloudProvider(s: string) {
+  const csps = ['aws', 'azure', 'gcp'];
+  if (!csps.includes(s)) {
+    return 'Invalid cloud provider';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -148,6 +155,12 @@ export const AgentPolicyBaseSchema = {
   ),
   agentless: schema.maybe(
     schema.object({
+      cloud_connectors: schema.maybe(
+        schema.object({
+          target_csp: schema.maybe(schema.string({ validate: validateCloudProvider })),
+          enabled: schema.boolean(),
+        })
+      ),
       resources: schema.maybe(
         schema.object({
           requests: schema.maybe(
@@ -253,15 +266,19 @@ const BaseSSLSchema = schema.object({
   renegotiation: schema.maybe(schema.string()),
 });
 
-const BaseSecretsSchema = schema.object({
-  ssl: schema.maybe(
-    schema.object({
-      key: schema.object({
-        id: schema.maybe(schema.string()),
-      }),
-    })
-  ),
-});
+const BaseSecretsSchema = schema
+  .object({
+    ssl: schema.maybe(
+      schema.object({
+        key: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      })
+    ),
+  })
+  .extendsDeep({
+    unknowns: 'allow',
+  });
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,

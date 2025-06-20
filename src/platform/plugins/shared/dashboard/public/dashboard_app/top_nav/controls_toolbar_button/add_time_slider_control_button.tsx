@@ -52,10 +52,12 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
       onClick={async () => {
         controlGroupApi?.addNewPanel({
           panelType: TIME_SLIDER_CONTROL,
-          initialState: {
-            grow: true,
-            width: 'large',
-            id: uuidv4(),
+          serializedState: {
+            rawState: {
+              grow: true,
+              width: 'large',
+              id: uuidv4(),
+            },
           },
         });
         dashboardApi.scrollToTop();

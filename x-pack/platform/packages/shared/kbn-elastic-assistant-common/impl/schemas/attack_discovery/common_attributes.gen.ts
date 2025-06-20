@@ -16,8 +16,9 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
+import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 /**
  * An attack discovery generated from one or more alerts
@@ -55,7 +56,7 @@ export const AttackDiscovery = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
 });
 
 /**
@@ -246,4 +247,102 @@ export const AttackDiscoveryCreateProps = z.object({
    */
   apiConfig: ApiConfig,
   replacements: Replacements.optional(),
+});
+
+export type CreateAttackDiscoveryAlertsParams = z.infer<typeof CreateAttackDiscoveryAlertsParams>;
+export const CreateAttackDiscoveryAlertsParams = z.object({
+  /**
+   * The number of alerts provided as context to the LLM
+   */
+  alertsContextCount: z.number().int(),
+  /**
+   * The anonymized alerts that were used to generate the attack discovery
+   */
+  anonymizedAlerts: z.array(
+    z.object({
+      id: z.string().optional(),
+      metadata: z.object({}),
+      pageContent: z.string(),
+    })
+  ),
+  /**
+   * LLM API configuration
+   */
+  apiConfig: ApiConfig,
+  /**
+   * The generated Attack discoveries
+   */
+  attackDiscoveries: AttackDiscoveries,
+  /**
+   * The name of the connector that generated the attack discovery
+   */
+  connectorName: z.string(),
+  /**
+   * The generation ID of the run that created the attack discovery
+   */
+  generationUuid: z.string(),
+  /**
+   * Replacements enable anonymization of data sent to the LLM. When Attack discoveries are added to an assistant conversation, replacements must be provided at the same time.
+   */
+  replacements: Replacements.optional(),
+});
+
+export type FindAttackDiscoveryAlertsParams = z.infer<typeof FindAttackDiscoveryAlertsParams>;
+export const FindAttackDiscoveryAlertsParams = z.object({
+  /**
+   * filter by alert IDs within Attack discovery
+   */
+  alertIds: z.array(z.string()).optional(),
+  /**
+   * filter by connector names
+   */
+  connectorNames: z.array(z.string()).optional(),
+  /**
+   * filter by end date (relative or absolute)
+   */
+  end: z.string().optional(),
+  /**
+   * filter by Attack discovery IDs
+   */
+  ids: z.array(z.string()).optional(),
+  page: z.number().int().min(1).optional().default(1),
+  perPage: z.number().int().min(0).optional().default(10),
+  /**
+   * filter by search query
+   */
+  search: z.string().optional(),
+  /**
+   * `undefined`: show both shared, and only visible to me Attack discoveries. `true`: show only shared Attack discoveries. `false`: show only visible to me Attack discoveries.
+   */
+  shared: z.boolean().optional(),
+  sortField: z.string().optional().default('@timestamp'),
+  sortOrder: z.string().optional(),
+  /**
+   * filter by start date (relative or absolute)
+   */
+  start: z.string().optional(),
+  /**
+   * filter by kibana.alert.workflow.status
+   */
+  status: z.array(z.string()).optional(),
+});
+
+export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
+export const AttackDiscoveryGenerationConfig = z.object({
+  alertsIndexPattern: z.string(),
+  anonymizationFields: z.array(AnonymizationFieldResponse),
+  /**
+   * LLM API configuration.
+   */
+  apiConfig: ApiConfig,
+  connectorName: z.string().optional(),
+  end: z.string().optional(),
+  filter: z.object({}).catchall(z.unknown()).optional(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
+  model: z.string().optional(),
+  replacements: Replacements.optional(),
+  size: z.number(),
+  start: z.string().optional(),
+  subAction: z.enum(['invokeAI', 'invokeStream']),
 });

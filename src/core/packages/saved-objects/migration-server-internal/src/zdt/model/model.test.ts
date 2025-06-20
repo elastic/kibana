@@ -8,7 +8,7 @@
  */
 
 import './model.test.mocks';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { FetchIndexResponse, RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';
@@ -29,6 +29,7 @@ describe('model', () => {
   const baseState: BaseState = {
     controlState: '42',
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     logs: [],
     skipDocumentMigration: false,

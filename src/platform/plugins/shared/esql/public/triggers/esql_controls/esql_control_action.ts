@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLVariableType, ESQLControlState } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
-import type { ESQLControlState } from './types';
 import { isActionCompatible, executeAction } from './esql_control_helpers';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
@@ -45,8 +44,8 @@ export class CreateESQLControlAction implements Action<Context> {
     return 'pencil';
   }
 
-  public async isCompatible({ queryString }: Context) {
-    return isActionCompatible(queryString);
+  public async isCompatible({ variableType }: Context) {
+    return isActionCompatible(this.core, variableType);
   }
 
   public async execute({

@@ -202,7 +202,20 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
-};
+} as const;
+
+/*
+ * ECS schema unique field to describe the event
+ * https://www.elastic.co/guide/en/ecs/current/ecs-event.html
+ */
+export const EVENT_ID = 'event.id';
+
+export const VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS: string[] = [
+  VULNERABILITY_FIELDS.VULNERABILITY_ID,
+  VULNERABILITY_FIELDS.PACKAGE_NAME,
+  VULNERABILITY_FIELDS.PACKAGE_VERSION,
+  VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION,
+];
 
 /*
 The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
@@ -221,6 +234,7 @@ export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = 
 The fields below are used to group the data in the Cloud Security Data Table.
 The keys are the fields that are used to group the data, and the values are the fields that need to have keyword mapping
 to prevent filtering out the data when grouping by the key field.
+WARNING: only add keys which are not mapped as keywords - casting to keywords could have negative effect on performance.
 TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
 the fields from the runtime mappings if they are removed from the Data Table.
 */

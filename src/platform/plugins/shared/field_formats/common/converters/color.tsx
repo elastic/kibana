@@ -20,8 +20,8 @@ import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
 /** @public */
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
-  static title = i18n.translate('fieldFormats.color.title', {
-    defaultMessage: 'Color',
+  static title = i18n.translate('fieldFormats.color.colorOrBadgeTitle', {
+    defaultMessage: 'Color / Badge',
   });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.BOOLEAN];
 
@@ -50,6 +50,7 @@ export class ColorFormat extends FieldFormat {
           // @ts-expect-error upgrade typescript v5.1.6
           return val >= Number(start) && val <= Number(end);
         });
+
       case 'boolean':
         return findLast(this.param('colors'), ({ boolean }) => {
           return boolean === val.toString();
@@ -68,9 +69,14 @@ export class ColorFormat extends FieldFormat {
 
     return ReactDOM.renderToStaticMarkup(
       <span
+        // using `style` so we can test with jest and emotion does not work for these formatter utils
+        // EuiBadge is not multiline, so we define custom styles here instead of using it.
         style={{
           color: color.text,
           backgroundColor: color.background,
+          display: 'inline-block',
+          padding: '0 8px',
+          borderRadius: '3px',
         }}
         dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
       />

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
 import {
   endpointEntriesArray,

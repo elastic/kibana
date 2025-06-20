@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import mapValues from 'lodash/mapValues';
+import { mapValues } from 'lodash';
 import { MetadataFieldName } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import { AnyFieldName, FieldMetadata, TMetadataFields } from '../../../../common';

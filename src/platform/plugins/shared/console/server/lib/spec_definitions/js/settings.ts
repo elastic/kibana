@@ -51,7 +51,6 @@ export const settings = (specService: SpecDefinitionsService) => {
           total_shards_per_node: -1,
         },
       },
-      'ttl.disable_purge': BOOLEAN,
       analysis: {
         analyzer: {},
         tokenizer: {},
@@ -59,9 +58,6 @@ export const settings = (specService: SpecDefinitionsService) => {
         char_filter: {},
         normalizer: {},
       },
-      'cache.query.enable': BOOLEAN,
-      shadow_replicas: BOOLEAN,
-      shared_filesystem: BOOLEAN,
       data_path: 'path',
       'index.codec': {
         __one_of: ['default', 'best_compression', 'lucene_default'],

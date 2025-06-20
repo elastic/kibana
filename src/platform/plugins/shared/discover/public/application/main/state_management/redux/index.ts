@@ -19,11 +19,16 @@ import {
   setDefaultProfileAdHocDataViews,
   setTabs,
   updateTabs,
+  disconnectTab,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 } from './actions';
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
 
-export { type InternalStateStore, createInternalStateStore, createTabItem } from './internal_state';
+export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
   ...omit(
@@ -35,30 +40,42 @@ export const internalStateActions = {
   loadDataViewList,
   setTabs,
   updateTabs,
+  disconnectTab,
   setDataView,
   setAdHocDataViews,
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSession,
+  updateTabAppStateAndGlobalState,
+  restoreTab,
+  clearAllTabs,
+  initializeTabs,
 };
 
 export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
+  CurrentTabProvider,
+  useCurrentTabSelector,
+  useCurrentTabAction,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectCurrentTab } from './selectors';
+export { selectAllTabs, selectRecentlyClosedTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,
+  type CombinedRuntimeState,
   createRuntimeStateManager,
   useRuntimeState,
-  selectCurrentTabRuntimeState,
+  selectTabRuntimeState,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
+
+export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';

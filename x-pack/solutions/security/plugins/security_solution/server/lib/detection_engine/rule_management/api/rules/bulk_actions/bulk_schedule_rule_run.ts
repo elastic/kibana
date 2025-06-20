@@ -12,6 +12,7 @@ import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../../rule_schema';
 import { validateBulkScheduleBackfill } from '../../../logic/bulk_actions/validations';
+import { handleScheduleBackfillResults } from './utils';
 
 interface BulkScheduleBackfillArgs {
   rules: RuleAlertType[];
@@ -61,37 +62,18 @@ export const bulkScheduleBackfill = async ({
   // Then if it's not a dry run, we schedule backfill for the rules that passed the validation
   const params: ScheduleBackfillParams = validatedRules.map(({ id }) => ({
     ruleId: id,
-    start: runPayload.start_date,
-    end: runPayload.end_date,
+    ranges: [{ start: runPayload.start_date, end: runPayload.end_date }],
   }));
 
   // Perform actual schedule using the rulesClient
-  const results = await rulesClient.scheduleBackfill(params);
-  return results.reduce(
-    (acc, backfillResult) => {
-      if ('error' in backfillResult) {
-        const ruleName = validatedRules.find(
-          (rule) => rule.id === backfillResult.error.rule.id
-        )?.name;
-        const backfillError = backfillResult.error;
-        const backfillRule = backfillError.rule;
-        const error = {
-          message: backfillError.message,
-          status: backfillError.status,
-          rule: { id: backfillRule.id, name: backfillRule.name ?? ruleName ?? '' },
-        };
-        acc.errors.push(error);
-      } else {
-        const backfillRule = validatedRules.find((rule) => rule.id === backfillResult.rule.id);
-        if (backfillRule) {
-          acc.backfilled.push(backfillRule);
-        }
-      }
-      return acc;
-    },
-    { backfilled: [], errors } as {
-      backfilled: RuleAlertType[];
-      errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError>;
-    }
-  );
+  const backfillResults = await rulesClient.scheduleBackfill(params);
+  const processedResults = handleScheduleBackfillResults({
+    results: backfillResults,
+    rules: validatedRules,
+  });
+
+  return {
+    backfilled: processedResults.backfilled,
+    errors: [...errors, ...processedResults.errors],
+  };
 };

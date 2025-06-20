@@ -13,12 +13,7 @@ import { useLensAttributes } from '../../../use_lens_attributes';
 import { getAlertsHistogramLensAttributes } from './alerts_histogram';
 
 jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('0039eb0c-9a1a-4687-ae54-0f4e239bec75')
-    .mockReturnValueOnce('e09e0380-0740-4105-becc-0a4ca12e3944')
-    .mockReturnValueOnce('34919782-4546-43a5-b668-06ac934d3acd')
-    .mockReturnValueOnce('aac9d7d0-13a3-480a-892b-08207a787926'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({

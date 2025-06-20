@@ -160,13 +160,8 @@ export class EndpointAppContextService {
       alerting,
       licenseService,
       telemetryConfigProvider,
-      exceptionListsClient,
-      featureUsageService,
-      esClient,
       productFeaturesService,
     } = this.startDependencies;
-    const endpointMetadataService = this.getEndpointMetadataService();
-    const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
     registerFleetCallback(
@@ -188,7 +183,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -199,23 +193,12 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        featureUsageService,
-        endpointMetadataService,
-        this.setupDependencies.cloud,
-        esClient,
-        productFeaturesService
-      )
+      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
 
-    registerFleetCallback(
-      'packagePolicyPostDelete',
-      getPackagePolicyDeleteCallback(exceptionListsClient, soClient)
-    );
+    registerFleetCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(this));
   }
 
   /**
@@ -300,14 +283,19 @@ export class EndpointAppContextService {
   /**
    * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
    * @param spaceId
+   * @param unscoped
    */
-  public getInternalFleetServices(spaceId?: string): EndpointInternalFleetServicesInterface {
+  public getInternalFleetServices(
+    spaceId?: string,
+    unscoped: boolean = false
+  ): EndpointInternalFleetServicesInterface {
     if (this.fleetServicesFactory === null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
     return this.fleetServicesFactory.asInternalUser(
-      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined
+      this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled ? spaceId : undefined,
+      unscoped
     );
   }
 
@@ -365,7 +353,9 @@ export class EndpointAppContextService {
     username = 'elastic',
     taskId,
     taskType,
+    spaceId,
   }: {
+    spaceId: string;
     agentType?: ResponseActionAgentType;
     username?: string;
     /** Used with background task and needed for `UnsecuredActionsClient`  */
@@ -381,11 +371,13 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),
         {
+          spaceId,
           relatedSavedObjects:
             taskId && taskType
               ? [

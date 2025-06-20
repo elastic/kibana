@@ -6,7 +6,8 @@
  */
 
 import url from 'url';
-import { synthtraceOtel } from '../../../synthtrace';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
+import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';
 
@@ -28,16 +29,17 @@ const transactionUrl = url.format({
 
 describe('Service Overview', () => {
   before(() => {
-    synthtraceOtel.index(
+    synthtrace.index(
       sendotlp({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
+      ApmSynthtracePipelineSchema.Otel
     );
   });
 
   after(() => {
-    synthtraceOtel.clean();
+    synthtrace.clean();
   });
 
   describe('renders', () => {
@@ -112,9 +114,9 @@ describe('Service Overview', () => {
 
       cy.wait('@transactionTypesRequest');
 
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.contains('Transactions').click();
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.contains('parent-synth');
     });
 
@@ -131,6 +133,27 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+    });
+
+    it('shows waterfall and transaction details flyout', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmWaterfallButton').should('exist');
+      cy.getByTestSubj('waterfall').should('exist');
+      cy.getByTestSubj('waterfallItem').should('exist');
+      cy.getByTestSubj('waterfallItem').first().click();
+      cy.contains('h4', 'Transaction details');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').should('exist');
+      cy.getByTestSubj('apmTransactionDetailLinkLink').contains('parent-synth');
+      cy.getByTestSubj('apmServiceListAppLink').should('exist');
+      cy.getByTestSubj('apmServiceListAppLink').contains('sendotlp-otel-native-synth');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
     });
   });
 
@@ -150,9 +173,16 @@ describe('Service Overview', () => {
       cy.url().should('include', '/sendotlp-otel-native-synth/errors');
     });
 
-    it('navigates to error detail page', () => {
-      cy.contains('a', '*errors.errorString').click();
+    it('navigates to error detail page and checks error summary', () => {
+      cy.contains('a', 'boom').click();
       cy.contains('div', 'boom');
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
     });
   });
 });

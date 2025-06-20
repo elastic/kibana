@@ -59,8 +59,7 @@ export function registerPostOneApplyLatestMappings({
           }
           await client.asCurrentUser.indices.putMapping({
             index: name,
-            // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-            body: mappings,
+            ...mappings,
             write_index_only: true,
           });
 

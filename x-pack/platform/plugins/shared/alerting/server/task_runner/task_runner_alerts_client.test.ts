@@ -287,6 +287,15 @@ describe('Task Runner', () => {
         });
         logger.get.mockImplementation(() => logger);
         ruleType.executor.mockResolvedValue({ state: {} });
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 0 },
+            hits: [],
+          },
+        });
       });
 
       test('should not use legacy alerts client if alerts client created', async () => {

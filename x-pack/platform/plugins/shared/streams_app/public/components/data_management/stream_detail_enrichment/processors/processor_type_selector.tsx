@@ -14,9 +14,13 @@ import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
+import { configDrivenProcessors } from './config_driven';
+import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
+import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { useStreamsEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
 
 interface TAvailableProcessor {
-  value: ProcessorType;
+  type: ProcessorType;
   inputDisplay: string;
   getDocUrl: (esDocUrl: string) => React.ReactNode;
 }
@@ -28,6 +32,7 @@ export const ProcessorTypeSelector = ({
 }: Pick<EuiSuperSelectProps, 'disabled'>) => {
   const { core } = useKibana();
   const esDocUrl = core.docLinks.links.elasticsearch.docsBase;
+  const getEnrichmentState = useGetStreamEnrichmentState();
 
   const { reset } = useFormContext();
   const { field, fieldState } = useController<ProcessorFormState, 'type'>({
@@ -37,8 +42,14 @@ export const ProcessorTypeSelector = ({
 
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
+  const grokCollection = useStreamsEnrichmentSelector((state) => state.context.grokCollection);
+
   const handleChange = (type: ProcessorType) => {
-    const formState = getDefaultFormStateByType(type);
+    const formState = getDefaultFormStateByType(
+      type,
+      selectPreviewDocuments(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
+      { grokCollection }
+    );
     reset(formState);
   };
 
@@ -69,7 +80,7 @@ export const ProcessorTypeSelector = ({
 
 const availableProcessors: TAvailableProcessors = {
   date: {
-    value: 'date',
+    type: 'date',
     inputDisplay: 'Date',
     getDocUrl: () => (
       <FormattedMessage
@@ -79,7 +90,7 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   dissect: {
-    value: 'dissect',
+    type: 'dissect',
     inputDisplay: 'Dissect',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
@@ -103,7 +114,7 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   grok: {
-    value: 'grok',
+    type: 'grok',
     inputDisplay: 'Grok',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
@@ -126,11 +137,22 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
+  ...configDrivenProcessors,
+  manual_ingest_pipeline: {
+    type: 'manual_ingest_pipeline',
+    inputDisplay: 'Manual pipeline configuration',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.manualIngestPipelineHelpText"
+        defaultMessage="Specify an array of ingest pipeline processors using JSON."
+      />
+    ),
+  },
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>
   availableProcessors[type].getDocUrl(esDocUrl);
 
 const processorTypeSelectorOptions = Object.values(availableProcessors).map(
-  ({ value, inputDisplay }) => ({ value, inputDisplay })
+  ({ type, inputDisplay }) => ({ value: type, inputDisplay })
 );

@@ -313,7 +313,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,
@@ -364,7 +364,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,
@@ -415,7 +415,7 @@ describe('useCasesColumns ', () => {
           Object {
             "align": "right",
             "render": [Function],
-            "width": "70px",
+            "width": "120px",
           },
         ],
         "isLoadingColumns": false,

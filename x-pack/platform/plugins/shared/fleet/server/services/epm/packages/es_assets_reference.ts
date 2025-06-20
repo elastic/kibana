@@ -56,6 +56,7 @@ export const updateEsAssetReferences = async (
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -100,6 +101,7 @@ export const optimisticallyAddEsAssetReferences = async (
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkgName,
+      name: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
 
@@ -119,6 +121,7 @@ export const optimisticallyAddEsAssetReferences = async (
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
+      name: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
 

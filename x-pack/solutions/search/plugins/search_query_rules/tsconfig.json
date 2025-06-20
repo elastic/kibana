@@ -24,6 +24,12 @@
     "@kbn/core-http-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/logging",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/try-in-console",
+    "@kbn/share-plugin",
+    "@kbn/search-index-documents",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*",

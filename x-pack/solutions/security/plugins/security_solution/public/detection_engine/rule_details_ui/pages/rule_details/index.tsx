@@ -38,7 +38,14 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import {
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -71,7 +78,7 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
-import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
+import { RuleSwitch } from '../../../common/components/rule_switch';
 import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
@@ -82,7 +89,7 @@ import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/ru
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
-import { RuleActionsOverflow } from '../../../../detections/components/rules/rule_actions_overflow';
+import { RuleActionsOverflow } from './rule_actions_overflow';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
@@ -95,7 +102,6 @@ import {
   focusUtilityBarAction,
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -110,7 +116,7 @@ import {
   RuleStatus,
   RuleStatusFailedCallOut,
   ruleStatusI18n,
-} from '../../../../detections/components/rules/rule_execution_status';
+} from '../../../common/components/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
@@ -179,6 +185,25 @@ const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
 `;
 
+const defaultGroupingOptions = [
+  {
+    label: i18n.SOURCE_ADDRESS,
+    key: 'source.address',
+  },
+  {
+    label: i18n.USER_NAME,
+    key: 'user.name',
+  },
+  {
+    label: i18n.HOST_NAME,
+    key: 'host.name',
+  },
+  {
+    label: i18n.DESTINATION_ADDRESS,
+    key: 'destination.address',
+  },
+];
+
 type DetectionEngineComponentProps = PropsFromRedux;
 
 const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
@@ -202,9 +227,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
-  const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
-  );
   const updatedAt = useShallowEqualSelector(
     (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
@@ -236,9 +258,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
     SourcererScopeName.detections
   );
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
@@ -535,6 +566,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    currentStatus: currentAlertStatusFilterValue,
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
+
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -590,11 +634,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
-        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+        <FiltersGlobal>
           <SiemSearchBar
             id={InputsModelId.global}
             pollForSignalIndex={pollForSignalIndex}
-            sourcererDataView={sourcererDataView}
+            sourcererDataView={sourcererDataViewSpec}
           />
         </FiltersGlobal>
         <RuleDetailsContextProvider>
@@ -762,17 +806,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
+                        accordionButtonContent={defaultGroupTitleRenderers}
+                        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+                        dataViewSpec={sourcererDataViewSpec}
                         defaultFilters={alertMergedFilters}
+                        defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        hasIndexWrite={hasIndexWrite ?? false}
+                        groupTakeActionItems={groupTakeActionItems}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}
-                        signalIndexName={signalIndexName}
                         tableId={TableId.alertsOnRuleDetailsPage}
                         to={to}
                       />

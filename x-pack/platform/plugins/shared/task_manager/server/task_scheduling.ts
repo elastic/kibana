@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import { chunk, flatten } from 'lodash';
+import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import type { Middleware } from './lib/middleware';
@@ -14,6 +14,7 @@ import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
   ConcreteTaskInstance,
   IntervalSchedule,
+  ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
 } from './task';
@@ -79,10 +80,10 @@ export class TaskScheduling {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
+      ...omit(options, 'apiKey', 'request'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
@@ -91,11 +92,18 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule({
-      ...modifiedTask,
-      traceparent: traceparent || '',
-      enabled: modifiedTask.enabled ?? true,
-    });
+    return await this.store.schedule(
+      {
+        ...modifiedTask,
+        traceparent: traceparent || '',
+        enabled: modifiedTask.enabled ?? true,
+      },
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   /**
@@ -106,7 +114,7 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: Record<string, unknown>
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
@@ -115,7 +123,7 @@ export class TaskScheduling {
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-          ...options,
+          ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         return {
@@ -126,7 +134,14 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks);
+    return await this.store.bulkSchedule(
+      modifiedTasks,
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {

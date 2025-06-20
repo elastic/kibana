@@ -100,6 +100,13 @@ export async function generateAgent(
         unenrollment_started_at: '2017-06-07T18:59:04.498Z',
       };
       break;
+    case 'uninstalled':
+      data = {
+        audit_unenrolled_reason: 'uninstall',
+        policy_revision_idx: 1,
+        last_checkin: new Date().toISOString(),
+      };
+      break;
     default:
       data = { policy_revision_idx: 1, last_checkin: new Date().toISOString() };
   }

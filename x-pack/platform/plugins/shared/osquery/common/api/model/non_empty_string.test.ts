@@ -6,8 +6,8 @@
  */
 
 import { NonEmptyString } from './non_empty_string';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('non_empty_string', () => {

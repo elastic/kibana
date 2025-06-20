@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useWaterfallFetcher } from '../../components/app/transaction_details/use_waterfall_fetcher';
-import { Waterfall } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall';
-import { isPending } from '../../hooks/use_fetcher';
-import type { ApmTraceWaterfallEmbeddableProps } from './react_embeddable_factory';
 import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
+import { isPending, useFetcher } from '../../hooks/use_fetcher';
+import { Loading } from './loading';
+import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
+import { TraceWaterfall } from '../../components/shared/trace_waterfall';
+import { getServiceLegends } from '../../components/shared/trace_waterfall/use_trace_waterfall';
+import { WaterfallLegendType } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -20,44 +21,43 @@ export function TraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   displayLimit,
-}: ApmTraceWaterfallEmbeddableProps) {
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId: entryTransactionId,
-    start: rangeFrom,
-    end: rangeTo,
-  });
+  scrollElement,
+  onNodeClick,
+  getRelatedErrorsHref,
+}: ApmTraceWaterfallEmbeddableEntryProps) {
+  const { data, status } = useFetcher(
+    (callApmApi) => {
+      return callApmApi('GET /internal/apm/unified_traces/{traceId}', {
+        params: {
+          path: { traceId },
+          query: { entryTransactionId, start: rangeFrom, end: rangeTo },
+        },
+      });
+    },
+    [entryTransactionId, rangeFrom, rangeTo, traceId]
+  );
 
-  if (isPending(waterfallFetchResult.status)) {
-    return (
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            {i18n.translate(
-              'xpack.apm.traceWaterfallEmbeddable.loadingTraceWaterfallSkeletonTextLabel',
-              { defaultMessage: 'Loading trace waterfall' }
-            )}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+  const legends = getServiceLegends(data?.traceItems || []);
+
+  if (isPending(status)) {
+    return <Loading />;
   }
-
-  const { legends, colorBy } = waterfallFetchResult.waterfall;
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
+        <WaterfallLegends
+          serviceName={serviceName}
+          legends={legends}
+          type={WaterfallLegendType.ServiceName}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
-        <Waterfall
-          showCriticalPath={false}
-          waterfall={waterfallFetchResult.waterfall}
-          displayLimit={displayLimit}
+        <TraceWaterfall
+          traceItems={data?.traceItems!}
+          onClick={(id) => onNodeClick?.(id)}
+          scrollElement={scrollElement}
+          getRelatedErrorsHref={getRelatedErrorsHref}
           isEmbeddable
         />
       </EuiFlexItem>

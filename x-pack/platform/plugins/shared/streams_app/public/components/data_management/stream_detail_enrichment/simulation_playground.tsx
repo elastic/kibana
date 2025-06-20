@@ -7,15 +7,25 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import {
+  EuiFlexItem,
+  EuiNotificationBadge,
+  EuiProgress,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import {
+  useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
+import { DetectedFieldsEditor } from './detected_fields_editor';
 
 export const SimulationPlayground = () => {
+  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
+
   const isViewingDataPreview = useStreamsEnrichmentSelector((state) =>
     state.matches({
       ready: { enrichment: { displayingSimulation: 'viewDataPreview' } },
@@ -26,11 +36,16 @@ export const SimulationPlayground = () => {
       ready: { enrichment: { displayingSimulation: 'viewDetectedFields' } },
     })
   );
-  const canViewDetectedFields = useStreamsEnrichmentSelector((state) =>
-    isWiredStreamGetResponse(state.context.definition)
+
+  const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
+  const isLoading = useSimulatorSelector(
+    (state) =>
+      state.matches('debouncingChanges') ||
+      state.matches('loadingSamples') ||
+      state.matches('runningSimulation')
   );
 
-  const { viewSimulationPreviewData, viewSimulationDetectedFields } = useStreamEnrichmentEvents();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
 
   return (
     <>
@@ -42,22 +57,28 @@ export const SimulationPlayground = () => {
               { defaultMessage: 'Data preview' }
             )}
           </EuiTab>
-          {canViewDetectedFields && (
-            <EuiTab isSelected={isViewingDetectedFields} onClick={viewSimulationDetectedFields}>
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                { defaultMessage: 'Detected fields' }
-              )}
-            </EuiTab>
-          )}
+          <EuiTab
+            isSelected={isViewingDetectedFields}
+            onClick={viewSimulationDetectedFields}
+            append={
+              detectedFields.length > 0 ? (
+                <EuiNotificationBadge size="m">{detectedFields.length}</EuiNotificationBadge>
+              ) : undefined
+            }
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
+              { defaultMessage: 'Detected fields' }
+            )}
+          </EuiTab>
         </EuiTabs>
+        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields &&
-        i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
-          defaultMessage: 'WIP',
-        })}
+      {isViewingDetectedFields && (
+        <DetectedFieldsEditor definition={definition} detectedFields={detectedFields} />
+      )}
     </>
   );
 };

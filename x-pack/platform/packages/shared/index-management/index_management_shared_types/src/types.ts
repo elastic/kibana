@@ -26,6 +26,10 @@ export type IndexManagementLocatorParams = SerializableRecord &
         includeHiddenIndices?: boolean;
       }
     | {
+        page: 'data_stream_index_list';
+        dataStreamName: string;
+      }
+    | {
         page: 'data_streams_details';
         dataStreamName?: string;
       }

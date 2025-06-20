@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 
 import {
   getPackageAssetsMapCache,
@@ -40,7 +40,7 @@ describe('EPM CacheSession', () => {
 
     it('should not cache handlebars template', () => {
       const template1 = `test1: {{test}}`;
-      setHandlebarsCompiledTemplateCache(template1, handlebars.compile(template1));
+      setHandlebarsCompiledTemplateCache(template1, handlebars.compileAST(template1));
       const cache1 = getHandlebarsCompiledTemplateCache(template1);
       expect(cache1).toBeUndefined();
     });
@@ -85,9 +85,9 @@ describe('EPM CacheSession', () => {
     it('should cache handle template', async () => {
       function setCache() {
         const template1 = `test1: {{test}}`;
-        setHandlebarsCompiledTemplateCache(template1, handlebars.compile(template1));
+        setHandlebarsCompiledTemplateCache(template1, handlebars.compileAST(template1));
         const template2 = `test2: {{test}}`;
-        setHandlebarsCompiledTemplateCache(template2, handlebars.compile(template2));
+        setHandlebarsCompiledTemplateCache(template2, handlebars.compileAST(template2));
       }
       function getCache() {
         const template1 = `test1: {{test}}`;

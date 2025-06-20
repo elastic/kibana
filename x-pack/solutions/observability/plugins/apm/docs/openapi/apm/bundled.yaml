@@ -22,7 +22,10 @@ paths:
   /api/apm/agent_keys:
     post:
       summary: Create an APM agent key
-      description: Create a new agent key for APM.
+      description: |
+        Create a new agent key for APM.
+        The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.
+        After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
       operationId: createAgentKey
       tags:
         - APM agent keys
@@ -35,6 +38,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/agent_keys_object'
+            examples:
+              createAgentKeyRequest1:
+                $ref: '#/components/examples/agent_keys_object_post_request1'
       responses:
         '200':
           description: Agent key created successfully
@@ -42,6 +48,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_keys_response'
+              examples:
+                createAgentKeyResponse1:
+                  $ref: '#/components/examples/agent_keys_object_post_200_response1'
         '400':
           description: Bad Request response
           content:
@@ -153,6 +162,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/create_annotation_response'
+              examples:
+                createAnnotationResponse1:
+                  $ref: '#/components/examples/annotation_object_post_200_response1'
         '400':
           description: Bad Request response
           content:
@@ -177,6 +189,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST \
+            http://localhost:5601/api/apm/services/opbeans-java/annotation \
+            -H 'Content-Type: application/json' \
+            -H 'kbn-xsrf: true' \
+            -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+            -d '{
+                "@timestamp": "2020-05-08T10:31:30.452Z",
+                "service": {
+                    "version": "1.2"
+                },
+                "message": "Deployment 1.2"
+                }'
   /api/apm/settings/agent-configuration:
     get:
       summary: Get a list of agent configurations
@@ -192,6 +219,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/agent_configurations_response'
+              examples:
+                getAgentConfigurationsResponseExample1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_get_200_response1'
         '400':
           description: Bad Request response
           content:
@@ -224,6 +254,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/service_object'
+            examples:
+              deleteAgentConfigurationRequest1:
+                $ref: '#/components/examples/agent_configuration_intake_object_delete_request1'
       responses:
         '200':
           description: Successful response
@@ -274,6 +307,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/agent_configuration_intake_object'
+            examples:
+              createUpdateAgentConfigurationRequestExample1:
+                $ref: '#/components/examples/agent_configuration_intake_object_put_request1'
       responses:
         '200':
           description: Successful response
@@ -355,7 +391,7 @@ paths:
     post:
       summary: Lookup single agent configuration
       description: |
-        This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.
+        This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
       operationId: searchSingleConfiguration
       tags:
         - APM agent configuration
@@ -368,6 +404,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/search_agent_configuration_object'
+            examples:
+              searchSingleConfigurationRequest1:
+                $ref: '#/components/examples/agent_configuration_intake_object_search_request1'
       responses:
         '200':
           description: Successful response
@@ -375,6 +414,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/search_agent_configuration_response'
+              examples:
+                searchSingleConfigurationResponse1:
+                  $ref: '#/components/examples/agent_configuration_intake_object_search_200_response1'
         '400':
           description: Bad Request response
           content:
@@ -746,10 +788,12 @@ components:
       properties:
         name:
           type: string
-          description: Agent name
+          description: The name of the APM agent key.
         privileges:
           type: array
-          description: Privileges configuration
+          description: |
+            The APM agent key privileges. It can take one or more of the following values:
+            * `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.
           items:
             type: string
             enum:
@@ -862,23 +906,26 @@ components:
       properties:
         '@timestamp':
           type: string
-          description: Timestamp
+          description: The date and time of the annotation. It must be in ISO 8601 format.
         service:
           type: object
-          description: Service
+          description: The service that identifies the configuration to create or update.
           required:
             - version
           properties:
             version:
               type: string
+              description: The version of the service.
             environment:
               type: string
+              description: The environment of the service.
         message:
           type: string
-          description: Message
+          description: The message displayed in the annotation. It defaults to `service.version`.
         tags:
           type: array
-          description: Tags
+          description: |
+            Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.
           items:
             type: string
     create_annotation_response:
@@ -945,11 +992,11 @@ components:
         name:
           type: string
           example: node
-          description: Name
+          description: The name of the service.
         environment:
           type: string
           example: prod
-          description: Environment
+          description: The environment of the service.
     settings_object:
       type: object
       description: Agent configuration settings
@@ -982,7 +1029,8 @@ components:
         etag:
           type: string
           example: 0bc3b5ebf18fba8163fe4c96f491e3767a358f85
-          description: Etag
+          description: |
+            `etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
     agent_configurations_response:
       type: object
       properties:
@@ -999,7 +1047,7 @@ components:
       properties:
         agent_name:
           type: string
-          description: Agent name
+          description: The agent name is used by the UI to determine which settings to display.
         service:
           $ref: '#/components/schemas/service_object'
         settings:
@@ -1198,6 +1246,154 @@ components:
               type: string
         - $ref: '#/components/schemas/base_source_map_object'
   examples:
+    agent_keys_object_post_request1:
+      description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
+      value: |
+        {
+            "name": "apm-key",
+            "privileges": ["event:write", "config_agent:read"]
+        }
+    agent_keys_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.
+      value: |
+        {
+          "agentKey": {
+            "id": "3DCLmn0B3ZMhLUa7WBG9",
+            "name": "apm-key",
+            "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+            "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+          }
+        }
+    annotation_object_post_200_response1:
+      description: An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.
+      value: |
+        {
+          "_index": "observability-annotations",
+          "_id": "Lc9I93EBh6DbmkeV7nFX",
+          "_version": 1,
+          "_seq_no": 12,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "message": "Deployment 1.2",
+            "@timestamp": "2020-05-08T10:31:30.452Z",
+            "service": {
+              "version": "1.2",
+              "name": "opbeans-java"
+            },
+            "tags": [
+              "apm",
+              "elastic.co",
+              "customer"
+            ],
+            "annotation": {
+              "type": "deployment"
+            },
+            "event": {
+              "created": "2020-05-09T02:34:43.937Z"
+            }
+          }
+        }
+    agent_configuration_intake_object_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
+      value: |
+        [
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go",
+              "environment": "production"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "200"
+              },
+              "@timestamp": 1581934104843,
+              "applied_by_agent": false,
+              "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+          },
+          {
+              "agent_name": "go",
+              "service": {
+              "name": "opbeans-go"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "300"
+              },
+              "@timestamp": 1581934111727,
+              "applied_by_agent": false,
+              "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+          },
+          {
+              "agent_name": "nodejs",
+              "service": {
+              "name": "frontend"
+              },
+              "settings": {
+              "transaction_sample_rate": "1",
+              },
+              "@timestamp": 1582031336265,
+              "applied_by_agent": false,
+              "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        ]
+    agent_configuration_intake_object_put_request1:
+      description: Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.
+      value: |
+        {
+            "service": {
+                "name": "frontend",
+                "environment": "production"
+            },
+            "settings": {
+                "transaction_sample_rate": "0.4",
+                "capture_body": "off",
+                "transaction_max_spans": "500"
+            },
+            "agent_name": "nodejs"
+        }
+    agent_configuration_intake_object_delete_request1:
+      description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
+      value: |
+        {
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
+    agent_configuration_intake_object_search_request1:
+      description: Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.
+      value: |
+        {
+            "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+            "service" : {
+                "name": "frontend",
+                "environment": "production"
+            }
+        }
+    agent_configuration_intake_object_search_200_response1:
+      description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
+      value: |
+        {
+          "_index": ".apm-agent-configuration",
+          "_id": "CIaqXXABmQCdPphWj8EJ",
+          "_score": 2,
+          "_source": {
+            "agent_name": "nodejs",
+            "service": {
+              "name": "frontend"
+            },
+            "settings": {
+              "transaction_sample_rate": "1",
+            },
+            "@timestamp": 1582031336265,
+            "applied_by_agent": false,
+            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        }
     source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
       value: |

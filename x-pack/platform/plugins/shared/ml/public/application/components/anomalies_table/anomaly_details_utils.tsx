@@ -32,6 +32,7 @@ import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
+import { AnomalyValueDisplay } from './anomaly_value_display';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -180,7 +181,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'Actual',
       }),
-      description: formatValue(anomaly.actual, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.actual} function={source.function} record={source} />
+      ),
     });
   }
 
@@ -189,7 +192,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'Typical',
       }),
-      description: formatValue(anomaly.typical, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.typical} function={source.function} record={source} />
+      ),
     });
 
     if (
@@ -201,11 +206,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.upperBoundsTitle', {
           defaultMessage: 'Upper bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.upper_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.upper_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
 
@@ -213,11 +219,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.lowerBoundsTitle', {
           defaultMessage: 'Lower bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.lower_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.lower_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
     }

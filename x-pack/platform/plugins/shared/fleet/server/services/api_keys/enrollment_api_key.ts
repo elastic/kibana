@@ -25,6 +25,8 @@ import { _joinFilters } from '../agents';
 import { appContextService } from '../app_context';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
+import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
+
 import { invalidateAPIKeys } from './security';
 
 const uuidRegex =
@@ -58,8 +60,7 @@ export async function listEnrollmentApiKeys(
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     if (useSpaceAwareness && spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
-        // TODO use constant
-        filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
+        filters.push(DEFAULT_NAMESPACES_FILTER);
       } else {
         filters.push(`namespaces:"${spaceId}"`);
       }
@@ -312,6 +313,7 @@ export async function generateEnrollmentAPIKey(
     policy_id: agentPolicyId,
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
+    hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
   };
 
   const res = await esClient.create({
@@ -429,5 +431,6 @@ function esDocToEnrollmentApiKey(doc: {
     policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
+    hidden: doc._source.hidden || false,
   };
 }

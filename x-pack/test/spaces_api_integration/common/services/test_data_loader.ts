@@ -199,6 +199,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
     deleteAllSavedObjectsFromKibanaIndex: async () => {
       await es.deleteByQuery({
         index: ALL_SAVED_OBJECT_INDICES,
+        ignore_unavailable: true,
         wait_for_completion: true,
         conflicts: 'proceed',
         query: {

@@ -30,7 +30,6 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';
 import { UnifiedSearchBar } from '../../../shared/unified_search_bar';
 
@@ -139,9 +138,6 @@ export function AgentExplorer() {
                 })}
               </h2>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <BetaBadge icon="beta" />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
       </EuiFlexItem>
@@ -149,7 +145,8 @@ export function AgentExplorer() {
       <EuiFlexItem grow={false}>
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage: 'Agent Explorer provides an inventory and details of deployed Agents.',
+            defaultMessage:
+              'Agent Explorer provides an inventory and details of deployed APM agents. EDOT SDKs are not currently listed.',
           })}
         </EuiText>
       </EuiFlexItem>

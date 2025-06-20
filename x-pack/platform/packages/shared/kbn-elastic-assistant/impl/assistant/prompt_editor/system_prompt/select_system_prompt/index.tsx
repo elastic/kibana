@@ -18,10 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
@@ -38,7 +35,7 @@ export interface Props {
   isOpen?: boolean;
   isSettingsModalVisible: boolean;
   selectedPrompt: PromptResponse | undefined;
-  setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsSettingsModalVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onSystemPromptSelectionChange: (promptId: string | undefined) => void;
 }
 
@@ -94,7 +91,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   const onChange = useCallback(
     async (selectedSystemPromptId: string) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
-        setIsSettingsModalVisible(true);
+        setIsSettingsModalVisible?.(true);
         setSelectedSettingsTab(SYSTEM_PROMPTS_TAB);
         return;
       }

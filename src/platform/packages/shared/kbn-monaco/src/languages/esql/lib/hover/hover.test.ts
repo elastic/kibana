@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '../../../../monaco_imports';
-import { getHoverItem } from './hover';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
 import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { monaco } from '../../../../monaco_imports';
+import { getHoverItem } from './hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
-const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+const fields: Array<ESQLFieldWithMetadata & { suggestedAs?: string }> = [
   ...types.map((type) => ({
     name: `${type}Field`,
     type,
@@ -62,7 +61,7 @@ const policies = [
 ];
 
 function createCustomCallbackMocks(
-  customFields: ESQLRealField[] | undefined,
+  customFields: ESQLFieldWithMetadata[] | undefined,
   customSources: Array<{ name: string; hidden: boolean }> | undefined,
   customPolicies:
     | Array<{
@@ -103,7 +102,7 @@ describe('hover', () => {
     Parameters<typeof createCustomCallbackMocks>?
   ];
 
-  const testSuggestionsFn = (
+  const testHoverFn = (
     statement: string,
     triggerString: string,
     contentFn: (name: string) => string[],
@@ -114,11 +113,6 @@ describe('hover', () => {
     ],
     { only, skip }: { only?: boolean; skip?: boolean } = {}
   ) => {
-    const token: monaco.CancellationToken = {
-      isCancellationRequested: false,
-      onCancellationRequested: () => ({ dispose: () => {} }),
-    };
-
     const { model, position } = createModelAndPosition(statement, triggerString);
     const testFn = only ? test.only : skip ? test.skip : test;
     const expected = contentFn(triggerString);
@@ -129,37 +123,25 @@ describe('hover', () => {
       })=> ["${expected.join('","')}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
-        const { contents } = await getHoverItem(
-          model,
-          position,
-          token,
-          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-          callbackMocks
-        );
+        const { contents } = await getHoverItem(model, position, callbackMocks);
         expect(contents.map(({ value }) => value)).toEqual(expected);
       }
     );
   };
 
   // Enrich the function to work with .only and .skip as regular test function
-  const testSuggestions = Object.assign(testSuggestionsFn, {
+  const testHover = Object.assign(testHoverFn, {
     skip: (...args: TestArgs) => {
       const paddingArgs = [[undefined, undefined, undefined]].slice(args.length - 1);
-      return testSuggestionsFn(
-        ...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs),
-        {
-          skip: true,
-        }
-      );
+      return testHoverFn(...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs), {
+        skip: true,
+      });
     },
     only: (...args: TestArgs) => {
       const paddingArgs = [[undefined, undefined, undefined]].slice(args.length - 1);
-      return testSuggestionsFn(
-        ...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs),
-        {
-          only: true,
-        }
-      );
+      return testHoverFn(...((args.length > 1 ? [...args, ...paddingArgs] : args) as TestArgs), {
+        only: true,
+      });
     },
   });
 
@@ -178,18 +160,14 @@ describe('hover', () => {
         `**Fields**: ${policyHit.enrichFields.join(', ')}`,
       ];
     }
-    testSuggestions(
-      `from a | enrich policy on b with var0 = stringField`,
-      'policy',
-      createPolicyContent
-    );
-    testSuggestions(`from a | enrich policy`, 'policy', createPolicyContent);
-    testSuggestions(`from a | enrich policy on b `, 'policy', createPolicyContent);
-    testSuggestions(`from a | enrich policy on b `, 'non-policy', createPolicyContent);
+    testHover(`from a | enrich policy on b with var0 = stringField`, 'policy', createPolicyContent);
+    testHover(`from a | enrich policy`, 'policy', createPolicyContent);
+    testHover(`from a | enrich policy on b `, 'policy', createPolicyContent);
+    testHover(`from a | enrich policy on b `, 'non-policy', createPolicyContent);
 
     describe('ccq mode', () => {
       for (const mode of ENRICH_MODES) {
-        testSuggestions(`from a | enrich _${mode.name}:policy`, `_${mode.name}`, () => [
+        testHover(`from a | enrich _${mode.name}:policy`, `_${mode.name}`, () => [
           modeDescription,
           `**${mode.name}**: ${mode.description}`,
         ]);
@@ -204,23 +182,19 @@ describe('hover', () => {
       }
       return [getFunctionSignatures(fnDefinition)[0].declaration, fnDefinition.description];
     }
-    testSuggestions(`from a | eval round(numberField)`, 'round', createFunctionContent);
-    testSuggestions(
-      `from a | eval nonExistentFn(numberField)`,
-      'nonExistentFn',
-      createFunctionContent
-    );
-    testSuggestions(`from a | stats avg(round(numberField))`, 'round', () => {
+    testHover(`from a | eval round(numberField)`, 'round', createFunctionContent);
+    testHover(`from a | eval nonExistentFn(numberField)`, 'nonExistentFn', createFunctionContent);
+    testHover(`from a | stats avg(round(numberField))`, 'round', () => {
       return [
         '**Acceptable types**: **double** | **integer** | **long**',
         ...createFunctionContent('round'),
       ];
     });
-    testSuggestions(`from a | stats avg(round(numberField))`, 'avg', createFunctionContent);
-    testSuggestions(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', () => [
+    testHover(`from a | stats avg(round(numberField))`, 'avg', createFunctionContent);
+    testHover(`from a | stats avg(nonExistentFn(numberField))`, 'nonExistentFn', () => [
       '**Acceptable types**: **double** | **integer** | **long**',
       ...createFunctionContent('nonExistentFn'),
     ]);
-    testSuggestions(`from a | where round(numberField) > 0`, 'round', createFunctionContent);
+    testHover(`from a | where round(numberField) > 0`, 'round', createFunctionContent);
   });
 });

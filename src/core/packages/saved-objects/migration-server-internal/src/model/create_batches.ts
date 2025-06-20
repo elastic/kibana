@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexTypesMap } from '@kbn/core-saved-objects-base-server-internal';

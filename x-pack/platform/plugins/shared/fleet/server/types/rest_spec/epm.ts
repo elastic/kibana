@@ -337,10 +337,15 @@ export const InstallPackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
   _meta: schema.object({
     install_source: schema.string(),
+    name: schema.string(),
   }),
 });
 
 export const InstallKibanaAssetsResponseSchema = schema.object({
+  success: schema.boolean(),
+});
+
+export const DeletePackageDatastreamAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
@@ -371,7 +376,7 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
 
-export const GetOneBulkUpgradePackagesResponseSchema = schema.object({
+export const GetOneBulkOperationPackagesResponseSchema = schema.object({
   status: schema.string(),
   error: schema.maybe(schema.object({ message: schema.string() })),
   results: schema.maybe(
@@ -565,7 +570,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
   }),
 };
 
-export const GetOneBulkUpgradePackagesRequestSchema = {
+export const GetOneBulkOperationPackagesRequestSchema = {
   params: schema.object({
     taskId: schema.string(),
   }),
@@ -583,6 +588,19 @@ export const BulkUpgradePackagesRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     force: schema.boolean({ defaultValue: false }),
     upgrade_package_policies: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkUninstallPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -648,6 +666,16 @@ export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
     pkgVersion: schema.string(),
+  }),
+};
+
+export const DeletePackageDatastreamAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    packagePolicyId: schema.string(),
   }),
 };
 

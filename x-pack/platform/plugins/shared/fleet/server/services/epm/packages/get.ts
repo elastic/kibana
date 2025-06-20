@@ -141,6 +141,11 @@ export async function getPackages(
               );
               return null;
             }
+            // ignoring errors of type PackageNotFoundError to avoid blocking the UI over a package not found in the registry
+            if (err instanceof PackageNotFoundError) {
+              logger.warn(`Package ${pkg.id} ${pkg.attributes.version} not found in registry`);
+              return null;
+            }
             throw err;
           }
         } else {
@@ -170,6 +175,7 @@ export async function getPackages(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -286,6 +292,7 @@ export async function getLimitedPackages(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -307,6 +314,7 @@ export async function getPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -337,15 +345,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
-      // Filter for a "queryable" marker
-      buildFunctionNode(
-        'nested',
-        `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
-        nodeBuilder.is('type', 'index_template')
-      ),
-      // "Type" filter
       ...(dataStreamType
         ? [
+            // Filter for a "queryable" marker
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
+              nodeBuilder.is('type', 'index_template')
+            ),
+            // "Type" filter
             buildFunctionNode(
               'nested',
               `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.installed_es`,
@@ -360,6 +368,7 @@ export async function getInstalledPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -555,6 +564,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType: packagePolicySavedObjectType,
       });
     }
@@ -673,6 +683,7 @@ export async function getInstallationObject(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
+    name: installation.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -694,6 +705,7 @@ async function getInstallationObjects(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
+      name: installation.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }

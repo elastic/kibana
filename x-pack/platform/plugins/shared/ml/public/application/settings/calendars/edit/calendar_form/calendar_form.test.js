@@ -10,7 +10,7 @@ import React from 'react';
 import { CalendarForm } from './calendar_form';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToMlLink: jest.fn(),
+  useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
 jest.mock('../../../../capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],

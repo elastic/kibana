@@ -66,7 +66,7 @@ describe('createPlaywrightConfig', () => {
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);
     expect(config.outputDir).toBe('./output/test-artifacts');
-    expect(config.projects).toHaveLength(1);
+    expect(config.projects).toHaveLength(3);
     expect(config.projects![0].name).toEqual('local');
   });
 
@@ -106,10 +106,16 @@ describe('createPlaywrightConfig', () => {
     const config = createPlaywrightConfig({ testDir, workers });
     expect(config.workers).toBe(workers);
 
-    expect(config.projects).toHaveLength(2);
-    expect(config.projects![0].name).toEqual('setup');
+    expect(config.projects).toHaveLength(6);
+    expect(config.projects![0].name).toEqual('setup-local');
     expect(config.projects![1].name).toEqual('local');
-    expect(config.projects![1]).toHaveProperty('dependencies', ['setup']);
+    expect(config.projects![1]).toHaveProperty('dependencies', ['setup-local']);
+    expect(config.projects![2].name).toEqual('setup-ech');
+    expect(config.projects![3].name).toEqual('ech');
+    expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
+    expect(config.projects![4].name).toEqual('setup-mki');
+    expect(config.projects![5].name).toEqual('mki');
+    expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

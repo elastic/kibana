@@ -107,6 +107,18 @@ export class ConsolePageObject extends FtrService {
     return label.getVisibleText();
   }
 
+  public async getAllAutocompleteSuggestions() {
+    const suggestionsWidget = await this.find.byClassName('suggest-widget');
+    const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
+    const labels = await Promise.all(
+      suggestions.map(async (suggestion) => {
+        const label = await suggestion.findByClassName('label-name');
+        return label.getVisibleText();
+      })
+    );
+    return labels;
+  }
+
   public async pressUp(shift: boolean = false) {
     const textArea = await this.getTextArea();
     await textArea.pressKeys(shift ? [Key.SHIFT, Key.UP] : Key.UP);
@@ -277,6 +289,10 @@ export class ConsolePageObject extends FtrService {
   public async isShortcutsPopoverOpen() {
     const classAttribute = await this.testSubjects.getAttribute('consoleShortcutsPopover', 'class');
     return classAttribute?.includes('euiPopover-isOpen');
+  }
+
+  public async isTourPopoverOpen() {
+    return this.testSubjects.isDisplayed('consoleSkipTourButton');
   }
 
   public async clickSkipTour() {

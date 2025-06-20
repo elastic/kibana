@@ -8,8 +8,12 @@
  */
 
 import moment from 'moment';
-import { Config } from '../../config';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { tagsByMode } from '../tags';
+import { CliSupportedServerModes } from '../../types';
+
+export const execPromise = promisify(exec);
 
 export const isValidUTCDate = (date: string): boolean => {
   return !isNaN(Date.parse(date)) && new Date(date).toISOString() === date;
@@ -19,22 +23,22 @@ export function formatTime(date: string, fmt: string = 'MMM D, YYYY @ HH:mm:ss.S
   return moment.utc(date, fmt).format();
 }
 
-export const getPlaywrightGrepTag = (config: Config): string => {
-  const serversConfig = config.getScoutTestConfig();
+const getServerlessTag = (projectType: string): string => {
+  if (!projectType) {
+    throw new Error(`'projectType' is required to determine tags for 'serverless' mode.`);
+  }
+  const tag = tagsByMode.serverless[projectType as 'security' | 'es' | 'oblt'];
+  if (!tag) {
+    throw new Error(`No tags found for projectType: '${projectType}'.`);
+  }
+  return tag;
+};
 
-  if (serversConfig.serverless) {
-    const { projectType } = serversConfig;
+export const getPlaywrightGrepTag = (mode: CliSupportedServerModes): string => {
+  const [distro, projectType] = mode.split('=');
 
-    if (!projectType) {
-      throw new Error(`'projectType' is required to determine tags for 'serverless' mode.`);
-    }
-
-    const tag = tagsByMode.serverless[projectType];
-    if (!tag) {
-      throw new Error(`No tags found for projectType: '${projectType}'.`);
-    }
-
-    return tag;
+  if (distro === 'serverless') {
+    return getServerlessTag(projectType);
   }
 
   return tagsByMode.stateful;

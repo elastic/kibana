@@ -37,8 +37,16 @@ const packages: PackageListItem[] = [
     version: '',
   },
 ];
+const ruleResponse = {
+  rules: [],
+  isLoading: false,
+};
 
 describe('<SearchBarSection />', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render all components', () => {
     (useIntegrations as jest.Mock).mockReturnValue({
       isLoading: false,
@@ -49,7 +57,7 @@ describe('<SearchBarSection />', () => {
     });
 
     const { getByTestId, queryByTestId } = render(
-      <SearchBarSection dataView={dataView} packages={packages} />
+      <SearchBarSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
     );
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
@@ -64,7 +72,7 @@ describe('<SearchBarSection />', () => {
     });
 
     const { getByTestId, queryByTestId } = render(
-      <SearchBarSection dataView={dataView} packages={packages} />
+      <SearchBarSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
     );
 
     expect(getByTestId(INTEGRATION_BUTTON_LOADING_TEST_ID)).toBeInTheDocument();

@@ -10,15 +10,12 @@ import { callAssistantGraph } from '.';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { createOpenAIToolsAgent, createToolCallingAgent } from 'langchain/agents';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { AssistantTool, AssistantToolParams } from '../../../..';
@@ -35,6 +32,16 @@ jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
 const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
 const getPromptMock = getPrompt as jest.Mock;
+const telemetryTracerMock = TelemetryTracer as unknown as jest.Mock;
+const getTool = jest.fn();
+const mockTool: AssistantTool = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  sourceRegister: 'sourceRegister',
+  isSupported: (params: AssistantToolParams) => true,
+  getTool: getTool.mockReturnValue({ name: 'name' }),
+};
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
@@ -42,7 +49,7 @@ describe('callAssistantGraph', () => {
     },
     kbDataClient: {
       isInferenceEndpointExists: jest.fn(),
-      getAssistantTools: jest.fn(),
+      getAssistantTools: jest.fn().mockReturnValue([{ name: 'MyKBTool' }]),
     },
   } as unknown as AssistantDataClients;
 
@@ -59,6 +66,7 @@ describe('callAssistantGraph', () => {
     total: 0,
     saved_objects: [],
   });
+  const mockLogger = loggerMock.create();
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -72,7 +80,7 @@ describe('callAssistantGraph', () => {
     llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     llmType: 'openai',
     isOssModel: false,
-    logger: loggerMock.create(),
+    logger: mockLogger,
     isStream: false,
     onLlmResponse: jest.fn(),
     onNewReplacements: jest.fn(),
@@ -188,15 +196,6 @@ describe('callAssistantGraph', () => {
   });
 
   it('calls getPrompt for each tool and the default system prompt', async () => {
-    const getTool = jest.fn();
-    const mockTool: AssistantTool = {
-      id: 'id',
-      name: 'name',
-      description: 'description',
-      sourceRegister: 'sourceRegister',
-      isSupported: (params: AssistantToolParams) => true,
-      getTool,
-    };
     const params = {
       ...defaultParams,
       assistantTools: [
@@ -239,13 +238,37 @@ describe('callAssistantGraph', () => {
     );
   });
 
+  it('Passes only Elastic tools, not custom, to Telemetry tracer', async () => {
+    await callAssistantGraph({
+      ...defaultParams,
+      assistantTools: [
+        { ...mockTool, name: 'test-tool', getTool: getTool.mockReturnValue({ name: 'test-tool' }) },
+        {
+          ...mockTool,
+          name: 'test-tool2',
+          getTool: getTool.mockReturnValue({ name: 'test-tool2' }),
+        },
+      ],
+    });
+    expect(telemetryTracerMock).toHaveBeenCalledWith(
+      {
+        elasticTools: ['test-tool2', 'test-tool2'],
+        telemetry: {},
+        telemetryParams: {},
+      },
+      {
+        ...mockLogger,
+        context: ['defaultAssistantGraph'],
+      }
+    );
+  });
+
   describe('agentRunnable', () => {
     it('creates OpenAIToolsAgent for openai llmType', async () => {
       const params = { ...defaultParams, llmType: 'openai' };
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
     });
 
@@ -260,7 +283,6 @@ describe('callAssistantGraph', () => {
       await callAssistantGraph(params);
 
       expect(createOpenAIToolsAgent).toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
     });
 
@@ -270,7 +292,6 @@ describe('callAssistantGraph', () => {
 
       expect(createToolCallingAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
     });
 
     it('creates ToolCallingAgent for gemini llmType', async () => {
@@ -285,16 +306,14 @@ describe('callAssistantGraph', () => {
 
       expect(createToolCallingAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createStructuredChatAgent).not.toHaveBeenCalled();
     });
 
-    it('creates StructuredChatAgent for oss model', async () => {
+    it('creates ToolCallingAgent for oss model', async () => {
       const params = { ...defaultParams, llmType: 'openai', isOssModel: true };
       await callAssistantGraph(params);
 
-      expect(createStructuredChatAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
-      expect(createToolCallingAgent).not.toHaveBeenCalled();
+      expect(createToolCallingAgent).toHaveBeenCalled();
     });
     it('does not calls resolveProviderAndModel when llmType === openai', async () => {
       const params = { ...defaultParams, llmType: 'openai' };

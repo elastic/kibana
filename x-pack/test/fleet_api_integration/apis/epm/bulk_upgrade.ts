@@ -39,14 +39,14 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Validations', () => {
-      it('should not allow to create a _bulk_upgrade with non installed packages', async () => {
+      it('should not allow to create a _bulk_upgrade with non-installed packages', async () => {
         const res = await supertest
           .post(`/api/fleet/epm/packages/_bulk_upgrade`)
           .set('kbn-xsrf', 'xxxx')
           .send({ packages: [{ name: 'idonotexists' }] })
           .expect(400);
 
-        expect(res.body.message).equal('Cannot upgrade non installed packages: idonotexists');
+        expect(res.body.message).equal('Cannot upgrade non-installed packages: idonotexists');
       });
     });
 

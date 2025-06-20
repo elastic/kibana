@@ -18,6 +18,12 @@ const plugin = async (initContext: PluginInitializerContext) => {
   return new ApmSourcesAccessPlugin(initContext);
 };
 
+export {
+  APM_AGENT_CONFIGURATION_INDEX,
+  APM_CUSTOM_LINK_INDEX,
+  APM_SOURCE_MAP_INDEX,
+} from './constants';
+
 export type {
   APIEndpoint,
   APIReturnType,

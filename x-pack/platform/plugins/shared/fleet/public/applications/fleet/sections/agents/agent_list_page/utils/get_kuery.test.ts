@@ -10,6 +10,7 @@ import { getKuery } from './get_kuery';
 describe('getKuery', () => {
   const search = 'base search';
   const selectedTags = ['tag_1', 'tag_2', 'tag_3'];
+  const noTags = ['No Tags'];
   const selectedAgentIds = ['agent_id1', 'agent_id2'];
   const selectedAgentPolicies = ['policy1', 'policy2', 'policy3'];
   const selectedStatus = ['healthy', 'unhealthy'];
@@ -23,6 +24,14 @@ describe('getKuery', () => {
   it('should return a kuery with selected tags', () => {
     expect(getKuery({ selectedTags })).toEqual(
       'fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3")'
+    );
+  });
+  it('should return a kuery for no tags if selected', () => {
+    expect(getKuery({ selectedTags: noTags })).toEqual('((NOT fleet-agents.tags : (*)))');
+  });
+  it('should return a kuery for no tags and other tags when multiple are selected', () => {
+    expect(getKuery({ selectedTags: [...noTags, ...selectedTags] })).toEqual(
+      '((NOT fleet-agents.tags : (*)) or fleet-agents.tags : ("tag_1" or "tag_2" or "tag_3"))'
     );
   });
 

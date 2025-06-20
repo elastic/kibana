@@ -22,7 +22,7 @@ import { ElasticsearchQueryViewer } from './query_viewer';
 import { ElasticsearchQueryOutput } from './query_output';
 import { QuerySidePanel } from './query_side_panel';
 import { useElasticsearchQuery } from '../../hooks/use_elasticsearch_query';
-import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import {
   FullHeight,
   QueryViewContainer,
@@ -40,21 +40,22 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
   const { executeQuery, data, error, isError, fetchStatus } = useElasticsearchQuery(pageMode);
   const {
     field: { value: searchQuery },
-  } = useController<ChatForm, ChatFormFields.searchQuery>({
-    name: ChatFormFields.searchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
+    name: PlaygroundFormFields.searchQuery,
   });
   const {
     field: { value: question },
-  } = useController<ChatForm, ChatFormFields.question>({
-    name: ChatFormFields.question,
+  } = useController<PlaygroundForm, PlaygroundFormFields.question>({
+    name: PlaygroundFormFields.question,
   });
   const {
-    field: { value: userElasticsearchQueryValidations },
-  } = useController<ChatForm, ChatFormFields.userElasticsearchQueryValidations>({
-    name: ChatFormFields.userElasticsearchQueryValidations,
+    field: { value: userElasticsearchQuery },
+    fieldState: { invalid: userElasticsearchQueryInvalid },
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const executeQueryDisabled = disableExecuteQuery(
-    userElasticsearchQueryValidations,
+    userElasticsearchQuery === null || !userElasticsearchQueryInvalid,
     pageMode === PlaygroundPageMode.chat ? question : searchQuery
   );
   const isLoading = fetchStatus !== 'idle';

@@ -33,7 +33,6 @@
     "@kbn/config",
     "@kbn/shared-ux-avatar-solution",
     "@kbn/core-http-server",
-    "@kbn/react-kibana-context-render",
     "@kbn/utility-types-jest",
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
@@ -55,7 +54,8 @@
     "@kbn/ui-theme",
     "@kbn/core-chrome-browser",
     "@kbn/core-lifecycle-server",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/spaces-utils"
   ],
   "exclude": ["target/**/*"]
 }

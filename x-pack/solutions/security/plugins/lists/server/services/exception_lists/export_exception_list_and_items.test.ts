@@ -65,5 +65,33 @@ describe('export_exception_list_and_items', () => {
         missing_exception_lists_count: 0,
       });
     });
+
+    test.each`
+      title                            | includeExpired | expectedStringMatch
+      ${'with expired exceptions'}     | ${true}        | ${'^tags: foo$'}
+      ${'with OUT expired exceptions'} | ${false}       | ${'^\\(tags: foo\\) AND \\(exception-list.attributes.expire_time'}
+    `('it should use a `filter` $title', async ({ includeExpired, expectedStringMatch }) => {
+      (getExceptionList as jest.Mock).mockResolvedValue(getExceptionListSchemaMock());
+      (findExceptionListItemPointInTimeFinder as jest.Mock).mockImplementationOnce(
+        ({ executeFunctionOnStream }) => {
+          executeFunctionOnStream({ data: [getExceptionListItemSchemaMock()] });
+        }
+      );
+
+      await exportExceptionListAndItems({
+        filter: 'tags: foo',
+        id: '123',
+        includeExpiredExceptions: includeExpired,
+        listId: 'non-existent',
+        namespaceType: 'single',
+        savedObjectsClient: savedObjectsClientMock.create(),
+      });
+
+      expect(findExceptionListItemPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.stringMatching(expectedStringMatch),
+        })
+      );
+    });
   });
 });

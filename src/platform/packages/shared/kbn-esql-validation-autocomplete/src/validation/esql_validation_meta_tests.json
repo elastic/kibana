@@ -403,14 +403,14 @@
     {
       "query": "row var = 5 not in (\"a\", \"b\", \"c\")",
       "error": [
-        "Argument of [not_in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
+        "Argument of [not in] must be [integer[]], found value [(\"a\", \"b\", \"c\")] type [(keyword, keyword, keyword)]"
       ],
       "warning": []
     },
     {
       "query": "row var = 5 not in (1, 2, 3, \"a\")",
       "error": [
-        "Argument of [not_in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
+        "Argument of [not in] must be [integer[]], found value [(1, 2, 3, \"a\")] type [(integer, integer, integer, keyword)]"
       ],
       "warning": []
     },
@@ -866,7 +866,7 @@
     {
       "query": "row var = 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -880,7 +880,7 @@
     {
       "query": "row var = NOT 5 NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [5] type [integer]"
+        "Argument of [not like] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -914,7 +914,7 @@
     {
       "query": "row var = 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -928,7 +928,7 @@
     {
       "query": "row var = NOT 5 NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [5] type [integer]"
+        "Argument of [not rlike] must be [keyword], found value [5] type [integer]"
       ],
       "warning": []
     },
@@ -1006,9 +1006,7 @@
     },
     {
       "query": "row 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1071,9 +1069,7 @@
     },
     {
       "query": "row 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1136,9 +1132,7 @@
     },
     {
       "query": "row 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1201,9 +1195,7 @@
     },
     {
       "query": "row 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1266,9 +1258,7 @@
     },
     {
       "query": "row 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1331,9 +1321,7 @@
     },
     {
       "query": "row 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1396,9 +1384,7 @@
     },
     {
       "query": "row 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1461,9 +1447,7 @@
     },
     {
       "query": "row 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1526,9 +1510,7 @@
     },
     {
       "query": "row 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1591,9 +1573,7 @@
     },
     {
       "query": "row 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1656,9 +1636,7 @@
     },
     {
       "query": "row 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1721,9 +1699,7 @@
     },
     {
       "query": "row 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1786,9 +1762,7 @@
     },
     {
       "query": "row 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1851,9 +1825,7 @@
     },
     {
       "query": "row 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1916,9 +1888,7 @@
     },
     {
       "query": "row 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -1981,9 +1951,7 @@
     },
     {
       "query": "row 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2046,9 +2014,7 @@
     },
     {
       "query": "row 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2111,9 +2077,7 @@
     },
     {
       "query": "row 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -2172,7 +2136,7 @@
     {
       "query": "from index | limit ",
       "error": [
-        "SyntaxError: missing INTEGER_LITERAL at '<EOF>'"
+        "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2182,30 +2146,23 @@
       "warning": []
     },
     {
-      "query": "from index | limit 4.5",
-      "error": [
-        "SyntaxError: mismatched input '4.5' expecting INTEGER_LITERAL"
-      ],
-      "warning": []
-    },
-    {
       "query": "from index | limit a",
       "error": [
-        "SyntaxError: mismatched input 'a' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'a' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit doubleField",
       "error": [
-        "SyntaxError: mismatched input 'doubleField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'doubleField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
     {
       "query": "from index | limit textField",
       "error": [
-        "SyntaxError: mismatched input 'textField' expecting INTEGER_LITERAL"
+        "SyntaxError: mismatched input 'textField' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}"
       ],
       "warning": []
     },
@@ -2271,28 +2228,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2558,15 +2515,14 @@
     {
       "query": "from a_index | rename textField",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'"
+        "SyntaxError: no viable alternative at input 'textField'"
       ],
       "warning": []
     },
     {
       "query": "from a_index | rename a",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting 'as'",
-        "Unknown column [a]"
+        "SyntaxError: no viable alternative at input 'a'"
       ],
       "warning": []
     },
@@ -2606,6 +2562,23 @@
       "warning": []
     },
     {
+      "query": "from a_index | rename b = textField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename b = textField, b AS c",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | rename textField = a",
+      "error": [
+        "Unknown column [a]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | rename fn() as a",
       "error": [
         "SyntaxError: token recognition error at: '('",
@@ -2635,22 +2608,17 @@
     {
       "query": "from a_index | rename key* as keywords",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [key*]",
         "Unknown column [keywords]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | rename s* as strings",
-      "error": [
-        "Using wildcards (*) in RENAME is not allowed [s*]",
-        "Unknown column [s*]",
-        "Unknown column [strings]"
-      ],
+      "query": "row a = 10 | rename a as `this``is fine`",
+      "error": [],
       "warning": []
     },
     {
-      "query": "row a = 10 | rename a as `this``is fine`",
+      "query": "ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow",
       "error": [],
       "warning": []
     },
@@ -2792,19 +2760,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
         "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },
@@ -3665,7 +3633,7 @@
     {
       "query": "from a_index | where doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3679,7 +3647,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3713,7 +3681,7 @@
     {
       "query": "from a_index | where doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -3727,7 +3695,7 @@
     {
       "query": "from a_index | where NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -4304,126 +4272,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where counterIntegerField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterIntegerField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterLongField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where counterDoubleField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | where dateNanosField IS NULL",
       "error": [],
       "warning": []
@@ -4460,46 +4308,6 @@
     },
     {
       "query": "from a_index | where dateNanosField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where functionNamedParametersField Is nOt NuLL",
       "error": [],
       "warning": []
     },
@@ -5125,111 +4933,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval counterIntegerField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterIntegerField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterLongField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval counterDoubleField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval dateNanosField IS NULL",
       "error": [],
       "warning": []
@@ -5261,41 +4964,6 @@
     },
     {
       "query": "from a_index | eval dateNanosField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval functionNamedParametersField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -5770,7 +5438,7 @@
       ]
     },
     {
-      "query": "from a_index | eval var0 = log(-1, -20)",
+      "query": "from a_index | eval col0 = log(-1, -20)",
       "error": [],
       "warning": [
         "Log of a negative number results in null: -1",
@@ -6914,7 +6582,7 @@
     {
       "query": "from a_index | eval doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6928,7 +6596,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT like \"?a\"",
       "error": [
-        "Argument of [not_like] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not like] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6962,7 +6630,7 @@
     {
       "query": "from a_index | eval doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -6976,7 +6644,7 @@
     {
       "query": "from a_index | eval NOT doubleField NOT rlike \"?a\"",
       "error": [
-        "Argument of [not_rlike] must be [keyword], found value [doubleField] type [double]"
+        "Argument of [not rlike] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
     },
@@ -7125,7 +6793,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)",
+      "query": "from a_index | eval result = case(false, 0, 1) | stats col0 = sum(result)",
       "error": [],
       "warning": []
     },
@@ -7196,9 +6864,7 @@
     },
     {
       "query": "from a_index | eval 1 year + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7266,9 +6932,7 @@
     },
     {
       "query": "from a_index | eval 1 years + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7336,9 +7000,7 @@
     },
     {
       "query": "from a_index | eval 1 quarter + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7406,9 +7068,7 @@
     },
     {
       "query": "from a_index | eval 1 quarters + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7476,9 +7136,7 @@
     },
     {
       "query": "from a_index | eval 1 month + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7546,9 +7204,7 @@
     },
     {
       "query": "from a_index | eval 1 months + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7616,9 +7272,7 @@
     },
     {
       "query": "from a_index | eval 1 week + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7686,9 +7340,7 @@
     },
     {
       "query": "from a_index | eval 1 weeks + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7756,9 +7408,7 @@
     },
     {
       "query": "from a_index | eval 1 day + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7826,9 +7476,7 @@
     },
     {
       "query": "from a_index | eval 1 days + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7896,9 +7544,7 @@
     },
     {
       "query": "from a_index | eval 1 hour + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -7966,9 +7612,7 @@
     },
     {
       "query": "from a_index | eval 1 hours + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8036,9 +7680,7 @@
     },
     {
       "query": "from a_index | eval 1 minute + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8106,9 +7748,7 @@
     },
     {
       "query": "from a_index | eval 1 minutes + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8176,9 +7816,7 @@
     },
     {
       "query": "from a_index | eval 1 second + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8246,9 +7884,7 @@
     },
     {
       "query": "from a_index | eval 1 seconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8316,9 +7952,7 @@
     },
     {
       "query": "from a_index | eval 1 millisecond + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8386,9 +8020,7 @@
     },
     {
       "query": "from a_index | eval 1 milliseconds + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8456,9 +8088,7 @@
     },
     {
       "query": "from a_index | eval 1 ms + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8526,9 +8156,7 @@
     },
     {
       "query": "from a_index | eval 1 s + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8596,9 +8224,7 @@
     },
     {
       "query": "from a_index | eval 1 m + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8666,9 +8292,7 @@
     },
     {
       "query": "from a_index | eval 1 h + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8736,9 +8360,7 @@
     },
     {
       "query": "from a_index | eval 1 d + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8806,9 +8428,7 @@
     },
     {
       "query": "from a_index | eval 1 w + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8876,9 +8496,7 @@
     },
     {
       "query": "from a_index | eval 1 mo + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -8946,9 +8564,7 @@
     },
     {
       "query": "from a_index | eval 1 q + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9016,9 +8632,7 @@
     },
     {
       "query": "from a_index | eval 1 y + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9086,9 +8700,7 @@
     },
     {
       "query": "from a_index | eval 1 yr + 1 year",
-      "error": [
-        "Argument of [+] must be [date], found value [1 year] type [duration]"
-      ],
+      "error": [],
       "warning": []
     },
     {
@@ -9511,69 +9123,69 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 ",
+      "query": "from a_index | enrich policy on textField with col0 ",
       "error": [
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = c ",
+      "query": "from a_index | enrich policy on textField with col0 = c ",
       "error": [
-        "Unknown column [var0]",
+        "Unknown column [col0]",
         "Unknown column [c]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = , ",
+      "query": "from a_index |enrich policy on doubleField with col0 = , ",
       "error": [
         "SyntaxError: mismatched input ',' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 ",
       "error": [
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, yetAnotherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, yetAnotherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = otherField, var1 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = otherField, col1 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 = yetAnotherField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, `this``is fine` = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, `this``is fine` = yetAnotherField",
       "error": [],
       "warning": []
     },
@@ -9595,7 +9207,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy with var0 = otherField | eval var0",
+      "query": "from a_index | enrich policy with col0 = otherField | eval col0",
       "error": [],
       "warning": []
     },
@@ -9963,6 +9575,31 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -10038,6 +9675,42 @@
       "query": "FROM policy",
       "error": [
         "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
       ],
       "warning": []
     },

@@ -71,6 +71,4 @@ const suggestionsRoute = createApmServerRoute({
   },
 });
 
-export const suggestionsRouteRepository = {
-  ...suggestionsRoute,
-};
+export const suggestionsRouteRepository = suggestionsRoute;

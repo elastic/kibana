@@ -6,6 +6,7 @@
  */
 
 import type { ActorRef } from 'xstate';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   LogView,
   LogViewAttributes,
@@ -25,7 +26,7 @@ export interface LogViewContextWithLogView {
 }
 
 export interface LogViewContextWithResolvedLogView {
-  resolvedLogView: ResolvedLogView;
+  resolvedLogView: ResolvedLogView<DataView>;
 }
 
 export interface LogViewContextWithStatus {
@@ -113,7 +114,7 @@ export type LogViewEvent =
     }
   | {
       type: 'RESOLUTION_SUCCEEDED';
-      resolvedLogView: ResolvedLogView;
+      resolvedLogView: ResolvedLogView<DataView>;
     }
   | {
       type: 'UPDATE';

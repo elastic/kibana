@@ -6,23 +6,23 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiToolTip,
-  EuiButtonIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { type DataViewSpec, getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import styled from 'styled-components';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -75,22 +75,22 @@ interface FlyoutHeaderPanelProps {
 export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
   ({ timelineId, openToggleRef }) => {
     const dispatch = useDispatch();
-    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-    const { browserFields: sourcererBrowserFields, sourcererDataView } = useSourcererDataView(
-      SourcererScopeName.timeline
+    const { browserFields: sourcererBrowserFields, sourcererDataView: oldSourcererDataViewSpec } =
+      useSourcererDataView(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
+      DataViewManagerScopeName.timeline
     );
-
-    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
-
-    const browserFields = useMemo(() => {
-      return newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields;
-    }, [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]);
-
-    const dataView = useMemo(() => {
-      return newDataViewPickerEnabled ? experimentalDataView : sourcererDataView;
-    }, [experimentalDataView, newDataViewPickerEnabled, sourcererDataView]);
+    const browserFields = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields),
+      [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]
+    );
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
 
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -109,13 +109,13 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern: dataView,
+          dataViewSpec,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
           kqlMode,
         }),
-      [browserFields, dataProviders, esQueryConfig, filters, kqlMode, kqlQueryObj, dataView]
+      [browserFields, dataProviders, esQueryConfig, filters, kqlMode, kqlQueryObj, dataViewSpec]
     );
     const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 

@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -43,12 +42,21 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions, selectCurrentTabRuntimeState } from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import {
+  createTabActionInjector,
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
+} from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
+  /**
+   * The ID of the tab associated with this state container
+   */
+  tabId: string;
   /**
    * The current savedSearch
    */
@@ -62,9 +70,9 @@ export interface DiscoverStateContainerParams {
    */
   customizationContext: DiscoverCustomizationContext;
   /**
-   * a custom url state storage
+   * URL state storage
    */
-  stateStorageContainer?: IKbnUrlStateStorage;
+  stateStorageContainer: IKbnUrlStateStorage;
   /**
    * Internal shared state that's used at several places in the UI
    */
@@ -111,6 +119,14 @@ export interface DiscoverStateContainer {
    * Internal shared state that's used at several places in the UI
    */
   internalState: InternalStateStore;
+  /**
+   * Injects the current tab into a given internalState action
+   */
+  injectCurrentTab: TabActionInjector;
+  /**
+   * Gets the state of the current tab
+   */
+  getCurrentTab: () => TabState;
   /**
    * State manager for runtime state that can't be stored in Redux
    */
@@ -220,26 +236,15 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
+  tabId,
   services,
   customizationContext,
-  stateStorageContainer,
+  stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts;
-
-  /**
-   * state storage for state in the URL
-   */
-  const stateStorage =
-    stateStorageContainer ??
-    createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      history: services.history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
-      ...(toasts && withNotifyOnErrors(toasts)),
-    });
+  const injectCurrentTab = createTabActionInjector(tabId);
+  const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
   /**
    * Search session logic
@@ -267,10 +272,12 @@ export function getDiscoverStateContainer({
    * App State Container, synced with the _a part URL
    */
   const appStateContainer = getDiscoverAppStateContainer({
+    tabId,
     stateStorage,
     internalState,
     savedSearchContainer,
     services,
+    injectCurrentTab,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
@@ -286,7 +293,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalState.dispatch(internalStateActions.setDataView(dataView));
+    internalState.dispatch(injectCurrentTab(internalStateActions.setDataView)({ dataView }));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -297,8 +304,10 @@ export function getDiscoverStateContainer({
     appStateContainer,
     internalState,
     runtimeStateManager,
-    getSavedSearch: savedSearchContainer.getState,
+    savedSearchContainer,
     setDataView,
+    injectCurrentTab,
+    getCurrentTab,
   });
 
   /**
@@ -306,10 +315,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const { currentDataView$ } = selectCurrentTabRuntimeState(
-      internalState.getState(),
-      runtimeStateManager
-    );
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
@@ -427,6 +433,10 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
+    const updateTabAppStateAndGlobalState = () =>
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateTabAppStateAndGlobalState)()
+      );
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
@@ -434,7 +444,11 @@ export function getDiscoverStateContainer({
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
+      updateTabAppStateAndGlobalState();
     });
+
+    // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+    const unsubscribeSavedSearchUrlTracking = savedSearchContainer.initUrlTracking();
 
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
@@ -452,15 +466,16 @@ export function getDiscoverStateContainer({
       })
     );
 
+    const savedSearchChangesSubscription = savedSearchContainer
+      .getCurrent$()
+      .subscribe(updateTabAppStateAndGlobalState);
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$ } = selectCurrentTabRuntimeState(
-        internalState.getState(),
-        runtimeStateManager
-      );
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
@@ -488,9 +503,11 @@ export function getDiscoverStateContainer({
     );
 
     internalStopSyncing = () => {
+      savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
+      unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();
     };
@@ -531,6 +548,8 @@ export function getDiscoverStateContainer({
       internalState,
       runtimeStateManager,
       appState: appStateContainer,
+      injectCurrentTab,
+      getCurrentTab,
     });
   };
 
@@ -560,7 +579,7 @@ export function getDiscoverStateContainer({
       });
     }
 
-    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+    internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -592,6 +611,8 @@ export function getDiscoverStateContainer({
     globalState: globalStateContainer,
     appState: appStateContainer,
     internalState,
+    injectCurrentTab,
+    getCurrentTab,
     runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,

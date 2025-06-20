@@ -37,8 +37,7 @@ const nowMock = jest.spyOn(Date, 'now');
 const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
 function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBeExtended = true) {
-  const { notifications, http } = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
+  const { http, notifications, ...coreStart } = coreMock.createStart();
   const toast = Symbol();
   notifications.toasts.add.mockReturnValue(toast as any);
   const sessionExpired = createSessionExpiredMock();

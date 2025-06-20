@@ -15,6 +15,7 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexTemplatesStats,
   IndicesSettings,
   IndicesStats,
 } from '../indices.metadata.types';
@@ -216,6 +217,34 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description: 'Number of entities stored in the entity store',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
+  duration: number;
+}> = {
+  eventType: 'privmon_engine_initialization',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the privilege monitoring engine initialization',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'privmon_engine_resource_init_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
       },
     },
   },
@@ -449,6 +478,14 @@ export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
             type: 'keyword',
             _meta: { description: 'The name of the index.' },
           },
+          index_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Index mode.' },
+          },
+          source_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Source mode.' },
+          },
           default_pipeline: {
             type: 'keyword',
             _meta: {
@@ -618,6 +655,103 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
         },
       },
       _meta: { description: 'ILM stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream: {
+            type: 'boolean',
+            _meta: {
+              description: 'Datastream dataset',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source, if enabled',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
     },
   },
 };
@@ -1241,6 +1375,21 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
+  insightId: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_remediated_event',
+  schema: {
+    insightId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the action that was sent to the endpoint',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1250,16 +1399,20 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,

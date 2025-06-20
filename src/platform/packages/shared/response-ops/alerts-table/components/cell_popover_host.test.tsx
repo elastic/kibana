@@ -18,7 +18,7 @@ import { mockRenderContext } from '../mocks/context.mock';
 
 const props = createPartialObjectMock<EuiDataGridCellPopoverElementProps>({
   rowIndex: 0,
-  DefaultCellPopover: jest.fn().mockReturnValue(<div data-test-subj="defaultCellPopover" />),
+  DefaultCellPopover: jest.fn(() => <div data-test-subj="defaultCellPopover" />),
 });
 
 describe('CellPopoverHost', () => {

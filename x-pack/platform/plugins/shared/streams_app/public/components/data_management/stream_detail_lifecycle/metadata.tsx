@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
-  IngestStreamGetResponse,
+  Streams,
   isDisabledLifecycle,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
-  isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
 import React, { ReactNode } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
 import {
   EuiBadge,
-  EuiButton,
+  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -28,53 +25,76 @@ import {
   EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiPopover,
   EuiText,
-  formatNumber,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { css } from '@emotion/react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatIngestionRate } from './helpers/format_bytes';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 export function RetentionMetadata({
   definition,
-  ilmLocator,
   lifecycleActions,
   openEditModal,
   stats,
   isLoadingStats,
   statsError,
 }: {
-  definition: IngestStreamGetResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
+  definition: Streams.ingest.all.GetResponse;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
   statsError?: Error;
 }) {
-  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
+  const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
+  const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
+
+  const dateFormatter = useDateFormatter();
+
   const lifecycle = definition.effective_lifecycle;
 
   const contextualMenu =
     lifecycleActions.length === 0 ? null : (
       <EuiPopover
         button={
-          <EuiButton
-            data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-            size="s"
-            fullWidth
-            onClick={toggleMenu}
+          <EuiToolTip
+            content={
+              !definition.privileges.lifecycle
+                ? i18n.translate(
+                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
+                    {
+                      defaultMessage: "You don't have sufficient privileges to change retention.",
+                    }
+                  )
+                : undefined
+            }
           >
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
-              defaultMessage: 'Edit data retention',
-            })}
-          </EuiButton>
+            <EuiButtonEmpty
+              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+              size="s"
+              onClick={toggleMenu}
+              disabled={!definition.privileges.lifecycle}
+              iconType="pencil"
+              css={css`
+                margin-bottom: -${euiTheme.size.s};
+              `}
+            >
+              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+                defaultMessage: 'Edit data retention',
+              })}
+            </EuiButtonEmpty>
+          </EuiToolTip>
         }
         isOpen={isMenuOpen}
         closePopover={closeMenu}
@@ -99,7 +119,7 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+      <IlmLink lifecycle={lifecycle} />
     </EuiBadge>
   ) : null;
 
@@ -108,7 +128,7 @@ export function RetentionMetadata({
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
-      {isWiredStreamGetResponse(definition) ? (
+      {Streams.WiredStream.GetResponse.is(definition) ? (
         <EuiLink
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
@@ -136,13 +156,13 @@ export function RetentionMetadata({
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+    <>
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
           defaultMessage: 'Retention period',
         })}
         value={
-          <EuiFlexGroup responsive={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge color={isDisabledLifecycle(lifecycle) ? 'default' : 'accent'}>
                 {isDslLifecycle(lifecycle)
@@ -156,9 +176,10 @@ export function RetentionMetadata({
                     })}
               </EuiBadge>
             </EuiFlexItem>
+            {contextualMenu}
           </EuiFlexGroup>
         }
-        button={contextualMenu}
+        dataTestSubj="streamsAppRetentionMetadataRetentionPeriod"
       />
       <EuiHorizontalRule margin="s" />
       <MetadataRow
@@ -174,41 +195,51 @@ export function RetentionMetadata({
       />
       <EuiHorizontalRule margin="s" />
       <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.lastUupdated', {
+          defaultMessage: 'Last updated',
+        })}
+        value={
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="lastUpdated"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              dateFormatter.convert(stats.lastActivity)
+            )}
+          </PrivilegesWarningIconWrapper>
+        }
+      />
+      <EuiHorizontalRule margin="s" />
+      <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
           defaultMessage: 'Ingestion',
         })}
         tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
           defaultMessage:
-            'Estimated average (stream total size divided by the number of days since creation).',
+            'Approximate average (stream total size divided by the number of days since creation).',
         })}
         value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : stats.bytesPerDay ? (
-            formatIngestionRate(stats.bytesPerDay)
-          ) : (
-            '-'
-          )
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="ingestionRate"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : stats.bytesPerDay ? (
+              formatIngestionRate(stats.bytesPerDay)
+            ) : (
+              '-'
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
-      <EuiHorizontalRule margin="s" />
-      <MetadataRow
-        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
-          defaultMessage: 'Total doc count',
-        })}
-        value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            formatNumber(stats.totalDocs, '0,0')
-          )
-        }
-      />
-    </EuiPanel>
+    </>
   );
 }
 
@@ -216,15 +247,20 @@ function MetadataRow({
   metadata,
   value,
   tip,
-  button,
+  dataTestSubj,
 }: {
   metadata: string;
   value: ReactNode;
   tip?: string;
-  button?: ReactNode;
+  dataTestSubj?: string;
 }) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xl"
+      responsive={false}
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={1}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -238,8 +274,13 @@ function MetadataRow({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={4}>{value}</EuiFlexItem>
-      <EuiFlexItem grow={1}>{button}</EuiFlexItem>
+      <EuiFlexItem grow={5}>{value}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+const useDateFormatter = () => {
+  const { fieldFormats } = useKibana().dependencies.start;
+
+  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE]);
+};

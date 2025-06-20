@@ -32,14 +32,10 @@ const mockHttp = {
 };
 
 const useKibanaMockServices = {
-  uiSettings: {
-    get: jest.fn(),
-  },
+  uiSettings: { get: jest.fn() },
   notifications: mockNotifications,
   http: mockHttp,
-  observabilityAIAssistant: {
-    service: mockService,
-  },
+  observabilityAIAssistant: { service: mockService },
 };
 
 describe('useConversationContextMenu', () => {
@@ -104,6 +100,7 @@ describe('useConversationContextMenu', () => {
 
     expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
       title: 'Could not delete conversation',
+      toastMessage: undefined,
     });
   });
 
@@ -179,6 +176,74 @@ describe('useConversationContextMenu', () => {
 
     expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
       title: 'Could not copy conversation URL',
+    });
+  });
+
+  it('archives a conversation successfully', async () => {
+    const archivedConversation = { conversation: { id: '1' }, archived: true };
+    mockService.callApi.mockResolvedValueOnce(archivedConversation);
+
+    const { result } = renderHook(
+      () => useConversationContextMenu({ setIsUpdatingConversationList, refreshConversations }),
+      { wrapper }
+    );
+
+    await act(async () => {
+      const resultValue = await result.current.archiveConversation('1', true);
+      expect(resultValue).toEqual(archivedConversation);
+    });
+
+    expect(setIsUpdatingConversationList).toHaveBeenCalledWith(true);
+    expect(mockService.callApi).toHaveBeenCalledWith(
+      'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+      {
+        signal: null,
+        params: {
+          path: { conversationId: '1' },
+          body: { archived: true },
+        },
+      }
+    );
+    expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'Conversation archived successfully',
+    });
+    expect(setIsUpdatingConversationList).toHaveBeenCalledWith(false);
+  });
+
+  it('handles errors when archiving a conversation', async () => {
+    mockService.callApi.mockRejectedValueOnce(new Error('Archive failed'));
+
+    const { result } = renderHook(
+      () => useConversationContextMenu({ setIsUpdatingConversationList, refreshConversations }),
+      { wrapper }
+    );
+
+    await act(async () => {
+      await expect(result.current.archiveConversation('1', true)).rejects.toThrow('Archive failed');
+    });
+
+    expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Could not archive conversation',
+    });
+    expect(setIsUpdatingConversationList).toHaveBeenCalledWith(false);
+  });
+
+  it('unarchives a conversation successfully', async () => {
+    const unarchivedConversation = { conversation: { id: '1' }, archived: false };
+    mockService.callApi.mockResolvedValueOnce(unarchivedConversation);
+
+    const { result } = renderHook(
+      () => useConversationContextMenu({ setIsUpdatingConversationList, refreshConversations }),
+      { wrapper }
+    );
+
+    await act(async () => {
+      const resultValue = await result.current.archiveConversation('1', false);
+      expect(resultValue).toEqual(unarchivedConversation);
+    });
+
+    expect(mockNotifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'Conversation unarchived successfully',
     });
   });
 });

@@ -68,6 +68,7 @@ export function getTimelineItemsfromConversation({
   chatState,
   isConversationOwnedByCurrentUser,
   onActionClick,
+  isArchived,
 }: {
   conversationId?: string;
   chatService: ObservabilityAIAssistantChatService;
@@ -83,6 +84,7 @@ export function getTimelineItemsfromConversation({
     message: Message;
     payload: ChatActionClickPayload;
   }) => void;
+  isArchived: boolean;
 }): ChatTimelineItem[] {
   const items: ChatTimelineItem[] = [
     {
@@ -198,14 +200,14 @@ export function getTimelineItemsfromConversation({
 
             content = convertMessageToMarkdownCodeBlock(message.message);
 
-            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = true;
           } else {
             // is a prompt by the user
             title = '';
             content = message.message.content;
 
-            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = false;
           }
 
@@ -218,8 +220,8 @@ export function getTimelineItemsfromConversation({
           break;
 
         case MessageRole.Assistant:
-          actions.canRegenerate = hasConnector && isConversationOwnedByCurrentUser;
-          actions.canGiveFeedback = isConversationOwnedByCurrentUser;
+          actions.canRegenerate = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
+          actions.canGiveFeedback = isConversationOwnedByCurrentUser && !isArchived;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -246,7 +248,7 @@ export function getTimelineItemsfromConversation({
               display.collapsed = true;
             }
 
-            actions.canEdit = isConversationOwnedByCurrentUser;
+            actions.canEdit = isConversationOwnedByCurrentUser && !isArchived;
           } else {
             // is an assistant response
             title = '';

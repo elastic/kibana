@@ -84,6 +84,7 @@ describe('migrateMeta', () => {
       flapping: true,
       maintenanceWindowIds: ['id1', 'id2'],
       pendingRecoveredCount: 3,
+      activeCount: 1,
       uuid: 'abc123',
     };
 
@@ -96,6 +97,7 @@ describe('migrateMeta', () => {
       flapping: true,
       maintenanceWindowIds: ['id1', 'id2'],
       pendingRecoveredCount: 3,
+      activeCount: 1,
       uuid: 'abc123',
     };
 

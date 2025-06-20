@@ -21,15 +21,23 @@ let urlService: BrowserUrlService;
 // eslint-disable-next-line prefer-const
 ({ service: urlService } = urlServiceTestSetup());
 
+const shortUrlService = urlService.shortUrls.get(null)!;
+
 const defaultProps: Pick<
   ComponentProps<typeof EmbedContent>,
-  'allowShortUrl' | 'isDirty' | 'shareableUrl' | 'urlService' | 'objectType'
+  | 'allowShortUrl'
+  | 'isDirty'
+  | 'shareableUrl'
+  | 'objectType'
+  | 'shortUrlService'
+  | 'anonymousAccess'
 > = {
   isDirty: false,
   objectType: 'dashboard',
   shareableUrl: '/home#/',
-  urlService,
+  shortUrlService,
   allowShortUrl: false,
+  anonymousAccess: { getState: jest.fn(), getCapabilities: jest.fn() },
 };
 
 const renderComponent = (props: ComponentProps<typeof EmbedContent>) => {

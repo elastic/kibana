@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import type {
   CursorOrUndefined,

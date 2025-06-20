@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Privilege Monitoring Common Schema
+  description: Common schema for Privilege Monitoring
+  version: "1"
+paths: {}
+components:
+  schemas:
+    MonitoringEngineDescriptor:
+      type: object
+      required:
+        - type
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/EngineStatus"
+
+    EngineStatus:
+      type: string
+      enum:
+        - installing
+        - started
+        - stopped
+        - updating
+        - error
+
+    EngineComponentStatus:
+      type: object
+      required:
+        - id
+        - installed
+        - resource
+      properties:
+        id:
+          type: string
+        installed:
+          type: boolean
+        resource:
+          $ref: "#/components/schemas/EngineComponentResource"
+        health:
+          type: string
+          enum:
+            - green
+            - yellow
+            - red
+            - unknown
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              message:
+                type: string
+
+    EngineComponentResource:
+      type: string
+      enum:
+        - privmon_engine
+        - index
+        - task

@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Notifcations', function () {
+  describe('Notifications', function () {
     this.tags(['ml']);
 
     loadTestFile(require.resolve('./notification_list'));

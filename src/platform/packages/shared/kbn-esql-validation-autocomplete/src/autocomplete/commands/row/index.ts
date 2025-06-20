@@ -14,21 +14,21 @@ import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   getFunctionSuggestions,
-  getNewVariableSuggestion,
+  getNewUserDefinedColumnSuggestion,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
 export async function suggest({
-  getSuggestedVariableName,
+  getSuggestedUserDefinedColumnName,
   command,
   innerText,
 }: CommandSuggestParams<'row'>): Promise<SuggestionRawDefinition[]> {
-  // ROW var0 = /
+  // ROW col0 = /
   if (/=\s*$/.test(innerText)) {
     return getFunctionSuggestions({ location: Location.ROW });
   }
 
-  // ROW var0 = 23 /
+  // ROW col0 = 23 /
   else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
       { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
@@ -39,7 +39,7 @@ export async function suggest({
   // ROW /
   // ROW foo = "bar", /
   return [
-    getNewVariableSuggestion(getSuggestedVariableName()),
+    getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
     ...getFunctionSuggestions({ location: Location.ROW }),
   ];
 }

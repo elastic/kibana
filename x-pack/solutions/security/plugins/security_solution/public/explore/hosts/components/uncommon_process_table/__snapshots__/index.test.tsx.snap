@@ -1,213 +1,993 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Uncommon Process Table Component rendering it renders the default Uncommon process table 1`] = `
-<UncommonProcessTable
-  data={
-    Array [
-      Object {
-        "cursor": Object {
-          "value": "98966fa2013c396155c460d35c0902be",
-        },
-        "node": Object {
-          "_id": "cPsuhGcB0WOhS6qyTKC0",
-          "hosts": Array [],
-          "instances": 93,
-          "process": Object {
-            "name": Array [
-              "elrond.elstc.co",
-            ],
-            "title": Array [
-              "Hello World",
-            ],
-          },
-          "user": Object {
-            "id": Array [
-              "0",
-            ],
-            "name": Array [
-              "root",
-            ],
-          },
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "98966fa2013c396155c460d35c0902be",
-        },
-        "node": Object {
-          "_id": "cPsuhGcB0WOhS6qyTKC0",
-          "hosts": Array [
-            Object {
-              "id": Array [
-                "host-id-1",
-              ],
-              "name": Array [
-                "hello-world",
-              ],
-            },
-          ],
-          "instances": 93,
-          "process": Object {
-            "name": Array [
-              "elrond.elstc.co",
-            ],
-            "title": Array [
-              "Hello World",
-            ],
-          },
-          "user": Object {
-            "id": Array [
-              "0",
-            ],
-            "name": Array [
-              "root",
-            ],
-          },
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-        },
-        "node": Object {
-          "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "hosts": Array [
-            Object {
-              "id": Array [
-                "host-id-1",
-              ],
-              "name": Array [
-                "hello-world",
-              ],
-            },
-            Object {
-              "id": Array [
-                "host-id-2",
-              ],
-              "name": Array [
-                "hello-world-2",
-              ],
-            },
-          ],
-          "instances": 97,
-          "process": Object {
-            "name": Array [
-              "siem-kibana",
-            ],
-            "title": Array [
-              "Hello World",
-            ],
-          },
-          "user": Object {
-            "id": Array [
-              "1",
-            ],
-            "name": Array [
-              "Evan",
-            ],
-          },
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-        },
-        "node": Object {
-          "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "hosts": Array [
-            Object {
-              "ip": Array [
-                "127.0.0.1",
-              ],
-            },
-          ],
-          "instances": 97,
-          "process": Object {
-            "name": Array [
-              "siem-kibana",
-            ],
-            "title": Array [
-              "Hello World",
-            ],
-          },
-          "user": Object {
-            "id": Array [
-              "1",
-            ],
-            "name": Array [
-              "Evan",
-            ],
-          },
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-        },
-        "node": Object {
-          "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "hosts": Array [
-            Object {
-              "ip": Array [
-                "127.0.0.1",
-              ],
-            },
-            Object {
-              "id": Array [
-                "host-id-1",
-              ],
-              "name": Array [
-                "hello-world",
-              ],
-            },
-            Object {
-              "ip": Array [
-                "127.0.0.1",
-              ],
-            },
-            Object {
-              "id": Array [
-                "host-id-2",
-              ],
-              "name": Array [
-                "hello-world-2",
-              ],
-            },
-            Object {
-              "ip": Array [
-                "127.0.0.1",
-              ],
-            },
-          ],
-          "instances": 97,
-          "process": Object {
-            "name": Array [
-              "siem-kibana",
-            ],
-            "title": Array [
-              "Hello World",
-            ],
-          },
-          "user": Object {
-            "id": Array [
-              "1",
-            ],
-            "name": Array [
-              "Evan",
-            ],
-          },
-        },
-      },
-    ]
+.c3 {
+  color: #98a2b3;
+}
+
+.c1 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c0 {
+  position: relative;
+}
+
+.c2 tbody th,
+.c2 tbody td {
+  vertical-align: top;
+}
+
+.c2 tbody .euiTableCellContent {
+  display: block;
+}
+
+.c4 {
+  margin-top: 4px;
+}
+
+@media only screen and (min-width:575px) {
+  .c1 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
   }
-  fakeTotalCount={50}
-  id="uncommonProcess"
-  isInspect={false}
-  loadPage={[MockFunction]}
-  loading={false}
-  setQuerySkip={[MockFunction]}
-  showMorePagesIndicator={true}
-  totalCount={5}
-  type="page"
-/>
+
+  .c1 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+@media only screen and (min-width:768px) {
+  .c5 .euiButtonIcon:last-child {
+    margin-left: 28px;
+  }
+
+  .c5 .euiPagination {
+    position: relative;
+  }
+
+  .c5 .euiPagination::before {
+    bottom: 0;
+    color: #515761;
+    content: '\\2026';
+    font-size: 14px;
+    padding: 5px 8px;
+    position: absolute;
+    right: 24px;
+  }
+}
+
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium c0 emotion-euiPanel-grow-m-m-plain-hasBorder"
+  data-test-subj="table-uncommonProcesses-loading-false"
+>
+  <header
+    class="toggle-expand siemHeaderSection css-125xqyz-header"
+    data-test-subj="header-section"
+  >
+    <div
+      class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-stretch-column"
+      data-test-subj="headerSectionOuterFlexGroup"
+    >
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
+          data-test-subj="headerSectionInnerFlexGroup"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-center-row"
+            >
+              <div
+                class="euiFlexItem emotion-euiFlexItem-grow-1"
+              >
+                <div
+                  class="euiFlexGroup header-section-titles emotion-euiFlexGroup-none-flexStart-stretch-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <button
+                      aria-label="Open"
+                      class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                      data-test-subj="query-toggle-header"
+                      title="Open"
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                    </button>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-grow-1"
+                  >
+                    <h2
+                      class="euiTitle emotion-euiTitle-l"
+                      data-test-subj="header-section-title"
+                    >
+                      <span
+                        class="eui-textBreakNormal"
+                      >
+                        Uncommon processes
+                      </span>
+                    </h2>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem emotion-euiFlexItem-growZero"
+              >
+                <button
+                  aria-label="Inspect"
+                  class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+                  data-test-subj="inspect-icon-button"
+                  disabled=""
+                  title="Inspect"
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="euiButtonIcon__icon"
+                    color="inherit"
+                    data-euiicon-type="inspect"
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
+      >
+        <div
+          class="c1 siemSubtitle"
+          data-test-subj="header-section-subtitle"
+        >
+          <p
+            class="siemSubtitle__item siemSubtitle__item--text"
+            data-test-subj="header-panel-subtitle"
+          >
+            Showing: 5 processes
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div
+    class="euiBasicTable c2"
+    data-test-subj="paginated-basic-table"
+  >
+    <table
+      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+      />
+      <thead>
+        <tr>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Process name_0"
+            role="columnheader"
+            scope="col"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Process name"
+              >
+                Process name
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Hosts_1"
+            role="columnheader"
+            scope="col"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Hosts"
+              >
+                Hosts
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Instances_2"
+            role="columnheader"
+            scope="col"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Instances"
+              >
+                Instances
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Host names_3"
+            role="columnheader"
+            scope="col"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Host names"
+              >
+                Host names
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last command_4"
+            role="columnheader"
+            scope="col"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last command"
+              >
+                Last command
+              </span>
+            </div>
+          </th>
+          <th
+            class="euiTableHeaderCell emotion-euiTableHeaderCell"
+            data-test-subj="tableHeaderCell_Last user_5"
+            role="columnheader"
+            scope="col"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+            >
+              <span
+                class="eui-textTruncate"
+                title="Last user"
+              >
+                Last user
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody
+        class="css-0"
+      >
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              elrond.elstc.co
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              0
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              93
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      root
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              elrond.elstc.co
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              93
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-host.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="host-details-button"
+                        href="/name/hello-world"
+                        rel="noreferrer"
+                      >
+                        hello-world
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      root
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              siem-kibana
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              2
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              97
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-host.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="host-details-button"
+                        href="/name/hello-world"
+                        rel="noreferrer"
+                      >
+                        hello-world
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-test-subj="cellActions-renderContent-host.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="host-details-button"
+                        href="/name/hello-world-2"
+                        rel="noreferrer"
+                      >
+                        hello-world-2
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      Evan
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              siem-kibana
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              1
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              97
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      Evan
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        >
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 20%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              siem-kibana
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              5
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 8%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            >
+              97
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-host.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="host-details-button"
+                        href="/name/hello-world"
+                        rel="noreferrer"
+                      >
+                        hello-world
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-test-subj="cellActions-renderContent-host.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      <a
+                        class="euiLink emotion-euiLink-primary"
+                        data-test-subj="host-details-button"
+                        href="/name/hello-world-2"
+                        rel="noreferrer"
+                      >
+                        hello-world-2
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            style="width: 25%;"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="c3"
+              >
+                —
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <div
+                data-test-subj="cellActions-renderContent-user.name"
+              >
+                <div>
+                  <div
+                    class="euiPopover emotion-euiPopover-inline-block"
+                  >
+                    <div>
+                      Evan
+                    </div>
+                  </div>
+                </div>
+              </div>
+               
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div
+    class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiPopover emotion-euiPopover-inline-block"
+        data-test-subj="loadingMoreSizeRowPopover"
+        id="customizablePagination"
+      >
+        <button
+          class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+          type="button"
+        >
+          <span
+            class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+          >
+            <span
+              class="eui-textTruncate euiButtonEmpty__text"
+            >
+              Rows per page: 10
+            </span>
+            <span
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem c5 emotion-euiFlexItem-growZero"
+    >
+      <nav
+        class="euiPagination emotion-euiPagination"
+        data-test-subj="numberedPagination"
+      >
+        <span
+          aria-atomic="true"
+          aria-relevant="additions text"
+          class="emotion-euiScreenReaderOnly"
+          role="status"
+        >
+          Page 1 of 5
+        </span>
+        <button
+          aria-label="Previous page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
+          data-test-subj="pagination-button-previous"
+          disabled=""
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowLeft"
+          />
+        </button>
+        <ul
+          class="euiPagination__list emotion-euiPagination__list"
+        >
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-current="page"
+              aria-label="Page 1 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
+              data-test-subj="pagination-button-0"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  1
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 2 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-1"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  2
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 3 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-2"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  3
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 4 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-3"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  4
+                </span>
+              </span>
+            </button>
+          </li>
+          <li
+            class="euiPagination__item"
+          >
+            <button
+              aria-label="Page 5 of 5"
+              class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-text-euiPaginationButton"
+              data-test-subj="pagination-button-4"
+              type="button"
+            >
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate euiButtonEmpty__text"
+                >
+                  5
+                </span>
+              </span>
+            </button>
+          </li>
+        </ul>
+        <button
+          aria-label="Next page"
+          class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-text-euiPaginationButton"
+          data-test-subj="pagination-button-next"
+          title="Next page"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="arrowRight"
+          />
+        </button>
+      </nav>
+    </div>
+  </div>
+</div>
 `;

@@ -43,15 +43,13 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
     prefix: 'adJobInfoContextMenu',
     suffix: jobId,
   });
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
+  const onButtonClick = () => setPopover((prev) => !prev);
   const closePopover = () => {
     setPopover(false);
   };
 
   const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
-  const panels = useMemo(
+  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(
     () => {
       return [
         {
@@ -71,7 +69,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
             share,
           }),
         },
-      ] as EuiContextMenuPanelDescriptor[];
+      ];
     },
     // globalState is an object with references change on every render, so we are stringifying it here
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -5,22 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { WiredStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { Streams, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';
 import { useSchemaFields } from '../schema_editor/hooks/use_schema_fields';
 
 interface SchemaEditorProps {
-  definition?: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }
 
-export function StreamDetailSchemaEditor(props: SchemaEditorProps) {
-  if (!props.definition) return null;
-  return <Content definition={props.definition} {...props} />;
-}
-
-const Content = ({ definition, refreshDefinition }: Required<SchemaEditorProps>) => {
+export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const { loading } = useStreamDetail();
 
   const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
@@ -39,7 +34,7 @@ const Content = ({ definition, refreshDefinition }: Required<SchemaEditorProps>)
       onRefreshData={refreshFields}
       withControls
       withFieldSimulation
-      withTableActions={!isRootStreamDefinition(definition.stream)}
+      withTableActions={!isRootStreamDefinition(definition.stream) && definition.privileges.manage}
     />
   );
 };

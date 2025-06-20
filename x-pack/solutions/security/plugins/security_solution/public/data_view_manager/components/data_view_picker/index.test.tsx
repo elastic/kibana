@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { useDataView } from '../../hooks/use_data_view';
+import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
@@ -17,9 +17,15 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
+import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 
-jest.mock('../../hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
+jest.mock('../../../common/utils/global_query_string', () => ({
+  useUpdateUrlParam: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_data_view_spec', () => ({
+  useDataViewSpec: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_select_data_view', () => ({
@@ -56,6 +62,11 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
           {'Add Field'}
         </button>
       )}
+      {props.onEditDataView && (
+        <button type="button" onClick={() => props.onEditDataView()} data-test-subj="editDataView">
+          {'Edit Data View'}
+        </button>
+      )}
       <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
       <div data-test-subj="trigger">{props.trigger.label}</div>
     </div>
@@ -66,8 +77,10 @@ describe('DataViewPicker', () => {
   let mockDispatch = jest.fn();
 
   beforeEach(() => {
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: {
+    jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
+
+    jest.mocked(useDataViewSpec).mockReturnValue({
+      dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
       },
@@ -81,7 +94,10 @@ describe('DataViewPicker', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         dataViewFieldEditor: { openEditor: jest.fn() },
-        dataViewEditor: { openEditor: jest.fn() },
+        dataViewEditor: {
+          openEditor: jest.fn(),
+          userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
+        },
         data: { dataViews: { get: jest.fn() } },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -113,7 +129,24 @@ describe('DataViewPicker', () => {
 
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
+    });
+  });
+
+  it('calls useUpdateUrlParam when changing the data view', () => {
+    render(
+      <TestProviders>
+        <DataViewPicker scope={DataViewManagerScopeName.default} />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId('changeDataView'));
+
+    expect(jest.mocked(useUpdateUrlParam(URL_PARAM_KEY.sourcerer))).toHaveBeenCalledWith({
+      default: {
+        id: 'new-data-view-id',
+        selectedPatterns: [],
+      },
     });
   });
 
@@ -144,7 +177,7 @@ describe('DataViewPicker', () => {
     );
     expect(jest.mocked(useSelectDataView())).toHaveBeenCalledWith({
       id: 'new-data-view-id',
-      scope: ['default'],
+      scope: 'default',
     });
   });
 
@@ -167,6 +200,36 @@ describe('DataViewPicker', () => {
         'security-solution-default'
       );
       expect(jest.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
+    });
+  });
+
+  describe('when user does not have editDataView permission', () => {
+    it('does not render edit data view button', () => {
+      jest
+        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
+        .mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <DataViewPicker scope={DataViewManagerScopeName.default} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('editDataView')).not.toBeInTheDocument();
+    });
+
+    it('does not render add field button', () => {
+      jest
+        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
+        .mockReturnValue(false);
+
+      render(
+        <TestProviders>
+          <DataViewPicker scope={DataViewManagerScopeName.default} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('addField')).not.toBeInTheDocument();
     });
   });
 });

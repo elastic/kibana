@@ -109,6 +109,7 @@ components:
         # Rule actions
         actions:
           type: array
+          description: Array defining the automated actions (notifications) taken when alerts are generated.
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/RuleAction'
 
@@ -141,10 +142,13 @@ components:
         # Related integrations
         related_integrations:
           $ref: './common_attributes.schema.yaml#/components/schemas/RelatedIntegrationArray'
-
         # Required fields
         required_fields:
           type: array
+          description: |
+            Elasticsearch fields and their types that need to be present for the rule to function.
+            > info
+            > The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.
           items:
             $ref: './common_attributes.schema.yaml#/components/schemas/RequiredFieldInput'
 
@@ -193,8 +197,7 @@ components:
         created_by:
           type: string
         revision:
-          type: integer
-          minimum: 0
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleRevision'
         # NOTE: For now, Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would
@@ -272,7 +275,6 @@ components:
           description: Rule type
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
-          description: EQL query to execute
         language:
           $ref: '#/components/schemas/EqlQueryLanguage'
           description: Query language to use
@@ -827,7 +829,6 @@ components:
           $ref: '#/components/schemas/EsqlQueryLanguage'
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
-          description: ESQL query to execute
       required:
         - type
         - language

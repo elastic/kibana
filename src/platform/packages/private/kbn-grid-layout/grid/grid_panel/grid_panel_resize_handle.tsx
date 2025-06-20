@@ -15,25 +15,28 @@ import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
 
-export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
-  const startInteraction = useGridLayoutPanelEvents({
-    interactionType: 'resize',
-    panelId,
-    rowId,
-  });
+export const ResizeHandle = React.memo(
+  ({ sectionId, panelId }: { sectionId?: string; panelId: string }) => {
+    const startDrag = useGridLayoutPanelEvents({
+      interactionType: 'resize',
+      panelId,
+      sectionId,
+    });
 
-  return (
-    <button
-      css={styles}
-      onMouseDown={startInteraction}
-      onTouchStart={startInteraction}
-      className="kbnGridPanel--resizeHandle"
-      aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
-        defaultMessage: 'Resize panel',
-      })}
-    />
-  );
-});
+    return (
+      <button
+        css={styles}
+        onMouseDown={startDrag}
+        onTouchStart={startDrag}
+        onKeyDown={startDrag}
+        className="kbnGridPanel--resizeHandle"
+        aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
+          defaultMessage: 'Resize panel',
+        })}
+      />
+    );
+  }
+);
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
@@ -46,7 +49,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     maxHeight: '100%',
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.toast,
-    touchAction: 'none',
+    scrollMarginBottom: euiTheme.size.s,
     '&:hover, &:focus': {
       cursor: 'se-resize',
     },

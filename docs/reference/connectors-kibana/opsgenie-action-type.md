@@ -2,25 +2,27 @@
 navigation_title: "Opsgenie"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/opsgenie-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # Opsgenie connector and action [opsgenie-action-type]
-
 
 An {{opsgenie}} connector enables you to create and close alerts in {{opsgenie}}. In particular, it uses the [{{opsgenie}} alert API](https://docs.opsgenie.com/docs/alert-api).
 
 To create this connector, you must have a valid {{opsgenie}} URL and API key. For configuration tips, refer to [Configure an Opsgenie account](#configuring-opsgenie).
 
-
 ## Create connectors in {{kib}} [define-opsgenie-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
 :::{image} ../images/opsgenie-connector.png
 :alt: Opsgenie connector
-:class: screenshot
+:screenshot:
 :::
-
 
 ### Connector configuration [opsgenie-connector-configuration]
 
@@ -36,10 +38,8 @@ URL
     If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
     ::::
 
-
 API Key
 :   The Opsgenie API authentication key for HTTP basic authentication. For more details about generating Opsgenie API keys, refer to [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/).
-
 
 ## Test connectors [opsgenie-action-configuration]
 
@@ -48,18 +48,16 @@ After you create a connector, use the **Test** tab to test its actions:
 * [Create alert](#opsgenie-action-create-alert-configuration)
 * [Close alert](#opsgenie-action-close-alert-configuration)
 
-
 ### Create alert action [opsgenie-action-create-alert-configuration]
 
 When you create a rule that uses an {{opsgenie}} connector, its actions (with the exception of recovery actions) create {{opsgenie}} alerts. You can test this type of action when you create or edit your connector:
 
 :::{image} ../images/opsgenie-create-alert-test.png
 :alt: {{opsgenie}} create alert action test
-:class: screenshot
+:screenshot:
 :::
 
 You can configure the create alert action through the form view or using a JSON editor.
-
 
 #### Form view [opsgenie-action-create-alert-form-configuration]
 
@@ -91,7 +89,6 @@ User
 
 Note
 :   Additional information for the alert (optional).
-
 
 #### JSON editor [opsgenie-action-create-alert-json-configuration]
 
@@ -141,14 +138,13 @@ Example JSON editor contents
 }
 ```
 
-
 ### Close alert action [opsgenie-action-close-alert-configuration]
 
 When you create a rule that uses an {{opsgenie}} connector, its recovery actions close {{opsgenie}} alerts. You can test this type of action when you create or edit your connector:
 
 :::{image} ../images/opsgenie-close-alert-test.png
 :alt: {{opsgenie}} close alert action test
-:class: screenshot
+:screenshot:
 :::
 
 The close alert action has the following configuration properties.
@@ -165,37 +161,38 @@ Source
 User
 :   The display name of the owner (optional).
 
-
 ## Connector networking configuration [opgenie-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
 
 ## Configure an Opsgenie account [configuring-opsgenie]
 
 After obtaining an Opsgenie instance, configure the API integration. For details, refer to the [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/).
 
-If you’re using a free trial, go to the `Teams` dashboard and select the appropriate team.
+If you're using a free trial, go to the `Teams` dashboard and select the appropriate team.
 
 :::{image} ../images/opsgenie-teams.png
 :alt: Opsgenie teams dashboard
+:screenshot:
 :::
 
 Select the `Integrations` menu item, then select `Add integration`.
 
 :::{image} ../images/opsgenie-integrations.png
 :alt: Opsgenie teams integrations
+:screenshot:
 :::
 
 Search for `API` and select the `API` integration.
 
 :::{image} ../images/opsgenie-add-api-integration.png
 :alt: Opsgenie API integration
+:screenshot:
 :::
 
 Configure the integration and ensure you record the `API Key`. This key will be used to populate the `API Key` field when creating the Kibana Opsgenie connector. Click `Save Integration` after you finish configuring the integration.
 
 :::{image} ../images/opsgenie-save-integration.png
 :alt: Opsgenie save integration
+:screenshot:
 :::
-

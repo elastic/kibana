@@ -7,23 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
-
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   PublishesDataViews,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
+import { uniqBy } from 'lodash';
+import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
-  children$: PublishingSubject<{ [key: string]: unknown }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 

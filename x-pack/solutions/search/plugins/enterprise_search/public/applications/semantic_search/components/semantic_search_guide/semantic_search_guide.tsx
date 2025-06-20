@@ -88,8 +88,8 @@ const CREATE_INDEX_SNIPPET = `PUT /my-index
 }`;
 
 const INGEST_SNIPPET = `POST /my-index/_doc
-{ 
-  "text": "There are a few foods and food groups that will help to fight inflammation and delayed onset muscle soreness (both things that are inevitable after a long, hard workout) when you incorporate them into your postworkout eats, whether immediately after your run or at a meal later in the day" 
+{
+  "text": "There are a few foods and food groups that will help to fight inflammation and delayed onset muscle soreness (both things that are inevitable after a long, hard workout) when you incorporate them into your postworkout eats, whether immediately after your run or at a meal later in the day"
 }`;
 
 const QUERY_SNIPPET = `POST /my-index/_search
@@ -97,8 +97,8 @@ const QUERY_SNIPPET = `POST /my-index/_search
   "size" : 3,
   "query" : {
     "semantic": {
-      "field": "text", 
-      "query": "How to avoid muscle soreness while running?" 
+      "field": "text",
+      "query": "How to avoid muscle soreness while running?"
     }
   }
 }`;
@@ -201,6 +201,7 @@ export const SemanticSearchGuide: React.FC = () => {
 
   return (
     <EnterpriseSearchSemanticSearchPageTemplate
+      data-test-subj="semanticSearchGuidePage"
       restrictWidth
       pageHeader={{
         description: (

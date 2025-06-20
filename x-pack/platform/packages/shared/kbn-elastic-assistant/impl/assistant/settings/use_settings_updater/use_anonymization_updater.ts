@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import {
+  FindAnonymizationFieldsResponse,
+  PerformAnonymizationFieldsBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { useCallback, useEffect, useState } from 'react';
-import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';

@@ -35,6 +35,7 @@ import {
 import { ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { MemoryRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 jest.mock('../../common/api/use_stats_api');
@@ -110,7 +111,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0 },
           isPluginInitialized: false,
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -151,7 +155,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -191,7 +198,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -231,7 +241,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'waiting_for_results', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -271,7 +284,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -311,7 +327,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -351,7 +370,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -390,7 +412,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -429,7 +454,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -468,7 +496,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -508,7 +539,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -548,7 +582,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -588,7 +625,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -619,7 +659,7 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', () => {
+  it('Show CSPM installation prompt if CSPM is not installed and KSPM is installed ,NO AGENT', async () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -628,7 +668,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -647,7 +690,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage(cloudPosturePages.kspm_dashboard.path);
 
-    screen.getByTestId(CLOUD_DASHBOARD_TAB).click();
+    await userEvent.click(screen.getByTestId(CLOUD_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],
@@ -661,7 +704,7 @@ describe('<ComplianceDashboard />', () => {
     });
   });
 
-  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', () => {
+  it('Show KSPM installation prompt if KSPM is not installed and CSPM is installed , NO AGENT', async () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
@@ -670,7 +713,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -689,7 +735,7 @@ describe('<ComplianceDashboard />', () => {
 
     renderComplianceDashboardPage();
 
-    screen.getByTestId(KUBERNETES_DASHBOARD_TAB).click();
+    await userEvent.click(screen.getByTestId(KUBERNETES_DASHBOARD_TAB));
 
     expectIdsInDoc({
       be: [KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT],

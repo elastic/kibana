@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import * as ruleDetailsI18n from '../../../../translations';
-import { RelatedIntegrationsDescription } from '../../../../../../../../detections/components/rules/related_integrations/integrations_description';
+import { RelatedIntegrationsDescription } from '../../../../../../../common/components/related_integrations/integrations_description';
 import type { RelatedIntegrationArray } from '../../../../../../../../../common/api/detection_engine';
 import { EmptyFieldValuePlaceholder } from '../../empty_field_value_placeholder';
 

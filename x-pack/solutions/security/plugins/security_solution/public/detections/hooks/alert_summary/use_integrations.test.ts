@@ -10,11 +10,10 @@ import { useIntegrations } from './use_integrations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { FILTER_KEY } from '../../components/alert_summary/search_bar/integrations_filter_button';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 
 describe('useIntegrations', () => {
   beforeEach(() => {
@@ -33,18 +32,6 @@ describe('useIntegrations', () => {
         },
       },
     });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: {
-        rules: [
-          {
-            related_integrations: [{ package: 'splunk' }],
-            name: 'SplunkRuleName',
-          },
-        ],
-        total: 0,
-      },
-    });
 
     const packages: PackageListItem[] = [
       {
@@ -55,8 +42,17 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
+    const ruleResponse = {
+      rules: [
+        {
+          related_integrations: [{ package: 'splunk' }],
+          id: 'SplunkRuleId',
+        } as RuleResponse,
+      ],
+      isLoading: false,
+    };
 
-    const { result } = renderHook(() => useIntegrations({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -64,7 +60,7 @@ describe('useIntegrations', () => {
         {
           checked: 'on',
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleName',
+          key: 'SplunkRuleId',
           label: 'Splunk',
         },
       ],
@@ -85,26 +81,14 @@ describe('useIntegrations', () => {
                     disabled: false,
                     type: 'phrase',
                     key: FILTER_KEY,
-                    params: { query: 'Splunk' },
+                    params: { query: 'SplunkRuleId' },
                   },
-                  query: { match_phrase: { [FILTER_KEY]: 'Splunk' } },
+                  query: { match_phrase: { [FILTER_KEY]: 'SplunkRuleId' } },
                 },
               ]),
             },
           },
         },
-      },
-    });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: {
-        rules: [
-          {
-            related_integrations: [{ package: 'splunk' }],
-            name: 'SplunkRuleName',
-          },
-        ],
-        total: 0,
       },
     });
 
@@ -117,15 +101,24 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
+    const ruleResponse = {
+      rules: [
+        {
+          related_integrations: [{ package: 'splunk' }],
+          id: 'SplunkRuleId',
+        } as RuleResponse,
+      ],
+      isLoading: false,
+    };
 
-    const { result } = renderHook(() => useIntegrations({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
 
     expect(result.current).toEqual({
       isLoading: false,
       integrations: [
         {
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleName',
+          key: 'SplunkRuleId',
           label: 'Splunk',
         },
       ],
@@ -138,10 +131,6 @@ describe('useIntegrations', () => {
         data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
       },
     });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      isLoading: false,
-      data: undefined,
-    });
 
     const packages: PackageListItem[] = [
       {
@@ -152,8 +141,12 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
+    const ruleResponse = {
+      rules: [],
+      isLoading: false,
+    };
 
-    const { result } = renderHook(() => useIntegrations({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
 
     expect(result.current).toEqual({
       isLoading: false,
@@ -167,10 +160,6 @@ describe('useIntegrations', () => {
         data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
       },
     });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      isLoading: true,
-      data: undefined,
-    });
 
     const packages: PackageListItem[] = [
       {
@@ -181,8 +170,12 @@ describe('useIntegrations', () => {
         version: '',
       },
     ];
+    const ruleResponse = {
+      rules: [],
+      isLoading: true,
+    };
 
-    const { result } = renderHook(() => useIntegrations({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages, ruleResponse }));
 
     expect(result.current).toEqual({
       isLoading: true,

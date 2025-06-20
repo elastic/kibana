@@ -6,9 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { DashboardAsset } from '../../../../common/assets';
 import { createServerRoute } from '../../create_server_route';
 import { SanitizedDashboardAsset } from '../../dashboards/route';
+import { ASSET_ID } from '../../../lib/streams/assets/fields';
 
 export interface SuggestDashboardResponse {
   suggestions: SanitizedDashboardAsset[];
@@ -16,8 +18,8 @@ export interface SuggestDashboardResponse {
 
 function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
   return {
-    id: asset.assetId,
-    label: asset.label,
+    id: asset[ASSET_ID],
+    title: asset.title,
     tags: asset.tags,
   };
 }
@@ -29,9 +31,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

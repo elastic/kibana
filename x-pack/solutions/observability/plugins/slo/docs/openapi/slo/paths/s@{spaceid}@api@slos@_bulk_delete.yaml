@@ -1,0 +1,43 @@
+post:
+  summary: Bulk delete SLO definitions and their associated summary and rollup data.
+  operationId: bulkDeleteOp
+  description: >
+    Bulk delete SLO definitions and their associated summary and rollup data. 
+    This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete. 
+    The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
+  tags:
+    - slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/bulk_delete_request.yaml'
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/bulk_delete_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import {
   getApmAgentCommands,
@@ -54,6 +55,13 @@ export function AgentConfigInstructions({
 
       <EuiCodeBlock
         isCopyable
+        copyAriaLabel={i18n.translate(
+          'xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel',
+          {
+            defaultMessage: 'Copy {variantId} agent configuration code',
+            values: { variantId },
+          }
+        )}
         language={highlightLang || 'bash'}
         data-test-subj="commands"
         lineNumbers={lineNumbers}

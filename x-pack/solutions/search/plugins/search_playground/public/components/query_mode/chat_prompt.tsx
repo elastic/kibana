@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { ChatFormFields } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 export const ChatPrompt = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();
@@ -18,12 +18,16 @@ export const ChatPrompt = ({ isLoading }: { isLoading: boolean }) => {
   return (
     <Controller
       control={control}
-      name={ChatFormFields.question}
+      name={PlaygroundFormFields.question}
       render={({ field }) => (
         <EuiFieldText
           data-test-subj="searchPlaygroundChatQuestionFieldText"
           prepend="{query}"
-          {...field}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+          value={field.value}
+          inputRef={field.ref}
           fullWidth
           placeholder={i18n.translate(
             'xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder',

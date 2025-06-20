@@ -36,8 +36,8 @@ export const getTimelineBaseKibanaFeature = (
         all: params.savedObjects,
         read: params.savedObjects,
       },
-      ui: ['read', 'crud'],
-      api: ['timeline_read', 'timeline_write'],
+      ui: [],
+      api: [],
     },
     read: {
       app: [TIMELINE_FEATURE_ID, 'kibana'],
@@ -46,8 +46,8 @@ export const getTimelineBaseKibanaFeature = (
         all: [],
         read: params.savedObjects,
       },
-      ui: ['read'],
-      api: ['timeline_read'],
+      ui: [],
+      api: [],
     },
   },
 });

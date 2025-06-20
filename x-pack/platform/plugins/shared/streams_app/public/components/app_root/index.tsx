@@ -13,13 +13,10 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
 import { StreamsAppStartDependencies } from '../../types';
 import { StreamsAppServices } from '../../services/types';
-import { HeaderMenuPortal } from '../header_menu';
-import { TimeFilterProvider } from '../../hooks/use_timefilter';
 
 export function AppRoot({
   coreStart,
@@ -48,33 +45,12 @@ export function AppRoot({
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <TimeFilterProvider timefilter={pluginsStart.data.query.timefilter.timefilter}>
-          <RouterProvider history={history} router={streamsAppRouter}>
-            <BreadcrumbsContextProvider>
-              <RouteRenderer />
-            </BreadcrumbsContextProvider>
-            <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
-          </RouterProvider>
-        </TimeFilterProvider>
+        <RouterProvider history={history} router={streamsAppRouter}>
+          <BreadcrumbsContextProvider>
+            <RouteRenderer />
+          </BreadcrumbsContextProvider>
+        </RouterProvider>
       </RedirectAppLinks>
     </StreamsAppContextProvider>
-  );
-}
-
-export function StreamsAppHeaderActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <></>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
   );
 }

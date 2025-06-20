@@ -13,7 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  const availableMLObjectTypes = ['Anomaly detection jobs', 'Trained models'];
+  const availableMLObjectTypes = [
+    'Anomaly detection jobs',
+    'Data frame analytics jobs',
+    'Trained models',
+  ];
 
   describe('Memory usage page', function () {
     before(async () => {

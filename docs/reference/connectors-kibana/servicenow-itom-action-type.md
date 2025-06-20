@@ -2,13 +2,16 @@
 navigation_title: "{{sn-itom}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-itom-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # {{sn-itom}} connector and action [servicenow-itom-action-type]
 
-
 The {{sn-itom}} connector uses the [event API](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.md) to create {{sn}} events. You can use the connector for rule actions.
-
 
 ## Create connectors in {{kib}} [define-servicenow-itom-ui]
 
@@ -16,14 +19,13 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as 
 
 :::{image} ../images/servicenow-itom-connector-basic.png
 :alt: {{sn-itom}} connector using basic auth
-:class: screenshot
+:screenshot:
 :::
 
 :::{image} ../images/servicenow-itom-connector-oauth.png
 :alt: {{sn-itom}} connector using OAuth
-:class: screenshot
+:screenshot:
 :::
-
 
 ### Connector configuration [servicenow-itom-connector-configuration]
 
@@ -59,14 +61,13 @@ User identifier
 Username
 :   The username for HTTP basic authentication.
 
-
 ## Test connectors [servicenow-itom-action-configuration]
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
 :::{image} ../images/servicenow-itom-params-test.png
 :alt: {{sn-itom}} params test
-:class: screenshot
+:screenshot:
 :::
 
 {{sn-itom}} actions have the following configuration properties.
@@ -100,16 +101,13 @@ Type
 
 Refer to [{{sn}} documentation](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.md) for more information about the properties.
 
-
 ## Connector networking configuration [servicenow-itom-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-
 ## Configure {{sn-itom}} [configuring-servicenow-itom]
 
 {{sn}} offers free [Personal Developer Instances](https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi), which you can use to test incidents.
-
 
 ### Prerequisites [servicenow-itom-connector-prerequisites]
 
@@ -118,8 +116,6 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
     1. [Create an RSA keypair and add an X.509 Certificate](#servicenow-itom-connector-prerequisites-rsa-key).
     2. [Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map](#servicenow-itom-connector-prerequisites-endpoint).
-
-
 
 ### Create a {{sn}} integration user [servicenow-itom-connector-prerequisites-integration-user]
 
@@ -136,12 +132,11 @@ To ensure authenticated communication between Elastic and {{sn}}, create a {{sn}
 
 6. Click **Save**.
 
-
 ### Create an RSA keypair and add an X.509 Certificate [servicenow-itom-connector-prerequisites-rsa-key]
 
 This step is required to use OAuth for authentication between Elastic and {{sn}}.
 
-**Create an RSA keypair:**
+#### Create an RSA keypair
 
 1. Use [OpenSSL](https://www.openssl.org/docs/man1.0.2/man1/genrsa.md) to generate an RSA private key.
 
@@ -163,8 +158,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     openssl req -new -x509 -key example-private-key.pem -out example-sn-cert.pem -days 360
     ```
 
-
-**Add an X.509 certificate to ServiceNow:**
+#### Add an X.509 certificate to ServiceNow
 
 1. In your {{sn}} instance, go to **Certificates** and select **New**.
 2. Configure the certificate as follows:
@@ -174,11 +168,10 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 
     :::{image} ../images/servicenow-new-certificate.png
     :alt: Shows new certificate form in ServiceNow
-    :class: screenshot
+    :screenshot:
     :::
 
 3. Click **Submit** to create the certificate.
-
 
 ### Create an OAuth JWT API endpoint for external clients with a JWT Verifiers Map [servicenow-itom-connector-prerequisites-endpoint]
 
@@ -189,7 +182,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 
     :::{image} ../images/servicenow-jwt-endpoint.png
     :alt: Shows application type selection
-    :class: screenshot
+    :screenshot:
     :::
 
 3. Configure the application as follows:
@@ -199,7 +192,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 
     :::{image} ../images/servicenow-new-application.png
     :alt: Shows new application form in ServiceNow
-    :class: screenshot
+    :screenshot:
     :::
 
     ::::{important}
@@ -216,15 +209,14 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 
     :::{image} ../images/servicenow-new-jwt-verifier-map.png
     :alt: Shows new JWT Verifier Map form in ServiceNow
-    :class: screenshot
+    :screenshot:
     :::
 
 8. Click **Submit** to create the verifier map.
 9. Note the **Client ID**, **Client Secret** and **JWT Key ID**. You will need these values to create your {{sn}} connector.
 
-    :::{image} ../images/servicenow-oauth-values.png
-    :alt: Shows where to find OAuth values in ServiceNow
-    :class: screenshot
-    :::
-
+:::{image} ../images/servicenow-oauth-values.png
+:alt: Shows where to find OAuth values in ServiceNow
+:screenshot:
+:::
 

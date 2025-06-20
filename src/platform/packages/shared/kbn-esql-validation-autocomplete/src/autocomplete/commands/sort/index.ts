@@ -19,10 +19,13 @@ export async function suggest({
   innerText,
   getColumnsByType,
   columnExists,
+  command,
 }: CommandSuggestParams<'sort'>): Promise<SuggestionRawDefinition[]> {
   const prependSpace = (s: SuggestionRawDefinition) => ({ ...s, text: ' ' + s.text });
 
-  const { pos, nulls } = getSortPos(innerText);
+  const commandText = innerText.slice(command.location.min);
+
+  const { pos, nulls } = getSortPos(commandText);
 
   switch (pos) {
     case 'space2': {

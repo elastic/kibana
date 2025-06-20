@@ -26,7 +26,7 @@ export interface DashboardGridData {
 
 interface DashboardPanelState {
   type: string;
-  gridData: DashboardGridData & { row?: string };
+  gridData: DashboardGridData & { section?: string };
   explicitInput: Partial<any> & { id: string };
   version?: string;
 }
@@ -35,13 +35,13 @@ export interface MockedDashboardPanelMap {
   [key: string]: DashboardPanelState;
 }
 
-export interface MockedDashboardRowMap {
-  [id: string]: { id: string; order: number; title: string; collapsed: boolean };
+export interface MockedDashboardSectionMap {
+  [id: string]: { id: string; y: number; title: string; collapsed: boolean };
 }
 
 export interface MockSerializedDashboardState {
   panels: MockedDashboardPanelMap;
-  rows: MockedDashboardRowMap;
+  sections: MockedDashboardSectionMap;
 }
 
 export type MockDashboardApi = PresentationContainer &
@@ -50,5 +50,5 @@ export type MockDashboardApi = PresentationContainer &
   PublishesWritableViewMode &
   CanExpandPanels & {
     panels$: BehaviorSubject<MockedDashboardPanelMap>;
-    rows$: BehaviorSubject<MockedDashboardRowMap>;
+    sections$: BehaviorSubject<MockedDashboardSectionMap>;
   };

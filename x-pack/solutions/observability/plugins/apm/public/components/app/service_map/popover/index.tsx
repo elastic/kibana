@@ -21,18 +21,15 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
 import { DependencyContents } from './dependency_contents';
-import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 
 function getContentsComponent(
-  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition,
-  isTraceExplorerEnabled: boolean
+  selectedElementData: cytoscape.NodeDataDefinition | cytoscape.EdgeDataDefinition
 ) {
   if (
     selectedElementData.groupedConnections &&
@@ -45,10 +42,6 @@ function getContentsComponent(
   }
   if (selectedElementData[SPAN_TYPE] === 'resource') {
     return ResourceContents;
-  }
-
-  if (isTraceExplorerEnabled && selectedElementData.sourceData && selectedElementData.targetData) {
-    return EdgeContents;
   }
 
   if (selectedElementData.label) {
@@ -90,8 +83,6 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     setSelectedElement(undefined);
   }, [cy, setSelectedElement]);
 
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
-
   const renderedHeight = selectedElement?.renderedHeight() ?? 0;
   const renderedWidth = selectedElement?.renderedWidth() ?? 0;
   const box = selectedElement?.renderedBoundingBox({});
@@ -128,10 +119,6 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       cy.on('unselect', 'node', deselect);
       cy.on('viewport', deselect);
       cy.on('drag', 'node', deselect);
-      if (isTraceExplorerEnabled) {
-        cy.on('select', 'edge', selectHandler);
-        cy.on('unselect', 'edge', deselect);
-      }
     }
 
     return () => {
@@ -144,7 +131,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
         cy.removeListener('unselect', 'edge', deselect);
       }
     };
-  }, [cy, deselect, isTraceExplorerEnabled]);
+  }, [cy, deselect]);
 
   // Handle positioning of popover. This makes it so the popover positions
   // itself correctly and the arrows are always pointing to where they should.
@@ -173,7 +160,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => deselect();
 
-  const ContentsComponent = getContentsComponent(selectedElementData, isTraceExplorerEnabled);
+  const ContentsComponent = getContentsComponent(selectedElementData);
 
   const isOpen = !!selectedElement && !!ContentsComponent;
 

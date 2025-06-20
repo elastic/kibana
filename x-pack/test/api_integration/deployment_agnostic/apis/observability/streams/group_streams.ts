@@ -41,11 +41,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'Test group description',
                   group: {
                     members: ['logs', 'logs.test2', 'logs'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -60,11 +62,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group-too' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs.test2'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -79,15 +83,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'Test group description',
                   group: {
                     members: ['logs', 'non-existent-stream'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
-          .expect(404);
+          .expect(400);
       });
 
       it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
@@ -97,11 +103,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs', 'test-group'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -115,11 +123,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: 'Test group description',
                   group: {
                     members: ['logs', 'test-group-too'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -147,16 +157,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body).to.eql({
           stream: {
             name: 'test-group',
+            description: 'Test group description',
             group: {
               members: ['logs', 'logs.test2'],
             },
           },
           dashboards: [],
+          queries: [],
         });
       });
 
-      it('successfully upserts a GroupStream from _group', async () => {
-        const response = await apiClient
+      it('fails when trying to update a non-existing GroupStream', async () => {
+        await apiClient
           .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
             params: {
               path: { name: 'test-group-3' },
@@ -167,24 +179,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           })
-          .expect(200);
-        expect(response.body).to.eql({
-          acknowledged: true,
-          result: 'created',
-        });
+          .expect(404);
       });
 
       it('successfully reads a GroupStream from _group', async () => {
         const response = await apiClient
           .fetch('GET /api/streams/{name}/_group 2023-10-31', {
             params: {
-              path: { name: 'test-group-3' },
+              path: { name: 'test-group' },
             },
           })
           .expect(200);
         expect(response.body).to.eql({
           group: {
-            members: ['logs.test2'],
+            members: ['logs', 'logs.test2'],
           },
         });
       });
@@ -192,7 +200,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('successfully lists a GroupStream', async () => {
         const response = await apiClient.fetch('GET /api/streams 2023-10-31').expect(200);
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
-        expect(response.body.streams.some((stream) => stream.name === 'test-group-3')).to.eql(true);
       });
 
       it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
@@ -203,11 +210,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'metrics-test-test' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -221,11 +230,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'logs.group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs'],
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })

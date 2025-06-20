@@ -80,6 +80,7 @@ describe('UserToolTip', () => {
           </EuiFlexGroup>
         }
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >

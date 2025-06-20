@@ -7,10 +7,11 @@
 
 import type { QueryObserverResult } from '@tanstack/react-query';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import type { BulkGetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common/types';
+import type { GetBulkIntegrationPoliciesResponse } from './types';
 import { useHttp } from '../../../common/lib/kibana';
 
 /**
@@ -19,21 +20,24 @@ import { useHttp } from '../../../common/lib/kibana';
  * @param ignoreMissing
  * @param options
  */
-export const useBulkFetchFleetIntegrationPolicies = (
+export const useBulkFetchFleetIntegrationPolicies = <T extends PackagePolicy = PackagePolicy>(
   { ids, ignoreMissing = true }: BulkGetPackagePoliciesRequestBody,
-  options: UseQueryOptions<BulkGetPackagePoliciesResponse, IHttpFetchError> = {}
-): QueryObserverResult<BulkGetPackagePoliciesResponse> => {
+  options: UseQueryOptions<GetBulkIntegrationPoliciesResponse<T>, IHttpFetchError> = {}
+): QueryObserverResult<GetBulkIntegrationPoliciesResponse<T>, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<BulkGetPackagePoliciesResponse, IHttpFetchError>({
+  return useQuery<GetBulkIntegrationPoliciesResponse<T>, IHttpFetchError>({
     queryKey: ['bulkFetchFleetIntegrationPolicies', ids, ignoreMissing],
     refetchOnWindowFocus: false,
     ...options,
     queryFn: async () => {
-      return http.post(packagePolicyRouteService.getBulkGetPath(), {
-        body: JSON.stringify({ ids, ignoreMissing }),
-        version: '2023-10-31',
-      });
+      return http.post<GetBulkIntegrationPoliciesResponse<T>>(
+        packagePolicyRouteService.getBulkGetPath(),
+        {
+          body: JSON.stringify({ ids, ignoreMissing }),
+          version: '2023-10-31',
+        }
+      );
     },
   });
 };

@@ -1,0 +1,20 @@
+# summary: 
+description: An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.
+value: >
+  {
+    "_index": ".apm-agent-configuration",
+    "_id": "CIaqXXABmQCdPphWj8EJ",
+    "_score": 2,
+    "_source": {
+      "agent_name": "nodejs",
+      "service": {
+        "name": "frontend"
+      },
+      "settings": {
+        "transaction_sample_rate": "1",
+      },
+      "@timestamp": 1582031336265,
+      "applied_by_agent": false,
+      "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+    }
+  }

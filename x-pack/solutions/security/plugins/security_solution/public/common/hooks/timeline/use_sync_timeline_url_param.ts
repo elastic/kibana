@@ -17,15 +17,15 @@ import { URL_PARAM_KEY } from '../use_url_state';
 export const useSyncTimelineUrlParam = () => {
   const updateUrlParam = useUpdateUrlParam<TimelineUrl>(URL_PARAM_KEY.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { activeTab, graphEventId, show, savedObjectId, savedSearchId, kqlQuery } =
-    useShallowEqualSelector((state) => getTimeline(state, TimelineId.active) ?? {});
+  const { activeTab, show, savedObjectId, savedSearchId, kqlQuery } = useShallowEqualSelector(
+    (state) => getTimeline(state, TimelineId.active) ?? {}
+  );
 
   useEffect(() => {
     const params = {
       ...(savedObjectId ? { id: savedObjectId } : {}),
       isOpen: show,
       activeTab,
-      graphEventId: graphEventId ?? '',
       savedSearchId: savedSearchId ? savedSearchId : undefined,
       query: {
         kind: kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
@@ -33,5 +33,5 @@ export const useSyncTimelineUrlParam = () => {
       },
     };
     updateUrlParam(params);
-  }, [activeTab, graphEventId, savedObjectId, show, updateUrlParam, savedSearchId, kqlQuery]);
+  }, [activeTab, savedObjectId, show, updateUrlParam, savedSearchId, kqlQuery]);
 };

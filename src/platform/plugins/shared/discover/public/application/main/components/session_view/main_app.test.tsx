@@ -14,13 +14,12 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverMainApp } from './main_app';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -45,13 +44,16 @@ describe('DiscoverMainApp', () => {
     await act(async () => {
       const component = mountWithIntl(
         <Router history={history}>
-          <KibanaContextProvider services={discoverServiceMock}>
-            <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-                <DiscoverMainApp {...props} />
-              </RuntimeStateProvider>
-            </DiscoverMainProvider>
-          </KibanaContextProvider>
+          <DiscoverTestProvider
+            services={discoverServiceMock}
+            stateContainer={stateContainer}
+            runtimeState={{
+              currentDataView: dataViewMock,
+              adHocDataViews: [],
+            }}
+          >
+            <DiscoverMainApp {...props} />
+          </DiscoverTestProvider>
         </Router>
       );
 

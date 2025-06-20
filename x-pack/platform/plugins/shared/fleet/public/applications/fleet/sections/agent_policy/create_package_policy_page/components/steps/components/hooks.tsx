@@ -27,7 +27,9 @@ export function useOutputs(
   packageName: string
 ) {
   const licenseService = useLicense();
-  const canUseOutputPerIntegration = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+  const canUseOutputPerIntegration =
+    licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION) &&
+    !packagePolicy.supports_agentless;
   const { data: outputsData, isLoading } = useGetOutputs();
   const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {

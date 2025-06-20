@@ -175,6 +175,7 @@ export type DatasetQualityDetailsControllerTypeState =
         | 'initializing.dataStreamSettings.doneFetchingQualityIssues'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.errorFetchingDegradedFields'
+        | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.pending'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.fetchingFailedDocs'
         | 'initializing.dataStreamSettings.qualityIssues.dataStreamFailedDocs.errorFetchingFailedDocs';
       context: WithDefaultControllerState & WithDataStreamSettings;

@@ -16,6 +16,7 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { nonPkiSecretsValidator, pkiSecretsValidator } from './lib/other_openai_utils';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
@@ -34,7 +35,10 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
-  validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
+  validators: [
+    { type: ValidatorType.CONFIG, validator: configValidator },
+    { type: ValidatorType.SECRETS, validator: secretsValidator },
+  ],
   supportedFeatureIds: [
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
@@ -43,6 +47,17 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });
+
+const secretsValidator = (secretsObject: Secrets) => {
+  const validatorFn =
+    ('certificateData' in secretsObject && secretsObject.certificateData) ||
+    ('privateKeyData' in secretsObject && secretsObject.privateKeyData)
+      ? pkiSecretsValidator
+      : nonPkiSecretsValidator;
+  validatorFn(secretsObject);
+
+  return secretsObject;
+};
 
 export const configValidator = (configObject: Config, validatorServices: ValidatorServices) => {
   try {

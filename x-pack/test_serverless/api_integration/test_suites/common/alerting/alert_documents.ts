@@ -280,6 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.consecutive_matches',
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
+        'kibana.alert.url',
       ];
 
       for (const field of fields) {

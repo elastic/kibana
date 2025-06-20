@@ -16,8 +16,12 @@ import {
 import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
 import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
-import { getGenAiConfig } from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import {
+  getGenAiConfig,
+  isElasticManagedLlmConnector,
+} from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
+
 import { CenteredLoadingSpinner } from '../../../../../common/components/centered_loading_spinner';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -31,6 +35,7 @@ import { CardCallOut } from '../common/card_callout';
 import { CardSubduedText } from '../common/card_subdued_text';
 import type { AIConnector } from '../common/connectors/types';
 import type { AssistantCardMetadata } from './types';
+import { ElasticAIFeatureMessage } from './ai_feature_message';
 
 export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   isCardComplete,
@@ -117,6 +122,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             provider: apiProvider,
             model,
           },
+        }).catch(() => {
+          // If the conversation is not found, it means the connector was deleted
+          // and return null to avoid setting the conversation
+          return null;
         });
 
         if (conversation && onConversationChange != null) {
@@ -129,6 +138,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       }
     },
     [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
+  );
+
+  const isEISConnectorAvailable = useMemo(
+    () => connectors?.some((c) => isElasticManagedLlmConnector(c)) ?? false,
+    [connectors]
   );
 
   if (!checkCompleteMetadata) {
@@ -149,7 +163,13 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       {canExecuteConnectors ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <CardSubduedText size="s">{i18n.ASSISTANT_CARD_DESCRIPTION}</CardSubduedText>
+            <CardSubduedText size="s">
+              {isEISConnectorAvailable ? (
+                <ElasticAIFeatureMessage />
+              ) : (
+                i18n.ASSISTANT_CARD_DESCRIPTION
+              )}
+            </CardSubduedText>
           </EuiFlexItem>
           <EuiFlexItem>
             {isIntegrationsCardAvailable && !isIntegrationsCardComplete ? (

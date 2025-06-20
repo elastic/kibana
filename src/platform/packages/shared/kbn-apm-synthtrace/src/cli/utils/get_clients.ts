@@ -15,7 +15,6 @@ import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtra
 import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
-import { OtelSynthtraceEsClient } from '../../lib/otel/otel_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
@@ -26,7 +25,6 @@ export interface SynthtraceClients {
   entitiesEsClient: EntitiesSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
-  otelEsClient: OtelSynthtraceEsClient;
   streamsClient: StreamsSynthtraceClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
   entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
@@ -77,7 +75,6 @@ export async function getClients({
   });
 
   const syntheticsEsClient = new SyntheticsSynthtraceEsClient(options);
-  const otelEsClient = new OtelSynthtraceEsClient(options);
 
   const streamsClient = new StreamsSynthtraceClient(options);
 
@@ -86,7 +83,6 @@ export async function getClients({
     entitiesEsClient,
     infraEsClient,
     logsEsClient,
-    otelEsClient,
     streamsClient,
     syntheticsEsClient,
     entitiesKibanaClient,

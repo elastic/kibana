@@ -1,0 +1,189 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSLIPipelineTemplate handles slo with groupBy having empty string 1`] = `
+Object {
+  "_meta": Object {
+    "description": "Ingest pipeline for SLO rollup data",
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.5,
+  },
+  "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
+  "id": ".slo-observability.sli.pipeline-irrelevant-1",
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "_id",
+        "value": "{{{_id}}}-irrelevant-1",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "event.ingested",
+        "value": "{{{_ingest.timestamp}}}",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.id",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.name",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.tags",
+        "value": Array [
+          "critical",
+          "k8s",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.revision",
+        "value": 1,
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "spaceId",
+        "value": "default",
+      },
+    },
+    Object {
+      "date_index_name": Object {
+        "date_formats": Array [
+          "UNIX_MS",
+          "ISO8601",
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+        ],
+        "date_rounding": "M",
+        "field": "@timestamp",
+        "index_name_prefix": ".slo-observability.sli-v3.5.",
+      },
+    },
+    Object {
+      "dot_expander": Object {
+        "field": "*",
+        "if": "ctx.slo.groupings != null",
+        "ignore_failure": true,
+        "path": "slo.groupings",
+      },
+    },
+    Object {
+      "set": Object {
+        "description": "Generated the instanceId field based on the groupings field",
+        "field": "slo.instanceId",
+        "value": "*",
+      },
+    },
+    Object {
+      "pipeline": Object {
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-irrelevant@custom",
+      },
+    },
+  ],
+}
+`;
+
+exports[`getSLIPipelineTemplate handles slo with many fields as groupBy 1`] = `
+Object {
+  "_meta": Object {
+    "description": "Ingest pipeline for SLO rollup data",
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3.5,
+  },
+  "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
+  "id": ".slo-observability.sli.pipeline-irrelevant-1",
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "_id",
+        "value": "{{{_id}}}-irrelevant-1",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "event.ingested",
+        "value": "{{{_ingest.timestamp}}}",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.id",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.name",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.tags",
+        "value": Array [
+          "critical",
+          "k8s",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.revision",
+        "value": 1,
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "spaceId",
+        "value": "default",
+      },
+    },
+    Object {
+      "date_index_name": Object {
+        "date_formats": Array [
+          "UNIX_MS",
+          "ISO8601",
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXX",
+        ],
+        "date_rounding": "M",
+        "field": "@timestamp",
+        "index_name_prefix": ".slo-observability.sli-v3.5.",
+      },
+    },
+    Object {
+      "dot_expander": Object {
+        "field": "*",
+        "if": "ctx.slo.groupings != null",
+        "ignore_failure": true,
+        "path": "slo.groupings",
+      },
+    },
+    Object {
+      "set": Object {
+        "description": "Generated the instanceId field based on the groupings field",
+        "field": "slo.instanceId",
+        "value": "{{{slo.groupings.host.name}}},{{{slo.groupings.some.labelId}}}",
+      },
+    },
+    Object {
+      "pipeline": Object {
+        "ignore_failure": true,
+        "ignore_missing_pipeline": true,
+        "name": "slo-irrelevant@custom",
+      },
+    },
+  ],
+}
+`;

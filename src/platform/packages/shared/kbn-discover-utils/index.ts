@@ -29,8 +29,10 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  convertValueToString,
   createLogsContextService,
   createTracesContextService,
+  createApmErrorsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -38,7 +40,8 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
-  getTraceDocumentOverview,
+  getTransactionDocumentOverview,
+  getSpanDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
@@ -59,7 +62,7 @@ export {
   LogLevelBadge,
 } from './src';
 
-export type { LogsContextService, TracesContextService } from './src';
+export type { LogsContextService, TracesContextService, ApmErrorsContextService } from './src';
 
 export * from './src/types';
 

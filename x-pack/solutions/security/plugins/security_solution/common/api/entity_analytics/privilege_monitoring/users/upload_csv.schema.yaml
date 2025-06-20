@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: PrivmonBulkUploadUsersCSV
+      summary: Upsert multiple monitored users via CSV upload
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload.
+              required:
+                - file
+      responses:
+        "200":
+          description: Bulk upload successful
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  errors:
+                    - message: "Invalid monitored field"
+                      username: "john.doe"
+                      index: 1
+                  stats:
+                    successful: 1
+                    failed: 1
+                    total: 2
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PrivmonUserCsvUploadErrorItem"
+                  stats:
+                    $ref: "#/components/schemas/PrivmonUserCsvUploadStats"
+                required:
+                  - errors
+                  - stats
+        "413":
+          description: File too large
+
+components:
+  schemas:
+    PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+        username:
+          type: string
+          nullable: true
+        index:
+          type: integer
+          nullable: true
+      required:
+        - message
+        - index
+        - username
+
+    PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        successful:
+          type: integer
+        failed:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total

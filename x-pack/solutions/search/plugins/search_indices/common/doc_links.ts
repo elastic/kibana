@@ -9,6 +9,7 @@ import { DocLinks } from '@kbn/doc-links';
 
 class SearchIndicesDocLinks {
   public apiReference: string = '';
+  public searchAPIReference: string = '';
   public setupSemanticSearch: string = '';
   public analyzeLogs: string = '';
 
@@ -18,6 +19,7 @@ class SearchIndicesDocLinks {
     this.apiReference = newDocLinks.apiReference;
     this.setupSemanticSearch = newDocLinks.enterpriseSearch.semanticSearch;
     this.analyzeLogs = newDocLinks.serverlessSearch.integrations;
+    this.searchAPIReference = newDocLinks.query.queryDsl;
   }
 }
 export const docLinks = new SearchIndicesDocLinks();

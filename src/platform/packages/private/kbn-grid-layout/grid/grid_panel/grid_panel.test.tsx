@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { GridPanel, type GridPanelProps } from './grid_panel';
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
@@ -25,13 +26,15 @@ describe('GridPanel', () => {
     } as GridLayoutContextType;
     const panelProps = {
       panelId: 'panel1',
-      rowId: 'first',
+      sectionId: 'first',
       ...(overrides?.propsOverrides ?? {}),
     };
     const { rerender, ...rtlRest } = render(
-      <GridLayoutContext.Provider value={contextValue}>
-        <GridPanel {...panelProps} />
-      </GridLayoutContext.Provider>
+      <EuiThemeProvider>
+        <GridLayoutContext.Provider value={contextValue}>
+          <GridPanel {...panelProps} />
+        </GridLayoutContext.Provider>
+      </EuiThemeProvider>
     );
 
     return {
@@ -41,16 +44,18 @@ describe('GridPanel', () => {
         contextOverrides?: Partial<GridLayoutContextType>;
       }) => {
         return rerender(
-          <GridLayoutContext.Provider
-            value={
-              {
-                ...contextValue,
-                ...(newOverrides?.contextOverrides ?? {}),
-              } as GridLayoutContextType
-            }
-          >
-            <GridPanel {...panelProps} {...(newOverrides?.propsOverrides ?? {})} />
-          </GridLayoutContext.Provider>
+          <EuiThemeProvider>
+            <GridLayoutContext.Provider
+              value={
+                {
+                  ...contextValue,
+                  ...(newOverrides?.contextOverrides ?? {}),
+                } as GridLayoutContextType
+              }
+            >
+              <GridPanel {...panelProps} {...(newOverrides?.propsOverrides ?? {})} />
+            </GridLayoutContext.Provider>
+          </EuiThemeProvider>
         );
       },
     };

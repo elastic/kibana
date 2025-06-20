@@ -187,6 +187,34 @@ export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.alertSuppressionTitle',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
+  {
+    defaultMessage: 'Apply alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
+  {
+    defaultMessage: 'Apply alert suppression to threshold rules',
+  }
+);
+
+export const BULK_ACTION_DELETE_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteAlertSuppression',
+  {
+    defaultMessage: 'Remove alert suppression',
+  }
+);
+
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
@@ -1029,63 +1057,6 @@ export const DELETE = i18n.translate(
   }
 );
 
-export const IMPORT_RULE_BTN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
-  {
-    defaultMessage: 'Import',
-  }
-);
-
-export const SELECT_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
-  {
-    defaultMessage:
-      'Select rules to import. Associated rule actions and exceptions can be included.',
-  }
-);
-
-export const INITIAL_PROMPT_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.initialPromptTextDescription',
-  {
-    defaultMessage: 'Select or drag and drop a valid rules_export.ndjson file',
-  }
-);
-
-export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
-  {
-    defaultMessage: 'Overwrite existing detection rules with conflicting "rule_id"',
-  }
-);
-
-export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle',
-    {
-      values: { totalRules },
-      defaultMessage:
-        'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
-export const IMPORT_FAILED = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-    {
-      values: { totalRules },
-      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
-export const IMPORT_FAILED_DETAILED = (message: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
-    {
-      values: { message },
-      defaultMessage: '{message}',
-    }
-  );
-
 export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
@@ -1389,6 +1360,44 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
   );
 
 /**
+ * Bulk fill gaps for rules
+ */
+
+export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
+  {
+    defaultMessage: 'Gaps filling for rules scheduled',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling gaps filling for rules',
+  }
+);
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled gaps filling for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        'Failed to schedule gaps filling for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+    }
+  );
+
+/**
  * Bulk Edit
  */
 
@@ -1531,5 +1540,12 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDuration',
   {
     defaultMessage: 'Unfilled gaps duration',
+  }
+);
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
+  {
+    defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
   }
 );

@@ -21,25 +21,35 @@ import type {
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
+import { UnifiedHistogramChart } from '@kbn/unified-histogram';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
-function getStateContainer(savedSearch?: SavedSearch) {
+const mockSearchSessionId = '123';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+}));
+
+function getStateContainer({
+  savedSearch,
+  searchSessionId,
+}: {
+  savedSearch?: SavedSearch;
+  searchSessionId?: string;
+}) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
   const appState = {
@@ -50,16 +60,21 @@ function getStateContainer(savedSearch?: SavedSearch) {
 
   stateContainer.appState.update(appState);
 
-  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
   stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        searchSessionId,
       },
     })
   );
@@ -68,16 +83,14 @@ function getStateContainer(savedSearch?: SavedSearch) {
 }
 
 const mountComponent = async ({
-  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
-  searchSessionId = '123',
+  noSearchSessionId,
 }: {
-  isEsqlMode?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
-  searchSessionId?: string | null;
+  noSearchSessionId?: boolean;
 } = {}) => {
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
@@ -112,11 +125,10 @@ const mountComponent = async ({
     totalHits$,
   };
 
-  const session = getSessionServiceMock();
-
-  session.getSession$.mockReturnValue(new BehaviorSubject(searchSessionId ?? undefined));
-
-  const stateContainer = getStateContainer(savedSearch);
+  const stateContainer = getStateContainer({
+    savedSearch,
+    searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
+  });
   stateContainer.dataState.data$ = savedSearchData$;
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
@@ -142,18 +154,16 @@ const mountComponent = async ({
       />
     ),
   };
-  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
-    <KibanaRenderContextProvider {...services.core}>
-      <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-            <DiscoverHistogramLayout {...props} />
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    <DiscoverTestProvider
+      services={services}
+      stateContainer={stateContainer}
+      runtimeState={{ currentDataView: dataView, adHocDataViews: [] }}
+      usePortalsRenderer
+    >
+      <DiscoverHistogramLayout {...props} />
+    </DiscoverTestProvider>
   );
 
   // wait for lazy modules
@@ -167,20 +177,15 @@ const mountComponent = async ({
 
 describe('Discover histogram layout component', () => {
   describe('render', () => {
-    it('should render null if there is no search session', async () => {
-      const { component } = await mountComponent({ searchSessionId: null });
-      expect(component.isEmptyRender()).toBe(true);
+    it('should not render chart if there is no search session', async () => {
+      const { component } = await mountComponent({ noSearchSessionId: true });
+      expect(component.exists(UnifiedHistogramChart)).toBe(false);
     });
 
-    it('should not render null if there is a search session', async () => {
+    it('should render chart if there is a search session', async () => {
       const { component } = await mountComponent();
-      expect(component.isEmptyRender()).toBe(false);
+      expect(component.exists(UnifiedHistogramChart)).toBe(true);
     }, 10000);
-
-    it('should not render null if there is no search session, but isEsqlMode is true', async () => {
-      const { component } = await mountComponent({ isEsqlMode: true });
-      expect(component.isEmptyRender()).toBe(false);
-    });
 
     it('should render PanelsToggle', async () => {
       const { component } = await mountComponent();

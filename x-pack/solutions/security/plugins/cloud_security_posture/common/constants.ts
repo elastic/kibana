@@ -40,8 +40,6 @@ export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
-export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
-  'logs-cloud_security_posture.findings_latest-default';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
@@ -121,6 +119,7 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 };
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
+  cloud_connectors: ['role_arn', 'aws.credentials.external_id'],
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
   temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],
@@ -160,6 +159,7 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
 };
 
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
+export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';

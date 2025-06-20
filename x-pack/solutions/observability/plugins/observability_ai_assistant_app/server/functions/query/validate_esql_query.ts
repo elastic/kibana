@@ -6,7 +6,6 @@
  */
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -29,7 +28,7 @@ export async function runAndValidateEsqlQuery({
 }> {
   const queryWithoutLineBreaks = query.replaceAll(/\n/g, '');
 
-  const { errors } = await validateQuery(queryWithoutLineBreaks, getAstAndSyntaxErrors, {
+  const { errors } = await validateQuery(queryWithoutLineBreaks, {
     // setting this to true, we don't want to validate the index / fields existence
     ignoreOnMissingCallbacks: true,
   });

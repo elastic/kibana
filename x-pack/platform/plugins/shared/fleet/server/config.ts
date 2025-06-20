@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.3';
+const REGISTRY_SPEC_MAX_VERSION = '3.4';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -37,6 +37,10 @@ export const config: PluginConfigDescriptor = {
     },
     agentless: {
       enabled: true,
+      isDefault: true,
+      customIntegrations: {
+        enabled: true,
+      },
     },
     enableExperimental: true,
     developer: {
@@ -47,6 +51,9 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
+    integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
+    hideDashboards: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -151,6 +158,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
+          isDefault: schema.maybe(schema.boolean({ defaultValue: false })),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -161,6 +169,17 @@ export const config: PluginConfigDescriptor = {
                   ca: schema.maybe(schema.string()),
                 })
               ),
+            })
+          ),
+          deploymentSecrets: schema.maybe(
+            schema.object({
+              fleetAppToken: schema.maybe(schema.string()),
+              elasticsearchAppToken: schema.maybe(schema.string()),
+            })
+          ),
+          customIntegrations: schema.maybe(
+            schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
         })
@@ -293,9 +312,18 @@ export const config: PluginConfigDescriptor = {
       ),
       autoUpgrades: schema.maybe(
         schema.object({
+          taskInterval: schema.maybe(schema.string()),
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
+      hideDashboards: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

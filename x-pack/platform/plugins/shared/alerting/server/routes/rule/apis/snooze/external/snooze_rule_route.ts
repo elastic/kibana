@@ -96,16 +96,22 @@ export const snoozeRuleRoute = (
             (schedule) => schedule.id === snoozeScheduleId
           );
 
-          const transformedCustomSchedule = transformRRuleToCustomSchedule(createdSchedule);
+          let transformedCustomSchedule;
+
+          if (createdSchedule) {
+            transformedCustomSchedule = transformRRuleToCustomSchedule(createdSchedule);
+          }
 
           const response: SnoozeResponseV1 = {
             body: {
               schedule: {
                 id: snoozeScheduleId,
-                custom: transformedCustomSchedule && {
-                  ...transformedCustomSchedule,
-                  duration: customSchedule.duration,
-                },
+                ...(transformedCustomSchedule && {
+                  custom: {
+                    ...transformedCustomSchedule,
+                    duration: customSchedule.duration,
+                  },
+                }),
               },
             },
           };

@@ -21,7 +21,7 @@ import { SecurityRoutePageWrapper } from '../../common/components/security_route
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useFullDataView } from '../../data_view_manager/hooks/use_full_data_view';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -29,15 +29,13 @@ export const TimelinesPage = React.memo(() => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  let { indicesExist } = useSourcererDataView();
+  const { indicesExist: oldIndicesExist } = useSourcererDataView();
 
-  const { dataView } = useFullDataView(DataViewManagerScopeName.default);
+  const { dataView } = useDataView(DataViewManagerScopeName.default);
   // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
   const experimentalIndicesExist = !!dataView?.matchedIndices?.length;
 
-  if (newDataViewPickerEnabled) {
-    indicesExist = experimentalIndicesExist;
-  }
+  const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
 
   const {
     timelinePrivileges: { crud: canWriteTimeline },
