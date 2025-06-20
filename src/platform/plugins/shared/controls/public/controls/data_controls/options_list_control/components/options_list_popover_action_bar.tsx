@@ -183,7 +183,7 @@ export const OptionsListPopoverActionBar = ({
                   {OptionsListStrings.popover.getCardinalityLabel(totalCardinality)}
                 </EuiText>
               </EuiFlexItem>
-             <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false}>
                 <div css={styles.borderDiv} />
               </EuiFlexItem>
             </>
