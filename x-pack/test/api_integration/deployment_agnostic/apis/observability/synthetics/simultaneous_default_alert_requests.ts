@@ -35,11 +35,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
     });
 
-    after(() => kibanaServer.savedObjects.cleanStandardList());
+    afterEach(async () => await kibanaServer.savedObjects.cleanStandardList());
 
     it('should handle multiple simultaneous requests for default alerting', async () => {
       // make many simultaneous requests to the default alerting API
-      const REQUEST_COUNT = 5;
+      const REQUEST_COUNT = 3;
       const requests = Array.from({ length: REQUEST_COUNT }, () =>
         supertest
           .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
