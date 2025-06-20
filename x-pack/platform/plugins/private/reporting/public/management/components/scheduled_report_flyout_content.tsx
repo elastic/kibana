@@ -163,6 +163,8 @@ export const ScheduledReportFlyoutContent = ({
           ),
         });
       } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
         toasts.addError(error, {
           title: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_TITLE,
           toastMessage: i18n.SCHEDULED_REPORT_FORM_FAILURE_TOAST_MESSAGE,
