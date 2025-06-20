@@ -14,7 +14,7 @@ export type ReferenceDataOwner = 'EDR';
  */
 export type ReferenceDataItemKey =
   | 'SPACE-AWARENESS-ARTIFACT-MIGRATION'
-  | `SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION`
+  | 'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION'
   | 'ORPHAN-RESPONSE-ACTIONS-SPACE';
 
 export interface ReferenceDataSavedObject<Meta extends object = {}> {

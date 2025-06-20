@@ -77,7 +77,7 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
           }
 
           throw new EndpointError(
-            `Definition for reference data key [${refDataKey}] not defined. Unable to created it.`
+            `Definition for reference data key [${refDataKey}] not defined. Unable to create it.`
           );
         }
 
@@ -95,7 +95,7 @@ export class ReferenceDataClient implements ReferenceDataClientInterface {
 
     if (data.id !== refDataKey) {
       throw new EndpointError(
-        `Update data 'id' value [${data.id}] differs from the reference data key provided [${refDataKey}]`
+        `Updated data 'id' value [${data.id}] differs from the reference data key provided [${refDataKey}]`
       );
     }
 
