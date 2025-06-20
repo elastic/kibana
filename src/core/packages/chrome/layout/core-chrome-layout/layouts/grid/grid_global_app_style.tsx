@@ -116,9 +116,12 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     }
   }
 
-  // push flyout should be pushing the application area
+  // push flyout should be pushing the application area, instead of body
   main[class*='LayoutApplication'] {
     ${logicalCSS('padding-right', `var(${euiPushFlyoutPaddingInlineEnd}, 0px)`)};
+  }
+  .kbnBody {
+    ${logicalCSS('padding-right', `0px !important`)};
   }
 
   // overlay mask "belowHeader" should only cover the application area
