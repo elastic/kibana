@@ -15,6 +15,8 @@ import {
   uiMetricService,
   UIM_REINDEX_CLOSE_FLYOUT_CLICK,
   UIM_REINDEX_OPEN_FLYOUT_CLICK,
+  UIM_REINDEX_CLOSE_MODAL_CLICK,
+  UIM_REINDEX_OPEN_MODAL_CLICK,
 } from '../../../../lib/ui_metric';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
@@ -22,6 +24,7 @@ import { ReindexResolutionCell } from './resolution_table_cell';
 import { IndexFlyout, IndexFlyoutProps } from './flyout';
 import { IndexStatusProvider, useIndexContext } from './context';
 import { ReindexActionCell } from './actions_table_cell';
+import { IndexModal } from './flyout/modal_container';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -37,6 +40,7 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [selectedResolutionType, setSelectedResolutionType] = useState<
     IndicesResolutionType | undefined
   >(undefined);
@@ -59,7 +63,6 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         props: {
           closeFlyout,
           ...indexContext,
-          selectedResolutionType,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -78,37 +81,58 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
     selectedResolutionType,
   ]);
 
+  const closeModal = useCallback(() => {
+    setShowModal(false);
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_CLOSE_MODAL_CLICK);
+  }, []);
+
   useEffect(() => {
     if (showFlyout) {
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_OPEN_FLYOUT_CLICK);
     }
   }, [showFlyout]);
 
+  useEffect(() => {
+    if (showModal) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_OPEN_MODAL_CLICK);
+    }
+  }, [showModal]);
+
   return (
-    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
-      {rowFieldNames.map((field: DeprecationTableColumns) => {
-        return (
-          <EuiTableRowCell
-            key={field}
-            truncateText={false}
-            data-test-subj={`reindexTableCell-${field}`}
-            align={field === 'actions' ? 'right' : 'left'}
-          >
-            <EsDeprecationsTableCells
-              fieldName={field}
-              deprecation={deprecation}
-              resolutionTableCell={<ReindexResolutionCell deprecation={deprecation} />}
-              actionsTableCell={
-                <ReindexActionCell
-                  openFlyout={() => setShowFlyout(true)}
-                  setSelectedResolutionType={setSelectedResolutionType}
-                />
-              }
-            />
-          </EuiTableRowCell>
-        );
-      })}
-    </EuiTableRow>
+    <>
+      {showModal && (
+        <IndexModal
+          closeModal={closeModal}
+          selectedResolutionType={selectedResolutionType}
+          {...indexContext}
+        />
+      )}
+      <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
+        {rowFieldNames.map((field: DeprecationTableColumns) => {
+          return (
+            <EuiTableRowCell
+              key={field}
+              truncateText={false}
+              data-test-subj={`reindexTableCell-${field}`}
+              align={field === 'actions' ? 'right' : 'left'}
+            >
+              <EsDeprecationsTableCells
+                fieldName={field}
+                deprecation={deprecation}
+                resolutionTableCell={<ReindexResolutionCell deprecation={deprecation} />}
+                actionsTableCell={
+                  <ReindexActionCell
+                    openFlyout={() => setShowFlyout(true)}
+                    setSelectedResolutionType={setSelectedResolutionType}
+                    openModal={() => setShowModal(true)}
+                  />
+                }
+              />
+            </EuiTableRowCell>
+          );
+        })}
+      </EuiTableRow>
+    </>
   );
 };
 
