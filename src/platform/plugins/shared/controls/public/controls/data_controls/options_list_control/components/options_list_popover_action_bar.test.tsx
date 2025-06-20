@@ -88,18 +88,18 @@ describe('Options list popover', () => {
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll').checked).toBeFalse();
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).not.toBeChecked();
   });
 
   test('Select all is checked when all available options are selected ', async () => {
     const contextMock = getOptionsListContextMock();
     contextMock.componentApi.setTotalCardinality(80);
-    contextMock.componentApi.setAvailableOptions(['moo']);
+    contextMock.componentApi.setAvailableOptions([{ value: 'moo', docCount: 1 }]);
     contextMock.componentApi.setSelectedOptions(['moo']);
     const actionBarComponent = mountComponent(contextMock);
 
     expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeEnabled();
-    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll').checked).toBeTrue();
+    expect(actionBarComponent.queryByTestId('optionsList-control-selectAll')).toBeChecked();
   });
 
   test('bulk selections are disabled when there are more than 100 available options', async () => {

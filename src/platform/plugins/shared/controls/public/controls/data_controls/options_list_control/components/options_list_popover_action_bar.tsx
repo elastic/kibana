@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -42,7 +41,6 @@ export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  const { euiTheme } = useEuiTheme();
   const { componentApi, displaySettings } = useOptionsListContext();
   const [areAllSelected, setAllSelected] = useState<boolean>(false);
 
@@ -108,7 +106,7 @@ export const OptionsListPopoverActionBar = ({
   );
 
   useEffect(() => {
-    if (availableOptions.some(({value}) => !selectedOptions.includes(value as string))) {
+    if (availableOptions.some(({ value }) => !selectedOptions.includes(value as string))) {
       if (areAllSelected) {
         setAllSelected(false);
       }
@@ -117,7 +115,7 @@ export const OptionsListPopoverActionBar = ({
         setAllSelected(true);
       }
     }
-  },[availableOptions, selectedOptions, areAllSelected])
+  }, [availableOptions, selectedOptions, areAllSelected]);
 
   return (
     <div className="optionsList__actions">
@@ -168,22 +166,22 @@ export const OptionsListPopoverActionBar = ({
               }
             >
               <EuiCheckbox
-                size="xs"
+                checked={areAllSelected}
+                id={`optionsList-control-selectAll-checkbox-${componentApi.uuid}`}
                 disabled={isBulkSelectDisabled}
                 data-test-subj="optionsList-control-selectAll"
-                onClick={() => {
-                  if (areAllSelected)
+                onChange={() => {
+                  if (areAllSelected) {
                     handleBulkAction(componentApi.deselectAll);
                     setAllSelected(false);
                   } else {
                     handleBulkAction(componentApi.selectAll);
                     setAllSelected(true);
                   }
-                }
+                }}
                 css={{ padding: 0 }}
                 label={OptionsListStrings.popover.getSelectAllButtonLabel()}
-                />
-              </EuiButtonEmpty>
+              />
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
