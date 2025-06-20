@@ -274,6 +274,6 @@ components:
             }
           ],
           "instructions": [
-            "Get the latest server status"
+            "Always respond in German."
           ]
         }
