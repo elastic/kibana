@@ -9,27 +9,131 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import useMountedState from 'react-use/lib/useMountedState';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { KibanaContextExtra } from '../types';
+
+interface FilePreviewItem {
+  fileName: string;
+  sampleDocs: DataTableRecord[];
+  dataView: DataView;
+  mappings: FindFileStructureResponse['mappings'];
+  columnNames: FindFileStructureResponse['column_names'];
+}
 
 export const FilesPreview: FC = () => {
   const { filesStatus, uploadStatus, fileClashes } = useFileUploadContext();
 
-  const isUploading = uploadStatus.overallImportStatus === STATUS.STARTED;
+  const {
+    services: { data },
+  } = useKibana<KibanaContextExtra>();
+
+  const isMounted = useMountedState();
+
+  const [filePreviewItems, setFilePreviewItems] = useState<FilePreviewItem[]>([]);
+
+  const {
+    services: { messageImporter },
+  } = useKibana<KibanaContextExtra>();
+
+  const fetchFilePreview = useCallback(async () => {
+    try {
+      const previewResults = await Promise.allSettled(
+        filesStatus.map((fileStatus, index) => {
+          if (fileStatus.data) {
+            return messageImporter.previewDocs(
+              fileStatus.data,
+              fileStatus.results?.ingest_pipeline!,
+              10
+            );
+          }
+        })
+      );
+
+      // Create an ad-hoc data view for each file
+      const adHocDataViews = await Promise.all(
+        filesStatus.map((fileStatus) => {
+          return data.dataViews.create({
+            allowNoIndex: true,
+            id: fileStatus.fileName,
+          });
+        })
+      );
+
+      if (!isMounted()) return;
+
+      setFilePreviewItems(
+        filesStatus.map<FilePreviewItem>((status, index) => {
+          const promisePreviewResult = previewResults[index];
+
+          const dV = adHocDataViews[index];
+
+          console.log(status.results, '___status.results___');
+
+          const columnNames = status.results?.column_names || [];
+          const mappings = status.results?.mappings || {
+            properties: {},
+          };
+
+          if (promisePreviewResult.status === 'fulfilled') {
+            const filePreview = promisePreviewResult.value!;
+            const validESHits: EsHitRecord[] = filePreview?.docs
+              ?.filter((d) => !!d.doc)
+              .map<EsHitRecord>((d) => d.doc as EsHitRecord);
+
+            const dataRecords = validESHits?.map((doc) => {
+              return buildDataTableRecord(doc, dV);
+            });
+
+            return {
+              fileName: status.fileName,
+              sampleDocs: dataRecords,
+              dataView: dV,
+              mappings,
+              columnNames,
+            };
+          } else {
+            return {
+              fileName: status.fileName,
+              sampleDocs: [],
+              dataView: dV,
+              columnNames,
+              mappings,
+            };
+          }
+        })
+      );
+    } catch (error) {
+      // Handle error appropriately, e.g., log it or show a notification
+    }
+  }, [data.dataViews, filesStatus, isMounted, messageImporter]);
+
+  useEffect(() => {
+    fetchFilePreview();
+  }, [fetchFilePreview]);
+
+  if (!filePreviewItems.length) return null;
 
   return uploadStatus.overallImportStatus === STATUS.NOT_STARTED && filesStatus.length > 0 ? (
     <div>
-      {filesStatus.map((status, i) => {
-        console.log('🚀 ~ {filesStatus.map ~ status:', status.fileContents.split('\n'));
-        const sample = status.fileContents.split('\n').slice(0, 10).join('\n');
-
-        return sample;
-
-        return status.results ? <ResultsPreview fileStructureResponse={status.results} /> : null;
+      {filePreviewItems.map((filePreviewItem, i) => {
+        return (
+          <div key={filePreviewItem.fileName}>
+            <h4>{filePreviewItem.fileName}</h4>
+            <ResultsPreview
+              sampleDocs={filePreviewItem.sampleDocs}
+              dataView={filePreviewItem.dataView}
+              mappings={filePreviewItem.mappings}
+              columnNames={filePreviewItem.columnNames}
+            />
+          </div>
+        );
       })}
 
       {fileClashes ? <div>clashes</div> : null}
@@ -38,17 +142,19 @@ export const FilesPreview: FC = () => {
   ) : null;
 };
 
-export interface ResultsPreviewProps {
-  fileStructureResponse: FindFileStructureResponse;
-}
+export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 
-const ResultsPreview: FC<ResultsPreviewProps> = ({ fileStructureResponse }) => {
-  return null;
+const ResultsPreview: FC<ResultsPreviewProps> = ({
+  sampleDocs,
+  dataView,
+  mappings,
+  columnNames,
+}) => {
   const {
     services: { data, theme, uiSettings, notifications, dataViewFieldEditor, fieldFormats },
   } = useKibana<KibanaContextExtra>();
 
-  const [activeColumns, setActiveColumns] = useState<string[]>(fileStructureResponse.column_names!);
+  const [activeColumns, setActiveColumns] = useState<string[]>(columnNames!);
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
@@ -69,8 +175,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ fileStructureResponse }) => {
 
   const columnsMeta = useMemo(() => {
     return activeColumns.reduce((acc, columnName) => {
-      const typeFromMapping =
-        fileStructureResponse.mappings.properties[columnName]?.type || 'unknown';
+      const typeFromMapping = mappings.properties[columnName]?.type || 'unknown';
 
       acc[columnName] = {
         type: 'string',
@@ -78,18 +183,14 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ fileStructureResponse }) => {
       };
       return acc;
     }, {} as DataTableColumnsMeta);
-  }, [activeColumns, fileStructureResponse.mappings.properties]);
-
-  const rows = Object.entries(fileStructureResponse.field_stats).map(([key, value]) => {
-    return key;
-  });
+  }, [activeColumns, mappings.properties]);
 
   return (
     <UnifiedDataTable
       sampleSizeState={10}
       onSetColumns={onSetColumns}
       columns={activeColumns}
-      rows={rows}
+      rows={sampleDocs}
       columnsMeta={columnsMeta}
       services={services}
       enableInTableSearch={false}

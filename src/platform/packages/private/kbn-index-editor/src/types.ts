@@ -61,4 +61,5 @@ export interface KibanaContextExtra {
   // Additional services
   fileUpload: FileUploadPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  messageImporter: MessageImporter;
 }
