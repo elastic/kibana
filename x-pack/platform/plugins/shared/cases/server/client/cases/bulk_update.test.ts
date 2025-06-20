@@ -32,6 +32,7 @@ describe('update', () => {
       },
     ],
   };
+
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
@@ -1894,6 +1895,50 @@ describe('update', () => {
           `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
         );
       });
+    });
+  });
+
+  describe('Metrics', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: mockCases,
+      });
+
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+    });
+
+    it('calculates metrics correctly', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+      expect(updatedAttributes.time_to_acknowledge).toEqual(expect.any(Number));
+      expect(updatedAttributes.time_to_investigate).toEqual(expect.any(Number));
+      expect(updatedAttributes.time_to_resolve).toEqual(expect.any(Number));
     });
   });
 });

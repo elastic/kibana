@@ -179,6 +179,7 @@ export class QueryClient {
               if (isBoom(error) && error.output.statusCode === 409) {
                 return rulesClient.update<EsqlRuleParams>(this.toUpdateRuleParams(query, stream));
               }
+              throw error;
             })
         );
       }),
@@ -190,6 +191,7 @@ export class QueryClient {
               if (isBoom(error) && error.output.statusCode === 404) {
                 return rulesClient.create<EsqlRuleParams>(this.toCreateRuleParams(query, stream));
               }
+              throw error;
             })
         );
       }),

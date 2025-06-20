@@ -367,6 +367,7 @@ describe('fleet usage telemetry', () => {
           },
         },
       ],
+      latest_revision: true,
     });
 
     await soClient.create('ingest-package-policies', {
@@ -381,6 +382,7 @@ describe('fleet usage telemetry', () => {
       policy_id: 'policy2',
       policy_ids: ['policy2', 'policy3'],
       inputs: [],
+      latest_revision: true,
     });
 
     await soClient.create(

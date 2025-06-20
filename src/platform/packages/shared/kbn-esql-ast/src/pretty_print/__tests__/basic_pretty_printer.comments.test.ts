@@ -99,9 +99,24 @@ describe('inline cast expression', () => {
   });
 });
 
-describe('list literal expression', () => {
-  test('can print source left comment', () => {
-    assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+describe('list expressions', () => {
+  describe('literal list', () => {
+    test('can print source left comment', () => {
+      assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+    });
+  });
+
+  describe('tuple list', () => {
+    test('can print comments around the tuple', () => {
+      assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+    });
+
+    test('can print comments inside the tuple', () => {
+      assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
+      );
+    });
   });
 });
 

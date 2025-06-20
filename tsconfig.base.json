@@ -1406,6 +1406,8 @@
       "@kbn/onechat-browser/*": ["x-pack/platform/packages/shared/onechat/onechat-browser/*"],
       "@kbn/onechat-common": ["x-pack/platform/packages/shared/onechat/onechat-common"],
       "@kbn/onechat-common/*": ["x-pack/platform/packages/shared/onechat/onechat-common/*"],
+      "@kbn/onechat-genai-utils": ["x-pack/platform/packages/shared/onechat/onechat-genai-utils"],
+      "@kbn/onechat-genai-utils/*": ["x-pack/platform/packages/shared/onechat/onechat-genai-utils/*"],
       "@kbn/onechat-plugin": ["x-pack/platform/plugins/shared/onechat"],
       "@kbn/onechat-plugin/*": ["x-pack/platform/plugins/shared/onechat/*"],
       "@kbn/onechat-server": ["x-pack/platform/packages/shared/onechat/onechat-server"],
