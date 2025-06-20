@@ -51,26 +51,7 @@ router.get(
 - `context.core.elasticsearch.client.asCurrentUser` executes requests as the user making the HTTP request.
 - Always prefer `asCurrentUser` in route handlers to respect user permissions.
 
-## Example: Searching as the Current User
-
-Here is a minimal example of searching an index as the current user from a route handler:
-
-```ts
-router.get(
-  { path: '/api/my_plugin/search', validate: false },
-  async (context, request, response) => {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const result = await esClient.search({
-      index: 'my-index',
-      body: { query: { match_all: {} } }
-      allow_partial_search_results: true // Optional: allows partial results if some shards are unavailable
-    });
-    return response.ok({ body: result });
-  }
-);
-```
-
-## Example: Initializing, Indexing, and Searching an Index
+## Example: Safely Initializing, Indexing, and Searching an Index
 
 When working in distributed environments (such as multiple Kibana instances), it is common for several instances to attempt to create the same index at the same time. To ensure the index is ready for ingesting and searching, all instances should:
 
@@ -78,8 +59,6 @@ When working in distributed environments (such as multiple Kibana instances), it
 2. If the index already exists (or creation succeeds), wait until the index status is **green** before proceeding.
 
 > **Note:** If your use case allows partial search results, waiting for **yellow** status is sufficient. See the footnote below.
-
-### Example: Safe Index Initialization and Usage in the Plugin Start Lifecycle
 
 ```ts
 import type { CoreStart, Plugin } from '@kbn/core/server';
@@ -106,6 +85,7 @@ async function ensureIndexReady(esClient: ElasticsearchClient, indexName: string
 
   // Wait for the index to be ready (green status)
   // Use a long timeout and set requestTimeout slightly longer to avoid socket closure
+  // Note: On serverless, the health API is only available to the internal user
   await esClient.cluster.health(
     {
       index: indexName,
