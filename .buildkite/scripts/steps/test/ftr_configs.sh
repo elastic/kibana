@@ -115,7 +115,7 @@ printf "%s\n" "${results[@]}"
 echo ""
 
 # Scout reporter
-echo "--- ✨ Upload Scout reporter events to AppEx QA's team cluster"
+echo "--- Upload Scout reporter events to AppEx QA's team cluster"
 node scripts/scout upload-events
 
 exit $exitCode
