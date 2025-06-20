@@ -7,7 +7,6 @@
 
 import { cloneDeep } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import { TELEMETRY_CHANNEL_LISTS } from '../constants';
 import {
   batchTelemetryRecords,
   responseActionsCustomRuleTelemetryData,
@@ -17,7 +16,11 @@ import {
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
-import type { ResponseActionRules, ResponseActionsRuleResponseAggregations } from '../types';
+import {
+  TelemetryChannel,
+  type ResponseActionRules,
+  type ResponseActionsRuleResponseAggregations,
+} from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { telemetryConfiguration } from '../configuration';
@@ -124,11 +127,11 @@ export function createTelemetryCustomResponseActionRulesTaskConfig(maxTelemetryB
         const documents = cloneDeep(Object.values(responseActionsRulesTelemetryData));
 
         if (telemetryConfiguration.use_async_sender) {
-          await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, documents);
+          await sender.sendAsync(TelemetryChannel.LISTS, documents);
         } else {
           const batches = batchTelemetryRecords(documents, maxTelemetryBatch);
           for (const batch of batches) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
+            await sender.sendOnDemand(TelemetryChannel.LISTS, batch);
           }
         }
 
