@@ -36,6 +36,7 @@ import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 import { ScheduledReportFlyout } from './scheduled_report_flyout';
 import { TruncatedTitle } from './truncated_title';
+import { DisableReportConfirmationModal } from './disable_report_confirmation_modal';
 
 interface QueryParams {
   index: number;
@@ -45,6 +46,8 @@ interface QueryParams {
 export const ReportSchedulesTable = (props: ListingPropsInternal) => {
   const { http, toasts } = props;
   const [selectedReport, setSelectedReport] = useState<ScheduledReportApiJSON | null>(null);
+  const [configFlyOut, setConfigFlyOut] = useState<boolean>(false);
+  const [disableFlyOut, setDisableFlyOut] = useState<boolean>(false);
   const [queryParams, setQueryParams] = useState<QueryParams>({
     index: 1,
     size: 10,
@@ -189,6 +192,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           type: 'icon',
           icon: 'calendar',
           onClick: (item) => {
+            setConfigFlyOut(true);
             setSelectedReport(item);
           },
         },
@@ -233,12 +237,27 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           type: 'icon',
           icon: 'cross',
           onClick: (item) => {
-            bulkDisableScheduledReports({ ids: [item.id] });
+            setSelectedReport(item);
+            setDisableFlyOut(true);
           },
         },
       ],
     },
   ];
+
+  const onConfirm = useCallback(() => {
+    if (selectedReport) {
+      bulkDisableScheduledReports({ ids: [selectedReport.id] });
+    }
+
+    setSelectedReport(null);
+    setDisableFlyOut(false);
+  }, [bulkDisableScheduledReports, setSelectedReport, selectedReport]);
+
+  const onCancel = useCallback(() => {
+    setSelectedReport(null);
+    setDisableFlyOut(false);
+  }, [setSelectedReport]);
 
   const tableOnChangeCallback = useCallback(
     ({ page }: { page: QueryParams }) => {
@@ -268,11 +287,12 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         onChange={tableOnChangeCallback}
         rowProps={() => ({ 'data-test-subj': 'scheduledReportRow' })}
       />
-      {selectedReport && (
+      {selectedReport && configFlyOut && (
         <ScheduledReportFlyout
           apiClient={props.apiClient}
           onClose={() => {
             setSelectedReport(null);
+            setConfigFlyOut(false);
           }}
           scheduledReport={transformScheduledReport(selectedReport)}
           availableReportTypes={[
@@ -283,6 +303,19 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
           ]}
         />
       )}
+      {selectedReport && disableFlyOut ? (
+        <DisableReportConfirmationModal
+          title={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalTitle', {
+            defaultMessage: 'Disable schedule',
+          })}
+          message={i18n.translate('xpack.reporting.schedules.table.disableSchedule.modalMessage', {
+            defaultMessage:
+              'Disabling this schedule will stop the generation of future exports. You will not be able to enable this schedule again.',
+          })}
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+        />
+      ) : null}
     </Fragment>
   );
 };

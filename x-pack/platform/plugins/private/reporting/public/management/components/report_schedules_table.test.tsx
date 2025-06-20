@@ -85,6 +85,14 @@ describe('ReportSchedulesTable', () => {
     mutateAsync: bulkDisableScheduledReportsMock,
   });
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -158,8 +166,8 @@ describe('ReportSchedulesTable', () => {
     expect(await screen.findAllByText('Disabled')).toHaveLength(1);
   });
 
-  it('disable schedule report correctly', async () => {
-    (useGetScheduledList as jest.Mock).mockReturnValueOnce({
+  it('shows disable confirmation modal correctly', async () => {
+    (useGetScheduledList as jest.Mock).mockReturnValue({
       data: {
         page: 3,
         size: 10,
@@ -187,7 +195,45 @@ describe('ReportSchedulesTable', () => {
 
     expect(firstReportDisable).toBeInTheDocument();
 
-    userEvent.click(firstReportDisable);
+    userEvent.click(firstReportDisable, { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('confirm-disable-modal')).toBeInTheDocument();
+  });
+
+  it('disable schedule report correctly', async () => {
+    (useGetScheduledList as jest.Mock).mockReturnValue({
+      data: {
+        page: 3,
+        size: 10,
+        total: 3,
+        data: mockScheduledReports,
+      },
+      isLoading: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    userEvent.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    const firstReportDisable = await screen.findByTestId(
+      `reportDisableSchedule-${mockScheduledReports[0].id}`
+    );
+
+    expect(firstReportDisable).toBeInTheDocument();
+
+    userEvent.click(firstReportDisable, { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('confirm-disable-modal')).toBeInTheDocument();
+
+    userEvent.click(await screen.findByText('Disable'));
 
     await waitFor(() => {
       expect(bulkDisableScheduledReportsMock).toHaveBeenCalledWith({
