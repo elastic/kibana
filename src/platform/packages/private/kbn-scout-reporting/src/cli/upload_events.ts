@@ -33,25 +33,6 @@ const readFilesRecursively = (dir: string, callback: Function) => {
   });
 };
 
-const readNdjsonFilesRecursively = (inputPath: string, callback: Function) => {
-  const result: string[] = [];
-  if (fs.statSync(inputPath).isDirectory()) {
-    const files = fs.readdirSync(inputPath);
-
-    files.forEach((file) => {
-      const filePath = path.join(inputPath, file);
-      const stat = fs.statSync(filePath);
-      if (stat.isDirectory()) {
-        readNdjsonFilesRecursively(filePath, callback);
-      } else if (stat.isFile() && filePath.endsWith('.ndjson')) {
-        callback(filePath);
-      }
-    });
-
-    return result.filter((filePath) => filePath.endsWith('.ndjson'));
-  }
-};
-
 export const uploadEvents: Command<void> = {
   name: 'upload-events',
   description: 'Upload events recorded by the Scout reporter to Elasticsearch',
