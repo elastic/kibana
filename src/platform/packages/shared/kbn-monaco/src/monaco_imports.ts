@@ -33,6 +33,7 @@ import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.j
 
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
+import 'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js'; // Needed for enabling custom Monaco context menu
 
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support

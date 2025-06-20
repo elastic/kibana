@@ -572,6 +572,56 @@ describe('getMaxQueued()', () => {
   });
 });
 
+describe('getWebhookSettings()', () => {
+  test('returns the webhook settings from config', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: true,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: true,
+        },
+      },
+    });
+  });
+
+  test('returns the webhook settings from config when pfx is false', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      webhook: {
+        ssl: {
+          pfx: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({
+      ssl: {
+        pfx: {
+          enabled: false,
+        },
+      },
+    });
+  });
+
+  test('returns true when no webhook settings are defined', () => {
+    const config: ActionsConfig = defaultActionsConfig;
+    const webhookSettings = getActionsConfigurationUtilities(config).getWebhookSettings();
+    expect(webhookSettings).toEqual({ ssl: { pfx: { enabled: true } } });
+  });
+});
+
 describe('getAwsSesConfig()', () => {
   test('returns null when no email config set', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
@@ -580,6 +630,14 @@ describe('getAwsSesConfig()', () => {
 
   test('returns null when no email.services config set', () => {
     const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getAwsSesConfig()).toEqual(null);
+  });
+
+  test('returns null when no email.services.ses config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
     expect(acu.getAwsSesConfig()).toEqual(null);
   });
 
@@ -600,5 +658,49 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEnabledEmailServices()', () => {
+  test('returns all services when no email config set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services config set', () => {
+    const acu = getActionsConfigurationUtilities({ ...defaultActionsConfig, email: {} });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns all services when no email.services.enabled config set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: { services: {} },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
+  });
+
+  test('returns only enabled services', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['google-mail', 'microsoft-exchange'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['google-mail', 'microsoft-exchange']);
+  });
+
+  test('returns all services when enabled is set to "*" in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      email: {
+        services: {
+          enabled: ['*'],
+        },
+      },
+    });
+    expect(acu.getEnabledEmailServices()).toEqual(['*']);
   });
 });

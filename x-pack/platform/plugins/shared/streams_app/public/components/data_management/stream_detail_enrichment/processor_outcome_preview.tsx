@@ -7,24 +7,24 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
-  EuiFlexItem,
   EuiSpacer,
   EuiProgress,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -34,19 +34,17 @@ import {
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
 import { isGrokProcessor } from './utils';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
+import { WithUIAttributes } from './types';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (state) =>
-      state.matches('debouncingChanges') ||
-      state.matches('loadingSamples') ||
-      state.matches('runningSimulation')
+    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
   );
 
   return (
     <>
       <EuiFlexItem grow={false}>
-        <OutcomeControls />
+        <PreviewDocumentsGroupBy />
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <OutcomePreviewTable />
@@ -54,15 +52,16 @@ export const ProcessorOutcomePreview = () => {
     </>
   );
 };
+
 const formatter = new Intl.NumberFormat('en-US', {
   style: 'percent',
-  maximumFractionDigits: 0,
+  maximumFractionDigits: 1,
 });
 
 const formatRateToPercentage = (rate?: number) =>
   (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
-const OutcomeControls = () => {
+const PreviewDocumentsGroupBy = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
@@ -132,45 +131,126 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-      <StreamsAppSearchBar showDatePicker />
     </EuiFlexGroup>
   );
 };
-
-const MemoPreviewTable = React.memo(PreviewTable, (prevProps, nextProps) => {
-  // Need to specify the props to compare since the columns might be the same even if the useMemo call returns a new array
-  return (
-    prevProps.documents === nextProps.documents &&
-    isEqual(prevProps.displayColumns, nextProps.displayColumns)
-  );
-});
 
 const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const explicitlyEnabledPreviewColumns = useSimulatorSelector(
+    (state) => state.context.explicitlyEnabledPreviewColumns
+  );
+  const explicitlyDisabledPreviewColumns = useSimulatorSelector(
+    (state) => state.context.explicitlyDisabledPreviewColumns
+  );
+  const previewColumnsOrder = useSimulatorSelector((state) => state.context.previewColumnsOrder);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
 
-  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+  const {
+    setExplicitlyEnabledPreviewColumns,
+    setExplicitlyDisabledPreviewColumns,
+    setPreviewColumnsOrder,
+  } = useStreamEnrichmentEvents();
+
+  const allColumns = useMemo(() => {
+    // Get all fields from the preview documents
+    const fields = new Set<string>();
+    previewDocuments.forEach((doc) => {
+      Object.keys(doc).forEach((key) => {
+        fields.add(key);
+      });
+    });
+    return Array.from(fields);
+  }, [previewDocuments]);
+
+  const draftProcessor = useStreamEnrichmentSelector((snapshot) =>
     selectDraftProcessor(snapshot.context)
   );
 
-  const grokCollection = useStreamsEnrichmentSelector(
+  const grokCollection = useStreamEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
 
-  const previewColumns = useMemo(
-    () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
-    [detectedFields, previewDocsFilter, processors]
-  );
+  const grokMode =
+    draftProcessor?.processor &&
+    isGrokProcessor(draftProcessor.processor) &&
+    !isEmpty(draftProcessor.processor.grok.field) &&
+    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
+    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
+      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
+      const fieldName = draftProcessor.processor?.grok.field;
+      return Array.from(grokExpression.getFields().values()).some(
+        (field) => field.name === fieldName
+      );
+    });
+
+  const grokField = grokMode
+    ? (draftProcessor.processor as WithUIAttributes<GrokProcessorDefinition>).grok.field
+    : undefined;
+
+  const previewColumns = useMemo(() => {
+    let cols = getTableColumns(processors, detectedFields ?? [], previewDocsFilter);
+    if (grokField) {
+      // If we are in Grok mode, we exclude the detected fields and only use the Grok field
+      // sine it is highlighting extracted values
+      cols = [grokField];
+    }
+    if (cols.length === 0) {
+      // If no columns are detected, we fall back to all fields from the preview documents
+      cols = allColumns;
+    }
+    // Filter out columns that are explicitly disabled
+    const filteredCols = cols.filter((col) => !explicitlyDisabledPreviewColumns.includes(col));
+    // Add explicitly enabled columns if they are not already included and exist in allFields
+    explicitlyEnabledPreviewColumns.forEach((col) => {
+      if (!filteredCols.includes(col) && allColumns.includes(col)) {
+        filteredCols.push(col);
+      }
+    });
+    return filteredCols;
+  }, [
+    allColumns,
+    detectedFields,
+    explicitlyDisabledPreviewColumns,
+    explicitlyEnabledPreviewColumns,
+    grokField,
+    previewDocsFilter,
+    processors,
+  ]);
+
+  const setVisibleColumns = (visibleColumns: string[]) => {
+    if (visibleColumns.length === 0) {
+      // If no columns are visible, we reset the explicitly enabled and disabled columns
+      setExplicitlyDisabledPreviewColumns(allColumns);
+      return;
+    }
+    // find which columns got added or removed comparing visibleColumns with the current displayColumns
+    const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+    if (addedColumns.length > 0) {
+      setExplicitlyEnabledPreviewColumns([
+        ...explicitlyEnabledPreviewColumns,
+        ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
+      ]);
+    }
+    const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+    if (removedColumns.length > 0) {
+      setExplicitlyDisabledPreviewColumns([
+        ...explicitlyDisabledPreviewColumns,
+        ...removedColumns.filter((col) => !explicitlyDisabledPreviewColumns.includes(col)),
+      ]);
+    }
+    setPreviewColumnsOrder(visibleColumns);
+  };
 
   if (!previewDocuments || isEmpty(previewDocuments)) {
     return (
       <EuiEmptyPrompt
         titleSize="xs"
-        icon={<AssetImage type="noResults" />}
+        icon={<AssetImage type="unableToGeneratePreview" />}
         title={
           <h2>
             {i18n.translate(
@@ -194,37 +274,32 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return draftProcessor?.processor &&
-    isGrokProcessor(draftProcessor.processor) &&
-    !isEmpty(draftProcessor.processor.grok.field) &&
-    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !isGrokProcessor(draftProcessor.processor)) return false;
-      const fieldName = draftProcessor.processor?.grok.field;
-      return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
-      );
-    }) ? (
+  return (
     <PreviewTable
       documents={previewDocuments}
-      displayColumns={[draftProcessor.processor.grok.field]}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
-      renderCellValue={(document, columnId) => {
-        const value = document[columnId];
-        if (typeof value === 'string') {
-          return (
-            <Sample
-              grokCollection={grokCollection}
-              draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-              sample={value}
-            />
-          );
-        } else {
-          return undefined;
-        }
-      }}
+      displayColumns={previewColumns}
+      rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
+      toolbarVisibility
+      setVisibleColumns={setVisibleColumns}
+      columnOrderHint={previewColumnsOrder}
+      renderCellValue={
+        grokMode
+          ? (document, columnId) => {
+              const value = document[columnId];
+              if (typeof value === 'string' && columnId === grokField) {
+                return (
+                  <Sample
+                    grokCollection={grokCollection}
+                    draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+                    sample={value}
+                  />
+                );
+              } else {
+                return undefined;
+              }
+            }
+          : undefined
+      }
     />
-  ) : (
-    <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />
   );
 };
