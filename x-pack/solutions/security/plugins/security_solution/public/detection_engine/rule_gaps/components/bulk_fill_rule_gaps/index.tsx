@@ -4,25 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiConfirmModal,
-  EuiDatePicker,
-  EuiDatePickerRange,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  useGeneratedHtmlId,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
-import moment from 'moment';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import type moment from 'moment';
+import React, { useMemo } from 'react';
 import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
 import * as i18n from './translations';
-
-const BULK_FILL_RULE_GAPS_MODAL_WIDTH = 600;
+import { ScheduleBulkActionModal } from '../../../common/components/schedule_bulk_action_modal';
 
 interface BulkFillRuleGapsModalProps {
   onCancel: () => void;
@@ -30,115 +18,53 @@ interface BulkFillRuleGapsModalProps {
   rulesCount: number;
 }
 
+const modalCopy = {
+  modalTitle: i18n.BULK_FILL_RULE_GAPS_MODAL_TITLE,
+  timeRangeTitle: i18n.BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE,
+  confirmButton: i18n.BULK_FILL_RULE_GAPS_CONFIRM_BUTTON,
+  cancelButton: i18n.BULK_FILL_RULE_GAPS_CANCEL_BUTTON,
+  errors: {
+    startDateOutOfRange: i18n.BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR(
+      MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS
+    ),
+    endDateInFuture: i18n.BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR,
+    invalidTimeRange: i18n.BULK_FILL_RULE_GAPS_INVALID_TIME_RANGE_ERROR,
+  },
+};
+
 const BulkFillRuleGapsModalComponent = ({
   onCancel,
   onConfirm,
   rulesCount,
 }: BulkFillRuleGapsModalProps) => {
-  const modalTitleId = useGeneratedHtmlId();
-
-  const now = moment();
-
-  // By default we show three hours time range which user can then adjust
-  const [startDate, setStartDate] = useState(now.clone().subtract(3, 'h'));
-  const [endDate, setEndDate] = useState(now.clone());
-
-  const isStartDateOutOfRange = now
-    .clone()
-    .subtract(MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS, 'd')
-    .isAfter(startDate);
-  const isEndDateInFuture = endDate.isAfter(now);
-  const isInvalidTimeRange = startDate.isSameOrAfter(endDate);
-  const isInvalid = isStartDateOutOfRange || isEndDateInFuture || isInvalidTimeRange;
-  const errorMessage = useMemo(() => {
-    if (isStartDateOutOfRange) {
-      return i18n.BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR(
-        MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS
-      );
-    }
-    if (isEndDateInFuture) {
-      return i18n.BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR;
-    }
-    if (isInvalidTimeRange) {
-      return i18n.BULK_FILL_RULE_GAPS_INVALID_TIME_RANGE_ERROR;
-    }
-    return null;
-  }, [isEndDateInFuture, isInvalidTimeRange, isStartDateOutOfRange]);
-
-  const handleConfirm = useCallback(() => {
-    onConfirm({ startDate, endDate });
-  }, [endDate, onConfirm, startDate]);
-
-  return (
-    <EuiConfirmModal
-      aria-labelledby={modalTitleId}
-      title={
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>{i18n.BULK_FILL_RULE_GAPS_MODAL_TITLE}</EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      titleProps={{ id: modalTitleId, style: { width: '100%' } }}
-      onCancel={onCancel}
-      onConfirm={handleConfirm}
-      confirmButtonText={i18n.BULK_FILL_RULE_GAPS_CONFIRM_BUTTON}
-      cancelButtonText={i18n.BULK_FILL_RULE_GAPS_CANCEL_BUTTON}
-      confirmButtonDisabled={isInvalid}
-      style={{ width: BULK_FILL_RULE_GAPS_MODAL_WIDTH }}
-    >
-      <EuiForm data-test-subj="fill-rule-gaps-modal-modal-form" fullWidth>
-        <EuiFormRow
-          data-test-subj="fill-rule-gaps-modal-time-range-form"
-          label={i18n.BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE}
-          isInvalid={isInvalid}
-          error={errorMessage}
-        >
-          <EuiDatePickerRange
-            data-test-subj="fill-rule-gaps-modal-time-range"
-            startDateControl={
-              <EuiDatePicker
-                className="start-date-picker"
-                aria-label="Start date range"
-                selected={startDate}
-                onChange={(date) => date && setStartDate(date)}
-                startDate={startDate}
-                endDate={endDate}
-                showTimeSelect={true}
-              />
-            }
-            endDateControl={
-              <EuiDatePicker
-                className="end-date-picker"
-                aria-label="End date range"
-                selected={endDate}
-                onChange={(date) => date && setEndDate(date)}
-                startDate={startDate}
-                endDate={endDate}
-                showTimeSelect={true}
-              />
-            }
-          />
-        </EuiFormRow>
-      </EuiForm>
-
-      <EuiSpacer size="m" />
-
+  const callouts = useMemo(() => {
+    const components = [
       <EuiCallOut
         size="s"
         iconType="warning"
         title={i18n.BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS}
-      />
+      />,
+    ];
+    if (rulesCount > 1) {
+      components.push(
+        <EuiCallOut
+          size="s"
+          iconType="warning"
+          title={i18n.BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS}
+        />
+      );
+    }
 
-      {rulesCount > 1 && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            size="s"
-            iconType="warning"
-            title={i18n.BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS}
-          />
-        </>
-      )}
-    </EuiConfirmModal>
+    return components;
+  }, [rulesCount]);
+  return (
+    <ScheduleBulkActionModal
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      text={modalCopy}
+      maxLookbackWindowDays={MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS}
+      callouts={callouts}
+    />
   );
 };
 

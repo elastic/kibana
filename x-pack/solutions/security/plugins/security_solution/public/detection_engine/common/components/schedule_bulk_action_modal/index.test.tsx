@@ -8,14 +8,26 @@
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { BulkFillRuleGapsModal } from '.';
-import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { ScheduleBulkActionModal } from '.';
+import { EuiCallOut } from '@elastic/eui';
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
 };
 
-describe('BulkFillRuleGapsModal', () => {
+const modalCopy = {
+  modalTitle: 'MODAL_TITLE',
+  timeRangeTitle: 'TIME_RANGE_TITLE',
+  confirmButton: 'CONFIRM_BUTTON',
+  cancelButton: 'CANCEL_BUTTON',
+  errors: {
+    startDateOutOfRange: 'START_DATE_OUT_OF_RANGE_ERROR',
+    endDateInFuture: 'FUTURE_TIME_RANGE_ERROR',
+    invalidTimeRange: 'INVALID_TIME_RANGE_ERROR',
+  },
+};
+
+describe('ScheduleBulkActionModal', () => {
   const onCancelMock = jest.fn();
   const onConfirmMock = jest.fn();
 
@@ -31,8 +43,17 @@ describe('BulkFillRuleGapsModal', () => {
   });
 
   beforeEach(() => {
+    const callouts = [
+      <EuiCallOut size="s" iconType="warning" key={1} title={'NOTIFIACTIONS_LIMITATIONS'} />,
+    ];
     render(
-      <BulkFillRuleGapsModal onCancel={onCancelMock} onConfirm={onConfirmMock} rulesCount={10} />
+      <ScheduleBulkActionModal
+        onCancel={onCancelMock}
+        onConfirm={onConfirmMock}
+        text={modalCopy}
+        maxLookbackWindowDays={90}
+        callouts={callouts}
+      />
     );
 
     timeRangeForm = screen.getByTestId('schedule-bulk-action-modal-time-range-form');
@@ -63,14 +84,14 @@ describe('BulkFillRuleGapsModal', () => {
     });
 
     expect(confirmModalConfirmButton).toBeDisabled();
-    expect(timeRangeForm).toHaveTextContent('Selected time range is invalid');
+    expect(timeRangeForm).toHaveTextContent('INVALID_TIME_RANGE_ERROR');
   });
 
-  it('should render confirmation button disabled if selected start date is more than 90 days in the past', () => {
+  it('should render confirmation button disabled if selected start date is more than lookup window', () => {
     expect(confirmModalConfirmButton).toBeEnabled();
 
     const now = moment();
-    const startDate = now.clone().subtract(MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS, 'd');
+    const startDate = now.clone().subtract(90, 'd');
 
     fireEvent.change(startDatePicker, {
       target: {
@@ -79,9 +100,7 @@ describe('BulkFillRuleGapsModal', () => {
     });
 
     expect(confirmModalConfirmButton).toBeDisabled();
-    expect(timeRangeForm).toHaveTextContent(
-      'Rule gaps fill cannot be scheduled earlier than 90 days ago'
-    );
+    expect(timeRangeForm).toHaveTextContent('START_DATE_OUT_OF_RANGE_ERROR');
   });
 
   it('should render confirmation button disabled if selected end date is in future', () => {
@@ -95,6 +114,6 @@ describe('BulkFillRuleGapsModal', () => {
     });
 
     expect(confirmModalConfirmButton).toBeDisabled();
-    expect(timeRangeForm).toHaveTextContent('Rule gaps fill cannot be scheduled for the future');
+    expect(timeRangeForm).toHaveTextContent('FUTURE_TIME_RANGE_ERROR');
   });
 });
