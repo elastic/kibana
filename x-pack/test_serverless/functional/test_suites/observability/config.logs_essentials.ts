@@ -16,7 +16,13 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
 
   // include settings from elasticsearch controller
-  esServerArgs: ['xpack.ml.dfa.enabled=false'],
+  esServerArgs: [
+    // ML data frame analytics is not available in observability projects
+    'xpack.ml.dfa.enabled=false',
+    // logs essentials tier configuration
+    'serverless.project_type=observability',
+    'serverless.observability.tier=logs_essentials',
+  ],
   kbnServerArgs: [
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',

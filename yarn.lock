@@ -6583,6 +6583,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/onechat-genai-utils@link:x-pack/platform/packages/shared/onechat/onechat-genai-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/onechat-plugin@link:x-pack/platform/plugins/shared/onechat":
   version "0.0.0"
   uid ""
