@@ -24,7 +24,7 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
-import { PersonalizedRecentlyViewed } from './personalization/RecentlyViewedTable';
+import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
 import { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';

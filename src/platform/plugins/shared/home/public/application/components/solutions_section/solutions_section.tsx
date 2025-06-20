@@ -43,7 +43,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
           </h2>
         </EuiScreenReaderOnly>
 
-        <EuiFlexGroup wrap responsive={false} gutterSize="l" justifyContent="spaceBetween">
+        <EuiFlexGroup>
           {solutions.map((solution) => (
             <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
           ))}
