@@ -134,8 +134,24 @@ export const CAI_CASES_INDEX_SCRIPT: StoredScript = {
     ctx._source.owner = source.cases.owner;
     ctx._source.space_ids = source.namespaces;
 
-    if (ctx._source.created_at_ms != null && ctx._source.closed_at_ms != null){
-      ctx._source.time_to_resolve = (ctx._source.closed_at_ms - ctx._source.created_at_ms) / 1000;
+    if (source.cases.time_to_acknowledge != null){
+      ctx._source.time_to_acknowledge = source.cases.time_to_acknowledge;
+    }
+
+    if (source.cases.time_to_investigate != null){
+      ctx._source.time_to_investigate = source.cases.time_to_investigate;
+    }
+
+    if (source.cases.time_to_resolve != null){
+      ctx._source.time_to_resolve = source.cases.time_to_resolve;
+    }
+
+    if (source.cases.total_alerts != null && source.cases.total_alerts >= 0){
+      ctx._source.total_alerts = source.cases.total_alerts;
+    }
+
+    if (source.cases.total_comments != null && source.cases.total_comments >= 0){
+      ctx._source.total_comments = source.cases.total_comments;
     }
   `,
 };

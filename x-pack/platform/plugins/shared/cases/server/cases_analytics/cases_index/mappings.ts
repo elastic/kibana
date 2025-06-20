@@ -107,15 +107,12 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
     time_to_resolve: {
-      // in seconds, calculated by case.closed_at - case.created_at
       type: 'long',
     },
     time_to_acknowledge: {
-      // in seconds, calculated by case.in_progress_at - case.created_at
       type: 'long',
     },
-    time_to_investigaste: {
-      // in seconds, calculated by case.closed_at - case.in_progress_at
+    time_to_investigate: {
       type: 'long',
     },
     custom_fields: {
@@ -150,6 +147,12 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     space_ids: {
       type: 'keyword',
+    },
+    total_alerts: {
+      type: 'integer',
+    },
+    total_comments: {
+      type: 'integer',
     },
   },
 };
