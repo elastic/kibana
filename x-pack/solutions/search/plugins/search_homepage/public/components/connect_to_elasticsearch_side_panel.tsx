@@ -77,7 +77,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           title={
             <FormattedMessage
               id="xpack.searchHomepage.connectToElasticsearch.needAdviceTitle"
-              defaultMessage="Need help with Serverless? Engage a Customer Engineer."
+              defaultMessage="Need help with Serverless? Engage a customer engineer."
             />
           }
           description={
