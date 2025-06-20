@@ -45,6 +45,7 @@ const baseSafePaths = [
   join(REPO_ROOT, 'data'),
   join(REPO_ROOT, '.es'),
   join(REPO_ROOT, 'oas_docs'),
+  'docs/openapi',
 ];
 
 const tmpPath = tmpdir();
