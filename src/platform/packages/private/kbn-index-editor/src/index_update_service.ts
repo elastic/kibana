@@ -210,37 +210,7 @@ export class IndexUpdateService {
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),
           switchMap((updates) => {
-            const body = JSON.stringify({
-              operations: (
-                updates.map((update) => {
-                  if (update.id) {
-                    return [
-                      {
-                        update: { _id: update.id },
-                      },
-                      {
-                        doc: update.value,
-                      },
-                    ];
-                  }
-                  return [
-                    {
-                      index: {},
-                    },
-                    update.value,
-                  ];
-                }) as BulkRequest['operations']
-              ).flat(),
-            });
-
-            return from(
-              this.http.post<BulkResponse>(
-                `/internal/esql/lookup_index/${this.getIndexName()}/update`,
-                {
-                  body,
-                }
-              )
-            ).pipe(
+            return from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
               map(([response, rows, dataView]) => {
                 return { updates, response, rows, dataView };
@@ -365,6 +335,42 @@ export class IndexUpdateService {
   /* Partial doc update */
   public updateDoc(id: string, update: Record<string, any>) {
     this.actions$.next({ type: 'add', payload: { id, value: update } });
+  }
+
+  /**
+   * Saves documents immediately to the index.
+   * @param updates
+   */
+  public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
+    const body = JSON.stringify({
+      operations: (
+        updates.map((update) => {
+          if (update.id) {
+            return [
+              {
+                update: { _id: update.id },
+              },
+              {
+                doc: update.value,
+              },
+            ];
+          }
+          return [
+            {
+              index: {},
+            },
+            update.value,
+          ];
+        }) as BulkRequest['operations']
+      )?.flat(),
+    });
+
+    return this.http.post<BulkResponse>(
+      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+      {
+        body,
+      }
+    );
   }
 
   /**

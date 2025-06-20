@@ -13,7 +13,7 @@ import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { lazy } from 'react';
+import React, { Fragment, lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
@@ -22,6 +22,7 @@ import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
 import { EmptyPrompt } from './empty_prompt';
+import { RowColumnCreator } from './row_column_creator';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -82,13 +83,16 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
           >
             <FileDropzone>
               {dataView && dataViewColumns ? (
-                <DataGridLazy
-                  {...props}
-                  dataView={dataView}
-                  columns={dataViewColumns}
-                  rows={rows}
-                  totalHits={totalHits}
-                />
+                <Fragment>
+                  <RowColumnCreator columns={dataViewColumns} />
+                  <DataGridLazy
+                    {...props}
+                    dataView={dataView}
+                    columns={dataViewColumns}
+                    rows={rows}
+                    totalHits={totalHits}
+                  />
+                </Fragment>
               ) : (
                 <EmptyPrompt />
               )}
