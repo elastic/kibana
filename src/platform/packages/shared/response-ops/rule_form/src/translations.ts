@@ -321,8 +321,7 @@ export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
 export const RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT = i18n.translate(
   'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
   {
-    defaultMessage:
-      'Save time by creating an investigation guide that shares step-by-step guidelines or links to helpful resources for investigating alerts. When alerts are created, you can find the investigation guide on the alerts' details page.',
+    defaultMessage: `Save time by creating an investigation guide that shares step-by-step guidelines or links to helpful resources for investigating alerts. When alerts are created, you can find the investigation guide on the alerts' details page.`,
   }
 );
 
