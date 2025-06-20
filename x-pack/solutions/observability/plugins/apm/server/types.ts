@@ -45,10 +45,6 @@ import type {
   CustomIntegrationsPluginStart,
 } from '@kbn/custom-integrations-plugin/server';
 import type {
-  EntityManagerServerPluginSetup,
-  EntityManagerServerPluginStart,
-} from '@kbn/entityManager-plugin/server';
-import type {
   LogsDataAccessPluginSetup,
   LogsDataAccessPluginStart,
 } from '@kbn/logs-data-access-plugin/server';
@@ -78,7 +74,6 @@ export interface APMPluginSetupDependencies {
   dataViews: {};
   share: SharePluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
-  entityManager: EntityManagerServerPluginSetup;
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
   actions?: ActionsPlugin['setup'];
@@ -106,7 +101,6 @@ export interface APMPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
   share: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
-  entityManager: EntityManagerServerPluginStart;
   // optional dependencies
   observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
   actions?: ActionsPlugin['start'];

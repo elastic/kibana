@@ -34,34 +34,4 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
   },
 };
 
-const tryItClickEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.TRY_IT_CLICK,
-  schema: {
-    view: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
-      },
-    },
-  },
-};
-
-const learnMoreClickEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.LEARN_MORE_CLICK,
-  schema: {
-    view: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Where the action was initiated (empty_state or add_data_button or add_apm_cta)',
-      },
-    },
-  },
-};
-
-export const apmTelemetryEventBasedTypes = [
-  searchQuerySubmittedEventType,
-  tryItClickEventType,
-  learnMoreClickEventType,
-];
+export const apmTelemetryEventBasedTypes = [searchQuerySubmittedEventType];
