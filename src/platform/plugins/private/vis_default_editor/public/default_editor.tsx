@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 import { EuiResizableContainer, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
