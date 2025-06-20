@@ -34,16 +34,12 @@ describe('transformPanelsOut', () => {
 
     const references: SavedObjectReference[] = [{ name: '1:panel_1', type: 'foo', id: '123' }];
 
-    const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
     const result = await transformPanelsOut({
       panelsJSON,
       embeddable: embeddableStartMock,
       references,
     });
-    expect(injectSpy).toHaveBeenCalledTimes(1);
-    expect(injectSpy).toHaveBeenCalledWith({ type: 'foo', foo: 'bar', savedObjectId: '123' }, [
-      { name: 'panel_1', type: 'foo', id: '123' },
-    ]);
+
     expect(result).toEqual([
       {
         gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
@@ -73,48 +69,9 @@ describe('transformPanelsOut', () => {
 
     const references: SavedObjectReference[] = [];
 
-    expect(
+    await expect(
       async () =>
         await transformPanelsOut({ panelsJSON, embeddable: embeddableStartMock, references })
-    ).toThrow('Could not find reference "panel_1"');
-  });
-
-  it('should call embeddable inject method', async () => {
-    const panelsJSON = JSON.stringify([
-      {
-        gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
-        id: '1',
-        embeddableConfig: { foo: 'bar' },
-        panelIndex: '1',
-        title: 'Panel 1',
-        type: 'foo',
-        version: '1.0.0',
-      },
-    ]);
-
-    const references: SavedObjectReference[] = [];
-
-    embeddableStartMock.inject.mockImplementation((panelConfig, refs) => ({
-      ...panelConfig,
-      injected: true,
-    }));
-
-    const result = await transformPanelsOut({
-      panelsJSON,
-      embeddable: embeddableStartMock,
-      references,
-    });
-
-    expect(result).toEqual([
-      {
-        gridData: { x: 0, y: 0, w: 12, h: 12, i: '1' },
-        id: '1',
-        panelConfig: { foo: 'bar', injected: true },
-        panelIndex: '1',
-        title: 'Panel 1',
-        type: 'foo',
-        version: '1.0.0',
-      },
-    ]);
+    ).rejects.toThrow('Could not find reference "panel_1"');
   });
 });
