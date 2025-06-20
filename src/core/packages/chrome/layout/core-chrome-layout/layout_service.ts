@@ -22,6 +22,12 @@ export interface LayoutServiceParams {
   debug?: boolean;
 }
 
+/**
+ * The LayoutService responsible for layout management of Kibana.
+ * Kibana can swap between different layout service implementation to support different layout types.
+ * 
+ * @internal
+ */
 export interface LayoutService {
   /**
    * Returns a layout component with the provided dependencies
