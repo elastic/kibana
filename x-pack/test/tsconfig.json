@@ -93,7 +93,6 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/journeys",
     "@kbn/stdio-dev-helpers",
-    "@kbn/alerting-api-integration-helpers",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
@@ -174,7 +173,6 @@
     "@kbn/test-suites-xpack-observability",
     "@kbn/management-settings-ids",
     "@kbn/apm-sources-access-plugin",
-    "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",
   ]
 }
