@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isRight } from 'fp-ts/Either';
 import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
-import type { BulkProcessingResults, Options } from './bulk/types';
+import type { BulkProcessingError, BulkProcessingResults, Options } from './bulk/types';
 
 export interface SoftDeletionResults {
   updated: BulkProcessingResults;
@@ -39,33 +38,60 @@ export const softDeleteOmittedUsers =
     const usersToDelete = res.map((hit) => hit._id);
     const errors: BulkProcessingResults['errors'] = [];
 
-    const { failed, successful } = await esClient.helpers.bulk<string>({
-      index,
-      datasource: usersToDelete,
-      flushBytes,
-      retries,
-      refreshOnCompletion: index,
-      onDocument: (id) => {
-        return [
-          { update: { _id: id } },
-          {
-            doc: {
-              labels: { monitoring: { privileged_users: 'deleted' } },
-            },
-          },
-        ];
-      },
-      onDrop: ({ error, document }) => {
-        errors.push({
-          message: error?.message || 'Unknown error',
-          username: document,
-          index: null, // The error is not related to a specific row in a CSV
-        });
-      },
-    });
+    const accumulator = { users: usersToDelete, failed: 0, successful: 0, errors };
+
+    const stats =
+      usersToDelete.length === 0
+        ? accumulator
+        : await esClient
+            .bulk<MonitoredUserDoc>({
+              index,
+              refresh: 'wait_for',
+              operations: usersToDelete.flatMap((id) => [
+                { update: { _id: id } },
+                {
+                  script: {
+                    source: /* java */ `
+                      if (ctx._source.labels != null && ctx._source.labels.sources != null) {
+                        ctx._source.labels.sources.removeIf(src -> src == params.to_remove);
+                        if (ctx._source.labels.sources.isEmpty()) {
+                          ctx._source.labels.monitoring.privileged_users = params.new_value;
+                        }
+                      }
+                    `,
+                    lang: 'painless',
+                    params: {
+                      to_remove: 'csv',
+                      new_value: 'deleted',
+                    },
+                  },
+                },
+              ]),
+            })
+            .then((results) =>
+              results.items.reduce((acc, item, i) => {
+                if (item.update?.error) {
+                  return {
+                    ...acc,
+                    failed: acc.failed + 1,
+                    errors: acc.errors.concat({
+                      message:
+                        item.update.error.reason || 'Soft delete update action: Unknown error',
+                      username: acc.users[i],
+                      index: i,
+                    } satisfies BulkProcessingError),
+                  };
+                }
+
+                return {
+                  ...acc,
+                  successful: acc.successful + 1,
+                };
+              }, accumulator)
+            );
 
     return {
       updated: processed,
-      deleted: { failed, successful, errors, users: usersToDelete },
+      deleted: stats,
     } satisfies SoftDeletionResults;
   };
