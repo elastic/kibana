@@ -76,6 +76,7 @@ export default function (providerContext: FtrProviderContext) {
         package: {
           name: 'fleet_server',
         },
+        latest_revision: true,
       },
     });
   };
