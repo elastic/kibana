@@ -80,5 +80,6 @@
   "ipv6": true,
   "params": "",
   "labels": {},
-  "maintenance_windows": []
+  "maintenance_windows": [],
+  "spaces": ["default"]
 }

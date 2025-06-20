@@ -25,8 +25,8 @@ import {
 } from '../../../../common/constants/monitor_defaults';
 import {
   LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-} from '../../synthetics_monitor';
+  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
+} from '../../synthetics_monitor/legacy_synthetics_monitor';
 import { validateMonitor } from '../../../routes/monitor_cruds/monitor_validation';
 import {
   formatSecrets,
@@ -89,7 +89,7 @@ export const migration880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginS
       return migrated;
     },
     inputType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-    migratedType: SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+    migratedType: LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
   });
 };
 

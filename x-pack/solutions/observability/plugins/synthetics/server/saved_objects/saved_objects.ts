@@ -5,35 +5,26 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
-  SavedObjectsServiceSetup,
-} from '@kbn/core/server';
+import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
 import {
-  syntheticsSettings,
-  syntheticsSettingsObjectId,
-  syntheticsSettingsObjectType,
-  uptimeSettingsObjectId,
-  uptimeSettingsObjectType,
-} from './synthetics_settings';
+  getSyntheticsMonitorConfigSavedObjectType,
+  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
+} from './synthetics_monitor/synthetics_monitor_config';
+import { syntheticsSettings } from './synthetics_settings';
 import {
-  SYNTHETICS_SECRET_ENCRYPTED_TYPE,
+  SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
 import {
   LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
   PRIVATE_LOCATION_SAVED_OBJECT_TYPE,
 } from './private_locations';
-import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
-import { DynamicSettingsAttributes } from '../runtime_types/settings';
 import {
-  getSyntheticsMonitorSavedObjectType,
-  SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
-} from './synthetics_monitor';
+  getLegacySyntheticsMonitorSavedObjectType,
+  LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE,
+} from './synthetics_monitor/legacy_synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
 
 export const registerSyntheticsSavedObjects = (
@@ -43,64 +34,27 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService.registerType(LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
   savedObjectsService.registerType(PRIVATE_LOCATION_SAVED_OBJECT_TYPE);
 
-  savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
-  savedObjectsService.registerType(syntheticsServiceApiKey);
-  savedObjectsService.registerType(syntheticsParamSavedObjectType);
   savedObjectsService.registerType(syntheticsSettings);
 
+  // legacy synthetics monitor saved object type which is single namespace
+  savedObjectsService.registerType(
+    getLegacySyntheticsMonitorSavedObjectType(encryptedSavedObjects)
+  );
+  encryptedSavedObjects.registerType(LEGACY_SYNTHETICS_MONITOR_ENCRYPTED_TYPE_SINGLE);
+
+  // synthetics monitor config saved object type which supports multiple namespace
+  savedObjectsService.registerType(getSyntheticsMonitorConfigSavedObjectType());
+  encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
+
+  // service api key saved object type
+  savedObjectsService.registerType(syntheticsServiceApiKey);
   encryptedSavedObjects.registerType({
     type: syntheticsServiceApiKey.name,
     attributesToEncrypt: new Set(['apiKey']),
     attributesToIncludeInAAD: new Set(['id', 'name']),
   });
 
-  encryptedSavedObjects.registerType(SYNTHETICS_MONITOR_ENCRYPTED_TYPE);
-  encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
-};
-
-export const savedObjectsAdapter = {
-  getSyntheticsDynamicSettings: async (
-    client: SavedObjectsClientContract
-  ): Promise<DynamicSettingsAttributes> => {
-    try {
-      const obj = await client.get<DynamicSettingsAttributes>(
-        syntheticsSettingsObjectType,
-        syntheticsSettingsObjectId
-      );
-      return fromSettingsAttribute(obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-    } catch (getErr) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        // If the object doesn't exist, check to see if uptime settings exist
-        return getUptimeDynamicSettings(client);
-      }
-      throw getErr;
-    }
-  },
-  setSyntheticsDynamicSettings: async (
-    client: SavedObjectsClientContract,
-    settings: DynamicSettingsAttributes
-  ) => {
-    const settingsObject = await client.create<DynamicSettingsAttributes>(
-      syntheticsSettingsObjectType,
-      settings,
-      {
-        id: syntheticsSettingsObjectId,
-        overwrite: true,
-      }
-    );
-
-    return settingsObject.attributes;
-  },
-};
-
-const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
-  try {
-    const obj = await client.get<DynamicSettingsAttributes>(
-      uptimeSettingsObjectType,
-      uptimeSettingsObjectId
-    );
-    return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
-  } catch (getErr) {
-    return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
-  }
+  // global params saved object type
+  savedObjectsService.registerType(syntheticsParamSavedObjectType);
+  encryptedSavedObjects.registerType(SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE);
 };

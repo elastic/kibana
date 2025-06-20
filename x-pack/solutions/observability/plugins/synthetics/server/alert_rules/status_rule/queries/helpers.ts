@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/get_all_monitors';
+import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
 import {
   AlertStatusConfigs,
   AlertPendingStatusConfigs,
