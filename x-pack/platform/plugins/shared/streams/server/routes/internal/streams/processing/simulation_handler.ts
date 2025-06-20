@@ -535,9 +535,9 @@ const extractProcessorMetrics = ({
     return {
       detected_fields,
       errors,
-      failed_rate: parseFloat(failureRate.toFixed(2)),
-      skipped_rate: parseFloat(skippedRate.toFixed(2)),
-      parsed_rate: parseFloat(parsedRate.toFixed(2)),
+      failed_rate: parseFloat(failureRate.toFixed(3)),
+      skipped_rate: parseFloat(skippedRate.toFixed(3)),
+      parsed_rate: parseFloat(parsedRate.toFixed(3)),
     };
   });
 };
@@ -718,10 +718,10 @@ const prepareSimulationResponse = async (
     documents: docReports,
     processors_metrics: processorsMetrics,
     documents_metrics: {
-      failed_rate: parseFloat(failureRate.toFixed(2)),
-      partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(2)),
-      skipped_rate: parseFloat(skippedRate.toFixed(2)),
-      parsed_rate: parseFloat(parsedRate.toFixed(2)),
+      failed_rate: parseFloat(failureRate.toFixed(3)),
+      partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
+      skipped_rate: parseFloat(skippedRate.toFixed(3)),
+      parsed_rate: parseFloat(parsedRate.toFixed(3)),
     },
     is_non_additive_simulation: isNotAdditiveSimulation,
   };

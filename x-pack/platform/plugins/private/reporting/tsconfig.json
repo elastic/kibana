@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/actions-plugin",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
@@ -52,7 +53,11 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
     "@kbn/core-http-server-utils",
+    "@kbn/core-saved-objects-server",
+    "@kbn/rrule",
     "@kbn/notifications-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",

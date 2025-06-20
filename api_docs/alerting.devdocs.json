@@ -4964,7 +4964,13 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{} & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
+          "; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 1 | 7 | 6 | 5 | 4 | 3)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { params: Record<string, any>; id: string; actionTypeId: string; group: string; }>[]; enabled: boolean; alertTypeId: string; schedule: Readonly<{} & { interval: string; }>; createdBy: string | null; updatedBy: string | null; createdAt: string; updatedAt: string; apiKeyOwner: string | null; revision: number; }>; enabled: boolean; schedule: Readonly<{} & { interval: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; runAt: string; }>[]; createdAt: string; duration: string; status: \"error\" | \"running\" | \"complete\" | \"pending\" | \"timeout\"; }> | Readonly<{} & { error: Readonly<{ status?: number | undefined; } & { message: string; rule: Readonly<{ name?: string | undefined; } & { id: string; }>; }>; }>)[]>; bulkFillGapsByRuleIds: (params: ",
+          "BulkFillGapsByRuleIdsParams",
+          ", options: ",
+          "BulkFillGapsByRuleIdsOptions",
+          ") => Promise<",
+          "BulkFillGapsByRuleIdsResult",
+          ">; getRuleIdsWithGaps: (params: Readonly<{ statuses?: string[] | undefined; } & { start: string; end: string; }>) => Promise<Readonly<{} & { ruleIds: string[]; total: number; }>>; getGapsSummaryByRuleIds: (params: Readonly<{} & { start: string; end: string; ruleIds: string[]; }>) => Promise<Readonly<{} & { data: Readonly<{} & { ruleId: string; totalUnfilledDurationMs: number; totalInProgressDurationMs: number; totalFilledDurationMs: number; }>[]; }>>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/index.ts",
         "deprecated": false,
@@ -6904,59 +6910,6 @@
               "{ blob: string; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.BulkActionSkipResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "BulkActionSkipResult",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.BulkActionSkipResult.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.BulkActionSkipResult.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.BulkActionSkipResult.skip_reason",
-            "type": "string",
-            "tags": [],
-            "label": "skip_reason",
-            "description": [],
-            "signature": [
-              "\"RULE_NOT_MODIFIED\""
-            ],
-            "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -10302,6 +10255,50 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.BulkActionSkipResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkActionSkipResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.BulkEditActionSkipResult",
+            "text": "BulkEditActionSkipResult"
+          },
+          " | ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.BulkGapsFillingSkipResult",
+            "text": "BulkGapsFillingSkipResult"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkEditActionSkipResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkEditActionSkipResult",
+        "description": [],
+        "signature": [
+          "SkipResult<\"RULE_NOT_MODIFIED\">"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.BulkEditSkipReason",
         "type": "Type",
         "tags": [],
@@ -10310,7 +10307,37 @@
         "signature": [
           "\"RULE_NOT_MODIFIED\""
         ],
-        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
+        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkGapsFillingSkipReason",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkGapsFillingSkipReason",
+        "description": [],
+        "signature": [
+          "\"NO_GAPS_TO_FILL\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_action.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BulkGapsFillingSkipResult",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkGapsFillingSkipResult",
+        "description": [],
+        "signature": [
+          "SkipResult<\"NO_GAPS_TO_FILL\">"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/bulk_action.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

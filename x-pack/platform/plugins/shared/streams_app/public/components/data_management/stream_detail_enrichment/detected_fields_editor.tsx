@@ -13,17 +13,21 @@ import { Streams } from '@kbn/streams-schema';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import { SchemaField } from '../schema_editor/types';
-import { useStreamEnrichmentEvents } from './state_management/stream_enrichment_state_machine';
+import {
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 
 interface DetectedFieldsEditorProps {
-  definition: Streams.ingest.all.GetResponse;
   detectedFields: SchemaField[];
 }
 
-export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
+
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
 
   const hasFields = detectedFields.length > 0;

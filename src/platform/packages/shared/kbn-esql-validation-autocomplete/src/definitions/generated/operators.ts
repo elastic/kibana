@@ -3175,7 +3175,7 @@ const likeDefinition: FunctionDefinition = {
   name: 'like',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.like', {
     defaultMessage:
-      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern or a list of patterns. If a list of patterns is provided,\nthe expression will return true if any of the patterns match.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
   preview: false,
   alias: undefined,
@@ -4432,7 +4432,7 @@ const notLikeDefinition: FunctionDefinition = {
   name: 'not like',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_like', {
     defaultMessage:
-      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern or a list of patterns. If a list of patterns is provided,\nthe expression will return true if any of the patterns match.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
   preview: false,
   alias: undefined,

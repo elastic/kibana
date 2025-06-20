@@ -11,7 +11,6 @@ import {
   guideStateSavedObjectsType,
   pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import { websiteSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { createGuides } from '@kbn/test-suites-src/api_integration/apis/guided_onboarding/helpers';
@@ -41,19 +40,13 @@ export default function testGetGuidesState({ getService }: FtrProviderContext) {
     });
 
     it('returns all created guides (active and inactive)', async () => {
-      await createGuides(kibanaServer, [
-        testGuideStep1ActiveState,
-        { ...testGuideStep1ActiveState, guideId: websiteSearchGuideId },
-      ]);
+      await createGuides(kibanaServer, [testGuideStep1ActiveState]);
       const response = await supertest
         .get(getGuidesPath)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       expect(response.body).not.to.be.empty();
-      expect(response.body.state).to.eql([
-        testGuideStep1ActiveState,
-        { ...testGuideStep1ActiveState, guideId: websiteSearchGuideId },
-      ]);
+      expect(response.body.state).to.eql([testGuideStep1ActiveState]);
     });
   });
 }

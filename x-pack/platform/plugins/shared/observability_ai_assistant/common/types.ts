@@ -189,6 +189,7 @@ export interface InferenceChunk {
 export interface NerAnonymizationRule {
   type: 'ner';
   enabled: boolean;
+  modelId?: string;
 }
 
 export interface RegexAnonymizationRule {

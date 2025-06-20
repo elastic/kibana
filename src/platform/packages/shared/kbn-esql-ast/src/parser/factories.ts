@@ -119,7 +119,7 @@ export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['
   );
 
 export const createList = (ctx: ParserRuleContext, values: ESQLLiteral[]): ESQLList =>
-  Builder.expression.literal.list({ values }, createParserFields(ctx));
+  Builder.expression.list.literal({ values }, createParserFields(ctx));
 
 export const createNumericLiteral = (
   ctx: DecimalValueContext | IntegerValueContext,
@@ -238,15 +238,17 @@ export function createFunction<Subtype extends FunctionSubtype>(
   name: string,
   ctx: ParserRuleContext,
   customPosition?: ESQLLocation,
-  subtype?: Subtype
+  subtype?: Subtype,
+  args: ESQLAstItem[] = [],
+  incomplete?: boolean
 ): ESQLFunction<Subtype> {
   const node: ESQLFunction<Subtype> = {
     type: 'function',
     name,
     text: ctx.getText(),
     location: customPosition ?? getPosition(ctx.start, ctx.stop),
-    args: [],
-    incomplete: Boolean(ctx.exception),
+    args,
+    incomplete: Boolean(ctx.exception) || !!incomplete,
   };
   if (subtype) {
     node.subtype = subtype;

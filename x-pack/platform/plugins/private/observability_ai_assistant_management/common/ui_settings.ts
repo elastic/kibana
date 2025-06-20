@@ -12,6 +12,7 @@ import {
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
   aiAssistantAnonymizationRules,
+  NER_MODEL_ID,
 } from '@kbn/observability-ai-assistant-plugin/common';
 
 const baseRuleSchema = schema.object({
@@ -31,6 +32,7 @@ const nerRuleSchema = schema.allOf([
   baseRuleSchema,
   schema.object({
     type: schema.literal('ner'),
+    modelId: schema.maybe(schema.string()),
   }),
 ]);
 
@@ -94,6 +96,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         },
         {
           type: 'ner',
+          modelId: NER_MODEL_ID,
           enabled: false,
         },
       ],
@@ -103,12 +106,19 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.anonymizationRulesDescription',
       {
-        defaultMessage:
-          'List of anonymization rules.\n' +
-          '- type: "ner" or "regex"\n' +
-          '- entityClass: (regex type only) eg: email, url, ip\n' +
-          '- pattern: (regex type only) the regular‑expression string to match\n' +
-          '- enabled: boolean flag to turn the rule on or off\n',
+        defaultMessage: `List of anonymization rules
+          <ul>
+            <li><strong>type:</strong> "ner" or "regex"</li>
+            <li><strong>entityClass:</strong> (regex type only) eg: EMAIL, URL, IP</li>
+            <li><strong>pattern:</strong> (regex type only) the regular-expression string to match</li>
+            <li><strong>modelId:</strong> (ner type only) ID of the NER (Named Entity Recognition) model to use</li>
+            <li><strong>enabled:</strong> boolean flag to turn the rule on or off</li>
+          </ul>`,
+        values: {
+          ul: (chunks) => `<ul>${chunks}</ul>`,
+          li: (chunks) => `<li>${chunks}</li>`,
+          strong: (chunks) => `<strong>${chunks}</strong>`,
+        },
       }
     ),
     schema: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema])),

@@ -22,9 +22,10 @@ import {
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
+  getArgsFromRenameFunction,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
-
+import { parse, walk } from '@kbn/esql-ast';
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {
@@ -782,6 +783,36 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getArgsFromRenameFunction', () => {
+    it('should return the args from an = rename function', () => {
+      const esql = 'FROM index | RENAME renamed = original';
+      const { root } = parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
+    });
+
+    it('should return the args from an AS rename function', () => {
+      const esql = 'FROM index | RENAME original AS renamed';
+      const { root } = parse(esql);
+      let renameFunction;
+      walk(root, {
+        visitFunction: (node) => (renameFunction = node),
+      });
+
+      expect(getArgsFromRenameFunction(renameFunction!)).toMatchObject({
+        original: { name: 'original' },
+        renamed: { name: 'renamed' },
+      });
     });
   });
 });

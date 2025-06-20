@@ -5702,12 +5702,12 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLAstRenameExpression.name",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "name",
             "description": [],
             "signature": [
-              "\"as\""
+              "\"=\" | \"as\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,

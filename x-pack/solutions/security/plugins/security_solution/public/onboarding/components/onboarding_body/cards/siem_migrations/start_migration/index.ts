@@ -17,7 +17,6 @@ import startMigrationDarkIcon from './images/start_migration_icon_dark.png';
 export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsRules,
   title: START_MIGRATION_CARD_TITLE,
-  badge: 'tech_preview',
   icon: startMigrationIcon,
   iconDark: startMigrationDarkIcon,
   Component: React.lazy(

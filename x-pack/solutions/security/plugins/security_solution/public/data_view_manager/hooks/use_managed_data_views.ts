@@ -10,19 +10,18 @@ import { useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 
 export const useManagedDataViews = () => {
-  const { dataViews } = useSelector(sharedStateSelector);
+  const { dataViews, defaultDataViewId } = useSelector(sharedStateSelector);
   const {
     services: { fieldFormats },
   } = useKibana();
 
   return useMemo(() => {
     const managed = dataViews
-      .filter((dv) => dv.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
+      .filter((dv) => dv.id === defaultDataViewId)
       .map((spec) => new DataView({ spec, fieldFormats }));
 
     return managed;
-  }, [dataViews, fieldFormats]);
+  }, [dataViews, defaultDataViewId, fieldFormats]);
 };
