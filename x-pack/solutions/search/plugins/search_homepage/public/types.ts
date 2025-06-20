@@ -43,17 +43,16 @@ export interface SearchHomepagePluginStart {
 }
 
 export interface SearchHomepageAppPluginStartDependencies {
-  application: CoreStart['application'];
   console?: ConsolePluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
   cloud?: CloudStart;
 }
 
-export interface SearchHomepageServicesContext extends SearchHomepageAppPluginStartDependencies {
-  history: AppMountParameters['history'];
-  http: CoreStart['http'];
-}
+export type SearchHomepageServicesContext = CoreStart &
+  SearchHomepageAppPluginStartDependencies & {
+    history: AppMountParameters['history'];
+  };
 
 export interface AppUsageTracker {
   click: (eventName: string | string[]) => void;
