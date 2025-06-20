@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('searchLabsSection');
         await testSubjects.existOrFail('searchLabsButton');
         await testSubjects.click('searchLabsButton');
-        await pageObjects.svlSearchHomePage.expectToBeOnSearchLabsTutorialsPage();
+        await pageObjects.svlSearchHomePage.expectToBeOnSearchLabsPage();
       });
 
       it('renders Open Notebooks content', async () => {
