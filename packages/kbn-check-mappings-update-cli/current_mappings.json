@@ -1256,6 +1256,9 @@
         "dynamic": false,
         "properties": {}
       },
+      "previous_version": {
+        "type": "keyword"
+      },
       "verification_key_id": {
         "type": "keyword"
       },
@@ -1833,6 +1836,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -2436,6 +2442,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -3756,6 +3765,9 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {
