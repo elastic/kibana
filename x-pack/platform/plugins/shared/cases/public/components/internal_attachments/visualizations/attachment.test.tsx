@@ -7,14 +7,14 @@
 
 import React, { Suspense } from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { LENS_ATTACHMENT_TYPE } from '../../../common';
-import type { PersistableStateAttachmentViewProps } from '../../client/attachment_framework/types';
-import { AttachmentActionType } from '../../client/attachment_framework/types';
+import { LENS_ATTACHMENT_TYPE } from '../../../../common';
+import type { PersistableStateAttachmentViewProps } from '../../../client/attachment_framework/types';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase } from '../../../containers/mock';
 import { getVisualizationAttachmentType } from './attachment';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('getVisualizationAttachmentType', () => {
   const mockEmbeddableComponent = jest

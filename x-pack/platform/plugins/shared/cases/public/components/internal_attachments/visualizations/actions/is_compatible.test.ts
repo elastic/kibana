@@ -8,15 +8,15 @@
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { isCompatible } from './is_compatible';
-import { canUseCases } from '../../../client/helpers/can_use_cases';
+import { canUseCases } from '../../../../client/helpers/can_use_cases';
 import { getMockLensApi } from './mocks';
 
-jest.mock('../../../../common/utils/owner', () => ({
+jest.mock('../../../../../common/utils/owner', () => ({
   getCaseOwnerByAppId: () => 'securitySolution',
 }));
 
-jest.mock('../../../client/helpers/can_use_cases', () => {
-  const actual = jest.requireActual('../../../client/helpers/can_use_cases');
+jest.mock('../../../../client/helpers/can_use_cases', () => {
+  const actual = jest.requireActual('../../../../client/helpers/can_use_cases');
   return {
     ...actual,
     canUseCases: jest.fn(),

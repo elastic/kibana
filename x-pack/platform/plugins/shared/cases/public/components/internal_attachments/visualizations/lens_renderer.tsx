@@ -9,7 +9,7 @@ import React from 'react';
 import { Global, css } from '@emotion/react';
 
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import type { LensProps } from './types';
 
 const LENS_VISUALIZATION_HEIGHT = 200;

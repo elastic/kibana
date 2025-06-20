@@ -8,7 +8,7 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { OPEN_IN_VISUALIZATION } from './translations';
 import type { LensProps } from './types';
 

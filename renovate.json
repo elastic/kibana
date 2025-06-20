@@ -3737,7 +3737,8 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": [
-        "react-hook-form"
+        "react-hook-form",
+        "html2canvas"
       ],
       "reviewers": [
         "team:obs-ux-management-team"

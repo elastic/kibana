@@ -12,8 +12,8 @@ import { screen } from '@testing-library/react';
 import { OpenLensButton } from './open_lens_button';
 import { lensVisualization } from './index.mock';
 import userEvent from '@testing-library/user-event';
-import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
-import { renderWithTestingProviders } from '../../common/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('OpenLensButton', () => {
   const props = {

@@ -15,7 +15,7 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
-import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
+import { OPEN_IN_VISUALIZATION } from '../../../internal_attachments/visualizations/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
