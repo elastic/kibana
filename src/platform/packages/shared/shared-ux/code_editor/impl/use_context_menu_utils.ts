@@ -66,7 +66,11 @@ const DEFAULT_ACTIONS: ContextMenuAction[] = [
         if (selection && model) {
           const selectedText = model.getValueInRange(selection);
           copyToClipboard(selectedText);
-          ed.setPosition(position); //
+          if (position) {
+            // For some reason (possibly rerendering), calling copyToClipboard
+            // changes the position of the cursor so we set it to the initial position
+            ed.setPosition(position);
+          }
         }
       },
     },
