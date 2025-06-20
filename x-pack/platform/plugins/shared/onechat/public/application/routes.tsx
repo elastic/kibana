@@ -7,7 +7,7 @@
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
-import { OnechatStackToolsPage } from './pages/tools';
+import { OnechatToolsPage } from './pages/tools';
 import { OnechatChatPage } from './pages/chat';
 
 export const OnechatRoutes: React.FC<{}> = () => {
@@ -17,7 +17,7 @@ export const OnechatRoutes: React.FC<{}> = () => {
         <OnechatChatPage />
       </Route>
       <Route path="/tools">
-        <OnechatStackToolsPage />
+        <OnechatToolsPage />
       </Route>
     </Routes>
   );

@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { ONECHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
-interface WorkchatBreadcrumb {
+interface OnechatBreadcrumb {
   text: string;
   path?: string;
 }
 
-export const useBreadcrumb = (breadcrumbs: WorkchatBreadcrumb[]) => {
+export const useBreadcrumb = (breadcrumbs: OnechatBreadcrumb[]) => {
   const {
     services: { chrome, application },
   } = useKibana();
