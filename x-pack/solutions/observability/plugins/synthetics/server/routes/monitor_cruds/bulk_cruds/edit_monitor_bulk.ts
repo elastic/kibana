@@ -31,27 +31,6 @@ export interface MonitorConfigUpdate {
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
 }
 
-const updateConfigSavedObjects = async ({
-  routeContext,
-  monitorsToUpdate,
-}: {
-  routeContext: RouteContext;
-  monitorsToUpdate: MonitorConfigUpdate[];
-}) => {
-  return await routeContext.savedObjectsClient.bulkUpdate<MonitorFields>(
-    monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
-      type: syntheticsMonitorType,
-      id: decryptedPreviousMonitor.id,
-      attributes: {
-        ...monitorWithRevision,
-        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
-        [ConfigKey.MONITOR_QUERY_ID]:
-          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
-      },
-    }))
-  );
-};
-
 async function syncUpdatedMonitors({
   spaceId,
   privateLocations,
@@ -92,11 +71,20 @@ export const syncEditedMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server } = routeContext;
+  const { server, monitorConfigRepository } = routeContext;
 
   try {
+    const data = monitorsToUpdate.map(({ monitorWithRevision, decryptedPreviousMonitor }) => ({
+      id: decryptedPreviousMonitor.id,
+      attributes: {
+        ...monitorWithRevision,
+        [ConfigKey.CONFIG_ID]: decryptedPreviousMonitor.id,
+        [ConfigKey.MONITOR_QUERY_ID]:
+          monitorWithRevision[ConfigKey.CUSTOM_HEARTBEAT_ID] || decryptedPreviousMonitor.id,
+      } as unknown as MonitorFields,
+    }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
-      updateConfigSavedObjects({ monitorsToUpdate, routeContext }),
+      monitorConfigRepository.bulkUpdate({ monitors: data }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
