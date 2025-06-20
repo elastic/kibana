@@ -31,6 +31,7 @@ import {
   LogicalNotContext,
   MapExpressionContext,
   MatchBooleanExpressionContext,
+  RegexBooleanExpressionContext,
   MatchExpressionContext,
   MetadataContext,
   MvExpandCommandContext,
@@ -40,7 +41,6 @@ import {
   OperatorExpressionDefaultContext,
   ParenthesizedExpressionContext,
   QualifiedIntegerLiteralContext,
-  RegexBooleanExpressionContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
@@ -60,6 +60,8 @@ import {
   type RenameClauseContext,
   type StatsCommandContext,
   type ValueExpressionContext,
+  LikeExpressionContext,
+  RlikeExpressionContext,
 } from '../antlr/esql_parser';
 import {
   computeLocationExtends,
@@ -442,23 +444,31 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       const renameToken = asToken || assignToken;
 
       if (renameToken && textExistsAndIsValid(renameToken.getText())) {
-        const option = createOption(renameToken.getText().toLowerCase(), clause);
+        const renameFunction = createFunction(
+          renameToken.getText().toLowerCase(),
+          clause,
+          undefined,
+          'binary-expression'
+        );
 
         const renameArgsInOrder = asToken
           ? [clause._oldName, clause._newName]
           : [clause._newName, clause._oldName];
+
         for (const arg of renameArgsInOrder) {
           if (textExistsAndIsValid(arg.getText())) {
-            option.args.push(createColumn(arg));
+            renameFunction.args.push(createColumn(arg));
           }
         }
-        const firstArg = firstItem(option.args);
-        const lastArg = lastItem(option.args);
-        const location = option.location;
+        const firstArg = firstItem(renameFunction.args);
+        const lastArg = lastItem(renameFunction.args);
+        const location = renameFunction.location;
         if (firstArg) location.min = firstArg.location.min;
         if (lastArg) location.max = lastArg.location.max;
-        return option;
-      } else if (textExistsAndIsValid(clause._oldName?.getText())) {
+        return renameFunction;
+      }
+
+      if (textExistsAndIsValid(clause._oldName?.getText())) {
         return createColumn(clause._oldName);
       }
     })
@@ -559,21 +569,26 @@ function collectRegexExpression(ctx: BooleanExpressionContext): ESQLFunction[] {
   const regexes = ctx.getTypedRuleContexts(RegexBooleanExpressionContext);
   const ret: ESQLFunction[] = [];
   return ret.concat(
-    regexes.map((regex) => {
-      const negate = regex.NOT();
-      const likeType = regex._kind.text?.toLowerCase() || '';
-      const fnName = `${negate ? 'not ' : ''}${likeType}`;
-      const fn = createFunction(fnName, regex, undefined, 'binary-expression');
-      const arg = visitValueExpression(regex.valueExpression());
-      if (arg) {
-        fn.args.push(arg);
+    regexes
+      .map((regex) => {
+        if (regex instanceof RlikeExpressionContext || regex instanceof LikeExpressionContext) {
+          const negate = regex.NOT();
+          const likeType = regex instanceof RlikeExpressionContext ? 'rlike' : 'like';
+          const fnName = `${negate ? 'not ' : ''}${likeType}`;
+          const fn = createFunction(fnName, regex, undefined, 'binary-expression');
+          const arg = visitValueExpression(regex.valueExpression());
+          if (arg) {
+            fn.args.push(arg);
 
-        const literal = createLiteralString(regex._pattern);
+            const literal = createLiteralString(regex.string_());
 
-        fn.args.push(literal);
-      }
-      return fn;
-    })
+            fn.args.push(literal);
+          }
+          return fn;
+        }
+        return undefined;
+      })
+      .filter(nonNullable)
   );
 }
 

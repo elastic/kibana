@@ -13,22 +13,12 @@ import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
+jest.mock('../../../../common/lib/kibana/use_kibana');
+
 jest.mock('../data_input_flyout/context', () => ({
   useRuleMigrationDataInputContext: () => ({
     openFlyout: jest.fn(),
   }),
-}));
-
-jest.mock('../../../../common/lib/kibana/kibana_react', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      siemMigrations: {
-        rules: {
-          telemetry: jest.fn(),
-        },
-      },
-    },
-  })),
 }));
 
 jest.mock('../../service/hooks/use_start_migration');
@@ -96,14 +86,24 @@ describe('MigrationReadyPanel', () => {
     it('should render description text correctly', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        `Migration of 6 rules is created but the translation has not started yet.`
+        `Migration of 6 rules is created and ready to start.`
       );
     });
 
     it('should render start migration button', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start');
+    });
+
+    it('should render starting migration button while loading', () => {
+      useStartMigrationMock.mockReturnValue({
+        startMigration: mockStartMigration,
+        isLoading: true,
+      });
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      expect(screen.getByTestId('startMigrationButton')).toBeVisible();
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');
     });
   });
 
@@ -120,21 +120,31 @@ describe('MigrationReadyPanel', () => {
 
     it('should render start migration button when there is an error', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStateWithError} />);
-      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start');
     });
   });
 
-  describe('Aborted Migration', () => {
+  describe('Stopped Migration', () => {
     it('should render aborted migration message', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        'Migration of 6 rules was stopped. You can resume it any time.'
+        'Migration of 6 rules was stopped, you can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
+    });
+
+    it('should render resuming migration button while loading', () => {
+      useStartMigrationMock.mockReturnValue({
+        startMigration: mockStartMigration,
+        isLoading: true,
+      });
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsStopped} />);
+      expect(screen.getByTestId('startMigrationButton')).toBeVisible();
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resuming');
     });
   });
 
@@ -156,7 +166,7 @@ describe('MigrationReadyPanel', () => {
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created but the translation has not started yet. Upload macros & lookups and start the translation process.'
+          'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.'
         );
       });
     });

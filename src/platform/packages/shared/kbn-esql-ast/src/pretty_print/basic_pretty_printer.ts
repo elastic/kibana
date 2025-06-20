@@ -374,12 +374,6 @@ export class BasicPrettyPrinter {
       }
     })
 
-    .on('visitRenameExpression', (ctx) => {
-      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
-
-      return this.decorateWithComments(ctx.node, formatted);
-    })
-
     .on('visitOrderExpression', (ctx) => {
       const node = ctx.node;
       let text = ctx.visitArgument(0);

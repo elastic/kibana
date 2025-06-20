@@ -34,10 +34,7 @@ export const softDeleteOmittedUsers =
       index,
       query: {
         bool: {
-          must: [
-            { term: { 'labels.monitoring.privileged_users': 'monitored' } },
-            { term: { 'labels.sources': 'csv' } },
-          ],
+          must: [{ term: { 'user.is_privileged': true } }, { term: { 'labels.sources': 'csv' } }],
           must_not: [{ terms: { 'user.name': uploaded } }],
         },
       },
@@ -57,7 +54,9 @@ export const softDeleteOmittedUsers =
           { update: { _id: id } },
           {
             doc: {
-              labels: { monitoring: { privileged_users: 'deleted' } },
+              user: {
+                is_privileged: false,
+              },
             },
           },
         ];

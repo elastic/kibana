@@ -58,8 +58,8 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
 
   return (
     <EuiText color="subdued">
-      {i18n.translate('xpack.streams.streamsRetentionColumn.disabledLifecycleBadgeLabel', {
-        defaultMessage: 'Disabled',
+      {i18n.translate('xpack.streams.streamsRetentionColumn.noDataLabel', {
+        defaultMessage: 'N/A',
       })}
     </EuiText>
   );

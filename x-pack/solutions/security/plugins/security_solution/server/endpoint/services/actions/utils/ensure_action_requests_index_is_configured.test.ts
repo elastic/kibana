@@ -105,6 +105,7 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
             },
           },
           originSpaceId: { ignore_above: 1024, type: 'keyword' },
+          tags: { type: 'keyword' },
         },
       });
     });
@@ -152,6 +153,7 @@ describe('ensureActionRequestsIndexIsConfigured()', () => {
                 },
               },
               originSpaceId: { ignore_above: 1024, type: 'keyword' },
+              tags: { type: 'keyword' },
             },
           },
         },
