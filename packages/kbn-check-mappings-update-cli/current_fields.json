@@ -958,6 +958,9 @@
     "installCount",
     "unInstallCount"
   ],
+  "scheduled_report": [
+    "createdBy"
+  ],
   "search": [
     "description",
     "title"
@@ -990,6 +993,11 @@
     "sourceIndex",
     "updated",
     "version"
+  ],
+  "security:reference-data": [
+    "id",
+    "owner",
+    "type"
   ],
   "siem-detection-engine-rule-actions": [
     "actions",
@@ -1152,6 +1160,7 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",

@@ -1079,7 +1079,7 @@
       "managed": {
         "type": "boolean"
       },
-        "matchers": {
+      "matchers": {
         "dynamic": false,
         "type": "object"
       },
@@ -3119,6 +3119,14 @@
       }
     }
   },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "search": {
     "dynamic": false,
     "properties": {
@@ -3216,6 +3224,20 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:reference-data": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
@@ -3734,6 +3756,9 @@
             "type": "text"
           }
         }
+      },
+      "maintenance_windows": {
+        "type": "keyword"
       },
       "name": {
         "fields": {
