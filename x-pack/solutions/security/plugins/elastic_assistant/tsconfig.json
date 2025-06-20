@@ -79,7 +79,8 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/discover-plugin",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/core-notifications-browser-mocks"
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/ai-assistant-management-plugin"
   ],
   "exclude": [
     "target/**/*",
