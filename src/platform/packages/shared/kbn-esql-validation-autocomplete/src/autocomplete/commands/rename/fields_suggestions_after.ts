@@ -6,47 +6,49 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  type ESQLAstCommand,
-  walk,
-  type ESQLAstRenameExpression,
-  type ESQLAstBaseItem,
-} from '@kbn/esql-ast';
+import { type ESQLAstCommand, type ESQLAstBaseItem, type ESQLFunction } from '@kbn/esql-ast';
+import uniqBy from 'lodash/uniqBy';
 import type { ESQLFieldWithMetadata } from '../../../validation/types';
-import { isOptionItem } from '../../../shared/helpers';
+import { isFunctionItem } from '../../../shared/helpers';
 
 export const fieldsSuggestionsAfter = (
   command: ESQLAstCommand,
   previousCommandFields: ESQLFieldWithMetadata[],
   userDefinedColumns: ESQLFieldWithMetadata[]
 ) => {
-  const currentColumns: string[] = [];
-  const renamePairs: ESQLAstRenameExpression[] = [];
+  const asRenamePairs: ESQLFunction[] = [];
+  const assignRenamePairs: ESQLFunction[] = [];
 
-  walk(command, {
-    visitColumn: (node) => {
-      currentColumns.push(node.name);
-    },
-  });
-
-  walk(command, {
-    visitCommand: (node) => {
-      const args = node.args.filter((arg) => isOptionItem(arg) && arg.name === 'as');
-      renamePairs.push(...(args as ESQLAstRenameExpression[]));
-    },
-  });
+  for (const arg of command.args) {
+    if (isFunctionItem(arg)) {
+      if (arg.name === 'as') {
+        asRenamePairs.push(arg);
+      } else if (arg.name === '=') {
+        assignRenamePairs.push(arg);
+      }
+    }
+  }
 
   // rename the columns with the user defined name
-  return previousCommandFields.map((oldColumn) => {
-    const renamePair = renamePairs.find(
-      (pair) =>
-        pair.args && pair.args[0] && (pair.args[0] as ESQLAstBaseItem).name === oldColumn.name
+  const newFields = previousCommandFields.map((oldColumn) => {
+    const asRenamePair = asRenamePairs.find(
+      (pair) => (pair?.args?.[0] as ESQLAstBaseItem)?.name === oldColumn.name
     );
 
-    if (renamePair && renamePair.args && renamePair.args[1]) {
-      return { name: (renamePair.args[1] as ESQLAstBaseItem).name, type: oldColumn.type };
-    } else {
-      return oldColumn; // No rename found, keep the old name
+    if (asRenamePair?.args?.[1]) {
+      return { name: (asRenamePair.args[1] as ESQLAstBaseItem).name, type: oldColumn.type };
     }
+
+    const assignRenamePair = assignRenamePairs.find(
+      (pair) => (pair?.args?.[1] as ESQLAstBaseItem)?.name === oldColumn.name
+    );
+
+    if (assignRenamePair?.args?.[0]) {
+      return { name: (assignRenamePair.args[0] as ESQLAstBaseItem).name, type: oldColumn.type };
+    }
+
+    return oldColumn; // No rename found, keep the old name
   });
+
+  return uniqBy(newFields, 'name');
 };

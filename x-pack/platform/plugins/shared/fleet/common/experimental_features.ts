@@ -15,6 +15,8 @@ const _allowedExperimentalValues = {
   enableSSLSecrets: false,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
+  enableAgentMigrations: false,
+  enablePackageRollback: false,
 };
 
 /**

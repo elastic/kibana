@@ -71,6 +71,7 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'alerts'
+    | 'internallyManaged'
   > {
   id: string;
   enabledInLicense: boolean;

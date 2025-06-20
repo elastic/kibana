@@ -108,7 +108,7 @@ export async function getTraceItems({
     logger,
   });
 
-  const [errorResponse, traceResponse, spanLinksCountById] = await Promise.all([
+  const [errorDocs, traceResponse, spanLinksCountById] = await Promise.all([
     errorResponsePromise,
     traceResponsePromise,
     getSpanLinksCountById({ traceId, apmEventClient, start, end }),
@@ -119,7 +119,52 @@ export async function getTraceItems({
 
   const traceDocs = traceResponse.hits.map(({ hit }) => hit);
 
-  const errorDocs = errorResponse.hits.hits.map((hit) => {
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+    spanLinksCountById,
+    traceDocsTotal,
+    maxTraceItems,
+  };
+}
+
+export const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
+const excludedLogLevels = ['debug', 'info', 'warning'];
+
+export async function getApmTraceError({
+  apmEventClient,
+  traceId,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  traceId: string;
+  start: number;
+  end: number;
+}) {
+  const response = await apmEventClient.search('get_errors_docs', {
+    apm: {
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
+    },
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
+      },
+    },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
+  });
+
+  return response.hits.hits.map((hit) => {
     const errorSource = 'error' in hit._source ? hit._source : undefined;
 
     const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
@@ -141,51 +186,6 @@ export async function getTraceItems({
     };
 
     return waterfallErrorEvent;
-  });
-
-  return {
-    exceedsMax,
-    traceDocs,
-    errorDocs,
-    spanLinksCountById,
-    traceDocsTotal,
-    maxTraceItems,
-  };
-}
-
-export const MAX_ITEMS_PER_PAGE = 10000; // 10000 is the max allowed by ES
-const excludedLogLevels = ['debug', 'info', 'warning'];
-
-export function getApmTraceError({
-  apmEventClient,
-  traceId,
-  start,
-  end,
-}: {
-  apmEventClient: APMEventClient;
-  traceId: string;
-  start: number;
-  end: number;
-}) {
-  return apmEventClient.search('get_errors_docs', {
-    apm: {
-      sources: [
-        {
-          documentType: ApmDocumentType.ErrorEvent,
-          rollupInterval: RollupInterval.None,
-        },
-      ],
-    },
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-      },
-    },
-    fields: [...requiredFields, ...optionalFields],
-    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 }
 
