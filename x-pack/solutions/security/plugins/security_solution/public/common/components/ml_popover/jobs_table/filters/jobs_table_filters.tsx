@@ -36,7 +36,7 @@ export const JobsTableFiltersComponent = ({
   securityJobs,
   onFilterChanged,
 }: JobsTableFiltersProps) => {
-  const [filterQuery, setFilterQuery] = useState<string>('defaultFilters.filterQuery');
+  const [filterQuery, setFilterQuery] = useState<string>('');
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [showCustomJobs, setShowCustomJobs] = useState<boolean>(false);
   const [showElasticJobs, setShowElasticJobs] = useState<boolean>(false);

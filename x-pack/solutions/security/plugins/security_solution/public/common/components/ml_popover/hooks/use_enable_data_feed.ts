@@ -65,7 +65,7 @@ export const useEnableDataFeed = () => {
         }
       }
 
-      // Max start time for the job is no more than two weeks ago to ensure job performance
+      // Max start time for job is no more than two weeks ago to ensure job performance
       const date = new Date();
       const maxStartTime = date.setDate(date.getDate() - 14);
 

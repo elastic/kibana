@@ -48,7 +48,6 @@ const defaultFilterProps: JobsFilters = {
 export const MlPopover = React.memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
-
   const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
 
   const {
@@ -83,7 +82,7 @@ export const MlPopover = React.memo(() => {
     ...filterProperties,
   });
 
-  const incompatibleJobCount = filteredJobs.filter((j) => !j.isCompatible).length;
+  const incompatibleJobCount = jobs.filter((j) => !j.isCompatible).length;
   const installedJobsIds = useMemo(
     () => jobs.filter((j) => j.isInstalled).map((j) => j.id),
     [jobs]
