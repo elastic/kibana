@@ -24,8 +24,8 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { getPreConfiguredActions } from '../../../alerting_api_integration/common/config';
-import { getTlsWebhookServerUrls } from '../../../alerting_api_integration/common/lib/get_tls_webhook_servers';
+import { getPreConfiguredActions } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/config';
+import { getTlsWebhookServerUrls } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/get_tls_webhook_servers';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {

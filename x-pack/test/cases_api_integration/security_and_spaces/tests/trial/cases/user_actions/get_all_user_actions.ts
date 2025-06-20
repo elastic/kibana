@@ -12,6 +12,7 @@ import type {
   PushedUserAction,
   UserActionWithDeprecatedResponse,
 } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
@@ -29,7 +30,6 @@ import {
   getCaseUserActions,
 } from '../../../../../common/lib/api';
 
-import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { setupSuperUserProfile } from '../../../../../common/lib/api/user_profiles';
 
 // eslint-disable-next-line import/no-default-export
