@@ -10,6 +10,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AnalyticsIndex } from '../analytics_index';
 import {
   CAI_COMMENTS_INDEX_NAME,
+  CAI_COMMENTS_INDEX_ALIAS,
   CAI_COMMENTS_INDEX_VERSION,
   CAI_COMMENTS_SOURCE_INDEX,
   CAI_COMMENTS_SOURCE_QUERY,
@@ -37,6 +38,7 @@ export const createCommentsAnalyticsIndex = ({
     isServerless,
     taskManager,
     indexName: CAI_COMMENTS_INDEX_NAME,
+    indexAlias: CAI_COMMENTS_INDEX_ALIAS,
     indexVersion: CAI_COMMENTS_INDEX_VERSION,
     mappings: CAI_COMMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_COMMENTS_INDEX_SCRIPT_ID,

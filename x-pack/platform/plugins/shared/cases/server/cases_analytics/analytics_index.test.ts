@@ -32,6 +32,7 @@ describe('AnalyticsIndex', () => {
   const taskManager = taskManagerMock.createStart();
   const isServerless = false;
   const indexName = '.test-index-name';
+  const indexAlias = '.index-name';
   const indexVersion = 1;
   const painlessScriptId = 'painless_script_id';
   const taskId = 'foobar_task_id';
@@ -77,6 +78,7 @@ describe('AnalyticsIndex', () => {
       esClient,
       logger,
       indexName,
+      indexAlias,
       indexVersion,
       isServerless,
       mappings,
@@ -108,6 +110,11 @@ describe('AnalyticsIndex', () => {
       mappings: {
         ...mappings,
         _meta: mappingsMeta,
+      },
+      aliases: {
+        [indexAlias]: {
+          is_write_index: true,
+        },
       },
       settings: {
         index: {

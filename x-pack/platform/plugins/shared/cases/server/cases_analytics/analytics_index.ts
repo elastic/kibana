@@ -29,6 +29,7 @@ interface AnalyticsIndexParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   indexName: string;
+  indexAlias: string;
   indexVersion: number;
   isServerless: boolean;
   mappings: MappingTypeMapping;
@@ -48,6 +49,7 @@ interface MappingMeta {
 export class AnalyticsIndex {
   private readonly logger: Logger;
   private readonly indexName: string;
+  private readonly indexAlias: string;
   private readonly indexVersion: number;
   private readonly esClient: ElasticsearchClient;
   private readonly mappings: MappingTypeMapping;
@@ -65,6 +67,7 @@ export class AnalyticsIndex {
     esClient,
     isServerless,
     indexName,
+    indexAlias,
     indexVersion,
     mappings,
     painlessScriptId,
@@ -77,6 +80,7 @@ export class AnalyticsIndex {
     this.logger = logger;
     this.esClient = esClient;
     this.indexName = indexName;
+    this.indexAlias = indexAlias;
     this.indexVersion = indexVersion;
 
     this.mappings = mappings;
@@ -178,6 +182,11 @@ export class AnalyticsIndex {
       mappings: this.mappings,
       settings: {
         index: this.indexSettings,
+      },
+      aliases: {
+        [this.indexAlias]: {
+          is_write_index: true,
+        },
       },
     });
 
