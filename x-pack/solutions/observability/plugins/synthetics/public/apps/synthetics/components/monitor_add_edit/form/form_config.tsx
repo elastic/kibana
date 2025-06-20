@@ -335,7 +335,6 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
       MAINTENANCE_WINDOWS_OPTIONS(readOnly),
       ICMP_ADVANCED(readOnly).requestConfig,
       KIBANA_SPACES_OPTIONS(readOnly),
-
     ],
   },
 });
