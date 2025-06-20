@@ -14,6 +14,7 @@ import {
   ChromeLayoutConfig,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
+import useObservable from 'react-use/lib/useObservable';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -22,13 +23,12 @@ import type {
 } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
-import useObservable from 'react-use/lib/useObservable';
 
-const layoutConfig: ChromeLayoutConfig = {
+const defaultLayoutConfig: ChromeLayoutConfig = {
   headerHeight: 96,
+  bannerHeight: 32,
 
   /** for debug for now */
-  bannerHeight: 48,
   sidebarWidth: 48,
   footerHeight: 48,
   navigationWidth: 48,
@@ -51,18 +51,33 @@ export class GridLayout implements LayoutService {
     const chromeHeader = chrome.getClassicHeaderComponentForGridLayout();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
+    // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
+    const chromelessHeader = chrome.getChromelessHeader();
+    const headerBanner = chrome.getHeaderBanner();
+    const hasHeaderBanner$ = chrome.hasHeaderBanner$();
     const chromeVisible$ = chrome.getIsVisible$();
     const debug = this.params.debug ?? false;
 
     return React.memo(() => {
+      // TODO: optimize initial value to avoid unnecessary re-renders
       const chromeVisible = useObservable(chromeVisible$, false);
+      const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
+
+      const layoutConfig = React.useMemo<ChromeLayoutConfig>(
+        () => ({
+          ...defaultLayoutConfig,
+          // Use the default header height if chrome is visible, otherwise set it to 0 while displaying {chromelessHeader}
+          headerHeight: chromeVisible ? 96 : 0,
+        }),
+        [chromeVisible]
+      );
 
       return (
         <>
           <GridLayoutGlobalStyles />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
-              header={chromeVisible && chromeHeader}
+              header={chromeVisible ? chromeHeader : chromelessHeader}
               sidebar={
                 chromeVisible && debug ? <SimpleDebugOverlay label="Debug Sidebar" /> : undefined
               }
@@ -74,7 +89,13 @@ export class GridLayout implements LayoutService {
                   <SimpleDebugOverlay label="Debug Nav" style={{ transform: 'rotate(180deg)' }} />
                 ) : undefined
               }
-              banner={debug ? <SimpleDebugOverlay label="Debug Banner" /> : undefined}
+              banner={
+                hasHeaderBanner ? (
+                  headerBanner
+                ) : debug ? (
+                  <SimpleDebugOverlay label="Debug Banner" />
+                ) : undefined
+              }
             >
               <>
                 <div id="globalBannerList">{bannerComponent}</div>

@@ -421,7 +421,12 @@ export class ChromeService {
     const getClassicHeader = ({
       isFixed,
       includeBanner,
+      as,
     }: {
+      /**
+       * Whether the header should be rendered as a header element, or as a div element.
+       */
+      as: 'header' | 'div';
       /**
        * Whether the header should be fixed to the top of the page, with display: fixed;
        */
@@ -433,6 +438,7 @@ export class ChromeService {
     }) => (
       <Header
         /* customizable header variations */
+        as={as}
         headerBanner$={includeBanner ? headerBanner$.pipe(takeUntil(this.stop$)) : null}
         isFixed={isFixed}
         /* consistent header properties */
@@ -538,14 +544,14 @@ export class ChromeService {
           return <ProjectHeaderWithNavigationComponent />;
         }
 
-        return getClassicHeader({ isFixed: true, includeBanner: true });
+        return getClassicHeader({ isFixed: true, includeBanner: true, as: 'header' });
       };
 
       return <HeaderComponent />;
     };
 
     const getClassicHeaderComponentForGridLayout = () => {
-      return getClassicHeader({ isFixed: false, includeBanner: false });
+      return getClassicHeader({ isFixed: false, includeBanner: false, as: 'div' });
     };
 
     return {
@@ -555,6 +561,21 @@ export class ChromeService {
       docTitle,
       getLegacyHeaderComponentForFixedLayout,
       getClassicHeaderComponentForGridLayout,
+      getHeaderBanner: () => {
+        return (
+          <HeaderTopBanner
+            headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
+            position={'static'}
+          />
+        );
+      },
+      getChromelessHeader: () => {
+        return (
+          <div data-test-subj="kibanaHeaderChromeless">
+            <LoadingIndicator loadingCount$={http.getLoadingCount$()} showAsBar />
+          </div>
+        );
+      },
 
       getIsVisible$: () => this.isVisible$,
 

@@ -16,13 +16,18 @@ import { HeaderExtension } from './header_extension';
 
 export interface HeaderTopBannerProps {
   headerBanner$: Observable<ChromeUserBanner | undefined>;
+  position?: 'fixed' | 'static';
 }
 
 const styles = {
-  root: css`
+  rootFixed: css`
     position: fixed;
     top: 0;
     left: 0;
+    height: var(--kbnHeaderBannerHeight);
+    width: 100%;
+  `,
+  rootStatic: css`
     height: var(--kbnHeaderBannerHeight);
     width: 100%;
   `,
@@ -32,7 +37,10 @@ const styles = {
   `,
 };
 
-export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => {
+export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({
+  headerBanner$,
+  position = 'fixed',
+}) => {
   const headerBanner = useObservable(headerBanner$, undefined);
   if (!headerBanner) {
     return null;
@@ -41,7 +49,7 @@ export const HeaderTopBanner: FC<HeaderTopBannerProps> = ({ headerBanner$ }) => 
   return (
     <div
       css={[
-        styles.root,
+        position === 'static' ? styles.rootStatic : styles.rootFixed,
         ({ euiTheme }) => ({
           zIndex: euiTheme.levels.header,
         }),
