@@ -17,6 +17,8 @@ const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getLegacyHeaderComponentForFixedLayout: jest.fn(),
     getClassicHeaderComponentForGridLayout: jest.fn(),
+    getChromelessHeader: jest.fn(),
+    getHeaderBanner: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
