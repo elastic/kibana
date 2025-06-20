@@ -17,7 +17,7 @@ import { toolIdToLangchain } from './tool_provider_to_langchain_tools';
 /**
  * Converts a conversation to langchain format
  */
-export const conversationLangchainMessages = ({
+export const conversationToLangchainMessages = ({
   previousRounds,
   nextInput,
 }: {

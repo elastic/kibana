@@ -7,7 +7,7 @@
 
 import { isHumanMessage, isAIMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
 import { ToolCallWithResult, ToolCallStep, ConversationRoundStepType } from '@kbn/onechat-common';
-import { conversationLangchainMessages } from './to_langchain_messages';
+import { conversationToLangchainMessages } from './to_langchain_messages';
 
 describe('conversationLangchainMessages', () => {
   const makeRoundInput = (message: string) => ({ message });
@@ -30,7 +30,7 @@ describe('conversationLangchainMessages', () => {
 
   it('returns only the user message if no previous rounds', () => {
     const nextInput = makeRoundInput('hello');
-    const result = conversationLangchainMessages({ previousRounds: [], nextInput });
+    const result = conversationToLangchainMessages({ previousRounds: [], nextInput });
     expect(result).toHaveLength(1);
     expect(isHumanMessage(result[0])).toBe(true);
     expect(result[0].content).toBe('hello');
@@ -45,7 +45,7 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = conversationLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({ previousRounds, nextInput });
 
     expect(result).toHaveLength(3);
 
@@ -68,7 +68,7 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({ previousRounds, nextInput });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(5);
     const [
@@ -106,7 +106,7 @@ describe('conversationLangchainMessages', () => {
       },
     ];
     const nextInput = makeRoundInput('bye');
-    const result = conversationLangchainMessages({ previousRounds, nextInput });
+    const result = conversationToLangchainMessages({ previousRounds, nextInput });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
     expect(result).toHaveLength(7);
     const [
