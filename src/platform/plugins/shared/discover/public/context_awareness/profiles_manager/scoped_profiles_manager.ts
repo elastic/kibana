@@ -24,7 +24,7 @@ import type {
   DocumentProfileService,
 } from '../profiles/document_profile';
 import type { RootContext } from '../profiles/root_profile';
-import type { ScopedDiscoverEBTManager } from '../../discover_ebt_manager';
+import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
 import { logResolutionError } from './utils';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
 import { ContextualProfileLevel } from './consts';

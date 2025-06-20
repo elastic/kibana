@@ -17,7 +17,7 @@ import type {
   RootContext,
 } from '../profiles';
 import type { ContextWithProfileId } from '../profile_service';
-import type { DiscoverEBTManager } from '../../discover_ebt_manager';
+import type { DiscoverEBTManager } from '../../ebt_manager';
 import type { AppliedProfile } from '../composable_profile';
 import { logResolutionError } from './utils';
 import { ScopedProfilesManager } from './scoped_profiles_manager';

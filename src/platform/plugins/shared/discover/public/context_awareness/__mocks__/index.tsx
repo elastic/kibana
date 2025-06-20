@@ -25,7 +25,7 @@ import {
 } from '../profiles';
 import type { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
-import { DiscoverEBTManager } from '../../discover_ebt_manager';
+import { DiscoverEBTManager } from '../../ebt_manager';
 import {
   createApmErrorsContextServiceMock,
   createLogsContextServiceMock,
