@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable max-classes-per-file */
-
-import type { BehaviorSubject } from 'rxjs';
-import { isEqual } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { type PerformanceMetricEvent, reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -25,10 +18,17 @@ import {
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
 } from './discover_ebt_manager_registrations';
+import { ContextualProfileLevel } from '../../context_awareness';
+import type {
+  ReportEvent,
+  ReportPerformanceEvent,
+  SetAsActiveManager,
+  UpdateProfilesContextWith,
+} from './types';
 
 type FilterOperation = '+' | '-' | '_exists_';
 
-export enum FieldUsageEventName {
+enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
   filterAddition = 'filterAddition',
@@ -42,108 +42,6 @@ interface FieldUsageEventData {
 interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXTUAL_PROFILE_ID]: string;
-}
-
-export interface DiscoverEBTContextProps {
-  discoverProfiles: string[]; // Discover Context Awareness Profiles
-}
-export type DiscoverEBTContext = BehaviorSubject<DiscoverEBTContextProps>;
-
-type ReportEvent = CoreSetup['analytics']['reportEvent'];
-
-type ReportPerformanceEvent = (eventData: PerformanceMetricEvent) => void;
-
-type UpdateProfilesContextWith = (
-  discoverProfiles: DiscoverEBTContextProps['discoverProfiles']
-) => void;
-
-type SetAsActiveManager = () => void;
-
-export class DiscoverEBTManager {
-  private isCustomContextEnabled: boolean = false;
-  private customContext$: DiscoverEBTContext | undefined;
-  private activeScopedManagerId: string | undefined;
-  private reportEvent: ReportEvent | undefined;
-  private reportPerformanceEvent: ReportPerformanceEvent | undefined;
-
-  private updateProfilesContextWith: UpdateProfilesContextWith = (discoverProfiles) => {
-    if (
-      this.isCustomContextEnabled &&
-      this.customContext$ &&
-      !isEqual(this.customContext$.getValue().discoverProfiles, discoverProfiles)
-    ) {
-      this.customContext$.next({
-        discoverProfiles,
-      });
-    }
-  };
-
-  // https://docs.elastic.dev/telemetry/collection/event-based-telemetry
-  public initialize({
-    core,
-    discoverEbtContext$,
-  }: {
-    core: CoreSetup;
-    discoverEbtContext$: BehaviorSubject<DiscoverEBTContextProps>;
-  }) {
-    this.customContext$ = discoverEbtContext$;
-    this.reportEvent = core.analytics.reportEvent;
-    this.reportPerformanceEvent = (eventData) =>
-      reportPerformanceMetricEvent(core.analytics, eventData);
-  }
-
-  public onDiscoverAppMounted() {
-    this.isCustomContextEnabled = true;
-  }
-
-  public onDiscoverAppUnmounted() {
-    this.updateProfilesContextWith([]);
-    this.isCustomContextEnabled = false;
-    this.activeScopedManagerId = undefined;
-  }
-
-  public getProfilesContext() {
-    return this.customContext$?.getValue()?.discoverProfiles;
-  }
-
-  public createScopedEBTManager() {
-    const scopedManagerId = uuidv4();
-    let scopedDiscoverProfiles: string[] = [];
-
-    const withScopedContext =
-      <T extends (...params: Parameters<T>) => void>(callback: T) =>
-      (...params: Parameters<T>) => {
-        const currentDiscoverProfiles = this.customContext$?.getValue().discoverProfiles ?? [];
-        this.updateProfilesContextWith(scopedDiscoverProfiles);
-        callback(...params);
-        this.updateProfilesContextWith(currentDiscoverProfiles);
-      };
-
-    const scopedReportEvent = this.reportEvent ? withScopedContext(this.reportEvent) : undefined;
-
-    const scopedReportPerformanceEvent = this.reportPerformanceEvent
-      ? withScopedContext(this.reportPerformanceEvent)
-      : undefined;
-
-    const scopedUpdateProfilesContextWith: UpdateProfilesContextWith = (discoverProfiles) => {
-      scopedDiscoverProfiles = discoverProfiles;
-      if (this.activeScopedManagerId === scopedManagerId) {
-        this.updateProfilesContextWith(discoverProfiles);
-      }
-    };
-
-    const scopedSetAsActiveManager: SetAsActiveManager = () => {
-      this.activeScopedManagerId = scopedManagerId;
-      this.updateProfilesContextWith(scopedDiscoverProfiles);
-    };
-
-    return new ScopedDiscoverEBTManager(
-      scopedReportEvent,
-      scopedReportPerformanceEvent,
-      scopedUpdateProfilesContextWith,
-      scopedSetAsActiveManager
-    );
-  }
 }
 
 export class ScopedDiscoverEBTManager {
