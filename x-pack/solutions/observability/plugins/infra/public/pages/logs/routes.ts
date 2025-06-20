@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { logsAnomaliesTitle, logCategoriesTitle } from '../../translations';
+import { logsAnomaliesTitle, logCategoriesTitle, settingsTitle } from '../../translations';
 
 export interface LogsRoute {
   id: string;
@@ -29,6 +29,11 @@ export const getLogsAppRoutes = () => {
       id: 'log-categories',
       title: logCategoriesTitle,
       path: '/log-categories',
+    },
+    settings: {
+      id: 'settings',
+      title: settingsTitle,
+      path: '/settings',
     },
   };
 

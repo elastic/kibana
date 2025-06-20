@@ -37,6 +37,10 @@ const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
 
+const LogsSettingsPage = dynamic(() =>
+  import('./settings').then((mod) => ({ default: mod.LogsSettingsPage }))
+);
+
 const StateMachinePlayground = dynamic(() =>
   import('../../observability_logs/xstate_helpers').then((mod) => ({
     default: mod.StateMachinePlayground,
@@ -115,6 +119,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
+        <Route path={routes.settings.path} component={LogsSettingsPage} />
         {enableDeveloperRoutes && (
           <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
         )}
