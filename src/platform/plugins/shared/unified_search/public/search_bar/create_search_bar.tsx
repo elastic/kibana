@@ -167,9 +167,9 @@ export function createSearchBar({
     // Problem that after this inial setting up the query, in this component subsequent changes to the props.query
     // are just ignored, since there's a subscription to the queryStringManager of data.query.queryString setting the query
     // and since a query edits is unknow to it, it will always return the most recent submitted query
-    const queryEdited = useRef<string | undefined>();
+    const queryEdited = useRef<Query | QT | undefined>();
     const onQueryChanged = useCallback(
-      (query) => {
+      (query: { dateRange: TimeRange; query?: QT | Query }) => {
         if (query.query) {
           queryEdited.current = query.query;
         }
