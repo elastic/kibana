@@ -28,3 +28,15 @@ export const responseActionsWithLegacyActionProperty: readonly ResponseActionsAp
   'isolate',
   'unisolate',
 ];
+
+/**
+ * The list of `tags` that can be used on an Action Request document
+ */
+export const ALLOWED_ACTION_REQUEST_TAGS = Object.freeze({
+  // introduced with space awareness. Indicates that response action is currently associated with
+  // an integration policy that no longer exists.
+  integrationPolicyDeleted: 'INTEGRATION-POLICY-DELETED',
+} as const);
+
+export type ResponseActionRequestTag =
+  (typeof ALLOWED_ACTION_REQUEST_TAGS)[keyof typeof ALLOWED_ACTION_REQUEST_TAGS];

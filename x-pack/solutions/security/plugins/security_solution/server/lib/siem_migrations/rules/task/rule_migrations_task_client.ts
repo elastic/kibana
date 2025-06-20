@@ -193,7 +193,7 @@ export class RuleMigrationsTaskClient {
     try {
       const migrationRunning = this.migrationsRunning.get(migrationId);
       if (migrationRunning) {
-        migrationRunning.abortController.abort();
+        migrationRunning.abortController.abort('Stopped by user');
         await this.data.migrations.setIsStopped({ id: migrationId });
         return { exists: true, stopped: true };
       }

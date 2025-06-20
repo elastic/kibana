@@ -12,6 +12,7 @@ import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
+  DeleteAllConversationsRequestBody,
 } from '@kbn/elastic-assistant-common';
 import {
   CreateMessageSchema,
@@ -86,6 +87,10 @@ export const getCreateConversationSchemaMock = (
   ],
   category: 'assistant',
   ...rest,
+});
+
+export const getDeleteAllConversationsSchemaMock = (): DeleteAllConversationsRequestBody => ({
+  excludedIds: ['conversation-1'],
 });
 
 export const getUpdateConversationSchemaMock = (

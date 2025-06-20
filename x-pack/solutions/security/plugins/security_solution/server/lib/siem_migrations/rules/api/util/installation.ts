@@ -21,6 +21,7 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../../common/siem_migrations/rules/utils';
+import { getVendorTag } from './tags';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
@@ -107,8 +108,12 @@ export const installCustomRules = async (
         rule.elastic_rule,
         enabled
       );
+      const tags = [getVendorTag(rule.original_rule)];
       const createdRule = await detectionRulesClient.createCustomRule({
-        params: payloadRule,
+        params: {
+          ...payloadRule,
+          tags,
+        },
       });
       rulesToUpdate.push({
         id: rule.id,

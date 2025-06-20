@@ -33,6 +33,7 @@ export interface CasePersistedAttributes {
   closed_by: User | null;
   created_at: string;
   created_by: User;
+  in_progress_at?: string | null;
   connector: ConnectorPersisted;
   description: string;
   duration: number | null;
@@ -51,6 +52,9 @@ export interface CasePersistedAttributes {
   customFields?: CasePersistedCustomFields;
   observables?: Observable[];
   incremental_id?: number | null;
+  time_to_acknowledge?: number | null;
+  time_to_investigate?: number | null;
+  time_to_resolve?: number | null;
 }
 
 type CasePersistedCustomFields = Array<{
