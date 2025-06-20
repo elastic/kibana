@@ -92,7 +92,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   }
 
   return (
-    <EuiFlexItem css={[styles.flyoutColumn, dynamicStyles]}>
+    <EuiFlexItem css={styles.flyoutColumn} style={dynamicStyles}>
       <flyoutPanelContext.Provider value={{ registerContent, registerFooter }}>
         <div
           css={[

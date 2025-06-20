@@ -112,7 +112,8 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
 
   return (
     <EuiFlexItem
-      css={[styles.flyoutColumn, dynamicStyles]}
+      css={styles.flyoutColumn}
+      style={dynamicStyles}
       grow={false}
       data-test-subj={dataTestSubj}
     >

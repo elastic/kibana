@@ -22,7 +22,7 @@ export const PanelContent: FC<PropsWithChildren<unknown>> = (props) => {
     registerContent();
   }, [registerContent]);
 
-  return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+  return <div css={styles.content} {...props} />;
 };
 
 const componentStyles = {
