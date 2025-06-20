@@ -24,13 +24,7 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
  * in Discover's contextual View
  *
  */
-const ALLOWED_DISCOVER_RENDERED_FIELDS = [
-  'host.name',
-  'user.name',
-  'source.ip',
-  'destination.ip',
-  'kibana.alert.workflow_status',
-];
+const ALLOWED_DISCOVER_RENDERED_FIELDS = ['kibana.alert.workflow_status'];
 
 export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGetter = (
   fieldName: string

@@ -30,7 +30,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   const { discoverShared } = services;
   const discoverFeaturesRegistry = discoverShared.features.registry;
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
-  const appWrapperFeature = discoverFeaturesRegistry.getById('security-solution-app-wrapper');
 
   return {
     profileId: 'security-root-profile',
