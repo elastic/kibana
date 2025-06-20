@@ -104,7 +104,8 @@ describe('formatMonitorConfig', () => {
         Object.keys(testHTTPConfig) as ConfigKey[],
         testHTTPConfig,
         logger,
-        { proxyUrl: 'https://www.google.com' }
+        { proxyUrl: 'https://www.google.com' },
+        []
       );
 
       expect(yamlConfig).toEqual({
@@ -145,7 +146,8 @@ describe('formatMonitorConfig', () => {
             [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
           },
           logger,
-          { proxyUrl: 'https://www.google.com' }
+          { proxyUrl: 'https://www.google.com' },
+          []
         );
 
         expect(yamlConfig).toEqual({
@@ -218,7 +220,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(formattedBrowserConfig);
@@ -233,7 +236,8 @@ describe('browser fields', () => {
         params: '',
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
@@ -251,7 +255,8 @@ describe('browser fields', () => {
         },
       },
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -269,7 +274,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = {
@@ -287,7 +293,8 @@ describe('browser fields', () => {
       Object.keys(testBrowserConfig) as ConfigKey[],
       testBrowserConfig,
       logger,
-      { proxyUrl: 'https://www.google.com' }
+      { proxyUrl: 'https://www.google.com' },
+      []
     );
 
     const expected = { ...formattedConfig, enabled: false };

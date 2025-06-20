@@ -154,6 +154,7 @@ export const AGENT_API_ROUTES = {
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
   MIGRATE_PATTERN: `${API_ROOT}/agents/{agentId}/migrate`,
+  BULK_MIGRATE_PATTERN: `${API_ROOT}/agents/bulk_migrate`,
   CANCEL_ACTIONS_PATTERN: `${API_ROOT}/agents/actions/{actionId}/cancel`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,

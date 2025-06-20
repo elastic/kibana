@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -48,6 +49,9 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           request
         );
 
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
         const savedQuery = await spaceScopedClient.get<SavedQuerySavedObject>(
           savedQuerySavedObjectType,
           request.params.id
@@ -60,10 +64,24 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           );
         }
 
-        savedQuery.attributes.prebuilt = await isSavedQueryPrebuilt(
+        const prebuiltById = await isSavedQueryPrebuilt(
           osqueryContext.service.getPackageService()?.asInternalUser,
-          savedQuery.id
+          savedQuery.id,
+          spaceScopedClient,
+          spaceId
         );
+
+        const prebuiltByOriginId =
+          !prebuiltById && savedQuery.originId
+            ? await isSavedQueryPrebuilt(
+                osqueryContext.service.getPackageService()?.asInternalUser,
+                savedQuery.originId,
+                spaceScopedClient,
+                spaceId
+              )
+            : false;
+
+        savedQuery.attributes.prebuilt = prebuiltById || prebuiltByOriginId;
 
         const {
           created_at: createdAt,

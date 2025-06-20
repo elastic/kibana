@@ -10,7 +10,6 @@ import { of } from 'rxjs';
 import { mergeMap } from 'rxjs';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
-
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type {
   ActionResultsRequestOptions,

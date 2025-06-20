@@ -18,7 +18,13 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 
-export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
+export const LocationForm = ({
+  privateLocations,
+  privateLocationToEdit,
+}: {
+  privateLocations: PrivateLocation[];
+  privateLocationToEdit?: PrivateLocation;
+}) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
@@ -27,6 +33,8 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
     const tags = item.tags || [];
     return [...acc, ...tags];
   }, [] as string[]);
+
+  const isEditingLocation = privateLocationToEdit !== undefined;
 
   return (
     <>
@@ -48,7 +56,8 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
                 message: NAME_REQUIRED,
               },
               validate: (val: string) => {
-                return privateLocations.some((loc) => loc.label === val)
+                return privateLocations.some((loc) => loc.label === val) &&
+                  val !== privateLocationToEdit?.label
                   ? NAME_ALREADY_EXISTS
                   : undefined;
               },
@@ -56,13 +65,13 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} />
+        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector helpText={LOCATION_HELP_TEXT} />
+        <SpaceSelector helpText={LOCATION_HELP_TEXT} isDisabled={isEditingLocation} />
       </EuiForm>
     </>
   );
