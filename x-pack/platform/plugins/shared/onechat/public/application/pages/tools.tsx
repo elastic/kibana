@@ -9,7 +9,7 @@ import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { OnechatTools } from '../components/tools/tools';
 
-export const OnechatStackToolsPage = () => {
+export const OnechatToolsPage = () => {
   useBreadcrumb([{ text: 'Analyze' }, { text: 'Chat' }, { text: 'Tools' }]);
   return <OnechatTools />;
 };
