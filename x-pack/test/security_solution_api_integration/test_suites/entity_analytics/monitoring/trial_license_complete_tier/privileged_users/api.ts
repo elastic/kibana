@@ -44,22 +44,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.body);
       });
 
-      it('should retrieve a user', async () => {
-        log.info(`retrieving a user`);
-        const { body } = await api.createPrivMonUser({
-          body: { user: { name: 'test_user2' } },
-        });
-
-        const res = await api.getPrivMonUser({ params: { id: body.id } });
-
-        if (res.status !== 200) {
-          log.error(`Retrieving privmon user failed`);
-          log.error(JSON.stringify(res.body));
-        }
-
-        expect(res.status).eql(200);
-      });
-
       it('should update a user', async () => {
         log.info(`updating a user`);
         const { body } = await api.createPrivMonUser({

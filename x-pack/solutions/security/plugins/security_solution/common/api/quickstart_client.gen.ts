@@ -274,10 +274,6 @@ import type {
   DeletePrivMonUserResponse,
 } from './entity_analytics/privilege_monitoring/users/delete.gen';
 import type {
-  GetPrivMonUserRequestParamsInput,
-  GetPrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/get.gen';
-import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
 } from './entity_analytics/privilege_monitoring/users/list.gen';
@@ -1428,18 +1424,6 @@ finalize it.
         method: 'GET',
 
         query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getPrivMonUser(props: GetPrivMonUserProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrivMonUser`);
-    return this.kbnClient
-      .request<GetPrivMonUserResponse>({
-        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'GET',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2723,9 +2707,6 @@ export interface GetNotesProps {
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
-}
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
