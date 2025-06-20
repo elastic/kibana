@@ -137,15 +137,15 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
 
   return (
     <>
-      <EuiFlyout data-test-subj="migrateAgentFlyout" size="s" onClose={onClose}>
+      <EuiFlyout data-test-subj="migrateAgentFlyout" onClose={onClose}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.title"
-                defaultMessage="Migrate {plural}"
+                defaultMessage="Migrate {agentCount, plural, one {agent} other {agents}}"
                 values={{
-                  plural: agents.length > 1 ? 'agents' : 'agent',
+                  agentCount: agents.length,
                 }}
               />
             </h1>
@@ -154,9 +154,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.agentList.migrateAgentFlyout.title"
-              defaultMessage="Move {plural} to a different Fleet server by specifying a new cluster URL and enrollment token."
+              defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet server by specifying a new cluster URL and enrollment token."
               values={{
-                plural: agents.length > 1 ? 'these agents' : 'this agent',
+                agentCount: agents.length,
               }}
             />
           </EuiText>
@@ -168,7 +168,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                    defaultMessage="{icon} {x} of {y} selected Agents cannot be migrated as they are tamper protected or Fleet-Server agents."
+                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet-Server agents."
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: protectedAndFleetAgents.length,
@@ -270,7 +270,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             <EuiSpacer size="m" />
 
             {/* Additional Settings Section */}
-            <EuiFormRow>
+            <EuiFormRow fullWidth>
               <EuiAccordion
                 arrowDisplay="right"
                 id="migrateAgentFlyoutAdditionalOptions"
@@ -306,8 +306,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                     </EuiText>
 
                     <EuiSpacer size="m" />
-                    <EuiFormRow label="ca_sha256">
+                    <EuiFormRow label="ca_sha256" fullWidth>
                       <EuiFieldText
+                        fullWidth
                         onChange={(e) =>
                           setFormContent({
                             ...formContent,
@@ -323,8 +324,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Certificate Authorities"
                         />
                       }
+                      fullWidth
                     >
                       <EuiFieldText
+                        fullWidth
                         onChange={(e) =>
                           setFormContent({
                             ...formContent,
@@ -343,6 +346,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Elastic Agent Certificate"
                         />
                       }
+                      fullWidth
                     >
                       <EuiTextArea
                         onChange={(e) =>
@@ -364,6 +368,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Elastic Agent Certificate Key"
                         />
                       }
+                      fullWidth
                     >
                       <EuiTextArea
                         onChange={(e) =>
@@ -407,6 +412,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Headers"
                         />
                       }
+                      fullWidth
                     >
                       <HeadersInput
                         headers={formContent.settings?.headers || {}}
@@ -428,6 +434,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Proxy Headers"
                         />
                       }
+                      fullWidth
                     >
                       <HeadersInput
                         headers={formContent.settings?.proxy_headers || {}}
@@ -471,15 +478,16 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                           defaultMessage="Proxy URL"
                         />
                       }
+                      fullWidth
                     >
                       <EuiFieldText
+                        fullWidth
                         onChange={(e) =>
                           setFormContent({
                             ...formContent,
                             settings: { ...formContent.settings, proxy_url: e.target.value },
                           })
                         }
-                        fullWidth
                       />
                     </EuiFormRow>
                   </EuiAccordion>
@@ -505,7 +513,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                       />
                     </EuiText>
                     <EuiSpacer size="m" />
-                    <EuiFormRow>
+                    <EuiFormRow fullWidth>
                       <EuiFlexGroup alignItems="flexStart">
                         <EuiFlexItem>
                           <EuiSwitch
@@ -543,7 +551,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFormRow>
-                    <EuiFormRow>
+                    <EuiFormRow fullWidth>
                       <EuiFlexGroup justifyContent="spaceBetween">
                         <EuiFlexItem>
                           <EuiSwitch
@@ -577,11 +585,9 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                                 />
                               }
                               checked={
-                                agents.length === 1
-                                  ? (
-                                      formContent.settings as MigrateSingleAgentRequest['body']['settings']
-                                    )?.replace_token ?? false
-                                  : false
+                                (
+                                  formContent.settings as MigrateSingleAgentRequest['body']['settings']
+                                )?.replace_token ?? false
                               }
                               onChange={(e) => {
                                 // Only allow setting replace_token when migrating a single agent
@@ -622,8 +628,8 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
             >
               <FormattedMessage
                 id="xpack.fleet.agentList.migrateAgentFlyout.submitButtonLabel"
-                defaultMessage="Migrate {plural}"
-                values={{ plural: agents.length === 1 ? 'agent' : 'agents' }}
+                defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+                values={{ agentCount: agents.length }}
               />
             </EuiButton>
           </EuiFlexGroup>
