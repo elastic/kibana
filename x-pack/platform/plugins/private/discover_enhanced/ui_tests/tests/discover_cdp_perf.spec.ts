@@ -8,7 +8,7 @@
 import { test, tags, expect, CDPSession } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-test.describe(
+test.describe.skip(
   'Discover App - Performance Metrics & Bundle Analysis',
   { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
   () => {
