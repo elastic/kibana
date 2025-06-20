@@ -54,14 +54,14 @@ paths:
                   description: A title for the conversation.
                 persist:
                   type: boolean
-                  description: Flag indicating whether to persist the conversation in Kibana.
+                  description: Indicates whether the conversation should be saved to storage. If true, the conversation will be saved and will be available in Kibana.
                 actions:
                   type: array
                   items:
                     $ref: '#/components/schemas/Function'
                 disableFunctions:
                   type: boolean
-                  description: Flag indicating whether functions should be disabled.
+                  description: Flag indicating whether all function calls should be disabled for the conversation. If true, no calls to functions will be made.
                 instructions:
                   type: array
                   description: An array of instruction objects, which can be either simple strings or detailed objects.
