@@ -372,10 +372,11 @@ export const ComplianceDashboard = () => {
     [updateActiveNamespace]
   );
 
-  const namespaces =
-    currentTabUrlState === POSTURE_TYPE_CSPM
+  const namespaces = useMemo(() => {
+    return currentTabUrlState === POSTURE_TYPE_CSPM
       ? getCspmDashboardData.data?.namespaces || []
       : getKspmDashboardData.data?.namespaces || [];
+  }, [currentTabUrlState, getCspmDashboardData.data, getKspmDashboardData.data]);
 
   // if the active namespace is not in the list of namespaces, default to the first available namespace
   // this can happen when changing between CSPM and KSPM dashboards and if there is no namespace called "default"
@@ -461,13 +462,7 @@ export const ComplianceDashboard = () => {
           />,
         ]
       : [];
-  }, [
-    currentTabUrlState,
-    getCspmDashboardData.data,
-    getKspmDashboardData.data,
-    activeNamespace,
-    onActiveNamespaceChange,
-  ]);
+  }, [namespaces, currentTabUrlState, activeNamespace, onActiveNamespaceChange]);
 
   return (
     <CloudPosturePage>
