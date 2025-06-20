@@ -13,3 +13,16 @@ import type { IHttpFetchError } from './types';
 export function isHttpFetchError<T>(error: T | IHttpFetchError): error is IHttpFetchError {
   return error instanceof Error && 'request' in error && 'name' in error;
 }
+
+/** @public */
+export function isServerOverloadedError(error: unknown): boolean {
+  return !!(
+    isHttpFetchError(error) &&
+    error.response?.status === 429 &&
+    error.response.headers
+      .get('RateLimit')
+      ?.split(';')
+      .map((g) => g.replace(/^['"]?(.*?)['"]?$/, '$1'))
+      .includes('elu')
+  );
+}
