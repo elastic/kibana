@@ -106,8 +106,9 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
       );
     }
     if (new SemVer(options.kibanaVersionCheck).compare(previousKibanaVersion) === 1) {
+      const currentMajor = new SemVer(options.kibanaVersion).major;
       throw new Error(
-        `Kibana ${previousKibanaVersion} deployment detected. Please upgrade to Kibana 8.18.0 or 8.19.0 before upgrading to 9.x series.`
+        `Kibana ${previousKibanaVersion} deployment detected. Please upgrade to Kibana ${options.kibanaVersionCheck} or newer before upgrading to ${currentMajor}.x series.`
       );
     }
   }

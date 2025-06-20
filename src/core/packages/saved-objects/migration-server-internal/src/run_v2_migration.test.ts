@@ -148,11 +148,11 @@ describe('runV2Migration', () => {
       mappings: {},
       aliases: ['.kibana', '.kibana_8.17.0'],
     });
-    const options = mockOptions();
+    const options = mockOptions('9.1.0');
     options.documentMigrator.prepareMigrations();
     await expect(runV2Migration(options)).rejects.toEqual(
       new Error(
-        'Kibana 8.17.0 deployment detected. Please upgrade to Kibana 8.18.0 or 8.19.0 before upgrading to 9.x series.'
+        'Kibana 8.17.0 deployment detected. Please upgrade to Kibana 8.18.0 or newer before upgrading to 9.x series.'
       )
     );
   });

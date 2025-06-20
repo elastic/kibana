@@ -41,7 +41,6 @@ export const checkVersionCompatibility = ({
   deletedTypes,
 }: CheckVersionCompatibilityOpts): CheckVersionCompatibilityResult => {
   const appVersions = getVirtualVersionMap({ types, useModelVersionsOnly: true });
-  // TODO check that these indexVersions are Math.min(10.0.0)-ed
   const indexVersions = getVirtualVersionsFromMappings({
     mappings,
     source,
