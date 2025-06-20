@@ -20,13 +20,43 @@ import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction } from '../../../common/types';
-import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
+import {
+  assistantScopeType,
+  functionRt,
+  messageRt,
+  publicMessageRt,
+  screenContextRt,
+} from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([
     t.type({
       messages: t.array(messageRt),
+      connectorId: t.string,
+      persist: toBooleanRt,
+    }),
+    t.partial({
+      conversationId: t.string,
+      title: t.string,
+      disableFunctions: toBooleanRt,
+      instructions: t.array(
+        t.union([
+          t.string,
+          t.type({
+            id: t.string,
+            text: t.string,
+          }),
+        ])
+      ),
+    }),
+  ]),
+});
+
+const chatCompletePublicBaseRt = t.type({
+  body: t.intersection([
+    t.type({
+      messages: t.array(publicMessageRt),
       connectorId: t.string,
       persist: toBooleanRt,
     }),
@@ -58,13 +88,10 @@ const chatCompleteInternalRt = t.intersection([
 ]);
 
 const chatCompletePublicRt = t.intersection([
-  chatCompleteBaseRt,
+  chatCompletePublicBaseRt,
   t.partial({
     body: t.partial({
       actions: t.array(functionRt),
-    }),
-    query: t.partial({
-      format: t.union([t.literal('default'), t.literal('openai')]),
     }),
   }),
 ]);
@@ -316,10 +343,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
     const {
       body: { actions, ...restOfBody },
-      query = {},
     } = params;
-
-    const { format = 'default' } = query;
 
     const response$ = await chatComplete({
       ...resources,
@@ -336,9 +360,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       },
     });
 
-    return format === 'openai'
-      ? observableIntoOpenAIStream(response$, logger)
-      : observableIntoStream(response$);
+    return observableIntoOpenAIStream(response$, logger);
   },
 });
 

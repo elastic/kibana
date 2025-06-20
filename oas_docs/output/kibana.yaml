@@ -43493,21 +43493,6 @@ paths:
         It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-      parameters:
-        - description: |
-            The format the response should be returned in.
-
-            If 'openai', the response will be in OpenAI compatible format. 
-
-            If 'default', the response will be in Elastic internal format.
-          in: query
-          name: format
-          required: false
-          schema:
-            enum:
-              - default
-              - openai
-            type: string
       requestBody:
         content:
           application/json:
@@ -66598,6 +66583,26 @@ components:
         parameters:
           description: The parameters of the function.
           type: object
+    Observability_AI_Assistant_APIs_FunctionCall:
+      description: Details of the function call within the message.
+      type: object
+      properties:
+        arguments:
+          description: The arguments for the function call.
+          type: string
+        name:
+          description: The name of the function.
+          type: string
+        trigger:
+          description: The trigger of the function call.
+          enum:
+            - assistant
+            - user
+            - elastic
+          type: string
+      required:
+        - name
+        - trigger
     Observability_AI_Assistant_APIs_Instruction:
       oneOf:
         - description: A simple instruction represented as a string.
@@ -66635,17 +66640,12 @@ components:
               description: The event related to the message.
               type: string
             function_call:
-              $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Unredaction'
+              $ref: '#/components/schemas/Observability_AI_Assistant_APIs_FunctionCall'
             name:
               description: The name associated with the message.
               type: string
             role:
               $ref: '#/components/schemas/Observability_AI_Assistant_APIs_MessageRoleEnum'
-            unredactions:
-              description: A list of unredacted elements for anonymization.
-              items:
-                $ref: '#/components/schemas/Observability_AI_Assistant_APIs_Unredaction'
-              type: array
           required:
             - role
       required:
@@ -66660,38 +66660,6 @@ components:
         - user
         - elastic
       type: string
-    Observability_AI_Assistant_APIs_Unredaction:
-      type: object
-      properties:
-        class_name:
-          description: The class name associated with the entity.
-          type: string
-        end_pos:
-          description: The ending position of the unredacted entity.
-          type: number
-        entity:
-          description: The entity that has been unredacted.
-          type: string
-        start_pos:
-          description: The starting position of the unredacted entity.
-          type: number
-        type:
-          description: |
-            The type of unredaction applied. 
-
-            If "ner", the entity has been unredacted using Named Entity Recognition (NER). 
-
-            If "regex", the entity has been unredacted using regular expressions.
-          enum:
-            - ner
-            - regex
-          type: string
-      required:
-        - entity
-        - class_name
-        - start_pos
-        - end_pos
-        - type
     Saved_objects_400_response:
       title: Bad request
       type: object

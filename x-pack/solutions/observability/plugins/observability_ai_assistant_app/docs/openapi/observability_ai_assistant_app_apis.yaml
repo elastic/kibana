@@ -74,19 +74,6 @@ paths:
             examples:
               completeChatRequestExample:
                 $ref: '#/components/schemas/completeChatRequestExample'
-      parameters:
-        - in: query
-          name: format
-          schema:
-            type: string
-            enum: [default, openai]
-          required: false
-          description: |
-            The format the response should be returned in.
-
-            If 'openai', the response will be in OpenAI compatible format. 
-
-            If 'default', the response will be in Elastic internal format.
       responses:
         '200':
           description: Successful response
@@ -126,49 +113,12 @@ components:
               type: string
               description: Additional data associated with the message.
             function_call:
-              $ref: '#/components/schemas/Unredaction'
-            unredactions:
-              type: array
-              description: A list of unredacted elements for anonymization.
-              items:
-                $ref: '#/components/schemas/Unredaction'
+              $ref: '#/components/schemas/FunctionCall'
           required:
             - role
       required:
         - '@timestamp'
         - message
-    Unredaction:
-      type: object
-      properties:
-        entity:
-          type: string
-          description: The entity that has been unredacted.
-        class_name:
-          type: string
-          description: The class name associated with the entity.
-        start_pos:
-          type: number
-          description: The starting position of the unredacted entity.
-        end_pos:
-          type: number
-          description: The ending position of the unredacted entity.
-        type:
-          type: string
-          description: |
-            The type of unredaction applied. 
-
-            If "ner", the entity has been unredacted using Named Entity Recognition (NER). 
-
-            If "regex", the entity has been unredacted using regular expressions.
-          enum:
-            - ner
-            - regex
-      required:
-        - entity
-        - class_name
-        - start_pos
-        - end_pos
-        - type
     MessageRoleEnum:
       description: The role of the message sender.
       type: string
