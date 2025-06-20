@@ -7148,6 +7148,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/read-only-objects-test-plugin@link:x-pack/test/spaces_api_integration/common/plugins/read_only_objects_test_plugin":
+  version "0.0.0"
+  uid ""
+
 "@kbn/recently-accessed@link:src/platform/packages/shared/kbn-recently-accessed":
   version "0.0.0"
   uid ""

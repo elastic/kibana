@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/read-only-objects-test-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "readOnlyObjectsTestPlugin",
+    "server": true,
+    "browser": false
+  }
+}

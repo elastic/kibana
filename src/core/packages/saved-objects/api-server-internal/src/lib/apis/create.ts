@@ -124,6 +124,20 @@ export const performCreate = async <T>(
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
   }
 
+  const typeSupportsAccessControl = registry.supportsAccessControl(type);
+  const accessControlToWrite =
+    typeSupportsAccessControl && createdBy
+      ? {
+          owner: createdBy,
+          accessMode: options.accessControl?.accessMode,
+        }
+      : undefined;
+
+  if (preflightResult?.error) {
+    // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
+    throw SavedObjectsErrorHelpers.createConflictError(type, id);
+  }
+
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
   const originId = Object.keys(options).includes('originId') ? options.originId : existingOriginId;
@@ -148,6 +162,7 @@ export const performCreate = async <T>(
     ...(createdBy && { created_by: createdBy }),
     ...(updatedBy && { updated_by: updatedBy }),
     ...(Array.isArray(references) && { references }),
+    ...(accessControlToWrite && { accessControl: accessControlToWrite }),
   });
 
   /**
