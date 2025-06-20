@@ -63,6 +63,7 @@ import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { AnalyticsService } from '@kbn/core-analytics-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
+import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
 
 import { loadActiveApi } from '../public/lib/kb';
@@ -76,6 +77,7 @@ import { AutocompleteInfo } from '../public/services';
 
 
 export interface BootDependencies extends ConsoleStartServices {
+  lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
 }
 
 const trackUiMetricMock = { count: () => {}, load: () => {} };
@@ -143,7 +145,28 @@ const coreContext = {
   }
 };
 
-export const OneConsole = ({ }: BootDependencies) => {
+// Import all translation files statically so webpack includes them in the bundle
+const translations = {
+  'en': {
+    formats: {},
+    messages: {}
+  },
+  'fr-FR': require('./translations/fr-FR.json'),
+  'ja-JP': require('./translations/ja-JP.json'),
+  'zh-CN': require('./translations/zh-CN.json'),
+};
+
+export const OneConsole = ({ lang = 'en' }: BootDependencies) => {
+  // Get the translations for the selected language, fallback to English
+  const selectedTranslations = translations[lang] || translations['en'];
+
+  // Configure the global @kbn/i18n system with the same translations
+  i18n.init({
+    locale: lang,
+    formats: selectedTranslations.formats,
+    messages: selectedTranslations.messages,
+  });
+
   let docLinksService = new DocLinksService(coreContext as CoreContext);
   docLinksService.setup();
   const docLinks = docLinksService.start({ injectedMetadata });
@@ -157,7 +180,7 @@ export const OneConsole = ({ }: BootDependencies) => {
     // rendering,
   // });
 
-  const i18n = new I18nService();
+  const i18nService = new I18nService();
 
   const themeService = new ThemeService();
   const theme = themeService.setup({ injectedMetadata });
@@ -173,7 +196,7 @@ export const OneConsole = ({ }: BootDependencies) => {
     injectedMetadata,
     analytics,
     theme,
-    i18n: i18n.getContext(),
+    i18n: i18nService.getContext(),
   });
 
   const executionContextService = new ExecutionContextService();
@@ -227,7 +250,11 @@ export const OneConsole = ({ }: BootDependencies) => {
   autocompleteInfo.mapping.setup(http, settings);
 
   return (
-    <IntlProvider locale="en">
+    <IntlProvider
+      locale={lang}
+      messages={selectedTranslations.messages}
+      formats={selectedTranslations.formats}
+    >
       <ServicesContextProvider
         value={{
           // ...coreStart,
