@@ -49,9 +49,8 @@ describe('buildStreamRows', () => {
     cChild1,
   ];
 
-  it('sorts by name ascending and keeps hierarchy', () => {
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
-    expect(rows.map((r) => r.name)).toEqual([
+  it('sorts by name ascending', () => {
+    const expected = [
       'logs-a',
       'logs-a.child1',
       'logs-a.child2',
@@ -64,36 +63,66 @@ describe('buildStreamRows', () => {
       'metrics-c.child1',
       'metrics-c.child2',
       'metrics-c.child3',
-    ]);
+    ];
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
+    expect(rows.map((r) => r.name)).toEqual(expected);
   });
 
-  it('sorts by retention descending across roots and children', () => {
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
-    expect(rows.map((r) => r.name).slice(0, 5)).toEqual([
+  it('sorts by name descending', () => {
+    const expected = [
+      'metrics-c',
+      'metrics-c.child3',
+      'metrics-c.child2',
+      'metrics-c.child1',
+      'logs-b',
+      'logs-b.child3',
+      'logs-b.child2',
+      'logs-b.child1',
+      'logs-a',
+      'logs-a.child3',
+      'logs-a.child2',
+      'logs-a.child1',
+    ];
+    const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction);
+    expect(rows.map((r) => r.name)).toEqual(expected);
+  });
+
+  it('sorts by retention ascending', () => {
+    const expected = [
+      'logs-a',
+      'logs-a.child2',
+      'logs-a.child3',
+      'logs-a.child1',
+      'metrics-c',
+      'metrics-c.child2',
+      'metrics-c.child3',
+      'metrics-c.child1',
+      'logs-b',
+      'logs-b.child1',
+      'logs-b.child2',
+      'logs-b.child3',
+    ];
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
+    expect(rows.map((r) => r.name)).toEqual(expected);
+  });
+
+  it('sorts by retention descending', () => {
+    const expected = [
       'logs-b',
       'logs-b.child3',
       'logs-b.child2',
       'logs-b.child1',
       'metrics-c',
-    ]);
-  });
-
-  it('children are sorted by retention asc inside each root', () => {
-    const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
-    const aChildren = rows
-      .filter((r) => r.name.startsWith('logs-a.') && r.level === 1)
-      .map((r) => r.name);
-    expect(aChildren).toEqual(['logs-a.child2', 'logs-a.child3', 'logs-a.child1']);
-  });
-
-  it('children are sorted by name asc inside each root', () => {
-    const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
-
-    const aChildrenByName = rows
-      .filter((r) => r.name.startsWith('logs-a.') && r.level === 1)
-      .map((r) => r.name);
-
-    expect(aChildrenByName).toEqual(['logs-a.child1', 'logs-a.child2', 'logs-a.child3']);
+      'metrics-c.child1',
+      'metrics-c.child3',
+      'metrics-c.child2',
+      'logs-a',
+      'logs-a.child1',
+      'logs-a.child3',
+      'logs-a.child2',
+    ];
+    const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
+    expect(rows.map((r) => r.name)).toEqual(expected);
   });
 
   it('always lists a child immediately after its parent', () => {
