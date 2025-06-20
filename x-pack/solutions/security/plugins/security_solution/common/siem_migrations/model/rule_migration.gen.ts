@@ -151,9 +151,9 @@ export const RuleMigrationLastExecution = z.object({
    */
   started_at: z.string().optional(),
   /**
-   * The moment the last execution ended.
+   * The moment the last execution finished.
    */
-  ended_at: z.string().nullable().optional(),
+  finished_at: z.string().nullable().optional(),
   /**
    * The connector ID used for the last execution.
    */
@@ -163,9 +163,9 @@ export const RuleMigrationLastExecution = z.object({
    */
   error: z.string().nullable().optional(),
   /**
-   * Indicates if the last execution was aborted by the user.
+   * Indicates if the last execution was stopped by the user.
    */
-  is_aborted: z.boolean().optional(),
+  is_stopped: z.boolean().optional(),
   /**
    * Indicates if the last execution skipped pre-built rule matching.
    */
@@ -314,7 +314,7 @@ export const RuleMigrationTaskStatus = z.enum([
   'running',
   'stopped',
   'finished',
-  'aborted',
+  'interrupted',
 ]);
 export type RuleMigrationTaskStatusEnum = typeof RuleMigrationTaskStatus.enum;
 export const RuleMigrationTaskStatusEnum = RuleMigrationTaskStatus.enum;
