@@ -20,13 +20,14 @@ import type { CoreStart, Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public start(core: CoreStart) {
-    const esClient = core.elasticsearch.client.asCurrentUser;
+    const esClient = core.elasticsearch.client.asInternalUser;
     // You can now use esClient to call Elasticsearch APIs
   }
 }
 ```
 
-- Use `asCurrentUser` to perform actions as the currently authenticated user.
+- Use `asScoped(request)` to perform actions as the request-authenticated user.
+- **Note**: In HTTP route handlers you receive a client already scoped to the user `elasticsearch.client.asCurrentUser` instead of needing to call `asScoped(request)`.
 - Use `asInternalUser` for system-level operations that should bypass user permissions (see security considerations).
 
 ### From a Route Handler Context
@@ -37,7 +38,7 @@ When defining a server route, you can access the Elasticsearch client from the r
 router.get(
   { path: '/api/my_plugin/search', validate: false },
   async (context, request, response) => {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     // Use esClient to call Elasticsearch APIs
     const result = await esClient.search({
       index: 'my-index',
