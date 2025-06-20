@@ -69,8 +69,6 @@
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
     "xpack.inference": "platform/plugins/shared/inference",
     "xpack.inventory": "solutions/observability/plugins/inventory",
-    "xpack.investigate": "solutions/observability/plugins/investigate",
-    "xpack.investigateApp": "solutions/observability/plugins/investigate_app",
     "xpack.kubernetesSecurity": "solutions/security/plugins/kubernetes_security",
     "xpack.lens": "platform/plugins/shared/lens",
     "xpack.licenseApiGuard": "platform/plugins/private/license_api_guard",

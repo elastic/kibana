@@ -567,9 +567,6 @@ src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elas
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations

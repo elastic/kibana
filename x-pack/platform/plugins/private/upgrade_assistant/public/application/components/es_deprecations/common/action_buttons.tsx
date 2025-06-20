@@ -19,13 +19,13 @@ export interface ActionButtonConfig {
   iconType: string;
   canDisplay: boolean;
   resolutionType: string;
+  onClick: () => void;
 }
 
 export const ActionButtons: React.FunctionComponent<{
   actions: ActionButtonConfig[];
-  onClick: (resolutionType: string) => void;
   dataTestSubjPrefix: string;
-}> = ({ actions, onClick, dataTestSubjPrefix }) => (
+}> = ({ actions, dataTestSubjPrefix }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {actions
       .filter((action) => action.canDisplay)
@@ -33,10 +33,15 @@ export const ActionButtons: React.FunctionComponent<{
         <EuiFlexItem grow={false} key={action.resolutionType}>
           <EuiToolTip position="top" content={action.tooltip}>
             <EuiLink
-              onClick={() => onClick(action.resolutionType)}
+              onClick={action.onClick}
               data-test-subj={`deprecation-${dataTestSubjPrefix}-${action.resolutionType}`}
             >
-              <EuiIcon type={action.iconType} size="m" aria-label={action.tooltip} />
+              <EuiIcon
+                color="primary"
+                type={action.iconType}
+                size="m"
+                aria-label={action.tooltip}
+              />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
