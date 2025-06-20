@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type Cookie, parse as parseCookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
@@ -28,63 +28,105 @@ export default function ({ getService }: FtrProviderContext) {
         params: { username, password },
       })
       .expect(200);
-    return parseCookie(response.headers['set-cookie'][0])!;
+    return {
+      cookie: parseCookie(response.headers['set-cookie'][0])!,
+      profileUid: response.body.profile_uid,
+    };
   };
 
-  const createObject = async (type: string, isReadOnly: boolean, cookie: Cookie) => {
-    return supertest
-      .post('/read_only_objects/create')
-      .set('kbn-xsrf', 'true')
-      .set('Cookie', cookie.cookieString())
-      .send({ type, isReadOnly })
-      .expect(200);
+  const loginAsTestUser = async () => {
+    const { cookie: testUserCookie, profileUid } = await login('test_user', 'changeme');
+    return {
+      cookie: testUserCookie,
+      profileUid,
+    };
   };
 
   describe('read only saved objects', () => {
+    before(async () => {
+      await security.testUser.setRoles(['kibana_savedobjects_editor']);
+    });
     after(async () => {
       await security.testUser.restoreDefaults();
     });
     describe('create and access read only objects', () => {
-      it.only('should create a read only object', async () => {
-        const adminCookie = await login(adminTestUser.username, adminTestUser.username);
-        const response = await createObject('read_only_type', true, adminCookie);
-        console.log(response.body);
+      it('should create a read only object', async () => {
+        const { cookie: adminCookie, profileUid } = await login(
+          adminTestUser.username,
+          adminTestUser.password
+        );
+        const response = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
         expect(response.body.type).to.eql('read_only_type');
         expect(response.body).to.have.property('accessControl');
-        expect(response.body.accessControl).to.have.property('readOnly', true);
-        expect(response.body.accessControl).to.have.property('owner');
+        expect(response.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(response.body.accessControl).to.have.property('owner', profileUid);
+      });
+
+      it('should throw when trying to create read only object with no user', async () => {
+        await supertest
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(400);
       });
 
       it('should update read only objects owned by the same user', async () => {
-        const getResponse = await createObject('read_only_type', true);
-        const objectId = getResponse.body.id;
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
-        expect(getResponse.body.attributes).to.have.property('description', 'test');
-
-        await supertest
+        const updateResponse = await supertestWithoutAuth
           .put('/read_only_objects/update')
           .set('kbn-xsrf', 'true')
-          .send({ objectId, type: getResponse.body.type })
-          .expect(200)
-          .then((response) => {
-            expect(response.body.type).to.be('read_only_type');
-            expect(response.body.id).to.be(objectId);
-          });
+          .set('cookie', testUserCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
+          .expect(200);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
       });
 
       it('should throw when updating read only objects owned by a different user when not admin', async () => {
-        await security.testUser.setRoles(['kibana_savedobjects_editor']);
-        const getResponse = await createObject('read_only_type', true);
-        const objectId = getResponse.body.id;
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await login(
+          adminTestUser.username,
+          adminTestUser.password
+        );
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
 
-        expect(getResponse.body.attributes).to.have.property('description', 'test');
-
-        await supertestWithoutAuth
+        const { cookie: testUserCookie } = await loginAsTestUser();
+        const updateResponse = await supertestWithoutAuth
           .put('/read_only_objects/update')
-          .set('kbn-xsrf', 'xxx')
-          .auth('test_user', 'changeme')
-          .send({ objectId, type: getResponse.body.type })
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
           .expect(403);
+        expect(updateResponse.body).to.have.property('message');
+        expect(updateResponse.body.message).to.contain(
+          'Access control denied: No modifiable objects'
+        );
       });
     });
   });

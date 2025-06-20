@@ -284,6 +284,8 @@ export class SecurityPlugin
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      getTypeRegistry: () =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
