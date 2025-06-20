@@ -20,10 +20,10 @@ import {
 import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from '../helpers/elasticsearch';
 
-const readFilesRecursively = (dir: string, callback: Function) => {
-  const files = fs.readdirSync(dir);
+const readFilesRecursively = (directory: string, callback: Function) => {
+  const files = fs.readdirSync(directory);
   files.forEach((file) => {
-    const filePath = path.join(dir, file);
+    const filePath = path.join(directory, file);
     const stat = fs.statSync(filePath);
     if (stat.isDirectory()) {
       readFilesRecursively(filePath, callback);
@@ -47,25 +47,26 @@ export const uploadEvents: Command<void> = {
     help: `
     --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-    --eventLogPath    (optional)  Path to an event log file or directory. If omitted, all events in the Scout reports output directory will be uploaded
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --eventLogPath    (optional)  Path to an event log file or directory. If omitted, all events in the Scout reports output directory will be uploaded
     `,
   },
   run: async ({ flagsReader, log }) => {
     // Read & validate CLI options
     let eventLogPath = flagsReader.string('eventLogPath');
 
+    if (eventLogPath && !fs.existsSync(eventLogPath)) {
+      throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
+    }
+
     if (!eventLogPath) {
       // Default to the SCOUT_REPORT_OUTPUT_ROOT directory if no path is provided
       eventLogPath = SCOUT_REPORT_OUTPUT_ROOT;
-    }
 
-    if (!fs.existsSync(eventLogPath)) {
-      const label =
-        eventLogPath === SCOUT_REPORT_OUTPUT_ROOT
-          ? 'The Scout reports output directory'
-          : 'The provided event log path';
-      throw createFlagError(`${label} '${eventLogPath}' does not exist.`);
+      if (!fs.existsSync(eventLogPath)) {
+        log.info(`No Scout report output directory found at ${eventLogPath}. No events to upload.`);
+        return;
+      }
     }
 
     const esURL = flagsReader.requiredString('esURL');
