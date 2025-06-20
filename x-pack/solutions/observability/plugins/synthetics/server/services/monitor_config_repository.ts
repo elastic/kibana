@@ -161,7 +161,7 @@ export class MonitorConfigRepository {
     if (isEqual(prevSpaces, spaces)) {
       return this.soClient.update<MonitorFields>(soType, id, data);
     } else {
-      return this.soClient.delete(soType, id).then(() => {
+      return this.soClient.delete(soType, id, { force: true }).then(() => {
         return this.soClient.create(syntheticsMonitorSavedObjectType, data, {
           id,
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
