@@ -181,14 +181,8 @@ export const deleteDataView = (dataViewId: string) => {
 export const refreshSavedObjectIndices = (): void => {
   // Refresh indices to prevent a race condition between a write and subsequent read operation. To
   // fix it deterministically we have to refresh saved object indices and wait until it's done.
-  rootRequest({
-    method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/_refresh`,
-  });
+  cy.task('refreshIndex', { index: '*' });
   // Additionally, we need to clear the cache to ensure that the next read operation will
   // not return stale data.
-  rootRequest({
-    method: 'POST',
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/_cache/clear`,
-  });
+  cy.task('clearCache');
 };
