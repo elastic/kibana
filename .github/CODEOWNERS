@@ -5,7 +5,9 @@
 ## `node scripts/generate codeowners`.
 ####
 
+x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 x-pack/platform/plugins/shared/actions @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
@@ -20,6 +22,7 @@ x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
@@ -29,6 +32,7 @@ x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
@@ -983,6 +987,7 @@ x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
+x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
@@ -1004,12 +1009,6 @@ x-pack/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
-x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
-x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
-x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
-x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
-x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
-x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/solutions/search/test @elastic/search-kibana
 x-pack/solutions/security/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
@@ -2778,6 +2777,13 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
