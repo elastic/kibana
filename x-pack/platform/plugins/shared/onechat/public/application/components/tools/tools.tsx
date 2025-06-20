@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
@@ -17,14 +16,10 @@ export const OnechatTools = () => {
         pageTitle={i18n.translate('xpack.onechat.tools.title', {
           defaultMessage: 'Tools',
         })}
-        description={
-          <EuiText>
-            {i18n.translate('xpack.onechat.tools.toolsDescription', {
-              defaultMessage:
-                'Functionality used to enhance the capabilities of your AI agents in your chat experience by allowing them to perform specific tasks or access additional information.',
-            })}
-          </EuiText>
-        }
+        description={i18n.translate('xpack.onechat.tools.toolsDescription', {
+          defaultMessage:
+            'Functionality used to enhance the capabilities of your AI agents in your chat experience by allowing them to perform specific tasks or access additional information.',
+        })}
       />
       <KibanaPageTemplate.Section>
         <OnechatBaseTools />
