@@ -104,7 +104,14 @@ export class MonitorConfigRepository {
     normalizedMonitor: SyntheticsMonitor;
     spaceId: string;
   }) {
-    const { spaces } = normalizedMonitor;
+    let { spaces } = normalizedMonitor;
+    // Ensure spaceId is included in spaces
+    if (isEmpty(spaces)) {
+      spaces = [spaceId];
+    } else if (!spaces?.includes(spaceId)) {
+      spaces = [...(spaces ?? []), spaceId];
+    }
+
     const opts: SavedObjectsCreateOptions = {
       id,
       ...(id && { overwrite: true }),
@@ -118,7 +125,7 @@ export class MonitorConfigRepository {
         [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
         [ConfigKey.CONFIG_ID]: id,
         revision: 1,
-        [ConfigKey.KIBANA_SPACES]: isEmpty(spaces) ? [spaceId] : spaces,
+        [ConfigKey.KIBANA_SPACES]: spaces,
       }),
       opts
     );

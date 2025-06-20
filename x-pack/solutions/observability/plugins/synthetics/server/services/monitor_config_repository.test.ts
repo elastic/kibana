@@ -152,7 +152,7 @@ describe('MonitorConfigRepository', () => {
           formattedSecrets: true,
           spaces: ['default'],
         },
-        { id, overwrite: true }
+        { id, overwrite: true, initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);
@@ -195,7 +195,7 @@ describe('MonitorConfigRepository', () => {
           formattedSecrets: true,
           spaces: ['default'],
         },
-        { id: 'test', overwrite: true }
+        { id: 'test', overwrite: true, initialNamespaces: ['default'] }
       );
 
       expect(result).toBe(mockCreatedMonitor);
