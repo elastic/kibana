@@ -7,56 +7,56 @@
 import { i18n } from '@kbn/i18n';
 
 export const BULK_FILL_RULE_GAPS_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.modalTitle',
+  'xpack.securitySolution.bulkFillRuleGapsModal.modalTitle',
   {
     defaultMessage: 'Schedule gaps fill',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.timeRangeTitle',
+  'xpack.securitySolution.bulkFillRuleGapsModal.timeRangeTitle',
   {
     defaultMessage: 'Select timerange for gaps fill',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_START_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.startAtTitle',
+  'xpack.securitySolution.bulkFillRuleGapsModal.startAtTitle',
   {
     defaultMessage: 'Start at',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_END_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.endAtTitle',
+  'xpack.securitySolution.bulkFillRuleGapsModal.endAtTitle',
   {
     defaultMessage: 'Finish at',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_CONFIRM_BUTTON = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.confirmButton',
+  'xpack.securitySolution.bulkFillRuleGapsModal.confirmButton',
   {
     defaultMessage: 'Run',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_CANCEL_BUTTON = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.cancelButton',
+  'xpack.securitySolution.bulkFillRuleGapsModal.cancelButton',
   {
     defaultMessage: 'Cancel',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_INVALID_TIME_RANGE_ERROR = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.invalidTimeRangeError',
+  'xpack.securitySolution.bulkFillRuleGapsModal.invalidTimeRangeError',
   {
     defaultMessage: 'Selected time range is invalid',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.futureTimeRangeError',
+  'xpack.securitySolution.bulkFillRuleGapsModal.futureTimeRangeError',
   {
     defaultMessage: 'Rule gaps fill cannot be scheduled for the future',
   }
@@ -70,7 +70,7 @@ export const BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookbac
   });
 
 export const BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.notificationsLimitations',
+  'xpack.securitySolution.bulkFillRuleGapsModal.notificationsLimitations',
   {
     defaultMessage:
       'Alert summary rule actions that run at a custom frequency are not performed during manual rule runs triggered by the gaps fill process.',
@@ -78,7 +78,7 @@ export const BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
 );
 
 export const BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS = i18n.translate(
-  'xpack.securitySolution.bulkFullRuleGapsModal.maxGapsLimitations',
+  'xpack.securitySolution.bulkFillRuleGapsModal.maxGapsLimitations',
   {
     defaultMessage: 'A maximum of 1000 gaps will be filled per rule.',
   }
