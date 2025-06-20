@@ -33,6 +33,7 @@ export const AlertConsumers = {
   DISCOVER: 'discover',
 } as const;
 export type AlertConsumers = (typeof AlertConsumers)[keyof typeof AlertConsumers];
+export const DEPRECATED_ALERTING_CONSUMERS = [AlertConsumers.OBSERVABILITY];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'
 
 export type ValidFeatureId = AlertConsumers;
