@@ -19,6 +19,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import { TelemetryServiceStart } from './src/common/lib/telemetry/telemetry_service';
+import { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
 
 export interface ElasticAssistantPublicPluginSetupDependencies {
   ml: MlPluginSetup;
@@ -34,6 +35,7 @@ export interface ElasticAssistantPublicPluginStartDependencies {
   productDocBase: ProductDocBasePluginStart;
   discover: DiscoverStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
+  aiAssistantManagementSelection: AIAssistantManagementSelectionPluginPublicStart;
 }
 
 export type StartServices = CoreStart &

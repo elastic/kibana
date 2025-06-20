@@ -66,6 +66,7 @@ export class ElasticAssistantPublicPlugin
         discover: dependencies.discover,
         spaces: dependencies.spaces,
         elasticAssistantSharedState: dependencies.elasticAssistantSharedState,
+        aiAssistantManagementSelection: dependencies.aiAssistantManagementSelection,
       };
       return services;
     };

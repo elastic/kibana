@@ -22,6 +22,7 @@ import { useAssistantAvailability } from '../../hooks/assistant_availability/use
 import { useBasePath } from '../../hooks/base_path/use_base_path';
 import { CommentActionsMounter } from '../../components/comment_actions/comment_actions_mounter';
 import { useAssistantTelemetry } from '../../hooks/use_assistant_telemetry';
+import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible/use_is_nav_control_visible';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -110,6 +111,12 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
       assistantContextValue
     );
   }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
+
+  const { isVisible } = useIsNavControlVisible()
+
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <ElasticAssistantProvider value={assistantContextValue}>{children}</ElasticAssistantProvider>
