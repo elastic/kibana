@@ -36,30 +36,6 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const tabs = {
-    route: {
-      content: (
-        <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
-        defaultMessage: 'Partitioning',
-      }),
-    },
-    enrich: {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    },
-    schemaEditor: {
-      content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
-        defaultMessage: 'Schema editor',
-      }),
-    },
     lifecycle: {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
@@ -79,6 +55,30 @@ export function WiredStreamDetailManagement({
           </span>
         </EuiToolTip>
       ),
+    },
+    route: {
+      content: (
+        <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
+        defaultMessage: 'Partitioning',
+      }),
+    },
+    enrich: {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
+      }),
+    },
+    schemaEditor: {
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+        defaultMessage: 'Schema editor',
+      }),
     },
   };
 

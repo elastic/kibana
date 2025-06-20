@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiBadgeGroup, EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
@@ -63,7 +63,7 @@ export function StreamDetailView() {
   const { definition } = useStreamDetail();
 
   if (tab === 'management') {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />;
   }
 
   if (!isValidStreamDetailTab(tab)) {
@@ -84,18 +84,7 @@ export function StreamDetailView() {
             {key}
             <EuiBadgeGroup gutterSize="s">
               {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <EuiToolTip
-                position="top"
-                title={i18n.translate('xpack.streams.badges.lifecycle.title', {
-                  defaultMessage: 'Data Retention',
-                })}
-                content={i18n.translate('xpack.streams.badges.lifecycle.description', {
-                  defaultMessage:
-                    'You can edit retention settings from the stream’s management view',
-                })}
-              >
-                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-              </EuiToolTip>
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }

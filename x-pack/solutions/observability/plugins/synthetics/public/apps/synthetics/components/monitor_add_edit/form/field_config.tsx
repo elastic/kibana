@@ -30,6 +30,8 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
+import { MaintenanceWindowsLink } from '../fields/maintenance_windows/create_maintenance_windows_btn';
+import { MaintenanceWindowsFieldProps } from '../fields/maintenance_windows/maintenance_windows';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import {
   PROFILE_OPTIONS,
@@ -60,6 +62,7 @@ import {
   KeyValuePairsField,
   TextArea,
   ThrottlingWrapper,
+  MaintenanceWindowsFieldWrapper,
 } from './field_wrappers';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
@@ -1675,5 +1678,27 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       },
       'data-test-subj': 'syntheticsEnableAttemptSwitch',
     }),
+  },
+  [ConfigKey.MAINTENANCE_WINDOWS]: {
+    fieldKey: ConfigKey.MAINTENANCE_WINDOWS,
+    label: i18n.translate('xpack.synthetics.monitorConfig.maintenanceWindows.label', {
+      defaultMessage: 'Maintenance windows',
+    }),
+    controlled: true,
+    component: MaintenanceWindowsFieldWrapper,
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.maintenanceWindows.helpText', {
+      defaultMessage:
+        'A list of maintenance windows to apply to this monitor. The monitor will not run during these times.',
+    }),
+    props: ({ field, setValue, trigger }): MaintenanceWindowsFieldProps => ({
+      readOnly,
+      onChange: async (value) => {
+        setValue(ConfigKey.MAINTENANCE_WINDOWS, value);
+        await trigger(ConfigKey.MAINTENANCE_WINDOWS);
+      },
+      fullWidth: true,
+      value: field?.value as string[],
+    }),
+    labelAppend: <MaintenanceWindowsLink />,
   },
 });

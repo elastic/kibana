@@ -754,7 +754,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<boolean | undefined>; management?: ",
+          "<boolean | undefined>; ui?: readonly string[] | undefined; management?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -770,7 +770,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<readonly string[] | undefined>; ui?: readonly string[] | undefined; catalogue?: ",
+          "<readonly string[] | undefined>; catalogue?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

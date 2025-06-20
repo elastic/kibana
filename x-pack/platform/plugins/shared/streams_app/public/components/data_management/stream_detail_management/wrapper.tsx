@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadgeGroup, EuiFlexGroup, EuiPageHeader, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +14,7 @@ import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
 
 export type ManagementTabs = Record<
   string,
@@ -57,30 +57,32 @@ export function Wrapper({
       <EuiPageHeader
         paddingSize="l"
         bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
         css={css`
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
             })}
-            <EuiBadgeGroup gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <DiscoverBadgeButton definition={definition} />
               {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <EuiToolTip
-                position="top"
-                title={i18n.translate('xpack.streams.badges.lifecycle.title', {
-                  defaultMessage: 'Data Retention',
-                })}
-                content={i18n.translate('xpack.streams.badges.lifecycle.description', {
-                  defaultMessage:
-                    'You can edit retention settings from the stream’s management view',
-                })}
-              >
-                <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-              </EuiToolTip>
-            </EuiBadgeGroup>
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            </EuiFlexGroup>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
