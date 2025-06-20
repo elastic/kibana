@@ -55,8 +55,10 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
   const [actualQuery, setActualQuery] = useState(query);
+  // Note, this is just experimental, if we want to store the edited / dirty state of the query
+  // is should be done I guess in out internal state container
   const onQueryChange = useCallback((q: { dateRange: TimeRange; query?: QT | Query }) => {
-    console.log('onQueryChange', q);
+    // console.log('onQueryChange', q);
     setActualQuery(q);
   }, []);
   useEffect(() => {
@@ -224,7 +226,7 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
-  console.log('DiscoverTop query in use', actualQuery);
+  // console.log('DiscoverTop query in use', actualQuery);
 
   return (
     <>

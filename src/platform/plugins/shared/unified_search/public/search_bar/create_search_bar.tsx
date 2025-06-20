@@ -163,10 +163,16 @@ export function createSearchBar({
     const { useDefaultBehaviors, allowSavingQueries, onQueryChange } = props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
-    const queryEdited = useRef('');
+    // Just to test tracking of query changes
+    // Problem that after this inial setting up the query, in this component subsequent changes to the props.query
+    // are just ignored, since there's a subscription to the queryStringManager of data.query.queryString setting the query
+    // and since a query edits is unknow to it, it will always return the most recent submitted query
+    const queryEdited = useRef<string | undefined>();
     const onQueryChanged = useCallback(
       (query) => {
-        queryEdited.current = query.query || '';
+        if (query.query) {
+          queryEdited.current = query.query;
+        }
         if (onQueryChange) {
           onQueryChange(query);
         }
@@ -205,7 +211,7 @@ export function createSearchBar({
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
       if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
-      queryEdited.current = '';
+      queryEdited.current = undefined;
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -255,7 +261,7 @@ export function createSearchBar({
             isLoading={props.isLoading}
             onCancel={props.onCancel}
             filters={filters}
-            query={queryEdited.current || query}
+            query={queryEdited.current ?? query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled

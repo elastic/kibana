@@ -340,6 +340,7 @@ export const QueryBarTopRow = React.memo(
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
+
         propsOnSubmit({ query, dateRange });
       },
       [timeHistory, propsOnSubmit]
@@ -740,12 +741,12 @@ export const QueryBarTopRow = React.memo(
             errors={props.textBasedLanguageModeErrors}
             warning={props.textBasedLanguageModeWarning}
             detectedTimestamp={detectedTimestamp}
-            onTextLangQuerySubmit={async () => {
-              return onSubmit({
+            onTextLangQuerySubmit={async () =>
+              onSubmit({
                 query: queryRef.current,
                 dateRange: dateRangeRef.current,
-              });
-            }}
+              })
+            }
             isDisabled={props.isDisabled}
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
