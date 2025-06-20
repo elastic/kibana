@@ -137,7 +137,12 @@ export const markdownRenderers = (
 
       return (
         <>
-          <EuiAccordion id={id} buttonContent={summaryText} initialIsOpen={false} data-test-subj="integrationsDocs.accordion">
+          <EuiAccordion
+            id={id}
+            buttonContent={summaryText}
+            initialIsOpen={false}
+            data-test-subj="integrationsDocs.accordion"
+          >
             {bodyNodes}
           </EuiAccordion>
           <EuiSpacer size="m" />
