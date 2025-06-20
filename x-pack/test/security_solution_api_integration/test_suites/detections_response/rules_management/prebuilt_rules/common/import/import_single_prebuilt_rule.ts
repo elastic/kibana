@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('with overwriting', () => {
+      describe('with overwriting (prebuilt rules installed)', () => {
         it('imports a non-customized prebuilt rule on top of an installed non-customized prebuilt rule', async () => {
           await installPrebuiltRules(es, supertest);
 
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('with overwriting', () => {
+      describe('with overwriting (prebuilt rules installed)', () => {
         it('imports a customized prebuilt rule on top of an installed non-customized prebuilt rule', async () => {
           await installPrebuiltRules(es, supertest);
 
