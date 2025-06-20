@@ -17,6 +17,7 @@ import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discove
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { noop } from 'lodash';
 import { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
@@ -24,7 +25,7 @@ interface FilePreviewItem {
   sampleDocs: DataTableRecord[];
   dataView: DataView;
   mappings: FindFileStructureResponse['mappings'];
-  columnNames: FindFileStructureResponse['column_names'];
+  columnNames: Exclude<FindFileStructureResponse['column_names'], undefined>;
 }
 
 export const FilesPreview: FC = () => {
@@ -60,8 +61,9 @@ export const FilesPreview: FC = () => {
       const adHocDataViews = await Promise.all(
         filesStatus.map((fileStatus) => {
           return data.dataViews.create({
-            allowNoIndex: true,
             id: fileStatus.fileName,
+            title: `temp_${fileStatus.fileName}`,
+            allowNoIndex: true,
           });
         })
       );
@@ -74,8 +76,6 @@ export const FilesPreview: FC = () => {
 
           const dV = adHocDataViews[index];
 
-          console.log(status.results, '___status.results___');
-
           const columnNames = status.results?.column_names || [];
           const mappings = status.results?.mappings || {
             properties: {},
@@ -87,8 +87,15 @@ export const FilesPreview: FC = () => {
               ?.filter((d) => !!d.doc)
               .map<EsHitRecord>((d) => d.doc as EsHitRecord);
 
-            const dataRecords = validESHits?.map((doc) => {
-              return buildDataTableRecord(doc, dV);
+            const dataRecords = validESHits?.map((doc, i) => {
+              return buildDataTableRecord(
+                {
+                  ...doc,
+                  _id: `${status.fileName}-${i}`,
+                  _index: `temp_index_${i}`,
+                },
+                dV
+              );
             });
 
             return {
@@ -154,12 +161,6 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
     services: { data, theme, uiSettings, notifications, dataViewFieldEditor, fieldFormats },
   } = useKibana<KibanaContextExtra>();
 
-  const [activeColumns, setActiveColumns] = useState<string[]>(columnNames!);
-
-  const onSetColumns = useCallback((columns: string[]) => {
-    setActiveColumns(columns);
-  }, []);
-
   const services = useMemo(() => {
     const storage = new Storage(localStorage);
     return {
@@ -174,7 +175,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
   }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats]);
 
   const columnsMeta = useMemo(() => {
-    return activeColumns.reduce((acc, columnName) => {
+    return columnNames.reduce((acc, columnName) => {
       const typeFromMapping = mappings.properties[columnName]?.type || 'unknown';
 
       acc[columnName] = {
@@ -183,13 +184,13 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
       };
       return acc;
     }, {} as DataTableColumnsMeta);
-  }, [activeColumns, mappings.properties]);
+  }, [columnNames, mappings.properties]);
 
   return (
     <UnifiedDataTable
       sampleSizeState={10}
-      onSetColumns={onSetColumns}
-      columns={activeColumns}
+      onSetColumns={noop}
+      columns={columnNames!}
       rows={sampleDocs}
       columnsMeta={columnsMeta}
       services={services}
