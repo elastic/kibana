@@ -82,7 +82,7 @@ describe('Reference Data Client', () => {
       await expect(
         refDataClient.get('some-invalid-key' as unknown as ReferenceDataItemKey)
       ).rejects.toThrow(
-        'Definition for reference data key [some-invalid-key] not defined. Unable to created it.'
+        'Definition for reference data key [some-invalid-key] not defined. Unable to create it.'
       );
     });
   });
@@ -105,7 +105,7 @@ describe('Reference Data Client', () => {
       await expect(
         refDataClient.update(REF_DATA_KEYS.spaceAwarenessResponseActionsMigration, update)
       ).rejects.toThrow(
-        `Update data \'id\' value [some-other-id] differs from the reference data key provided [${REF_DATA_KEYS.spaceAwarenessResponseActionsMigration}]`
+        `Updated data \'id\' value [some-other-id] differs from the reference data key provided [${REF_DATA_KEYS.spaceAwarenessResponseActionsMigration}]`
       );
     });
   });
