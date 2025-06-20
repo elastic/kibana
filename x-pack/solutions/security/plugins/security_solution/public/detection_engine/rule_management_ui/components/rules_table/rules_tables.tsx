@@ -46,6 +46,8 @@ import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_ru
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
 import { RulesWithGapsOverviewPanel } from '../../../rule_gaps/components/rules_with_gaps_overview_panel';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { BulkEditDeleteAlertSuppressionConfirmation } from './bulk_actions/bulk_edit_delete_alert_suprression_confirmation';
+import { BulkActionEditTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -313,14 +315,23 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           rulesCount={rulesCount}
         />
       )}
-      {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
-        <BulkEditFlyout
-          rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
-          editAction={bulkEditActionType}
-          onClose={handleBulkEditFormCancel}
-          onConfirm={handleBulkEditFormConfirm}
-        />
-      )}
+      {isBulkEditFlyoutVisible &&
+        bulkEditActionType &&
+        (bulkEditActionType === BulkActionEditTypeEnum.delete_alert_suppression ? (
+          <BulkEditDeleteAlertSuppressionConfirmation
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
+            onCancel={handleBulkEditFormCancel}
+            onConfirm={handleBulkEditFormConfirm}
+          />
+        ) : (
+          <BulkEditFlyout
+            rulesCount={bulkActionsDryRunResult?.succeededRulesCount ?? 0}
+            editAction={bulkEditActionType}
+            onClose={handleBulkEditFormCancel}
+            onConfirm={handleBulkEditFormConfirm}
+          />
+        ))}
+
       {shouldShowRulesTable && (
         <>
           {selectedTab === AllRulesTabs.monitoring && storeGapsInEventLogEnabled && (

@@ -6,12 +6,16 @@
  */
 
 import { DetectedEntity } from '../../types';
+
 /** Regex matching object‑hash placeholders (40 hex chars) */
 export const HASH_REGEX = /[0-9a-f]{40}/g;
+
+/** Default model ID for named entity recognition */
+export const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
+
 /**
  * Replace each entity span in the original with its hash.
  */
-
 export function redactEntities(original: string, entities: DetectedEntity[]): string {
   let redacted = original;
   entities
@@ -23,6 +27,7 @@ export function redactEntities(original: string, entities: DetectedEntity[]): st
 
   return redacted;
 }
+
 /**
  * Replace every placeholder in a string with its real value
  * (taken from `hashMap`).
