@@ -16,14 +16,22 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 const EXPLORE_LOGSTASH_AND_BEATS = '/app/integrations/browse/observability';
-const CREATE_OBSERVABILITY_SPACE = '/app/management/kibana/spaces/create';
 
 export const Observability: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { http } = useKibana().services;
+  const { http, cloud } = useKibana().services;
+
+  const o11yTrialLink = useMemo(() => {
+    if (cloud && cloud.isServerlessEnabled) {
+      const baseUrl = cloud?.projectsUrl ?? 'https://cloud.elastic.co/projects/';
+      return `${baseUrl}create/observability/start`;
+    }
+    return http.basePath.prepend('/app/observability/onboarding');
+  }, [cloud, http]);
+
   return (
     <EuiFlexGroup gutterSize="m" data-test-subj="observabilitySection">
       <EuiFlexItem grow={false}>
@@ -99,12 +107,9 @@ export const Observability: React.FC = () => {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={http.basePath.prepend(CREATE_OBSERVABILITY_SPACE)}
-                      data-test-subj="createObservabilityProjectLink"
-                    >
+                    <EuiLink href={o11yTrialLink} data-test-subj="createObservabilityProjectLink">
                       {i18n.translate('xpack.searchHomepage.observability.observabilitySpaceLink', {
-                        defaultMessage: 'Create an Observability space',
+                        defaultMessage: 'Create an Observability project',
                       })}
                     </EuiLink>
                   </EuiFlexItem>
