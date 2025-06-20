@@ -67,7 +67,6 @@ fi
 results=()
 failedConfigs=()
 configWithoutTests=()
-passedConfigs=()
 
 FINAL_EXIT_CODE=0
 
@@ -122,5 +121,8 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
   printf '%s\n' "${failedConfigs[@]}"
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
+
+echo "✨ Upload Scout reporter events to AppEx QA's team cluster"
+node scripts/scout upload-events
 
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures
