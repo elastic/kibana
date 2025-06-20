@@ -12,46 +12,45 @@ import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 function getVisibility(
-    appId: string | undefined,
-    applications: ReadonlyMap<string, PublicAppInfo>,
-    preferredAssistantType: AIAssistantType
+  appId: string | undefined,
+  applications: ReadonlyMap<string, PublicAppInfo>,
+  preferredAssistantType: AIAssistantType
 ) {
+  // The "Global assistant" stack management setting for the security assistant still needs to be developed.
+  // In the meantime, while testing, show the Security assistant everywhere except in Observability.
 
-    // The "Global assistant" stack management setting for the security assistant still needs to be developed.
-    // In the meantime, while testing, show the Security assistant everywhere except in Observability.
+  const categoryId =
+    (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
-    const categoryId =
-        (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
+  if (preferredAssistantType === AIAssistantType.Observability) {
+    return false;
+  }
 
-    if (preferredAssistantType === AIAssistantType.Observability) {
-        return false
-    }
-
-    return true
+  return true;
 }
 
 export function useIsNavControlVisible() {
-    const {
-        application: { currentAppId$, applications$ },
-        aiAssistantManagementSelection
-    } = useKibana().services;
-    const [isVisible, setIsVisible] = useState(false);
+  const {
+    application: { currentAppId$, applications$ },
+    aiAssistantManagementSelection,
+  } = useKibana().services;
+  const [isVisible, setIsVisible] = useState(false);
 
-    useEffect(() => {
-        const appSubscription = combineLatest([
-            currentAppId$,
-            applications$,
-            aiAssistantManagementSelection.aiAssistantType$,
-        ]).subscribe({
-            next: ([appId, applications, preferredAssistantType]) => {
-                setIsVisible(getVisibility(appId, applications, preferredAssistantType));
-            },
-        });
+  useEffect(() => {
+    const appSubscription = combineLatest([
+      currentAppId$,
+      applications$,
+      aiAssistantManagementSelection.aiAssistantType$,
+    ]).subscribe({
+      next: ([appId, applications, preferredAssistantType]) => {
+        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      },
+    });
 
-        return () => appSubscription.unsubscribe();
-    }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+    return () => appSubscription.unsubscribe();
+  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
 
-    return {
-        isVisible,
-    };
+  return {
+    isVisible,
+  };
 }

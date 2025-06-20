@@ -112,7 +112,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     );
   }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
 
-  const { isVisible } = useIsNavControlVisible()
+  const { isVisible } = useIsNavControlVisible();
 
   if (!isVisible) {
     return null;
