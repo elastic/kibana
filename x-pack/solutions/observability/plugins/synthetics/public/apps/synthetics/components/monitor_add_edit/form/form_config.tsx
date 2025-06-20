@@ -207,9 +207,9 @@ const KIBANA_SPACES_OPTIONS = (readOnly: boolean): AdvancedFieldGroup => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.section.kibanaSpaces.title', {
     defaultMessage: 'Kibana Spaces',
   }),
-  description: i18n.translate('xpack.synthetics.monitorConfig.section.kibanaSpaces.description', {
+  description: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.helpText', {
     defaultMessage:
-      'Select the Kibana spaces where this monitor should be available. If no space is selected, the monitor will be available in all spaces.',
+      'Select the Kibana spaces where this monitor should be available. Current space should always be part of list, unless All spaces is selected.',
   }),
   components: [FIELD(readOnly)[ConfigKey.KIBANA_SPACES]],
 });

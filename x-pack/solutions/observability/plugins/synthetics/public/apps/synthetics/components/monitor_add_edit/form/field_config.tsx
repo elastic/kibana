@@ -1711,7 +1711,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     helpText: i18n.translate('xpack.synthetics.monitorConfig.kibanaSpaces.helpText', {
       defaultMessage:
-        'Select the Kibana spaces where this monitor should be available. If no spaces are selected, the monitor will be available in current space.',
+        ' Current space should always be part of list, unless All spaces is selected.',
     }),
     controlled: true,
     props: ({ field, setValue, trigger }): MonitorSpacesProps => ({
