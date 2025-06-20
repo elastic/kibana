@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy, isEmpty } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -24,7 +24,7 @@ import type {
   ExternalService,
   User,
 } from '../../../common/types/domain';
-import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CaseRequestCustomFields,
@@ -397,6 +397,145 @@ export const getClosedInfoForUpdate = ({
     };
   }
 };
+
+/**
+ * If the status changes to 'in-progress' and in_progress_at is not set, we set it to the current date.
+ * If the status does not change to 'in-progress' or in_progress_at is already set, we do not change it.
+ */
+
+export const getInProgressInfoForUpdate = ({
+  status,
+  stateTransitionTimestamp,
+  inProgressAt,
+}: {
+  status?: CaseStatuses;
+  stateTransitionTimestamp: string;
+  inProgressAt?: string | null;
+}): Partial<Pick<CaseAttributes, 'in_progress_at'>> | undefined => {
+  if (status && status === CaseStatuses['in-progress'] && inProgressAt == null) {
+    return {
+      in_progress_at: stateTransitionTimestamp,
+    };
+  }
+};
+
+const areValidDatesWhenChangingToInProgress = (createdAtMillis: number, updatedAtMillis: number) =>
+  !isNaN(createdAtMillis) && !isNaN(updatedAtMillis) && updatedAtMillis >= createdAtMillis;
+
+const areValidDatesWhenClosing = (
+  createdAtMillis: number,
+  stateTransitionTimestampMillis: number,
+  inProgressAtMillis: number | null
+) => {
+  if (
+    isNaN(createdAtMillis) ||
+    isNaN(stateTransitionTimestampMillis) ||
+    stateTransitionTimestampMillis < createdAtMillis
+  ) {
+    return false;
+  }
+
+  if (inProgressAtMillis != null) {
+    return (
+      !isNaN(inProgressAtMillis) &&
+      inProgressAtMillis >= createdAtMillis &&
+      stateTransitionTimestampMillis >= inProgressAtMillis
+    );
+  }
+
+  return true;
+};
+
+/**
+ * Calculates timing metrics based on the case status and timestamps.
+ * If the status is 'closed', it calculates all metrics.
+ * If the status is 'in-progress', it calculates only the time to acknowledge and sets the other metrics to null.
+ * If the status is 'open', it nullifies all metrics.
+ */
+
+export const getTimingMetricsForUpdate = ({
+  status,
+  createdAt,
+  inProgressAt,
+  stateTransitionTimestamp,
+}: {
+  status?: CaseStatuses;
+  createdAt: string;
+  stateTransitionTimestamp: string;
+  inProgressAt?: string | null;
+}):
+  | Partial<Pick<CaseAttributes, 'time_to_acknowledge' | 'time_to_investigate' | 'time_to_resolve'>>
+  | undefined => {
+  try {
+    const createdAtMillis = new Date(createdAt).getTime();
+    const stateTransitionTimestampMillis = new Date(stateTransitionTimestamp).getTime();
+    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+
+    if (status && status === CaseStatuses['in-progress']) {
+      if (
+        createdAt != null &&
+        stateTransitionTimestamp != null &&
+        areValidDatesWhenChangingToInProgress(createdAtMillis, stateTransitionTimestampMillis)
+      ) {
+        return {
+          time_to_acknowledge: calculateTimeDifferenceInSeconds(
+            stateTransitionTimestampMillis,
+            createdAtMillis
+          ),
+          time_to_investigate: null,
+          time_to_resolve: null,
+        };
+      }
+    }
+
+    if (status && status === CaseStatuses.closed) {
+      if (
+        createdAt != null &&
+        stateTransitionTimestamp != null &&
+        areValidDatesWhenClosing(
+          createdAtMillis,
+          stateTransitionTimestampMillis,
+          inProgressAtMillis
+        )
+      ) {
+        const timeToResolve = calculateTimeDifferenceInSeconds(
+          stateTransitionTimestampMillis,
+          createdAtMillis
+        );
+
+        const timeToAcknowledge =
+          inProgressAtMillis != null
+            ? calculateTimeDifferenceInSeconds(inProgressAtMillis, createdAtMillis)
+            : timeToResolve;
+
+        const timeToInvestigate =
+          inProgressAtMillis != null
+            ? calculateTimeDifferenceInSeconds(stateTransitionTimestampMillis, inProgressAtMillis)
+            : 0;
+
+        return {
+          time_to_acknowledge: timeToAcknowledge,
+          time_to_investigate: timeToInvestigate,
+          time_to_resolve: timeToResolve,
+        };
+      }
+    }
+
+    if (status && status === CaseStatuses.open) {
+      // Reset all metrics when the status is re-opened
+      return {
+        time_to_acknowledge: null,
+        time_to_investigate: null,
+        time_to_resolve: null,
+      };
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+};
+
+const calculateTimeDifferenceInSeconds = (endTime: number, startTime: number) =>
+  Math.floor((endTime - startTime) / 1000);
 
 export const getDurationInSeconds = ({
   closedAt,

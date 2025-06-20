@@ -7,7 +7,6 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
-import { firstValueFrom } from 'rxjs';
 
 import { getChangePointDetectionComponent } from './shared_components';
 import { LogCategorizationForDiscover as PatternAnalysisComponent } from './shared_lazy_components';
@@ -26,29 +25,25 @@ export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
 {
-  public setup(
-    core: AiopsCoreSetup,
-    { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
-  ) {
-    Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
-      ([license, [coreStart, pluginStart]]) => {
-        const { canUseAiops } = coreStart.application.capabilities.ml;
+  public setup(core: AiopsCoreSetup, { embeddable, cases, uiActions }: AiopsPluginSetupDeps) {
+    core.getStartServices().then(([coreStart, pluginStart]) => {
+      const { canUseAiops } = coreStart.application.capabilities.ml;
+      const aiopsEnabled = coreStart.application.capabilities.aiops.enabled;
 
-        if (license.hasAtLeast('platinum') && canUseAiops) {
-          if (embeddable) {
-            registerEmbeddables(embeddable, core);
-          }
+      if (canUseAiops && aiopsEnabled) {
+        if (embeddable) {
+          registerEmbeddables(embeddable, core);
+        }
 
-          if (uiActions) {
-            registerAiopsUiActions(uiActions, coreStart, pluginStart);
-          }
+        if (uiActions) {
+          registerAiopsUiActions(uiActions, coreStart, pluginStart);
+        }
 
-          if (cases) {
-            registerCases(cases, coreStart, pluginStart);
-          }
+        if (cases) {
+          registerCases(cases, coreStart, pluginStart);
         }
       }
-    );
+    });
   }
 
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
@@ -58,7 +53,7 @@ export class AiopsPlugin
         const { getPatternAnalysisAvailable } = await import(
           './components/log_categorization/log_categorization_enabled'
         );
-        return getPatternAnalysisAvailable(plugins.licensing);
+        return getPatternAnalysisAvailable(core.application);
       },
       PatternAnalysisComponent,
     };
