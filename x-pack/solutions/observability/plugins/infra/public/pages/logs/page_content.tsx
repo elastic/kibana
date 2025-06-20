@@ -13,11 +13,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
+  ALL_DATASETS_LOCATOR_ID,
   OBSERVABILITY_ONBOARDING_LOCATOR,
   type ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDevMode } from '@kbn/xstate-utils';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { safeDecode } from '@kbn/rison';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -86,6 +89,30 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
+        <Route
+          path="/stream"
+          exact
+          render={(props) => {
+            const searchParams = new URLSearchParams(props.location.search);
+            const logFilterEncoded = searchParams.get('logFilter');
+            let locatorParams: LogsLocatorParams = {};
+
+            if (logFilterEncoded) {
+              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+              locatorParams = {
+                timeRange: logFilter?.timeRange,
+                query: logFilter?.query,
+                filters: logFilter?.filters,
+                refreshInterval: logFilter?.refreshInterval,
+              };
+            }
+
+            share.url.locators
+              .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+              ?.navigate(locatorParams);
+            return null;
+          }}
+        />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         {enableDeveloperRoutes && (
