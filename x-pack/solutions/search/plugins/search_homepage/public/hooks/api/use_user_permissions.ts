@@ -18,7 +18,7 @@ export const useUserPrivilegesQuery = (indexName: string) => {
     queryKey: [QueryKeys.FetchUserStartPrivileges],
     queryFn: () =>
       http.get<UserStartPrivilegesResponse>(
-        `/internal/search_homepage/start_privileges/${indexName}`
+        GET_USER_PRIVILEGES_ROUTE.replace('{indexName}', indexName)
       ),
   });
 };
