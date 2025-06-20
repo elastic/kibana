@@ -13,7 +13,7 @@ import type {
 
 export const extractRuleThreshold = (rule: ThresholdRule | ThresholdRuleCreateProps): Threshold => {
   const cardinality =
-    rule.threshold.cardinality && rule.threshold.cardinality.length > 0
+    rule.threshold.cardinality && rule.threshold.cardinality.length
       ? rule.threshold.cardinality
       : undefined;
   return {

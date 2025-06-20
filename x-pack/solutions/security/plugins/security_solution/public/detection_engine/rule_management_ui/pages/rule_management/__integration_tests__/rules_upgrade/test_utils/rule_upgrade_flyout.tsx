@@ -111,6 +111,7 @@ export function mockRuleUpgradeReviewData({
         target_rule: {
           rule_id: 'test-rule',
           type: ruleType,
+          [fieldName]: fieldVersions.target,
         },
         diff: {
           num_fields_with_updates: 2, // tested field + version field
