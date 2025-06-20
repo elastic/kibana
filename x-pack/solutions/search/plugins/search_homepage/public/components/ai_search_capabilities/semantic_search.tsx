@@ -17,7 +17,7 @@ export const SemanticSearch: React.FC = () => {
   const semanticSearchText = {
     image: `${assetBasePath}/semantic_search.svg`,
     imageAlt: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.imageAlt', {
-      defaultMessage: 'Semantic Search',
+      defaultMessage: 'Semantic search',
     }),
     heading: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.semanticSearch.title', {
       defaultMessage: 'Enhance search accuracy with advanced semantic capabilities.',
