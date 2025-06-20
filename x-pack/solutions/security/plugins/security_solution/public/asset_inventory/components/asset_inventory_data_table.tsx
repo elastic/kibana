@@ -102,7 +102,7 @@ const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
       | 'deleted';
     return (
       <AssetCriticalityBadge
-        criticalityLevel={criticality === 'deleted' ? undefined : criticality}
+        criticalityLevel={criticality === 'deleted' ? 'unassigned' : criticality}
       />
     );
   },
