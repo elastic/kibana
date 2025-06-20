@@ -994,7 +994,8 @@ ROW
                     1234567890,
                     1234567890,
                     1234567890,
-                    1234567890]))))))))`);
+                    1234567890
+                  ]))))))))`);
       });
     });
 
@@ -1021,8 +1022,40 @@ ROW
   [
     "..............................................",
     "..............................................",
-    ".............................................."]`);
+    ".............................................."
+  ]`);
       });
+    });
+  });
+
+  describe('list tuples', () => {
+    test('wraps long lists over one line', () => {
+      const query =
+        'FROM a | WHERE b in (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890)';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (1234567890, 1234567890, 1234567890, 1234567890, 1234567890, 1234567890,
+          1234567890, 1234567890, 1234567890)`);
+    });
+
+    test('breaks lists with long items', () => {
+      const query =
+        'FROM a | WHERE b in ("abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz")';
+      const text = reprint(query).text;
+
+      expect('\n' + text).toBe(`
+FROM a
+  | WHERE
+      b IN
+        (
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+          "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+        )`);
     });
   });
 });

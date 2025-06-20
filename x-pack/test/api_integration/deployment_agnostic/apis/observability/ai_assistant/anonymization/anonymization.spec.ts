@@ -40,28 +40,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       // configure anonymization rules for these tests
       await setAdvancedSettings(supertest, {
-        'observability:aiAssistantAnonymizationRules': [
-          {
-            id: 'email_regex',
-            entityClass: 'EMAIL',
-            type: 'regex',
-            pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize email addresses',
-            normalize: true,
-          },
-          {
-            id: 'url_regex',
-            entityClass: 'URL',
-            type: 'regex',
-            pattern: 'https?://[^\\s]+',
-            enabled: true,
-            builtIn: true,
-            description: 'Anonymize URLs',
-            normalize: true,
-          },
-        ],
+        'observability:aiAssistantAnonymizationRules': JSON.stringify(
+          [
+            {
+              entityClass: 'EMAIL',
+              type: 'regex',
+              pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+              enabled: true,
+            },
+            {
+              entityClass: 'URL',
+              type: 'regex',
+              pattern: 'https?://[^\\s]+',
+              enabled: true,
+            },
+          ],
+          null,
+          2
+        ),
       });
     });
 
