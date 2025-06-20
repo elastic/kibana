@@ -147,14 +147,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is available if new', async () => {
         await reporting.openExportPopover();
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await exports.closeExportFlyout();
+        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
         await discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await reporting.openExportPopover();
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await exports.closeExportFlyout();
+        await reporting.openExportPopover();
       });
     });
 
