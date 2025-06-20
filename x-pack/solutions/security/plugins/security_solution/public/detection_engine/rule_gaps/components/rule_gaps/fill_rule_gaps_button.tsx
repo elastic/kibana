@@ -144,7 +144,7 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       );
     }, 5 * 1000);
 
-    const isSuccessful = await executeBulkAction({
+    const response = await executeBulkAction({
       type: BulkActionTypeEnum.fill_gaps,
       ids: [ruleId],
       fillGapsPayload: {
@@ -165,7 +165,7 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       rangeInMs: modalBulkFillRuleGapsConfirmationResult.endDate.diff(
         modalBulkFillRuleGapsConfirmationResult.startDate
       ),
-      status: isSuccessful ? 'success' : 'error',
+      status: response !== undefined ? 'success' : 'error',
       rulesCount: 1,
     });
   }, [

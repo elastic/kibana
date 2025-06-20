@@ -45,7 +45,6 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
 
   const executeBulkAction = useCallback(
     async (bulkAction: BulkAction) => {
-      let isSuccessful = true;
       try {
         setLoadingRules?.({
           ids: bulkAction.ids ?? guessRuleIdsForBulkAction(bulkAction.type),
@@ -66,12 +65,10 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
 
         return response;
       } catch (error) {
-        isSuccessful = false;
         showBulkErrorToast({ actionType: bulkAction.type, error });
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }
-      return isSuccessful;
     },
     [
       options?.suppressSuccessToast,
