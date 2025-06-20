@@ -129,11 +129,14 @@ const BulkFillRuleGapsModalComponent = ({
       />
 
       {rulesCount > 1 && (
-        <EuiCallOut
-          size="s"
-          iconType="warning"
-          title={i18n.BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS}
-        />
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            size="s"
+            iconType="warning"
+            title={i18n.BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS}
+          />
+        </>
       )}
     </EuiConfirmModal>
   );

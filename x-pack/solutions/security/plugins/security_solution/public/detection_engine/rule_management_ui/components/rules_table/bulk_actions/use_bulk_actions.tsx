@@ -11,6 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui
 import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
+import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
 import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
@@ -113,7 +114,7 @@ export const useBulkActions = ({
   const isBulkEditAlertSuppressionFeatureEnabled = useIsExperimentalFeatureEnabled(
     'bulkEditAlertSuppressionEnabled'
   );
-  const isBulkGapsFillEnabled = useIsExperimentalFeatureEnabled('bulkGapsFillEnabled');
+  const isBulkFillRuleGapsEnabled = useIsExperimentalFeatureEnabled('bulkFillRuleGapsEnabled');
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
   const license = useLicense();
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
@@ -325,12 +326,12 @@ export const useBulkActions = ({
           return;
         }
 
-        const modalManualGapsFillingConfirmationResult = await showBulkFillRuleGapsConfirmation();
-        // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.FillGaps, {
-        //   type: 'bulk',
-        // });
+        const modalBulkFillRuleGapsConfirmationResult = await showBulkFillRuleGapsConfirmation();
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsOpenModal, {
+          type: 'bulk',
+        });
 
-        if (modalManualGapsFillingConfirmationResult === null) {
+        if (modalBulkFillRuleGapsConfirmationResult === null) {
           return;
         }
 
@@ -378,21 +379,21 @@ export const useBulkActions = ({
           type: BulkActionTypeEnum.fill_gaps,
           ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
           fillGapsPayload: {
-            start_date: modalManualGapsFillingConfirmationResult.startDate.toISOString(),
-            end_date: modalManualGapsFillingConfirmationResult.endDate.toISOString(),
+            start_date: modalBulkFillRuleGapsConfirmationResult.startDate.toISOString(),
+            end_date: modalBulkFillRuleGapsConfirmationResult.endDate.toISOString(),
           },
         });
 
         isBulkFillGapsFinished = true;
         hideWarningToast();
 
-        // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
-        //   rangeInMs: modalManualGapsFillingConfirmationResult.endDate.diff(
-        //     modalManualGapsFillingConfirmationResult.startDate
-        //   ),
-        //   status: 'success',
-        //   rulesCount: enabledIds.length,
-        // });
+        startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsExecute, {
+          rangeInMs: modalBulkFillRuleGapsConfirmationResult.endDate.diff(
+            modalBulkFillRuleGapsConfirmationResult.startDate
+          ),
+          status: 'success',
+          rulesCount: enabledIds.length,
+        });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -603,7 +604,7 @@ export const useBulkActions = ({
               onClick: handleScheduleRuleRunAction,
               icon: undefined,
             },
-            ...(isBulkGapsFillEnabled
+            ...(isBulkFillRuleGapsEnabled
               ? [
                   {
                     key: i18n.BULK_ACTION_FILL_RULE_GAPS,
@@ -789,7 +790,7 @@ export const useBulkActions = ({
       globalQuery,
       kql,
       showBulkFillRuleGapsConfirmation,
-      isBulkGapsFillEnabled,
+      isBulkFillRuleGapsEnabled,
     ]
   );
 

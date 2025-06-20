@@ -26,6 +26,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { BULK_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { BulkFillRuleGapsEventTypes } from '../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 
 interface BulkActionRuleErrorItemProps {
   errorCode: BulkActionsDryRunErrCode | undefined;
@@ -101,9 +102,9 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       return;
     }
     const modalManualGapsFillingConfirmationResult = await showBulkFillRuleGapsConfirmation();
-    // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.FillGaps, {
-    //   type: 'bulk',
-    // });
+    startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsOpenModal, {
+      type: 'single',
+    });
     if (modalManualGapsFillingConfirmationResult === null) {
       return;
     }
@@ -143,7 +144,7 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
       );
     }, 5 * 1000);
 
-    await executeBulkAction({
+    const isSuccessful = await executeBulkAction({
       type: BulkActionTypeEnum.fill_gaps,
       ids: [ruleId],
       fillGapsPayload: {
@@ -160,13 +161,13 @@ export const FillRuleGapsButton = ({ ruleId }: Props) => {
     invalidateFindGapsQuery();
     invalidateFindBackfillsQuery();
 
-    // startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
-    //     rangeInMs: modalManualGapsFillingConfirmationResult.endDate.diff(
-    //         modalManualGapsFillingConfirmationResult.startDate
-    //     ),
-    //     status: 'success',
-    //     rulesCount: enabledIds.length,
-    // });
+    startServices.telemetry.reportEvent(BulkFillRuleGapsEventTypes.BulkFillRuleGapsExecute, {
+      rangeInMs: modalManualGapsFillingConfirmationResult.endDate.diff(
+        modalManualGapsFillingConfirmationResult.startDate
+      ),
+      status: isSuccessful ? 'success' : 'error',
+      rulesCount: 1,
+    });
   }, [
     isBulkActionsDryRunLoading,
     isBulkActionExecuteLoading,
