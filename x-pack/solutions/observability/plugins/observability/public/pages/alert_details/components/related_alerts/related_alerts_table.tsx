@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -53,8 +53,13 @@ export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
   const esQuery = useBuildRelatedAlertsQuery({ alert });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-
   const { services } = useKibana();
+
+  const onLoaded = useCallback(
+    ({ totalAlertsCount }: { totalAlertsCount: number }) =>
+      services.telemetryClient.reportRelatedAlertsLoaded(totalAlertsCount),
+    [services.telemetryClient]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -63,9 +68,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
         id={RELATED_ALERTS_TABLE_ID}
         query={esQuery}
         columns={columns}
-        onLoaded={({ totalAlertsCount }) => {
-          services.telemetryClient.reportRelatedAlertsLoaded(totalAlertsCount);
-        }}
+        onLoaded={onLoaded}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         minScore={1.5}
         trackScores={true}
