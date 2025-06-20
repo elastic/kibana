@@ -77,54 +77,52 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     [columns, updateRow]
   );
 
-  const saveNewRow = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      if (!validateNewRow()) {
-        return;
-      }
+  const saveNewRow = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      try {
+        // At least one column must have a value
+        const hasValue = Object.values(newRow).some(
+          (v) => v !== undefined && v !== null && v !== ''
+        );
+        if (!hasValue) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('indexEditor.addRow.ValidationErrorTitle', {
+              defaultMessage: 'Cannot add empty row',
+            }),
+            text: i18n.translate('indexEditor.addRow.ValidationErrorText', {
+              defaultMessage: 'Please enter a value for at least one column before saving.',
+            }),
+          });
+          return;
+        }
 
-      const response = await indexUpdateService.saveDocsImmediately([{ value: newRow }]);
+        const response = await indexUpdateService.saveDocsImmediately([{ value: newRow }]);
 
-      if (!response.errors) {
-        setActiveMode(null);
-        notifications.toasts.addSuccess({
-          title: i18n.translate('indexEditor.addRow.SuccessTitle', {
-            defaultMessage: 'Row added successfully',
-          }),
-          text: i18n.translate('indexEditor.addRow.SuccessContent', {
-            defaultMessage: 'Refresh the table to see the new row.',
+        if (!response.errors) {
+          setActiveMode(null);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('indexEditor.addRow.SuccessTitle', {
+              defaultMessage: 'Row added successfully',
+            }),
+            text: i18n.translate('indexEditor.addRow.SuccessContent', {
+              defaultMessage: 'Refresh the table to see the new row.',
+            }),
+          });
+          return;
+        }
+
+        throw new Error(response.items[0].index?.error?.reason);
+      } catch (error) {
+        notifications.toasts.addError(error as Error, {
+          title: i18n.translate('indexEditor.addRow.ErrorTitle', {
+            defaultMessage: 'An error occurred while adding the row',
           }),
         });
-        return;
       }
-
-      throw new Error(response.items[0].index?.error?.reason);
-    } catch (error) {
-      notifications.toasts.addError(error as Error, {
-        title: i18n.translate('indexEditor.addRow.ErrorTitle', {
-          defaultMessage: 'An error occurred while adding the row',
-        }),
-      });
-    }
-  };
-
-  const validateNewRow = (): boolean => {
-    // At least one column must have a value
-    const hasValue = Object.values(newRow).some((v) => v !== undefined && v !== null && v !== '');
-    if (!hasValue) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('indexEditor.addRow.ValidationErrorTitle', {
-          defaultMessage: 'Cannot add empty row',
-        }),
-        text: i18n.translate('indexEditor.addRow.ValidationErrorText', {
-          defaultMessage: 'Please enter a value for at least one column before saving.',
-        }),
-      });
-      return false;
-    }
-    return true;
-  };
+    },
+    [newRow, indexUpdateService, notifications]
+  );
 
   return (
     <>
