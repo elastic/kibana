@@ -109,7 +109,7 @@ export const ConnectToElasticsearch = () => {
                         {i18n.translate(
                           'xpack.searchHomepage.connectToElasticsearch.apiKeysLabel',
                           {
-                            defaultMessage: 'API Keys',
+                            defaultMessage: 'API keys',
                           }
                         )}
                       </span>
