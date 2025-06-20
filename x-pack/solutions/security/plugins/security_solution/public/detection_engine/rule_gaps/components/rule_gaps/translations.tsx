@@ -192,7 +192,7 @@ export const GAPS_FILL_ALL_GAPS_UNKNOWN_ERROR_MESSAGE = (message: string) =>
     'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalUnknownErrorLabel',
     {
       values: { message },
-      defaultMessage: 'Cannot fill gaps for this rule ({message})',
+      defaultMessage: 'Cannot fill gaps for 1 rule ({message})',
     }
   );
 
@@ -227,7 +227,7 @@ export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_TITLE = i18n.translate(
 export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastMessage',
   {
-    defaultMessage: 'Scheduling the gaps fill for this rule.',
+    defaultMessage: 'Scheduling the gaps fill for 1 rule.',
   }
 );
 

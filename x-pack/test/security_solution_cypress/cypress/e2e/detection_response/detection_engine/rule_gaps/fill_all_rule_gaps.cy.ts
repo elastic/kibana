@@ -157,7 +157,7 @@ describe(
       // Schedule the backfill
       cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();
       cy.get(MODAL_CONFIRMATION_BTN).click();
-      cy.contains(TOASTER_BODY, `Scheduling the gaps fill for this rule`);
+      cy.contains(TOASTER_BODY, `Scheduling the gaps fill for 1 rule`);
       cy.wait('@bulkFillRulesGaps');
 
       // After scheduling the backfill, the gaps and manual runs are refreshed
