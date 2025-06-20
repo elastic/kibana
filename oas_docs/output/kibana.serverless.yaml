@@ -11271,24 +11271,6 @@ paths:
       summary: Delete a monitored user
       tags:
         - Security Entity Analytics API
-    get:
-      operationId: GetPrivMonUser
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
-          description: User details retrieved
-      summary: Retrieve a monitored user by ID
-      tags:
-        - Security Entity Analytics API
     put:
       operationId: UpdatePrivMonUser
       parameters:
