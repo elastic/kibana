@@ -392,7 +392,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
+      {viewMode === 'edit' && 1 ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
       <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />

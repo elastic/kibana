@@ -19,6 +19,29 @@ import { AddTimeSliderControlButton } from './add_time_slider_control_button';
 import { AddESQLControlButton } from './add_esql_control_button';
 import { EditControlGroupButton } from './edit_control_group_button';
 
+export const getControlMenuItems = (closePopover: () => void, controlGroupApi?: ControlGroupApi) => [
+  <AddDataControlButton
+    key="addControl"
+    controlGroupApi={controlGroupApi}
+    closePopover={closePopover}
+  />,
+  <AddTimeSliderControlButton
+    key="addTimeSliderControl"
+    controlGroupApi={controlGroupApi}
+    closePopover={closePopover}
+  />,
+  <AddESQLControlButton
+    key="addESQLControl"
+    controlGroupApi={controlGroupApi}
+    closePopover={closePopover}
+  />,
+  <EditControlGroupButton
+    key="manageControls"
+    controlGroupApi={controlGroupApi}
+    closePopover={closePopover}
+  />,
+]
+
 export function ControlsToolbarButton({
   controlGroupApi,
   isDisabled,
@@ -41,30 +64,7 @@ export function ControlsToolbarButton({
       isDisabled={isDisabled}
     >
       {({ closePopover }: { closePopover: () => void }) => (
-        <EuiContextMenuPanel
-          items={[
-            <AddDataControlButton
-              key="addControl"
-              controlGroupApi={controlGroupApi}
-              closePopover={closePopover}
-            />,
-            <AddTimeSliderControlButton
-              key="addTimeSliderControl"
-              controlGroupApi={controlGroupApi}
-              closePopover={closePopover}
-            />,
-            <AddESQLControlButton
-              key="addESQLControl"
-              controlGroupApi={controlGroupApi}
-              closePopover={closePopover}
-            />,
-            <EditControlGroupButton
-              key="manageControls"
-              controlGroupApi={controlGroupApi}
-              closePopover={closePopover}
-            />,
-          ]}
-        />
+        <EuiContextMenuPanel items={getControlMenuItems(closePopover, controlGroupApi)} />
       )}
     </ToolbarPopover>
   );

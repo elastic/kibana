@@ -214,6 +214,14 @@ export const topNavStrings = {
       defaultMessage: 'Switch to view-only mode',
     }),
   },
+  addElement: {
+    label: i18n.translate('dashboard.topNave.addAnElementButtonAriaLabel', {
+      defaultMessage: 'Add',
+    }),
+    description: i18n.translate('dashboard.topNave.addAnElementConfigDescription', {
+      defaultMessage: 'Add a new element to the dashboard',
+    }),
+  },
   export: {
     label: i18n.translate('dashboard.topNave.exportButtonAriaLabel', {
       defaultMessage: 'Export',

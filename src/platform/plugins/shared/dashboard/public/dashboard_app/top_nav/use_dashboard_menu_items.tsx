@@ -23,6 +23,7 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { toggleAddMenuOpen } from './add_element_menu/add_element_menu';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -66,6 +67,17 @@ export const useDashboardMenuItems = ({
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
+
+    /**
+   * Show the Dashboard app's share menu
+   */
+    const showAdd = useCallback(
+      (anchorElement: HTMLElement) => {
+        console.log('anchorElement', dashboardApi);
+        toggleAddMenuOpen({anchorElement, dashboardApi});
+      },
+      [dashboardTitle, hasUnsavedChanges, lastSavedId]
+    );
 
   /**
    * Save the dashboard without any UI or popups.
@@ -206,6 +218,19 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
         run: (anchorElement) => showShare(anchorElement, true),
       } as TopNavMenuData,
+      addElement: {
+        ...topNavStrings.addElement,
+        fill: false,
+        emphasize: true,
+        iconType: 'plusInCircle',
+        color: 'primary',
+        id: 'add-element',
+        testId: 'dashboardAddElementButton',
+        run: (anchorElement) => {
+          console.log('Open a dialog to add a new element');
+          showAdd(anchorElement, dashboardApi);
+        },
+      } as TopNavMenuData,
 
       settings: {
         ...topNavStrings.settings,
@@ -314,20 +339,23 @@ export const useDashboardMenuItems = ({
 
     if (lastSavedId) {
       editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
+      
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-
+      
       editModeItems.push(menuItems.quickSave);
+      editModeItems.push(menuItems.addElement);
     } else {
+
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
+      editModeItems.push(menuItems.addElement);
     }
 
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-1, 0, ...shareMenuItem);
+    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
@@ -338,6 +366,7 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
+    menuItems.addElement,
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
@@ -347,3 +376,5 @@ export const useDashboardMenuItems = ({
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };
+
+
