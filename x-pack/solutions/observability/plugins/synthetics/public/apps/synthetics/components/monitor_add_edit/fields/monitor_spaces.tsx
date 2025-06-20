@@ -111,16 +111,7 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
       options={spacesList.map((option) =>
         isAllSpacesSelected && option.id !== ALL_SPACES_ID ? { ...option, disabled: true } : option
       )}
-      selectedOptions={selectedIds.map((id) => {
-        const sp = spacesList.find((spaceObj) => spaceObj.id === id);
-        if (!sp) {
-          return {
-            id,
-            label: id,
-          };
-        }
-        return { id: sp.id, label: sp.label };
-      })}
+      selectedOptions={spacesList.filter(({ id }) => selectedIds.includes(id))}
       isClearable={true}
       onChange={(selected) => {
         const newSelectedIds = selected.map((option) => option.id!);
