@@ -47,4 +47,3 @@ export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
 export const SECURITY_FEATURE_ID = 'siemV2' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
-

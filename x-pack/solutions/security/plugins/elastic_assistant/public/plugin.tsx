@@ -31,12 +31,12 @@ export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPubli
 
 export class ElasticAssistantPublicPlugin
   implements
-  Plugin<
-    ElasticAssistantPublicPluginSetup,
-    ElasticAssistantPublicPluginStart,
-    ElasticAssistantPublicPluginSetupDependencies,
-    ElasticAssistantPublicPluginStartDependencies
-  >
+    Plugin<
+      ElasticAssistantPublicPluginSetup,
+      ElasticAssistantPublicPluginStart,
+      ElasticAssistantPublicPluginSetupDependencies,
+      ElasticAssistantPublicPluginStartDependencies
+    >
 {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();

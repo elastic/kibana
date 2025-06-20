@@ -13,7 +13,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { licenseService } from '../../common/hooks/use_license';
 import { useAssistantAvailability } from '../use_assistant_availability';
 
-
 export const useMigrateConversationsFromLocalStorage = () => {
   const hasEnterpriseLicense = licenseService.isEnterprise();
   const assistantAvailability = useAssistantAvailability();

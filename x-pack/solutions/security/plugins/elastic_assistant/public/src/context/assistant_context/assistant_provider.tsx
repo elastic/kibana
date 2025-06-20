@@ -32,7 +32,7 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
  */
 export function AssistantProvider({ children }: { children: React.ReactElement }) {
   const {
-    application: { navigateToApp, currentAppId$},
+    application: { navigateToApp, currentAppId$ },
     http,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
