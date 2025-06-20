@@ -13,6 +13,8 @@ import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { SelectOption, SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
+import { useMemoizedStyles } from '@kbn/core/public';
+import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { ValueAxis } from '../../../../types';
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
@@ -43,6 +45,7 @@ export function ValueAxisOptions({
   setParamByIndex,
   setMultipleValidity,
 }: ValueAxisOptionsParams) {
+  const styles = useMemoizedStyles(visEditorSidebarStyles);
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
       setParamByIndex('valueAxes', index, paramName, value),
@@ -181,6 +184,7 @@ export function ValueAxisOptions({
             defaultMessage: 'Toggle custom extents',
           }
         )}
+        css={[styles.section, styles.collapsible]}
       >
         <>
           <EuiSpacer size="m" />

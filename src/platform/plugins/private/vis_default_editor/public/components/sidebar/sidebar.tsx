@@ -17,7 +17,15 @@ import React, {
 } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import {
+  keys,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  UseEuiTheme,
+  euiBreakpoint,
+  euiScrollBarStyles,
+} from '@elastic/eui';
 import { EventEmitter } from 'events';
 
 import {
@@ -29,6 +37,7 @@ import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -36,7 +45,45 @@ import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
 import { useOptionTabs } from './use_option_tabs';
 
+const flexParentStyle = (basis: string) =>
+  css({
+    flex: `1 1 ${basis}`,
+    display: 'flex',
+    flexDirection: 'column',
+    '> *': { flexShrink: 0 },
+  });
+
 const defaultEditorSideBarStyles = {
+  base: (euiThemeContext: UseEuiTheme) =>
+    css({
+      height: '100%',
+      paddingLeft: euiThemeContext.euiTheme.size.s,
+      [euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])]: {
+        paddingLeft: 0,
+      },
+    }),
+  form: css({ ...flexParentStyle('auto'), maxWidth: '100%' }),
+  config: (euiThemeContext: UseEuiTheme) =>
+    css`
+      &.visEditorSidebar__config {
+        padding: ${euiThemeContext.euiTheme.size.s};
+
+        > * {
+          flex-grow: 0;
+        }
+
+        ${euiBreakpoint(euiThemeContext, ['l', 'xl'])} {
+          overflow: auto;
+          ${flexParentStyle('1px')};
+          ${euiScrollBarStyles(euiThemeContext)};
+        }
+      }
+    `,
+  configIsHidden: css({
+    '&.visEditorSidebar__config-isHidden': {
+      display: 'none',
+    },
+  }),
   collapsibleSideBarButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',
@@ -68,6 +115,7 @@ function DefaultEditorSideBarComponent({
   savedSearch,
   timeRange,
 }: DefaultEditorSideBarProps) {
+  const styles = useMemoizedStyles(defaultEditorSideBarStyles);
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
@@ -192,12 +240,14 @@ function DefaultEditorSideBarComponent({
         justifyContent="spaceBetween"
         gutterSize="none"
         responsive={false}
+        css={styles.base}
       >
         <EuiFlexItem>
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"
             onKeyDownCapture={onSubmit}
+            css={styles.form}
           >
             {vis.type.requiresSearch && (
               <SidebarTitle
@@ -218,6 +268,7 @@ function DefaultEditorSideBarComponent({
                 className={`visEditorSidebar__config ${
                   isSelected ? '' : 'visEditorSidebar__config-isHidden'
                 }`}
+                css={[styles.config, !isSelected && styles.configIsHidden]}
               >
                 <Editor
                   isTabSelected={isSelected}
