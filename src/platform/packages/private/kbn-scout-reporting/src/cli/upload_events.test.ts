@@ -12,7 +12,6 @@ import fs from 'node:fs';
 import { runUploadEvents } from './upload_events';
 import { FlagsReader } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutReportDataStream } from '../reporting/report/events';
 
 jest.mock('fs');
 
@@ -24,15 +23,15 @@ jest.mock('../helpers/elasticsearch', () => ({
   getValidatedESClient: jest.fn(),
 }));
 
-jest.mock('../reporting/report/events', () => {
-  return {
-    ScoutReportDataStream: jest.fn().mockImplementation(() => {
-      return {
-        addEventsFromFile: jest.fn(),
-      };
-    }),
-  };
-});
+const mockAddEventsFromFile = jest.fn();
+
+jest.mock('../reporting/report/events', () => ({
+  ScoutReportDataStream: jest.fn().mockImplementation(() => {
+    return {
+      addEventsFromFile: mockAddEventsFromFile,
+    };
+  }),
+}));
 
 describe('runUploadEvents', () => {
   let flagsReader: jest.Mocked<FlagsReader>;
@@ -53,7 +52,6 @@ describe('runUploadEvents', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
     jest.clearAllMocks();
   });
 
@@ -87,7 +85,6 @@ describe('runUploadEvents', () => {
     );
   });
 
-  /*
   it('should upload the event log file', async () => {
     flagsReader.string.mockImplementation((flag) => {
       if (flag === 'eventLogPath') {
@@ -104,6 +101,34 @@ describe('runUploadEvents', () => {
     } as unknown as fs.Stats);
 
     await runUploadEvents(flagsReader, log);
+
+    expect(mockAddEventsFromFile).toHaveBeenCalledWith('existing_event_log.ndjson');
+  });
+
+  /*
+  it('should upload multiple event log files', async () => {
+    flagsReader.string.mockImplementation((flag) => {
+      if (flag === 'eventLogPath') {
+        return 'directory/with/event/logs';
+      }
+    });
+
+    // assume the provided event log path exists
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+
+    // the provided event log path is a directory
+    jest.spyOn(fs, 'statSync').mockReturnValue({
+      isDirectory: () => true,
+    } as unknown as fs.Stats);
+
+    await runUploadEvents(flagsReader, log);
+
+    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
+      'directory/with/event/logs/event_log_1.ndjson'
+    );
+    expect(mockAddEventsFromFile).toHaveBeenCalledWith(
+      'directory/with/event/logs/event_log_2.ndjson'
+    );
   });
   */
 });
