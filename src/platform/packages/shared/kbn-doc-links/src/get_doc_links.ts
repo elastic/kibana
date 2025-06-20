@@ -194,7 +194,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
     searchHomepage: {
-      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs/tutorials`,
+      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
       notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
       customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
       elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
