@@ -135,6 +135,7 @@ export const esqlExecutor = async ({
 
         const esqlQueryString = {
           drop_null_columns: true,
+          // allow_partial_results is true by default, but we need to set it to false for aggregating queries
           allow_partial_results: !isRuleAggregating,
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
