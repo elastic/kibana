@@ -6,6 +6,7 @@
  */
 
 import {
+  DURATION,
   SPAN_DURATION,
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
@@ -37,7 +38,7 @@ export function getDurationField(
       return TRANSACTION_DURATION;
     case dependencyLatency:
     case spanLatency:
-      return isOtel ? 'duration' : SPAN_DURATION;
+      return isOtel ? DURATION : SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;
   }
