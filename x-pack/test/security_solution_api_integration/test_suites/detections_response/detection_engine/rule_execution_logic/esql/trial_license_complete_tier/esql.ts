@@ -763,7 +763,6 @@ export default ({ getService }: FtrProviderContext) => {
             );
 
             expect(alertsResponse.hits.hits.length).toBe(120);
-            expect(alertsResponse.hits.hits.length).toBe(200);
           });
 
           it('should create alerts from all events(2 x max_signals) when used timestamp override', async () => {

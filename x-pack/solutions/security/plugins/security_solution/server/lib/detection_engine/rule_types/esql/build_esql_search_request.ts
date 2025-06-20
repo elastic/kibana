@@ -83,26 +83,28 @@ const convertExternalIdsToDSL = (
   for (const index of indices) {
     const documents = excludedDocuments[index];
 
-    queries.push({
-      bool: {
-        filter: [
-          {
-            ids: {
-              values: documents.map((doc) => doc.id),
+    if (documents.length > 0) {
+      queries.push({
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: documents.map((doc) => doc.id),
+              },
             },
-          },
-          ...(index
-            ? [
-                {
-                  term: {
-                    _index: index,
+            ...(index
+              ? [
+                  {
+                    term: {
+                      _index: index,
+                    },
                   },
-                },
-              ]
-            : []),
-        ],
-      },
-    });
+                ]
+              : []),
+          ],
+        },
+      });
+    }
   }
 
   return queries;

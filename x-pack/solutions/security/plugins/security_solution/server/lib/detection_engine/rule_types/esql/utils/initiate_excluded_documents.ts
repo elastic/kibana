@@ -32,7 +32,11 @@ export const initiateExcludedDocuments = ({
 
   const excludedDocuments: Record<string, ExcludedDocument[]> = {};
 
-  for (const index of Object.keys(state.excludedDocuments)) {
+  for (const index of Object.keys(
+    // handle a case when excludedDocuments format was array in previous implementation
+    // we would discard this array and build a new structure aware of document indices
+    Array.isArray(state.excludedDocuments) ? {} : state.excludedDocuments
+  )) {
     excludedDocuments[index] =
       state?.excludedDocuments?.[index]?.filter(({ timestamp }) => {
         return timestamp && timestamp >= tuple.from.toISOString();
