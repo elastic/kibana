@@ -121,7 +121,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/response-ops-rule-params",
     "@kbn/controls-plugin",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/esql"
   ],
   "exclude": ["target/**/*"]
 }
