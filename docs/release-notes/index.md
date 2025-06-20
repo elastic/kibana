@@ -42,7 +42,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 
 **Discover**:
 * In version 9.0.0, we changed the way time ranges are handled for Discover ES|QL CSV exports ([#216792]({{kib-pull}}216792)). We realized that this change caused an issue with CSV Post URLs now using an absolute time range instead of a relative one, leading to duplicate reports being generated. We've reverted this change while we investigate different solutions [#223249]({{kib-pull}}223249).
-* Adds request parameters that were formerly missing from the **Request** tab when you inspected an ES|QL request [#221816]({{kib-pull}}221816).
+* The request URL now appears correctly again when inspecting an ES|QL request [#221816]({{kib-pull}}221816).
 
 **Elastic Observability solution**:
 For the Elastic Observability 9.0.3 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
