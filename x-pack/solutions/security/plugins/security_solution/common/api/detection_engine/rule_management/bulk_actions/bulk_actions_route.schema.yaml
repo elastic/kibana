@@ -45,6 +45,7 @@ paths:
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
                 - $ref: '#/components/schemas/BulkManualRuleRun'
+                - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
             examples:
               example01:
@@ -359,6 +360,58 @@ paths:
                               eventAction: trigger
                               timestamp: 2023-10-31T00:00:00Z
                             group: default3
+              example27:
+                summary: Edit - Set alert suppression to rules (idempotent)
+                description: The following request set alert suppression to the rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression'
+                      value:
+                        group_by:
+                          - 'source.ip'
+                        duration:
+                          value: 1
+                          unit: 'h'
+                        missing_fields_strategy: 'suppress'    
+              example28:
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'set_alert_suppression_for_threshold'
+                      value:
+                        duration:
+                          value: 1
+                          unit: 'h'
+              example29:
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                value:
+                  ids:
+                    - '12345678-1234-1234-1234-1234567890ab'
+                    - '87654321-4321-4321-4321-0987654321ba'
+                  action: 'edit'
+                  edit:
+                    - type: 'delete_alert_suppression'
+              example30:
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                value:
+                  action: 'fill_gaps'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+                    - '164d0918-f720-4c9f-9f5c-c5122587cf19'
+                  run:
+                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: '2025-03-10T23:59:59.999Z'
       responses:
         200:
           description: OK
@@ -1006,6 +1059,11 @@ components:
       type: string
       enum:
         - RULE_NOT_MODIFIED
+    
+    BulkGapsFillingSkipReason:
+      type: string
+      enum:
+        - NO_GAPS_TO_FILL
 
     BulkActionSkipResult:
       type: object
@@ -1015,7 +1073,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/BulkEditSkipReason'
+            - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -1040,6 +1100,9 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
 
     NormalizedRuleError:
       type: object
@@ -1245,6 +1308,31 @@ components:
           required:
             - action
             - run
+    
+    BulkManualRuleFillGaps:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [fill_gaps]
+            fill_gaps:
+              type: object
+              description: Object that describes applying a manual gap fill action for the specified time range.
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the manual gap fill
+                end_date:
+                  type: string
+                  description: End date of the manual gap fill
+              required:
+                - start_date
+                - end_date
+          required:
+            - action
+            - fill_gaps
 
     ThrottleForBulkActions:
       type: string
@@ -1269,6 +1357,7 @@ components:
         - duplicate
         - edit
         - run
+        - fill_gaps
 
     BulkActionEditType:
       type: string
@@ -1286,6 +1375,9 @@ components:
         - add_investigation_fields
         - delete_investigation_fields
         - set_investigation_fields
+        - delete_alert_suppression
+        - set_alert_suppression
+        - set_alert_suppression_for_threshold
 
     # Per rulesClient.bulkEdit rules actions operation contract (x-pack/platform/plugins/shared/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
@@ -1458,6 +1550,48 @@ components:
         - type
         - value
 
+    BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_alert_suppression
+        value:
+          $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AlertSuppression'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - set_alert_suppression_for_threshold
+        value:
+          $ref: '../../model/rule_schema/specific_attributes/threshold_attributes.schema.yaml#/components/schemas/ThresholdAlertSuppression'
+      required:
+        - type
+        - value
+
+    BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - delete_alert_suppression
+      required:
+        - type
+
+    BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/BulkActionEditPayloadDeleteAlertSuppression'
+
     BulkActionEditPayload:
       anyOf:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
@@ -1466,6 +1600,8 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
+
 
     BulkEditRules:
       allOf:
