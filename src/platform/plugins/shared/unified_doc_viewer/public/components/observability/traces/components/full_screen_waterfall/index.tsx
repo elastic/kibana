@@ -152,14 +152,16 @@ export const FullScreenWaterfall = ({
       </EuiOverlayMask>
 
       {isFlyoutVisible && spanId && (
-        <SpanFlyout
-          tracesIndexPattern={tracesIndexPattern}
-          spanId={spanId}
-          dataView={dataView}
-          onCloseFlyout={() => {
-            setIsFlyoutVisible(false);
-          }}
-        />
+        <EuiFocusTrap>
+          <SpanFlyout
+            tracesIndexPattern={tracesIndexPattern}
+            spanId={spanId}
+            dataView={dataView}
+            onCloseFlyout={() => {
+              setIsFlyoutVisible(false);
+            }}
+          />
+        </EuiFocusTrap>
       )}
     </>
   );
