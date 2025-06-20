@@ -19,6 +19,10 @@ export const CAI_ACTIVITY_INDEX_SCRIPT: StoredScript = {
     ctx._source.action = source["cases-user-actions"].action;
     ctx._source.type = source["cases-user-actions"].type;
 
+    long milliSinceEpoch = new Date().getTime();
+    Instant instant = Instant.ofEpochMilli(milliSinceEpoch);
+    ctx._source['@timestamp'] = ZonedDateTime.ofInstant(instant, ZoneId.of('Z'));
+
     ZonedDateTime zdt_created =
       ZonedDateTime.parse(source["cases-user-actions"].created_at);
     ctx._source.created_at_ms = zdt_created.toInstant().toEpochMilli();
