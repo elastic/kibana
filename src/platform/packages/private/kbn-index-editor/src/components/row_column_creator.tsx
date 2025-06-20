@@ -177,14 +177,18 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
                 iconType="check"
                 display="base"
                 color="success"
-                aria-label="Save"
+                aria-label={i18n.translate('indexEditor.addRow.save', {
+                  defaultMessage: 'Save',
+                })}
               />
               <EuiButtonIcon
                 onClick={cancelAction}
                 iconType="cross"
                 display="base"
                 color="danger"
-                aria-label="Cancel"
+                aria-label={i18n.translate('indexEditor.addRow.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
               />
             </EuiFlexGroup>
           </EuiForm>

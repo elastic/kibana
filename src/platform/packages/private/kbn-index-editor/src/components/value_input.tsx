@@ -9,6 +9,7 @@
 
 import { EuiFieldText } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 interface ValueInputProps {
   value?: string;
@@ -51,7 +52,10 @@ export const ValueInput = ({
       compressed
       placeholder={columnName}
       value={editValue}
-      aria-label={`Value for ${columnName}`}
+      aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
+        defaultMessage: 'Value for {columnName}',
+        values: { columnName },
+      })}
       onChange={(e) => {
         setEditValue(e.target.value);
         onChange?.(e.target.value);
