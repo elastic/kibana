@@ -71,6 +71,12 @@ interface PrivilegeMonitoringClientOpts {
   apiKeyManager?: ApiKeyManager;
 }
 
+interface PrivMonBulkUser {
+  username: string;
+  indexName: string;
+  existingUserId?: string;
+}
+
 export class PrivilegeMonitoringDataClient {
   private apiKeyGenerator?: ApiKeyManager;
   private esClient: ElasticsearchClient;
@@ -341,24 +347,6 @@ export class PrivilegeMonitoringDataClient {
     await this.removeStaleIndexUsers(allUserNames);
   }
 
-  public async plainIndexSync() {
-    // get all monitoring index source saved objects of type 'index'
-    const indexSources: MonitoringEntitySourceDescriptor[] =
-      await this.monitoringIndexSourceClient.findByIndex();
-    this.log(
-      'debug',
-      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
-    );
-    const seenUserNames: string[] = [];
-    for (const source of indexSources) {
-      const index = source.indexPattern ?? '';
-      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
-      const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
-      seenUserNames.push(...batchUserNames);
-    }
-    this.log('debug', `Total usernames collected: ${seenUserNames.length}`);
-  }
-
   public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
 
@@ -398,13 +386,34 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 
+  public async plainIndexSync() {
+    // get all monitoring index source saved objects of type 'index'
+    this.log('info', 'Starting plain index sync for privilege monitoring users');
+    const indexSources: MonitoringEntitySourceDescriptor[] =
+      await this.monitoringIndexSourceClient.findByIndex();
+    this.log(
+      'info',
+      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
+    );
+    const seenUserNames: string[] = [];
+    for (const source of indexSources) {
+      const index = source.indexPattern ?? ''; // if no index pattern cry -- TODO: handle this case,
+      // log and move on. Don't allow empty index patterns
+      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
+      const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
+      seenUserNames.push(...batchUserNames);
+      // add create logic here?
+    }
+    this.log('info', `Usernames collected from all index sources: \n${seenUserNames.join('\n')}`);
+    this.log('info', `Total usernames collected: ${seenUserNames.length}`);
+  }
+
   public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
     const batchUsernames: string[] = [];
     let searchAfter: SortResults | undefined;
     const batchSize = 100; // Make a const
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
-
     while (true) {
       const response = await this.esClient.search<{ user?: { name?: string } }>({
         index: indexName,
@@ -418,19 +427,96 @@ export class PrivilegeMonitoringDataClient {
       const hits = response.hits.hits;
       if (hits.length === 0) break;
 
+      // Collect usernames from the hits
       for (const hit of hits) {
         const username = hit._source?.user?.name;
         if (username) batchUsernames.push(username);
       }
 
-      searchAfter = hits[hits.length - 1].sort;
+      const existingUserRes = await this.esClient.search<MonitoredUserDoc>({
+        index: this.getIndex(),
+        size: batchUsernames.length,
+        query: {
+          bool: {
+            must: [{ terms: { 'user.name': batchUsernames } }],
+          },
+        },
+      });
 
-      this.log(
-        'debug',
-        `Fetched ${hits.length} usernames from ${indexName}, total so far: ${batchUsernames.length}`
-      );
+      const existingUserMap = new Map<string, string | undefined>();
+      for (const hit of existingUserRes.hits.hits) {
+        const username = hit._source?.user?.name;
+        this.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
+        if (username) existingUserMap.set(username, hit._id);
+      }
+
+      const usersToWrite: PrivMonBulkUser[] = batchUsernames.map((username) => ({
+        username,
+        indexName,
+        existingUserId: existingUserMap.get(username),
+      }));
+      // Handle create and update logic here
+      // bulk operations to create or update users in the privileged monitoring index
+      const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
+      this.log('info', `Executing bulk operations for ${usersToWrite.length} users`);
+      try {
+        this.log('info', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
+        await this.esClient.bulk({ body: ops }); // TODO: change to helper method instead of direct call
+      } catch (error) {
+        this.log('error', `Error executing bulk operations: ${error}`);
+      }
+      searchAfter = hits[hits.length - 1].sort;
     }
 
     return batchUsernames;
+  }
+
+  // can maybe do helpers - on document to do one user and that will iterate instead of doing this yourself.
+  public buildBulkOperationsForUsers(users: PrivMonBulkUser[], userIndexName: string): object[] {
+    const ops: object[] = [];
+    this.log('info', `Building bulk operations for ${users.length} users`);
+    for (const user of users) {
+      if (user.existingUserId) {
+        // Update user with painless script
+        this.log(
+          'info',
+          `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
+        );
+        ops.push(
+          { update: { _index: userIndexName, _id: user.existingUserId } },
+          {
+            script: {
+              source: `
+              if (!ctx._source.labels.source_indices.contains(params.index)) {
+                ctx._source.labels.source_indices.add(params.index);
+              }
+              if (!ctx._source.labels.sources.contains("index")) {
+                ctx._source.labels.sources.add("index");
+              }
+            `,
+              params: {
+                index: user.indexName,
+              },
+            },
+          }
+        );
+      } else {
+        // New user — create
+        this.log('info', `Creating new user: ${user.username} with index: ${user.indexName}`);
+        ops.push(
+          { index: { _index: userIndexName } },
+          {
+            user: { name: user.username },
+            labels: {
+              sources: ['index'],
+              source_indices: [user.indexName],
+              monitoring: { privileged_users: 'monitored' }, // This will need updated after https://github.com/elastic/kibana/pull/224623
+            },
+          }
+        );
+      }
+    }
+    this.log('info', `Built ${ops.length} bulk operations for users`);
+    return ops;
   }
 }

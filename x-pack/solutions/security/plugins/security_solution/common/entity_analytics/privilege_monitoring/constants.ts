@@ -15,4 +15,5 @@ export const getPrivilegedMonitorUsersIndex = (namespace: string) =>
 export const getPrivilegedMonitorGroupsIndex = (namespace: string) =>
   `${privilegedMonitorBaseIndexName}.groups-${namespace}`;
 // Default index for privileged monitoring users. Not required.
-export const defaultMonitoringUsersIndex = 'entity-analytics.privileged-users';
+export const defaultMonitoringUsersIndex = 'entity_analytics.privileged_monitoring'; // TODO: update in accordance to spec. Why does this not work when you do this. Investigate.
+// should be entity-analytics.privileged-users
