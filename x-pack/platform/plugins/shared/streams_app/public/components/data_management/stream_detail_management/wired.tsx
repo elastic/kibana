@@ -80,14 +80,6 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Schema editor',
       }),
     },
-    lifecycle: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
-      }),
-    },
   };
 
   if (!isValidManagementSubTab(tab)) {

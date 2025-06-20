@@ -13,6 +13,7 @@ import {
   isIlmLifecycle,
   isErrorLifecycle,
   isDslLifecycle,
+  Streams,
 } from '@kbn/streams-schema';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
