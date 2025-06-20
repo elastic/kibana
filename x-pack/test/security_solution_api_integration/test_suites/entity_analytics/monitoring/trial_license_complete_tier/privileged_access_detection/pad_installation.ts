@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('privileged access detection status and installation APIs', () => {
       it('should be able to successfully install the package', async () => {
         const statusResponseBeforeInstallation =
-          await api.getStatusPrivilegedAccessDetectionPackage();
+          await api.getPrivilegedAccessDetectionPackageStatus();
 
         if (statusResponseBeforeInstallation.status !== 200) {
           log.error(`Retrieving status failed`);
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
         log.info('Privileged access detection installation was successful');
 
         const statusResponseAfterInstallation =
-          await api.getStatusPrivilegedAccessDetectionPackage();
+          await api.getPrivilegedAccessDetectionPackageStatus();
 
         if (statusResponseAfterInstallation.status !== 200) {
           log.error(`Retrieving status failed`);

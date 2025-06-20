@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { API_VERSIONS } from '../../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { GetStatusPrivilegedAccessDetectionPackageResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
 const PRIVILEGED_ACCESS_DETECTION_INDEX_PATTERN =
   'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';
@@ -18,7 +18,7 @@ export const usePrivilegedAccessDetectionRoutes = () => {
 
   return useMemo(() => {
     const getPrivilegedAccessDetectionStatus = async () => {
-      return http.fetch<GetStatusPrivilegedAccessDetectionPackageResponse>(
+      return http.fetch<GetPrivilegedAccessDetectionPackageStatusResponse>(
         '/api/entity_analytics/privileged_user_monitoring/pad/status',
         {
           method: 'GET',

@@ -24,7 +24,7 @@ import type {
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { Installable, RegistrySearchResult } from '@kbn/fleet-plugin/common';
-import type { GetStatusPrivilegedAccessDetectionPackageResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 
 interface PadPackageInstallationClientOpts {
   logger: Logger;
@@ -87,7 +87,7 @@ export class PadPackageInstallationClient {
     }));
   }
 
-  public async getStatus(): Promise<GetStatusPrivilegedAccessDetectionPackageResponse> {
+  public async getStatus(): Promise<GetPrivilegedAccessDetectionPackageStatusResponse> {
     const packageInstalled = !!(await this.getCurrentlyInstalledPADPackage());
     const packageInstallationStatus = packageInstalled ? 'complete' : 'incomplete';
     if (!packageInstalled) {
