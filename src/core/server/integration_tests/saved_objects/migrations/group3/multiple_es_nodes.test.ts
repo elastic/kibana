@@ -19,6 +19,7 @@ import {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Root } from '@kbn/core-root-server-internal';
 import { getFips } from 'crypto';
+import { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
@@ -99,6 +100,19 @@ describe('migration v2', () => {
   let root: Root;
   const migratedIndexAlias: string = `.kibana_${pkg.version}`;
 
+  interface SomeObjectV1 {
+    status: string;
+  }
+
+  type SomeObjectV2 = SomeObjectV1;
+
+  const transformFn: SavedObjectModelUnsafeTransformFn<SomeObjectV1, SomeObjectV2> = (document) => {
+    if (document.attributes?.status) {
+      document.attributes.status = document.attributes.status.replace('not_migrated', 'migrated');
+    }
+    return { document };
+  };
+
   beforeAll(async () => {
     await removeLogFile();
   });
@@ -161,15 +175,7 @@ describe('migration v2', () => {
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (document) => {
-                  if (document.attributes?.status) {
-                    document.attributes.status = document.attributes.status.replace(
-                      'not_migrated',
-                      'migrated'
-                    );
-                  }
-                  return { document };
-                },
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
               },
             ],
           },
@@ -185,15 +191,7 @@ describe('migration v2', () => {
             changes: [
               {
                 type: 'unsafe_transform',
-                transformFn: (document) => {
-                  if (document.attributes?.status) {
-                    document.attributes.status = document.attributes.status.replace(
-                      'not_migrated',
-                      'migrated'
-                    );
-                  }
-                  return { document };
-                },
+                transformFn: (typeSafeGuard) => typeSafeGuard(transformFn),
               },
             ],
           },
