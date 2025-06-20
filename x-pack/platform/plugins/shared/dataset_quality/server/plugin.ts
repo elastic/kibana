@@ -7,10 +7,11 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { mapValues } from 'lodash';
-import { DataTelemetryService } from './services';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetQualityRouteHandlerResources } from './routes/types';
+import { registerBuiltInRuleTypes } from './rule_types';
+import { DataTelemetryService } from './services';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginSetupDependencies,
@@ -77,6 +78,10 @@ export class DatasetQualityServerPlugin
 
     // Setup Data Telemetry Service
     this.dataTelemetryService.setup(plugins.taskManager, plugins.usageCollection);
+
+    if (plugins.alerting) {
+      registerBuiltInRuleTypes(plugins.alerting, plugins.share?.url.locators);
+    }
 
     return {};
   }

@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { i18n } from '@kbn/i18n';
 import {
+  ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  LOG_THRESHOLD_ALERT_TYPE_ID,
-  ALERT_EVALUATION_THRESHOLD,
   ApmRuleType,
-  SLO_BURN_RATE_RULE_TYPE_ID,
+  DEGRADED_DOCS_RULE_TYPE_ID,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
-import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
-
+import { asDuration, asPercent, convertToBuiltInComparators } from '../../../../common';
+import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
+import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
+import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
+import {
+  BaseMetricExpressionParams,
+  CustomMetricExpressionParams,
+} from '../../../../common/custom_threshold_rule/types';
 import {
   ABOVE_OR_EQ_TEXT,
   ABOVE_TEXT,
   BELOW_OR_EQ_TEXT,
   BELOW_TEXT,
 } from '../../../../common/i18n';
-import { asDuration, asPercent, convertToBuiltInComparators } from '../../../../common';
-import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
-import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
-import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
-import {
-  BaseMetricExpressionParams,
-  CustomMetricExpressionParams,
-} from '../../../../common/custom_threshold_rule/types';
 import { TopAlert } from '../../../typings/alerts';
 import { isFieldsSameType } from './is_fields_same_type';
 export interface FlyoutThresholdData {
@@ -308,6 +308,15 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         ),
       } as unknown as FlyoutThresholdData;
       return [SLOBurnRateFlyoutMap];
+
+    case DEGRADED_DOCS_RULE_TYPE_ID:
+      const DegradedDocsFlyoutMap = {
+        observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
+        threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
+        comparator: ruleParams.comparator,
+      } as unknown as FlyoutThresholdData;
+      return [DegradedDocsFlyoutMap];
+
     default:
       return [];
   }
