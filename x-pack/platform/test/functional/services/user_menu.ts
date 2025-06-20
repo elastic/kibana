@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export function UserMenuProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function UserMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -22,7 +24,7 @@ export function UserMenuProvider({ getService }) {
 
     async logoutLinkExists() {
       if (!(await testSubjects.exists('userMenuButton'))) {
-        return;
+        return false;
       }
 
       await this._ensureMenuOpen();
