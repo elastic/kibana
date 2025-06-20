@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+
 export const EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID = 'EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID';
 
 export const EDIT_LOOKUP_INDEX_CONTENT_TRIGGER: Trigger = {

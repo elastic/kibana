@@ -11,12 +11,14 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { type ESQLSource } from '@kbn/esql-ast';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
-import type { ESQLEditorDeps, JoinIndexAutocompleteItem } from '../types';
+import { memoize } from 'lodash';
+import { IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLEditorDeps } from '../types';
 
 /**
  * Returns a query with appended index name to the join command.
@@ -64,9 +66,9 @@ function isESQLSourceItem(arg: unknown): arg is ESQLSource {
  * @param onIndexCreated
  */
 export const useLookupIndexCommand = (
-  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor>,
-  editorModel: React.MutableRefObject<monaco.editor.ITextModel>,
-  getLookupIndices: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>,
+  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>,
+  editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>,
+  getLookupIndices: (() => Promise<{ indices: IndexAutocompleteItem[] }>) | undefined,
   query: AggregateQuery,
   onIndexCreated: (resultQuery: string) => void
 ) => {
@@ -130,15 +132,17 @@ export const useLookupIndexCommand = (
     [query.esql]
   );
 
-  const onUploadComplete = useCallback(
-    (results: any) => {
-      const cursorPosition = editorRef.current.getPosition();
+  const onFlyoutClose = useCallback(
+    (resultIndexName: string, indexCreated: boolean) => {
+      if (!indexCreated) return;
+
+      const cursorPosition = editorRef.current?.getPosition();
 
       if (!cursorPosition) {
         throw new Error('Could not find cursor position in the editor');
       }
 
-      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, results.index);
+      const resultQuery = appendIndexToJoinCommand(query.esql, cursorPosition, resultIndexName);
       onIndexCreated(resultQuery);
     },
     [onIndexCreated, query.esql, editorRef]
@@ -149,19 +153,26 @@ export const useLookupIndexCommand = (
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
   const openFlyout = useCallback(
-    async (indexName: string) => {
+    async (indexName: string, doesIndexExist?: boolean) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
-        onClose: () => {},
-        onSave: () => {},
+        doesIndexExist,
+        onClose: ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
+          onFlyoutClose(resultIndexName, indexCreatedDuringFlyout);
+        },
       } as EditLookupIndexContentContext);
     },
-    [uiActions]
+    [onFlyoutClose, uiActions]
   );
 
   monaco.editor.registerCommand('esql.lookup_index.create', async (_, indexName) => {
-    await openFlyout(indexName);
+    await openFlyout(indexName, false);
   });
+
+  const getLookupIndicesMemoized = useMemo(
+    () => memoize(getLookupIndices ?? (() => Promise.resolve({ indices: [] }))),
+    [getLookupIndices]
+  );
 
   const addLookupIndicesDecorator = useCallback(() => {
     // we need to remove the previous decorations first
@@ -171,7 +182,7 @@ export const useLookupIndexCommand = (
       editorRef?.current?.removeDecorations(decorations.map((d) => d.id));
     }
 
-    getLookupIndices().then(({ indices: existingIndices }) => {
+    getLookupIndicesMemoized().then(({ indices: existingIndices }) => {
       // TODO extract aliases as well
       const lookupIndices: string[] = inQueryLookupIndices.current;
 
@@ -207,7 +218,7 @@ export const useLookupIndexCommand = (
         });
       }
     });
-  }, [editorModel, getLookupIndices, editorRef, inQueryLookupIndices]);
+  }, [editorModel, getLookupIndicesMemoized, editorRef]);
 
   useEffect(
     function updateOnQueryChange() {
@@ -229,11 +240,15 @@ export const useLookupIndexCommand = (
         currentWord?.word.includes(v)
       );
 
+      const doesIndexExist = (await getLookupIndicesMemoized()).indices.some(
+        (index) => index.name === clickedIndexName
+      );
+
       if (clickedIndexName) {
-        await openFlyout(clickedIndexName);
+        await openFlyout(clickedIndexName, doesIndexExist);
       }
     },
-    [editorModel, inQueryLookupIndices, openFlyout]
+    [editorModel, getLookupIndicesMemoized, openFlyout]
   );
 
   return {

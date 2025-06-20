@@ -220,11 +220,12 @@ export class FileUploadManager {
     });
   }
 
-  async addFiles(fileList: FileList) {
+  async addFiles(fileList: FileList | File[]) {
     this.setStatus({
       analysisStatus: STATUS.STARTED,
     });
-    const promises = Array.from(fileList).map((file) => this.addFile(file));
+    const arrayOfFiles = Array.isArray(fileList) ? fileList : Array.from(fileList);
+    const promises = arrayOfFiles.map((file) => this.addFile(file));
     await Promise.all(promises);
   }
 

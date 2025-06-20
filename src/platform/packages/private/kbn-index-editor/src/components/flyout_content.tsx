@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
 import React, { lazy } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { CustomPanel } from './custom_panel';
+import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
+import { IndexName } from './index_name';
+import { EmptyPrompt } from './empty_prompt';
 import { RowColumnCreator } from './row_column_creator';
 
 export interface FlyoutContentProps {
@@ -30,14 +36,24 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const { coreStart, ...restDeps } = deps;
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
-
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
   const totalHits = 10;
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
 
-  if (!dataView || !dataViewColumns) return null;
+  const fileUploadContextValue = useFileUpload(
+    deps.fileManager,
+    deps.data,
+    coreStart.application,
+    coreStart.http,
+    coreStart.notifications,
+    // On upload complete callback
+    (res) => {
+      deps.indexUpdateService.setIndexName(res!.index);
+      deps.indexUpdateService.setIndexCreated(true);
+    }
+  );
 
   return (
     <KibanaContextProvider
@@ -46,34 +62,47 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         ...restDeps,
       }}
     >
-      <>
+      <FileUploadContext.Provider value={fileUploadContextValue}>
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h3>{props.indexName}</h3>
-          </EuiTitle>
+          <IndexName />
+
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="indexEditor.flyout.headerDescription"
+              defaultMessage={
+                'Lookup indices can be created manually, by uploading data from a file or through the Elasticsearch API.'
+              }
+            />
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <RowColumnCreator columns={dataViewColumns} />
+          <CustomPanel />
+
           <CellActionsProvider
             getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
           >
-            <DataGridLazy
-              data={deps.data}
-              fieldFormats={deps.fieldFormats}
-              core={deps.coreStart}
-              share={deps.share}
-              {...props}
-              dataView={dataView}
-              columns={dataViewColumns}
-              rows={rows}
-              totalHits={totalHits}
-            />
+            <FileDropzone>
+              {dataView && dataViewColumns ? (
+                <template>
+                  <RowColumnCreator columns={dataViewColumns} />
+                  <DataGridLazy
+                    {...props}
+                    dataView={dataView}
+                    columns={dataViewColumns}
+                    rows={rows}
+                    totalHits={totalHits}
+                  />
+                </template>
+              ) : (
+                <EmptyPrompt />
+              )}
+            </FileDropzone>
           </CellActionsProvider>
         </EuiFlyoutBody>
 
         <FlyoutFooter indexUpdateService={deps.indexUpdateService} onClose={props.onClose} />
-      </>
+      </FileUploadContext.Provider>
     </KibanaContextProvider>
   );
 };

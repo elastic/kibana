@@ -8,12 +8,14 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -28,6 +30,8 @@ export interface FlyoutFooterProps {
 export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
+
+  const { uploadStatus, uploadStarted, onImportClick, canImport } = useFileUploadContext();
 
   const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
 
@@ -64,6 +68,33 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClos
                   <span>{undoInSeconds}</span>
                 </EuiButtonEmpty>
               </EuiFlexItem>
+            ) : null}
+
+            {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={onImportClick}>
+                  <FormattedMessage
+                    id="indexEditor.flyout.footer.importButton"
+                    defaultMessage="Import"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
+
+            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty disabled>
+                    <FormattedMessage
+                      id="indexEditor.flyout.footer.importingButton"
+                      defaultMessage="Importing..."
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ) : null}
 
             {isSaving ? (
