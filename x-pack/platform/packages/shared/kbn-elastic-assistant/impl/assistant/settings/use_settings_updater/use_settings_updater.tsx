@@ -36,6 +36,7 @@ export const DEFAULT_CONVERSATIONS: Record<string, Conversation> = {};
 export const DEFAULT_PROMPTS: FindPromptsResponse = { page: 0, perPage: 0, total: 0, data: [] };
 interface UseSettingsUpdater {
   assistantStreamingEnabled: boolean;
+  onConversationsBulkDeleted: (cIds: string[]) => void;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   updatedAnonymizationData: FindAnonymizationFieldsResponse;
@@ -141,6 +142,39 @@ export const useSettingsUpdater = (
 
   const hasBulkPrompts =
     promptsBulkActions.create || promptsBulkActions.update || promptsBulkActions.delete;
+
+
+  const onConversationsBulkDeleted = useCallback(
+    (cIds: string[]) => {
+      let updatedConversationSettings: Record<string, Conversation> = {};
+      const deletedConversations = new Set(conversationsSettingsBulkActions.delete?.ids ?? []);
+      Object.values(conversations).forEach((current) => {
+        const isConversationExist = cIds.includes(current.id);
+        if (isConversationExist) {
+          if (!deletedConversations.has(current.id)) {
+            deletedConversations.add(current.id);
+          } else {
+            updatedConversationSettings = { ...updatedConversationSettings, current };
+          }
+        }
+      });
+
+      setConversationSettings(updatedConversationSettings);
+      setConversationsSettingsBulkActions({
+        ...conversationsSettingsBulkActions,
+        delete: {
+          ids: Array.from(deletedConversations),
+        },
+      });
+    },
+    [
+      conversations,
+      conversationsSettingsBulkActions,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+    ]
+  );
+
   /**
    * Save all pending settings
    */
@@ -252,6 +286,7 @@ export const useSettingsUpdater = (
   }, [allPrompts.data, promptsLoaded]);
 
   return {
+    onConversationsBulkDeleted,
     conversationSettings,
     conversationsSettingsBulkActions,
     knowledgeBase: updatedKnowledgeBaseSettings,

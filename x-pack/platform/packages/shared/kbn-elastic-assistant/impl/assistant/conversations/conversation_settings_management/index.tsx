@@ -16,7 +16,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Conversation } from '../../../assistant_context/types';
-import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
+import { useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
@@ -39,6 +39,10 @@ import { DEFAULT_PAGE_SIZE } from '../../settings/const';
 import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
 import { mergeBaseWithPersistedConversations } from '../../helpers';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
+import { Toolbar } from './tool_bar_component';
+import { ConversationTableItem } from './types';
+import { useConversationSelection } from './use_conversation_selection';
+
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
@@ -65,14 +69,44 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     nameSpace,
     toasts,
   } = useAssistantContext();
+  const [totalItemCount, setTotalItemCount] = useState(5);
 
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
-  );
-
+  const onFetchedConversations = useCallback((conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
+      const mergedConversations = mergeBaseWithPersistedConversations(baseConversations, conversationsData);
+      setTotalItemCount(Object.keys(mergedConversations).length);
+      return mergedConversations;
+  }, [baseConversations]);
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
+
+  const {
+    selectionState: {
+      isDeleteAll,
+      isExcludedMode,
+      deletedConversations,
+      totalSelectedConversations,
+      excludedIds,
+    },
+    selectionActions: {
+      handleUnselectAll,
+      handleSelectAll,
+      handlePageUnchecked,
+      handlePageChecked,
+      handleRowUnChecked,
+      handleRowChecked,
+      setDeletedConversations,
+    },
+  } = useConversationSelection();
+
+  const { onTableChange, pagination, sorting } = useSessionPagination({
+    nameSpace,
+    storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  });
+
+  const deletedConversationsIds = useMemo(
+    () => deletedConversations.map((item) => item.id),
+    [deletedConversations]
+  );
 
   const {
     data: conversations,
@@ -112,6 +146,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           title: SETTINGS_UPDATED_TOAST_TITLE,
         });
         setHasPendingChanges(false);
+        handleUnselectAll();
         param?.callback?.();
       } else {
         resetSettings();
@@ -165,7 +200,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     openFlyout: openEditFlyout,
     closeFlyout: closeEditFlyout,
   } = useFlyoutModalVisibility();
-  const [deletedConversation, setDeletedConversation] = useState<ConversationTableItem | null>();
 
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -200,14 +234,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const onDeleteActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
-      setDeletedConversation(rowItem);
-      onConversationDeleted(rowItem.title);
+      setDeletedConversations([rowItem]);
+      onConversationDeleted(rowItem.id);
 
       closeEditFlyout();
       openConfirmModal();
     },
-    [closeEditFlyout, onConversationDeleted, openConfirmModal]
+    [closeEditFlyout, onConversationDeleted, openConfirmModal, setDeletedConversations]
   );
+
+  const onBulkDeleteActionClicked = useCallback(() => {
+    onConversationsBulkDeleted(deletedConversationsIds);
+
+    closeEditFlyout();
+    openConfirmModal();
+  }, [closeEditFlyout, deletedConversationsIds, onConversationsBulkDeleted, openConfirmModal]);
 
   const onDeleteConfirmed = useCallback(() => {
     if (Object.keys(conversationsSettingsBulkActions).length === 0) {
@@ -225,18 +266,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   ]);
 
   const onDeleteCancelled = useCallback(() => {
-    setDeletedConversation(null);
+    handleUnselectAll();
     closeConfirmModal();
     onCancelClick();
-  }, [closeConfirmModal, onCancelClick]);
+  }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
   const { getConversationsList, getColumns } = useConversationsTable();
-
-  const { onTableChange, pagination, sorting } = useSessionPagination({
-    nameSpace,
-    storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
-  });
 
   const conversationOptions = getConversationsList({
     allSystemPrompts,
@@ -260,21 +295,48 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const columns = useMemo(
     () =>
       getColumns({
-        isDeleteEnabled: (rowItem: ConversationTableItem) => rowItem.isDefault !== true,
-        isEditEnabled: () => true,
+        conversationOptions,
+        deletedConversationsIds,
+        excludedIds,
+        handlePageChecked,
+        handlePageUnchecked,
+        handleRowChecked,
+        handleRowUnChecked,
+        isDeleteEnabled: () => !isDeleteAll && deletedConversations.length === 0,
+        isEditEnabled: () => !isDeleteAll && deletedConversations.length === 0,
+        isExcludedMode,
         onDeleteActionClicked,
         onEditActionClicked,
+        totalItemCount,
       }),
-    [getColumns, onDeleteActionClicked, onEditActionClicked]
+    [
+      conversationOptions,
+      deletedConversations.length,
+      deletedConversationsIds,
+      excludedIds,
+      getColumns,
+      handlePageChecked,
+      handlePageUnchecked,
+      handleRowChecked,
+      handleRowUnChecked,
+      isDeleteAll,
+      isExcludedMode,
+      onDeleteActionClicked,
+      onEditActionClicked,
+      totalItemCount,
+    ]
   );
 
-  const confirmationTitle = useMemo(
-    () =>
-      deletedConversation?.title
-        ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversation?.title)
-        : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE,
-    [deletedConversation?.title]
-  );
+  const confirmationTitle = useMemo(() => {
+    if (!deletedConversations) {
+      return;
+    }
+    return deletedConversations.length === 1
+      ? deletedConversations[0]?.title
+        ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversations[0]?.title)
+        : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE
+      : i18n.DELETE_MULTIPLE_CONVERSATIONS_CONFIRMATION_TITLE(totalSelectedConversations);
+  }, [deletedConversations, totalSelectedConversations]);
 
   if (!conversationsLoaded) {
     return null;
@@ -298,12 +360,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiSpacer size="xs" />
         <EuiText size="m">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
+        <Toolbar
+          onConversationsBulkDeleted={onBulkDeleteActionClicked}
+          handleSelectAll={handleSelectAll}
+          handleUnselectAll={handleUnselectAll}
+          totalConversations={totalItemCount}
+          totalSelected={totalSelectedConversations}
+          isDeleteAll={isDeleteAll}
+        />
         <EuiInMemoryTable
           items={conversationOptions}
           columns={columns}
           pagination={pagination}
           sorting={sorting}
           onTableChange={onTableChange}
+          itemId="id"
         />
       </EuiPanel>
       {editFlyoutVisible && (
@@ -329,21 +400,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           />
         </Flyout>
       )}
-      {deleteConfirmModalVisibility && deletedConversation?.title && (
-        <EuiConfirmModal
-          aria-labelledby={confirmationTitle}
-          title={confirmationTitle}
-          titleProps={{ id: deletedConversation?.id ?? undefined }}
-          onCancel={onDeleteCancelled}
-          onConfirm={onDeleteConfirmed}
-          cancelButtonText={CANCEL}
-          confirmButtonText={DELETE}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        >
-          <p />
-        </EuiConfirmModal>
-      )}
+      {deleteConfirmModalVisibility &&
+        (isDeleteAll || deletedConversations?.length > 0 || excludedIds?.length > 0) && (
+          <EuiConfirmModal
+            aria-labelledby={confirmationTitle}
+            title={confirmationTitle}
+            onCancel={onDeleteCancelled}
+            onConfirm={onDeleteConfirmed}
+            cancelButtonText={CANCEL}
+            confirmButtonText={DELETE}
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            <p />
+          </EuiConfirmModal>
+        )}
       <AssistantSettingsBottomBar
         hasPendingChanges={hasPendingChanges}
         onCancelClick={onCancelClick}

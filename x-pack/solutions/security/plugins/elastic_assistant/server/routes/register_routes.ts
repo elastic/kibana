@@ -42,6 +42,7 @@ import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_r
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import type { ConfigSchema } from '../config_schema';
+import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -61,6 +62,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  deleteAllConversationsRoute(router);
   appendConversationMessageRoute(router);
 
   // User Conversations bulk CRUD
