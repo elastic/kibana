@@ -8,12 +8,15 @@ import { i18n } from '@kbn/i18n';
 
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 
+const TRACES_INDEX_PATTERN = 'traces-*';
+const LOGS_INDEX_PATTERN = 'logs-*';
+
 const TRACES_ESQL_RECOMMENDED_QUERIES = [
   {
     name: i18n.translate('xpack.observability.recommendedQueries.findRootTraces.name', {
       defaultMessage: 'Root traces',
     }),
-    query: 'FROM traces-* | WHERE parent.id IS NULL',
+    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE parent.id IS NULL`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.findRootTraces.description',
       {
@@ -26,7 +29,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.recommendedQueries.slowDatabaseQueries.name', {
       defaultMessage: 'Database queries',
     }),
-    query: 'FROM traces-* | WHERE QSTR("span.type:db OR db.system:*")',
+    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("span.type:db OR db.system:*")`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.slowDatabaseQueries.description',
       {
@@ -38,7 +41,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.recommendedQueries.allApplicationErrors.name', {
       defaultMessage: 'All application errors',
     }),
-    query: 'FROM logs-* | WHERE QSTR("processor.event:error OR event_name:exception")',
+    query: `FROM ${LOGS_INDEX_PATTERN} | WHERE QSTR("processor.event:error OR event_name:exception")`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.allApplicationErrors.description',
       {
@@ -51,7 +54,7 @@ const TRACES_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.recommendedQueries.matchingUrlPattern.name', {
       defaultMessage: 'Spans matching URL pattern',
     }),
-    query: 'FROM traces-* | WHERE QSTR("""url.path: \\/api\\/*""")',
+    query: `FROM ${TRACES_INDEX_PATTERN} | WHERE QSTR("""url.path: \\/api\\/*""")`,
     description: i18n.translate(
       'xpack.observability.recommendedQueries.matchingUrlPattern.description',
       {
