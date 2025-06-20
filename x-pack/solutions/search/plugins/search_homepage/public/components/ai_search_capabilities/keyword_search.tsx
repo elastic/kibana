@@ -17,7 +17,7 @@ export const KeywordSearch: React.FC = () => {
   const keywordSearchText = {
     image: `${assetBasePath}/keyword_search.svg`,
     imageAlt: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.imageAlt', {
-      defaultMessage: 'Keyword Search',
+      defaultMessage: 'Keyword search',
     }),
     heading: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.keywordSearch.title', {
       defaultMessage: 'Setup your application with Elasticsearch’s full-text search capabilities',
