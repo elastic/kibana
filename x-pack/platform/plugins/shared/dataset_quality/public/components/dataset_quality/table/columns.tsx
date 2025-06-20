@@ -79,8 +79,6 @@ const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName
 const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
   defaultMessage: 'Open',
 });
-const FAILURE_STORE_DOCS_URL =
-  'https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store';
 
 const inactiveDatasetActivityColumnDescription = i18n.translate(
   'xpack.datasetQuality.inactiveDatasetActivityColumnDescription',
@@ -361,15 +359,21 @@ export const getDatasetQualityTableColumns = ({
               if (!dataStreamStat.hasFailureStore) {
                 const FailureStoreHoverLink = () => {
                   const [hovered, setHovered] = React.useState(false);
+                  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
+                  const params = {
+                    page: 'data_streams_details',
+                    dataStreamName: dataStreamStat.rawName,
+                  } as const;
+
                   return (
                     <EuiToolTip
                       content={i18n.translate('xpack.datasetQuality.failureStore.notEnabled', {
                         defaultMessage:
-                          'Failure store is not enabled for this data stream. Learn how to enable it.',
+                          'Failure store is not enabled for this data stream. Enable failure store.',
                       })}
                     >
                       <EuiLink
-                        href={FAILURE_STORE_DOCS_URL}
+                        href={locator?.getRedirectUrl(params)}
                         target="_blank"
                         external={false}
                         data-test-subj="datasetQualitySetFailureStoreLink"

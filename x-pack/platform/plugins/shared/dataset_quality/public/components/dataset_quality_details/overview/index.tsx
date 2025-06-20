@@ -13,9 +13,7 @@ import { noAccessToFailureStoreWarningDescription } from '../../../../common/tra
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
-
-const FAILURE_STORE_DOCS_URL =
-  'https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store';
+import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
@@ -30,6 +28,16 @@ export function Overview() {
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
   } = useDatasetQualityDetailsState();
+
+  const {
+    services: {
+      share: { url: urlService },
+    },
+  } = useKibanaContextForPlugin();
+
+  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
+  const locatorParams = { page: 'data_streams_details', dataStreamName: dataStream } as const;
+
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
   const handleRefresh = useCallback(
@@ -49,16 +57,25 @@ export function Overview() {
           <EuiCallOut
             color="warning"
             iconType="warning"
-            title={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
-              defaultMessage: 'Failure store is not enabled for this data stream.',
-            })}
-          >
-            <EuiLink href={FAILURE_STORE_DOCS_URL} external>
-              {i18n.translate('xpack.datasetQuality.learnMore', {
-                defaultMessage: 'Learn how to enable it',
-              })}
-            </EuiLink>
-          </EuiCallOut>
+            title={
+              <>
+                {i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
+                  defaultMessage: 'Failure store is not enabled for this data stream. ',
+                })}
+                <EuiLink
+                  href={locator?.getRedirectUrl(locatorParams)}
+                  target="_blank"
+                  external={false}
+                  color="warning"
+                  css={{ textDecoration: 'underline' }}
+                >
+                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
+                    defaultMessage: 'Enable failure store',
+                  })}
+                </EuiLink>
+              </>
+            }
+          />
         </div>
       )}
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
