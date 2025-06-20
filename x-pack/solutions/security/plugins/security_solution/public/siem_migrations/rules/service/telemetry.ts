@@ -137,6 +137,15 @@ export class SiemRulesMigrationsTelemetry {
     });
   };
 
+  reportStopTranslation = (params: { migrationId: string; error?: Error }) => {
+    const { migrationId, error } = params;
+    this.telemetryService.reportEvent(SiemMigrationsEventTypes.StopMigration, {
+      migrationId,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.StopMigration],
+      ...this.getBaseResultParams(error),
+    });
+  };
+
   // Translated rule actions
 
   reportTranslatedRuleUpdate = (params: { migrationRule: RuleMigrationRule; error?: Error }) => {

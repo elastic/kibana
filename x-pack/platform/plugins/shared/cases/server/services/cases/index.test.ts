@@ -2211,7 +2211,11 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
-      'incremental_id'
+      'incremental_id',
+      'in_progress_at',
+      'time_to_acknowledge',
+      'time_to_resolve',
+      'time_to_investigate'
     );
 
     describe('getCaseIdsByAlertId', () => {

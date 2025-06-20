@@ -15,7 +15,7 @@ import type { RuleMigrationResourceBase } from '../../../../../common/siem_migra
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana/use_kibana');
 
 jest.mock('../data_input_flyout/context', () => ({
   useRuleMigrationDataInputContext: () => ({
@@ -94,14 +94,24 @@ describe('MigrationReadyPanel', () => {
     it('should render description text correctly', () => {
       renderReadyPanel(mockMigrationStatsReady);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        `Migration of 6 rules is created but the translation has not started yet.`
+        `Migration of 6 rules is created and ready to start.`
       );
     });
 
     it('should render start migration button', () => {
       renderReadyPanel(mockMigrationStatsReady);
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Start');
+    });
+
+    it('should render starting migration button while loading', () => {
+      useStartMigrationMock.mockReturnValue({
+        startMigration: mockStartMigration,
+        isLoading: true,
+      });
+      render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />);
+      expect(screen.getByTestId('startMigrationButton')).toBeVisible();
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');
     });
   });
 
@@ -118,21 +128,21 @@ describe('MigrationReadyPanel', () => {
 
     it('should render start migration button when there is an error', () => {
       renderReadyPanel(mockMigrationStateWithError);
-      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start translation');
+      expect(screen.queryByTestId('startMigrationButton')).toHaveTextContent('Start');
     });
   });
 
-  describe('Aborted Migration', () => {
+  describe('Stopped Migration', () => {
     it('should render aborted migration message', () => {
       renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-        'Migration of 6 rules was stopped. You can resume it any time.'
+        'Migration of 6 rules was stopped, you can resume it any time.'
       );
     });
 
     it('should render correct start migration button for aborted migration', () => {
       renderReadyPanel(mockMigrationStatsStopped);
-      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume translation');
+      expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
     });
   });
 
@@ -154,7 +164,7 @@ describe('MigrationReadyPanel', () => {
       renderReadyPanel(mockMigrationStatsReady);
       await waitFor(() => {
         expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
-          'Migration of 6 rules is created but the translation has not started yet. Upload macros & lookups and start the translation process.'
+          'Migration of 6 rules is created and ready to start. You can also upload the missing macros & lookups for more accurate results.'
         );
       });
     });

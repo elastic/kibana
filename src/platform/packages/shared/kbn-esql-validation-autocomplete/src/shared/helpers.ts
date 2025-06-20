@@ -271,33 +271,15 @@ export function getColumnByName(
   return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
 }
 
-const ARRAY_REGEXP = /\[\]$/;
-
 export function isArrayType(type: string): type is ArrayType {
-  return ARRAY_REGEXP.test(type);
+  return type.endsWith('[]');
 }
-
-const arrayToSingularMap: Map<ArrayType, FunctionParameterType> = new Map([
-  ['double[]', 'double'],
-  ['unsigned_long[]', 'unsigned_long'],
-  ['long[]', 'long'],
-  ['integer[]', 'integer'],
-  ['counter_integer[]', 'counter_integer'],
-  ['counter_long[]', 'counter_long'],
-  ['counter_double[]', 'counter_double'],
-  ['keyword[]', 'keyword'],
-  ['text[]', 'text'],
-  ['date[]', 'date'],
-  ['date_period[]', 'date_period'],
-  ['boolean[]', 'boolean'],
-  ['any[]', 'any'],
-]);
 
 /**
  * Given an array type for example `string[]` it will return `string`
  */
-export function extractSingularType(type: FunctionParameterType): FunctionParameterType {
-  return isArrayType(type) ? arrayToSingularMap.get(type)! : type;
+export function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
+  return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -444,16 +426,16 @@ export function checkFunctionArgMatchesDefinition(
   parameterDefinition: FunctionParameter,
   references: ReferenceMaps,
   parentCommand?: string
-) {
-  const argType = parameterDefinition.type;
-  if (argType === 'any') {
+): boolean {
+  const parameterType = parameterDefinition.type;
+  if (parameterType === 'any') {
     return true;
   }
   if (isParam(arg)) {
     return true;
   }
   if (arg.type === 'literal') {
-    const matched = doesLiteralMatchParameterType(argType, arg);
+    const matched = doesLiteralMatchParameterType(parameterType, arg);
     return matched;
   }
   if (arg.type === 'function') {
@@ -462,13 +444,13 @@ export function checkFunctionArgMatchesDefinition(
       return fnDef.signatures.some(
         (signature) =>
           signature.returnType === 'unknown' ||
-          argType === signature.returnType ||
-          bothStringTypes(argType, signature.returnType)
+          parameterType === signature.returnType ||
+          bothStringTypes(parameterType, signature.returnType)
       );
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_duration' && inKnownTimeInterval(arg.unit);
+    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);
@@ -481,14 +463,19 @@ export function checkFunctionArgMatchesDefinition(
       : [validHit.type];
 
     return wrappedTypes.some(
-      (ct) => ct === argType || bothStringTypes(ct, argType) || ct === 'null' || ct === 'unknown'
+      (ct) =>
+        ct === parameterType ||
+        bothStringTypes(ct, parameterType) ||
+        ct === 'null' ||
+        ct === 'unknown'
     );
   }
   if (arg.type === 'inlineCast') {
-    const lowerArgType = argType?.toLowerCase();
+    const lowerArgType = parameterType?.toLowerCase();
     const castedType = getExpressionType(arg);
     return castedType === lowerArgType;
   }
+  return false;
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {

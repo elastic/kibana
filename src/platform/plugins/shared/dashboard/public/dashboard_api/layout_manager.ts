@@ -344,6 +344,8 @@ export function initializeLayoutManager(
       title: dashboardClonePanelActionStrings.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
+    trackPanel.setScrollToPanelId(uuidOfDuplicate);
+    trackPanel.setHighlightPanelId(uuidOfDuplicate);
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
