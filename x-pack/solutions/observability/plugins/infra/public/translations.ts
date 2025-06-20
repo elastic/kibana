@@ -30,6 +30,10 @@ export const logCategoriesTitle = i18n.translate(
   }
 );
 
+export const settingsTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
+  defaultMessage: 'Settings',
+});
+
 export const metricsTitle = i18n.translate('xpack.infra.header.infrastructureTitle', {
   defaultMessage: 'Infrastructure',
 });
