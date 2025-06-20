@@ -18,11 +18,15 @@ import {
   IconDonutHoleMedium,
   IconDonutHoleLarge,
 } from '@kbn/chart-icons';
-import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { LegendValue } from '@elastic/charts';
-import { SharedPieLayerState, EmptySizeRatios } from '../../../common/types';
-import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
-import type { PieChartType } from '../../../common/types';
+import {
+  LENS_CATEGORY_DISPLAY,
+  PARTITION_EMPTY_SIZE_RADIUS,
+  LENS_NUMBER_DISPLAY,
+  type PartitionChartType,
+  type SharedPartitionLayerState,
+  type EmptySizeRadius,
+} from '@kbn/visualizations-plugin/common';
 
 interface PartitionChartMeta {
   id: string;
@@ -35,16 +39,16 @@ interface PartitionChartMeta {
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
-      id: SharedPieLayerState['categoryDisplay'];
+      id: SharedPartitionLayerState['categoryDisplay'];
       label: string;
     }>;
     numberOptions: Array<{
-      id: SharedPieLayerState['numberDisplay'];
+      id: SharedPartitionLayerState['numberDisplay'];
       label: string;
     }>;
     emptySizeRatioOptions?: Array<{
       id: string;
-      value: EmptySizeRatios | 0;
+      value: EmptySizeRadius | 0;
       label: string;
       icon?: IconType;
     }>;
@@ -59,19 +63,19 @@ interface PartitionChartMeta {
 
 const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    id: CategoryDisplay.HIDE,
+    id: LENS_CATEGORY_DISPLAY.HIDE,
     label: i18n.translate('xpack.lens.pieChart.categoriesHideLabel', {
       defaultMessage: 'Hide',
     }),
   },
   {
-    id: CategoryDisplay.INSIDE,
+    id: LENS_CATEGORY_DISPLAY.INSIDE,
     label: i18n.translate('xpack.lens.pieChart.categoriesInsideOnlyLabel', {
       defaultMessage: 'Inside',
     }),
   },
   {
-    id: CategoryDisplay.DEFAULT,
+    id: LENS_CATEGORY_DISPLAY.DEFAULT,
     label: i18n.translate('xpack.lens.pieChart.autoCategoriesLabel', {
       defaultMessage: 'Auto',
     }),
@@ -80,13 +84,13 @@ const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] =
 
 const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
-    id: CategoryDisplay.HIDE,
+    id: LENS_CATEGORY_DISPLAY.HIDE,
     label: i18n.translate('xpack.lens.pieChart.hideTreemapCategoriesLabel', {
       defaultMessage: 'Hide',
     }),
   },
   {
-    id: CategoryDisplay.DEFAULT,
+    id: LENS_CATEGORY_DISPLAY.DEFAULT,
     label: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
       defaultMessage: 'Show',
     }),
@@ -95,19 +99,19 @@ const categoryOptionsTreemap: PartitionChartMeta['toolbarPopover']['categoryOpti
 
 const numberOptions: PartitionChartMeta['toolbarPopover']['numberOptions'] = [
   {
-    id: NumberDisplay.HIDDEN,
+    id: LENS_NUMBER_DISPLAY.HIDDEN,
     label: i18n.translate('xpack.lens.pieChart.hiddenNumbersLabel', {
       defaultMessage: 'Hide',
     }),
   },
   {
-    id: NumberDisplay.VALUE,
+    id: LENS_NUMBER_DISPLAY.VALUE,
     label: i18n.translate('xpack.lens.pieChart.integerLabel', {
       defaultMessage: 'Integer',
     }),
   },
   {
-    id: NumberDisplay.PERCENT,
+    id: LENS_NUMBER_DISPLAY.PERCENT,
     label: i18n.translate('xpack.lens.pieChart.percentageLabel', {
       defaultMessage: 'Percentage',
     }),
@@ -125,14 +129,14 @@ const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRati
   {
     id: 'emptySizeRatioOption-small',
     icon: IconDonutHoleSmall,
-    value: EmptySizeRatios.SMALL,
+    value: PARTITION_EMPTY_SIZE_RADIUS.SMALL,
     label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.small', {
       defaultMessage: 'Small',
     }),
   },
   {
     id: 'emptySizeRatioOption-medium',
-    value: EmptySizeRatios.MEDIUM,
+    value: PARTITION_EMPTY_SIZE_RADIUS.MEDIUM,
     icon: IconDonutHoleMedium,
     label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.medium', {
       defaultMessage: 'Medium',
@@ -140,7 +144,7 @@ const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRati
   },
   {
     id: 'emptySizeRatioOption-large',
-    value: EmptySizeRatios.LARGE,
+    value: PARTITION_EMPTY_SIZE_RADIUS.LARGE,
     icon: IconDonutHoleLarge,
     label: i18n.translate('xpack.lens.pieChart.emptySizeRatioOptions.large', {
       defaultMessage: 'Large',
@@ -168,7 +172,7 @@ const sharedPieDonutOptions: Omit<PartitionChartMeta, 'id'> = {
   }),
 };
 
-export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
+export const PartitionChartsMeta: Record<PartitionChartType, PartitionChartMeta> = {
   pie: {
     id: 'pie',
     ...sharedPieDonutOptions,

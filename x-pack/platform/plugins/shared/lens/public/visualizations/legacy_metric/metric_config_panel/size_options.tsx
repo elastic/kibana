@@ -8,14 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import { LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE } from '@kbn/visualizations-plugin/common';
 import type { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;
   setState: (newState: LegacyMetricState) => void;
 }
-
-export const DEFAULT_TITLE_SIZE = 'm';
 
 const titleSizes = [
   {
@@ -58,7 +57,7 @@ const titleSizes = [
 
 export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
   const currSizeIndex = titleSizes.findIndex(
-    (size) => size.id === (state.size || DEFAULT_TITLE_SIZE)
+    (size) => size.id === (state.size || LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE)
   );
 
   const changeSize = (change: number) => {
@@ -90,7 +89,7 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
           inputDisplay: position.label,
         };
       })}
-      valueOfSelected={state.size ?? DEFAULT_TITLE_SIZE}
+      valueOfSelected={state.size ?? LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE}
       onChange={(value) => {
         setState({ ...state, size: value });
       }}

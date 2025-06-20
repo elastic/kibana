@@ -27,14 +27,17 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
 import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
+import {
+  LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT,
+  LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION,
+  LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE,
+  type OperationMetadata,
+} from '@kbn/visualizations-plugin/common';
 import { getSuggestions } from './metric_suggestions';
-import { Visualization, OperationMetadata, DatasourceLayers, FramePublicAPI } from '../../types';
+import type { Visualization, DatasourceLayers, FramePublicAPI } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
-import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
-import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
-import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
@@ -97,7 +100,7 @@ const toExpression = (
     xxl: getFontSizeAndUnit(euiThemeVars.euiFontSizeXXL),
   };
 
-  const labelFont = fontSizes[state?.size || DEFAULT_TITLE_SIZE];
+  const labelFont = fontSizes[state?.size || LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE];
   const labelToMetricFontSizeMap: Record<string, number> = {
     xs: fontSizes.xs.size * 2,
     s: fontSizes.m.size * 2.5,
@@ -106,10 +109,11 @@ const toExpression = (
     xl: fontSizes.xxl.size * 2.5,
     xxl: fontSizes.xxl.size * 3,
   };
-  const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
+  const metricFontSize =
+    labelToMetricFontSizeMap[state?.size || LENS_LEGACY_METRIC_DEFAULT_TITLE_SIZE];
 
   const fontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
-    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    align: (state?.textAlign || LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
     size: metricFontSize,
     weight: '600' as FontWeight,
     lHeight: metricFontSize * 1.5,
@@ -117,7 +121,7 @@ const toExpression = (
   });
 
   const labelFontFn = buildExpressionFunction<ExpressionFunctionFont>('font', {
-    align: (state?.textAlign || DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
+    align: (state?.textAlign || LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT) as TextAlignment,
     size: labelFont.size,
     lHeight: labelFont.size * 1.5,
     sizeUnit: labelFont.sizeUnit,
@@ -131,7 +135,7 @@ const toExpression = (
     'legacyMetricVis',
     {
       autoScaleMetricAlignment: state?.autoScaleMetricAlignment,
-      labelPosition: state?.titlePosition || DEFAULT_TITLE_POSITION,
+      labelPosition: state?.titlePosition || LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION,
       font: buildExpression([fontFn]),
       labelFont: buildExpression([labelFontFn]),
       metric: buildExpression([visdimensionFn]),

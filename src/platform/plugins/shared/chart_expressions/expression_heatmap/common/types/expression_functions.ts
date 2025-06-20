@@ -21,7 +21,7 @@ import {
   EXPRESSION_HEATMAP_LEGEND_NAME,
   EXPRESSION_HEATMAP_GRID_NAME,
   EXPRESSION_HEATMAP_NAME,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { HEATMAP_FUNCTION_RENDERER_NAME } from '../constants';
 

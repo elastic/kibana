@@ -44,7 +44,7 @@ import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { LENS_HEATMAP_DEFAULT_PALETTE_PARAMS } from '@kbn/visualization-types-and-defaults';
+import { LENS_HEATMAP_DEFAULT_PALETTE_PARAMS } from '@kbn/visualizations-plugin/common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,

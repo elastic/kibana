@@ -8,14 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
+import { LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT } from '@kbn/visualizations-plugin/common';
 import { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;
   setState: (newState: LegacyMetricState) => void;
 }
-
-export const DEFAULT_TEXT_ALIGNMENT = 'left';
 
 const alignButtonIcons = [
   {
@@ -48,7 +47,7 @@ export const AlignOptions: React.FC<TitlePositionProps> = ({ state, setState }) 
         defaultMessage: 'Align',
       })}
       options={alignButtonIcons}
-      idSelected={state.textAlign ?? DEFAULT_TEXT_ALIGNMENT}
+      idSelected={state.textAlign ?? LENS_LEGACY_METRIC_DEFAULT_TEXT_ALIGNMENT}
       onChange={(id) => {
         setState({ ...state, textAlign: id as LegacyMetricState['textAlign'] });
       }}

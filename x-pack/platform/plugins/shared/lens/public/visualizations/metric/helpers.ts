@@ -8,9 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
-import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
+import {
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  MetricVisualizationState,
+  SecondaryTrend,
+  SecondaryTrendType,
+} from '@kbn/visualizations-plugin/common';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
 
 export function getColorMode(
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -61,7 +65,7 @@ export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTren
   if (mode === 'static') {
     return {
       type: 'static',
-      color: SECONDARY_DEFAULT_STATIC_COLOR,
+      color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     };
   }
   return {

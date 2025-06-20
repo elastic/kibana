@@ -21,13 +21,18 @@ import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
 import { ThemeServiceStart } from '@kbn/core/public';
-import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
+import {
+  LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
+  type CollapseFunction,
+  type MetricVisualizationState,
+  LENS_METRIC_STATE_DEFAULTS,
+  LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+} from '@kbn/visualizations-plugin/common';
+import { CollapseArgs } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
-import { MetricVisualizationState } from './types';
-import { metricStateDefaults } from './constants';
+import { getDefaultColor } from './visualization';
 import {
   getColorMode,
   getDefaultConfigForMode,
@@ -183,8 +188,8 @@ export const toExpression = (
     secondaryTrendBaseline:
       secondaryTrendConfig.type === 'dynamic'
         ? isMetricNumeric
-          ? secondaryTrendConfig.baselineValue ?? 0
-          : 0
+          ? secondaryTrendConfig.baselineValue ?? LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE
+          : LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE
         : undefined,
     secondaryTrendPalette: getTrendPalette(
       secondaryDynamicColorMode,
@@ -199,10 +204,10 @@ export const toExpression = (
     progressDirection: showingBar(state)
       ? state.progressDirection || LayoutDirection.Vertical
       : undefined,
-    titlesTextAlign: state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign,
-    valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
-    iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
-    valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
+    titlesTextAlign: state.titlesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
+    valuesTextAlign: state.valuesTextAlign ?? LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+    iconAlign: state.iconAlign ?? LENS_METRIC_STATE_DEFAULTS.iconAlign,
+    valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasIcon(state.icon) ? state.icon : undefined,
     palette:
@@ -213,7 +218,7 @@ export const toExpression = (
               .toExpression(computePaletteParams(paletteService, state.palette)),
           ]
         : [],
-    maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
+    maxCols: state.maxCols ?? LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
   });

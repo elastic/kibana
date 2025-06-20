@@ -33,15 +33,21 @@ import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+import {
+  LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+  MetricVisualizationState,
+  SecondaryTrend,
+  SecondaryTrendType,
+} from '@kbn/visualizations-plugin/common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
+import { getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getDefaultConfigForMode, getPrefixSelected } from './helpers';
-import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -97,7 +103,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
   const { inputValue: currentMaxCols, handleInputChange: handleMaxColsChange } =
     useDebouncedValue<string>({
       onChange: setMaxCols,
-      value: String(state.maxCols ?? DEFAULT_MAX_COLUMNS),
+      value: String(state.maxCols ?? LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS),
     });
 
   return (
@@ -442,7 +448,7 @@ function SecondaryMetricEditor({
     () =>
       state.secondaryTrend?.type === 'static'
         ? state.secondaryTrend.color
-        : SECONDARY_DEFAULT_STATIC_COLOR,
+        : LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
     [state]
   );
 
@@ -1007,7 +1013,7 @@ export function DimensionEditorDataExtraComponent({
   setState,
 }: Omit<Props, 'paletteService'>) {
   const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
-  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+  if (!isMetricNumeric || groupId !== LENS_METRIC_GROUP_ID.BREAKDOWN_BY) {
     return null;
   }
   return (

@@ -8,14 +8,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION } from '@kbn/visualizations-plugin/common';
 import type { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;
   setState: (newState: LegacyMetricState) => void;
 }
-
-export const DEFAULT_TITLE_POSITION = 'top';
 
 const titlePositions = [
   {
@@ -50,7 +49,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         data-test-subj="lnsMissingValuesSelect"
         legend="This is a basic group"
         options={titlePositions}
-        idSelected={state.titlePosition ?? DEFAULT_TITLE_POSITION}
+        idSelected={state.titlePosition ?? LENS_LEGACY_METRIC_DEFAULT_TITLE_POSITION}
         onChange={(value) => {
           setState({ ...state, titlePosition: value as LegacyMetricState['titlePosition'] });
         }}

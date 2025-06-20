@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PieChartType } from '../../types';
+import { PARTITION_CHART_TYPES, type PartitionChartType } from '@kbn/visualizations-plugin/common';
 
-export const isPartitionShape = (shape: PieChartType | string) =>
-  ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].includes(shape);
+const PartitionChartTypesList = Object.values<string>(PARTITION_CHART_TYPES);
+
+export const isPartitionShape = (shape: string): shape is PartitionChartType =>
+  PartitionChartTypesList.includes(shape);

@@ -14,19 +14,24 @@ import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
 import { ThemeServiceStart } from '@kbn/core/public';
+import {
+  type OperationMetadata,
+  type UserMessage,
+  type MetricVisualizationState,
+  type SecondaryTrend,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_ID,
+  layerTypes,
+} from '@kbn/visualizations-plugin/common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
-import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
-  OperationMetadata,
   VisualizationConfigProps,
   VisualizationDimensionGroupConfig,
   Suggestion,
-  UserMessage,
 } from '../../types';
-import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
@@ -37,11 +42,8 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import { MetricVisualizationState, SecondaryTrend } from './types';
 import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
 import { getAccessorType } from '../../shared_components';
-
-export const DEFAULT_MAX_COLUMNS = 3;
 
 export const showingBar = (
   state: MetricVisualizationState
@@ -136,7 +138,7 @@ const getMetricLayerConfiguration = (
   return {
     groups: [
       {
-        groupId: GROUP_ID.METRIC,
+        groupId: LENS_METRIC_GROUP_ID.METRIC,
         dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
@@ -162,7 +164,7 @@ const getMetricLayerConfiguration = (
         requiredMinDimensionCount: 1,
       },
       {
-        groupId: GROUP_ID.SECONDARY_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
         dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
@@ -187,7 +189,7 @@ const getMetricLayerConfiguration = (
         enableFormatSelector: true,
       },
       {
-        groupId: GROUP_ID.MAX,
+        groupId: LENS_METRIC_GROUP_ID.MAX,
         dataTestSubj: 'lnsMetric_maxDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
         paramEditorCustomProps: {
@@ -214,7 +216,7 @@ const getMetricLayerConfiguration = (
         }),
       },
       {
-        groupId: GROUP_ID.BREAKDOWN_BY,
+        groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
         dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
@@ -246,7 +248,7 @@ const getTrendlineLayerConfiguration = (
     hidden: true,
     groups: [
       {
-        groupId: GROUP_ID.TREND_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
@@ -263,7 +265,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 3,
       },
       {
-        groupId: GROUP_ID.TREND_SECONDARY_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
         groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
         }),
@@ -280,7 +282,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 2,
       },
       {
-        groupId: GROUP_ID.TREND_TIME,
+        groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
         accessors: props.state.trendlineTimeAccessor
           ? [
@@ -295,7 +297,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 1,
       },
       {
-        groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+        groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
@@ -439,7 +441,7 @@ export const getMetricVisualization = ({
           defaultMessage: 'Trendline',
         }),
         initialDimensions: [
-          { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
+          { groupId: LENS_METRIC_GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
       },
@@ -494,12 +496,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.metricAccessor,
-          groupId: GROUP_ID.METRIC,
+          groupId: LENS_METRIC_GROUP_ID.METRIC,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineMetricAccessor,
-          groupId: GROUP_ID.TREND_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
           layerId: state.trendlineLayerId,
         },
       });
@@ -509,12 +511,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.secondaryMetricAccessor,
-          groupId: GROUP_ID.SECONDARY_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineSecondaryMetricAccessor,
-          groupId: GROUP_ID.TREND_SECONDARY_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
           layerId: state.trendlineLayerId,
         },
       });
@@ -524,12 +526,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.breakdownByAccessor,
-          groupId: GROUP_ID.BREAKDOWN_BY,
+          groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineBreakdownByAccessor,
-          groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+          groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
           layerId: state.trendlineLayerId,
         },
       });
@@ -575,31 +577,31 @@ export const getMetricVisualization = ({
     const updated = { ...prevState };
 
     switch (groupId) {
-      case GROUP_ID.METRIC:
+      case LENS_METRIC_GROUP_ID.METRIC:
         updated.metricAccessor = columnId;
         break;
-      case GROUP_ID.SECONDARY_METRIC:
+      case LENS_METRIC_GROUP_ID.SECONDARY_METRIC:
         updated.secondaryMetricAccessor = columnId;
         break;
-      case GROUP_ID.MAX:
+      case LENS_METRIC_GROUP_ID.MAX:
         updated.maxAccessor = columnId;
         if (!prevState.trendlineLayerId) {
           updated.showBar = true;
         }
         break;
-      case GROUP_ID.BREAKDOWN_BY:
+      case LENS_METRIC_GROUP_ID.BREAKDOWN_BY:
         updated.breakdownByAccessor = columnId;
         break;
-      case GROUP_ID.TREND_TIME:
+      case LENS_METRIC_GROUP_ID.TREND_TIME:
         updated.trendlineTimeAccessor = columnId;
         break;
-      case GROUP_ID.TREND_METRIC:
+      case LENS_METRIC_GROUP_ID.TREND_METRIC:
         updated.trendlineMetricAccessor = columnId;
         break;
-      case GROUP_ID.TREND_SECONDARY_METRIC:
+      case LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC:
         updated.trendlineSecondaryMetricAccessor = columnId;
         break;
-      case GROUP_ID.TREND_BREAKDOWN_BY:
+      case LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY:
         updated.trendlineBreakdownByAccessor = columnId;
         break;
     }

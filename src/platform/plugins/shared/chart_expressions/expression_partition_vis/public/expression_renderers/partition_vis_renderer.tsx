@@ -32,10 +32,11 @@ import {
   extractVisualizationType,
   isOnAggBasedEditor,
 } from '@kbn/chart-expressions-common';
+import { PARTITION_CHART_TYPES } from '@kbn/visualizations-plugin/common';
 import { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { CellValueAction, GetCompatibleCellValueActions } from '../types';
-import { ChartTypes, type PartitionVisParams, type PartitionChartProps } from '../../common/types';
+import { type PartitionVisParams, type PartitionChartProps } from '../../common/types';
 
 export const strings = {
   getDisplayName: () =>
@@ -153,7 +154,7 @@ export const getPartitionVisRenderer: (
             palettesRegistry={palettesRegistry}
             visParams={visConfig}
             visData={visData}
-            visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
+            visType={visConfig.isDonut ? PARTITION_CHART_TYPES.DONUT : visType}
             renderComplete={renderComplete}
             fireEvent={handlers.event}
             hasCompatibleActions={handlers.hasCompatibleActions}

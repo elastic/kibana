@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PaletteOutput } from '@kbn/coloring';
-import { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
 import {
   Datatable,
   DefaultInspectorAdapters,
@@ -17,45 +14,14 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
 import type {
-  AllowedChartOverrides,
-  AllowedSettingsOverrides,
-  CustomPaletteState,
-} from '@kbn/charts-plugin/common';
+  MetricTrendlineResult,
+  MetricTrendlineArguments,
+  MetricArguments,
+} from '@kbn/visualizations-plugin/common';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { VisParams, visType } from './expression_renderers';
-import {
-  EXPRESSION_METRIC_NAME,
-  EXPRESSION_METRIC_TRENDLINE_NAME,
-  AvailableMetricIcons,
-} from '../constants';
-
-export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
-
-export interface MetricArguments {
-  metric: ExpressionValueVisDimension | string;
-  secondaryMetric?: ExpressionValueVisDimension | string;
-  max?: ExpressionValueVisDimension | string;
-  breakdownBy?: ExpressionValueVisDimension | string;
-  trendline?: TrendlineResult;
-  subtitle?: string;
-  secondaryPrefix?: string;
-  secondaryColor?: string;
-  secondaryTrendVisuals?: string;
-  secondaryTrendBaseline?: number | string;
-  secondaryTrendPalette?: [string, string, string];
-  progressDirection?: LayoutDirection;
-  titlesTextAlign: MetricStyle['titlesTextAlign'];
-  valuesTextAlign: MetricStyle['valuesTextAlign'];
-  iconAlign: MetricStyle['iconAlign'];
-  valueFontSize: MetricStyle['valueFontSize'];
-  color?: string;
-  icon?: string;
-  palette?: PaletteOutput<CustomPaletteState>;
-  maxCols: number;
-  minTiles?: number;
-  inspectorTableId: string;
-}
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export type MetricInput = Datatable;
 
@@ -76,7 +42,7 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
 
 export type TrendlineExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof EXPRESSION_METRIC_TRENDLINE_NAME,
-  Datatable,
-  TrendlineArguments,
-  TrendlineResult
+  MetricInput,
+  MetricTrendlineArguments,
+  MetricTrendlineResult
 >;

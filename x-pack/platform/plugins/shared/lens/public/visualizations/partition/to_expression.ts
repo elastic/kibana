@@ -21,18 +21,20 @@ import type {
   WaffleVisExpressionFunctionDefinition,
 } from '@kbn/expression-partition-vis-plugin/common';
 import { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
-import type { CollapseExpressionFunction } from '../../../common/expressions';
-import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
-import { getLegendStats } from './render_helpers';
-import { PieLayerState, PieVisualizationState, EmptySizeRatios } from '../../../common/types';
+import { ExpressionFunctionVisDimension, Operation } from '@kbn/visualizations-plugin/common';
 import {
   CategoryDisplay,
+  EMPTY_SIZE_RADIUS,
+  PARTITION_CHART_TYPES,
+  LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
   LegendDisplay,
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
   NumberDisplay,
-  PieChartTypes,
-} from '../../../common/constants';
+} from '@kbn/visualizations-plugin/common';
+import type { CollapseExpressionFunction } from '../../../common/expressions';
+import type { DatasourcePublicAPI, DatasourceLayers } from '../../types';
+import { getLegendStats } from './render_helpers';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { hasNonCollapsedSliceBy, isCollapsed } from './visualization';
 
@@ -48,18 +50,18 @@ interface OperationColumnId {
 }
 
 type GenerateExpressionAstFunction = (
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   attributes: Attributes,
   operations: OperationColumnId[],
-  layer: PieLayerState,
+  layer: LensPartitionLayerState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => Ast | null;
 
 type GenerateLabelsAstArguments = (
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   attributes: Attributes,
-  layer: PieLayerState,
+  layer: LensPartitionLayerState,
   columnToLabelMap: Record<string, string>
 ) => [Ast];
 
@@ -79,7 +81,7 @@ export const getColumnToLabelMap = (
 
 export const getSortedAccessorsForGroup = (
   datasource: DatasourcePublicAPI | undefined,
-  layer: PieLayerState,
+  layer: LensPartitionLayerState,
   accessor: 'primaryGroups' | 'secondaryGroups' | 'metrics'
 ) => {
   const originalOrder = datasource
@@ -108,7 +110,7 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
   const values = layer.numberDisplay !== NumberDisplay.HIDDEN;
   const valuesFormat =
     layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
-  const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
+  const percentDecimals = layer.percentDecimals ?? LENS_PARTITION_DEFAULT_PERCENT_DECIMALS;
   const colorOverrides =
     layer.allowMultipleMetrics && !hasNonCollapsedSliceBy(layer)
       ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
@@ -144,7 +146,7 @@ const generateWaffleLabelsAstArguments: GenerateLabelsAstArguments = (...args) =
   return [
     {
       ...labelsExpr,
-      chain: [{ ...labels, percentDecimals: DEFAULT_PERCENT_DECIMALS }],
+      chain: [{ ...labels, percentDecimals: LENS_PARTITION_DEFAULT_PERCENT_DECIMALS }],
     },
   ];
 };
@@ -165,10 +167,10 @@ const generatePaletteAstArguments = (
     : [paletteService.get('default').toExpression()];
 
 const generateCommonArguments = (
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   attributes: Attributes,
   operations: OperationColumnId[],
-  layer: PieLayerState,
+  layer: LensPartitionLayerState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry
 ) => {
@@ -222,7 +224,7 @@ const generateDonutVisAst: GenerateExpressionAstFunction = (...rest) => {
       respectSourceOrder: false,
       isDonut: true,
       startFromSecondLargestSlice: true,
-      emptySizeRatio: layer.emptySizeRatio ?? EmptySizeRatios.SMALL,
+      emptySizeRatio: layer.emptySizeRatio ?? EMPTY_SIZE_RADIUS.SMALL,
     }),
   ]).toAst();
 };
@@ -276,15 +278,15 @@ const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
 
 const generateExprAst: GenerateExpressionAstFunction = (state, ...restArgs) =>
   ({
-    [PieChartTypes.PIE]: () => generatePieVisAst(state, ...restArgs),
-    [PieChartTypes.DONUT]: () => generateDonutVisAst(state, ...restArgs),
-    [PieChartTypes.TREEMAP]: () => generateTreemapVisAst(state, ...restArgs),
-    [PieChartTypes.MOSAIC]: () => generateMosaicVisAst(state, ...restArgs),
-    [PieChartTypes.WAFFLE]: () => generateWaffleVisAst(state, ...restArgs),
+    [PARTITION_CHART_TYPES.PIE]: () => generatePieVisAst(state, ...restArgs),
+    [PARTITION_CHART_TYPES.DONUT]: () => generateDonutVisAst(state, ...restArgs),
+    [PARTITION_CHART_TYPES.TREEMAP]: () => generateTreemapVisAst(state, ...restArgs),
+    [PARTITION_CHART_TYPES.MOSAIC]: () => generateMosaicVisAst(state, ...restArgs),
+    [PARTITION_CHART_TYPES.WAFFLE]: () => generateWaffleVisAst(state, ...restArgs),
   }[state.shape]());
 
 function expressionHelper(
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Attributes = { isPreview: false },
@@ -343,7 +345,7 @@ function expressionHelper(
 }
 
 export function toExpression(
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
@@ -362,7 +364,7 @@ export function toExpression(
 }
 
 export function toPreviewExpression(
-  state: PieVisualizationState,
+  state: LensPartitionVisualizationState,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}

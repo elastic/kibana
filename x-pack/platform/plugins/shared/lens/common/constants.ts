@@ -22,35 +22,6 @@ export const STAGE_ID = 'production';
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';
 
-export const PieChartTypes = {
-  PIE: 'pie',
-  DONUT: 'donut',
-  TREEMAP: 'treemap',
-  MOSAIC: 'mosaic',
-  WAFFLE: 'waffle',
-} as const;
-
-export const CategoryDisplay = {
-  DEFAULT: 'default',
-  INSIDE: 'inside',
-  HIDE: 'hide',
-} as const;
-
-export const NumberDisplay = {
-  HIDDEN: 'hidden',
-  PERCENT: 'percent',
-  VALUE: 'value',
-} as const;
-
-export const LegendDisplay = {
-  DEFAULT: 'default',
-  SHOW: 'show',
-  HIDE: 'hide',
-} as const;
-
-// might collide with user-supplied field names, try to make as unique as possible
-export const DOCUMENT_FIELD_NAME = '___records___';
-
 export function getBasePath() {
   return `#/`;
 }

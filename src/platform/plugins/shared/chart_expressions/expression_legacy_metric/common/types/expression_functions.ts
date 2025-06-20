@@ -21,7 +21,7 @@ import type { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import type {
   LegacyMetricAlignment,
   LegacyMetricLabelPositionType,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 import { VisParams, visType } from './expression_renderers';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 

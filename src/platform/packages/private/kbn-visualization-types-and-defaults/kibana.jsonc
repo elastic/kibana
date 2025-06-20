@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/visualization-types-and-defaults",
-  "owner": "@elastic/kibana-visualizations",
-  "group": "platform",
-  "visibility": "private"
-}

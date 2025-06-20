@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { GaugeColorMode, GaugeExpressionState } from '@kbn/visualization-types-and-defaults';
+import type { GaugeColorMode, GaugeExpressionState } from '@kbn/visualizations-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type {
   Datatable,

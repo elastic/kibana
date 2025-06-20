@@ -1052,7 +1052,6 @@
     "@kbn/vis-type-vega-plugin": "link:src/platform/plugins/private/vis_types/vega",
     "@kbn/vis-type-vislib-plugin": "link:src/platform/plugins/private/vis_types/vislib",
     "@kbn/vis-type-xy-plugin": "link:src/platform/plugins/private/vis_types/xy",
-    "@kbn/visualization-types-and-defaults": "link:src/platform/packages/private/kbn-visualization-types-and-defaults",
     "@kbn/visualization-ui-components": "link:src/platform/packages/shared/kbn-visualization-ui-components",
     "@kbn/visualization-utils": "link:src/platform/packages/shared/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/platform/plugins/shared/visualizations",

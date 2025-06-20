@@ -10,12 +10,9 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import {
-  LegendDisplay,
-  type PartitionChartProps,
-  type PartitionVisParams,
-} from '../types/expression_renderers';
-import { ChartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
+import { LENS_LEGEND_DISPLAY, PARTITION_CHART_TYPES } from '@kbn/visualizations-plugin/common';
+import { type PartitionChartProps, type PartitionVisParams } from '../types/expression_renderers';
+import { TreemapVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -63,8 +60,8 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     legendDisplay: {
       types: ['string'],
       help: strings.getLegendDisplayArgHelp(),
-      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
-      default: LegendDisplay.HIDE,
+      options: [LENS_LEGEND_DISPLAY.SHOW, LENS_LEGEND_DISPLAY.HIDE, LENS_LEGEND_DISPLAY.DEFAULT],
+      default: LENS_LEGEND_DISPLAY.HIDE,
       strict: true,
     },
     legendPosition: {
@@ -184,7 +181,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: ChartTypes.TREEMAP,
+        visType: PARTITION_CHART_TYPES.TREEMAP,
         params: {
           listenOnChange: true,
         },

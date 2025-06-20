@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { CollapseExpressionFunction } from './types';
 
-export type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
 export interface CollapseArgs {
   by?: string[];
   metric?: string[];

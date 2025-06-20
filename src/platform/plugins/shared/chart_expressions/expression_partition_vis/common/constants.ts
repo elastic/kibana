@@ -17,5 +17,3 @@ export const WAFFLE_VIS_EXPRESSION_NAME = 'waffleVis';
 export const PARTITION_VIS_RENDERER_NAME = 'partitionVis';
 export const PARTITION_LABELS_VALUE = 'partitionLabelsValue';
 export const PARTITION_LABELS_FUNCTION = 'partitionLabels';
-
-export const DEFAULT_PERCENT_DECIMALS = 2;

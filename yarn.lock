@@ -6134,10 +6134,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/visualization-types-and-defaults@link:src/platform/packages/private/kbn-visualization-types-and-defaults":
-  version "0.0.0"
-  uid ""
-
 "@kbn/license-api-guard-plugin@link:x-pack/platform/plugins/private/license_api_guard":
   version "0.0.0"
   uid ""

@@ -7,9 +7,11 @@
 
 import { applyPaletteParams, type PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { LENS_HEATMAP_DEFAULT_PALETTE_NAME } from '@kbn/visualization-types-and-defaults';
+import {
+  type HeatmapVisualizationState,
+  LENS_HEATMAP_DEFAULT_PALETTE_NAME,
+} from '@kbn/visualizations-plugin/common';
 import { findMinMaxByColumnId } from '../../shared_components';
-import type { HeatmapVisualizationState, Palette } from './types';
 
 export function getSafePaletteParams(
   paletteService: PaletteRegistry,

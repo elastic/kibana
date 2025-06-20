@@ -25,7 +25,7 @@ import {
   type SeriesType,
   type XYState,
   visualizationTypes,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';

@@ -37,7 +37,7 @@ import {
   LENS_GAUGE_ID,
   OperationMetadata,
   UserMessage,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type { DatasourceLayers, FramePublicAPI, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';

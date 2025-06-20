@@ -21,7 +21,7 @@ import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { LENS_PARTITION_DEFAULT_PERCENT_DECIMALS } from '@kbn/visualizations-plugin/common';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { EmptySizeRatios, PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay, NumberDisplay } from '../../../common/constants';
@@ -274,7 +274,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
               {layer.numberDisplay === NumberDisplay.PERCENT && (
                 <EuiFormRow label=" " fullWidth display="columnCompressed">
                   <DecimalPlaceInput
-                    value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
+                    value={layer.percentDecimals ?? LENS_PARTITION_DEFAULT_PERCENT_DECIMALS}
                     setValue={onPercentDecimalsChange}
                   />
                 </EuiFormRow>

@@ -10,12 +10,9 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import {
-  LegendDisplay,
-  type PartitionChartProps,
-  type PartitionVisParams,
-} from '../types/expression_renderers';
-import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
+import { LENS_LEGEND_DISPLAY, PARTITION_CHART_TYPES } from '@kbn/visualizations-plugin/common';
+import type { PartitionChartProps, PartitionVisParams } from '../types/expression_renderers';
+import type { MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -58,8 +55,8 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
     legendDisplay: {
       types: ['string'],
       help: strings.getLegendDisplayArgHelp(),
-      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
-      default: LegendDisplay.HIDE,
+      options: [LENS_LEGEND_DISPLAY.SHOW, LENS_LEGEND_DISPLAY.HIDE, LENS_LEGEND_DISPLAY.DEFAULT],
+      default: LENS_LEGEND_DISPLAY.HIDE,
       strict: true,
     },
     legendPosition: {
@@ -178,7 +175,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: ChartTypes.MOSAIC,
+        visType: PARTITION_CHART_TYPES.MOSAIC,
         params: {
           listenOnChange: true,
         },

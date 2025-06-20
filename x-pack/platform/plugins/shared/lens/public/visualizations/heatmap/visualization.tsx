@@ -28,18 +28,18 @@ import {
   HeatmapLegendExpressionFunctionDefinition,
 } from '@kbn/expression-heatmap-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { OperationMetadata, Suggestion, UserMessage, Visualization } from '../../types';
-import type { HeatmapVisualizationState } from './types';
-import { getSuggestions } from './suggestions';
 import {
-  CHART_NAMES,
-  CHART_SHAPES,
-  DEFAULT_PALETTE_NAME,
-  GROUP_ID,
-  HEATMAP_GRID_FUNCTION,
-  LEGEND_FUNCTION,
+  HeatmapVisualizationState,
+  LENS_HEATMAP_CHART_NAMES,
+  LENS_HEATMAP_CHART_SHAPES,
+  LENS_HEATMAP_GROUP_ID,
   LENS_HEATMAP_ID,
-} from './constants';
+  OperationMetadata,
+  UserMessage,
+} from '@kbn/visualizations-plugin/common';
+import type { Suggestion, Visualization } from '../../types';
+import { getSuggestions } from './suggestions';
+import { HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
@@ -76,7 +76,7 @@ export const isCellValueSupported = (op: OperationMetadata) => {
 
 function getInitialState(): Omit<HeatmapVisualizationState, 'layerId' | 'layerType'> {
   return {
-    shape: CHART_SHAPES.HEATMAP,
+    shape: LENS_HEATMAP_CHART_SHAPES.HEATMAP,
     legend: {
       isVisible: true,
       position: Position.Right,
@@ -147,12 +147,12 @@ export const getHeatmapVisualization = ({
   switchVisualizationType: (visualizationTypeId, state) => {
     return {
       ...state,
-      shape: visualizationTypeId as typeof CHART_SHAPES.HEATMAP,
+      shape: visualizationTypeId as typeof LENS_HEATMAP_CHART_SHAPES.HEATMAP,
     };
   },
 
   getDescription(state) {
-    return CHART_NAMES.heatmap;
+    return LENS_HEATMAP_CHART_NAMES.heatmap;
   },
 
   initialize(addNewLayer, state, mainPalette) {
@@ -189,8 +189,8 @@ export const getHeatmapVisualization = ({
       groups: [
         {
           layerId: state.layerId,
-          groupId: GROUP_ID.X,
-          groupLabel: getAxisName(GROUP_ID.X),
+          groupId: LENS_HEATMAP_GROUP_ID.X,
+          groupLabel: getAxisName(LENS_HEATMAP_GROUP_ID.X),
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.xAccessor,
@@ -199,8 +199,8 @@ export const getHeatmapVisualization = ({
         },
         {
           layerId: state.layerId,
-          groupId: GROUP_ID.Y,
-          groupLabel: getAxisName(GROUP_ID.Y),
+          groupId: LENS_HEATMAP_GROUP_ID.Y,
+          groupLabel: getAxisName(LENS_HEATMAP_GROUP_ID.Y),
           accessors: state.yAccessor ? [{ columnId: state.yAccessor }] : [],
           filterOperations: filterOperationsAxis,
           supportsMoreColumns: !state.yAccessor,
@@ -210,7 +210,7 @@ export const getHeatmapVisualization = ({
         },
         {
           layerId: state.layerId,
-          groupId: GROUP_ID.CELL,
+          groupId: LENS_HEATMAP_GROUP_ID.CELL,
           groupLabel: i18n.translate('xpack.lens.heatmap.cellValueLabel', {
             defaultMessage: 'Cell value',
           }),
@@ -248,13 +248,13 @@ export const getHeatmapVisualization = ({
 
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
     const update: Partial<HeatmapVisualizationState> = {};
-    if (groupId === GROUP_ID.X) {
+    if (groupId === LENS_HEATMAP_GROUP_ID.X) {
       update.xAccessor = columnId;
     }
-    if (groupId === GROUP_ID.Y) {
+    if (groupId === LENS_HEATMAP_GROUP_ID.Y) {
       update.yAccessor = columnId;
     }
-    if (groupId === GROUP_ID.CELL) {
+    if (groupId === LENS_HEATMAP_GROUP_ID.CELL) {
       update.valueAccessor = columnId;
     }
     return {
@@ -352,9 +352,9 @@ export const getHeatmapVisualization = ({
     );
 
     const heatmapFn = buildExpressionFunction<HeatmapExpressionFunctionDefinition>('heatmap', {
-      xAccessor: state.xAccessor ?? '',
-      yAccessor: state.yAccessor ?? '',
-      valueAccessor: state.valueAccessor ?? '',
+      xAccessor: state.xAccessor,
+      yAccessor: state.yAccessor,
+      valueAccessor: state.valueAccessor,
       lastRangeIsRightOpen: state.palette?.params?.continuity
         ? ['above', 'all'].includes(state.palette.params.continuity)
         : true,
@@ -411,9 +411,9 @@ export const getHeatmapVisualization = ({
     );
 
     const heatmapFn = buildExpressionFunction<HeatmapExpressionFunctionDefinition>('heatmap', {
-      xAccessor: state.xAccessor ?? '',
-      yAccessor: state.yAccessor ?? '',
-      valueAccessor: state.valueAccessor ?? '',
+      xAccessor: state.xAccessor,
+      yAccessor: state.yAccessor,
+      valueAccessor: state.valueAccessor,
       legend: buildExpression([legendFn]),
       gridConfig: buildExpression([gridConfigFn]),
       palette: state.palette?.params
@@ -518,7 +518,7 @@ export const getHeatmapVisualization = ({
     if (state.xAccessor) {
       dimensions.push({
         id: state.xAccessor,
-        name: getAxisName(GROUP_ID.X),
+        name: getAxisName(LENS_HEATMAP_GROUP_ID.X),
         dimensionType: 'x',
       });
     }
@@ -526,7 +526,7 @@ export const getHeatmapVisualization = ({
     if (state.yAccessor) {
       dimensions.push({
         id: state.yAccessor,
-        name: getAxisName(GROUP_ID.Y),
+        name: getAxisName(LENS_HEATMAP_GROUP_ID.Y),
         dimensionType: 'y',
       });
     }

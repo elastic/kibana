@@ -44,11 +44,13 @@ import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import {
+  LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
+  PARTITION_VALUE_FORMATS,
+} from '@kbn/visualizations-plugin/common';
 import { consolidateMetricColumns } from '../../common/utils';
-import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   type BucketColumns,
-  ValueFormats,
   type PieContainerDimensions,
   type PartitionChartProps,
   type PartitionVisParams,
@@ -300,7 +302,9 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const percentFormatter = services.fieldFormats.deserialize({
     id: 'percent',
     params: {
-      pattern: `0,0.[${'0'.repeat(visParams.labels.percentDecimals ?? DEFAULT_PERCENT_DECIMALS)}]%`,
+      pattern: `0,0.[${'0'.repeat(
+        visParams.labels.percentDecimals ?? LENS_PARTITION_DEFAULT_PERCENT_DECIMALS
+      )}]%`,
     },
   });
 
@@ -609,10 +613,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 percentFormatter={(d: number) => percentFormatter.convert(d / 100)}
                 valueGetter={
                   !visParams.labels.show ||
-                  visParams.labels.valuesFormat === ValueFormats.VALUE ||
+                  visParams.labels.valuesFormat === PARTITION_VALUE_FORMATS.VALUE ||
                   !visParams.labels.values
                     ? undefined
-                    : ValueFormats.PERCENT
+                    : PARTITION_VALUE_FORMATS.PERCENT
                 }
                 valueFormatter={(d: number) =>
                   !visParams.labels.show || !visParams.labels.values

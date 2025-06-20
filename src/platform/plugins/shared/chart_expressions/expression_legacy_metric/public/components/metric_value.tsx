@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { LegacyMetricStyle } from '@kbn/visualization-types-and-defaults';
+import type { LegacyMetricStyle } from '@kbn/visualizations-plugin/common';
 import type { MetricOptions, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {

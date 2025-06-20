@@ -7,29 +7,34 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import {
+  CategoryDisplay,
+  PARTITION_CHART_TYPES,
+  LegendDisplay,
+  PartitionChartType,
+  LensPartitionVisualizationState,
+  NumberDisplay,
+  layerTypes,
+} from '@kbn/visualizations-plugin/common';
 import type {
   SuggestionRequest,
   TableSuggestionColumn,
   VisualizationSuggestion,
 } from '../../types';
-import { PieVisualizationState } from '../../../common/types';
-import {
-  CategoryDisplay,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from '../../../common/constants';
+
 import { isPartitionShape } from '../../../common/visualizations';
-import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { layerTypes } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
 }
 
-function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+function shouldReject({
+  table,
+  keptLayerIds,
+  state,
+}: SuggestionRequest<LensPartitionVisualizationState>) {
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
@@ -39,8 +44,8 @@ function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisua
 }
 
 function getNewShape(
-  subVisualizationId?: PieVisualizationState['shape'],
-  currentShape?: PieVisualizationState['shape']
+  subVisualizationId?: LensPartitionVisualizationState['shape'],
+  currentShape?: LensPartitionVisualizationState['shape']
 ) {
   if (subVisualizationId) {
     return subVisualizationId;
@@ -50,14 +55,14 @@ function getNewShape(
     return currentShape;
   }
 
-  return PieChartTypes.PIE;
+  return PARTITION_CHART_TYPES.PIE;
 }
 
-function hasCustomSuggestionsExists(shape: PieChartType | string | undefined) {
-  const shapes: Array<PieChartType | string> = [
-    PieChartTypes.TREEMAP,
-    PieChartTypes.WAFFLE,
-    PieChartTypes.MOSAIC,
+function hasCustomSuggestionsExists(shape: PartitionChartType | string | undefined) {
+  const shapes: Array<PartitionChartType | string> = [
+    PARTITION_CHART_TYPES.TREEMAP,
+    PARTITION_CHART_TYPES.WAFFLE,
+    PARTITION_CHART_TYPES.MOSAIC,
   ];
   return shape ? shapes.includes(shape) : false;
 }
@@ -72,8 +77,8 @@ export function suggestions({
   keptLayerIds,
   mainPalette,
   subVisualizationId,
-}: SuggestionRequest<PieVisualizationState>): Array<
-  VisualizationSuggestion<PieVisualizationState>
+}: SuggestionRequest<LensPartitionVisualizationState>): Array<
+  VisualizationSuggestion<LensPartitionVisualizationState>
 > {
   if (shouldReject({ table, state, keptLayerIds })) {
     return [];
@@ -110,7 +115,7 @@ export function suggestions({
 
   const metricColumnIds = metrics.map(({ columnId }) => columnId);
 
-  const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
+  const results: Array<VisualizationSuggestion<LensPartitionVisualizationState>> = [];
 
   // Histograms are not good for pi. But we should not hide suggestion on switching between partition charts.
   const shouldHideSuggestion =
@@ -121,10 +126,10 @@ export function suggestions({
     !hasCustomSuggestionsExists(subVisualizationId)
   ) {
     const newShape = getNewShape(
-      subVisualizationId as PieVisualizationState['shape'],
+      subVisualizationId as LensPartitionVisualizationState['shape'],
       state?.shape
     );
-    const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
+    const baseSuggestion: VisualizationSuggestion<LensPartitionVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: '{chartName}',
         values: { chartName: PartitionChartsMeta[newShape].label },
@@ -181,7 +186,9 @@ export function suggestions({
         values: {
           chartName:
             PartitionChartsMeta[
-              newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE
+              newShape === PARTITION_CHART_TYPES.PIE
+                ? PARTITION_CHART_TYPES.DONUT
+                : PARTITION_CHART_TYPES.PIE
             ].label,
         },
         description: 'chartName is already translated',
@@ -189,7 +196,10 @@ export function suggestions({
       score: 0.1,
       state: {
         ...baseSuggestion.state,
-        shape: newShape === PieChartTypes.PIE ? PieChartTypes.DONUT : PieChartTypes.PIE,
+        shape:
+          newShape === PARTITION_CHART_TYPES.PIE
+            ? PARTITION_CHART_TYPES.DONUT
+            : PARTITION_CHART_TYPES.PIE,
       },
       hide: true,
     });
@@ -197,7 +207,7 @@ export function suggestions({
 
   if (
     groups.length <= PartitionChartsMeta.treemap.maxBuckets &&
-    (!subVisualizationId || subVisualizationId === PieChartTypes.TREEMAP)
+    (!subVisualizationId || subVisualizationId === PARTITION_CHART_TYPES.TREEMAP)
   ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.treemapSuggestionLabel', {
@@ -205,9 +215,9 @@ export function suggestions({
       }),
       // Use a higher score when currently active, to prevent chart type switching
       // on the user unintentionally
-      score: state?.shape === PieChartTypes.TREEMAP ? 0.7 : 0.5,
+      score: state?.shape === PARTITION_CHART_TYPES.TREEMAP ? 0.7 : 0.5,
       state: {
-        shape: PieChartTypes.TREEMAP,
+        shape: PARTITION_CHART_TYPES.TREEMAP,
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : state?.palette,
         layers: [
           state?.layers[0]
@@ -246,15 +256,15 @@ export function suggestions({
 
   if (
     groups.length <= PartitionChartsMeta.mosaic.maxBuckets &&
-    (!subVisualizationId || subVisualizationId === PieChartTypes.MOSAIC)
+    (!subVisualizationId || subVisualizationId === PARTITION_CHART_TYPES.MOSAIC)
   ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
         defaultMessage: 'Mosaic',
       }),
-      score: state?.shape === PieChartTypes.MOSAIC ? 0.7 : 0.5,
+      score: state?.shape === PARTITION_CHART_TYPES.MOSAIC ? 0.7 : 0.5,
       state: {
-        shape: PieChartTypes.MOSAIC,
+        shape: PARTITION_CHART_TYPES.MOSAIC,
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : state?.palette,
         layers: [
           state?.layers[0]
@@ -294,15 +304,15 @@ export function suggestions({
 
   if (
     groups.length <= PartitionChartsMeta.waffle.maxBuckets &&
-    (!subVisualizationId || subVisualizationId === PieChartTypes.WAFFLE)
+    (!subVisualizationId || subVisualizationId === PARTITION_CHART_TYPES.WAFFLE)
   ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
         defaultMessage: 'Waffle',
       }),
-      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.4,
+      score: state?.shape === PARTITION_CHART_TYPES.WAFFLE ? 0.7 : 0.4,
       state: {
-        shape: PieChartTypes.WAFFLE,
+        shape: PARTITION_CHART_TYPES.WAFFLE,
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : state?.palette,
         layers: [
           state?.layers[0]

@@ -11,44 +11,16 @@ import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } fro
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
-import {
-  CategoryDisplayTypes,
-  PartitionChartTypes,
-  NumberDisplayTypes,
-  LegendDisplayTypes,
-  FillTypes,
-  SeriesTypes,
-  YAxisModes,
-  XYCurveTypes,
-  LayerTypes,
-  GaugeShapes,
-  GaugeTicksPositions,
-  GaugeLabelMajorModes,
-  GaugeColorModes,
-  GaugeCentralMajorModes,
-  CollapseFunctions,
-} from '../constants';
+import { type XYLegendValue } from '../../constants';
+import { FillTypes, SeriesTypes, YAxisModes, XYCurveTypes } from '../constants';
 import { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
-
-export type CollapseFunction = (typeof CollapseFunctions)[number];
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type XYCurveType = $Values<typeof XYCurveTypes>;
-export type PartitionChartType = $Values<typeof PartitionChartTypes>;
-export type CategoryDisplayType = $Values<typeof CategoryDisplayTypes>;
-export type NumberDisplayType = $Values<typeof NumberDisplayTypes>;
-export type LegendDisplayType = $Values<typeof LegendDisplayTypes>;
-export type LayerType = $Values<typeof LayerTypes>;
-export type GaugeColorMode = $Values<typeof GaugeColorModes>;
-export type GaugeShape = $Values<typeof GaugeShapes>;
-export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
-export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
-export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
@@ -229,7 +201,7 @@ export interface MetricVisConfiguration {
 
 export interface PartitionLayerState {
   layerId: string;
-  layerType: LayerType;
+  layerType: LensLayerType;
   metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
@@ -255,13 +227,6 @@ export interface PartitionVisConfiguration {
 
 export const LENS_GAUGE_ID = 'lnsGauge';
 
-export const GROUP_ID = {
-  METRIC: 'metric',
-  MIN: 'min',
-  MAX: 'max',
-  GOAL: 'goal',
-} as const;
-
 interface GaugeState {
   metricAccessor?: string;
   minAccessor?: string;
@@ -284,7 +249,7 @@ interface GaugeState {
 
 export type GaugeVisConfiguration = GaugeState & {
   layerId: string;
-  layerType: typeof LayerTypes.DATA;
+  layerType: typeof LENS_LAYER_TYPES.DATA;
 };
 
 export interface HeatmapLegendConfig {
@@ -326,7 +291,7 @@ export interface HeatmapArguments {
 
 export type HeatmapLayerState = HeatmapArguments & {
   layerId: string;
-  layerType: LayerType;
+  layerType: LensLayerType;
   valueAccessor?: string;
   xAccessor?: string;
   yAccessor?: string;
@@ -337,12 +302,12 @@ export type Palette = PaletteOutput<CustomPaletteParams> & { accessor: string };
 
 export type HeatmapConfiguration = HeatmapLayerState & {
   // need to store the current accessor to reset the color stops at accessor change
-  palette?: Palette;
+  palette?: HeatmapPalette;
 };
 
 export interface TagcloudVisConfiguration {
   layerId: string;
-  layerType: LayerType;
+  layerType: LensLayerType;
   valueAccessor: string;
   tagAccessor: string;
   maxFontSize: number;

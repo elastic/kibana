@@ -46,10 +46,3 @@ export type {
   Dimension,
   Dimensions,
 } from './types/expression_renderers';
-
-export {
-  ValueFormats,
-  LabelPositions,
-  EmptySizeRatios,
-  LegendDisplay,
-} from './types/expression_renderers';

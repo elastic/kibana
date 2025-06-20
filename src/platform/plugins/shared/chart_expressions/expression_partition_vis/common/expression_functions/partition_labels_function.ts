@@ -8,14 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
-import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
+import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin/common';
 import {
-  ExpressionValuePartitionLabels,
-  LabelPositions,
-  PartitionLabelsArguments,
-  ValueFormats,
-} from '../types';
+  PARTITION_LABEL_POSITIONS,
+  PARTITION_VALUE_FORMATS,
+} from '@kbn/visualizations-plugin/common';
+import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
+import type { ExpressionValuePartitionLabels, PartitionLabelsArguments } from '../types';
 
 export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
   typeof PARTITION_LABELS_FUNCTION,
@@ -42,7 +41,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.position.help', {
         defaultMessage: 'Defines the label position',
       }),
-      options: [LabelPositions.DEFAULT, LabelPositions.INSIDE],
+      options: [PARTITION_LABEL_POSITIONS.DEFAULT, PARTITION_LABEL_POSITIONS.INSIDE],
     },
     values: {
       types: ['boolean'],
@@ -88,7 +87,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
           defaultMessage: 'Defines the format of the values',
         }
       ),
-      options: [ValueFormats.PERCENT, ValueFormats.VALUE],
+      options: [PARTITION_VALUE_FORMATS.PERCENT, PARTITION_VALUE_FORMATS.VALUE],
     },
     colorOverrides: {
       types: ['string'],

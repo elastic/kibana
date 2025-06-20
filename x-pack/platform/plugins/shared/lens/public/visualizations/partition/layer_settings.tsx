@@ -8,17 +8,21 @@
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { PieChartTypes } from '../../../common/constants';
-import { PieVisualizationState } from '../..';
+import {
+  PARTITION_CHART_TYPES,
+  type LensPartitionVisualizationState,
+} from '@kbn/visualizations-plugin/common';
 import { VisualizationLayerSettingsProps } from '../../types';
 
 export function LayerSettings(
-  props: VisualizationLayerSettingsProps<PieVisualizationState> & { section: 'data' | 'appearance' }
+  props: VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
+    section: 'data' | 'appearance';
+  }
 ) {
   if (props.section === 'appearance') {
     return null;
   }
-  if (props.state.shape === PieChartTypes.MOSAIC) {
+  if (props.state.shape === PARTITION_CHART_TYPES.MOSAIC) {
     return null;
   }
 

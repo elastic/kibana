@@ -13,7 +13,7 @@ import type {
   LegacyMetricAlignment,
   LegacyMetricLabelsConfig,
   LegacyMetricStyle,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 
 export const visType = 'metric';
 

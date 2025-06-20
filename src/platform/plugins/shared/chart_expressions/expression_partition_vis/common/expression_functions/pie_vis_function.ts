@@ -11,12 +11,12 @@ import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import {
-  EmptySizeRatios,
-  LegendDisplay,
-  type PartitionChartProps,
-  type PartitionVisParams,
-} from '../types/expression_renderers';
-import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
+  LENS_LEGEND_DISPLAY,
+  PARTITION_CHART_TYPES,
+  PARTITION_EMPTY_SIZE_RADIUS,
+} from '@kbn/visualizations-plugin/common';
+import { type PartitionChartProps, type PartitionVisParams } from '../types/expression_renderers';
+import { PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -64,8 +64,8 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     legendDisplay: {
       types: ['string'],
       help: strings.getLegendDisplayArgHelp(),
-      options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
-      default: LegendDisplay.HIDE,
+      options: [LENS_LEGEND_DISPLAY.SHOW, LENS_LEGEND_DISPLAY.HIDE, LENS_LEGEND_DISPLAY.DEFAULT],
+      default: LENS_LEGEND_DISPLAY.HIDE,
       strict: true,
     },
     legendPosition: {
@@ -120,7 +120,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     emptySizeRatio: {
       types: ['number'],
       help: strings.getEmptySizeRatioArgHelp(),
-      default: EmptySizeRatios.SMALL,
+      default: PARTITION_EMPTY_SIZE_RADIUS.SMALL,
     },
     palette: {
       types: ['palette', 'system_palette'],
@@ -205,7 +205,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
+        visType: args.isDonut ? PARTITION_CHART_TYPES.DONUT : PARTITION_CHART_TYPES.PIE,
         canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
         params: {
           listenOnChange: true,

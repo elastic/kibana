@@ -24,15 +24,19 @@ import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-compon
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import {
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+  OperationMetadata,
+  UserMessage,
+  VisualizationInfo,
+} from '@kbn/visualizations-plugin/common';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
-  OperationMetadata,
   VisualizationDimensionGroupConfig,
   Suggestion,
   VisualizeEditorContext,
-  VisualizationInfo,
-  UserMessage,
 } from '../../types';
 import {
   getColumnToLabelMap,
@@ -40,7 +44,6 @@ import {
   toExpression,
   toPreviewExpression,
 } from './to_expression';
-import { PieLayerState, PieVisualizationState } from '../../../common/types';
 import {
   CategoryDisplay,
   LegendDisplay,
@@ -67,7 +70,10 @@ const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
 });
 
-function newLayerState(layerId: string, colorMapping?: ColorMapping.Config): PieLayerState {
+function newLayerState(
+  layerId: string,
+  colorMapping?: ColorMapping.Config
+): LensPartitionLayerState {
   return {
     layerId,
     primaryGroups: [],
@@ -92,10 +98,10 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
-export const isCollapsed = (columnId: string, layer: PieLayerState) =>
+export const isCollapsed = (columnId: string, layer: LensPartitionLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
-export const hasNonCollapsedSliceBy = (l: PieLayerState) => {
+export const hasNonCollapsedSliceBy = (l: LensPartitionLayerState) => {
   const sliceByLength = l.primaryGroups.length;
   const collapsedGroupsLength =
     (l.collapseFns && Object.values(l.collapseFns).filter(Boolean).length) ?? 0;
@@ -109,11 +115,11 @@ export const getDefaultColorForMultiMetricDimension = ({
   datasource,
   palette,
 }: {
-  layer: PieLayerState;
+  layer: LensPartitionLayerState;
   columnId: string;
   paletteService: PaletteRegistry;
   datasource: DatasourcePublicAPI | undefined;
-  palette?: PieVisualizationState['palette'];
+  palette?: LensPartitionVisualizationState['palette'];
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
   const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
@@ -134,7 +140,7 @@ export const getPieVisualization = ({
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
   formatFactory: FormatFactory;
-}): Visualization<PieVisualizationState> => ({
+}): Visualization<LensPartitionVisualizationState> => ({
   id: 'lnsPie',
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -160,7 +166,7 @@ export const getPieVisualization = ({
 
   switchVisualizationType: (visualizationTypeId, state) => ({
     ...state,
-    shape: visualizationTypeId as PieVisualizationState['shape'],
+    shape: visualizationTypeId as LensPartitionVisualizationState['shape'],
   }),
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
@@ -564,12 +570,14 @@ export const getPieVisualization = ({
       return;
     }
     const suggestionByShape = (
-      props.suggestions as Array<Suggestion<PieVisualizationState, FormBasedPersistedState>>
+      props.suggestions as Array<
+        Suggestion<LensPartitionVisualizationState, FormBasedPersistedState>
+      >
     ).find((suggestion) => suggestion.visualizationState.shape === context.configuration.shape);
     if (!suggestionByShape) {
       return;
     }
-    const suggestion: Suggestion<PieVisualizationState, FormBasedPersistedState> = {
+    const suggestion: Suggestion<LensPartitionVisualizationState, FormBasedPersistedState> = {
       ...suggestionByShape,
       visualizationState: {
         ...suggestionByShape.visualizationState,

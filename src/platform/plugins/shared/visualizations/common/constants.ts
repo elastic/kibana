@@ -79,5 +79,3 @@ export type XYLegendValue = Extract<
   | 'difference'
   | 'differencePercent'
 >;
-
-export type PartitionLegendValue = Extract<LegendValue, 'value' | 'percent'>;

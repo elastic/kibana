@@ -60,7 +60,7 @@ import {
   UserMessagesGetter,
   VisualizationInfo,
   VisualizationType,
-} from '@kbn/visualization-types-and-defaults';
+} from '@kbn/visualizations-plugin/common';
 import type { DateRange, LayerType } from '../common/types';
 import type {
   LensSortActionData,

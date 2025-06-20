@@ -9,7 +9,7 @@
 
 import type { PartitionProps } from '@elastic/charts';
 import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueRender,
@@ -17,6 +17,7 @@ import {
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
+import type { LabelPositions, ValueFormats } from '@kbn/visualizations-plugin/common';
 import {
   PARTITION_LABELS_VALUE,
   PIE_VIS_EXPRESSION_NAME,
@@ -28,8 +29,6 @@ import {
 import {
   type PartitionChartProps,
   type PieVisConfig,
-  LabelPositions,
-  ValueFormats,
   type TreemapVisConfig,
   type MosaicVisConfig,
   type WaffleVisConfig,
@@ -48,20 +47,14 @@ export interface PartitionLabelsArguments {
   last_level?: boolean;
 }
 
+export type PartitionLabelsResult = Omit<PartitionLabelsArguments, 'colorOverrides'> & {
+  // The colorOverrides entres as stringified JSON object and it get parsed as result
+  colorOverrides: Record<string, string>;
+};
+
 export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
   typeof PARTITION_LABELS_VALUE,
-  {
-    show: boolean;
-    position: LabelPositions;
-    values: boolean;
-    valuesFormat: ValueFormats;
-    percentDecimals: number;
-    colorOverrides: Record<string, string>;
-    /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
-    truncate?: number | null;
-    /** @deprecated This field is deprecated and going to be removed in the futher release versions. */
-    last_level?: boolean;
-  }
+  PartitionLabelsResult
 >;
 
 export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -95,14 +88,6 @@ export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   ExpressionValueRender<PartitionChartProps>,
   ExecutionContext<DefaultInspectorAdapters>
 >;
-
-export enum ChartTypes {
-  PIE = 'pie',
-  DONUT = 'donut',
-  TREEMAP = 'treemap',
-  MOSAIC = 'mosaic',
-  WAFFLE = 'waffle',
-}
 
 export type PartitionLabelsExpressionFunctionDefinition = ExpressionFunctionDefinition<
   typeof PARTITION_LABELS_FUNCTION,

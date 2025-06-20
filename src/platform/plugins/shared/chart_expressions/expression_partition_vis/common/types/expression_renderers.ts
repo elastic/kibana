@@ -18,16 +18,16 @@ import type {
 } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
+  PartitionChartType,
+  EmptySizeRadius as EmptySizeRatios,
+  LabelPositions,
+  ValueFormats,
+  LegendDisplayType,
+} from '@kbn/visualizations-plugin/common';
+import {
   type AllowedPartitionOverrides,
-  ChartTypes,
   type ExpressionValuePartitionLabels,
 } from './expression_functions';
-
-export enum EmptySizeRatios {
-  SMALL = 0.3,
-  MEDIUM = 0.54,
-  LARGE = 0.7,
-}
 
 export interface Dimension {
   accessor: number;
@@ -59,7 +59,7 @@ export interface LabelsParams {
 
 interface VisCommonParams {
   addTooltip: boolean;
-  legendDisplay: LegendDisplay;
+  legendDisplay: LegendDisplayType;
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
@@ -119,27 +119,11 @@ export interface WaffleVisConfig extends Omit<VisCommonConfig, 'buckets'> {
 
 export interface PartitionChartProps {
   visData: Datatable;
-  visType: ChartTypes;
+  visType: PartitionChartType;
   visConfig: PartitionVisParams;
   syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
-}
-
-export enum LabelPositions {
-  INSIDE = 'inside',
-  DEFAULT = 'default',
-}
-
-export enum ValueFormats {
-  PERCENT = 'percent',
-  VALUE = 'value',
-}
-
-export enum LegendDisplay {
-  SHOW = 'show',
-  HIDE = 'hide',
-  DEFAULT = 'default',
 }
 
 export interface BucketColumns extends DatatableColumn {
