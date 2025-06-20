@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import {
   DEFAULT_LOG_VIEW,
   getLogsLocatorFromUrlService,
@@ -20,8 +18,9 @@ import {
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import moment from 'moment';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -37,12 +36,26 @@ export const Logs = () => {
   const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsContext();
 
-  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
+  const { reference: logViewReference } = logs ?? {};
 
-  const { services } = useKibanaContextForPlugin();
-  const logsLocator = getLogsLocatorFromUrlService(services.share.url)!;
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+      share: { url },
+    },
+  } = useKibanaContextForPlugin();
+  const logsLocator = getLogsLocatorFromUrlService(url)!;
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
+
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
 
   const currentTimestamp = getDateRangeInTimestamp().to;
   const state = useIntersectingState(ref, {
@@ -132,34 +145,20 @@ export const Logs = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {logViewLoading || !logViewReference ? (
-          <InfraLoadingPanel
-            width="100%"
-            height="60vh"
-            text={
-              <FormattedMessage
-                id="xpack.infra.hostsViewPage.tabs.logs.loadingEntriesLabel"
-                defaultMessage="Loading entries"
-              />
-            }
-          />
-        ) : (
-          <LogStream
-            logView={logView}
-            startTimestamp={state.startTimestamp}
-            endTimestamp={state.currentTimestamp}
-            startDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.from : undefined
-            }
-            endDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.to : undefined
-            }
+        {logSources.value ? (
+          <LazySavedSearchComponent
+            dependencies={{ embeddable, searchSource, dataViews }}
+            index={logSources.value}
+            timeRange={dateRange}
             query={filter}
-            height="60vh"
-            showFlyoutAction
-            isStreaming={state.autoRefresh && !state.autoRefresh.isPaused}
+            height="68vh"
+            displayOptions={{
+              solutionNavIdOverride: 'oblt',
+              enableDocumentViewer: false,
+              enableFilters: false,
+            }}
           />
-        )}
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
