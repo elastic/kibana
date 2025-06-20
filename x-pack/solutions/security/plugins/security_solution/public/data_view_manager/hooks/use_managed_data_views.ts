@@ -12,16 +12,16 @@ import { useKibana } from '../../common/lib/kibana';
 import { sharedStateSelector } from '../redux/selectors';
 
 export const useManagedDataViews = () => {
-  const { dataViews, defaultDataViewId } = useSelector(sharedStateSelector);
+  const { dataViews, defaultDataViewId, alertDataViewId } = useSelector(sharedStateSelector);
   const {
     services: { fieldFormats },
   } = useKibana();
 
   return useMemo(() => {
     const managed = dataViews
-      .filter((dv) => dv.id === defaultDataViewId)
+      .filter((dv) => dv.id === defaultDataViewId || dv.id === alertDataViewId)
       .map((spec) => new DataView({ spec, fieldFormats }));
 
     return managed;
-  }, [dataViews, defaultDataViewId, fieldFormats]);
+  }, [dataViews, defaultDataViewId, alertDataViewId, fieldFormats]);
 };

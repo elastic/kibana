@@ -11,11 +11,11 @@ import { useSelector } from 'react-redux';
 import { sharedStateSelector } from '../redux/selectors';
 
 export const useSavedDataViews = () => {
-  const { dataViews, defaultDataViewId } = useSelector(sharedStateSelector);
+  const { dataViews, defaultDataViewId, alertDataViewId } = useSelector(sharedStateSelector);
 
   return useMemo(() => {
     const savedViewsAsListItems: DataViewListItem[] = dataViews
-      .filter((dv) => dv.id !== defaultDataViewId)
+      .filter((dv) => dv.id !== defaultDataViewId && dv.id !== alertDataViewId)
       .map((spec) => ({
         id: spec.id ?? '',
         title: spec.title ?? '',
@@ -23,5 +23,5 @@ export const useSavedDataViews = () => {
       }));
 
     return savedViewsAsListItems;
-  }, [dataViews, defaultDataViewId]);
+  }, [dataViews, defaultDataViewId, alertDataViewId]);
 };

@@ -6,6 +6,7 @@
  */
 
 export const DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID = 'security-solution-default';
+export const DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID = 'security-solution-alert';
 
 export { SourcererScopeName as DataViewManagerScopeName } from '../sourcerer/store/model';
 

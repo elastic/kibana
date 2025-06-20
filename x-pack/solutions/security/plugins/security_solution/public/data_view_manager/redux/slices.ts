@@ -28,6 +28,7 @@ export const initialSharedState: SharedDataViewSelectionState = {
   status: 'pristine',
   signalIndex: null,
   defaultDataViewId: null,
+  alertDataViewId: null,
 };
 
 export const sharedDataViewManagerSlice = createSlice({
@@ -43,6 +44,9 @@ export const sharedDataViewManagerSlice = createSlice({
     },
     setDefaultDataViewId: (state, action: PayloadAction<string>) => {
       state.defaultDataViewId = action.payload;
+    },
+    setAlertDataViewId: (state, action: PayloadAction<string>) => {
+      state.alertDataViewId = action.payload;
     },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();
