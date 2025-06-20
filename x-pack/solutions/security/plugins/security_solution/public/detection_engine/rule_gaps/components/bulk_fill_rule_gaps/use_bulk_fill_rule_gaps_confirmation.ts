@@ -11,7 +11,8 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import type { TimeRange } from '../../types';
 
 /**
- * Hook that controls manual rule gaps filling confirmation modal window and its content
+ * Hook that controls rule gaps filling confirmation modal window and its content
+``
  */
 export const useBulkFillRuleGapsConfirmation = () => {
   const [isBulkFillRuleGapsConfirmationVisible, showModal, hideModal] = useBoolState();
