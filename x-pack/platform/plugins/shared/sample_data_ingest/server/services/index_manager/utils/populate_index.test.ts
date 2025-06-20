@@ -8,12 +8,9 @@
 import { times } from 'lodash';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
-import { internalElserInferenceId } from '../../../../common/consts';
-import type { ZipArchive } from '../utils/zip_archive';
+import { internalElserInferenceId } from '../../../../common';
+import type { ZipArchive } from '../../types';
 import { populateIndex } from './populate_index';
-
-const LEGACY_SEMANTIC_TEXT_VERSION = '1.0.0';
 
 const createMockArchive = (entries: Record<string, string>): ZipArchive => {
   return {
@@ -47,7 +44,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
-      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
+      legacySemanticText: false,
       archive,
       log,
       esClient,
@@ -63,7 +60,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
-      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
+      legacySemanticText: false,
       archive,
       log,
       esClient,
@@ -97,7 +94,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
-      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
+      legacySemanticText: false,
       archive,
       log,
       esClient,
@@ -131,7 +128,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
-      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
+      legacySemanticText: true,
       archive,
       log,
       esClient,

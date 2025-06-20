@@ -8,7 +8,6 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { InstallationService } from './installation_service';
 import { STATUS_API_PATH, INSTALL_API_PATH } from '../../../common';
-import expect from '@kbn/expect';
 
 describe('InstallationService', () => {
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -35,23 +34,24 @@ describe('InstallationService', () => {
   });
   describe('#install', () => {
     beforeEach(() => {
-      http.post.mockResolvedValue({ installed: true });
+      http.post.mockResolvedValue({ status: 'installed' });
     });
 
     it('calls the endpoint with the right parameters', async () => {
       await service.install();
+
       expect(http.post).toHaveBeenCalledTimes(1);
       expect(http.post).toHaveBeenCalledWith(INSTALL_API_PATH);
     });
     it('returns the value from the server', async () => {
-      const expected = { installed: true };
+      const expected = { status: 'installed' };
       http.post.mockResolvedValue(expected);
 
       const response = await service.install();
       expect(response).toEqual(expected);
     });
     it('throws when the server returns installed: false', async () => {
-      const expected = { installed: false };
+      const expected = { status: false };
       http.post.mockResolvedValue(expected);
 
       await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(

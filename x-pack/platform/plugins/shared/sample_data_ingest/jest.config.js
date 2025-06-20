@@ -7,16 +7,16 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../..',
+  rootDir: '../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/plugins/shared/data_ingester/public',
-    '<rootDir>/x-pack/platform/plugins/shared/data_ingester/server',
-    '<rootDir>/x-pack/platform/plugins/shared/date_ingester/common',
+    '<rootDir>/x-pack/platform/plugins/shared/sample_data_ingest/public',
+    '<rootDir>/x-pack/platform/plugins/shared/sample_data_ingest/server',
+    '<rootDir>/x-pack/platform/plugins/shared/sample_data_ingest/common',
   ],
   setupFiles: [],
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/data_ingester/{public,server,common}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/sample_data_ingest/{public,server,common}/**/*.{js,ts,tsx}',
   ],
 
   coverageReporters: ['html'],

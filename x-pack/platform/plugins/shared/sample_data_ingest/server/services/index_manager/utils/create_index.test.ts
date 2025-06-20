@@ -9,11 +9,8 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import { createIndex } from './create_index';
-import { internalElserInferenceId } from '../../../../common/consts';
-
-const LEGACY_SEMANTIC_TEXT_VERSION = '1.0.0';
+import { internalElserInferenceId } from '../../../../common';
 
 describe('createIndex', () => {
   let log: MockedLogger;
@@ -33,7 +30,7 @@ describe('createIndex', () => {
     await createIndex({
       indexName,
       mappings,
-      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
+      legacySemanticText: false,
       log,
       esClient,
     });
@@ -59,7 +56,7 @@ describe('createIndex', () => {
     await createIndex({
       indexName,
       mappings,
-      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
+      legacySemanticText: true,
       log,
       esClient,
     });
@@ -92,7 +89,7 @@ describe('createIndex', () => {
     await createIndex({
       indexName: '.some-index',
       mappings,
-      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
+      legacySemanticText: false,
       log,
       esClient,
     });

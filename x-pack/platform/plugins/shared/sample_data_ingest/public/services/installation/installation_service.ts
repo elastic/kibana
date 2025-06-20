@@ -6,8 +6,12 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { StatusResponse, InstallResponse } from '../../../common';
-import { STATUS_API_PATH, INSTALL_API_PATH } from '../../../common';
+import {
+  STATUS_API_PATH,
+  INSTALL_API_PATH,
+  type StatusResponse,
+  type InstallResponse,
+} from '../../../common';
 
 export class InstallationService {
   private readonly http: HttpSetup;

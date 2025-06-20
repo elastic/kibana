@@ -7,7 +7,7 @@
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ArtifactManifest } from '@kbn/product-doc-common';
-import type { ZipArchive } from './zip_archive';
+import type { ZipArchive } from '../../types';
 import { loadManifestFile, loadMappingFile } from './archive_accessors';
 
 const createMockArchive = (entries: Record<string, string>): ZipArchive => {

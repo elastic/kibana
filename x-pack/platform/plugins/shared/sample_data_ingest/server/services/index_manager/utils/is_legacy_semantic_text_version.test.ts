@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isLegacySemanticTextVersion } from './manifest_versions';
+import { isLegacySemanticTextVersion } from './is_legacy_semantic_text_version';
 
 describe('isLegacySemanticTextVersion', () => {
   it('returns true for version 1.0.0', () => {
