@@ -19,6 +19,7 @@ export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
   handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
+    console.log('GET ALERTING');
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
     const statusRule = defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE);
     const tlsRule = defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE);

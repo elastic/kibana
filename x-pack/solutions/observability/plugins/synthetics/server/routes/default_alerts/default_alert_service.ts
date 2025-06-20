@@ -47,6 +47,7 @@ export class DefaultAlertService {
   }
 
   async setupDefaultAlerts(spaceId: string) {
+    console.log('SETUP DEFAULT ALERTS WITH ', spaceId);
     this.settings = await this.getSettings();
 
     const [statusRule, tlsRule] = await Promise.allSettled([
@@ -78,8 +79,10 @@ export class DefaultAlertService {
   setupStatusRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
+      console.log('I NOT GONNA CREATE CAUSE DISABLED');
       return;
     }
+    console.log('CALLING CREATE DEFAULT RULE FROM SETUP STATUS RULE');
     return this.createDefaultRuleIfNotExist(
       SYNTHETICS_STATUS_RULE,
       `Synthetics status internal rule`,
@@ -161,15 +164,16 @@ export class DefaultAlertService {
         actions: [...actionsFromRules, ...systemActions],
         ruleTypeId: newAlert.alertTypeId,
       };
+      console.log('default rule created', defaultRule);
     } catch (error) {
       if (error.message && !error.message.includes('document already exists')) {
         this.server.logger.error(`Error creating default alert for ${ruleType}: ${error.message}`);
         throw error;
+      } else {
+        this.server.logger.error('Encountered error creating default rule', error.message);
       }
     }
-
     if (defaultRule) return defaultRule;
-
     /**
      * If `defaultRule` is falsy, it means the rule already exists and the
      * alerting API rejected the create request.
@@ -178,12 +182,55 @@ export class DefaultAlertService {
      * if there was an exception in the create request unrelated to the rule already existing,
      * but we assume that the rule exists if we reach this point.
      */
-    return this.getExistingAlert(ruleType);
+    const t = await this.getExistingAlert(ruleType);
+    console.log('trying to get existing alert', t);
+    if (t) return t;
+    try {
+      console.log('GOING FOR ROUND NUMBER 2!!!!!!!!!!!!!');
+      // create the rule with hardcoded ID (we only ever want one of these)
+      // the request will fail if the rule already exists
+      const {
+        actions: actionsFromRules = [],
+        systemActions = [],
+        ...newAlert
+      } = await rulesClient.create({
+        data: {
+          actions,
+          params: {},
+          consumer: 'uptime',
+          alertTypeId: ruleType,
+          schedule: { interval },
+          tags: ['SYNTHETICS_DEFAULT_ALERT'],
+          name,
+          enabled: true,
+          throttle: null,
+        },
+        options: {
+          id: `SYNTHETICS_DEFAULT_ALERT-${ruleType}-${spaceId}`,
+        },
+      });
+      defaultRule = {
+        ...newAlert,
+        actions: [...actionsFromRules, ...systemActions],
+        ruleTypeId: newAlert.alertTypeId,
+      };
+      console.log('default rule created', defaultRule);
+    } catch (error) {
+      if (error.message && !error.message.includes('document already exists')) {
+        this.server.logger.error(`Error creating default alert for ${ruleType}: ${error.message}`);
+        throw error;
+      } else {
+        this.server.logger.error('Encountered error creating default rule', error.message);
+      }
+    }
+    return defaultRule;
   }
 
   async updateStatusRule(spaceId: string, enabled?: boolean) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
+    console.log('update status rule', minimumRuleInterval);
     if (enabled) {
+      console.log('enabled, calling upsert', spaceId);
       return this.upsertDefaultAlert(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
@@ -191,10 +238,26 @@ export class DefaultAlertService {
         spaceId
       );
     } else {
+      console.trace('rule not enabled, getting rules client and deleting rules');
       const rulesClient = await (await this.context.alerting)?.getRulesClient();
-      await rulesClient.bulkDeleteRules({
-        filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
-      });
+      try {
+        await rulesClient.bulkDeleteRules({
+          filter: `alert.attributes.alertTypeId:"${SYNTHETICS_STATUS_RULE}" AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+        });
+        console.log('after bulk delete has succeeded');
+      } catch (error) {
+        console.log('could be some issue here');
+        console.log(
+          'searching for saved objects',
+          await rulesClient.find({
+            options: {
+              page: 1,
+              perPage: 1,
+              filter: `alert.attributes.alertTypeId:(${SYNTHETICS_STATUS_RULE}) AND alert.attributes.tags:"SYNTHETICS_DEFAULT_ALERT"`,
+            },
+          })
+        );
+      }
     }
   }
 
@@ -221,13 +284,16 @@ export class DefaultAlertService {
     interval: string,
     spaceId: string
   ) {
+    console.log('upsert default alert', ruleType, name, interval, spaceId);
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
     const alert = await this.getExistingAlert(ruleType);
+    console.log('existing alert result', alert);
     if (alert) {
       const currentIntervalInMs = parseDuration(alert.schedule.interval);
       const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getRuleActions(ruleType);
+      console.log('calling update on rules client');
       const {
         actions: actionsFromRules = [],
         systemActions = [],
@@ -245,6 +311,7 @@ export class DefaultAlertService {
           params: alert.params,
         },
       });
+      console.log('updated alert result', updatedAlert);
       return {
         ...updatedAlert,
         actions: [...actionsFromRules, ...systemActions],
@@ -252,6 +319,7 @@ export class DefaultAlertService {
       };
     }
 
+    console.log('I have to call the create default rule');
     return this.createDefaultRuleIfNotExist(ruleType, name, interval, spaceId);
   }
 

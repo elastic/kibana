@@ -186,6 +186,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .expect(200);
 
+        if (res.body.statusRule === null || res.body.tlsRule === null) {
+          console.log('NULL FOUND WAITING ON YOU TO FIGURE THIS OUT');
+          await new Promise((r) => setTimeout(r, 200_000));
+        }
         expect(res.body.statusRule.ruleTypeId).eql('xpack.synthetics.alerts.monitorStatus');
         expect(res.body.tlsRule.ruleTypeId).eql('xpack.synthetics.alerts.tls');
       });

@@ -38,6 +38,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     },
   },
   handler: async (routeContext): Promise<any> => {
+    console.log('YOU HIT THE MONITOR ADD ROUTE')
     const { request, response, server } = routeContext;
     // usually id is auto generated, but this is useful for testing
     const { id, internal } = request.query;
@@ -110,6 +111,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         id,
         normalizedMonitor,
       });
+      console.log('monitor created scucessfully ')
 
       if (errors && errors.length > 0) {
         return {
@@ -118,6 +120,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           id: newMonitor.id,
         };
       }
+      console.log('INIT MONITOR ALERTS')
       await addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 

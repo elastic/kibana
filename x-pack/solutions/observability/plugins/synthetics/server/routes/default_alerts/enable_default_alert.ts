@@ -20,6 +20,7 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     savedObjectsClient,
     request,
   }): Promise<DEFAULT_ALERT_RESPONSE> => {
+    console.log('POST ALERTING')
     const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
