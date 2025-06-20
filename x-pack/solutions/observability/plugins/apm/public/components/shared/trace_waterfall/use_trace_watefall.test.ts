@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import {
   getTraceWaterfall,
@@ -12,6 +13,7 @@ import {
   getTraceParentChildrenMap,
   getTraceWaterfallDuration,
   getClockSkew,
+  getServiceLegends,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -21,45 +23,46 @@ jest.mock('@elastic/eui', () => ({
   }),
 }));
 
+const root: TraceItem = {
+  id: '1',
+  timestamp: '2024-01-01T00:00:00.000Z',
+  name: 'root',
+  traceId: 't1',
+  duration: 1000,
+  serviceName: 'svcA',
+};
+const child1: TraceItem = {
+  id: '2',
+  parentId: '1',
+  timestamp: '2024-01-01T00:00:00.500Z',
+  name: 'child1',
+  traceId: 't1',
+  duration: 400,
+  serviceName: 'svcB',
+};
+const child2: TraceItem = {
+  id: '3',
+  parentId: '1',
+  timestamp: '2024-01-01T00:00:00.800Z',
+  name: 'child2',
+  traceId: 't1',
+  duration: 100,
+  serviceName: 'svcC',
+};
+const grandchild: TraceItem = {
+  id: '4',
+  parentId: '2',
+  timestamp: '2024-01-01T00:00:01.000Z',
+  name: 'grandchild',
+  traceId: 't1',
+  duration: 50,
+  serviceName: 'svcD',
+};
+
 describe('getFlattenedTraceWaterfall', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
-  const root: TraceItem = {
-    id: '1',
-    timestamp: '2024-01-01T00:00:00.000Z',
-    name: 'root',
-    traceId: 't1',
-    duration: 1000,
-    serviceName: 'svcA',
-  };
-  const child1: TraceItem = {
-    id: '2',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.500Z',
-    name: 'child1',
-    traceId: 't1',
-    duration: 400,
-    serviceName: 'svcB',
-  };
-  const child2: TraceItem = {
-    id: '3',
-    parentId: '1',
-    timestamp: '2024-01-01T00:00:00.800Z',
-    name: 'child2',
-    traceId: 't1',
-    duration: 100,
-    serviceName: 'svcC',
-  };
-  const grandchild: TraceItem = {
-    id: '4',
-    parentId: '2',
-    timestamp: '2024-01-01T00:00:01.000Z',
-    name: 'grandchild',
-    traceId: 't1',
-    duration: 50,
-    serviceName: 'svcD',
-  };
 
   const parentChildMap = {
     root: [root],
@@ -371,5 +374,36 @@ describe('getclockSkew', () => {
       parent: parentWithSkew,
     });
     expect(result).toBe(1000350);
+  });
+});
+
+describe('getWaterfallLegends', () => {
+  it('should generate waterfall legends without duplicates', () => {
+    const traceItems: TraceItem[] = [root, root, child1, child2, grandchild];
+
+    const waterfallLegends = getServiceLegends(traceItems);
+
+    expect(waterfallLegends).toEqual([
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[0].serviceName,
+        color: 'color0',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[2].serviceName,
+        color: 'color1',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[3].serviceName,
+        color: 'color2',
+      },
+      {
+        type: WaterfallLegendType.ServiceName,
+        value: traceItems[4].serviceName,
+        color: 'color3',
+      },
+    ]);
   });
 });
