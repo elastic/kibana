@@ -372,6 +372,17 @@ export const ComplianceDashboard = () => {
     [updateActiveNamespace]
   );
 
+  const namespaces =
+    currentTabUrlState === POSTURE_TYPE_CSPM
+      ? getCspmDashboardData.data?.namespaces || []
+      : getKspmDashboardData.data?.namespaces || [];
+
+  // if the active namespace is not in the list of namespaces, default to the first available namespace
+  // this can happen when changing between CSPM and KSPM dashboards and if there is no namespace called "default"
+  if (activeNamespace && namespaces.length > 0 && !namespaces.includes(activeNamespace)) {
+    onActiveNamespaceChange(namespaces[0]);
+  }
+
   const preferredTabUrlState = useMemo(
     () => getDefaultTab(getSetupStatus, getCspmDashboardData.data, getKspmDashboardData.data),
     [getCspmDashboardData.data, getKspmDashboardData.data, getSetupStatus]
@@ -438,11 +449,6 @@ export const ComplianceDashboard = () => {
 
   // if there is more than one namespace, show the namespace selector in the header
   const rightSideItems = useMemo(() => {
-    const namespaces =
-      currentTabUrlState === POSTURE_TYPE_CSPM
-        ? getCspmDashboardData.data?.namespaces || []
-        : getKspmDashboardData.data?.namespaces || [];
-
     return namespaces.length > 1
       ? [
           <NamespaceSelector

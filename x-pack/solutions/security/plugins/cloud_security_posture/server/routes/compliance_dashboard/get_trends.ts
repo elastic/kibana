@@ -188,16 +188,21 @@ export const getTrends = async (
 
     if (!scoreTrendDocs.length) return { trends: [], namespaces: [] }; // No trends data available
 
-    const result = Object.fromEntries(
+    const namespacedData = Object.fromEntries(
       scoreTrendDocs.map((entry) => {
         const [key, value] = Object.entries(entry)[0];
         return [key, value.documents];
       })
     );
 
-    const namespaces = Object.keys(result);
+    const namespaceKeys = Object.keys(namespacedData);
 
-    return { trends: formatTrends(result[namespace]), namespaces };
+    if (!namespacedData[namespace]) {
+      logger.warn(`Namespace '${namespace}' not found in trend results.`);
+      return { trends: [], namespaces: namespaceKeys };
+    }
+
+    return { trends: formatTrends(namespacedData[namespace]), namespaces: namespaceKeys };
   } catch (err) {
     logger.error(`Failed to fetch trendlines data ${err.message}`);
     logger.error(err);
