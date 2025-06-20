@@ -57,13 +57,10 @@ import type {
   DiscoverStartPlugins,
 } from './types';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
-import type {
-  DiscoverEBTContextProps,
-  DiscoverEBTManager,
-} from './plugin_imports/discover_ebt_manager';
+import type { DiscoverEBTContextProps, DiscoverEBTManager } from './discover_ebt_manager';
+import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
-import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_ebt_manager';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana

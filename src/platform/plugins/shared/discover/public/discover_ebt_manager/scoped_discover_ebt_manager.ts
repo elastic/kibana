@@ -18,7 +18,7 @@ import {
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
 } from './discover_ebt_manager_registrations';
-import { ContextualProfileLevel } from '../../context_awareness';
+import { ContextualProfileLevel } from '../context_awareness';
 import type {
   ReportEvent,
   ReportPerformanceEvent,

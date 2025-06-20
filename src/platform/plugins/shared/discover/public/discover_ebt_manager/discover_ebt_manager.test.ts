@@ -11,7 +11,7 @@ import { BehaviorSubject, skip } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { type DiscoverEBTContextProps, DiscoverEBTManager } from '.';
 import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_registrations';
-import { ContextualProfileLevel } from '../../context_awareness/profiles_manager';
+import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 

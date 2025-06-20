@@ -9,7 +9,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
-import type { DiscoverStartPlugins } from '../../types';
+import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
 
 /**
