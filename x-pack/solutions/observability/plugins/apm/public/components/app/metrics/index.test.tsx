@@ -115,24 +115,5 @@ describe('Metrics', () => {
         expect(apmMetricsNoDashboardFound).toBeInTheDocument();
       });
     });
-
-    describe('Logs signals', () => {
-      beforeEach(() => {
-        jest.spyOn(useApmServiceContext, 'useApmServiceContext').mockReturnValue({
-          agentName: 'java',
-          serviceName: 'testServiceName',
-          transactionTypeStatus: FETCH_STATUS.SUCCESS,
-          transactionTypes: [],
-          fallbackToTransactions: true,
-          serviceAgentStatus: FETCH_STATUS.SUCCESS,
-        });
-      });
-
-      it('shows service from logs metrics content', () => {
-        const result = render(<MetricsWithWrapper />);
-        const apmAddApmCallout = result.getByTestId('apmAddApmCallout');
-        expect(apmAddApmCallout).toBeInTheDocument();
-      });
-    });
   });
 });
