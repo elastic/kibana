@@ -11,10 +11,11 @@ import {
   deleteAllPrebuiltRuleAssets,
   installMockPrebuiltRulesPackage,
   installPrebuiltRules,
+  importRulesWithSuccess,
+  assertImportedRule,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { importRulesWithSuccess, assertImportedRule } from './utils';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
