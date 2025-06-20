@@ -48,7 +48,7 @@ export const checkForTripleQuotesAndQueries = (
       if (insideSingleQuotes) {
         insideSingleQuotesQuery = /.*"query"\s*:\s*$/.test(text.slice(0, i));
         if (insideSingleQuotesQuery) {
-          currentQueryStartIndex = i;
+          currentQueryStartIndex = i + 1;
         }
       } else {
         insideSingleQuotesQuery = false;
