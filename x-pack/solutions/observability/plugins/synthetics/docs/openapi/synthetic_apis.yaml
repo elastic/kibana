@@ -1024,6 +1024,71 @@ paths:
                         },
                         "namespace": "default"
                     }
+    put:
+      summary: Update a private location
+      operationId: put-private-location
+      description: >
+        Update an existing private location's label.
+
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier of the private location to be updated.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - label
+              properties:
+                label:
+                  type: string
+                  minLength: 1
+                  description: A new label for the private location. Must be at least 1 character long.
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPrivateLocation"
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
 components:
   schemas:
     commonMonitorFields:
