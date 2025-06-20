@@ -16,6 +16,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     describe('Synthetics Alerting', () => {
       loadTestFile(require.resolve('./synthetics/synthetics_default_rule'));
       loadTestFile(require.resolve('./synthetics/custom_status_rule'));
+      loadTestFile(require.resolve('./synthetics/alert_on_no_data'));
     });
   });
 }
