@@ -693,7 +693,7 @@
           "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
         ],
         "signature": [
-          "\"strict\" | \"ui\""
+          "\"ui\" | \"strict\""
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,

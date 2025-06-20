@@ -907,6 +907,49 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.createApmErrorsContextService",
+        "type": "Function",
+        "tags": [],
+        "label": "createApmErrorsContextService",
+        "description": [],
+        "signature": [
+          "({ apmSourcesAccess, }: ",
+          "ApmErrorsContextServiceDeps",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.ApmErrorsContextService",
+            "text": "ApmErrorsContextService"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.createApmErrorsContextService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  apmSourcesAccess,\n}",
+            "description": [],
+            "signature": [
+              "ApmErrorsContextServiceDeps"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.createDegradedDocsControl",
         "type": "Function",
         "tags": [],
@@ -2751,6 +2794,36 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ApmErrorsContextService",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApmErrorsContextService",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmErrorsContextService.getErrorsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getErrorsIndexPattern",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.AppMenuActionBase",
@@ -6110,6 +6183,21 @@
         "description": [],
         "signature": [
           "\"orchestrator.resource.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_SPAN_KIND",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_KIND",
+        "description": [],
+        "signature": [
+          "\"kind\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,

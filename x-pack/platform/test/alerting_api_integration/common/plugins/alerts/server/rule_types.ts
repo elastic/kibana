@@ -1195,6 +1195,41 @@ function getSeverityRuleType() {
   return result;
 }
 
+const getInternalRuleType = () => {
+  const result: RuleType<{}, never, {}, {}, {}, 'default'> = {
+    id: 'test.internal-rule-type',
+    name: 'Test: Internal Rule Type',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    validate: {
+      params: schema.any(),
+    },
+    category: 'management',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    internallyManaged: true,
+    async executor(ruleExecutorOptions) {
+      const { services } = ruleExecutorOptions;
+
+      services.alertsClient?.report({ id: '1', actionGroup: 'default' });
+      services.alertsClient?.report({ id: '2', actionGroup: 'default' });
+
+      return { state: {} };
+    },
+    alerts: {
+      context: 'observability.test.alerts',
+      mappings: {
+        fieldMap: {},
+      },
+      useLegacyAlerts: true,
+      shouldWrite: true,
+    },
+  };
+  return result;
+};
+
 async function sendSignal(
   logger: Logger,
   es: ElasticsearchClient,
@@ -1640,6 +1675,7 @@ export function defineRuleTypes(
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));
   alerting.registerType(getSeverityRuleType());
+  alerting.registerType(getInternalRuleType());
   alerting.registerType(dangerouslyCreateAlertsInAllSpacesPersistenceRuleType);
   alerting.registerType(dangerouslyCreateAlertsInAllSpacesRuleType);
 }

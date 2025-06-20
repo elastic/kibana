@@ -10,6 +10,7 @@
 export { AlertLifecycleStatusBadge } from './src/alert_lifecycle_status_badge';
 export type { AlertLifecycleStatusBadgeProps } from './src/alert_lifecycle_status_badge';
 export { MaintenanceWindowCallout } from './src/maintenance_window_callout';
+export { useFetchActiveMaintenanceWindows } from './src/maintenance_window_callout/use_fetch_active_maintenance_windows';
 export { AddMessageVariables } from './src/add_message_variables';
 
 export * from './src/common/hooks';

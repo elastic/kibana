@@ -23,6 +23,8 @@ export {
   createBuiltinToolId,
   builtinToolProviderId,
   unknownToolProviderId,
+  BuiltinToolIds,
+  BuiltinTags,
 } from './tools';
 export {
   OnechatErrorCode,
