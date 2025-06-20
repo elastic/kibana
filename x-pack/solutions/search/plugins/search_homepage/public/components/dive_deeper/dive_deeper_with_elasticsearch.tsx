@@ -53,7 +53,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             })}
             description={i18n.translate('xpack.searchHomepage.pythonNotebooks.description', {
               defaultMessage:
-                'A range of executable Python notebooks available to easily test features in a virtual environment.',
+                'Test features in a virtual environment with executable notebooks.',
             })}
             buttonHref={docLinks.notebooksExamples}
             buttonLabel={i18n.translate('xpack.searchHomepage.pythonNotebooks.buttonText', {
