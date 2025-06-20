@@ -13,7 +13,7 @@ export function SvlObltNavigationServiceProvider({
 }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   return {
     async navigateToLandingPage() {
@@ -25,7 +25,7 @@ export function SvlObltNavigationServiceProvider({
     async navigateToDiscoverPage() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.header.awaitKibanaChrome();
       });
     },
   };
