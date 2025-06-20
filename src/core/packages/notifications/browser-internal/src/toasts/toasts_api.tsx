@@ -49,7 +49,7 @@ const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
 
 const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
   return {
-    errorType,
+    error_type: errorType,
   };
 };
 
