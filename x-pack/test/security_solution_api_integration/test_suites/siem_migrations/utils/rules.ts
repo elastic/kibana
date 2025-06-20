@@ -57,7 +57,7 @@ export interface RequestParams {
 }
 
 export interface CreateMigrationRequestParams extends RequestParams {
-  body: CreateRuleMigrationRequestBody;
+  body?: CreateRuleMigrationRequestBody;
 }
 export interface MigrationRequestParams extends RequestParams {
   /** `id` of the migration to get rules documents for */
@@ -94,7 +94,7 @@ export type StartMigrationRuleParams = MigrationRequestParams & {
 export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => {
   return {
     create: async ({
-      body,
+      body = { name: 'test migration' },
       expectStatusCode = 200,
     }: CreateMigrationRequestParams): Promise<{
       body: CreateRuleMigrationResponse;
