@@ -30216,6 +30216,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.BULK_MIGRATE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_MIGRATE_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN",
             "type": "string",
             "tags": [],

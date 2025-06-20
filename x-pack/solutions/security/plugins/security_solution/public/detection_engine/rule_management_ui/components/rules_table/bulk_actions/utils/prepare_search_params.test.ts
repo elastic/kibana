@@ -83,6 +83,26 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
+      BulkActionsDryRunErrCodeEnum.THRESHOLD_RULE_TYPE_IN_SUPPRESSION,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        excludeRuleTypes: ['threshold'],
+      },
+    ],
+    [
+      BulkActionsDryRunErrCodeEnum.UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD,
+      {
+        filter: '',
+        tags: [],
+        showCustomRules: false,
+        showElasticRules: false,
+        includeRuleTypes: ['threshold'],
+      },
+    ],
+    [
       undefined,
       {
         filter: '',

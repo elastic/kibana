@@ -314,6 +314,7 @@ export const getHttpInput = ({
         },
       },
     ],
+    maintenance_windows: null,
   };
 
   return {
