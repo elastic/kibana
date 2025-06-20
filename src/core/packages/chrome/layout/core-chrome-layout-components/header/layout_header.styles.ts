@@ -8,12 +8,14 @@
  */
 
 import { css } from '@emotion/react';
+import { EmotionFn } from '../types';
 
-const root = css`
+const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   overflow: hidden;
   grid-area: header;
   height: var(--kbn-layout--header-height);
+  z-index: ${euiTheme.levels.header};
 `;
 
 export const styles = {

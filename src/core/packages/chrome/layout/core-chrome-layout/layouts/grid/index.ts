@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export type { HeaderProps } from './header';
+export { GridLayout } from './grid_layout';

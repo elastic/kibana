@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export type { HeaderProps } from './header';
+export { type LayoutService } from './layout_service';
+export {
+  LAYOUT_FEATURE_FLAG_KEY,
+  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
+  type LayoutFeatureFlag,
+} from './layout_feature_flag';

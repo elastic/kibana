@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export type { HeaderProps } from './header';
+export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
+export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
+export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';

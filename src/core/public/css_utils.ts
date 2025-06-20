@@ -23,7 +23,7 @@ import bg_bottom_branded_dark from './styles/core_app/images/bg_bottom_branded_d
 // header banner, app menu, and is visible or hidden
 export const kibanaFullBodyHeightCss = (additionalOffset = '0px') =>
   css({
-    height: `calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset})`,
+    height: `calc(var(--kbn-layout--application-height) - ${additionalOffset})`,
   });
 
 export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEuiTheme) => {
