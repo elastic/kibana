@@ -101,7 +101,11 @@ export const performCreate = async <T>(
       initialNamespaces || getSavedObjectNamespaces(namespace, preflightResult?.existingDocument);
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
-
+  if (!createdBy && options.accessControl?.accessMode === 'read_only') {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `Cannot create a saved object of type "${type}" with "read_only" access control without an owner.`
+    );
+  }
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
   const accessControlToWrite =
     typeSupportsAccessControl && createdBy
