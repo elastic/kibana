@@ -63,7 +63,7 @@ export const BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR = i18n.translate(
 );
 
 export const BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookback: number) =>
-  i18n.translate('xpack.securitySolution.manuelRulaRun.startDateIsOutOfRangeError', {
+  i18n.translate('xpack.securitySolution.bulkFillRuleGapsModal.startDateIsOutOfRangeError', {
     values: { maxDaysLookback },
     defaultMessage:
       'Rule gaps fill cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
