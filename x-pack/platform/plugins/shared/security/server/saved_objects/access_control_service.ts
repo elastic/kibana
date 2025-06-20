@@ -44,7 +44,7 @@ export class AccessControlService {
       type
     );
 
-    const accessControl = object?.accessControl;
+    const accessControl = object.accessControl;
     const currentUser = this.userForOperation;
 
     if (!currentUser) {
@@ -59,7 +59,7 @@ export class AccessControlService {
       return true;
     }
 
-    if (accessControl.owner === currentUser.username) {
+    if (accessControl.owner === currentUser.profile_uid) {
       return true;
     }
 

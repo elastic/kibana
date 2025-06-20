@@ -44,6 +44,32 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${readOnlyObjectsPlugin}`,
       ],
     },
+    security: {
+      ...xPackAPITestsConfig.get('security'),
+      roles: {
+        ...xPackAPITestsConfig.get('security.roles'),
+        kibana_savedobjects_editor: {
+          kibana: [
+            {
+              base: [],
+              spaces: ['*'],
+              feature: {
+                savedObjects: ['all'],
+              },
+            },
+          ],
+          elasticsearch: {
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['.kibana*'],
+                privileges: ['read', 'write', 'create', 'delete', 'view_index_metadata'],
+              },
+            ],
+          },
+        },
+      },
+    },
 
     junit: {
       reportName: 'X-Pack API Integration Tests (Read Only Saved Objects)',

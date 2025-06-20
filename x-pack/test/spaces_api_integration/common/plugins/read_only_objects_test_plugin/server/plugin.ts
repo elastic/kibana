@@ -7,12 +7,17 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const READ_ONLY_TYPE = 'read_only_type';
 const NON_READ_ONLY_TYPE = 'non_read_only_type';
 
-export class ReadOnlyObjectsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+interface SetupDeps {
+  features: FeaturesPluginSetup;
+}
+
+export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
+  public setup(core: CoreSetup, { features }: SetupDeps) {
     core.savedObjects.registerType({
       name: READ_ONLY_TYPE,
       hidden: false,
@@ -62,18 +67,17 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
+        const options = isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {};
         try {
-          await soClient.create(
+          const result = await soClient.create(
             objType,
             {
               description: 'test',
             },
-            {
-              ...(isReadOnly ? { accessControl: { accessMode: 'read_only' } } : {}),
-            }
+            options
           );
           return response.ok({
-            body: 'test',
+            body: result,
           });
         } catch (error) {
           return response.badRequest({
@@ -127,15 +131,13 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         try {
           const objectType = request.body.type || READ_ONLY_TYPE;
           const result = await soClient.update(objectType, request.body.objectId, {
-            attributes: {
-              description: 'updated description',
-            },
+            description: 'updated description',
           });
           return response.ok({
             body: result,
           });
         } catch (error) {
-          return response.badRequest({
+          return response.forbidden({
             body: error.message,
           });
         }

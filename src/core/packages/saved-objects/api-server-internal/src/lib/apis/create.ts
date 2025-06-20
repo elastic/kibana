@@ -62,7 +62,6 @@ export const performCreate = async <T>(
     refresh = DEFAULT_REFRESH_SETTING,
     initialNamespaces,
     version,
-    accessControl,
   } = options;
   const { migrationVersionCompatibility } = options;
   if (!allowedTypes.includes(type)) {
@@ -103,22 +102,6 @@ export const performCreate = async <T>(
     existingOriginId = preflightResult?.existingDocument?._source?.originId;
   }
 
-  const authorizationResult = await securityExtension?.authorizeCreate({
-    namespace,
-    object: {
-      type,
-      id,
-      initialNamespaces,
-      existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
-      accessControl,
-    },
-  });
-
-  if (preflightResult?.error) {
-    // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
-    throw SavedObjectsErrorHelpers.createConflictError(type, id);
-  }
-
   const typeSupportsAccessControl = registry.supportsAccessControl(type);
   const accessControlToWrite =
     typeSupportsAccessControl && createdBy
@@ -127,6 +110,22 @@ export const performCreate = async <T>(
           accessMode: options.accessControl?.accessMode,
         }
       : undefined;
+
+  const authorizationResult = await securityExtension?.authorizeCreate({
+    namespace,
+    object: {
+      type,
+      id,
+      initialNamespaces,
+      existingNamespaces: preflightResult?.existingDocument?._source?.namespaces ?? [],
+      accessControl: accessControlToWrite,
+    },
+  });
+
+  if (preflightResult?.error) {
+    // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
+    throw SavedObjectsErrorHelpers.createConflictError(type, id);
+  }
 
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
