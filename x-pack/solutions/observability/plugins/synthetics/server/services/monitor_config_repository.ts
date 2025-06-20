@@ -235,7 +235,10 @@ export class MonitorConfigRepository {
 
   async bulkDelete(monitorIds: string[]) {
     return this.soClient.bulkDelete(
-      monitorIds.map((monitor) => ({ type: syntheticsMonitorSavedObjectType, id: monitor }))
+      monitorIds.map((monitor) => ({ type: syntheticsMonitorSavedObjectType, id: monitor })),
+      {
+        force: true,
+      }
     );
   }
 
