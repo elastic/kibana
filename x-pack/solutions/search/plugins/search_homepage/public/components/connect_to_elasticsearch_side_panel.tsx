@@ -83,8 +83,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           description={
             <FormattedMessage
               id="xpack.searchHomepage.connectToElasticsearch.getExpertAdviceDescription"
-              defaultMessage="Get in touch with us for help getting started with best practices on data ingest, per
-formance, and/or cost efficiency in your Serverless projects!"
+              defaultMessage="Get in touch with us for help getting started with best practices on data ingest, performance, and/or cost efficiency in your Serverless projects!"
             />
           }
           footer={
