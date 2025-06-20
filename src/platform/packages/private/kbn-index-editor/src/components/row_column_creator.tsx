@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextExtra } from '../types';
 import { ValueInput } from './value_input';
 
@@ -135,9 +136,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             size="s"
             disabled={activeMode === 'add-row'}
           >
-            {i18n.translate('indexEditor.addRow', {
-              defaultMessage: 'Add row',
-            })}
+            <FormattedMessage defaultMessage="Add row" id="indexEditor.addRow" />
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -147,9 +146,7 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
             size="s"
             disabled={activeMode === 'add-column'}
           >
-            {i18n.translate('indexEditor.addColumn', {
-              defaultMessage: 'Add column',
-            })}
+            <FormattedMessage defaultMessage="Add column" id="indexEditor.addColumn" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
