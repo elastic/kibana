@@ -35,7 +35,7 @@ const OBS_ESQL_RECOMMENDED_QUERIES = [
     name: i18n.translate('xpack.observability.esqlQueries.logsWithErrorOrWarn.name', {
       defaultMessage: 'Logs with "error" or "warn" messages',
     }),
-    query: 'FROM logs-* | WHERE KQL("message:error or message:warn")',
+    query: 'FROM logs-* | WHERE QSTR("message:error or message:warn")',
     description: i18n.translate('xpack.observability.esqlQueries.logsWithErrorOrWarn.description', {
       defaultMessage: 'Finds log entries where the message field contains "error" or "warn"',
     }),
@@ -45,7 +45,7 @@ const OBS_ESQL_RECOMMENDED_QUERIES = [
       defaultMessage: 'Error occurrences by host name',
     }),
     query:
-      'FROM logs-* | WHERE KQL("error") | STATS count = COUNT(*) BY host.name | SORT count DESC | LIMIT 50',
+      'FROM logs-* | WHERE QSTR("error") | STATS count = COUNT(*) BY host.name | SORT count DESC | LIMIT 50',
     description: i18n.translate('xpack.observability.esqlQueries.errorsByHost.description', {
       defaultMessage:
         'Counts error occurrences by host name and shows the top 50 hosts with the most errors',
