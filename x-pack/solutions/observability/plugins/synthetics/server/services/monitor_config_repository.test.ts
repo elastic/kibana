@@ -663,9 +663,9 @@ describe('MonitorConfigRepository', () => {
       const type = syntheticsMonitorSavedObjectType;
 
       const expectedOptions = {
-        filter: 'synthetics-monitor-multiple.attributes.enabled:true',
+        filter: 'synthetics-monitor-multi-space.attributes.enabled:true',
         search: 'my-monitor',
-        search_fields: ['synthetics-monitor-multiple.attributes.name', 'status'],
+        search_fields: ['synthetics-monitor-multi-space.attributes.name', 'status'],
         sortField: 'name',
       };
 

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { ConfigKey } from '../constants';
 
 export interface MonitorSpacesProps {
   onChange: (value: string[]) => void;
@@ -48,7 +49,6 @@ export function getUpdatedSpacesSelection(
 
 export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) => {
   const { space: currentSpace } = useKibanaSpace();
-  const NAMESPACES_NAME = 'spaces';
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
   const data = services.spaces?.ui.useSpaces();
@@ -58,7 +58,7 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
     formState: { isSubmitted },
     trigger,
   } = useFormContext();
-  const { isTouched, error } = control.getFieldState(NAMESPACES_NAME);
+  const { isTouched, error } = control.getFieldState(ConfigKey.KIBANA_SPACES);
 
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 

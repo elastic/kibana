@@ -192,7 +192,8 @@ export class MonitorConfigRepository {
 
   async find<T>(
     options: Omit<SavedObjectsFindOptions, 'type'>,
-    types: string[] = syntheticsMonitorSOTypes
+    types: string[] = syntheticsMonitorSOTypes,
+    soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
@@ -200,7 +201,7 @@ export class MonitorConfigRepository {
         ...options,
         perPage: options.perPage ?? 5000,
       };
-      return this.soClient.find<T>(this.handleLegacyOptions(opts, type));
+      return soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
     const [result, legacyResult] = await Promise.all(promises);
     return {

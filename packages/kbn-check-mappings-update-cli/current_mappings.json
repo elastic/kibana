@@ -3832,7 +3832,7 @@
       }
     }
   },
-  "synthetics-monitor-multiple": {
+  "synthetics-monitor-multi-space": {
     "dynamic": false,
     "properties": {
       "alert": {

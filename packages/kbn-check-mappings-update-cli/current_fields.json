@@ -1159,7 +1159,7 @@
     "type",
     "urls"
   ],
-  "synthetics-monitor-multiple": [
+  "synthetics-monitor-multi-space": [
     "alert",
     "alert.status",
     "alert.status.enabled",

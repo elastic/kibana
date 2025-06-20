@@ -7,13 +7,12 @@
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getSavedObjectKqlFilter } from '../../common';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
   legacyMonitorAttributes,
-  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSOTypes,
 } from '../../../../common/types/saved_objects';
-import { SyntheticsServerSetup } from '../../../types';
 
 type Payload = Array<{
   id: string;
@@ -43,27 +42,33 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ server }) => {
-    return await getMonitorsByLocation(server);
+  handler: async (context) => {
+    return await getMonitorsByLocation(context);
   },
 });
 
-export const getMonitorsByLocation = async (server: SyntheticsServerSetup, locationId?: string) => {
-  const soClient = server.coreStart.savedObjects.createInternalRepository();
+export const getMonitorsByLocation = async (context: RouteContext, locationId?: string) => {
+  const { monitorConfigRepository } = context;
+  const soClient = context.server.coreStart.savedObjects.createInternalRepository();
   const locationFilter = getSavedObjectKqlFilter({ field: 'locations.id', values: locationId });
 
-  const locationMonitors = await soClient.find<unknown, ExpectedResponse>({
-    type: legacySyntheticsMonitorTypeSingle,
-    perPage: 0,
-    aggs,
-    filter: locationFilter,
-    namespaces: [ALL_SPACES_ID],
-  });
+  const locationMonitors = await monitorConfigRepository.find(
+    {
+      perPage: 0,
+      aggs,
+      filter: locationFilter,
+      namespaces: [ALL_SPACES_ID],
+    },
+    syntheticsMonitorSOTypes,
+    soClient
+  );
 
   return (
-    locationMonitors.aggregations?.locations.buckets.map(({ key: id, doc_count: count }) => ({
-      id,
-      count,
-    })) ?? []
+    (locationMonitors.aggregations as ExpectedResponse)?.locations.buckets.map(
+      ({ key: id, doc_count: count }) => ({
+        id,
+        count,
+      })
+    ) ?? []
   );
 };

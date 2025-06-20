@@ -96,7 +96,7 @@ describe('StatusRuleExecutor', () => {
       expect(staleDownConfigs).toEqual({});
 
       expect(spy).toHaveBeenCalledWith({
-        filter: 'synthetics-monitor-multiple.attributes.alert.status.enabled: true',
+        filter: 'synthetics-monitor-multi-space.attributes.alert.status.enabled: true',
       });
     });
 

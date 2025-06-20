@@ -49,7 +49,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       });
     }
 
-    const monitors = await getMonitorsByLocation(server, locationId);
+    const monitors = await getMonitorsByLocation(routeContext, locationId);
 
     if (!isEmpty(monitors)) {
       const count = monitors.find((monitor) => monitor.id === locationId)?.count;
