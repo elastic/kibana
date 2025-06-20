@@ -48,14 +48,26 @@ const dataSourceContextMock = {
   name: 'Test Data Source',
 } as const;
 
+const defaultRootContextMock = {
+  profileId: 'default-root-profile-id',
+  contextType: 'root',
+  name: 'Default Root',
+} as const;
+
+const defaultDataSourceContextMock = {
+  profileId: 'default-datasource-profile-id',
+  contextType: 'datasource',
+  name: 'Default Data Source',
+} as const;
+
 const getScopedProfilesManagerMock = (withContexts = false) => {
   return {
     getContexts$: () => ({
       rootContext$: {
-        getValue: () => (withContexts ? rootContextMock : null),
+        getValue: () => (withContexts ? rootContextMock : defaultRootContextMock),
       },
       dataSourceContext$: {
-        getValue: () => (withContexts ? dataSourceContextMock : null),
+        getValue: () => (withContexts ? dataSourceContextMock : defaultDataSourceContextMock),
       },
     }),
   } as unknown as ScopedProfilesManager;
@@ -80,14 +92,14 @@ const setup = (attrs: {
 };
 
 describe('useActiveProfiles', () => {
-  it('should return null for root and dataSource contexts when none provided', () => {
+  it('should return default root and dataSource contexts when not explicitly provided', () => {
     const { result } = setup({});
 
     const onOpenDocDetails = jest.fn();
     const adapter = result.current({ onOpenDocDetails });
 
-    expect(adapter.getRootProfile()).toBeNull();
-    expect(adapter.getDataSourceProfile()).toBeNull();
+    expect(adapter.getRootProfile()).toEqual(defaultRootContextMock);
+    expect(adapter.getDataSourceProfile()).toEqual(defaultDataSourceContextMock);
     expect(adapter.getDocumentsProfiles()).toEqual({});
   });
 

@@ -19,14 +19,14 @@ import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from '../state_management/discover_data_state_container';
 
 export interface Profiles {
-  rootContext: ContextWithProfileId<RootContext> | null;
-  dataSourceContext: ContextWithProfileId<DataSourceContext> | null;
+  rootContext: ContextWithProfileId<RootContext>;
+  dataSourceContext: ContextWithProfileId<DataSourceContext>;
   documentContexts: Record<string, DataTableRecordWithContext[]>;
 }
 
 export interface ProfilesAdapter {
-  getRootProfile: () => ContextWithProfileId<RootContext> | null;
-  getDataSourceProfile: () => ContextWithProfileId<DataSourceContext> | null;
+  getRootProfile: () => ContextWithProfileId<RootContext>;
+  getDataSourceProfile: () => ContextWithProfileId<DataSourceContext>;
   getDocumentsProfiles: () => Record<string, DataTableRecordWithContext[]>;
   openDocDetails: (record: DataTableRecord) => void;
 }
