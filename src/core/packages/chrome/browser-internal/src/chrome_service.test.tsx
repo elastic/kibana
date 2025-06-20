@@ -8,7 +8,7 @@
  */
 
 import { registerAnalyticsContextProviderMock } from './chrome_service.test.mocks';
-import { shallow, mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { toArray, firstValueFrom } from 'rxjs';
@@ -27,7 +27,7 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { findTestSubject } from '@kbn/test-jest-helpers';
+
 import { ChromeService } from './chrome_service';
 
 const mockhandleSystemColorModeChange = jest.fn();
@@ -242,9 +242,8 @@ describe('start', () => {
 
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
-      expect(
-        shallow(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()))
-      ).toBeDefined();
+      // Render and assert that no error is thrown
+      render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
     });
 
     it('renders the custom project side navigation', async () => {
@@ -258,20 +257,15 @@ describe('start', () => {
       chrome.setChromeStyle('project');
       chrome.project.setSideNavComponent(MyNav);
 
-      const component = mount(
+      render(
         <KibanaRenderContextProvider {...startDeps}>
           {chrome.getLegacyHeaderComponentForFixedLayout()}
         </KibanaRenderContextProvider>
       );
 
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
-      expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(0); // Default side nav not mounted
-
-      const customProjectSideNav = findTestSubject(component, 'customProjectSideNav');
-      expect(customProjectSideNav.text()).toBe('HELLO');
+      expect(screen.getByTestId('kibanaProjectHeader')).toBeInTheDocument();
+      expect(screen.queryByTestId('defaultProjectSideNav')).not.toBeInTheDocument();
+      expect(screen.getByTestId('customProjectSideNav')).toHaveTextContent('HELLO');
     });
 
     it('renders chromeless header', async () => {
@@ -279,14 +273,13 @@ describe('start', () => {
 
       chrome.setIsVisible(false);
 
-      const component = mount(
+      render(
         <KibanaRenderContextProvider {...startDeps}>
           {chrome.getLegacyHeaderComponentForFixedLayout()}
         </KibanaRenderContextProvider>
       );
 
-      const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
-      expect(chromeless.length).toBe(1);
+      expect(screen.getByTestId('kibanaHeaderChromeless')).toBeInTheDocument();
     });
   });
 
