@@ -9,3 +9,8 @@
  * UI Setting ID for enabling / disabling the MCP server
  */
 export const ONECHAT_MCP_SERVER_UI_SETTING_ID = 'onechat:mcpServer:enabled';
+
+/**
+ * UI Setting ID for enabling / disabling the ESQL Tool API
+ */
+export const ESQL_TOOL_API_UI_SETTING_ID = 'onechat:esqlToolApi:enabled';

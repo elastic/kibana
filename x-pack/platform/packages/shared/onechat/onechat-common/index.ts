@@ -22,6 +22,7 @@ export {
   toolDescriptorToIdentifier,
   createBuiltinToolId,
   builtinToolProviderId,
+  esqlToolProviderId,
   unknownToolProviderId,
 } from './tools';
 export {

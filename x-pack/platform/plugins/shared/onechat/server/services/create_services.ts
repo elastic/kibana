@@ -64,6 +64,8 @@ export class ServiceManager {
 
     const tools = this.services.tools.start({
       getRunner,
+      logger,
+      elasticsearch,
     });
 
     const agents = this.services.agents.start({
@@ -100,6 +102,7 @@ export class ServiceManager {
       agents,
       conversations,
       runnerFactory,
+      esql: tools.esql,
       chat,
     };
 

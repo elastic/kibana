@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { builtinToolProviderId } from '@kbn/onechat-common';
+import { builtinToolProviderId, esqlToolProviderId } from '@kbn/onechat-common';
 import type { Runner, RegisteredTool } from '@kbn/onechat-server';
+import { Logger } from '@kbn/logging';
+import { ElasticsearchServiceStart } from '@kbn/core/server';
 import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
 import { createInternalRegistry } from './utils';
+import { createEsqlToolRegistry } from './esql/esql_registry';
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
+  logger: Logger;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class ToolsService {
@@ -36,7 +41,11 @@ export class ToolsService {
     };
   }
 
-  start({ getRunner }: ToolsServiceStartDeps): ToolsServiceStart {
+  start({ getRunner, logger, elasticsearch }: ToolsServiceStartDeps): ToolsServiceStart {
+    const esql = createEsqlToolRegistry(logger, elasticsearch);
+
+    this.providers.set(esqlToolProviderId, esql);
+
     const registry = createInternalRegistry({
       providers: [...this.providers.values()],
       getRunner,
@@ -44,9 +53,9 @@ export class ToolsService {
 
     return {
       registry,
+      esql,
     };
   }
-
   private register(toolRegistration: RegisteredTool<any, any>) {
     this.builtinRegistry.register(toolRegistration);
   }
