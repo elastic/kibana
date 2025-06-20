@@ -5,30 +5,25 @@
  * 2.0.
  */
 
-import { withInferenceSpan } from '@kbn/inference-tracing';
 import { ElasticsearchClient } from '@kbn/core/server';
-import pLimit from 'p-limit';
 import { OperatorFunction, map } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { chunk } from 'lodash';
 import { ChatCompletionEvent, ChatCompletionEventType } from '@kbn/inference-common';
 import { ChatCompletionUnredactedMessageEvent } from '@kbn/inference-common/src/chat_complete/events';
 import { unhashString, redactEntities } from '../../../common/utils/anonymization/redaction';
 import { detectRegexEntities } from './detect_regex_entities';
 import { deanonymizeText } from './deanonymize_text';
-import { chunkText } from './chunk_text';
 import { getRedactableMessageEventParts } from './get_redactable_message_parts';
 import {
   type DetectedEntity,
   DetectedEntityType,
-  type InferenceChunk,
   type Message,
   type AnonymizationRule,
+  RegexAnonymizationRule,
+  NerAnonymizationRule,
 } from '../../../common/types';
-import { getEntityHash } from './get_entity_hash';
+import { detectNamedEntities } from './detect_named_entities';
 
-const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
-const DEFAULT_MAX_CONCURRENT_REQUESTS = 5;
 export interface Dependencies {
   esClient: {
     asCurrentUser: ElasticsearchClient;
@@ -53,87 +48,24 @@ export class AnonymizationService {
     this.rules = anonymizationRules;
   }
 
-  private async detectNamedEntities(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
-    this.logger.debug(`Detecting named entities in ${chunks.length} text chunks`);
-
-    // Maximum number of concurrent requests to the ML model
-    const limiter = pLimit(DEFAULT_MAX_CONCURRENT_REQUESTS);
-
-    // Batch size - number of documents to send in each request
-    const BATCH_SIZE = 10;
-
-    // Create batches of chunks for the inference request
-    const batches = chunk(chunks, BATCH_SIZE);
-    this.logger.debug(`Processing ${batches.length} batches of up to ${BATCH_SIZE} chunks each`);
-
-    const tasks = batches.map((batchChunks) =>
-      limiter(async () =>
-        withInferenceSpan('infer_ner', async () => {
-          let response;
-          try {
-            response = await this.esClient.asCurrentUser.ml.inferTrainedModel({
-              model_id: NER_MODEL_ID,
-              docs: batchChunks.map((batchChunk) => ({ text_field: batchChunk.chunkText })),
-            });
-          } catch (error) {
-            throw new Error('NER inference failed', { cause: error });
-          }
-          // Process results from all documents in the batch
-          const batchResults: DetectedEntity[] = [];
-          const inferenceResults = response?.inference_results || [];
-
-          if (inferenceResults.length !== batchChunks.length) {
-            this.logger.warn(
-              `NER returned ${inferenceResults.length} results for ${batchChunks.length} docs in batch`
-            );
-          }
-
-          // Match results with their original chunks to maintain offsets
-          inferenceResults.forEach((result, index) => {
-            const batchChunk = batchChunks[index];
-            const entities = result.entities || [];
-
-            batchResults.push(
-              ...entities.map((e) => ({
-                ...e,
-                start_pos: e.start_pos + batchChunk.charStartOffset,
-                end_pos: e.end_pos + batchChunk.charStartOffset,
-                type: 'ner' as const,
-                hash: getEntityHash(e.entity, e.class_name),
-              }))
-            );
-          });
-
-          return batchResults;
-        })
-      )
-    );
-
-    const results = await Promise.all(tasks);
-    const flatResults = results.flat();
-    this.logger.debug(`Total entities detected: ${flatResults.length}`);
-    return flatResults;
-  }
-
   private async detectEntities(content: string): Promise<DetectedEntity[]> {
     // Skip detection if there's no content
     if (!content || !content.trim()) {
       return [];
     }
 
-    this.logger.debug(`Detecting entities in text content`);
+    this.logger.debug('Detecting entities in text content');
 
     // Filter rules by type
-    const nerRules = this.rules.filter((rule) => rule.type === 'ner' && rule.enabled);
-    const regexRules = this.rules.filter((rule) => rule.type === 'regex' && rule.enabled);
+    const nerRules = this.rules.filter(
+      (rule) => rule.type === 'ner' && rule.enabled
+    ) as NerAnonymizationRule[];
+    const regexRules = this.rules.filter(
+      (rule) => rule.type === 'regex' && rule.enabled
+    ) as RegexAnonymizationRule[];
 
-    // Only run NER if we have NER rules enabled
-    let nerEntities: DetectedEntity[] = [];
-    if (nerRules.length > 0) {
-      // Detect entities using NER
-      const chunks = chunkText(content);
-      nerEntities = await this.detectNamedEntities(chunks);
-    }
+    // Detect named entities
+    const nerEntities = await detectNamedEntities(content, nerRules, this.logger, this.esClient);
 
     // Detect entities using regex patterns
     const regexEntities = detectRegexEntities(content, regexRules, this.logger);
@@ -228,6 +160,7 @@ export class AnonymizationService {
     }
     return { unredactedMessages: messages };
   }
+
   unredactChatCompletionEvent(): OperatorFunction<
     ChatCompletionEvent,
     ChatCompletionEvent | ChatCompletionUnredactedMessageEvent
