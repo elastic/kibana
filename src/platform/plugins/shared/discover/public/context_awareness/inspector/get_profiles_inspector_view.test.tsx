@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { getProfilesInspectorView } from './get_profiles_inspector_view';
+import { getDataSourceContextMock, getRootContextMock } from '../__mocks__';
 
 describe('getProfilesInspectorView', () => {
   it('should return the title', () => {
@@ -39,8 +40,8 @@ describe('getProfilesInspectorView', () => {
 
   describe('when profiles are available', () => {
     const profilesAdapter = {
-      getRootProfile: jest.fn().mockReturnValue(null),
-      getDataSourceProfile: jest.fn().mockReturnValue(null),
+      getRootProfile: jest.fn().mockReturnValue(getRootContextMock()),
+      getDataSourceProfile: jest.fn().mockReturnValue(getDataSourceContextMock()),
       getDocumentsProfiles: jest.fn().mockReturnValue({}),
       openDocDetails: jest.fn(),
     };
