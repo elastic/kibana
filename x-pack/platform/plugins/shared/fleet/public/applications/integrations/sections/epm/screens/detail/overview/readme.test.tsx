@@ -73,16 +73,11 @@ Some metrics information.
 `);
 
     await waitFor(() => {
-      const accordionSummaries = result.getAllByText('Exported fields');
+      const accordionSummaries = result.getAllByTestId('integrationsDocs.accordion');
       expect(accordionSummaries.length).toBe(2);
 
       const tables = result.container.querySelectorAll('table');
       expect(tables.length).toBe(2);
-
-      const accordionRoots = Array.from(
-        result.container.querySelectorAll('[class*="euiAccordion"]')
-      ).filter((el) => el.className.includes('euiAccordion ') || el.className === 'euiAccordion');
-      expect(accordionRoots.length).toBe(2);
     });
   });
 
@@ -122,7 +117,9 @@ Some requirements and setup instructions.
 
     await waitFor(() => {
       expect(result.container).not.toBeEmptyDOMElement();
-      expect(result.queryByText('Exported fields')).not.toBeInTheDocument();
+
+      const accordion = result.queryByTestId('integrationsDocs.accordion');
+      expect(accordion).not.toBeInTheDocument();
     });
   });
 

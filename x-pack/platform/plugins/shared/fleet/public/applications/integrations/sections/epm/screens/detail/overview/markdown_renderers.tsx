@@ -14,6 +14,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiAccordion,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 import type { MutableRefObject } from 'react';
@@ -135,9 +136,12 @@ export const markdownRenderers = (
       const id = getAnchorId(children[0]?.toString(), node.position?.start.line);
 
       return (
-        <EuiAccordion id={id} buttonContent={summaryText} initialIsOpen={false}>
-          {bodyNodes}
-        </EuiAccordion>
+        <>
+          <EuiAccordion id={id} buttonContent={summaryText} initialIsOpen={false} data-test-subj="integrationsDocs.accordion">
+            {bodyNodes}
+          </EuiAccordion>
+          <EuiSpacer size="m" />
+        </>
       );
     },
   };
