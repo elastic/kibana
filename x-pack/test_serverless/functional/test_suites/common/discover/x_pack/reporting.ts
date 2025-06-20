@@ -93,8 +93,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('is available if new', async () => {
         await PageObjects.reporting.openExportPopover();
-        await PageObjects.exports.clickPopoverItem('CSV');
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await PageObjects.reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await PageObjects.reporting.openExportPopover();
         expect(await PageObjects.exports.isPopoverItemEnabled('CSV')).to.be(true);
+        await PageObjects.reporting.openExportPopover();
       });
     });
 
