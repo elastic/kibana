@@ -35,6 +35,14 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const tabs = {
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
+      }),
+    },
     route: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -47,8 +55,8 @@ export function WiredStreamDetailManagement({
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     },
     schemaEditor: {
@@ -57,14 +65,6 @@ export function WiredStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
-      }),
-    },
-    lifecycle: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-        defaultMessage: 'Data retention',
       }),
     },
   };

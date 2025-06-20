@@ -10069,6 +10069,58 @@ paths:
                               timestamp: '2023-10-31T00:00:00.000Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
+              example27:
+                description: The following request set alert suppression to the rules with the specified IDs.
+                summary: Edit - Set alert suppression to rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                        group_by:
+                          - source.ip
+                        missing_fields_strategy: suppress
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example28:
+                description: The following request set alert suppression to threshold rules with the specified IDs.
+                summary: Edit - Set alert suppression to threshold rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: set_alert_suppression_for_threshold
+                      value:
+                        duration:
+                          unit: h
+                          value: 1
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example29:
+                description: The following request removes alert suppression from the rules with the specified IDs. If the rules do not have alert suppression, no changes are made.
+                summary: Edit - Removes alert suppression from rules (idempotent)
+                value:
+                  action: edit
+                  edit:
+                    - type: delete_alert_suppression
+                  ids:
+                    - 12345678-1234-1234-1234-1234567890ab
+                    - 87654321-4321-4321-4321-0987654321ba
+              example30:
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                value:
+                  action: fill_gaps
+                  ids:
+                    - 748694f0-6977-4ea5-8384-cd2e39730779
+                    - 164d0918-f720-4c9f-9f5c-c5122587cf19
+                  run:
+                    end_date: '2025-03-10T23:59:59.999Z'
+                    start_date: '2025-03-01T00:00:00.000Z'
             schema:
               oneOf:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteRules'
@@ -10077,6 +10129,7 @@ paths:
                 - $ref: '#/components/schemas/Security_Detections_API_BulkExportRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkDuplicateRules'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleRun'
+                - $ref: '#/components/schemas/Security_Detections_API_BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/Security_Detections_API_BulkEditRules'
       responses:
         '200':
@@ -13305,58 +13358,48 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      operationId: BulkUploadUsersCSV
+      operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
-          text/csv:
-            schema:
-              type: string
-        description: CSV file containing users to upsert
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via CSV upload
-      tags:
-        - Security Entity Analytics API
-  /api/entity_analytics/monitoring/users/_json:
-    post:
-      operationId: BulkUploadUsersJSON
-      requestBody:
-        content:
-          text/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                users:
-                  items:
-                    type: object
-                    properties:
-                      is_monitored:
-                        type: boolean
-                      user_name:
-                        type: string
-                  type: array
-        description: JSON file containing users to upsert
-        required: true
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
       responses:
         '200':
           content:
             application/json:
               schema:
+                example:
+                  errors:
+                    - index: 1
+                      message: Invalid monitored field
+                      username: john.doe
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
                 type: object
                 properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via JSON upload
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivmonUserCsvUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Upsert multiple monitored users via CSV upload
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
@@ -23623,7 +23666,7 @@ paths:
                 required:
                   - message
                   - attributes
-      summary: Update an agent
+      summary: Update an agent by ID
       tags:
         - Elastic Agents
   /api/fleet/agents/{agentId}/actions:
@@ -23766,109 +23809,6 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
-  /api/fleet/agents/{agentId}/migrate:
-    post:
-      description: 'Migrate a single agent to another cluster.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.'
-      operationId: post-fleet-agents-agentid-migrate
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - in: path
-          name: agentId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                enrollment_token:
-                  type: string
-                settings:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    ca_sha256:
-                      type: string
-                    certificate_authorities:
-                      type: string
-                    elastic_agent_cert:
-                      type: string
-                    elastic_agent_cert_key:
-                      type: string
-                    elastic_agent_cert_key_passphrase:
-                      type: string
-                    headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    insecure:
-                      type: boolean
-                    proxy_disabled:
-                      type: boolean
-                    proxy_headers:
-                      additionalProperties:
-                        type: string
-                      type: object
-                    proxy_url:
-                      type: string
-                    replace_token:
-                      type: boolean
-                    staging:
-                      type: boolean
-                    tags:
-                      items:
-                        type: string
-                      type: array
-                uri:
-                  format: uri
-                  type: string
-              required:
-                - uri
-                - enrollment_token
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  actionId:
-                    type: string
-                required:
-                  - actionId
-        '400':
-          content:
-            application/json:
-              schema:
-                additionalProperties: false
-                description: Generic Error
-                type: object
-                properties:
-                  attributes: {}
-                  error:
-                    type: string
-                  errorType:
-                    type: string
-                  message:
-                    type: string
-                  statusCode:
-                    type: number
-                required:
-                  - message
-                  - attributes
-      summary: Migrate a single agent
-      tags:
-        - Elastic Agents
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -56819,6 +56759,69 @@ paths:
       summary: Get a private location
       tags:
         - synthetics
+    put:
+      description: |
+        Update an existing private location's label.
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      operationId: put-private-location
+      parameters:
+        - description: The unique identifier of the private location to be updated.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+            schema:
+              type: object
+              properties:
+                label:
+                  description: A new label for the private location. Must be at least 1 character long.
+                  minLength: 1
+                  type: string
+              required:
+                - label
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+              schema:
+                $ref: '#/components/schemas/Synthetics_getPrivateLocation'
+          description: A successful response.
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+      summary: Update a private location
+      tags:
+        - synthetics
   /api/task_manager/_health:
     get:
       description: |
@@ -68369,6 +68372,21 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadAlertSuppression:
+      anyOf:
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppression'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold'
+        - $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression'
+    Security_Detections_API_BulkActionEditPayloadDeleteAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - delete_alert_suppression
+          type: string
+      required:
+        - type
     Security_Detections_API_BulkActionEditPayloadIndexPatterns:
       description: |
         Edits index patterns of rulesClient.
@@ -68474,6 +68492,30 @@ components:
       required:
         - type
         - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppression:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_AlertSuppression'
+      required:
+        - type
+        - value
+    Security_Detections_API_BulkActionEditPayloadSetAlertSuppressionForThreshold:
+      type: object
+      properties:
+        type:
+          enum:
+            - set_alert_suppression_for_threshold
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_ThresholdAlertSuppression'
+      required:
+        - type
+        - value
     Security_Detections_API_BulkActionEditPayloadTags:
       description: |
         Edits tags of rules.
@@ -68527,6 +68569,9 @@ components:
         - ESQL_INDEX_PATTERN
         - MANUAL_RULE_RUN_FEATURE
         - MANUAL_RULE_RUN_DISABLED_RULE
+        - THRESHOLD_RULE_TYPE_IN_SUPPRESSION
+        - UNSUPPORTED_RULE_IN_SUPPRESSION_FOR_THRESHOLD
+        - RULE_FILL_GAPS_DISABLED_RULE
       type: string
     Security_Detections_API_BulkActionSkipResult:
       type: object
@@ -68536,7 +68581,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -68778,6 +68825,48 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkGapsFillingSkipReason:
+      enum:
+        - NO_GAPS_TO_FILL
+      type: string
+    Security_Detections_API_BulkManualRuleFillGaps:
+      type: object
+      properties:
+        action:
+          enum:
+            - fill_gaps
+          type: string
+        fill_gaps:
+          description: Object that describes applying a manual gap fill action for the specified time range.
+          type: object
+          properties:
+            end_date:
+              description: End date of the manual gap fill
+              type: string
+            start_date:
+              description: Start date of the manual gap fill
+              type: string
+          required:
+            - start_date
+            - end_date
+        gaps_range_end:
+          description: Gaps range end, valid only when query is provided
+          type: string
+        gaps_range_start:
+          description: Gaps range start, valid only when query is provided
+          type: string
+        ids:
+          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          items:
+            type: string
+          minItems: 1
+          type: array
+        query:
+          description: Query to filter rules.
+          type: string
+      required:
+        - action
+        - fill_gaps
     Security_Detections_API_BulkManualRuleRun:
       type: object
       properties:
@@ -76387,6 +76476,34 @@ components:
       required:
         - type
         - status
+    Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        index:
+          nullable: true
+          type: integer
+        message:
+          type: string
+        username:
+          nullable: true
+          type: string
+      required:
+        - message
+        - index
+        - username
+    Security_Entity_Analytics_API_PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

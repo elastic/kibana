@@ -14,6 +14,12 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 
+export interface MonitorData {
+  scheduleInMs: number;
+  locations: string[];
+  type: string;
+}
+
 export const processMonitors = (
   allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
   queryLocations?: string[] | string
@@ -28,12 +34,11 @@ export const processMonitors = (
   const disabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
-  let maxPeriod = 0;
   let projectMonitorsCount = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
-  const monitorLocationsMap: Record<string, string[]> = {};
   const monitorQueryIdToConfigIdMap: Record<string, string> = {};
+  const monitorsData: Record<string, MonitorData> = {};
 
   for (const monitor of allMonitors) {
     const attrs = monitor.attributes;
@@ -58,25 +63,26 @@ export const processMonitors = (
     } else {
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
-      monitorLocationsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
-        ? intersection(monitorLocIds, queryLocations)
-        : monitorLocIds;
-      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);
+      monitorsData[attrs[ConfigKey.MONITOR_QUERY_ID]] = {
+        scheduleInMs: periodToMs(attrs[ConfigKey.SCHEDULE]),
+        locations: queryLocations ? intersection(monitorLocIds, queryLocations) : monitorLocIds,
+        type: attrs[ConfigKey.MONITOR_TYPE],
+      };
 
-      maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
+      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);
     }
   }
 
   return {
-    maxPeriod,
+    maxPeriod: Math.max(...Object.values(monitorsData).map(({ scheduleInMs }) => scheduleInMs)),
     allIds,
     enabledMonitorQueryIds,
     disabledMonitorQueryIds,
     disabledCount,
-    monitorLocationsMap,
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorLocationIds: [...listOfLocationsSet],
     monitorQueryIdToConfigIdMap,
+    monitorsData,
   };
 };

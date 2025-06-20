@@ -818,7 +818,7 @@ export const getUngroupedESQuery = (
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   executionTimeRange?: ExecutionTimeRange
-): object => {
+): estypes.SearchRequest => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
     timestampField,
@@ -845,7 +845,7 @@ export const getUngroupedESQuery = (
     index,
     allow_no_indices: true,
     ignore_unavailable: true,
-    body,
+    ...body,
   };
 };
 

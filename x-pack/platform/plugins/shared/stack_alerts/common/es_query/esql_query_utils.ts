@@ -248,8 +248,11 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
   return astCommands.reduce((updatedFields, command) => {
     for (const renameArg of command.args) {
-      if (isOptionItem(renameArg) && renameArg.name === 'as') {
-        const [original, renamed] = renameArg.args;
+      if (isOptionItem(renameArg) && (renameArg.name === 'as' || renameArg.name === '=')) {
+        const [original, renamed] =
+          renameArg.name === 'as'
+            ? [renameArg.args[0], renameArg.args[1]]
+            : [renameArg.args[1], renameArg.args[0]];
         if (isColumnItem(original) && isColumnItem(renamed)) {
           updatedFields = updatedFields.map((field) =>
             field === original.name ? renamed.name : field

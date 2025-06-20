@@ -125,22 +125,10 @@ export class TLSRuleExecutor {
       )} | parsed location filter is ${JSON.stringify(locationIds)} `
     );
 
-    const {
-      allIds,
-      enabledMonitorQueryIds,
-      monitorLocationIds,
-      monitorLocationsMap,
-      projectMonitorsCount,
-      monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors);
+    const { enabledMonitorQueryIds } = processMonitors(this.monitors);
 
     return {
       enabledMonitorQueryIds,
-      monitorLocationIds,
-      allIds,
-      monitorLocationsMap,
-      projectMonitorsCount,
-      monitorQueryIdToConfigIdMap,
     };
   }
 

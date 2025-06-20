@@ -24,6 +24,7 @@ import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -70,6 +71,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         share: {} as unknown as SharePublicStart,
         navigation: {} as unknown as NavigationPublicStart,
         savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         licensing: {} as unknown as LicensingPluginStart,
         indexManagement: {} as unknown as IndexManagementPluginStart,

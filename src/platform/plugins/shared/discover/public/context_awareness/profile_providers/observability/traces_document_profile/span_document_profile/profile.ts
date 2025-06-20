@@ -8,7 +8,12 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import {
+  DATASTREAM_TYPE_FIELD,
+  getFieldValue,
+  OTEL_SPAN_KIND,
+  PROCESSOR_EVENT_FIELD,
+} from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
@@ -19,12 +24,20 @@ const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span
 
 export const createObservabilityTracesSpanDocumentProfileProvider = ({
   tracesContextService,
+  apmErrorsContextService,
+  logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer(tracesContextService.getAllTracesIndexPattern()),
+    getDocViewer: createGetDocViewer({
+      apm: {
+        errors: apmErrorsContextService.getErrorsIndexPattern(),
+        traces: tracesContextService.getAllTracesIndexPattern(),
+      },
+      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+    }),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
@@ -57,5 +70,10 @@ const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
 const isSpanDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'span';
+  const spanKind = getFieldValue(record, OTEL_SPAN_KIND);
+
+  const isApmSpan = processorEvent === 'span';
+  const isOtelSpan = spanKind != null || processorEvent == null;
+
+  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
 };

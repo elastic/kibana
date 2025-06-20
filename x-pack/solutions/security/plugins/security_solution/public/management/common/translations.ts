@@ -212,6 +212,11 @@ export const CONSOLE_COMMANDS = {
       },
     },
   },
+  runscript: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.runscript.about', {
+      defaultMessage: 'Run a script on the host',
+    }),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {
@@ -259,10 +264,7 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
       },
     },
     title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.title', {
-      defaultMessage: 'Isolate',
-    }),
-    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
-      defaultMessage: 'Run a script on the host',
+      defaultMessage: 'Run Script',
     }),
     helpUsage: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.runscript.about', {
       defaultMessage: `Command Examples for Running Scripts:
@@ -287,6 +289,45 @@ export const CROWDSTRIKE_CONSOLE_COMMANDS = {
     }),
     privileges: i18n.translate(
       'xpack.securitySolution.crowdStrikeConsoleCommands.runscript.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
+  },
+};
+
+export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
+  runscript: {
+    args: {
+      scriptName: {
+        about: i18n.translate(
+          'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.args.scriptName.about',
+          {
+            defaultMessage: 'Script name in Files Library',
+          }
+        ),
+      },
+      args: {
+        about: i18n.translate(
+          'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.args.args.about',
+          {
+            defaultMessage: 'Command line arguments',
+          }
+        ),
+      },
+    },
+
+    helpUsage: i18n.translate(
+      'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.about',
+      {
+        defaultMessage: `Command Examples for Running Scripts:
+   runscript --ScriptName="CloudScript1.ps1" --Args="--Verbose true"
+`,
+      }
+    ),
+    privileges: i18n.translate(
+      'xpack.securitySolution.msDefenderEndpointConsoleCommands.runscript.privileges',
       {
         defaultMessage:
           'Insufficient privileges to run script. Contact your Kibana administrator if you think you should have this permission.',

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +20,7 @@ import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { useTraceWaterfallContext } from './trace_waterfall_context';
 
 export function BarDetails({
   item,
@@ -30,6 +32,12 @@ export function BarDetails({
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
 }) {
   const theme = useEuiTheme();
+  const { getRelatedErrorsHref } = useTraceWaterfallContext();
+
+  const viewRelatedErrorsLabel = i18n.translate(
+    'xpack.apm.waterfall.embeddableRelatedErrors.unifedErrorCount',
+    { defaultMessage: 'View related errors' }
+  );
 
   return (
     <div
@@ -47,6 +55,7 @@ export function BarDetails({
           position: absolute;
           right: 0;
           max-width: 100%;
+          margin-top: ${theme.euiTheme.size.xxs};
           & > div:last-child {
             margin-right: ${theme.euiTheme.size.s};
             white-space: nowrap;
@@ -79,6 +88,7 @@ export function BarDetails({
                 color="danger"
                 iconType="errorFilled"
                 iconSize="s"
+                href={getRelatedErrorsHref ? (getRelatedErrorsHref(item.id) as any) : undefined}
                 onClick={(e: React.MouseEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
@@ -87,6 +97,22 @@ export function BarDetails({
                   }
                 }}
               />
+            ) : getRelatedErrorsHref ? (
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiBadge
+                color={theme.euiTheme.colors.danger}
+                iconType="arrowRight"
+                href={getRelatedErrorsHref(item.id) as any}
+                onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
+                  e.stopPropagation();
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={viewRelatedErrorsLabel}
+                onClickAriaLabel={viewRelatedErrorsLabel}
+              >
+                {viewRelatedErrorsLabel}
+              </EuiBadge>
             ) : (
               <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
             )}

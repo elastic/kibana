@@ -75,7 +75,9 @@ describe('useTableFilters', () => {
   });
 
   it('should return initial search term and field types', () => {
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     expect(result.current.searchTerm).toBe('');
     expect(result.current.selectedFieldTypes).toEqual([]);
@@ -86,7 +88,9 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by search term', () => {
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     act(() => {
       result.current.onChangeSearchTerm('ext');
@@ -99,7 +103,9 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by field type', () => {
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     act(() => {
       result.current.onChangeFieldTypes(['number']);
@@ -127,7 +133,9 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by search term and field type', () => {
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     act(() => {
       result.current.onChangeSearchTerm('ext');
@@ -159,7 +167,9 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by field value and field type', () => {
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     expect(result.current.onFilterField(rowTimestamp)).toBe(true);
     expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
@@ -201,7 +211,9 @@ describe('useTableFilters', () => {
     storage.set(LOCAL_STORAGE_KEY_SEARCH_TERM, 'bytes');
     storage.set(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES, '["number"]');
 
-    const { result } = renderHook(() => useTableFilters(storage));
+    const { result } = renderHook(() =>
+      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
+    );
 
     expect(result.current.searchTerm).toBe('bytes');
     expect(result.current.selectedFieldTypes).toEqual(['number']);

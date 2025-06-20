@@ -29,23 +29,20 @@ export function Variables({ vars }: Props) {
   }
   const flattenedVariables = getFlattenedKeyValuePairs(vars);
   return (
-    <React.Fragment>
-      <VariablesContainer>
-        <EuiAccordion
-          id="local-variables"
-          className="euiAccordion"
-          buttonContent={i18n.translate(
-            'xpack.eventStacktrace.stacktraceTab.localVariablesToogleButtonLabel',
-            {
-              defaultMessage: 'Local variables',
-            }
-          )}
-        >
-          <React.Fragment>
-            <KeyValueTable keyValuePairs={flattenedVariables} />
-          </React.Fragment>
-        </EuiAccordion>
-      </VariablesContainer>
-    </React.Fragment>
+    <VariablesContainer>
+      <EuiAccordion
+        id="local-variables"
+        data-test-subj="stacktraceLocalVariables"
+        className="euiAccordion"
+        buttonContent={i18n.translate(
+          'xpack.eventStacktrace.stacktraceTab.localVariablesToogleButtonLabel',
+          {
+            defaultMessage: 'Local variables',
+          }
+        )}
+      >
+        <KeyValueTable keyValuePairs={flattenedVariables} />
+      </EuiAccordion>
+    </VariablesContainer>
   );
 }

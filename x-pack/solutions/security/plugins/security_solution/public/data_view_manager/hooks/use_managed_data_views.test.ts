@@ -54,7 +54,10 @@ describe('useManagedDataViews', () => {
     ];
 
     // Mock the Redux selector
-    (useSelector as jest.Mock).mockReturnValue({ dataViews: mockDataViews });
+    (useSelector as jest.Mock).mockReturnValue({
+      dataViews: mockDataViews,
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
 
     // Render the hook
     const { result } = renderHook(() => useManagedDataViews());
@@ -85,7 +88,10 @@ describe('useManagedDataViews', () => {
       { id: 'some-id', title: 'Some Data View' },
       { id: 'another-id', title: 'Another Data View' },
     ];
-    (useSelector as jest.Mock).mockReturnValue({ dataViews: mockDataViews });
+    (useSelector as jest.Mock).mockReturnValue({
+      dataViews: mockDataViews,
+      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    });
 
     const { result } = renderHook(() => useManagedDataViews());
 

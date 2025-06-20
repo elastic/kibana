@@ -356,58 +356,48 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      operationId: BulkUploadUsersCSV
+      operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
-          text/csv:
-            schema:
-              type: string
-        description: CSV file containing users to upsert
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via CSV upload
-      tags:
-        - Security Entity Analytics API
-  /api/entity_analytics/monitoring/users/_json:
-    post:
-      operationId: BulkUploadUsersJSON
-      requestBody:
-        content:
-          text/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
-                users:
-                  items:
-                    type: object
-                    properties:
-                      is_monitored:
-                        type: boolean
-                      user_name:
-                        type: string
-                  type: array
-        description: JSON file containing users to upsert
-        required: true
+                file:
+                  description: The CSV file to upload.
+                  format: binary
+                  type: string
+              required:
+                - file
       responses:
         '200':
           content:
             application/json:
               schema:
+                example:
+                  errors:
+                    - index: 1
+                      message: Invalid monitored field
+                      username: john.doe
+                  stats:
+                    failed: 1
+                    successful: 1
+                    total: 2
                 type: object
                 properties:
-                  upserted_count:
-                    type: integer
-          description: Successful response
-      summary: Upsert multiple monitored users via JSON upload
+                  errors:
+                    items:
+                      $ref: '#/components/schemas/PrivmonUserCsvUploadErrorItem'
+                    type: array
+                  stats:
+                    $ref: '#/components/schemas/PrivmonUserCsvUploadStats'
+                required:
+                  - errors
+                  - stats
+          description: Bulk upload successful
+        '413':
+          description: File too large
+      summary: Upsert multiple monitored users via CSV upload
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
@@ -1670,6 +1660,34 @@ components:
       required:
         - type
         - status
+    PrivmonUserCsvUploadErrorItem:
+      type: object
+      properties:
+        index:
+          nullable: true
+          type: integer
+        message:
+          type: string
+        username:
+          nullable: true
+          type: string
+      required:
+        - message
+        - index
+        - username
+    PrivmonUserCsvUploadStats:
+      type: object
+      properties:
+        failed:
+          type: integer
+        successful:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

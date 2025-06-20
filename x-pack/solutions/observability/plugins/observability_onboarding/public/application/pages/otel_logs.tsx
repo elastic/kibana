@@ -8,10 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { PageTemplate } from './template';
 import { CustomHeader } from '../header';
 import { OtelLogsPanel } from '../quickstart_flows/otel_logs';
 import { type ObservabilityOnboardingAppServices } from '../..';
+import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 export const OtelLogsPage = () => {
   const {
@@ -19,6 +21,10 @@ export const OtelLogsPage = () => {
       context: { isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   return (
     <PageTemplate
@@ -31,13 +37,23 @@ export const OtelLogsPage = () => {
               defaultMessage: 'OpenTelemetry',
             }
           )}
-          captionCopy={i18n.translate(
-            'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
-            {
-              defaultMessage:
-                'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
-            }
-          )}
+          captionCopy={
+            metricsOnboardingEnabled
+              ? i18n.translate(
+                  'xpack.observability_onboarding.experimentalOnboardingFlow.customHeader.otel.description',
+                  {
+                    defaultMessage:
+                      'Collect logs and host metrics using the Elastic distribution of the OTel collector.',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.observability_onboarding.logsEssential.experimentalOnboardingFlow.customHeader.otel.description',
+                  {
+                    defaultMessage:
+                      'Collect logs using the Elastic distribution of the OTel collector.',
+                  }
+                )
+          }
           isTechnicalPreview={isServerless}
         />
       }

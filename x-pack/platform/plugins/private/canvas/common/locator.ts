@@ -6,6 +6,7 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { CANVAS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { CANVAS_APP } from './lib/constants';
 
@@ -17,8 +18,6 @@ export type CanvasAppLocatorParams = {
 };
 
 export type CanvasAppLocator = LocatorPublic<CanvasAppLocatorParams>;
-
-export const CANVAS_APP_LOCATOR = 'CANVAS_APP_LOCATOR';
 
 export class CanvasAppLocatorDefinition implements LocatorDefinition<CanvasAppLocatorParams> {
   id = CANVAS_APP_LOCATOR;

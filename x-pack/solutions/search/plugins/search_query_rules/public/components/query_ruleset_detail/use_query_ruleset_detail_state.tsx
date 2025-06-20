@@ -11,22 +11,35 @@ import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
 import { SearchQueryRulesQueryRule } from '../../types';
 import { normalizeQueryRuleset } from '../../utils/query_rules_utils';
 
+const createEmptyRuleset = (
+  rulesetId: QueryRulesQueryRuleset['ruleset_id']
+): QueryRulesQueryRuleset => ({
+  ruleset_id: rulesetId,
+  rules: [],
+});
+
 interface UseQueryRulesetDetailStateProps {
   rulesetId: string;
+  createMode: boolean;
 }
 
-export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailStateProps) => {
-  const { data, isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId);
-  const [queryRuleset, setQueryRuleset] = useState<QueryRulesQueryRuleset | null>(null);
+export const useQueryRulesetDetailState = ({
+  rulesetId,
+  createMode,
+}: UseQueryRulesetDetailStateProps) => {
+  const { data, isInitialLoading, isError, error } = useFetchQueryRuleset(rulesetId, !createMode);
+  const [queryRuleset, setQueryRuleset] = useState<QueryRulesQueryRuleset | null>(
+    createMode ? createEmptyRuleset(rulesetId) : null
+  );
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
 
   useEffect(() => {
-    if (data) {
+    if (!createMode && !isError && data) {
       const normalizedRuleset = normalizeQueryRuleset(data);
       setQueryRuleset(normalizedRuleset);
       setRules(normalizedRuleset.rules);
     }
-  }, [data, setRules, setQueryRuleset]);
+  }, [data, setRules, setQueryRuleset, createMode, isError]);
 
   const updateRule = (updatedRule: SearchQueryRulesQueryRule) => {
     const newRules = rules.map((rule) =>
@@ -34,16 +47,12 @@ export const useQueryRulesetDetailState = ({ rulesetId }: UseQueryRulesetDetailS
     );
     setRules([...newRules]);
   };
-  const addNewRule = (newRuleId: string) => {
+
+  const addNewRule = (newRule: SearchQueryRulesQueryRule) => {
     setRules((prevRules) => [
       ...prevRules,
       {
-        rule_id: newRuleId,
-        criteria: [],
-        type: 'pinned',
-        actions: {
-          docs: [],
-        },
+        ...newRule,
       },
     ]);
   };

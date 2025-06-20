@@ -142,6 +142,7 @@ export const getNavigationTreeDefinition = ({
                       }),
                     },
                     {
+                      breadcrumbStatus: 'hidden',
                       link: 'searchPlayground',
                     },
                     {

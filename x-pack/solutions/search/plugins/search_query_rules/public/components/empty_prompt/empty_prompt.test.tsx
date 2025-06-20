@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EmptyPrompt } from './empty_prompt';
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../common/doc_links', () => ({
@@ -21,16 +21,32 @@ const Wrapper = ({ children }: { children?: React.ReactNode }) => (
 );
 const mockGetStartedAction = jest.fn();
 
+const TEST_IDS = {
+  getStartedButton: 'searchQueryRulesEmptyPromptGetStartedButton',
+  footerLink: 'searchQueryRulesEmptyPromptFooterLink',
+};
+
+const ACTIONS = {
+  getStarted: () => {
+    act(() => {
+      fireEvent.click(screen.getByTestId(TEST_IDS.getStartedButton));
+    });
+  },
+};
+
 describe('Query Rules Overview Empty Prompt', () => {
-  it('renders', () => {
-    render(
-      <Wrapper>
-        <EmptyPrompt getStartedAction={mockGetStartedAction} />
-      </Wrapper>
-    );
-    expect(screen.getByTestId('searchQueryRulesEmptyPromptGetStartedButton')).toBeInTheDocument();
-    expect(screen.getByTestId('searchQueryRulesEmptyPromptFooterLink').getAttribute('href')).toBe(
-      'documentation-url'
-    );
+  it('renders correctly', () => {
+    render(<EmptyPrompt getStartedAction={mockGetStartedAction} />, {
+      wrapper: Wrapper,
+    });
+
+    expect(screen.getByTestId(TEST_IDS.getStartedButton)).toBeInTheDocument();
+    expect(screen.getByTestId(TEST_IDS.footerLink).getAttribute('href')).toBe('documentation-url');
+  });
+
+  it('calls getStartedAction when button is clicked', () => {
+    render(<EmptyPrompt getStartedAction={mockGetStartedAction} />, { wrapper: Wrapper });
+    ACTIONS.getStarted();
+    expect(mockGetStartedAction).toHaveBeenCalled();
   });
 });

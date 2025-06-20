@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-
+import { render, screen } from '@testing-library/react';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../../../dashboard_api/types';
 import { coreServices } from '../../../services/kibana_services';
@@ -19,67 +17,55 @@ import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 
 describe('DashboardEmptyScreen', () => {
-  function mountComponent(viewMode: ViewMode) {
+  function renderComponent(viewMode: ViewMode) {
     const mockDashboardApi = {
       viewMode$: new BehaviorSubject<ViewMode>(viewMode),
     } as unknown as DashboardApi;
-    return mountWithIntl(
+    return render(
       <DashboardContext.Provider value={mockDashboardApi}>
         <DashboardEmptyScreen />
       </DashboardContext.Provider>
     );
   }
 
-  test('renders correctly with view mode', () => {
-    const component = mountComponent('view');
-    expect(component.render()).toMatchSnapshot();
+  beforeEach(() => {
+    // Reset capabilities before each test
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
+  });
 
-    const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
-    expect(emptyReadWrite.length).toBe(1);
-    const emptyReadOnly = findTestSubject(component, 'dashboardEmptyReadOnly');
-    expect(emptyReadOnly.length).toBe(0);
-    const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
-    expect(editingPanel.length).toBe(0);
+  test('renders correctly with view mode', () => {
+    renderComponent('view');
+
+    expect(screen.getByTestId('dashboardEmptyReadWrite')).toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
   });
 
   test('renders correctly with edit mode', () => {
-    const component = mountComponent('edit');
-    expect(component.render()).toMatchSnapshot();
+    renderComponent('edit');
 
-    const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
-    expect(emptyReadWrite.length).toBe(0);
-    const emptyReadOnly = findTestSubject(component, 'dashboardEmptyReadOnly');
-    expect(emptyReadOnly.length).toBe(0);
-    const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
-    expect(editingPanel.length).toBe(1);
+    expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
+    expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
   });
 
   test('renders correctly with readonly mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
-    const component = mountComponent('view');
-    expect(component.render()).toMatchSnapshot();
+    renderComponent('view');
 
-    const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
-    expect(emptyReadWrite.length).toBe(0);
-    const emptyReadOnly = findTestSubject(component, 'dashboardEmptyReadOnly');
-    expect(emptyReadOnly.length).toBe(1);
-    const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
-    expect(editingPanel.length).toBe(0);
+    expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dashboardEmptyReadOnly')).toBeInTheDocument();
+    expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
   });
 
-  // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
     (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
-    const component = mountComponent('edit');
-    expect(component.render()).toMatchSnapshot();
+    renderComponent('edit');
 
-    const emptyReadWrite = findTestSubject(component, 'dashboardEmptyReadWrite');
-    expect(emptyReadWrite.length).toBe(0);
-    const emptyReadOnly = findTestSubject(component, 'dashboardEmptyReadOnly');
-    expect(emptyReadOnly.length).toBe(1);
-    const editingPanel = findTestSubject(component, 'emptyDashboardWidget');
-    expect(editingPanel.length).toBe(0);
+    expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dashboardEmptyReadOnly')).toBeInTheDocument();
+    expect(screen.queryByTestId('emptyDashboardWidget')).not.toBeInTheDocument();
   });
 });

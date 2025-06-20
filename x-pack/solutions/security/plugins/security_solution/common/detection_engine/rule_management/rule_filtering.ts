@@ -37,6 +37,7 @@ interface RulesFilterOptions {
   ruleExecutionStatus: RuleExecutionStatus;
   customizationStatus: RuleCustomizationStatus;
   ruleIds: string[];
+  includeRuleTypes?: Type[];
 }
 
 /**
@@ -55,6 +56,7 @@ export function convertRulesFilterToKQL({
   excludeRuleTypes = [],
   ruleExecutionStatus,
   customizationStatus,
+  includeRuleTypes = [],
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -80,6 +82,10 @@ export function convertRulesFilterToKQL({
 
   if (excludeRuleTypes.length) {
     kql.push(`NOT ${convertRuleTypesToKQL(excludeRuleTypes)}`);
+  }
+
+  if (includeRuleTypes.length) {
+    kql.push(convertRuleTypesToKQL(includeRuleTypes));
   }
 
   if (ruleExecutionStatus === RuleExecutionStatusEnum.succeeded) {

@@ -50,7 +50,8 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           `
         : css`
             .embPanel {
-              outline: 1px solid transparent; // necessary for outline-color transition
+              outline: var(--internalBorderStyle); // necessary for outline-color transition
+              outline-color: transparent; // necessary for outline-color transition
               z-index: ${euiTheme.levels.content}; // necessary for z-index transition
               // delay hiding border on hover out to match delay on hover actions
               transition: outline-color ${euiTheme.animation.extraFast},

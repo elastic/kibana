@@ -534,6 +534,62 @@
       },
       {
         "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.MissingAuthenticationError",
+        "type": "Class",
+        "tags": [],
+        "label": "MissingAuthenticationError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.MissingAuthenticationError",
+            "text": "MissingAuthenticationError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.MissingAuthenticationError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"missing_authentication_header_error\""
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.MissingAuthenticationError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
         "id": "def-common.PdfWorkerOutOfMemoryError",
         "type": "Class",
         "tags": [],
@@ -1568,6 +1624,41 @@
           },
           {
             "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.SCHEDULED",
+            "type": "Object",
+            "tags": [],
+            "label": "SCHEDULED",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.SCHEDULED.LIST",
+                "type": "string",
+                "tags": [],
+                "label": "LIST",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.INTERNAL_ROUTES.SCHEDULED.BULK_DISABLE",
+                "type": "string",
+                "tags": [],
+                "label": "BULK_DISABLE",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
             "id": "def-common.INTERNAL_ROUTES.HEALTH",
             "type": "string",
             "tags": [],
@@ -1583,6 +1674,17 @@
             "type": "string",
             "tags": [],
             "label": "GENERATE_PREFIX",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.SCHEDULE_PREFIX",
+            "type": "string",
+            "tags": [],
+            "label": "SCHEDULE_PREFIX",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
             "deprecated": false,

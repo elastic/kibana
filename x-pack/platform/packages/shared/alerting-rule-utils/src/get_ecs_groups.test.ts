@@ -51,4 +51,15 @@ describe('getEcsGroups', () => {
 
     expect(getEcsGroups(groups)).toEqual({});
   });
+
+  it('should handle array types assigned non-array values', () => {
+    const groups = [
+      {
+        field: 'tags',
+        value: 'abc',
+      },
+    ];
+
+    expect(getEcsGroups(groups)).toEqual({ tags: ['abc'] });
+  });
 });
