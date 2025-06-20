@@ -10,9 +10,8 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const returnTrue = () => true;
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const defaultOnFailure = (methodName: string) => (lastError: Error | undefined, reason: string) => {
   throw new Error(
@@ -48,6 +47,7 @@ interface Options<T> {
   description?: string;
   retryDelay?: number;
   retryCount?: number;
+  initialDelay?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
@@ -61,7 +61,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     accept = returnTrue,
     retryDelay = 502,
     retryCount,
+    initialDelay,
   } = options;
+
+  if (typeof initialDelay === 'number') {
+    await delay(initialDelay);
+  }
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
