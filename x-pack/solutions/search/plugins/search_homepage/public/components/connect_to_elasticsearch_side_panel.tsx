@@ -95,7 +95,7 @@ formance, and/or cost efficiency in your Serverless projects!"
               {i18n.translate(
                 'xpack.searchHomepage.connectToElasticsearch.customerEngineerRequestForm',
                 {
-                  defaultMessage: 'Customer Engineer Request Form',
+                  defaultMessage: 'Submit a request',
                 }
               )}
             </EuiLink>
