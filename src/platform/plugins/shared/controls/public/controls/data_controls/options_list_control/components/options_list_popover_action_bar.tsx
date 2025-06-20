@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -25,6 +26,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { lastValueFrom, take } from 'rxjs';
+import { css } from '@emotion/react';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
@@ -41,6 +43,7 @@ export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
+  const { euiTheme } = useEuiTheme();
   const { componentApi, displaySettings } = useOptionsListContext();
   const [areAllSelected, setAllSelected] = useState<boolean>(false);
 
@@ -168,6 +171,7 @@ export const OptionsListPopoverActionBar = ({
               <EuiCheckbox
                 checked={areAllSelected}
                 id={`optionsList-control-selectAll-checkbox-${componentApi.uuid}`}
+                // indeterminate={selectedOptions.length > 0 && !areAllSelected}
                 disabled={isBulkSelectDisabled}
                 data-test-subj="optionsList-control-selectAll"
                 onChange={() => {
@@ -179,8 +183,20 @@ export const OptionsListPopoverActionBar = ({
                     setAllSelected(true);
                   }
                 }}
-                css={{ padding: 0 }}
-                label={OptionsListStrings.popover.getSelectAllButtonLabel()}
+                css={css`
+                  .euiCheckbox__square {
+                    margin-block-start: 0;
+                  }
+                  .euiCheckbox__label {
+                    align-items: center;
+                    padding-inline-start: ${euiTheme.size.xs};
+                  }
+                `}
+                label={
+                  <EuiText size="xs">
+                    {OptionsListStrings.popover.getSelectAllButtonLabel()}
+                  </EuiText>
+                }
               />
             </EuiToolTip>
           </EuiFlexItem>
