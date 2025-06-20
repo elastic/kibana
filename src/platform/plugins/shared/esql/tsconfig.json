@@ -35,7 +35,11 @@
     "@kbn/visualization-utils",
     "@kbn/esql-types",
     "@kbn/licensing-plugin",
-    "@kbn/projects-solutions-groups"
+    "@kbn/projects-solutions-groups",
+    "@kbn/index-editor",
+    "@kbn/share-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/file-upload-plugin"
   ],
   "exclude": [
     "target/**/*",
