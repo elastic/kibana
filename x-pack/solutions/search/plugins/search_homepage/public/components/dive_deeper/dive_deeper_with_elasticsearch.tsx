@@ -65,7 +65,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
         <EuiFlexItem>
           <DocCallouts
             title={i18n.translate('xpack.searchHomepage.searchLabs.title', {
-              defaultMessage: 'Search Labs',
+              defaultMessage: 'Elasticsearch documentation',
             })}
             description={i18n.translate(
               'xpack.searchHomepage.elasticsearchDocumentation.description',
