@@ -9,7 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TableUpdateHandlerArgs } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -79,7 +79,6 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
-  const { onPageReady } = usePerformanceContext();
   const { toasts } = notifications;
   const {
     query: {
@@ -97,20 +96,26 @@ function InternalAlertsPage() {
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
 
+  const [tableLoading, setTableLoading] = useState(true);
+  const [tableCount, setTableCount] = useState(0);
+
   const onUpdate = ({ isLoading, totalCount }: TableUpdateHandlerArgs) => {
-    if (!isLoading) {
-      onPageReady({
-        customMetrics: {
-          key1: 'total_alert_count',
-          value1: totalCount,
-        },
-        meta: {
-          rangeFrom: alertSearchBarStateProps.rangeFrom,
-          rangeTo: alertSearchBarStateProps.rangeTo,
-        },
-      });
-    }
+    setTableLoading(isLoading);
+    setTableCount(totalCount);
   };
+
+  usePageReady({
+    isRefreshing: tableLoading,
+    isReady: !tableLoading,
+    customMetrics: {
+      key1: 'total_alert_count',
+      value1: tableCount,
+    },
+    meta: {
+      rangeFrom: alertSearchBarStateProps.rangeFrom,
+      rangeTo: alertSearchBarStateProps.rangeTo,
+    },
+  });
 
   useEffect(() => {
     return setScreenContext?.({
