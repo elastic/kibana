@@ -234,7 +234,7 @@ export const useAssetInventoryGrouping = ({
         },
       },
     }),
-    [currentSelectedGroup, uniqueValue, additionalFilters, query]
+    [currentSelectedGroup, uniqueValue, additionalFilters, query, pageIndex, pageSize]
   );
 
   const { data, isFetching } = useFetchGroupedData({
