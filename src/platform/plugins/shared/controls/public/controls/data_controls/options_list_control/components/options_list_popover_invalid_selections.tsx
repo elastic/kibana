@@ -57,6 +57,11 @@ export const OptionsListPopoverInvalidSelections = () => {
         key: String(key),
         label: fieldFormatter(key),
         checked: 'on',
+        css: css`
+          .euiSelectableListItem__prepend {
+            margin-inline-end: 0;
+          }
+        `,
         className: 'optionsList__selectionInvalid',
         'data-test-subj': `optionsList-control-invalid-selection-${key}`,
         prepend: (
@@ -97,7 +102,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           invalidSelections.size
         )}
         options={selectableOptions}
-        listProps={{ onFocusBadge: false, isVirtualized: false }}
+        listProps={{ onFocusBadge: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
           componentApi.deselectOption(changedOption.key);
