@@ -83,10 +83,29 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('imports new prebuilt rules when the package is not installed', async () => {
+    const IMPORT_PAYLOAD = [
+      {
+        ...NON_CUSTOMIZED_PREBUILT_RULE,
+        immutable: true,
+        rule_source: {
+          type: 'external',
+          is_customized: false,
+        },
+      },
+      {
+        ...CUSTOMIZED_PREBUILT_RULE,
+        immutable: true,
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+        },
+      },
+    ];
+
+    it('imports new prebuilt rules', async () => {
       await importRulesWithSuccess({
         getService,
-        rules: [NON_CUSTOMIZED_PREBUILT_RULE, CUSTOMIZED_PREBUILT_RULE],
+        rules: IMPORT_PAYLOAD,
         overwrite: false,
       });
 
@@ -148,7 +167,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    it('imports prebuilt rules on top of existing rules when the package is not installed', async () => {
+    it('imports prebuilt rules on top of existing rules', async () => {
       // Package installation is rate limited. A single package installation is allowed per 10 seconds.
       await retryService.tryWithRetries(
         'installSecurityDetectionEnginePackage',
@@ -164,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await importRulesWithSuccess({
         getService,
-        rules: [NON_CUSTOMIZED_PREBUILT_RULE, CUSTOMIZED_PREBUILT_RULE],
+        rules: IMPORT_PAYLOAD,
         overwrite: true,
       });
 

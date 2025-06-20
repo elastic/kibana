@@ -49,6 +49,69 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
+    it('imports a non-customized prebuilt rule without rule_source', async () => {
+      const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
+        ...PREBUILT_RULE_ASSET['security-rule'],
+      };
+
+      // At the moment of writing this test PREBUILT_RULE_ASSET['security-rule'] shouldn't contain immutable and rule_source
+      // but removing the fields explicitly will make test less sensitive to external changes
+      // @ts-expect-error intentionally remove non-optional immutable field
+      delete NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT.immutable;
+      // @ts-expect-error intentionally remove non-optional rule_source field
+      delete NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT.rule_source;
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
+        overwrite: false,
+      });
+
+      await assertImportedRule({
+        getService,
+        expectedRule: {
+          ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        },
+      });
+    });
+
+    it('imports a customized prebuilt rule without rule_source', async () => {
+      const CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
+        ...PREBUILT_RULE_ASSET['security-rule'],
+        name: 'Customized name',
+      };
+
+      // At the moment of writing this test PREBUILT_RULE_ASSET['security-rule'] shouldn't contain immutable and rule_source
+      // but removing the fields explicitly will make test less sensitive to external changes
+      // @ts-expect-error intentionally remove non-optional immutable field
+      delete CUSTOMIZED_PREBUILT_RULE_TO_IMPORT.immutable;
+      // @ts-expect-error intentionally remove non-optional rule_source field
+      delete CUSTOMIZED_PREBUILT_RULE_TO_IMPORT.rule_source;
+
+      await importRulesWithSuccess({
+        getService,
+        rules: [CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
+        overwrite: false,
+      });
+
+      await assertImportedRule({
+        getService,
+        expectedRule: {
+          ...CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: true,
+          },
+        },
+      });
+    });
+
     it('returns an error when importing a prebuilt rule without a rule_id field', async () => {
       const PREBUILT_RULE_TO_IMPORT = {
         ...PREBUILT_RULE_ASSET['security-rule'],
