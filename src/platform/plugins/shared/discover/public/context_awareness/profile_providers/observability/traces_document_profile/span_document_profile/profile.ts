@@ -8,7 +8,12 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import {
+  DATASTREAM_TYPE_FIELD,
+  getFieldValue,
+  OTEL_SPAN_KIND,
+  PROCESSOR_EVENT_FIELD,
+} from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
@@ -65,5 +70,10 @@ const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
 const isSpanDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'span';
+  const spanKind = getFieldValue(record, OTEL_SPAN_KIND);
+
+  const isApmSpan = processorEvent === 'span';
+  const isOtelSpan = spanKind != null || processorEvent == null;
+
+  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
 };

@@ -3317,6 +3317,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ConfigFieldSchema.requireTld",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requireTld",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ConfigFieldSchema.defaultValue",
             "type": "CompoundType",
             "tags": [],
