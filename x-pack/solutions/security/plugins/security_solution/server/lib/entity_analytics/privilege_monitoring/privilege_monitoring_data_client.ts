@@ -57,10 +57,11 @@ import type { PrivMonUserSource } from './types';
 
 import { batchPartitions } from '../shared/streams/batching';
 import { queryExistingUsers } from './users/query_existing_users';
-import { bulkBatchUpsertFromCSV } from './users/bulk/update_from_csv';
-import type { SoftDeletionResults } from './users/bulk/soft_delete_omitted_usrs';
-import { softDeleteOmittedUsers } from './users/bulk/soft_delete_omitted_usrs';
+import { bulkUpsertBatch } from './users/bulk/upsert_batch';
+import type { SoftDeletionResults } from './users/soft_delete_omitted_users';
+import { softDeleteOmittedUsers } from './users/soft_delete_omitted_users';
 import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
+import { accumulateUpsertResults } from './users/bulk/utils';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -284,28 +285,33 @@ export class PrivilegeMonitoringDataClient {
       skipEmptyLines: true,
     });
 
-    return Readable.from(stream.pipe(csvStream))
+    const res = Readable.from(stream.pipe(csvStream))
       .pipe(privilegedUserParserTransform())
       .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
       .map(queryExistingUsers(this.esClient, this.getIndex()))
-      .map(bulkBatchUpsertFromCSV(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .map(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .reduce(
-        (
-          { errors, stats }: PrivmonBulkUploadUsersCSVResponse,
-          batch: SoftDeletionResults
-        ): PrivmonBulkUploadUsersCSVResponse => {
-          return {
-            errors: errors.concat(batch.updated.errors),
-            stats: {
-              failed: stats.failed + batch.updated.failed,
-              successful: stats.successful + batch.updated.successful,
-              total: stats.total + batch.updated.failed + batch.updated.successful,
-            },
-          };
-        },
-        { errors: [], stats: { failed: 0, successful: 0, total: 0 } }
-      );
+      .map(bulkUpsertBatch(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .reduce(accumulateUpsertResults)
+      .then(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }));
+
+    // .map(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
+    // .reduce(
+    //   (
+    //     { errors, stats }: PrivmonBulkUploadUsersCSVResponse,
+    //     batch: SoftDeletionResults
+    //   ): PrivmonBulkUploadUsersCSVResponse => {
+    //     return {
+    //       errors: errors.concat(batch.updated.errors),
+    //       stats: {
+    //         failed: stats.failed + batch.updated.failed,
+    //         successful: stats.successful + batch.updated.successful,
+    //         total: stats.total + batch.updated.failed + batch.updated.successful,
+    //       },
+    //     };
+    //   },
+    //   { errors: [], stats: { failed: 0, successful: 0, total: 0 } }
+    // );
+
+    return res;
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

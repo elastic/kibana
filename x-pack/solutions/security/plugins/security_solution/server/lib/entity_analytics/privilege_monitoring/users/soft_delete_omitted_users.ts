@@ -6,9 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isRight } from 'fp-ts/Either';
-import type { MonitoredUserDoc } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
-import type { BulkProcessingResults, Options } from './types';
+import type { MonitoredUserDoc } from '../../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
+import type { BulkProcessingResults, Options } from './bulk/types';
 
 export interface SoftDeletionResults {
   updated: BulkProcessingResults;
@@ -23,19 +22,12 @@ export interface SoftDeletionResults {
 export const softDeleteOmittedUsers =
   (esClient: ElasticsearchClient, index: string, { flushBytes, retries }: Options) =>
   async (processed: BulkProcessingResults) => {
-    const uploaded = processed.batch.uploaded.reduce((acc: string[], either) => {
-      if (!isRight(either)) {
-        return acc;
-      }
-      acc.push(either.right.username);
-      return acc;
-    }, []);
     const res = await esClient.helpers.search<MonitoredUserDoc>({
       index,
       query: {
         bool: {
           must: [{ term: { 'user.is_privileged': true } }, { term: { 'labels.sources': 'csv' } }],
-          must_not: [{ terms: { 'user.name': uploaded } }],
+          must_not: [{ terms: { 'user.name': processed.users.map((u) => u.username) } }],
         },
       },
     });

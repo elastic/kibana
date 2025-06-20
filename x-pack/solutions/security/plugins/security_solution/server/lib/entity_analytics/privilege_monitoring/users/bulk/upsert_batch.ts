@@ -14,11 +14,11 @@ import type {
   Batch,
   BulkPrivMonUser,
   BulkProcessingError,
-  BulkProcessingResults,
+  BulkBatchProcessingResults,
   Options,
 } from './types';
 
-export const bulkBatchUpsertFromCSV =
+export const bulkUpsertBatch =
   (esClient: ElasticsearchClient, index: string, { flushBytes, retries }: Options) =>
   async (batch: Batch) => {
     const errors: BulkProcessingError[] = [];
@@ -78,5 +78,5 @@ export const bulkBatchUpsertFromCSV =
       successful,
       errors,
       batch,
-    } satisfies BulkProcessingResults;
+    } satisfies BulkBatchProcessingResults;
   };
