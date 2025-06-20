@@ -26,6 +26,13 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
   const [query, setQuery] = useState<Query | AggregateQuery>(
     props.query || props.queryStringManager.getQuery()
   );
+
+  useEffect(() => {
+    if (props.query && props.query !== query) {
+      setQuery(props.query);
+    }
+  }, [query, props.query]);
+
   useEffect(() => {
     const subscriptions = new Subscription();
 
@@ -33,7 +40,9 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
       props.queryStringManager.getUpdates$().subscribe({
         next: () => {
           const newQuery = props.queryStringManager.getQuery();
-          setQuery(newQuery);
+          if (newQuery !== query) {
+            setQuery(newQuery);
+          }
         },
       })
     );
@@ -41,7 +50,7 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [props.queryStringManager]);
+  }, [props.queryStringManager, query]);
 
   const isQueryType = isOfQueryType(query);
   const stableQuery = useMemo(() => {

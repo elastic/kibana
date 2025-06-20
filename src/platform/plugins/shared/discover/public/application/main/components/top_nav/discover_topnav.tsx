@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -53,6 +54,7 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
+  const [actualQuery, setActualQuery] = useState<Query | AggregateQuery | undefined>(query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
@@ -81,6 +83,9 @@ export const DiscoverTopNav = ({
       }
     };
   }, []);
+  useEffect(() => {
+    setActualQuery(query);
+  }, [query]);
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
@@ -109,6 +114,16 @@ export const DiscoverTopNav = ({
   const addField = useMemo(
     () => (canEditDataView && editField ? () => editField() : undefined),
     [editField, canEditDataView]
+  );
+
+  const onQueryChange = useCallback(
+    (payload: {
+      dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+      query?: Query | AggregateQuery;
+    }) => {
+      setActualQuery(payload.query);
+    },
+    [setActualQuery]
   );
 
   const createNewDataView = useCallback(() => {
@@ -221,10 +236,11 @@ export const DiscoverTopNav = ({
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
+        onQueryChange={onQueryChange}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
-        query={query}
+        query={actualQuery}
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}
