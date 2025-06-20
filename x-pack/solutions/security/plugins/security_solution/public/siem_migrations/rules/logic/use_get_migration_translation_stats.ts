@@ -34,6 +34,7 @@ export const useGetMigrationTranslationStats = (migrationId: string) => {
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_TRANSLATION_STATS_FAILURE });
       },
+      cacheTime: 2 * 1000,
     }
   );
 };
