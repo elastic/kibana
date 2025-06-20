@@ -137,6 +137,8 @@ export const getRecommendedQueries = ({
             label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.categorize.label',
               {
+                // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+                // the capability aiops.enabled can be used to check both of these conditions
                 defaultMessage: 'Detect change points',
               }
             ),
@@ -173,7 +175,9 @@ export const getRecommendedQueries = ({
         ]
       : []),
     ...(categorizationField
-      ? [
+      ? // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+        // the capability aiops.enabled can be used to check both of these conditions
+        [
           {
             label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.label',

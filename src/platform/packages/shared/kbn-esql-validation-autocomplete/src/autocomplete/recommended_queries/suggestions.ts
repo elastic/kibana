@@ -109,28 +109,31 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
   return recommendedQueriesTemplates;
 };
 
-export const METADATA_FIELDS = [
-  '_version',
-  '_id',
-  '_index',
-  '_source',
-  '_ignored',
-  '_index_mode',
-  '_score',
-];
-
 /**
  * This function returns the categorization field from the list of fields.
  * It checks for the presence of 'message', 'error.message', or 'event.original' in that order.
+ * If none of these fields are present, it returns the first field from the list,
+ * Assumes text fields have been passed in the `fields` array.
  *
- * This function is a duplicate of the one in x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/get_categorization_field.ts.
- * It is included here to avoid build errors when importing from xpack packages.
+ * This function is a duplicate of the one in src/platform/packages/shared/kbn-aiops-utils.
+ * It is included here to avoid build errors due to bazel
+ *
+ * TODO: Remove this function once the bazel issue is resolved.
  *
  * @param fields, the list of fields to check
  * @returns string | undefined, the categorization field if found, otherwise undefined
  */
 
 export function getCategorizationField(fields: string[]): string | undefined {
+  const METADATA_FIELDS = [
+    '_version',
+    '_id',
+    '_index',
+    '_source',
+    '_ignored',
+    '_index_mode',
+    '_score',
+  ];
   const fieldPriority = ['message', 'error.message', 'event.original'];
   const fieldSet = new Set(fields);
   for (const field of fieldPriority) {
