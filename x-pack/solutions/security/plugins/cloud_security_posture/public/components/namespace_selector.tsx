@@ -56,7 +56,7 @@ export const NamespaceSelector = ({
 
   const menuItems = useMemo(() => {
     return namespaces.map((namespace, index) => (
-      <>
+      <React.Fragment key={`namespace-selector-${namespace}`}>
         <EuiContextMenuItem
           {...isSelectedProps(namespace)}
           key={namespace}
@@ -69,7 +69,7 @@ export const NamespaceSelector = ({
         {index < namespaces.length - 1 && (
           <EuiHorizontalRule margin="none" key={`rule-${namespace}`} />
         )}
-      </>
+      </React.Fragment>
     ));
   }, [namespaces, isSelectedProps, onSelectedNamespaceChange]);
 

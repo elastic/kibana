@@ -447,6 +447,7 @@ export const ComplianceDashboard = () => {
       ? [
           <NamespaceSelector
             data-test-subj="namespace-selector"
+            key={`namespace-selector-${currentTabUrlState}`}
             namespaces={namespaces}
             activeNamespace={activeNamespace}
             postureType={currentTabUrlState}
