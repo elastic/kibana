@@ -9,12 +9,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
+  OTEL_DURATION,
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   SPAN_ID_FIELD,
   SPAN_NAME_FIELD,
   TRACE_ID_FIELD,
-  TRANSACTION_ID_FIELD,
   getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
@@ -23,7 +23,7 @@ import React, { useMemo } from 'react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { Trace } from '../components/trace';
-import { TransactionProvider } from './hooks/use_transaction';
+import { TraceProvider } from './hooks/use_trace';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
@@ -68,16 +68,19 @@ export function SpanOverview({
     [formattedDoc, flattenedDoc]
   );
 
-  const spanDuration = flattenedDoc[SPAN_DURATION_FIELD];
-  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
+  const isOtelSpan =
+    flattenedDoc[SPAN_DURATION_FIELD] == null && flattenedDoc[OTEL_DURATION] != null;
+
+  const spanDuration = isOtelSpan
+    ? flattenedDoc[OTEL_DURATION]! * 0.001
+    : flattenedDoc[SPAN_DURATION_FIELD];
+
+  const traceId = flattenedDoc[TRACE_ID_FIELD];
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider
-        traceId={flattenedDoc[TRACE_ID_FIELD]}
-        indexPattern={indexes.apm.traces}
-      >
-        <TransactionProvider transactionId={transactionId} indexPattern={indexes.apm.traces}>
+      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
+        <TraceProvider traceId={traceId} indexPattern={indexes.apm.traces}>
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -114,6 +117,7 @@ export function SpanOverview({
                       spanDuration={spanDuration}
                       spanName={flattenedDoc[SPAN_NAME_FIELD]}
                       serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                      isOtelSpan={isOtelSpan}
                     />
                   </EuiFlexItem>
                 )}
@@ -132,7 +136,7 @@ export function SpanOverview({
               </EuiFlexGroup>
             </EuiPanel>
           </FieldActionsProvider>
-        </TransactionProvider>
+        </TraceProvider>
       </RootTransactionProvider>
     </DataSourcesProvider>
   );

@@ -20,7 +20,11 @@ const {
   spanLatency,
 } = LatencyDistributionChartType;
 
-export function getDurationField(chartType: LatencyDistributionChartType, searchMetrics: boolean) {
+export function getDurationField(
+  chartType: LatencyDistributionChartType,
+  searchMetrics: boolean,
+  isOtel: boolean
+) {
   switch (chartType) {
     case transactionLatency:
       if (searchMetrics) {
@@ -33,7 +37,7 @@ export function getDurationField(chartType: LatencyDistributionChartType, search
       return TRANSACTION_DURATION;
     case dependencyLatency:
     case spanLatency:
-      return SPAN_DURATION;
+      return isOtel ? 'duration' : SPAN_DURATION;
     default:
       return TRANSACTION_DURATION;
   }

@@ -11,7 +11,7 @@ import { TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 import { EuiHorizontalRule } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
-import { useTransactionContext } from '../hooks/use_transaction';
+import { useTraceContext } from '../hooks/use_trace';
 import { FieldConfiguration } from '../../resources/get_field_configuration';
 export interface SpanSummaryFieldProps {
   fieldId: string;
@@ -24,7 +24,7 @@ export function SpanSummaryField({
   fieldId,
   showActions = true,
 }: SpanSummaryFieldProps) {
-  const { transaction, loading } = useTransactionContext();
+  const { transaction, loading } = useTraceContext();
   const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
   const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
   const isTransactionNameFieldWithoutValue = isTransactionNameField && !fieldValue;

@@ -13,31 +13,30 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import {
+  OTEL_DURATION,
+  PARENT_ID_FIELD,
   PROCESSOR_EVENT_FIELD,
+  SPAN_DURATION_FIELD,
+  SPAN_NAME_FIELD,
+  TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface UseTransactionPrams {
-  transactionId?: string;
+  traceId?: string;
   indexPattern: string;
 }
 
 interface GetTransactionParams {
-  transactionId: string;
+  traceId: string;
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
 }
 
-async function getTransactionData({
-  transactionId,
-  indexPattern,
-  data,
-  signal,
-}: GetTransactionParams) {
+async function getTraceData({ traceId, indexPattern, data, signal }: GetTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -46,21 +45,39 @@ async function getTransactionData({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_NAME_FIELD, TRANSACTION_DURATION_FIELD],
+            fields: [
+              TRANSACTION_NAME_FIELD,
+              TRANSACTION_DURATION_FIELD,
+              SPAN_NAME_FIELD,
+              SPAN_DURATION_FIELD,
+              OTEL_DURATION,
+            ],
             query: {
               bool: {
                 must: [
                   {
                     term: {
-                      [TRANSACTION_ID_FIELD]: transactionId,
+                      [TRACE_ID_FIELD]: traceId,
                     },
                   },
+                ],
+                should: [
                   {
                     term: {
                       [PROCESSOR_EVENT_FIELD]: 'transaction',
                     },
                   },
+                  {
+                    bool: {
+                      must_not: [
+                        { exists: { field: PROCESSOR_EVENT_FIELD } },
+                        { exists: { field: PARENT_ID_FIELD } },
+                        { exists: { field: 'parent_span_id' } },
+                      ],
+                    },
+                  },
                 ],
+                minimum_should_match: 1,
               },
             },
           },
@@ -71,19 +88,19 @@ async function getTransactionData({
   );
 }
 
-export interface Transaction {
+export interface Trace {
   name: string;
   duration: number;
 }
 
-const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
+const useTrace = ({ traceId, indexPattern }: UseTransactionPrams) => {
   const { data, core } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<Transaction | null>(null);
+  const [trace, setTrace] = useState<Trace | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!transactionId) {
-      setTransaction(null);
+    if (!traceId) {
+      setTrace(null);
       setLoading(false);
       return;
     }
@@ -94,26 +111,28 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getTransactionData({ transactionId, indexPattern, data, signal });
+        const result = await getTraceData({ traceId, indexPattern, data, signal });
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
-        const transactionName = fields?.[TRANSACTION_NAME_FIELD];
-        const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
+        const name = fields?.[TRANSACTION_NAME_FIELD] || fields?.[SPAN_NAME_FIELD];
+        const duration = resolveDuration(fields);
 
-        setTransaction({
-          name: transactionName || null,
-          duration: transactionDuration || null,
-        });
+        if (name && duration) {
+          setTrace({
+            name,
+            duration,
+          });
+        }
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
-            title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTransaction.error', {
-              defaultMessage: 'An error occurred while fetching the transaction',
+            title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTrace.error', {
+              defaultMessage: 'An error occurred while fetching the trace',
             }),
             text: error.message,
           });
-          setTransaction(null);
+          setTrace(null);
         }
       } finally {
         setLoading(false);
@@ -125,9 +144,25 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, indexPattern, transactionId]);
+  }, [core.notifications.toasts, data, indexPattern, traceId]);
 
-  return { loading, transaction };
+  return { loading, trace };
 };
 
-export const [TransactionProvider, useTransactionContext] = createContainer(useTransaction);
+export const [TraceProvider, useTraceContext] = createContainer(useTrace);
+
+function resolveDuration(fields?: Record<string, any>): number | null {
+  const duration = fields?.[TRANSACTION_DURATION_FIELD];
+
+  if (duration) {
+    return duration;
+  }
+
+  const otelDuration = fields?.[OTEL_DURATION];
+
+  if (otelDuration) {
+    return otelDuration * 0.001;
+  }
+
+  return null;
+}
