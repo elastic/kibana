@@ -51,8 +51,6 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/test/functional_gen_ai/inference/config.ts
 
-  # They will be moved to enabled once the first test is added, the first two initial configs are in disabled section
-  # - x-pack/platform/test/functional/config.firefox.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
