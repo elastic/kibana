@@ -199,7 +199,7 @@ describe('DetectionEnginePageComponent', () => {
       browserFields: mockBrowserFields,
       sourcererDataView: {
         fields: {},
-        title: '',
+        title: 'mock-*',
       },
     });
     jest

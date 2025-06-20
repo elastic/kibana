@@ -70,6 +70,10 @@
     "@kbn/content-packs-schema",
     "@kbn/charts-theme",
     "@kbn/grok-ui",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/zod",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/field-types",
+    "@kbn/field-formats-plugin"
   ]
 }

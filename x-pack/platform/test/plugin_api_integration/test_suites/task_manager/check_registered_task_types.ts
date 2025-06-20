@@ -166,10 +166,12 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
+        'maintenance-window:generate-events',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
+        'report:execute-scheduled',
         'risk_engine:risk_scoring',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
@@ -189,6 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'unusedUrlsCleanupTask',
       ]);
     });
   });
