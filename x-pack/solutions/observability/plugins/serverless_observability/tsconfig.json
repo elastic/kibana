@@ -31,5 +31,6 @@
     "@kbn/security-plugin",
     "@kbn/search-types",
     "@kbn/streams-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }
