@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getRowControlColumn } from './row_control_column';
@@ -24,14 +23,11 @@ describe('getRowControlColumn', () => {
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control label={`test-${rowProps.rowIndex}`} iconType="heart" onClick={mockClick} />
       )),
     };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+    const RowControlColumn = getRowControlColumn(props);
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn
@@ -56,8 +52,7 @@ describe('getRowControlColumn', () => {
   it('should wrap the Control button with a tooltip when tooltipContent is passed', async () => {
     const props = {
       id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent="Control tooltip text!"
@@ -66,9 +61,7 @@ describe('getRowControlColumn', () => {
         />
       )),
     };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+    const RowControlColumn = getRowControlColumn(props);
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowControlColumn
@@ -89,77 +82,5 @@ describe('getRowControlColumn', () => {
     await waitFor(() => {
       expect(screen.getByText('Control tooltip text!')).toBeInTheDocument();
     });
-  });
-
-  it('should render control button as a link when href is passed', () => {
-    const props = {
-      id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
-        <Control
-          label={`test-${rowProps.rowIndex}`}
-          iconType="heart"
-          href="https://www.elastic.co"
-          onClick={undefined}
-        />
-      )),
-    };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
-    render(
-      <UnifiedDataTableContext.Provider value={contextMock}>
-        <RowControlColumn
-          rowIndex={1}
-          setCellProps={jest.fn()}
-          columnId={props.id}
-          colIndex={0}
-          isDetails={false}
-          isExpandable={false}
-          isExpanded={false}
-        />
-      </UnifiedDataTableContext.Provider>
-    );
-    const link = screen.getByTestId('unifiedDataTable_rowControl_test_row_control');
-    expect(link).toBeInTheDocument();
-    expect(link).toBeInstanceOf(HTMLAnchorElement);
-    expect(link).toHaveAttribute('href', 'https://www.elastic.co');
-  });
-
-  it('should render control button as a disabled event when href is passed but the disabled == true', () => {
-    const props = {
-      id: 'test_row_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
-        <Control
-          label={`test-${rowProps.rowIndex}`}
-          iconType="heart"
-          href="https://www.elastic.co"
-          onClick={undefined}
-          disabled={true}
-        />
-      )),
-    };
-    const rowControlColumn = getRowControlColumn(props);
-    const RowControlColumn =
-      rowControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
-    render(
-      <UnifiedDataTableContext.Provider value={contextMock}>
-        <RowControlColumn
-          rowIndex={1}
-          setCellProps={jest.fn()}
-          columnId={props.id}
-          colIndex={0}
-          isDetails={false}
-          isExpandable={false}
-          isExpanded={false}
-        />
-      </UnifiedDataTableContext.Provider>
-    );
-    const link = screen.getByTestId('unifiedDataTable_rowControl_test_row_control');
-    expect(link).toBeInTheDocument();
-    expect(link).toBeInstanceOf(HTMLButtonElement);
-    expect(link).not.toHaveAttribute('href', 'https://www.elastic.co');
-    expect(link).toHaveAttribute('disabled');
   });
 });

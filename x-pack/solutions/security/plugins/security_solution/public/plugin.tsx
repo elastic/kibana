@@ -20,10 +20,7 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import type {
-  SecuritySolutionAppWrapperFeature,
-  SecuritySolutionCellRendererFeature,
-} from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
@@ -257,33 +254,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
 
-    const appWrapperFeature: SecuritySolutionAppWrapperFeature = {
-      id: 'security-solution-app-wrapper',
-      getWrapper: async () => {
-        const [coreStart, startPlugins] = await core.getStartServices();
-
-        const services = await this.services.generateServices(coreStart, startPlugins);
-        const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
-        const securityStoreForDiscover = await this.getStoreForDiscover(
-          coreStart,
-          startPlugins,
-          subPlugins
-        );
-
-        const { createSecuritySolutionDiscoverAppWrapperGetter } =
-          await this.getLazyDiscoverSharedDeps();
-
-        return createSecuritySolutionDiscoverAppWrapperGetter({
-          core: coreStart,
-          services,
-          plugins: startPlugins,
-          store: securityStoreForDiscover,
-        });
-      },
-    };
-
     discoverFeatureRegistry.register(cellRendererFeature);
-    discoverFeatureRegistry.register(appWrapperFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

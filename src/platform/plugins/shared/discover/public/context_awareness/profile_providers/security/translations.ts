@@ -14,3 +14,22 @@ export const exploreRowActionLabel = (isAlert: boolean) =>
     values: { isAlert },
     defaultMessage: 'Explore {isAlert, select, true {Alert} other {Event}} in Security',
   });
+
+export const overviewTabTitle = (isAlert: boolean) =>
+  i18n.translate('discover.profile.security.flyout.overviewTabTitle', {
+    values: { isAlert },
+    defaultMessage: '{isAlert, select, true {Alerts Overview} other {Event Overview}}',
+  });
+
+export const overviewExploreButtonLabel = (isAlert: boolean) =>
+  i18n.translate('discover.profile.security.flyout.overviewExploreButtonLabel', {
+    values: { isAlert },
+    defaultMessage: 'Explore in {isAlert, select, true {Alerts} other {Timeline}}',
+  });
+
+export const noEcsDescriptionReason = i18n.translate(
+  'discover.profile.security.flyout.noEventKindDescriptionMessage',
+  {
+    defaultMessage: "This field doesn't have a description because it's not part of ECS.",
+  }
+);

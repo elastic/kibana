@@ -46,6 +46,5 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/data-view-utils",
     "@kbn/react-hooks",
-    "@kbn/router-utils",
   ]
 }

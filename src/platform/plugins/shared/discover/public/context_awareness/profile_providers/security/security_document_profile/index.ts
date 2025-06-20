@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SecuritySolutionAppWrapperFeature } from '@kbn/discover-shared-plugin/public';
-
-export const createAppWrapperAccessor = async (
-  appWrapperFeature?: SecuritySolutionAppWrapperFeature
-) => {
-  if (!appWrapperFeature) return undefined;
-  return appWrapperFeature.getWrapper();
-};
+export { createSecurityDocumentProfileProvider } from './profile';

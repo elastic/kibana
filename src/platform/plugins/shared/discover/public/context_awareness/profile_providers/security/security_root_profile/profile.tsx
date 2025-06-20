@@ -8,17 +8,14 @@
  */
 
 import type { FunctionComponent, PropsWithChildren } from 'react';
-import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
-import { createAppWrapperAccessor } from '../accessors/create_app_wrapper_accessor';
 import { getDefaultSecuritySolutionAppState } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
-import { getRowAdditionalLeadingControls } from '../accessors/get_row_additional_control';
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -26,8 +23,6 @@ interface SecurityRootProfileContext {
     fieldName: string
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined;
 }
-
-const EmptyAppWrapper: FunctionComponent<PropsWithChildren<{}>> = ({ children }) => <>{children}</>;
 
 export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   RootProfileProvider<SecurityRootProfileContext>
@@ -39,35 +34,12 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
 
   return {
     profileId: 'security-root-profile',
-    isExperimental: true,
     profile: {
-      getRowAdditionalLeadingControls: (prev) => (params) => {
-        const additionalControls = prev(params) || [];
-
-        return getRowAdditionalLeadingControls({
-          services,
-          additionalControls,
-        });
-      },
-      getRenderAppWrapper: (PrevWrapper, params) => {
-        const AppWrapper = params.context.appWrapper ?? EmptyAppWrapper;
-        return ({ children }) => (
-          <PrevWrapper>
-            <AppWrapper>{children}</AppWrapper>
-          </PrevWrapper>
-        );
-      },
       getCellRenderers:
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-          [
-            'host.name',
-            'user.name',
-            'source.ip',
-            'destination.ip',
-            'kibana.alert.workflow_status',
-          ].forEach((fieldName) => {
+          ['kibana.alert.workflow_status'].forEach((fieldName) => {
             entries[fieldName] =
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });
@@ -83,14 +55,12 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         };
       }
 
-      const getAppWrapper = await createAppWrapperAccessor(appWrapperFeature);
       const getCellRenderer = await createCellRendererAccessor(cellRendererFeature);
 
       return {
         isMatch: true,
         context: {
           solutionType: SolutionType.Security,
-          appWrapper: getAppWrapper?.(),
           getSecuritySolutionCellRenderer: getCellRenderer,
         },
       };

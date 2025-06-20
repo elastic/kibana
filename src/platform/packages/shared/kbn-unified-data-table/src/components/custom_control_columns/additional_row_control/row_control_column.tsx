@@ -8,23 +8,15 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiButtonIcon,
-  EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
-  EuiScreenReaderOnly,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
-import { getRouterLinkProps } from '@kbn/router-utils';
-import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
 export const RowControlCell = ({
-  renderControl,
+  rowControlColumn,
   ...props
 }: EuiDataGridCellValueElementProps & {
-  renderControl: RowControlColumn['renderControl'];
+  rowControlColumn: RowControlColumn;
 }) => {
   const { record, rowIndex } = useControlColumn(props);
 
@@ -36,38 +28,27 @@ export const RowControlCell = ({
         disabled,
         iconType,
         label,
-        onClick: onClickProps,
+        onClick,
         tooltipContent,
-        href: hrefProps,
         ...extraProps
       }) => {
         const classNameProp = Boolean(tooltipContent)
           ? {}
           : { className: 'unifiedDataTable__rowControl' };
 
-        const { href, onClick } = getRouterLinkProps({
-          /**
-           * if the control is disabled, we ignore the href prop and button should be disabled.
-           * Additionaly, display as a button instead of an anchor
-           */
-          href: disabled ? undefined : hrefProps,
-          onClick: (_ev: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
-            if (record && onClickProps) {
-              onClickProps?.({ record, rowIndex });
-            }
-          },
-        });
-
         const control = (
           <EuiButtonIcon
             aria-label={label}
             color={color ?? 'text'}
-            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
+            data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${rowControlColumn.id}`}
+            disabled={disabled}
             iconSize="s"
             iconType={iconType}
-            onClick={onClick}
-            /** if href prop is present, disabled prop is invalid and not expected since it is a link */
-            {...(href ? { href } : { disabled })}
+            onClick={() => {
+              if (record && onClick) {
+                onClick({ record, rowIndex });
+              }
+            }}
             {...classNameProp}
             {...extraProps}
           />
@@ -87,29 +68,14 @@ export const RowControlCell = ({
 
         return control;
       },
-    [props.columnId, record, rowIndex]
+    [rowControlColumn.id, record, rowIndex]
   );
 
-  return record ? renderControl(Control, { record, rowIndex }) : null;
+  return record ? rowControlColumn.render(Control, { record, rowIndex }) : null;
 };
 
-export const getRowControlColumn = (
-  rowControlColumn: RowControlColumn
-): EuiDataGridControlColumn => {
-  const { id, headerAriaLabel, headerCellRender, renderControl } = rowControlColumn;
-
-  return {
-    id: `additionalRowControl_${id}`,
-    width: DEFAULT_CONTROL_COLUMN_WIDTH,
-    headerCellRender:
-      headerCellRender ??
-      (() => (
-        <EuiScreenReaderOnly>
-          <span>{headerAriaLabel}</span>
-        </EuiScreenReaderOnly>
-      )),
-    rowCellRender: (props) => {
-      return <RowControlCell {...props} renderControl={renderControl} />;
-    },
+export const getRowControlColumn = (rowControlColumn: RowControlColumn) => {
+  return (props: EuiDataGridCellValueElementProps) => {
+    return <RowControlCell {...props} rowControlColumn={rowControlColumn} />;
   };
 };
