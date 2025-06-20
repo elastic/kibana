@@ -55,6 +55,7 @@ import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedul
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import type { ConfigSchema } from '../config_schema';
+import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -74,6 +75,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  deleteAllConversationsRoute(router);
   appendConversationMessageRoute(router);
 
   // User Conversations bulk CRUD
