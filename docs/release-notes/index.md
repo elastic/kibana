@@ -41,7 +41,7 @@ For the Elastic Security 9.0.3 release information, refer to [Elastic Security S
 * Fixes an issue that prevented navigating through pages when inspecting a chart's data  [#217937]({{kib-pull}}217937).
 
 **Discover**:
-* Ensures the absolute time range is used when exporting a report from Discover in the CSV format [#223249]({{kib-pull}}223249).
+* In version 9.0.0, we changed the way time ranges are handled for Discover ES|QL CSV exports ([#216792]({{kib-pull}}216792)). We realized that this change caused an issue with CSV Post URLs now using an absolute time range instead of a relative one, leading to duplicate reports being generated. We've reverted this change while we investigate different solutions [#223249]({{kib-pull}}223249).
 * Adds request parameters that were formerly missing from the **Request** tab when you inspected an ES|QL request [#221816]({{kib-pull}}221816).
 
 **Elastic Observability solution**:
