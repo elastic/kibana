@@ -13,6 +13,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface NamespaceSelectorProps {
   'data-test-subj'?: string;
@@ -30,8 +31,6 @@ export const NamespaceSelector = ({
   postureType,
   'data-test-subj': dataTestSubj,
 }: NamespaceSelectorProps) => {
-  const title = 'Namespace';
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onSelectedNamespaceChange = useCallback(
@@ -75,6 +74,9 @@ export const NamespaceSelector = ({
   }, [namespaces, isSelectedProps, onSelectedNamespaceChange]);
 
   const button = useMemo(() => {
+    const title = i18n.translate('xpack.csp.namespaceSelector.title', {
+      defaultMessage: 'Namespace',
+    });
     return (
       <EuiButtonEmpty
         data-test-subj="namespace-selector-dropdown-button"
