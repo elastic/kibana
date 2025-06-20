@@ -25,15 +25,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['esGate']);
 
     before(async () => {
-      await esArchiver.load(
-        'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
-      );
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
-      );
-      await kibanaServer.uiSettings.update({
-        'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
-      });
       await esArchiver.loadIfNeeded(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
 
       const testRunUuid = uuidv4();
@@ -53,6 +44,16 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
           risk_score: 70,
         },
       });
+
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
+      );
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
+      });
     });
 
     after(async () => {
@@ -68,9 +69,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.unload(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
     });
 
-    // loadTestFile(require.resolve('./default_state'));
-    // loadTestFile(require.resolve('./cell_renderer'));
-    // loadTestFile(require.resolve('./row_indicator'));
-    loadTestFile(require.resolve('./row_leading_controls'));
+    loadTestFile(require.resolve('./default_state'));
+    loadTestFile(require.resolve('./cell_renderer'));
+    loadTestFile(require.resolve('./row_indicator'));
   });
 }

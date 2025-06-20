@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
+import { ServerlessRoleName } from '../../../../../../shared/lib';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getDiscoverESQLState } from './utils';
+import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 const defaultEventColumns = [
   '@timestamp',
@@ -24,10 +26,31 @@ const defaultEventColumns = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const queryBar = getService('queryBar');
+  const retry = getService('retry');
 
-  describe('row leading controls', () => {
+  describe('default State', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      // creates security data view if it does not exist
+      await PageObjects.common.navigateToApp('security', {
+        path: 'alerts',
+      });
+    });
+
+    describe('ES|QL mode', () => {
+      it('should have correct list of columns', async () => {
+        const state = getDiscoverESQLState();
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+          ensureCurrentUrl: false,
+        });
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await retry.try(async () => {
+          expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+            defaultEventColumns.join(', ')
+          );
+        });
+      });
     });
 
     describe('DataView mode', () => {
@@ -35,24 +58,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
-        await queryBar.setQuery('host.name: "siem-kibana"');
+
+        await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
+
         await queryBar.clickQuerySubmitButton();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          defaultEventColumns.join(', ')
-        );
-      });
-    });
-
-    describe('ES|QL mode', () => {
-      it('should have correct list of columns', async () => {
-        const state = kbnRison.encode({
-          dataSource: { type: 'esql' },
-        });
-
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
-          ensureCurrentUrl: false,
-        });
         await PageObjects.discover.waitUntilSearchingHasFinished();
         expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
           defaultEventColumns.join(', ')

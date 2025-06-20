@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { encode } from '@kbn/rison';
+import { ServerlessRoleName } from '../../../../../../shared/lib';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
+import { getDiscoverESQLState } from './utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
@@ -23,7 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('row indicators', () => {
       describe('alerts and events', () => {
         before(async () => {
-          await PageObjects.svlCommonPage.loginAsAdmin();
+          await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+          await PageObjects.common.navigateToApp('security', {
+            path: 'alerts',
+          });
         });
 
         describe('DataView mode', () => {
@@ -31,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.common.navigateToActualUrl('discover', undefined, {
               ensureCurrentUrl: false,
             });
+            await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
 
             await queryBar.clickQuerySubmitButton();
             await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -50,13 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         describe('ES|QL mode', () => {
           it('should have row indicator for both event and alert', async () => {
-            const query = `FROM ${SECURITY_SOLUTION_DATA_VIEW}`;
-
-            const state = encode({
-              datasource: { type: 'esql' },
-              query: { esql: query },
-            });
-
+            const state = getDiscoverESQLState();
             await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
               ensureCurrentUrl: false,
             });
