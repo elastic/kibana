@@ -1,6 +1,6 @@
 # LEFT
 
-The `LEFT` function extracts a specified number of characters from the beginning of a string.
+Returns a substring that extracts a specified number of characters from the beginning of a string.
 
 ## Syntax
 
@@ -26,4 +26,4 @@ FROM employees
 | LIMIT 5
 ```
 
-Extract the first three characters from the `last_name` column, sort the results alphabetically, and limit the output to the first five rows.
+Extracts the first three characters from the `last_name` column, sorts the results alphabetically, and limits the output to the first five rows.

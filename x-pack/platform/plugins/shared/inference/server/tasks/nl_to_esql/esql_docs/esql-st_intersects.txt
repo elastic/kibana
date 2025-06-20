@@ -1,6 +1,6 @@
 # ST_INTERSECTS
 
-Determines whether two geometries intersect. Two geometries intersect if they share any point in common, including interior points such as those along lines or within polygons. This function is the inverse of `ST_DISJOINT`.
+Determines whether two geometries intersect. Two geometries intersect if they share any point in common, including points along lines or within polygons. This function is the inverse of `ST_DISJOINT`.
 
 ## Syntax
 
@@ -8,25 +8,21 @@ Determines whether two geometries intersect. Two geometries intersect if they sh
 
 ### Parameters
 
-#### geomA
+#### `geomA`
 
-Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
+An expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`.
 
-#### geomB
+#### `geomB`
 
-Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The second parameter must use the same coordinate system as the first. Combining `geo_*` and `cartesian_*` parameters is not allowed.
+An expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_shape`. If `null`, the function returns `null`. The coordinate system of `geomB` must match that of `geomA`. Combining `geo_*` and `cartesian_*` parameters is not allowed.
 
 ## Examples
 
-### Example 1: Filtering airports within a polygon
-
-The following query filters airports whose locations intersect with a specified polygon:
+### Example 1: Checking if a location intersects with a polygon
 
 ```esql
 FROM airports
 | WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
 ```
 
-## Limitations
-
-- The two geometries must use the same coordinate system. For example, you cannot mix `geo_*` and `cartesian_*` types.
+This example filters airports to find those whose `location` intersects with the specified polygon.

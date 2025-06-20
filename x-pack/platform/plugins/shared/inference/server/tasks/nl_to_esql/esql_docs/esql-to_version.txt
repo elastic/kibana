@@ -20,4 +20,4 @@ The input value to be converted. This can be a single- or multi-valued column or
 ROW v = TO_VERSION("1.2.3")
 ```
 
-This example converts the string `"1.2.3"` into a version value.
+Convert the string `"1.2.3"` into a version value.

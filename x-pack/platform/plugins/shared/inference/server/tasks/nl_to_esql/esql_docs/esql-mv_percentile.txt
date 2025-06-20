@@ -10,11 +10,11 @@ Converts a multivalued field into a single-valued field containing the value at 
 
 #### `number`
 
-Multivalue expression.
+A multivalue expression.
 
 #### `percentile`
 
-The percentile to calculate. Must be a number between 0 and 100. Numbers out of range will return `null`.
+The percentile to calculate. Must be a number between 0 and 100. Numbers outside this range will return `null`.
 
 ## Examples
 

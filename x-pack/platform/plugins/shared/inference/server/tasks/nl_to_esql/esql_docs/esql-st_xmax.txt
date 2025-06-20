@@ -14,10 +14,6 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-### Example 1: Extracting boundary coordinates for a city
-
-The following query calculates the minimum and maximum `x` and `y` coordinates for the city boundary of the airport with the abbreviation "CPH":
-
 ```esql
 FROM airport_city_boundaries
 | WHERE abbrev == "CPH"
@@ -26,9 +22,4 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-## Supported Types
-
-- `geo_point`
-- `geo_shape`
-- `cartesian_point`
-- `cartesian_shape`
+This example calculates the bounding box of the city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates.

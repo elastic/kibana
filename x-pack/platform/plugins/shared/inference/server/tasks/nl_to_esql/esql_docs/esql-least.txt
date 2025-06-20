@@ -1,4 +1,4 @@
-# LEAST
+## LEAST
 
 Returns the minimum value from multiple columns. This function is similar to `MV_MIN` but is designed to operate on multiple columns simultaneously.
 

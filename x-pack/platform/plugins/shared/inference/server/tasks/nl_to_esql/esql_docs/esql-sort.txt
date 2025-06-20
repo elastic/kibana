@@ -15,7 +15,8 @@ The column to sort on.
 ## Examples
 
 ### Basic sorting
-Sort the table by the `height` column in ascending order (default behavior).
+
+Sort the table by the `height` column in ascending order (default behavior):
 
 ```esql
 FROM employees
@@ -24,7 +25,8 @@ FROM employees
 ```
 
 ### Explicitly sorting in descending order with `DESC`
-Sort the table by the `height` column in descending order.
+
+Sort the table by the `height` column in descending order:
 
 ```esql
 FROM employees
@@ -33,7 +35,8 @@ FROM employees
 ```
 
 ### Providing additional sort expressions to act as tie breakers
-Sort the table by `height` in descending order, and use `first_name` in ascending order as a tie breaker.
+
+Sort the table by `height` in descending order, and use `first_name` in ascending order as a tie breaker:
 
 ```esql
 FROM employees
@@ -42,7 +45,8 @@ FROM employees
 ```
 
 ### Sorting `null` values first using `NULLS FIRST`
-Sort the table by `first_name` in ascending order, placing `null` values first.
+
+Sort the table by `first_name` in ascending order, placing `null` values first:
 
 ```esql
 FROM employees

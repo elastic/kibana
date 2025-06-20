@@ -1,4 +1,4 @@
-## CATEGORIZE
+# CATEGORIZE
 
 Groups text messages into categories of similarly formatted text values.
 
@@ -16,11 +16,11 @@ Expression to categorize.
 
 ### Example 1: Categorizing server log messages
 
-Categorize server log messages into categories and aggregate their counts:
+Categorizes server log messages into categories and aggregates their counts.
 
 ```esql
 FROM sample_data
-| STATS count = COUNT() BY category = CATEGORIZE(message)
+| STATS count = COUNT() BY category=CATEGORIZE(message)
 ```
 
 ## Limitations
@@ -28,3 +28,7 @@ FROM sample_data
 - Cannot be used within other expressions.
 - Cannot be used with multiple groupings.
 - Cannot be used or referenced within aggregate functions.
+
+## Additional Notes
+
+- The `CATEGORIZE` function requires a platinum license.

@@ -1,6 +1,6 @@
 # CBRT
 
-The `CBRT` function calculates the cube root of a given numeric value. The result is always returned as a double.
+Returns the cube root of a number. The input can be any numeric value, and the return value is always a double. Cube roots of infinities are `null`.
 
 ## Syntax
 
@@ -10,7 +10,7 @@ The `CBRT` function calculates the cube root of a given numeric value. The resul
 
 #### `number`
 
-A numeric expression. If the input is `null`, the function returns `null`.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 

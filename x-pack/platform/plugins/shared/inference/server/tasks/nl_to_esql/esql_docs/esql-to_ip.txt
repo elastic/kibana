@@ -26,14 +26,14 @@ In this example:
 - The string `"1.1.1.1"` is successfully converted to an IP value and stored in `ip1`.
 - The string `"foo"` cannot be converted to an IP value, resulting in a `null` value for `ip2`.
 
-### Warnings for Conversion Failures
+When a conversion fails, a *Warning* header is added to the response. The header provides details about the failure, including the source of the issue and the offending value. For instance:
 
-When a conversion fails, the result is treated as `null`, and a warning is added to the response. For instance:
-- A warning header provides information about the failure source:
-  ```
-  "Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."
-  ```
-- Another header specifies the failure reason and the offending value:
-  ```
-  "java.lang.IllegalArgumentException: 'foo' is not an IP string literal."
-  ```
+```esql
+"Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."
+```
+
+The failure reason and the problematic value are also included in a subsequent header:
+
+```esql
+"java.lang.IllegalArgumentException: 'foo' is not an IP string literal."
+```

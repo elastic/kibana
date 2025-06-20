@@ -1,6 +1,6 @@
 ## SHOW
 
-The `SHOW` source command provides information about the deployment and its capabilities.
+The `SHOW` command provides information about the deployment and its capabilities.
 
 ## Syntax
 

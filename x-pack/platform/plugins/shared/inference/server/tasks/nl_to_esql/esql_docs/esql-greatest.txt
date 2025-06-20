@@ -18,14 +18,14 @@ The remaining columns to evaluate.
 
 ## Examples
 
-### Example 1
+### Example 1: Finding the maximum value between two columns
 
 ```esql
 ROW a = 10, b = 20
 | EVAL g = GREATEST(a, b)
 ```
 
-This example calculates the greatest value between columns `a` and `b`.
+This example evaluates the maximum value between columns `a` and `b`, resulting in `g = 20`.
 
 ## Notes
 

@@ -10,7 +10,7 @@ Converts a multivalued string expression into a single-valued column by concaten
 
 #### `string`
 
-A multivalue expression.
+A multivalued expression.
 
 #### `delim`
 

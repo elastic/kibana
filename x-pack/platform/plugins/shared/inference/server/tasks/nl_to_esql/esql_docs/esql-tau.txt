@@ -18,10 +18,4 @@ This function does not take any parameters.
 ROW TAU()
 ```
 
-This example returns the mathematical constant tau (approximately 6.283185307179586). 
-
-#### Result
-
-|   |
-|---|
-| 6.283185307179586 |
+This example returns the mathematical constant τ (tau).

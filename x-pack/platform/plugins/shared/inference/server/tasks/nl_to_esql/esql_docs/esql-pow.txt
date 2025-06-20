@@ -20,22 +20,24 @@ Numeric expression for the exponent. If `null`, the function returns `null`.
 
 ### Example 1: Basic usage
 
-Calculate the result of raising 2.0 to the power of 2:
-
 ```esql
 ROW base = 2.0, exponent = 2
 | EVAL result = POW(base, exponent)
 ```
 
+Calculate `2.0` raised to the power of `2`.
+
 ### Example 2: Fractional exponent (root calculation)
 
-Use a fractional exponent to calculate roots. For example, an exponent of `0.5` calculates the square root of the base:
+The exponent can be a fraction, which is similar to performing a root. For example, an exponent of `0.5` calculates the square root of the base:
 
 ```esql
 ROW base = 4, exponent = 0.5
 | EVAL s = POW(base, exponent)
 ```
 
+Calculate the square root of `4` using an exponent of `0.5`.
+
 ## Limitations
 
-- If the result of the calculation overflows a double, the function will return `null`.
+- It is possible to overflow a double result when using this function. In such cases, the function will return `null`.

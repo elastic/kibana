@@ -1,6 +1,6 @@
-# COUNT
+## COUNT
 
-The `COUNT` function calculates the total number of input values. If no field is specified, it counts the number of rows.
+The `COUNT` function returns the total number of input values. If no field is specified, it counts the number of rows.
 
 ## Syntax
 
@@ -14,18 +14,16 @@ An expression that outputs values to be counted. If omitted, the function is equ
 
 ## Examples
 
-### Example 1: Count specific field values
-
-Count the number of non-null values in the `height` field.
+### Count specific field values
 
 ```esql
 FROM employees
 | STATS COUNT(height)
 ```
 
-### Example 2: Count the number of rows
+Count the number of non-null values in the `height` field.
 
-Count the total number of rows, grouped by the `languages` column.
+### Count the number of rows
 
 ```esql
 FROM employees
@@ -33,18 +31,18 @@ FROM employees
 | SORT languages DESC
 ```
 
-### Example 3: Count values using inline functions
+Count the total number of rows grouped by the `languages` field and sort the results in descending order.
 
-Split a string into multiple values using the `SPLIT` function and count the resulting values.
+### Count values using inline functions
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"
 | STATS word_count = COUNT(SPLIT(words, ";"))
 ```
 
-### Example 4: Count values based on a condition
+Count the number of elements in a string split by the `;` delimiter.
 
-Count the number of rows where the condition `n < 0` is true.
+### Count values based on a condition
 
 ```esql
 ROW n=1
@@ -52,11 +50,13 @@ ROW n=1
 | STATS COUNT(n)
 ```
 
-### Example 5: Count based on two different expressions
+Count the number of rows where the value of `n` is less than 0.
 
-Count the same stream of data based on two different conditions using the pattern `COUNT(<expression> OR NULL)`. This approach leverages three-valued logic (3VL), where `TRUE OR NULL` evaluates to `TRUE`, but `FALSE OR NULL` evaluates to `NULL`. The `COUNT` function ignores `NULL` values.
+### Count based on two different expressions
 
 ```esql
 ROW n=1
 | STATS COUNT(n > 0 OR NULL), COUNT(n < 0 OR NULL)
 ```
+
+Count the number of rows where `n > 0` and `n < 0` separately.

@@ -14,9 +14,9 @@ String expression. If `null`, the function returns `null`.
 
 ## Examples
 
+Convert a string to upper case:
+
 ```esql
 ROW message = "Some Text"
 | EVAL message_upper = TO_UPPER(message)
 ```
-
-This example converts the string in the `message` column to upper case, resulting in `"SOME TEXT"`.

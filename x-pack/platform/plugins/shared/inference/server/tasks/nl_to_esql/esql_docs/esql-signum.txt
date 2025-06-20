@@ -14,11 +14,9 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW d = 100.0
 | EVAL s = SIGNUM(d)
 ```
 
-Determines the sign of the number `100.0`.
+This example calculates the sign of the number `100.0`.

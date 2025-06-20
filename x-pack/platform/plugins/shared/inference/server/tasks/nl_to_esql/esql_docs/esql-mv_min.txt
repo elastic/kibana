@@ -18,20 +18,20 @@ This function can be used with any column type, including `keyword` columns. For
 
 ## Examples
 
-### Example 1
+#### Example 1
 
 ```esql
 ROW a=[2, 1]
 | EVAL min_a = MV_MIN(a)
 ```
 
-Finds the minimum value in the multivalued column `a`, which contains numeric values.
+Extracts the minimum value from the multivalued column `a`, resulting in `min_a = 1`.
 
-### Example 2
+#### Example 2
 
 ```esql
 ROW a=["foo", "bar"]
 | EVAL min_a = MV_MIN(a)
 ```
 
-Finds the minimum value in the multivalued column `a`, which contains string values. The comparison is based on the UTF-8 byte-by-byte representation.
+Extracts the minimum value from the multivalued column `a` by comparing the strings lexicographically, resulting in `min_a = "bar"`.

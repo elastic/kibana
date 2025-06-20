@@ -1,4 +1,4 @@
-## SINH
+# SINH
 
 Returns the hyperbolic sine of a number.
 
@@ -8,7 +8,7 @@ Returns the hyperbolic sine of a number.
 
 ### Parameters
 
-#### `number`
+#### number
 
 A numeric expression. If `null`, the function returns `null`.
 

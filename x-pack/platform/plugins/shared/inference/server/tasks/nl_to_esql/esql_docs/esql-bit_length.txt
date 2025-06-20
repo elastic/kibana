@@ -1,6 +1,8 @@
 # BIT_LENGTH
 
-Returns the bit length of a string. Since all strings are in UTF-8, a single character may use multiple bytes.
+Returns the bit length of a string.
+
+**Note:** All strings are in UTF-8, so a single character can use multiple bytes.
 
 ## Syntax
 

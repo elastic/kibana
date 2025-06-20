@@ -1,4 +1,4 @@
-## VALUES
+# VALUES
 
 The `VALUES` function retrieves all values in a group as a multivalued field. The order of the returned values is not guaranteed. To ensure the values are returned in order, use the `MV_SORT` function.
 
@@ -14,9 +14,8 @@ The field from which to retrieve all values.
 
 ## Examples
 
-### Example 1: Grouping and sorting values
-
-Retrieve the first letter of employee first names, group the names by their first letter, and sort the results:
+### Example 1: Retrieve and sort first names by their first letter
+The following query extracts the first letter of each employee's first name, groups the data by this letter, and retrieves all first names in each group as a multivalued field. The `MV_SORT` function is used to sort the names within each group.
 
 ```esql
 FROM employees
@@ -27,5 +26,6 @@ FROM employees
 
 ## Notes
 
-- **Technical Preview**: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-- **Memory Usage**: The `VALUES` function can consume a significant amount of memory. ES|QL does not currently grow aggregations beyond memory limits. If the function collects more values than can fit into memory, the query will fail with a Circuit Breaker Error. Avoid using this function in production environments.
+- This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+- The `VALUES` function can consume a significant amount of memory. ES|QL does not currently support growing aggregations beyond available memory. If the aggregation collects more values than can fit into memory, the query will fail with a Circuit Breaker Error.
+

@@ -1,4 +1,4 @@
-## DATE_EXTRACT
+# DATE_EXTRACT
 
 Extracts specific parts of a date, such as the year, month, day, or hour.
 
@@ -10,7 +10,7 @@ Extracts specific parts of a date, such as the year, month, day, or hour.
 
 #### `datePart`
 
-The part of the date to extract. Can be one of the following:
+The part of the date to extract. Supported values include:
 
 - `aligned_day_of_week_in_month`
 - `aligned_day_of_week_in_year`
@@ -47,11 +47,11 @@ Refer to `java.time.temporal.ChronoField` for detailed descriptions of these val
 
 #### `date`
 
-A date expression. If `null`, the function returns `null`.
+The date expression from which to extract the specified part. If `null`, the function returns `null`.
 
 ## Examples
 
-### Extracting the year from a date
+### Extracting the Year from a Date
 
 Extract the year from a given date:
 
@@ -60,7 +60,7 @@ ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
 | EVAL year = DATE_EXTRACT("year", date)
 ```
 
-### Filtering events outside business hours
+### Filtering Events Outside Business Hours
 
 Retrieve all events that occurred outside of business hours (before 9 AM or after 5 PM):
 

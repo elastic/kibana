@@ -22,7 +22,7 @@ Input to hash.
 FROM sample_data
 | WHERE message != "Connection error"
 | EVAL md5 = hash("md5", message), sha256 = hash("sha256", message)
-| KEEP message, md5, sha256;
+| KEEP message, md5, sha256
 ```
 
 This example computes the MD5 and SHA-256 hashes of the `message` field for rows where the `message` is not "Connection error".

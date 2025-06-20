@@ -1,6 +1,6 @@
 ## CASE
 
-The `CASE` function evaluates a series of conditions and returns the value associated with the first condition that evaluates to `true`. If no conditions match, it returns a default value or `null`.
+The `CASE` function evaluates a series of conditions and returns a value corresponding to the first condition that evaluates to `true`. If no conditions match, a default value or `null` is returned.
 
 ## Syntax
 

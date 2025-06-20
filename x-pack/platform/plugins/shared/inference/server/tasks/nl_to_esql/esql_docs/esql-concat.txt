@@ -10,11 +10,11 @@ Concatenates two or more strings.
 
 #### `string1`
 
-Strings to concatenate.
+The first string to concatenate.
 
 #### `string2`
 
-Strings to concatenate.
+The second string to concatenate.
 
 ## Examples
 

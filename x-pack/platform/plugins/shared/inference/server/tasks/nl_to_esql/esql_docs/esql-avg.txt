@@ -14,7 +14,7 @@ A numeric field to calculate the average.
 
 ## Examples
 
-#### Example 1: Basic Usage
+### Example 1: Basic Usage
 
 ```esql
 FROM employees
@@ -23,11 +23,11 @@ FROM employees
 
 Calculate the average height of employees.
 
-#### Example 2: Using Inline Functions
+### Example 2: Using Inline Functions
 
 ```esql
 FROM employees
 | STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```
 
-Calculate the average salary change by first averaging the multiple values per row using `MV_AVG`, and then applying the `AVG` function with rounding to 10 decimal places.
+Calculate the average salary change by first averaging multiple values per row using `MV_AVG`, and then applying the `AVG` function with rounding to 10 decimal places.

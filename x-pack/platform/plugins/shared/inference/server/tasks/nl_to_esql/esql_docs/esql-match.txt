@@ -1,8 +1,8 @@
-## MATCH
+# MATCH
 
-The `MATCH` function performs a match query on a specified field. It is equivalent to the `match` query in the Elasticsearch Query DSL and can be used to search for values in various field types, including text, semantic_text, keyword, boolean, dates, and numeric types. 
+The `MATCH` function performs a match query on the specified field. It is equivalent to the `match` query in the Elasticsearch Query DSL and can be used to search for values in various field types, including text, semantic_text, keyword, boolean, dates, and numeric types. 
 
-`MATCH` supports function named parameters to specify additional options for the match query. For a simplified syntax, the match operator `:` can be used as an alternative to `MATCH`. The function returns `true` if the provided query matches the row.
+`MATCH` supports function named parameters to specify additional options for the match query. For a simplified syntax, the match operator `:` can be used instead of `MATCH`. The function returns `true` if the provided query matches the row.
 
 ## Syntax
 
@@ -18,14 +18,13 @@ The field that the query will target.
 
 The value to find in the specified field.
 
-#### `options` (Optional)
+#### `options`
 
-Match additional options as function named parameters. Refer to the match query documentation for more details.
+(Optional) Additional match query options provided as function named parameters. Refer to the match query documentation for more details.
 
 ## Examples
 
-#### Example 1: Match query on the `author` field
-Search for rows where the `author` field matches "Faulkner," and return the `book_no` and `author` columns, sorted by `book_no`:
+### Example 1: Match on a specific field
 
 ```esql
 FROM books
@@ -35,8 +34,9 @@ FROM books
 | LIMIT 5
 ```
 
-#### Example 2: Match query with additional options
-Search for rows where the `title` field matches "Hobbit Back Again" using the `AND` operator, and return the `title` column:
+This example retrieves books where the `author` field matches "Faulkner," keeping only the `book_no` and `author` fields, sorting by `book_no`, and limiting the results to 5 rows.
+
+### Example 2: Match with additional options
 
 ```esql
 FROM books
@@ -44,38 +44,4 @@ FROM books
 | KEEP title
 ```
 
-## Limitations
-
-- The `MATCH` function must be used directly after the `FROM` source command or close enough to it. Otherwise, the query will fail with a validation error.
-- Any `WHERE` command containing a `MATCH` function cannot use disjunctions (`OR`) unless:
-  - All functions in the `OR` clauses are full-text functions, or
-  - Scoring is not used.
-- Queries on `text` fields that do not explicitly use full-text functions like `MATCH`, `QSTR`, or `KQL` will behave as if the fields are `keyword` fields. This means they are case-sensitive and require an exact match.
-
-For example:
-- This query is valid:
-  ```esql
-FROM books
-| WHERE MATCH(author, "Faulkner") AND MATCH(author, "Tolkien")
-```
-- This query will fail due to the use of `STATS`:
-  ```esql
-FROM books
-| STATS AVG(price) BY author
-| WHERE MATCH(author, "Faulkner")
-```
-- This query with a disjunction will succeed:
-  ```esql
-FROM books
-| WHERE MATCH(author, "Faulkner") OR QSTR("author: Hemingway")
-```
-- However, using scoring in a disjunction will fail:
-  ```esql
-FROM books METADATA _score
-| WHERE MATCH(author, "Faulkner") OR author LIKE "Hemingway"
-```
-- Scoring will work if both `OR` clauses use full-text functions:
-  ```esql
-FROM books METADATA _score
-| WHERE MATCH(author, "Faulkner") OR QSTR("author: Hemingway")
-```
+This example searches for books where the `title` field matches "Hobbit Back Again" using the `AND` operator, and keeps only the `title` field in the results.

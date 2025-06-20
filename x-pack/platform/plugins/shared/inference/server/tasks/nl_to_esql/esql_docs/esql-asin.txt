@@ -20,4 +20,4 @@ ROW a = .9
 | EVAL asin = ASIN(a)
 ```
 
-Calculate the arcsine of the value `0.9` and store the result in a new column named `asin`.
+Calculate the arcsine of the value `0.9` and return the result in radians.

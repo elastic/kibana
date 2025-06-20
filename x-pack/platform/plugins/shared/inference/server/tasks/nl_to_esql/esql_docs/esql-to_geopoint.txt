@@ -1,6 +1,6 @@
 # TO_GEOPOINT
 
-Converts an input value to a `geo_point` value. A string will only be successfully converted if it adheres to the WKT (Well-Known Text) Point format.
+Converts an input value to a `geo_point` value. A string will only be successfully converted if it adheres to the WKT Point format.
 
 ## Syntax
 
@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-Convert a WKT-formatted string to a `geo_point` value:
+Convert a WKT Point string to a `geo_point` value:
 
 ```esql
 ROW wkt = "POINT(42.97109630194 14.7552534413725)"

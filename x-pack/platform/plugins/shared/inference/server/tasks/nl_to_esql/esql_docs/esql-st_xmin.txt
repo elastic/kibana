@@ -10,13 +10,13 @@ Extracts the minimum value of the `x` coordinates from the supplied geometry. Fo
 
 #### `point`
 
-Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If the value is `null`, the function returns `null`.
+Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_shape`. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1: Extracting the minimum and maximum coordinates of a city boundary
+### Example 1: Extracting the bounding box coordinates of a city boundary
 
-The following query calculates the minimum and maximum `x` and `y` coordinates of the city boundary for the airport with the abbreviation "CPH":
+The following query calculates the minimum and maximum `x` and `y` coordinates of the bounding box for the city boundary of the airport with the abbreviation "CPH":
 
 ```esql
 FROM airport_city_boundaries
@@ -25,10 +25,3 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
-
-## Supported Types
-
-- `geo_point`
-- `geo_shape`
-- `cartesian_point`
-- `cartesian_shape`

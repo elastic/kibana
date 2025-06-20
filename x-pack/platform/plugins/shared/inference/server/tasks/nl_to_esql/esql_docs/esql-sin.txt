@@ -19,4 +19,4 @@ ROW a=1.8
 | EVAL sin = SIN(a)
 ```
 
-Calculate the sine of the angle `1.8` radians.
+Calculate the sine of the angle `1.8` radians and store the result in a new column named `sin`.

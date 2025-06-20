@@ -14,7 +14,9 @@ Expression of type `geo_point`, `geo_shape`, `cartesian_point`, or `cartesian_sh
 
 ## Examples
 
-### Example 1: Extracting the maximum `y` coordinate from a geometry
+### Example 1: Extracting the bounding box coordinates of a city boundary
+
+The following query calculates the bounding box of the city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates:
 
 ```esql
 FROM airport_city_boundaries
@@ -23,5 +25,3 @@ FROM airport_city_boundaries
 | EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
-
-This example calculates the bounding box of the `city_boundary` geometry for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates.

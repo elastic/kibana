@@ -26,4 +26,4 @@ FROM employees
 | SORT languages
 ```
 
-This example calculates the weighted average of employee salaries using their heights as weights, grouped by languages. The result is rounded and sorted by languages.
+This example calculates the weighted average of employee salaries using their heights as weights, grouped by languages. The result is rounded and sorted by language.

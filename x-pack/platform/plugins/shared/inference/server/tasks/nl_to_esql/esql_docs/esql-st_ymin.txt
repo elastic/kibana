@@ -24,4 +24,4 @@ FROM airport_city_boundaries
 | KEEP abbrev, airport, xmin, xmax, ymin, ymax
 ```
 
-This example calculates the bounding box of a city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates.
+This example calculates the bounding box of a city boundary for the airport with the abbreviation "CPH" and extracts the minimum and maximum `x` and `y` coordinates, keeping only the relevant fields in the output.

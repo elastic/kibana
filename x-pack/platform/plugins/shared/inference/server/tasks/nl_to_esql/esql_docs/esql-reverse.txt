@@ -10,7 +10,7 @@ The `REVERSE` function returns a new string with the characters of the input str
 
 #### `str`
 
-String expression. If the input is `null`, the function returns `null`.
+String expression. If `null`, the function returns `null`.
 
 ## Examples
 
@@ -21,11 +21,11 @@ ROW message = "Some Text"
 | EVAL message_reversed = REVERSE(message);
 ```
 
-| message    | message_reversed |
-|------------|------------------|
-| Some Text  | txeT emoS        |
+| message   | message_reversed |
+|-----------|------------------|
+| Some Text | txeT emoS        |
 
-### Example 2: Reversing a string with Unicode characters
+### Example 2: Reversing a string with emojis
 
 ```esql
 ROW bending_arts = "💧🪨🔥💨"
@@ -33,11 +33,11 @@ ROW bending_arts = "💧🪨🔥💨"
 ```
 
 | bending_arts | bending_arts_reversed |
-|--------------|------------------------|
-| 💧🪨🔥💨      | 💨🔥🪨💧                |
+|--------------|-----------------------|
+| 💧🪨🔥💨      | 💨🔥🪨💧               |
 
 `REVERSE` works with Unicode and preserves grapheme clusters during reversal.
 
 ## Limitations
 
-If Elasticsearch is running with a JDK version less than 20, the `REVERSE` function may not properly reverse grapheme clusters. For example, the string "👍🏽😊" might be reversed to "🏽👍😊" instead of the correct "😊👍🏽". Elastic Cloud and the JDK bundled with Elasticsearch use newer JDKs, so this issue only arises if an older JDK is explicitly used.
+If Elasticsearch is running with a JDK version less than 20, the function may not properly reverse grapheme clusters. For example, "👍🏽😊" might be reversed to "🏽👍😊" instead of the correct "😊👍🏽". Elastic Cloud and the JDK bundled with Elasticsearch use newer JDKs, so this issue typically arises only if an older JDK is explicitly used.

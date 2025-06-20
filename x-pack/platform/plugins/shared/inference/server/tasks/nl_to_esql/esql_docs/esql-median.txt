@@ -1,6 +1,6 @@
 # MEDIAN
 
-The `MEDIAN` function calculates the value that is greater than half of all values and less than half of all values, also known as the 50th percentile (`PERCENTILE`). The result is usually approximate and non-deterministic, meaning repeated calculations on the same data may yield slightly different results.
+The `MEDIAN` function calculates the value that is greater than half of all values and less than half of all values, also known as the 50th percentile. The result is usually approximate.
 
 ## Syntax
 
@@ -23,7 +23,7 @@ FROM employees
 
 ### Example 2: Calculating the median of maximum values in a multivalued column
 
-To calculate the median of the maximum values of a multivalued column, use the `MV_MAX` function to get the maximum value per row, and then apply the `MEDIAN` function:
+To calculate the median of the maximum values of a multivalued column, first use `MV_MAX` to get the maximum value per row, and then use the result with the `MEDIAN` function:
 
 ```esql
 FROM employees
@@ -32,5 +32,5 @@ FROM employees
 
 ## Limitations
 
-- The `MEDIAN` function is non-deterministic, meaning repeated calculations on the same dataset may produce slightly different results.
-- The result is usually approximate, similar to the `PERCENTILE` function.
+- The `MEDIAN` function is non-deterministic, meaning you may get slightly different results when using the same data.
+- Like the `PERCENTILE` function, the `MEDIAN` function provides approximate results.

@@ -10,7 +10,7 @@ Converts a multivalued field into a single-valued field containing the average o
 
 #### `number`
 
-A multivalue expression.
+A multivalued expression.
 
 ## Examples
 

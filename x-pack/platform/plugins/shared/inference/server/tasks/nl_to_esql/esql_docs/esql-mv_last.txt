@@ -16,15 +16,11 @@ A multivalue expression.
 
 ## Examples
 
-### Example 1: Extracting the last value from a split string
-
-The following example splits a string into multiple values and retrieves the last value:
+### Example 1: Extracting the last value from a multivalued column
 
 ```esql
 ROW a="foo;bar;baz"
 | EVAL last_a = MV_LAST(SPLIT(a, ";"))
 ```
 
-## Limitations
-
-- The order in which multivalued fields are read is not guaranteed. If you require a specific order, consider using other functions like `MV_MAX` for maximum values.
+This example splits the string `a` into multiple values using the `SPLIT` function and then extracts the last value, resulting in `last_a = "baz"`.

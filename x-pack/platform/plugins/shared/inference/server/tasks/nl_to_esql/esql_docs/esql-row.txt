@@ -29,7 +29,7 @@ ROW a = 1, b = "two", c = null
 
 ### Example 2: Multi-value columns
 
-Use square brackets to define a column with multiple values:
+Use square brackets to assign multiple values to a single column:
 
 ```esql
 ROW a = [2, 1]

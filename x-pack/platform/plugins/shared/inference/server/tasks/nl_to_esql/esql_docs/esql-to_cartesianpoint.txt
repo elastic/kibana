@@ -14,10 +14,14 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-Convert a list of WKT Point strings into `cartesian_point` values:
+Convert WKT-formatted strings to `cartesian_point` values:
 
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
 | MV_EXPAND wkt
 | EVAL pt = TO_CARTESIANPOINT(wkt)
 ```
+
+## Limitations
+
+- The input string must strictly follow the WKT Point format for successful conversion.

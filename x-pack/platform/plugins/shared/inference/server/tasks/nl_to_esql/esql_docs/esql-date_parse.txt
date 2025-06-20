@@ -1,6 +1,6 @@
 # DATE_PARSE
 
-Parses a date string into a date value using a specified format.
+Parses a date string into a date object using the specified format.
 
 ## Syntax
 
@@ -10,11 +10,11 @@ Parses a date string into a date value using a specified format.
 
 #### `datePattern`
 
-The date format to use for parsing. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
+The date format. Refer to the `DateTimeFormatter` documentation for the syntax. If `null`, the function returns `null`.
 
 #### `dateString`
 
-The date expression as a string. If `null` or an empty string, the function returns `null`.
+A date expression as a string. If `null` or an empty string, the function returns `null`.
 
 ## Examples
 
@@ -25,4 +25,4 @@ ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
 
-This example parses the string `"2022-05-06"` into a date value using the format `"yyyy-MM-dd"`.
+This example parses the string `"2022-05-06"` into a date object using the format `"yyyy-MM-dd"`.

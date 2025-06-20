@@ -1,6 +1,6 @@
 # MAX
 
-The `MAX` function calculates the maximum value of a specified field.
+The `MAX` function returns the maximum value of a field.
 
 ## Syntax
 

@@ -1,4 +1,4 @@
-## DATE_FORMAT
+# DATE_FORMAT
 
 The `DATE_FORMAT` function returns a string representation of a date in the specified format.
 
@@ -21,8 +21,7 @@ The `DATE_FORMAT` function returns a string representation of a date in the spec
 
 ## Examples
 
-### Example 1: Formatting a date to a specific format
-Convert the `hire_date` field into a string formatted as `yyyy-MM-dd`:
+### Example 1: Formatting a date to `yyyy-MM-dd`
 
 ```esql
 FROM employees
@@ -30,6 +29,4 @@ FROM employees
 | EVAL hired = DATE_FORMAT("yyyy-MM-dd", hire_date)
 ```
 
-## Limitations
-
-- The function does not specify supported types in the documentation.
+This example formats the `hire_date` field into the `yyyy-MM-dd` format and stores the result in a new column named `hired`.

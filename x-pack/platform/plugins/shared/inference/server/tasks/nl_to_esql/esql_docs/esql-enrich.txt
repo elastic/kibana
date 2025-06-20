@@ -26,7 +26,7 @@ The name of the enrich policy. You must create and execute the enrich policy bef
 
 #### `new_nameX`
 
-(Optional) Allows you to rename the columns added for each enrich field. Defaults to the enrich field name. If a column with the same name as the new name already exists, it will be discarded. If multiple columns are renamed to the same name, only the rightmost column is retained.
+(Optional) Allows you to rename the columns added for each enrich field. Defaults to the enrich field name. If a column with the same name as the new name already exists, it will be discarded. If a name (new or original) occurs more than once, only the rightmost duplicate creates a column.
 
 ## Examples
 
@@ -50,7 +50,7 @@ ROW a = "1"
 
 ### Example 3: Selecting specific enrich fields
 
-Explicitly select specific enrich fields to add as columns.
+Explicitly select the enrich fields to be added as columns.
 
 ```esql
 ROW a = "1"
@@ -59,11 +59,20 @@ ROW a = "1"
 
 ### Example 4: Renaming added columns
 
-Rename the columns added for the enrich fields.
+Rename the columns added using the `WITH` clause.
 
 ```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH name = language_name
 ```
 
-**Note:** In case of name collisions, the newly created columns will override existing columns.
+In case of name collisions, the newly created columns will override existing columns.
+
+## Limitations
+
+- The `ENRICH` command requires an existing enrich policy to be created and executed beforehand.
+- The `match_field` in the `ENRICH` command must match the type defined in the enrich policy. For example:
+  - A `geo_match` policy requires a `match_field` of type `geo_point` or `geo_shape`.
+  - A `range` policy requires a `match_field` of type `integer`, `long`, `date`, or `ip`, depending on the range field type in the enrich index.
+  - For `range` policies, if the `match_field` is of type `KEYWORD`, field values are parsed during query execution. If parsing fails, the output values for that row are set to `null`, and a warning is produced.
+- The `geo_match` enrich policy type only supports the `intersects` spatial relation.

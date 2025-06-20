@@ -1,6 +1,6 @@
 ## FROM
 
-The `FROM` command retrieves a table of data from a data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field that can be accessed by its name.
+The `FROM` command retrieves data from a data stream, index, or alias and returns it as a table. Each row in the table represents a document, and each column corresponds to a field that can be accessed by its name.
 
 ## Syntax
 
@@ -20,7 +20,7 @@ A comma-separated list of metadata fields to retrieve.
 
 ### Basic Example
 
-Retrieve data from the `employees` index:
+Retrieve all documents from the `employees` index:
 
 ```esql
 FROM employees
@@ -36,7 +36,7 @@ FROM <logs-{now/d}>
 
 ### Querying Multiple Data Streams, Indices, or Aliases
 
-Query multiple data streams, indices, or aliases using comma-separated lists or wildcards:
+Query multiple data streams, indices, or aliases using a comma-separated list or wildcards:
 
 ```esql
 FROM employees-00001,other-employees-*
@@ -52,7 +52,7 @@ FROM cluster_one:employees-00001,cluster_two:other-employees-*
 
 ### Using the `METADATA` Directive
 
-Enable metadata fields using the optional `METADATA` directive:
+Enable metadata fields by using the optional `METADATA` directive:
 
 ```esql
 FROM employees METADATA _id
@@ -69,16 +69,12 @@ FROM "this=that","""this[that"""
 ## Limitations
 
 - By default, the `FROM` command applies an implicit limit of 1,000 rows if no explicit `LIMIT` is specified. For example:
-
   ```esql
 FROM employees
 ```
-
   is equivalent to:
-
   ```esql
 FROM employees
 | LIMIT 1000
 ```
-
-- Queries do not return more than 10,000 rows, regardless of the `LIMIT` value. This is a configurable upper limit. Refer to the [Limitations](esql-limitations.html) section for more details.
+- Queries cannot return more than 10,000 rows, even if a higher `LIMIT` is specified. This is a configurable upper limit. For more details, refer to the [LIMIT command](#LIMIT).

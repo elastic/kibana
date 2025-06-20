@@ -10,19 +10,19 @@ Truncates an IP address to a specified prefix length.
 
 #### `ip`
 
-IP address of type `ip` (supports both IPv4 and IPv6).
+The IP address to truncate. Supports both IPv4 and IPv6 addresses and must be of type `ip`.
 
 #### `prefixLengthV4`
 
-Prefix length for IPv4 addresses.
+The prefix length to apply for IPv4 addresses.
 
 #### `prefixLengthV6`
 
-Prefix length for IPv6 addresses.
+The prefix length to apply for IPv6 addresses.
 
 ## Examples
 
-### Example 1: Truncate IPv4 and IPv6 addresses to specified prefix lengths
+### Example 1: Truncating IPv4 and IPv6 addresses
 
 ```esql
 ROW ip4 = TO_IP("1.2.3.4"), ip6 = TO_IP("fe80::cae2:65ff:fece:feb9")

@@ -14,8 +14,6 @@ Query string in KQL query string format.
 
 ## Examples
 
-### Example 1: Filtering rows based on a KQL query
-
 ```esql
 FROM books
 | WHERE KQL("author: Faulkner")

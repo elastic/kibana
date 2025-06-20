@@ -8,7 +8,7 @@ Converts an input value to a `cartesian_shape` value. A string will only be succ
 
 ### Parameters
 
-#### `field`
+#### field
 
 The input value to be converted. This can be a single- or multi-valued column or an expression.
 

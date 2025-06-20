@@ -21,4 +21,4 @@ ROW x = "2024-01-01"::datetime
 | EVAL y = x + "3 hours"::time_duration, z = x - TO_TIMEDURATION(`3 hours`)
 ```
 
-This example demonstrates how to add and subtract a time duration from a datetime value. The `TO_TIMEDURATION` function is used to convert the string `"3 hours"` into a `time_duration` value.
+This example demonstrates how to add and subtract a time duration (`3 hours`) to and from a datetime value (`2024-01-01`).

@@ -1,6 +1,6 @@
 ## KEEP
 
-The `KEEP` command allows you to specify which columns are included in the output and the order in which they appear.
+The `KEEP` command specifies which columns are returned and the order in which they appear in the output.
 
 ## Syntax
 
@@ -10,12 +10,13 @@ The `KEEP` command allows you to specify which columns are included in the outpu
 
 #### `columns`
 
-A comma-separated list of columns to retain. Supports wildcards. If a column matches multiple wildcards or column names, precedence rules determine the final behavior.
+A comma-separated list of columns to retain. Supports wildcards. If a column matches multiple expressions, precedence rules determine the final output.
 
 ## Examples
 
-### Specify the order of returned columns
-This example ensures the columns `emp_no`, `first_name`, `last_name`, and `height` are returned in the specified order:
+### Return columns in a specific order
+
+The following query returns the `emp_no`, `first_name`, `last_name`, and `height` columns in the specified order:
 
 ```esql
 FROM employees
@@ -23,7 +24,8 @@ FROM employees
 ```
 
 ### Use wildcards to match column names
-This example keeps all columns with names starting with `h`:
+
+This query keeps all columns with names starting with `h`:
 
 ```esql
 FROM employees
@@ -31,7 +33,8 @@ FROM employees
 ```
 
 ### Combine specific columns and wildcards
-The asterisk wildcard (`*`) includes all columns not explicitly matched by other arguments. This query first includes columns starting with `h`, followed by all other columns:
+
+The asterisk wildcard (`*`) matches all columns not explicitly specified. This query returns all columns starting with `h` first, followed by all other columns:
 
 ```esql
 FROM employees
@@ -39,15 +42,17 @@ FROM employees
 ```
 
 ### Precedence of complete field names over wildcards
-Complete field names take precedence over wildcard expressions. In this example, `first_name` is prioritized over `first_name*`:
+
+When a column matches both a complete field name and a wildcard, the complete field name takes precedence:
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, first_name*
 ```
 
-### Wildcard precedence when multiple expressions match
-When multiple wildcard expressions match, the last one takes precedence, even if it is less specific:
+### Wildcard precedence and ordering
+
+If a column matches multiple wildcard expressions, the rightmost expression takes precedence, even if it is less specific:
 
 ```esql
 FROM employees
@@ -55,13 +60,10 @@ FROM employees
 ```
 
 ### Lowest precedence for the `*` wildcard
-The `*` wildcard has the lowest precedence. In this example, `first_name` is prioritized, and all other columns are included afterward:
+
+The `*` wildcard has the lowest precedence. The order of other arguments determines the output order:
 
 ```esql
 FROM employees
 | KEEP *, first_name
 ```
-
-## Limitations
-
-- When querying many indices at once without filters, using `KEEP` can help reduce the number of fields returned and avoid errors caused by excessive response sizes.

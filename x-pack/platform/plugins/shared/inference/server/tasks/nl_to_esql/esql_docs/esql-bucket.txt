@@ -16,11 +16,11 @@ A numeric or date expression from which to derive buckets.
 
 The target number of buckets or the desired bucket size if the `from` and `to` parameters are omitted.
 
-#### `from`
+#### `from` (optional)
 
 The start of the range. Can be a number, a date, or a date expressed as a string.
 
-#### `to`
+#### `to` (optional)
 
 The end of the range. Can be a number, a date, or a date expressed as a string.
 
@@ -35,7 +35,7 @@ FROM employees
 | SORT hire_date
 ```
 
-This example creates buckets for hire dates within the year 1985, aiming for up to 20 buckets. The actual number of buckets may vary based on the range and bucket size.
+This example creates buckets for hire dates in 1985, aiming for 20 buckets. The actual number of buckets may vary depending on the range.
 
 ### Example 2: Combine BUCKET with an aggregation to create a histogram
 
@@ -46,7 +46,7 @@ FROM employees
 | SORT month
 ```
 
-This example calculates the number of hires per month in 1985. Note that `BUCKET` does not create empty buckets for months with no data.
+This example calculates the number of hires per month in 1985.
 
 ### Example 3: Asking for more buckets can result in a smaller range
 
@@ -57,9 +57,9 @@ FROM employees
 | SORT week
 ```
 
-This example creates weekly buckets for hire dates in 1985. The bucket size is adjusted to fit the range and target number of buckets.
+This example creates weekly buckets for hire dates in 1985, aiming for 100 buckets.
 
-### Example 4: Providing the bucket size as the second parameter
+### Example 4: Providing the bucket size directly
 
 ```esql
 FROM employees
@@ -68,9 +68,9 @@ FROM employees
 | SORT week
 ```
 
-Here, the bucket size is explicitly set to one week.
+This example creates weekly buckets for hire dates in 1985 by directly specifying the bucket size.
 
-### Example 5: Operating on numeric fields
+### Example 5: Creating a salary histogram
 
 ```esql
 FROM employees
@@ -78,9 +78,9 @@ FROM employees
 | SORT bs
 ```
 
-This example creates buckets for salary values within the specified range.
+This example creates a histogram of salaries, dividing the range into 20 buckets.
 
-### Example 6: Omitting the range when the desired bucket size is known
+### Example 6: Omitting the range when the bucket size is known
 
 ```esql
 FROM employees
@@ -89,7 +89,7 @@ FROM employees
 | SORT b
 ```
 
-This example uses a fixed bucket size of 5000 for salary values.
+This example creates salary buckets with a fixed size of 5000.
 
 ### Example 7: Create hourly buckets for the last 24 hours
 
@@ -123,7 +123,7 @@ FROM employees
 
 This example demonstrates advanced usage of `BUCKET` in both aggregation and grouping.
 
-### Example 10: Adjusting bucketed date values with an offset
+### Example 10: Adjusting bucket start value with an offset
 
 ```esql
 FROM employees
@@ -133,10 +133,4 @@ FROM employees
 | LIMIT 3
 ```
 
-This example adjusts bucketed date values by adding and subtracting an offset.
-
-## Limitations
-
-- `BUCKET` does not create buckets for ranges with no matching documents.
-- Rows with values outside the specified range are assigned to buckets outside the range. Use `WHERE` to filter such rows.
-- When providing the bucket size as the second parameter, it must be a time duration or date period.
+This example adjusts the bucket start value by adding and subtracting an offset.

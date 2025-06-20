@@ -14,9 +14,11 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-Convert a WKT string into a `geo_shape` value:
+### Example 1
 
 ```esql
 ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
 | EVAL geom = TO_GEOSHAPE(wkt)
 ```
+
+This example converts a WKT string representing a polygon into a `geo_shape` value.

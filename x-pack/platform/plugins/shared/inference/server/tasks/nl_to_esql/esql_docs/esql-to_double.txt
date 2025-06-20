@@ -1,6 +1,6 @@
 # TO_DOUBLE
 
-Converts an input value to a double-precision floating-point number. If the input is a date, it is interpreted as milliseconds since the Unix epoch and converted to a double. Boolean values are converted to `1.0` for `true` and `0.0` for `false`.
+The TO_DOUBLE function converts an input value into a double value.
 
 ## Syntax
 
@@ -8,33 +8,18 @@ Converts an input value to a double-precision floating-point number. If the inpu
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value. This can be a single or multi-valued column or an expression.
 
 ## Examples
 
-### Example 1: Converting strings and handling invalid conversions
-
 ```esql
 ROW str1 = "5.20128E11", str2 = "foo"
-| EVAL dbl = TO_DOUBLE(520128000000), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
+| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
 ```
 
-- The first conversion (`"520128000000"`) successfully converts the string to a double.
-- The second conversion (`str1`) also succeeds, converting the scientific notation string to a double.
-- The third conversion (`str2`) fails because the string `"foo"` cannot be converted to a double. In such cases, the result is `null`, and a warning is added to the response.
+## Notes
 
-### Warning Example
-
-When a conversion fails, a warning is included in the response. For instance:
-
-```
-"Line 1:115: evaluation of [TO_DOUBLE(str2)] failed, treating result as null. Only first 20 failures recorded."
-```
-
-Additionally, a header provides the failure reason and the problematic value:
-
-```
-"java.lang.NumberFormatException: For input string: \"foo\""
-```
+- If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch and converted to a double.
+- A boolean value of true will be converted to a double value of 1.0, and false will be converted to 0.0.

@@ -1,4 +1,4 @@
-## EVAL
+# EVAL
 
 The `EVAL` command allows you to add new columns with calculated values to your dataset.
 
@@ -12,7 +12,7 @@ The `EVAL` command allows you to add new columns with calculated values to your 
 
 - The name of the column to be added or updated.
 - If a column with the same name already exists, it will be replaced by the new column.
-- If the same column name is used multiple times, only the rightmost definition is applied.
+- If a column name is used multiple times, only the rightmost definition is applied.
 
 #### `valueX`
 

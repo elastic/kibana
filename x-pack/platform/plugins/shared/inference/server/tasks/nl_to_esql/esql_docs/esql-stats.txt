@@ -1,6 +1,6 @@
-## STATS
+# STATS
 
-The `STATS` processing command groups rows based on a common value and calculates one or more aggregated values over the grouped rows.
+The `STATS` command groups rows based on a common value and calculates one or more aggregated values over the grouped rows.
 
 ## Syntax
 
@@ -28,55 +28,52 @@ The condition that must be met for a row to be included in the evaluation of `ex
 
 ### Calculating a statistic and grouping by the values of another column
 
-Group employees by the `languages` column and calculate the count of employees for each language:
-
 ```esql
 FROM employees
 | STATS count = COUNT(emp_no) BY languages
 | SORT languages
 ```
 
-### Omitting `BY` to return one row with the aggregations applied over the entire dataset
+Group rows by the `languages` column and calculate the count of `emp_no` for each group.
 
-Calculate the average number of languages spoken by employees across the entire dataset:
+### Omitting `BY` to return one row with the aggregations applied over the entire dataset
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages)
 ```
 
-### Calculating multiple values
+Calculate the average number of languages across all rows.
 
-Calculate both the average and maximum number of languages spoken by employees:
+### Calculating multiple values
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages), max_lang = MAX(languages)
 ```
 
-### Filtering rows that go into an aggregation using `WHERE`
+Calculate both the average and maximum number of languages.
 
-Calculate the average salary for employees born before and after 1960, grouped by gender:
+### Filtering rows that go into an aggregation using `WHERE`
 
 ```esql
 FROM employees
-| STATS avg50s = AVG(salary)::LONG WHERE birth_date < "1960-01-01", avg60s = AVG(salary)::LONG WHERE birth_date > BY gender
-| SORT gender
+| STATS avg50s = AVG(salary)::LONG WHERE birth_date < "1960-01-01"
 ```
 
-### Mixing aggregations with and without filters, and optional grouping
+Group rows by `gender` and calculate the average salary for employees born before and after 1960.
 
-Count employees in different salary ranges and calculate the total count:
+### Mixing aggregations with and without filters, and optional grouping
 
 ```esql
 FROM employees
 | EVAL Ks = salary / 1000 // thousands
-| STATS under_40K = COUNT(*) WHERE Ks < 40, inbetween = COUNT(*) WHERE 40 <, over_60K = COUNT(*) WHERE 60 <, total = COUNT(*)
+| STATS under_40K = COUNT(*) WHERE Ks < 40, inbetween = COUNT(*) WHERE Ks >= 40 and Ks <= 60, over_60K = COUNT(*) WHERE Ks > 60, total = COUNT(*)
 ```
 
-### Grouping by a multivalued key
+Calculate counts for salary ranges (under 40K, between 40K and 60K, over 60K) and the total count.
 
-Group rows by a multivalued column and calculate the minimum value for each group:
+### Grouping by a multivalued key
 
 ```esql
 ROW i=1, a=["a", "b"]
@@ -84,9 +81,9 @@ ROW i=1, a=["a", "b"]
 | SORT a ASC
 ```
 
-### Grouping by multiple values
+Group rows by the multivalued column `a` and calculate the minimum value of `i` for each group.
 
-Group employees by the year they were hired and the number of languages they speak, then calculate the average salary for each group:
+### Grouping by multiple values
 
 ```esql
 FROM employees
@@ -96,9 +93,9 @@ FROM employees
 | SORT hired, languages.long
 ```
 
-### Grouping by multiple multivalued keys
+Group rows by the year of hire and the `languages.long` column, then calculate and round the average salary for each group.
 
-Group rows by multiple multivalued columns and calculate the minimum value for each group:
+### Grouping by multiple multivalued keys
 
 ```esql
 ROW i=1, a=["a", "b"], b=[2, 3]
@@ -106,18 +103,18 @@ ROW i=1, a=["a", "b"], b=[2, 3]
 | SORT a ASC, b ASC
 ```
 
-### Using functions in aggregations and grouping expressions
+Group rows by the multivalued columns `a` and `b` and calculate the minimum value of `i` for each group.
 
-Calculate the average salary change using the `MV_AVG` function:
+### Using functions in aggregating and grouping expressions
 
 ```esql
 FROM employees
 | STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```
 
-### Grouping by an expression
+Calculate the average salary change using the `MV_AVG` function and round the result to 10 decimal places.
 
-Group employees by the first letter of their last name and count the number of employees in each group:
+### Grouping by an expression
 
 ```esql
 FROM employees
@@ -125,18 +122,18 @@ FROM employees
 | SORT `LEFT(last_name, 1)`
 ```
 
-### Specifying the output column name (optional)
+Group rows by the first letter of the `last_name` column and calculate the count for each group.
 
-Calculate the average salary without explicitly naming the output column:
+### Specifying the output column name (optional)
 
 ```esql
 FROM employees
 | STATS AVG(salary)
 ```
 
-### Using a column with special characters in subsequent commands
+Calculate the average salary. The output column name defaults to `AVG(salary)`.
 
-Calculate the average salary and round the result, using backticks to handle special characters in the column name:
+### Using quoted column names in subsequent commands
 
 ```esql
 FROM employees
@@ -144,8 +141,11 @@ FROM employees
 | EVAL avg_salary_rounded = ROUND(`AVG(salary)`)
 ```
 
+Use the calculated column `AVG(salary)` in subsequent commands by quoting its name.
+
 ## Limitations
 
 - Individual `null` values are skipped when computing aggregations.
-- `STATS` without any groups is significantly faster than adding a group.
-- Grouping on a single expression is more optimized than grouping on multiple expressions. For example, grouping on a single `keyword` column can be five times faster than grouping on two `keyword` columns. Avoid combining columns with functions like `CONCAT` for grouping, as it will not improve performance.
+- `STATS` without any groups is faster than adding a group.
+- Grouping on a single expression is more optimized than grouping on multiple expressions. For example, grouping on a single `keyword` column is significantly faster than grouping on two `keyword` columns.
+- Avoid combining columns with functions like `CONCAT` for grouping, as it does not improve performance.

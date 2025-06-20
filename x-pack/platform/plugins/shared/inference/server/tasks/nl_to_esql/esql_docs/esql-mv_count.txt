@@ -21,4 +21,4 @@ ROW a=["foo", "zoo", "bar"]
 | EVAL count_a = MV_COUNT(a)
 ```
 
-Counts the number of values in the multivalued column `a`.
+Count the number of values in the multivalued column `a`.

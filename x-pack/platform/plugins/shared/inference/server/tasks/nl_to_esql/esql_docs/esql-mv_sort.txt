@@ -10,11 +10,11 @@ Sorts a multivalued field in lexicographical order.
 
 #### `field`
 
-Multivalue expression. If `null`, the function returns `null`.
+- Multivalue expression. If `null`, the function returns `null`.
 
 #### `order`
 
-Sort order. The valid options are `ASC` and `DESC`. The default is `ASC`.
+- Sort order. The valid options are `ASC` and `DESC`. The default is `ASC`.
 
 ## Examples
 

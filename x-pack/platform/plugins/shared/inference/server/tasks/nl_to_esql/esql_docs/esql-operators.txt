@@ -1,13 +1,13 @@
 ```markdown
 # ES|QL Operators
 
-This document provides an overview of the operators supported in ES|QL, categorized into binary, unary, logical, and other operators. Each section includes examples of how to use these operators in ES|QL queries.
+This document provides an overview of the operators available in ES|QL, categorized into binary, unary, logical, and other operators. Each operator is accompanied by an example query to demonstrate its usage.
 
 ---
 
 ## Binary Operators
 
-Binary operators operate on two operands and include comparison, arithmetic, and logical operations.
+Binary operators are used to compare or perform arithmetic operations between two values.
 
 ### Equality (`==`)
 Checks if two values are equal.
@@ -26,7 +26,7 @@ FROM employees
 ```
 
 ### Less Than (`<`)
-Checks if the left operand is less than the right operand.
+Checks if a value is less than another.
 
 ```esql
 FROM employees
@@ -34,7 +34,7 @@ FROM employees
 ```
 
 ### Less Than or Equal To (`<=`)
-Checks if the left operand is less than or equal to the right operand.
+Checks if a value is less than or equal to another.
 
 ```esql
 FROM employees
@@ -42,7 +42,7 @@ FROM employees
 ```
 
 ### Greater Than (`>`)
-Checks if the left operand is greater than the right operand.
+Checks if a value is greater than another.
 
 ```esql
 FROM employees
@@ -50,7 +50,7 @@ FROM employees
 ```
 
 ### Greater Than or Equal To (`>=`)
-Checks if the left operand is greater than or equal to the right operand.
+Checks if a value is greater than or equal to another.
 
 ```esql
 FROM employees
@@ -58,7 +58,7 @@ FROM employees
 ```
 
 ### Add (`+`)
-Adds two numeric values.
+Adds two values.
 
 ```esql
 FROM employees
@@ -66,15 +66,15 @@ FROM employees
 ```
 
 ### Subtract (`-`)
-Subtracts the right operand from the left operand.
+Subtracts one value from another.
 
 ```esql
 FROM employees
-| EVAL remaining_leave = total_leave - used_leave
+| EVAL remaining_vacation_days = total_vacation_days - used_vacation_days
 ```
 
 ### Multiply (`*`)
-Multiplies two numeric values.
+Multiplies two values.
 
 ```esql
 FROM employees
@@ -82,19 +82,19 @@ FROM employees
 ```
 
 ### Divide (`/`)
-Divides the left operand by the right operand.
+Divides one value by another.
 
 ```esql
 FROM employees
-| EVAL tax_rate = tax_paid / salary
+| EVAL average_salary = total_salary / employee_count
 ```
 
 ### Modulus (`%`)
-Returns the remainder of the division of two numbers.
+Returns the remainder of a division.
 
 ```esql
 FROM employees
-| EVAL remainder = employee_id % 10
+| EVAL remainder = employee_id % 2
 ```
 
 ---
@@ -108,14 +108,14 @@ Negates a numeric value.
 
 ```esql
 ROW value = 10
-| EVAL negated_value = -value
+| EVAL negative_value = -value
 ```
 
 ---
 
 ## Logical Operators
 
-Logical operators are used to combine multiple conditions.
+Logical operators are used to combine or negate conditions.
 
 ### AND
 Returns `true` if both conditions are true.
@@ -138,7 +138,7 @@ Negates a condition.
 
 ```esql
 FROM employees
-| WHERE NOT (age < 25)
+| WHERE NOT still_hired
 ```
 
 ---
@@ -146,7 +146,7 @@ FROM employees
 ## Other Operators
 
 ### IS NULL and IS NOT NULL
-Used to check for `NULL` values.
+Checks if a value is `NULL` or not.
 
 #### IS NULL
 ```esql
@@ -181,17 +181,16 @@ ROW a = 1, b = 4, c = 3
 ### LIKE
 Filters data based on string patterns using wildcards.
 
-#### Example with `*` and `?` wildcards:
+#### Example 1: Basic usage
 ```esql
 FROM employees
-| WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
+| WHERE first_name LIKE "J*"
 ```
 
-#### Escaping special characters:
+#### Example 2: Escaping special characters
 ```esql
 ROW message = "foo * bar"
-| WHERE message LIKE """foo \* bar"""
+| WHERE message LIKE "foo \\* bar"
 ```
 
 ### RLIKE
@@ -199,11 +198,6 @@ Filters data based on string patterns using regular expressions.
 
 ```esql
 FROM employees
-| WHERE first_name RLIKE ".*John.*"
-| KEEP first_name, last_name
+| WHERE first_name RLIKE "J.*"
 ```
-
----
-
-This document provides a concise overview of ES|QL operators with examples to help you understand their usage in queries.
 ```

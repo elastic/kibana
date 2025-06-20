@@ -1,4 +1,4 @@
-## REPLACE
+# REPLACE
 
 The `REPLACE` function substitutes any match of a regular expression in a string with a specified replacement string.
 
@@ -22,9 +22,7 @@ Replacement string.
 
 ## Examples
 
-### Example 1: Replace a word in a string
-
-This example replaces any occurrence of the word "World" with the word "Universe":
+The following example replaces any occurrence of the word "World" with the word "Universe":
 
 ```esql
 ROW str = "Hello World"

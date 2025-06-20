@@ -10,24 +10,24 @@ Converts a multivalued field into a single-valued field containing the median va
 
 #### `number`
 
-A multivalue expression.
+Multivalue expression.
 
 ## Examples
 
 ### Example 1
-
-Calculate the median of a multivalued column:
 
 ```esql
 ROW a=[3, 5, 1]
 | EVAL median_a = MV_MEDIAN(a)
 ```
 
-### Example 2
+Calculate the median value of the multivalued column `a`.
 
-When the column has an even number of values, the result is the average of the middle two entries. If the column is not a floating-point type, the average rounds **down**:
+### Example 2
 
 ```esql
 ROW a=[3, 7, 1, 6]
 | EVAL median_a = MV_MEDIAN(a)
 ```
+
+For rows with an even number of values, the result is the average of the middle two entries. If the column is not of a floating-point type, the average rounds **down**.

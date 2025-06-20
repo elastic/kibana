@@ -1,6 +1,6 @@
 # ENDS_WITH
 
-Determines whether a keyword string ends with a specified suffix and returns a boolean result.
+Determines whether a keyword string ends with a specified suffix and returns a boolean value.
 
 ## Syntax
 

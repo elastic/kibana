@@ -14,9 +14,17 @@ The input value to be converted. It can be a single- or multi-valued column or a
 
 ## Examples
 
+Convert a list of radian values to degrees:
+
 ```esql
 ROW rad = [1.57, 3.14, 4.71]
 | EVAL deg = TO_DEGREES(rad)
 ```
 
-This example converts the values in the `rad` column from radians to degrees.
+### Result
+
+| rad   | deg       |
+|-------|-----------|
+| 1.57  | 89.954373 |
+| 3.14  | 179.908747|
+| 4.71  | 269.86312 |

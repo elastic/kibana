@@ -1,4 +1,4 @@
-# RENAME
+## RENAME
 
 The `RENAME` command is used to rename one or more columns in a table. If a column with the new name already exists, it will be replaced by the renamed column.
 
@@ -18,7 +18,7 @@ The new name for the column. If it conflicts with an existing column name, the e
 
 ## Examples
 
-### Renaming a single column
+### Rename a single column
 
 Rename the `still_hired` column to `employed`:
 
@@ -28,9 +28,9 @@ FROM employees
 | RENAME still_hired AS employed
 ```
 
-### Renaming multiple columns
+### Rename multiple columns
 
-Rename `first_name` to `fn` and `last_name` to `ln`:
+Rename `first_name` to `fn` and `last_name` to `ln` in a single command:
 
 ```esql
 FROM employees

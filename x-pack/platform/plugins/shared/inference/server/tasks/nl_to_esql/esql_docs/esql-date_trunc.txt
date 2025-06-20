@@ -20,17 +20,15 @@ The date expression to be truncated.
 
 ### Example 1: Truncate hire dates to the year
 
-Truncate the `hire_date` field to the beginning of the year:
-
 ```esql
 FROM employees
 | KEEP first_name, last_name, hire_date
 | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 ```
 
-### Example 2: Number of hires per year
+This example truncates the `hire_date` field to the beginning of the year and stores the result in a new column named `year_hired`.
 
-Combine `DATE_TRUNC` with the `STATS` command to create a histogram of hires per year:
+### Example 2: Number of hires per year
 
 ```esql
 FROM employees
@@ -39,9 +37,9 @@ FROM employees
 | SORT year
 ```
 
-### Example 3: Hourly error rate
+This example calculates the number of hires per year by truncating the `hire_date` field to the year and grouping the results.
 
-Calculate the hourly error rate by truncating timestamps to the hour and aggregating error occurrences:
+### Example 3: Hourly error rate
 
 ```esql
 FROM sample_data
@@ -50,3 +48,5 @@ FROM sample_data
 | STATS error_rate = AVG(error) BY hour
 | SORT hour
 ```
+
+This example calculates the hourly error rate by truncating the `@timestamp` field to the hour and averaging the `error` values for each hour.

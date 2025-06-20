@@ -24,4 +24,4 @@ FROM employees
 | EVAL ln_S = STARTS_WITH(last_name, "B")
 ```
 
-This example checks if the `last_name` column values start with the letter "B" and creates a new column `ln_S` with the boolean result.
+This example checks if the `last_name` column values start with the letter "B".

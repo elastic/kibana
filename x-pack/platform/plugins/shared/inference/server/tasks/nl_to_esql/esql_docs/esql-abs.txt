@@ -10,7 +10,7 @@ The `ABS` function returns the absolute value of a numeric expression.
 
 #### `number`
 
-- Numeric expression. If `null`, the function returns `null`.
+A numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
@@ -31,4 +31,4 @@ FROM employees
 | EVAL abs_height = ABS(0.0 - height)
 ```
 
-Compute the absolute height difference for employees.
+Calculate the absolute value of the difference between `0.0` and the `height` column.

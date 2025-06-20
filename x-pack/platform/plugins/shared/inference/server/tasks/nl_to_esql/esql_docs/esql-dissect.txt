@@ -22,7 +22,7 @@ A string used as the separator between appended values, when using the append mo
 
 ## Examples
 
-#### Example 1: Parsing a string with a timestamp, text, and IP address
+### Example 1: Parsing a string with a timestamp, text, and IP address
 
 Extracts the `date`, `msg`, and `ip` fields from a structured string.
 
@@ -32,7 +32,7 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | KEEP date, msg, ip
 ```
 
-#### Example 2: Converting output to another type
+### Example 2: Converting output to another type
 
 Converts the `date` field from a string to a datetime type after extracting it.
 

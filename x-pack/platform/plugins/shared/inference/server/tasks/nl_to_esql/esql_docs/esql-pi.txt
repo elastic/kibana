@@ -17,9 +17,3 @@ This function does not take any parameters.
 ```esql
 ROW PI()
 ```
-
-#### Result
-
-| PI()       |
-|------------|
-| 3.14159265 |

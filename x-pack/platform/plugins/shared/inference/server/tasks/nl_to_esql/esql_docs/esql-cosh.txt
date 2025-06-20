@@ -8,7 +8,7 @@ Returns the hyperbolic cosine of a number.
 
 ### Parameters
 
-#### `number`
+#### number
 
 Numeric expression. If `null`, the function returns `null`.
 

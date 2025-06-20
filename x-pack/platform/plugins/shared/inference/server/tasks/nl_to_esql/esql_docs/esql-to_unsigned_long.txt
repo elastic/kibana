@@ -1,6 +1,6 @@
 # TO_UNSIGNED_LONG
 
-Converts an input value to an unsigned long value. If the input is of a date type, its value is interpreted as milliseconds since the Unix epoch and converted to an unsigned long. Boolean values are converted as follows: `true` becomes `1`, and `false` becomes `0`.
+The TO_UNSIGNED_LONG function converts an input value into an unsigned long value.
 
 ## Syntax
 
@@ -8,37 +8,24 @@ Converts an input value to an unsigned long value. If the input is of a date typ
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value. This can be a single or multi-valued column or an expression.
 
 ## Examples
 
-### Example 1: Converting strings to unsigned long values
+The following example demonstrates the use of the TO_UNSIGNED_LONG function:
 
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
 ```
 
-- `str1` is successfully converted to an unsigned long value.
-- `str2` is also converted, but only the integer part is retained.
-- `str3` cannot be converted, resulting in a `null` value.
-
-When a conversion fails, a warning is added to the response. For example:
-
 ```esql
-"Line 1:133: evaluation of [TO_UL(str3)] failed, treating result as null. Only first 20 failures recorded."
+ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+| EVAL long_date1 = TO_UNSIGNED_LONG(date1), long_date2 = TO_UNSIGNED_LONG(date2)
 ```
 
-A subsequent header provides details about the failure and the problematic value:
+## Notes
 
-```esql
-"java.lang.NumberFormatException: Character f is neither a decimal digit number, decimal point,
-nor "e" notation exponential mark."
-```
-
-## Limitations
-
-- If the input cannot be converted to an unsigned long, the result is `null`, and a warning is issued in the response.
-- The function does not support all input types explicitly; unsupported types may result in conversion failures.
+If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch and then converted to an unsigned long. A boolean value of true will be converted to an unsigned long value of 1, and false will be converted to 0.

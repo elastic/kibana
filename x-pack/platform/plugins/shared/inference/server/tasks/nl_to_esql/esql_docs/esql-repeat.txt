@@ -18,11 +18,11 @@ The number of times the string should be repeated.
 
 ## Examples
 
-### Example 1: Repeating a string three times
+### Example 1
 
 ```esql
 ROW a = "Hello!"
 | EVAL triple_a = REPEAT(a, 3)
 ```
 
-This example creates a new column `triple_a` by repeating the string `"Hello!"` three times, resulting in `"Hello!Hello!Hello!"`.
+This example creates a new column `triple_a` by repeating the string `"Hello!"` three times.

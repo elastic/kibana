@@ -21,4 +21,4 @@ FROM airports
 | EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
 ```
 
-This example calculates both the character length and the byte length of city names in India.
+This example calculates both the character length and the byte length of city names in airports located in India.

@@ -1,6 +1,6 @@
 # FLOOR
 
-Rounds a number down to the nearest integer.
+Rounds a number down to the nearest integer. For `double` values, it selects the closest `double` representation of the integer, similar to `Math.floor`. For `long` (including unsigned) and `integer`, this operation has no effect.
 
 ## Syntax
 
@@ -14,11 +14,11 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1: Rounding down a floating-point number
+### Example 1
 
 ```esql
 ROW a=1.8
 | EVAL a = FLOOR(a)
 ```
 
-This example rounds the value `1.8` down to the nearest integer, resulting in `1`.
+Rounds the value `1.8` down to `1`.
