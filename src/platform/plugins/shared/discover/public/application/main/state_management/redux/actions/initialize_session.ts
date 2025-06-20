@@ -85,7 +85,10 @@ export const initializeSession: InternalStateThunkActionCreator<
       selectTabRuntimeState(runtimeStateManager, tabId);
     const tabState = selectTab(reduxState, tabId);
 
-    let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
+    let urlState = cleanupUrlState(
+      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      services.uiSettings
+    );
 
     /**
      * New tab initialization with the restored data if available
@@ -119,14 +122,9 @@ export const initializeSession: InternalStateThunkActionCreator<
       const tabInitialAppState = tabState.initialAppState;
 
       if (tabInitialAppState) {
-        initialUrlState = tabInitialAppState;
+        urlState = cleanupUrlState(cloneDeep(tabInitialAppState), services.uiSettings, true);
       }
     }
-
-    /**
-     * "No data" checks
-     */
-    const urlState = cleanupUrlState(initialUrlState, services.uiSettings);
 
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)
