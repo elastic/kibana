@@ -19,17 +19,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
-import {
-  RecurrenceFrequency,
-  RecurringSchedule,
-} from '@kbn/response-ops-recurring-schedule-form/types';
-import { RecurrenceEnd } from '@kbn/response-ops-recurring-schedule-form/constants';
-import type { Rrule } from '@kbn/task-manager-plugin/server/task';
 import { ListingPropsInternal } from '..';
 import {
   guessAppIconTypeFromObjectType,
@@ -42,7 +35,6 @@ import { ReportScheduleIndicator } from './report_schedule_indicator';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
 import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
 import { ScheduledReportFlyout } from './scheduled_report_flyout';
-import { ScheduledReport } from '../../types';
 import { TruncatedTitle } from './truncated_title';
 
 interface QueryParams {
