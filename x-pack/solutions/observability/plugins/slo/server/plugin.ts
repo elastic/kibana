@@ -231,6 +231,7 @@ export class SLOPlugin
         return sloClientFactory({
           request,
           getScopedClients,
+          logger: this.logger,
         });
       },
     };
