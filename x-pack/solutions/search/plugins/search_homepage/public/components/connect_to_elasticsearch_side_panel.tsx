@@ -65,7 +65,7 @@ export const ConnectToElasticsearchSidePanel = () => {
           footer={
             <EuiButtonEmpty href="#" iconType="importAction" data-test-subj="sampleDatasetButton">
               {i18n.translate('xpack.searchHomepage.connectToElasticsearch.sampleDatasetButton', {
-                defaultMessage: 'Sample dataset',
+                defaultMessage: 'Add sample data',
               })}
             </EuiButtonEmpty>
           }
