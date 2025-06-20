@@ -27,7 +27,7 @@ export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
 
-export const PRIVATE_LOCATIOSN_ROUTE = '/settings/private-locations';
+export const PRIVATE_LOCATIONS_ROUTE = '/settings/private-locations';
 
 export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
 
