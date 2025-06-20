@@ -11,12 +11,12 @@ import { ErrorCallout } from './error_callout';
 import { IHttpSerializedFetchError } from '../../../state';
 
 describe('ErrorCallout', () => {
-  it('renders', () => {
+  it('renders error info', () => {
     const error: IHttpSerializedFetchError = {
       name: 'Test Error',
       body: {
         error: 'Test Error',
-        message: 'Test Error',
+        message: 'Test Message',
         statusCode: 500,
       },
       requestUrl: 'http://localhost:5601',
@@ -24,10 +24,13 @@ describe('ErrorCallout', () => {
 
     const { getByText } = render(<ErrorCallout {...error} />);
 
+    expect(getByText('Status:'));
+    expect(getByText('500'));
     expect(getByText('Error fetching monitor details'));
     expect(getByText('Unable to fetch monitor details'));
-    expect(getByText('Message: Test Error'));
-    expect(getByText('Error: Test Error'));
-    expect(getByText('Status code: 500'));
+    expect(getByText('Message:'));
+    expect(getByText('Test Message'));
+    expect(getByText('Error:'));
+    expect(getByText('Test Error'));
   });
 });

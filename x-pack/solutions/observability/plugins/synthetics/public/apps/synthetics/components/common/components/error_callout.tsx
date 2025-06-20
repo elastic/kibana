@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IHttpSerializedFetchError } from '../../../state';
@@ -14,6 +14,31 @@ import { IHttpSerializedFetchError } from '../../../state';
  * Use this component when displaying fetch-related errors.
  */
 export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
+  const listItems = [];
+  if (error.body?.statusCode) {
+    listItems.push({
+      title: i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.statusCode', {
+        defaultMessage: 'Status:',
+      }),
+      description: error.body.statusCode,
+    });
+  }
+  if (error.body?.error) {
+    listItems.push({
+      title: i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.error', {
+        defaultMessage: 'Error:',
+      }),
+      description: error.body.error,
+    });
+  }
+  if (error.body?.message) {
+    listItems.push({
+      title: i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.messageTitle', {
+        defaultMessage: 'Message:',
+      }),
+      description: error.body.message,
+    });
+  }
   return (
     <EuiCallOut
       color="danger"
@@ -27,29 +52,9 @@ export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
           defaultMessage: 'Unable to fetch monitor details',
         })}
       </p>
-      {error.body?.message && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.message', {
-            defaultMessage: 'Message: {message}',
-            values: { message: error.body.message },
-          })}
-        </p>
-      )}
-      {error.body?.error && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.error', {
-            defaultMessage: 'Error: {error}',
-            values: { error: error.body.error },
-          })}
-        </p>
-      )}
-      {error.body?.statusCode && (
-        <p>
-          {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.statusCode', {
-            defaultMessage: 'Status code: {statusCode}',
-            values: { statusCode: error.body.statusCode },
-          })}
-        </p>
+
+      {listItems.length > 0 && (
+        <EuiDescriptionList compressed type="responsiveColumn" listItems={listItems} />
       )}
     </EuiCallOut>
   );
