@@ -25,23 +25,20 @@ export const RunTestButton = ({
   canUsePublicLocations?: boolean;
   isServiceAllowed?: boolean;
 }) => {
-  const { formState, getValues, handleSubmit } = useFormContext();
-
+  const { handleSubmit } = useFormContext();
   const [inProgress, setInProgress] = useState(false);
   const [testRun, setTestRun] = useState<TestRun>();
   const { space } = useKibanaSpace();
   const { spaceId } = useGetUrlParams();
 
-  const handleTestNow = () => {
-    const config = getValues() as MonitorFieldsType;
-    if (config && !Object.keys(formState.errors).length) {
-      setInProgress(true);
-      setTestRun({
-        id: uuidv4(),
-        name: config.name,
-        monitor: format(config) as MonitorFieldsType,
-      });
-    }
+  const handleTestNow = (formData: any) => {
+    const config = formData as MonitorFieldsType;
+    setInProgress(true);
+    setTestRun({
+      id: uuidv4(),
+      name: config.name,
+      monitor: format(config) as MonitorFieldsType,
+    });
   };
 
   const {
@@ -49,7 +46,6 @@ export const RunTestButton = ({
     loading: isPushing,
     error: serviceError,
   } = useFetcher(() => {
-    // in case of test now mode outside of form add/edit, we don't need to trigger since it's already triggered
     if (testRun?.id) {
       return runOnceMonitor({
         monitor: testRun.monitor,
@@ -59,7 +55,7 @@ export const RunTestButton = ({
     }
   }, [space?.id, spaceId, testRun?.id, testRun?.monitor]);
 
-  const { tooltipContent, isDisabled } = useTooltipContent(formState.isValid, inProgress);
+  const tooltipContent = inProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_DESCRIPTION;
 
   return (
     <>
@@ -67,7 +63,7 @@ export const RunTestButton = ({
         <EuiButton
           data-test-subj="syntheticsRunTestBtn"
           color="success"
-          disabled={isDisabled || !canUsePublicLocations || !isServiceAllowed}
+          disabled={inProgress || !canUsePublicLocations || !isServiceAllowed}
           aria-label={TEST_NOW_ARIA_LABEL}
           iconType="play"
           onClick={handleSubmit(handleTestNow)}
@@ -75,6 +71,7 @@ export const RunTestButton = ({
           {RUN_TEST}
         </EuiButton>
       </EuiToolTip>
+
       {testRun && (
         <TestNowModeFlyout
           serviceError={serviceError}
@@ -96,22 +93,8 @@ export const RunTestButton = ({
   );
 };
 
-const useTooltipContent = (isValid: boolean, isTestRunInProgress?: boolean) => {
-  let tooltipContent = !isValid ? INVALID_DESCRIPTION : TEST_NOW_DESCRIPTION;
-
-  tooltipContent = isTestRunInProgress ? TEST_SCHEDULED_LABEL : tooltipContent;
-
-  const isDisabled = isTestRunInProgress || !isValid;
-
-  return { tooltipContent, isDisabled };
-};
-
 const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.description', {
   defaultMessage: 'Test your monitor and verify the results before saving',
-});
-
-const INVALID_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.invalid', {
-  defaultMessage: 'Monitor has to be valid to run test, please fix above required fields.',
 });
 
 export const TEST_SCHEDULED_LABEL = i18n.translate(
