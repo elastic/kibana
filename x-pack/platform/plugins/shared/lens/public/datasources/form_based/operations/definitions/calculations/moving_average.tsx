@@ -98,8 +98,6 @@ export const movingAverageOperation: OperationDefinition<
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'moving_average',
-      isBucketed: false,
-      scale: 'ratio',
       references: referenceIds,
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),

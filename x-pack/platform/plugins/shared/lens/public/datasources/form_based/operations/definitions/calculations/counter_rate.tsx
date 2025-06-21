@@ -97,8 +97,6 @@ export const counterRateOperation: OperationDefinition<
       ),
       dataType: 'number',
       operationType: 'counter_rate',
-      isBucketed: false,
-      scale: 'ratio',
       references: referenceIds,
       timeScale,
       timeShift: columnParams?.shift || previousColumn?.timeShift,

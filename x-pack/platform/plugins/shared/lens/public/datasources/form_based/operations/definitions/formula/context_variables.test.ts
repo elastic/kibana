@@ -33,8 +33,6 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
         label: `Constant: ${type}`,
         dataType: 'number',
         operationType: type,
-        isBucketed: false,
-        scale: 'ratio',
         references: [],
       },
     },
@@ -111,8 +109,6 @@ describe('context variables', () => {
             dataType: 'date',
             operationType: 'date_histogram',
             sourceField: '@timestamp',
-            isBucketed: true,
-            scale: 'interval',
             params: {
               interval: 'auto',
               includeEmptyRows: true,

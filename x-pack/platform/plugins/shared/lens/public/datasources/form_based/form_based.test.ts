@@ -226,8 +226,6 @@ describe('IndexPattern Data Source', () => {
             col1: {
               label: 'My Op',
               dataType: 'string',
-              isBucketed: true,
-
               // Private
               operationType: 'terms',
               sourceField: 'op',
@@ -247,7 +245,6 @@ describe('IndexPattern Data Source', () => {
     it('appends a suffix to duplicates', () => {
       const col: GenericIndexPatternColumn = {
         dataType: 'number',
-        isBucketed: false,
         label: 'Foo',
         customLabel: true,
         operationType: 'count',
@@ -302,8 +299,6 @@ describe('IndexPattern Data Source', () => {
                 col1: {
                   label: 'My Op',
                   dataType: 'string',
-                  isBucketed: true,
-
                   // Private
                   operationType: 'terms',
                   sourceField: 'op',
@@ -348,7 +343,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'My Op',
                 dataType: 'string',
-                isBucketed: true,
 
                 // Private
                 operationType: 'terms',
@@ -395,7 +389,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Formula',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'formula',
                 references: [],
                 params: {},
@@ -441,14 +434,12 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -615,14 +606,12 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -632,7 +621,6 @@ describe('IndexPattern Data Source', () => {
               col3: {
                 label: 'Date 2',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'another_datefield',
                 params: {
@@ -642,7 +630,6 @@ describe('IndexPattern Data Source', () => {
               col4: {
                 label: 'Date 3',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'yet_another_datefield',
                 params: {
@@ -677,7 +664,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
                 timeShift: '1d',
@@ -685,7 +671,6 @@ describe('IndexPattern Data Source', () => {
               col2: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -735,8 +720,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 operationType: 'date_histogram',
                 sourceField: 'order_date',
-                isBucketed: true,
-                scale: 'interval',
                 params: {
                   interval: 'auto',
                   includeEmptyRows: true,
@@ -748,8 +731,6 @@ describe('IndexPattern Data Source', () => {
                   "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'count',
-                isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
                 params: {
                   emptyAsNull: false,
@@ -762,8 +743,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'sum',
                 sourceField: 'products.price',
-                isBucketed: false,
-                scale: 'ratio',
                 timeShift: '1h',
                 params: {
                   emptyAsNull: false,
@@ -776,8 +755,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'average',
                 sourceField: 'products.price',
-                isBucketed: false,
-                scale: 'ratio',
                 filter: {
                   query: 'NOT category : * ',
                   language: 'kuery',
@@ -793,8 +770,6 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 operationType: 'median',
                 sourceField: 'products.price',
-                isBucketed: false,
-                scale: 'ratio',
                 params: {
                   emptyAsNull: false,
                 },
@@ -805,8 +780,6 @@ describe('IndexPattern Data Source', () => {
                   "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'math',
-                isBucketed: false,
-                scale: 'ratio',
                 params: {
                   tinymathAst: {
                     type: 'function',
@@ -827,8 +800,6 @@ describe('IndexPattern Data Source', () => {
                   "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'differences',
-                isBucketed: false,
-                scale: 'ratio',
                 references: ['col2X4'],
                 filter: {
                   query: 'category : *',
@@ -841,8 +812,6 @@ describe('IndexPattern Data Source', () => {
                   "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'math',
-                isBucketed: false,
-                scale: 'ratio',
                 params: {
                   tinymathAst: {
                     type: 'function',
@@ -870,8 +839,6 @@ describe('IndexPattern Data Source', () => {
                   "Part of moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'moving_average',
-                isBucketed: false,
-                scale: 'ratio',
                 references: ['col2X6'],
                 timeShift: '3h',
                 params: {
@@ -884,8 +851,6 @@ describe('IndexPattern Data Source', () => {
                   "moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
                 dataType: 'number',
                 operationType: 'formula',
-                isBucketed: false,
-                scale: 'ratio',
                 params: {
                   formula:
                     "moving_average(count() + sum(products.price, shift='1h') + differences(average(products.price, kql='NOT category : * ') + median(products.price), kql='category : *'), shift='3h')",
@@ -950,7 +915,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
@@ -962,7 +926,6 @@ describe('IndexPattern Data Source', () => {
               col2: {
                 label: 'Average of bytes',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: 'bytes',
                 operationType: 'average',
                 timeScale: 'h',
@@ -970,7 +933,6 @@ describe('IndexPattern Data Source', () => {
               col3: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -1085,7 +1047,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
@@ -1093,7 +1054,6 @@ describe('IndexPattern Data Source', () => {
               col2: {
                 label: 'Average of bytes',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: 'bytes',
                 operationType: 'average',
                 timeScale: 'h',
@@ -1101,7 +1061,6 @@ describe('IndexPattern Data Source', () => {
               col3: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -1174,7 +1133,6 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
                 timeShift: '1h',
@@ -1213,7 +1171,6 @@ describe('IndexPattern Data Source', () => {
               bucket: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -1223,7 +1180,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
                 timeScale: 'h',
@@ -1231,7 +1187,6 @@ describe('IndexPattern Data Source', () => {
               calculated: {
                 label: 'Moving average of bytes',
                 dataType: 'number',
-                isBucketed: false,
                 operationType: 'moving_average',
                 references: ['metric'],
                 params: {
@@ -1267,14 +1222,12 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -1284,7 +1237,6 @@ describe('IndexPattern Data Source', () => {
               bucket2: {
                 label: 'Terms',
                 dataType: 'string',
-                isBucketed: true,
                 operationType: 'terms',
                 sourceField: 'geo.src',
                 params: {
@@ -1325,14 +1277,12 @@ describe('IndexPattern Data Source', () => {
               col1: {
                 label: 'Count of records',
                 dataType: 'date',
-                isBucketed: false,
                 sourceField: 'timefield',
                 operationType: 'unique_count',
               },
               col2: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -1369,8 +1319,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
-                  isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                     includeEmptyRows: true,
@@ -1382,8 +1330,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'percentile',
                   sourceField: 'bytes',
-                  isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1393,8 +1339,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'percentile',
                   sourceField: 'bytes',
-                  isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1434,8 +1378,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
-                  isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                     includeEmptyRows: true,
@@ -1447,8 +1389,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'number',
                   operationType: 'percentile',
                   sourceField: 'bytes',
-                  isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     percentile: 95,
                   },
@@ -1456,7 +1396,6 @@ describe('IndexPattern Data Source', () => {
                 col3: {
                   label: 'Count of records',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: '___records___',
                   operationType: 'count',
                   timeScale: 'h',
@@ -1464,7 +1403,6 @@ describe('IndexPattern Data Source', () => {
                 col4: {
                   label: 'Count of records2',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'bytes',
                   operationType: 'count',
                   timeScale: 'h',
@@ -1511,7 +1449,6 @@ describe('IndexPattern Data Source', () => {
                 col1: {
                   label: 'My Op',
                   dataType: 'string',
-                  isBucketed: true,
                   operationType: 'terms',
                   sourceField: 'op',
                   params: {
@@ -1526,7 +1463,6 @@ describe('IndexPattern Data Source', () => {
                 col2: {
                   label: 'Count of records',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: '___records___',
                   operationType: 'count',
                   timeScale: 'h',
@@ -1534,7 +1470,6 @@ describe('IndexPattern Data Source', () => {
                 col3: {
                   label: 'Count of records',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: '___records___',
                   operationType: 'count',
                   timeScale: 'h',
@@ -1542,7 +1477,6 @@ describe('IndexPattern Data Source', () => {
                 col4: {
                   label: 'Count of records',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: '___records___',
                   operationType: 'count',
                   timeScale: 'h',
@@ -1650,14 +1584,12 @@ describe('IndexPattern Data Source', () => {
                 col1: {
                   label: 'Count of records',
                   dataType: 'date',
-                  isBucketed: false,
                   sourceField: 'timefield',
                   operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'testReference',
                   references: ['col1'],
                 },
@@ -1690,14 +1622,12 @@ describe('IndexPattern Data Source', () => {
                 col1: {
                   label: 'Count of records',
                   dataType: 'date',
-                  isBucketed: false,
                   sourceField: 'timefield',
                   operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
                   dataType: 'number',
-                  isBucketed: false,
                   operationType: 'testReference',
                   references: ['col1'],
                 },
@@ -1737,8 +1667,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'count',
                   dataType: 'number',
                   operationType: 'count',
-                  isBucketed: false,
-                  scale: 'ratio',
                   sourceField: '___records___',
                   customLabel: true,
                 },
@@ -1747,8 +1675,6 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   operationType: 'date_histogram',
                   sourceField: 'timestamp',
-                  isBucketed: true,
-                  scale: 'interval',
                   params: {
                     interval: 'auto',
                   },
@@ -1757,8 +1683,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'Formula',
                   dataType: 'number',
                   operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     formula: 'count() + count()',
                     isFormulaBroken: false,
@@ -1769,8 +1693,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'countX0',
                   dataType: 'number',
                   operationType: 'count',
-                  isBucketed: false,
-                  scale: 'ratio',
                   sourceField: '___records___',
                   customLabel: true,
                 },
@@ -1778,8 +1700,6 @@ describe('IndexPattern Data Source', () => {
                   label: 'math',
                   dataType: 'number',
                   operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
                   params: {
                     tinymathAst: {
                       type: 'function',
@@ -2040,7 +1960,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
 
                     operationType: 'sum',
                     sourceField: 'test',
@@ -2049,7 +1968,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
-                    isBucketed: false,
 
                     operationType: 'cumulative_sum',
                     references: ['col1'],
@@ -2078,8 +1996,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2087,8 +2003,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'cumulative_sum',
                     references: ['col1'],
                     params: {},
@@ -2117,8 +2031,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2126,8 +2038,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'cumulative_sum',
                     references: ['col1'],
                     params: {},
@@ -2135,7 +2045,6 @@ describe('IndexPattern Data Source', () => {
                   col3: {
                     label: 'My Op',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'op',
                     params: {
@@ -2192,8 +2101,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2201,8 +2108,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Cumulative sum',
                     dataType: 'number',
-                    isBucketed: false,
-
                     operationType: 'cumulative_sum',
                     references: ['col1'],
                     params: {},
@@ -2237,7 +2142,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2246,7 +2150,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2279,7 +2182,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2309,7 +2211,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2321,7 +2222,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.dest',
                     params: {
@@ -2364,7 +2264,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2376,7 +2275,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.dest',
                     params: {
@@ -2435,7 +2333,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2447,7 +2344,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.dest',
                     params: {
@@ -2506,7 +2402,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2519,7 +2414,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2553,7 +2447,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Single range',
                     dataType: 'number',
-                    isBucketed: true,
                     operationType: 'range',
                     sourceField: 'bytes',
                     params: {
@@ -2564,7 +2457,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Multiple ranges',
                     dataType: 'number',
-                    isBucketed: true,
                     operationType: 'range',
                     sourceField: 'bytes',
                     params: {
@@ -2608,7 +2500,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Empty range',
                     dataType: 'number',
-                    isBucketed: true,
                     operationType: 'range',
                     sourceField: 'bytes',
                     params: {
@@ -2619,7 +2510,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'From range',
                     dataType: 'number',
-                    isBucketed: true,
                     operationType: 'range',
                     sourceField: 'bytes',
                     params: {
@@ -2630,7 +2520,6 @@ describe('IndexPattern Data Source', () => {
                   col3: {
                     label: 'To ranges',
                     dataType: 'number',
-                    isBucketed: true,
                     operationType: 'range',
                     sourceField: 'bytes',
                     params: {
@@ -2668,9 +2557,7 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'kuery Filter',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [{ label: '', input: { language: 'kuery', query: 'bytes > 1000' } }],
                     },
@@ -2678,9 +2565,7 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Lucene Filter',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [{ label: '', input: { language: 'lucene', query: 'memory' } }],
                     },
@@ -2688,9 +2573,7 @@ describe('IndexPattern Data Source', () => {
                   col3: {
                     label: 'Mixed filters',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [
                         { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
@@ -2739,7 +2622,6 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2748,7 +2630,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2778,8 +2659,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'Formula',
                     dataType: 'number',
                     operationType: 'formula',
-                    isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       formula: "count(kql='memory > 5000') + count()",
                       isFormulaBroken: false,
@@ -2790,8 +2669,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'countX0',
                     dataType: 'number',
                     operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'memory > 5000' },
@@ -2800,8 +2677,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'countX1',
                     dataType: 'number',
                     operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                   },
@@ -2809,8 +2684,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'math',
                     dataType: 'number',
                     operationType: 'math',
-                    isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       tinymathAst: {
                         type: 'function',
@@ -2850,9 +2723,7 @@ describe('IndexPattern Data Source', () => {
                   col1: {
                     label: 'Mixed filters',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'filters',
-                    scale: 'ordinal',
                     params: {
                       filters: [
                         { label: '', input: { language: 'kuery', query: 'bytes > 5000' } },
@@ -2865,7 +2736,6 @@ describe('IndexPattern Data Source', () => {
                   col2: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2874,7 +2744,6 @@ describe('IndexPattern Data Source', () => {
                   col3: {
                     label: 'Sum',
                     dataType: 'number',
-                    isBucketed: false,
                     operationType: 'sum',
                     sourceField: 'test',
                     params: {},
@@ -2883,7 +2752,6 @@ describe('IndexPattern Data Source', () => {
                   col4: {
                     label: 'Terms',
                     dataType: 'string',
-                    isBucketed: true,
                     operationType: 'terms',
                     sourceField: 'geo.src',
                     params: {
@@ -2938,8 +2806,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'Formula',
                     dataType: 'number',
                     operationType: 'formula',
-                    isBucketed: false,
-                    scale: 'ratio',
                     filter: { language: 'kuery', query: 'bytes > 4000' },
                     params: {
                       formula: "count(kql='memory > 5000') + count()",
@@ -2951,8 +2817,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'countX0',
                     dataType: 'number',
                     operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
@@ -2961,8 +2825,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'countX1',
                     dataType: 'number',
                     operationType: 'count',
-                    isBucketed: false,
-                    scale: 'ratio',
                     sourceField: '___records___',
                     customLabel: true,
                     filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2971,8 +2833,6 @@ describe('IndexPattern Data Source', () => {
                     label: 'math',
                     dataType: 'number',
                     operationType: 'math',
-                    isBucketed: false,
-                    scale: 'ratio',
                     params: {
                       tinymathAst: {
                         type: 'function',
@@ -3217,7 +3077,6 @@ describe('IndexPattern Data Source', () => {
                   },
                   label: 'My Op',
                   dataType: 'string',
-                  isBucketed: true,
                 } as TermsIndexPatternColumn,
               },
             },
@@ -3312,7 +3171,6 @@ describe('IndexPattern Data Source', () => {
         const termsColumn: TermsIndexPatternColumn = {
           operationType: 'terms',
           dataType: 'number',
-          isBucketed: true,
           label: '123211',
           sourceField: 'foo',
           params: {
@@ -3337,14 +3195,12 @@ describe('IndexPattern Data Source', () => {
                   },
                   label: '',
                   dataType: 'date',
-                  isBucketed: true,
                   sourceField: 'timestamp',
                 } as DateHistogramIndexPatternColumn,
                 col2: {
                   operationType: 'count',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'records',
                 },
                 col3: {
@@ -3352,7 +3208,6 @@ describe('IndexPattern Data Source', () => {
                   timeShift: '1h',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'records',
                 },
                 col4: {
@@ -3360,7 +3215,6 @@ describe('IndexPattern Data Source', () => {
                   timeShift: '13h',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'records',
                 },
                 col5: {
@@ -3368,7 +3222,6 @@ describe('IndexPattern Data Source', () => {
                   timeShift: '1w',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'records',
                 },
                 col6: {
@@ -3376,7 +3229,6 @@ describe('IndexPattern Data Source', () => {
                   timeShift: 'previous',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'records',
                 },
                 termsCol: termsColumn,
@@ -3486,14 +3338,12 @@ describe('IndexPattern Data Source', () => {
               },
               label: '',
               dataType: 'date',
-              isBucketed: true,
               sourceField: 'timestamp',
             } as DateHistogramIndexPatternColumn,
             [`col-${index}-2`]: {
               operationType: 'count',
               label: '',
               dataType: 'number',
-              isBucketed: false,
               sourceField: 'records',
             },
           },
@@ -3609,7 +3459,6 @@ describe('IndexPattern Data Source', () => {
                 columns: {
                   col1: {
                     dataType: 'number',
-                    isBucketed: false,
                     label: 'Foo',
                     operationType: 'average',
                     sourceField: 'bytes',
@@ -3672,7 +3521,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records2',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3685,14 +3533,12 @@ describe('IndexPattern Data Source', () => {
               metric2: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -3702,7 +3548,6 @@ describe('IndexPattern Data Source', () => {
               bucket2: {
                 label: 'Terms',
                 dataType: 'string',
-                isBucketed: true,
                 operationType: 'terms',
                 sourceField: 'geo.src',
                 params: {
@@ -3733,7 +3578,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records2',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3746,14 +3590,12 @@ describe('IndexPattern Data Source', () => {
               metric2: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
               bucket1: {
                 label: 'Date',
                 dataType: 'date',
-                isBucketed: true,
                 operationType: 'date_histogram',
                 sourceField: 'timestamp',
                 params: {
@@ -3764,7 +3606,6 @@ describe('IndexPattern Data Source', () => {
               bucket2: {
                 label: 'Terms',
                 dataType: 'string',
-                isBucketed: true,
                 operationType: 'terms',
                 sourceField: 'geo.src',
                 params: {
@@ -3795,7 +3636,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3821,7 +3661,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3845,7 +3684,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3873,7 +3711,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3900,13 +3737,10 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newStatic: {
                 dataType: 'number',
-                isStaticValue: true,
-                isBucketed: false,
                 label: 'Static value: 0',
                 operationType: 'static_value',
                 params: { value: '0' },
                 references: [],
-                scale: 'ratio',
               },
             },
           },
@@ -3925,7 +3759,6 @@ describe('IndexPattern Data Source', () => {
               metric: {
                 label: 'Count of records',
                 dataType: 'number',
-                isBucketed: false,
                 sourceField: '___records___',
                 operationType: 'count',
               },
@@ -3952,11 +3785,9 @@ describe('IndexPattern Data Source', () => {
               ...state.layers.first.columns,
               newTime: {
                 dataType: 'date',
-                isBucketed: true,
                 label: 'timestampLabel',
                 operationType: 'date_histogram',
                 params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
-                scale: 'interval',
                 sourceField: 'timestamp',
               },
             },
@@ -4007,7 +3838,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'sum',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'field1',
                   customLabel: false,
                   timeScale: 'd',
@@ -4133,7 +3963,6 @@ describe('IndexPattern Data Source', () => {
                   operationType: 'sum',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   sourceField: 'field1',
                   customLabel: false,
                   timeScale: 'd',
@@ -4143,7 +3972,6 @@ describe('IndexPattern Data Source', () => {
                   sourceField: 'field2',
                   label: '',
                   dataType: 'number',
-                  isBucketed: false,
                   params: {
                     orderBy: {
                       columnId: 'col1FirstLayer',
@@ -4192,8 +4020,6 @@ describe('IndexPattern Data Source', () => {
               label: 'Count of records',
               dataType: 'number',
               operationType: 'count',
-              isBucketed: false,
-              scale: 'ratio',
               sourceField: '___records___',
             },
           },

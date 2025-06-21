@@ -76,8 +76,6 @@ export const derivativeOperation: OperationDefinition<
       label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: DIFFERENCES_ID,
-      isBucketed: false,
-      scale: 'ratio',
       references: referenceIds,
       timeScale,
       filter: getFilter(previousColumn, columnParams),

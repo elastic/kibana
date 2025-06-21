@@ -35,6 +35,7 @@ import {
   TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
   TERMS_WITH_MULTIPLE_TIMESHIFT,
 } from '../../../../../user_messages_ids';
+import { isBucketed } from '../../../utils';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 
@@ -206,7 +207,6 @@ export function getDisallowedTermsMessage(
                   },
                 }),
                 customLabel: true,
-                isBucketed: layer.columns[columnId].isBucketed,
                 dataType: 'string',
                 operationType: 'filters',
                 params: {
@@ -271,7 +271,7 @@ export function isSortableByColumn(layer: FormBasedLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
-    !column.isBucketed &&
+    !isBucketed(column) &&
     checkLastValue(column) &&
     isPercentileRankSortable(column) &&
     isPercentileSortable(column) &&

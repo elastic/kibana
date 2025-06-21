@@ -131,8 +131,6 @@ export const percentileRanksOperation: OperationDefinition<
       dataType: 'number',
       operationType: 'percentile_rank',
       sourceField: field.name,
-      isBucketed: false,
-      scale: 'ratio',
       filter: getFilter(previousColumn, columnParams),
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,

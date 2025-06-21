@@ -785,7 +785,7 @@ function collectFiltersFromMetrics(layer: FormBasedLayer, columnIds: string[]) {
     const column = layer.columns[colId];
     const operationDefinition = operationDefinitionMap[column?.operationType];
     return (
-      !column?.isBucketed &&
+      column && !isBucketed(column) &&
       // global filters for formulas are picked up by referenced columns
       !isColumnOfType<FormulaIndexPatternColumn>('formula', column) &&
       operationDefinition?.filterable
@@ -951,3 +951,14 @@ export const cloneLayer = (
   }
   return layers;
 };
+
+export function isBucketed(column: GenericIndexPatternColumn): boolean {
+  const operationDefinition = operationDefinitionMap[column.operationType];
+  if (!operationDefinition) {
+    return false;
+  }
+  if (typeof operationDefinition.isBucketed === 'function') {
+    return operationDefinition.isBucketed(column);
+  }
+  return operationDefinition.isBucketed ?? false;
+}

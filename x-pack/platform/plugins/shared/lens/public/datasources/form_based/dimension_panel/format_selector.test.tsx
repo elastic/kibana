@@ -18,8 +18,6 @@ const props = {
   selectedColumn: {
     label: 'Max of bytes',
     dataType: 'number',
-    isBucketed: false,
-
     // Private
     operationType: 'max',
     sourceField: 'bytes',
