@@ -21,6 +21,7 @@ export {
   ConsoleOutputLang,
   CONSOLE_THEME_ID,
   CONSOLE_OUTPUT_THEME_ID,
+  CONSOLE_TRIGGER_CHARS,
 } from './language';
 export { ConsoleParsedRequestsProvider } from './console_parsed_requests_provider';
 

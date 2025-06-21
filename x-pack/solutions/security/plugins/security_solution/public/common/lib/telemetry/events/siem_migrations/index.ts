@@ -23,6 +23,7 @@ export const siemMigrationEventNames = {
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: 'Copy macros query',
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: 'Copy lookup name',
   [SiemMigrationsEventTypes.StartMigration]: 'Start rule migration',
+  [SiemMigrationsEventTypes.StopMigration]: 'Stop rule migration',
   [SiemMigrationsEventTypes.TranslatedRuleUpdate]: 'Update translated rule',
   [SiemMigrationsEventTypes.TranslatedRuleInstall]: 'Install translated rule',
   [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: 'Bulk install translated rules',
@@ -175,6 +176,13 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: false,
       },
     },
+    skipPrebuiltRulesMatching: {
+      type: 'boolean',
+      _meta: {
+        description: 'Flag indicating if prebuilt rules should be matched',
+        optional: false,
+      },
+    },
     isRetry: {
       type: 'boolean',
       _meta: {
@@ -189,6 +197,11 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
         optional: true,
       },
     },
+  },
+  [SiemMigrationsEventTypes.StopMigration]: {
+    ...baseResultActionSchema,
+    ...migrationIdSchema,
+    ...eventNameSchema,
   },
 
   // Translated Rule Events
