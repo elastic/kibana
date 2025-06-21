@@ -138,32 +138,28 @@ export async function updateDataStreamsLifecycle({
       { logger }
     );
 
-    // if we transition from ilm to dlm or vice versa, the rolled over backing
+    // if we transition from ilm to dsl or vice versa, the rolled over backing
     // indices need to be updated or they'll retain the lifecycle configuration
     // set at the time of creation.
-    // this is not needed for serverless since only dlm is allowed but in stateful
-    // we update every indices while not always necessary. this should be optimized
+    // this is not needed for serverless since only dsl is allowed.
     if (isServerless) {
       return;
     }
 
-    const dataStreams = await esClient.indices.getDataStream({ name: names });
     const isIlm = isIlmLifecycle(lifecycle);
-
-    for (const dataStream of dataStreams.data_streams) {
-      logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putSettings({
-            index: dataStream.indices.map((index) => index.index_name),
-            settings: {
-              'lifecycle.prefer_ilm': isIlm,
-              'lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-            },
-          }),
-        { logger }
-      );
-    }
+    await retryTransientEsErrors(
+      () =>
+        // TODO: use client method once available
+        esClient.transport.request({
+          method: 'PUT',
+          path: `/_data_stream/${names.join(',')}/_settings`,
+          body: {
+            'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
+            'index.lifecycle.prefer_ilm': isIlm,
+          },
+        }),
+      { logger }
+    );
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
