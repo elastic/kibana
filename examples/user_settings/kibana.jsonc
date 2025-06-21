@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/user-settings-example-plugin",
+  "owner": "@elastic/security-threat-hunting-investigations",
+  "description": "Demonstrates the usage of user settings.",
+  "plugin": {
+    "id": "userSettingsExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "spaces",
+      "developerExamples"
+    ]
+  }
+}
