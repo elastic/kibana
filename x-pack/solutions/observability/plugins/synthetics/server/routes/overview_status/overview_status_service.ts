@@ -352,6 +352,7 @@ export class OverviewStatusService {
         ConfigKey.PROJECT_ID,
         ConfigKey.ALERT_CONFIG,
         ConfigKey.URLS,
+        ConfigKey.MAINTENANCE_WINDOWS,
       ],
     });
   }
@@ -373,6 +374,7 @@ export class OverviewStatusService {
       updated_at: monitor.updated_at,
       spaceId: monitor.namespaces?.[0],
       urls: monitor.attributes[ConfigKey.URLS],
+      maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
     };
   }
 }
