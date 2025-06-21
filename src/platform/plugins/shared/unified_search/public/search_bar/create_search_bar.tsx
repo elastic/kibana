@@ -8,7 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -160,9 +160,25 @@ export function createSearchBar({
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
-    const { useDefaultBehaviors, allowSavingQueries } = props;
+    const { useDefaultBehaviors, allowSavingQueries, onQueryChange } = props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
+    // Just to test tracking of query changes
+    // Problem that after this inial setting up the query, in this component subsequent changes to the props.query
+    // are just ignored, since there's a subscription to the queryStringManager of data.query.queryString setting the query
+    // and since a query edits is unknow to it, it will always return the most recent submitted query
+    const queryEdited = useRef<Query | QT | undefined>();
+    const onQueryChanged = useCallback(
+      (query: { dateRange: TimeRange; query?: QT | Query }) => {
+        if (query.query) {
+          queryEdited.current = query.query;
+        }
+        if (onQueryChange) {
+          onQueryChange(query);
+        }
+      },
+      [onQueryChange]
+    );
 
     useEffect(() => {
       onQuerySubmitRef.current = props.onQuerySubmit;
@@ -195,6 +211,7 @@ export function createSearchBar({
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
       if (!useDefaultBehaviors || !onQuerySubmitRef.current) return;
+      queryEdited.current = undefined;
       onQuerySubmitRef.current(
         {
           dateRange: timeRange,
@@ -244,7 +261,7 @@ export function createSearchBar({
             isLoading={props.isLoading}
             onCancel={props.onCancel}
             filters={filters}
-            query={query}
+            query={queryEdited.current ?? query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled
@@ -253,6 +270,7 @@ export function createSearchBar({
             }
             savedQuery={savedQuery}
             onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onQueryChange={onQueryChanged}
             onRefresh={props.onRefresh}
             onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
             onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
