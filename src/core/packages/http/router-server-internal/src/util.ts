@@ -16,11 +16,11 @@ import {
   getRequestValidation,
   validBodyOutput,
 } from '@kbn/core-http-server';
-import type { Mutable } from 'utility-types';
 import type { IKibanaResponse, ResponseHeaders, SafeRouteMethod } from '@kbn/core-http-server';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { Request } from '@hapi/hapi';
 import type { InternalRouteConfig } from './route';
+import { injectResponseHeaders } from './response';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
@@ -70,22 +70,6 @@ export function prepareRouteConfigValidation<P, Q, B>(
   return config;
 }
 
-/**
- * @note mutates the response object
- * @internal
- */
-export function injectResponseHeaders(
-  headers: ResponseHeaders,
-  response: IKibanaResponse
-): IKibanaResponse {
-  const mutableResponse = response as Mutable<IKibanaResponse>;
-  mutableResponse.options.headers = {
-    ...mutableResponse.options.headers,
-    ...headers,
-  };
-  return mutableResponse;
-}
-
 export function getVersionHeader(version: string): ResponseHeaders {
   return {
     [ELASTIC_HTTP_VERSION_HEADER]: version,
@@ -93,7 +77,8 @@ export function getVersionHeader(version: string): ResponseHeaders {
 }
 
 export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
-  return injectResponseHeaders(getVersionHeader(version), response);
+  injectResponseHeaders(getVersionHeader(version), response);
+  return response;
 }
 
 export function formatErrorMeta(

@@ -327,6 +327,14 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * Defaults to undefined.
    */
   version?: ApiVersion;
+
+  /**
+   * Whether to apply a set of path filters to the response body. This can be used
+   * to reduce the amount of data sent over the wire.
+   *
+   * @note Intended to mimic `filter_path` that ES provides
+   */
+  filterPath?: string[];
 }
 
 /**
