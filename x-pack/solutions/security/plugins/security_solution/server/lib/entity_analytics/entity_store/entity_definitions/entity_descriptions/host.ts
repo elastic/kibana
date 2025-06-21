@@ -45,4 +45,12 @@ export const hostEntityEngineDescription: EntityDescription = {
     collect({ source: 'host.architecture' }),
     ...getCommonFieldDescriptions('host'),
   ],
+  customIngestProcessors: [
+    {
+      set: {
+        field: 'entity.type',
+        value: 'Host',
+      },
+    },
+  ],
 };
