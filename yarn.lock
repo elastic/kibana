@@ -7115,7 +7115,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-navigation@link:x-pack/solutions/search/plugins/search_solution/search_navigation":
+"@kbn/search-navigation@link:x-pack/solutions/search/plugins/search_navigation":
   version "0.0.0"
   uid ""
 
