@@ -174,7 +174,7 @@ export interface ScheduleNotificationActions {
 
 export interface CreateQueryRuleOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
-  name: 'Custom Query Rule' | 'Saved Query Rule';
+  name: 'Custom Query' | 'Saved Query';
 }
 
 export interface RuleRangeTuple {

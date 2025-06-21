@@ -20,7 +20,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRuleParams, {}> => {
   return {
     id: INDICATOR_RULE_TYPE_ID,
-    name: 'Indicator Match Rule',
+    name: 'Indicator Match',
     ruleTaskTimeout: '1h',
     validate: {
       params: {

@@ -79,7 +79,7 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
-        name: 'Custom Query Rule',
+        name: 'Custom Query',
       })
     );
 
@@ -118,7 +118,7 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
-        name: 'Custom Query Rule',
+        name: 'Custom Query',
       })
     );
 
@@ -161,7 +161,7 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
-        name: 'Custom Query Rule',
+        name: 'Custom Query',
       })
     );
 
@@ -218,7 +218,7 @@ describe('Custom Query Alerts', () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         id: QUERY_RULE_TYPE_ID,
-        name: 'Custom Query Rule',
+        name: 'Custom Query',
       })
     );
 
