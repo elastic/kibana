@@ -14,6 +14,8 @@ export interface RecentlyAccessedHistoryItem {
   link: string;
   label: string;
   id: string;
+  /** Timestamp when the item was last accessed */
+  lastAccessed?: number;
 }
 
 /**
