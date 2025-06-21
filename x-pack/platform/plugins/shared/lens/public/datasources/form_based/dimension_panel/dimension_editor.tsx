@@ -1190,13 +1190,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       ...state.layers[layerId].columns,
                       [columnId]: {
                         ...selectedColumn,
-                        label: value,
-                        customLabel:
-                          operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
-                            selectedColumn,
-                            state.layers[layerId].columns,
-                            props.indexPatterns[state.layers[layerId].indexPatternId]
-                          ) !== value,
+                        ...(operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
+                          selectedColumn,
+                          state.layers[layerId].columns,
+                          props.indexPatterns[state.layers[layerId].indexPatternId]
+                        ) !== value ? { label: value } : {}),                           
                       },
                     },
                   });

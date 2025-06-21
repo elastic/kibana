@@ -466,7 +466,6 @@ describe('indexpattern_datasource utils', () => {
             ],
             columns: {
               '1a027207-98b3-4a57-a97f-4c67e95eebc1': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -482,7 +481,6 @@ describe('indexpattern_datasource utils', () => {
                 sourceField: '___records___',
               },
               '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',

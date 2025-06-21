@@ -112,7 +112,6 @@ const layer: FormBasedLayer = {
   columns: {
     date: {
       label: '',
-      customLabel: true,
       dataType: 'date',
       isBucketed: true,
       operationType: 'date_histogram',
@@ -121,7 +120,6 @@ const layer: FormBasedLayer = {
     } as DateHistogramIndexPatternColumn,
     metric: {
       label: 'metricLabel',
-      customLabel: true,
       dataType: 'number',
       isBucketed: false,
       operationType: 'average',
@@ -130,7 +128,6 @@ const layer: FormBasedLayer = {
     } as AvgIndexPatternColumn,
     ref: {
       label: '',
-      customLabel: true,
       dataType: 'number',
       isBucketed: false,
       operationType: 'differences',

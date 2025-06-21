@@ -117,7 +117,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   } as StaticValueIndexPatternColumn,
   dateHistogram: {
     label: 'Date histogram of timestamp',
-    customLabel: true,
     dataType: 'date',
     isBucketed: true,
 
@@ -130,7 +129,6 @@ export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   } as DateHistogramIndexPatternColumn,
   dateHistogramCopy: {
     label: 'Date histogram of timestamp (1)',
-    customLabel: true,
     dataType: 'date',
     isBucketed: true,
 

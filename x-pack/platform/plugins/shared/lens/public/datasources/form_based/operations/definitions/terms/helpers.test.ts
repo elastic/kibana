@@ -174,7 +174,6 @@ describe('getDisallowedTermsMessage()', () => {
             params: {
               window: 5,
             },
-            customLabel: true,
           } as MovingAverageIndexPatternColumn,
         ]),
         'col1',

@@ -32,9 +32,8 @@ export function setTimeShift(
 ) {
   const trimmedTimeShift = timeShift?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.customLabel
-    ? currentColumn.label
-    : adjustTimeScaleLabelSuffix(
+  const label = urrentColumn.label
+    ?? adjustTimeScaleLabelSuffix(
         currentColumn.label,
         currentColumn.timeScale,
         currentColumn.timeScale,

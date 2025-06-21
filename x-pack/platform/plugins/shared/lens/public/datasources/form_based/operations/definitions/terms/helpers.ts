@@ -205,7 +205,6 @@ export function getDisallowedTermsMessage(
                       fieldNames.length > 1 ? fieldNames.join(fullSeparatorString) : fieldNames[0],
                   },
                 }),
-                customLabel: true,
                 isBucketed: layer.columns[columnId].isBucketed,
                 dataType: 'string',
                 operationType: 'filters',

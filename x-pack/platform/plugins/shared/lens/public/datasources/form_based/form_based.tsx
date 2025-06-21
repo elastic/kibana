@@ -507,13 +507,11 @@ export function getFormBasedDatasource({
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
           columnLabelMap[columnId] = uniqueLabelGenerator(
-            column.customLabel
-              ? column.label
-              : operationDefinitionMap[column.operationType].getDefaultLabel(
-                  column,
-                  layer.columns,
-                  indexPatternsMap[layer.indexPatternId]
-                )
+            column.label ?? operationDefinitionMap[column.operationType].getDefaultLabel(
+              column,
+              layer.columns,
+              indexPatternsMap[layer.indexPatternId]
+            )
           );
         });
       });

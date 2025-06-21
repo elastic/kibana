@@ -520,7 +520,6 @@ describe('[Lens] formula', () => {
             },
           },
           col1X0: {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of average(bytes)',
@@ -566,7 +565,6 @@ describe('[Lens] formula', () => {
             },
           },
           col1X0: {
-            customLabel: true,
             dataType: 'number',
             isBucketed: false,
             label: 'Part of 0',

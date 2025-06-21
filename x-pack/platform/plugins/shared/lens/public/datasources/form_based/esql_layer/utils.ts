@@ -203,7 +203,6 @@ export function updateColumnLabel({
       {
         ...currentColumn,
         label: value,
-        customLabel: !!value,
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

@@ -414,9 +414,8 @@ export const termsOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: oldColumn.customLabel
-        ? oldColumn.label
-        : ofName(
+      label: oldColumn.label
+        ?? ofName(
             field.displayName,
             newParams.secondaryFields?.length,
             newParams.orderBy.type === 'rare',
@@ -523,9 +522,8 @@ export const termsOperation: OperationDefinition<
               ...column,
               dataType: newDataType,
               sourceField: sourcefield,
-              label: column.customLabel
-                ? column.label
-                : ofName(
+              label: column.label
+                ?? ofName(
                     mainField?.displayName,
                     fields.length - 1,
                     newParams.orderBy.type === 'rare',
@@ -721,9 +719,8 @@ The top values of a specified field ranked by the chosen metric.
                 ...layer.columns,
                 [columnId]: {
                   ...currentColumn,
-                  label: currentColumn.customLabel
-                    ? currentColumn.label
-                    : ofName(
+                  label: currentColumn.label
+                    ?? ofName(
                         indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
                         secondaryFieldsCount,
                         currentColumn.params.orderBy.type === 'rare',

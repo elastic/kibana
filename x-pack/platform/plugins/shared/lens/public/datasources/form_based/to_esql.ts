@@ -114,9 +114,8 @@ export function getESQLForLayer(
         id: colId,
         format: format as unknown as ValueFormatConfig,
         interval: undefined as never,
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
+        label: col.label
+          ?? operationDefinitionMap[col.operationType].getDefaultLabel(
               col,
               layer.columns,
               indexPattern,
@@ -226,9 +225,8 @@ export function getESQLForLayer(
         format: format as unknown as ValueFormatConfig,
         interval: interval as never,
         ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
+        label: col.label
+          ?? operationDefinitionMap[col.operationType].getDefaultLabel(
               col,
               layer.columns,
               indexPattern,

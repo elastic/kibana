@@ -184,7 +184,7 @@ function testInitialState(): FormBasedPrivateState {
         columns: {
           col1: {
             label: 'My Op',
-            customLabel: true,
+            
             dataType: 'string',
             isBucketed: true,
 
@@ -818,7 +818,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
-                  customLabel: true,
+                  
                   operationType: 'terms',
                   params: {
                     orderBy: { type: 'column', columnId: 'colb' },
@@ -831,7 +831,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: false,
                   sourceField: 'bytes',
                   label: 'Avg of bytes',
-                  customLabel: true,
+                  
                   operationType: 'average',
                 },
               },
@@ -866,7 +866,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     isBucketed: false,
                     sourceField: 'bytes',
                     label: 'Avg of bytes',
-                    customLabel: true,
+                    
                     operationType: 'average',
                   },
                 },
@@ -1082,7 +1082,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   isBucketed: true,
                   sourceField: 'source',
                   label: 'values of source',
-                  customLabel: true,
+                  
                   operationType: 'terms',
                   params: {
                     orderBy: { type: 'alphabetical', fallback: false },
@@ -1213,7 +1213,7 @@ describe('IndexPattern Data Source suggestions', () => {
               columns: {
                 date: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'date',
                   isBucketed: true,
                   operationType: 'date_histogram',
@@ -1222,7 +1222,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 } as DateHistogramIndexPatternColumn,
                 metric: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'average',
@@ -1230,7 +1230,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 },
                 ref: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'cumulative_sum',
@@ -1282,7 +1282,7 @@ describe('IndexPattern Data Source suggestions', () => {
               columns: {
                 metric: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'average',
@@ -1290,7 +1290,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 },
                 ref: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'cumulative_sum',
@@ -1368,7 +1368,7 @@ describe('IndexPattern Data Source suggestions', () => {
               columns: {
                 metric: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'average',
@@ -1376,7 +1376,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 },
                 ref: {
                   label: '',
-                  customLabel: true,
+                  
                   dataType: 'number',
                   isBucketed: false,
                   operationType: 'cumulative_sum',
@@ -2214,7 +2214,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Op 2',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
 
@@ -2310,7 +2310,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2377,7 +2377,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Terms',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
                 operationType: 'terms',
@@ -2391,7 +2391,7 @@ describe('IndexPattern Data Source suggestions', () => {
               } as TermsIndexPatternColumn,
               colb: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2472,7 +2472,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               cola: {
                 label: 'My Terms',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
                 operationType: 'terms',
@@ -2486,7 +2486,7 @@ describe('IndexPattern Data Source suggestions', () => {
               } as TermsIndexPatternColumn,
               colb: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2501,7 +2501,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               referenceLineA: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2595,7 +2595,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               colb: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: true,
                 operationType: 'range',
@@ -2643,7 +2643,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               colb: {
                 label: 'My Custom Range',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
                 operationType: 'range',
@@ -2729,7 +2729,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               id1: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2767,7 +2767,7 @@ describe('IndexPattern Data Source suggestions', () => {
               ...initialState.layers.first.columns,
               col2: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'average',
@@ -2776,7 +2776,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col3: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
 
@@ -2849,7 +2849,7 @@ describe('IndexPattern Data Source suggestions', () => {
             columns: {
               col1: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
 
@@ -2863,7 +2863,7 @@ describe('IndexPattern Data Source suggestions', () => {
               } as TermsIndexPatternColumn,
               col2: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
 
@@ -2877,7 +2877,7 @@ describe('IndexPattern Data Source suggestions', () => {
               } as TermsIndexPatternColumn,
               col3: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'string',
                 isBucketed: true,
 
@@ -2891,7 +2891,7 @@ describe('IndexPattern Data Source suggestions', () => {
               } as TermsIndexPatternColumn,
               col4: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
 
@@ -2900,7 +2900,7 @@ describe('IndexPattern Data Source suggestions', () => {
               },
               col5: {
                 label: 'My Op',
-                customLabel: true,
+                
                 dataType: 'number',
                 isBucketed: false,
 
