@@ -25,6 +25,7 @@ import {
 import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
 import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../../../../user_messages_ids';
+import { getDatatypeFromOperation } from '../../utils';
 
 export function getInvalidFieldMessage(
   layer: FormBasedLayer,
@@ -182,19 +183,16 @@ export function isColumnFormatted(
   column: GenericIndexPatternColumn | TextBasedLayerColumn
 ): column is FormattedIndexPatternColumn | TextBasedLayerColumn {
   return Boolean(
-    'params' in column &&
-      (column as FormattedIndexPatternColumn).params &&
-      'format' in (column as FormattedIndexPatternColumn).params!
+    'format' in column
   );
 }
 
 export function getFormatFromPreviousColumn(
   previousColumn: GenericIndexPatternColumn | ReferenceBasedIndexPatternColumn | undefined
 ) {
-  return previousColumn?.dataType === 'number' &&
-    isColumnFormatted(previousColumn) &&
-    previousColumn.params
-    ? { format: previousColumn.params.format }
+  return previousColumn && getDatatypeFromOperation(previousColumn?.operationType, previousColumn) === 'number' &&
+    isColumnFormatted(previousColumn)
+    ? { format: previousColumn.format }
     : undefined;
 }
 

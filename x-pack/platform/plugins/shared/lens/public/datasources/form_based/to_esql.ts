@@ -21,6 +21,7 @@ import { DateHistogramIndexPatternColumn } from './operations/definitions';
 import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
 import { FormBasedLayer } from '../..';
+import { getIsBucketedFromOperation } from './utils';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -70,7 +71,7 @@ export function getESQLForLayer(
 
   const [metricEsAggsEntries, bucketEsAggsEntries] = partition(
     esAggEntries,
-    ([_, col]) => !col.isBucketed
+    ([_, col]) => !getIsBucketedFromOperation(col.operationType)
   );
 
   const metrics = metricEsAggsEntries.map(([colId, col], index) => {
@@ -114,7 +115,7 @@ export function getESQLForLayer(
         id: colId,
         format: format as unknown as ValueFormatConfig,
         interval: undefined as never,
-        label: col.customLabel
+        label: col.label
           ? col.label
           : operationDefinitionMap[col.operationType].getDefaultLabel(
               col,
@@ -226,9 +227,7 @@ export function getESQLForLayer(
         format: format as unknown as ValueFormatConfig,
         interval: interval as never,
         ...('sourceField' in col ? { sourceField: col.sourceField! } : {}),
-        label: col.customLabel
-          ? col.label
-          : operationDefinitionMap[col.operationType].getDefaultLabel(
+        label: col.label ?? operationDefinitionMap[col.operationType].getDefaultLabel(
               col,
               layer.columns,
               indexPattern,

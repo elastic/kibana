@@ -35,6 +35,7 @@ import {
   TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
   TERMS_WITH_MULTIPLE_TIMESHIFT,
 } from '../../../../../user_messages_ids';
+import { getDatatypeFromOperation, getIsBucketedFromOperation } from '../../../utils';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
 
@@ -205,9 +206,6 @@ export function getDisallowedTermsMessage(
                       fieldNames.length > 1 ? fieldNames.join(fullSeparatorString) : fieldNames[0],
                   },
                 }),
-                customLabel: true,
-                isBucketed: layer.columns[columnId].isBucketed,
-                dataType: 'string',
                 operationType: 'filters',
                 params: {
                   filters:
@@ -244,7 +242,7 @@ export function getDisallowedTermsMessage(
 function checkLastValue(column: GenericIndexPatternColumn) {
   return (
     column.operationType !== 'last_value' ||
-    (['number', 'date'].includes(column.dataType) &&
+    (['number', 'date'].includes(getDatatypeFromOperation(column.operationType, column)) &&
       !(column as LastValueIndexPatternColumn).params.showArrayValues)
   );
 }
@@ -271,7 +269,7 @@ export function isSortableByColumn(layer: FormBasedLayer, columnId: string) {
   const column = layer.columns[columnId];
   return (
     column &&
-    !column.isBucketed &&
+    !getIsBucketedFromOperation(column.operationType) &&
     checkLastValue(column) &&
     isPercentileRankSortable(column) &&
     isPercentileSortable(column) &&

@@ -6,18 +6,18 @@
  */
 
 import type { Query } from '@kbn/es-query';
-import type { Operation } from '../../../../types';
 import type { TimeScaleUnit } from '../../../../../common/expressions';
 import type { OperationType } from '.';
 
-export interface BaseIndexPatternColumn extends Operation {
+export interface BaseIndexPatternColumn {
   // Private
   operationType: string;
-  customLabel?: boolean;
+  label?: string;
   timeScale?: TimeScaleUnit;
   filter?: Query;
   reducedTimeRange?: string;
   timeShift?: string;
+  format?: ValueFormatConfig;
 }
 
 export interface ValueFormatConfig {
@@ -33,11 +33,7 @@ export interface ValueFormatConfig {
 }
 
 // Formatting can optionally be added to any column
-export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
-  params?: {
-    format?: ValueFormatConfig;
-  };
-}
+export type FormattedIndexPatternColumn = BaseIndexPatternColumn;
 
 export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
