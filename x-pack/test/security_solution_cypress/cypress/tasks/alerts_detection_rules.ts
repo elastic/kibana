@@ -57,6 +57,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   RULE_DETAILS_MANUAL_RULE_RUN_BTN,
   MANUAL_RULE_RUN_ACTION_BTN,
+  RULE_DETAILS_REVERT_RULE_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -72,6 +73,7 @@ import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { goToRuleEditSettings } from './rule_details';
 import { goToActionsStepTab } from './create_new_rule';
 import { setKibanaSetting } from './api_calls/kibana_advanced_settings';
+import { REVERT_MODAL_CONFIRMATION_BTN } from '../screens/rule_updates';
 
 export const getRulesManagementTableRows = () => cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW);
 
@@ -147,6 +149,13 @@ export const manualRuleRunFromDetailsPage = () => {
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
   cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
   cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+export const revertRuleFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click({ force: true });
+  cy.get(RULE_DETAILS_REVERT_RULE_BTN).click();
+  cy.get(RULE_DETAILS_REVERT_RULE_BTN).should('not.exist');
+  cy.get(REVERT_MODAL_CONFIRMATION_BTN).click();
 };
 
 export const exportRule = (name: string) => {
