@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
+import type { ExperimentalFeatures } from '../../../common';
 import { TelemetryEventsSender } from './sender';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
@@ -25,13 +26,13 @@ describe('TelemetryEventsSender', () => {
 
   describe('processEvents', () => {
     it('returns empty array when empty array is passed', () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       const result = sender.processEvents([]);
       expect(result).toStrictEqual([]);
     });
 
     it('applies the allowlist', () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       const input = [
         {
           credential_access: {
@@ -465,13 +466,13 @@ describe('TelemetryEventsSender', () => {
 
   describe('queueTelemetryEvents', () => {
     it('queues two events', () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       expect(sender['queue'].length).toBe(2);
     });
 
     it('queues more than maxQueueSize events', () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['maxQueueSize'] = 5;
       sender.queueTelemetryEvents([{ 'event.kind': '1' }, { 'event.kind': '2' }]);
       sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
@@ -481,7 +482,7 @@ describe('TelemetryEventsSender', () => {
     });
 
     it('empties the queue when sending', async () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
         isOptedIn$: new Observable<boolean>(),
@@ -514,7 +515,7 @@ describe('TelemetryEventsSender', () => {
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
@@ -531,7 +532,7 @@ describe('TelemetryEventsSender', () => {
     });
 
     it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
-      const sender = new TelemetryEventsSender(logger);
+      const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
       sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => true),
@@ -558,28 +559,28 @@ describe('getV3UrlFromV2', () => {
   });
 
   it('should return prod url', () => {
-    const sender = new TelemetryEventsSender(logger);
+    const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
     expect(
       sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
     ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should work when receiving a V3 URL', () => {
-    const sender = new TelemetryEventsSender(logger);
+    const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
     expect(
       sender.getV3UrlFromV2('https://telemetry.elastic.co/v3/send/channel', 'alerts-endpoint')
     ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should return staging url', () => {
-    const sender = new TelemetryEventsSender(logger);
+    const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
     expect(
       sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
     ).toBe('https://telemetry-staging.elastic.co/v3-dev/send/alerts-endpoint');
   });
 
   it('should support ports and auth', () => {
-    const sender = new TelemetryEventsSender(logger);
+    const sender = new TelemetryEventsSender(logger, {} as ExperimentalFeatures);
     expect(
       sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
     ).toBe('http://user:pass@myproxy.local:1337/v3/send/alerts-endpoint');
