@@ -18,6 +18,14 @@ const emptyLabel = i18n.translate('fieldFormats.string.emptyLabel', {
   defaultMessage: '(empty)',
 });
 
+const missingLabel = i18n.translate('fieldFormats.string.missingLabel', {
+  defaultMessage: '(missing)',
+});
+
+const otherLabel = i18n.translate('fieldFormats.string.otherLabel', {
+  defaultMessage: '(other)',
+});
+
 const TRANSFORM_OPTIONS = [
   {
     kind: false,
@@ -114,6 +122,12 @@ export class StringFormat extends FieldFormat {
     if (val === '') {
       return emptyLabel;
     }
+    if (val === '__missing__' || val == null) {
+      return missingLabel;
+    }
+    if (val === '__other__') {
+      return otherLabel;
+    }
     switch (this.param('transform')) {
       case 'lower':
         return String(val).toLowerCase();
@@ -135,6 +149,12 @@ export class StringFormat extends FieldFormat {
   htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
     if (val === '') {
       return `<span class="ffString__emptyValue">${emptyLabel}</span>`;
+    }
+    if (val === '__missing__' || val == null) {
+      return `<span class="ffString__emptyValue">${missingLabel}</span>`;
+    }
+    if (val === '__other__') {
+      return `<span class="ffString__emptyValue">${otherLabel}</span>`;
     }
 
     return hit?.highlight?.[field?.name!]
