@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { ProductInterceptPublicPlugin } from './plugin';
+import { GenericFtrProviderContext } from '@kbn/test';
+import { services } from './services';
 
-/**
- * @internal
- */
-export function plugin(ctx: PluginInitializerContext) {
-  return new ProductInterceptPublicPlugin(ctx);
-}
+export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

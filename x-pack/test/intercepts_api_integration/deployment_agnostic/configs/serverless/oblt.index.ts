@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { ProductInterceptPublicPlugin } from './plugin';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
-/**
- * @internal
- */
-export function plugin(ctx: PluginInitializerContext) {
-  return new ProductInterceptPublicPlugin(ctx);
+export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+  describe('apis', () => {
+    loadTestFile(require.resolve('../../apis'));
+  });
 }
