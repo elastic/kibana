@@ -15,6 +15,7 @@ import type { KibanaExecutionContext } from '@kbn/core-execution-context-common'
 import { Logger } from '@kbn/logging';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
 import apm from 'elastic-apm-node';
+import moment from 'moment';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
@@ -34,6 +35,10 @@ export function registerSearchRoute(
         authz: {
           enabled: false,
           reason: 'This route is opted out from authorization',
+        },
+        authc: {
+          enabled: 'minimal', // <-- Enable "minimal" authentication
+          sessionCache: moment.duration(16, 's'), // <-- Enable session cache,
         },
       },
     })
@@ -61,6 +66,8 @@ export function registerSearchRoute(
         },
       },
       async (context, request, res) => {
+        // console.log('Received search request:', request.body);
+
         const {
           legacyHitsTotal = true,
           sessionId,
