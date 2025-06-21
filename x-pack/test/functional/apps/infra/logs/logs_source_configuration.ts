@@ -11,10 +11,6 @@ import { DATES } from '../constants';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const COMMON_REQUEST_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-};
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -22,7 +18,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
-  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
@@ -44,11 +39,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           to: DATES.metricsAndLogs.stream.endWithData,
         },
       };
-      const formattedLocalStart = new Date(logFilter.timeRange.from).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      });
 
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
