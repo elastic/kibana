@@ -8,12 +8,7 @@
  */
 
 import { CommandSuggestParams } from '../../../definitions/types';
-import {
-  findPreviousWord,
-  getLastNonWhitespaceChar,
-  isColumnItem,
-  noCaseCompare,
-} from '../../../shared/helpers';
+import { getLastNonWhitespaceChar, isColumnItem } from '../../../shared/helpers';
 import type { SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
@@ -28,7 +23,7 @@ export async function suggest({
   if (
     /\s/.test(innerText[innerText.length - 1]) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&
-    !noCaseCompare(findPreviousWord(innerText), 'drop')
+    !/drop\s+\S*$/i.test(innerText)
   ) {
     return [pipeCompleteItem, commaCompleteItem];
   }

@@ -26,6 +26,13 @@ import { createWhereCommand } from './where';
 import { createCompletionCommand } from './completion';
 import { createChangePointCommand } from './change_point';
 import { createGrokCommand } from './grok';
+import { createKeepCommand } from './keep';
+import { createMvExpandCommand } from './mv_expand';
+import { createDropCommand } from './drop';
+import { createRenameCommand } from './rename';
+import { createEnrichCommand } from './enrich';
+import { createSampleCommand } from './sample';
+import { createJoinCommand } from './join';
 
 export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> => {
   const command = createCommand<'fork'>('fork', ctx);
@@ -112,5 +119,40 @@ function visitForkSubQueryProcessingCommandContext(ctx: ForkSubQueryProcessingCo
   const completionCtx = ctx.processingCommand().completionCommand();
   if (completionCtx) {
     return createCompletionCommand(completionCtx);
+  }
+
+  const mvExpandCtx = ctx.processingCommand().mvExpandCommand();
+  if (mvExpandCtx) {
+    return createMvExpandCommand(mvExpandCtx);
+  }
+
+  const keepCtx = ctx.processingCommand().keepCommand();
+  if (keepCtx) {
+    return createKeepCommand(keepCtx);
+  }
+
+  const dropCtx = ctx.processingCommand().dropCommand();
+  if (dropCtx) {
+    return createDropCommand(dropCtx);
+  }
+
+  const renameCtx = ctx.processingCommand().renameCommand();
+  if (renameCtx) {
+    return createRenameCommand(renameCtx);
+  }
+
+  const enrichCtx = ctx.processingCommand().enrichCommand();
+  if (enrichCtx) {
+    return createEnrichCommand(enrichCtx);
+  }
+
+  const sampleCtx = ctx.processingCommand().sampleCommand();
+  if (sampleCtx) {
+    return createSampleCommand(sampleCtx);
+  }
+
+  const joinCtx = ctx.processingCommand().joinCommand();
+  if (joinCtx) {
+    return createJoinCommand(joinCtx);
   }
 }
