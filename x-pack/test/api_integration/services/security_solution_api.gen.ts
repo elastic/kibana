@@ -966,6 +966,18 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          routeWithNamespace(
+            '/api/entity_analytics/privileged_user_monitoring/pad/status',
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     getProtectionUpdatesNote(
       props: GetProtectionUpdatesNoteProps,
       kibanaSpace: string = 'default'
@@ -1340,6 +1352,18 @@ providing you with the most current and effective threat detection capabilities.
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
+    },
+    installPrivilegedAccessDetectionPackage(kibanaSpace: string = 'default') {
+      return supertest
+        .post(
+          routeWithNamespace(
+            '/api/entity_analytics/privileged_user_monitoring/pad/install',
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest

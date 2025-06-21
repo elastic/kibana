@@ -38,7 +38,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
           gutterSize="xl"
           alignItems="center"
         >
-          <EuiFlexItem grow={1} paddingSize="xl">
+          <EuiFlexItem grow={1}>
             <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" direction="column">
                 <EuiFlexGroup gutterSize={'m'} alignItems={'center'}>

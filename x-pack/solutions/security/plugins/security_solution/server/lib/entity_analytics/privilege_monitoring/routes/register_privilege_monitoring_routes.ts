@@ -19,6 +19,9 @@ import {
   uploadUsersCSVRoute,
 } from './users';
 
+import { padInstallRoute } from './privileged_access_detection/pad_install';
+import { padGetStatusRoute } from './privileged_access_detection/pad_get_installation_status';
+
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
@@ -26,6 +29,8 @@ export const registerPrivilegeMonitoringRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  padInstallRoute(router, logger, config);
+  padGetStatusRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
   monitoringEntitySourceRoute(router, logger, config);
   createUserRoute(router, logger);
