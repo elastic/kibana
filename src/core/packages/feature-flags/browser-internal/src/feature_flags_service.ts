@@ -64,6 +64,7 @@ export class FeatureFlagsService {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }
     return {
+      getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
       setProvider: (provider) => {
         if (this.isProviderReadyPromise) {
           throw new Error('A provider has already been set. This API cannot be called twice.');

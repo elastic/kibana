@@ -220,6 +220,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       getAsLabels: deps.executionContext.getAsLabels,
     },
     featureFlags: {
+      setInitialFeatureFlagsGetter: deps.featureFlags.setInitialFeatureFlagsGetter,
       setProvider: deps.featureFlags.setProvider,
       appendContext: deps.featureFlags.appendContext,
     },
