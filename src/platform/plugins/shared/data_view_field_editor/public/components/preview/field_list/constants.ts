@@ -7,20 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
-import { EuiSpacer, EuiFlyoutHeader, EuiFlyoutHeaderProps } from '@elastic/eui';
-
-export const PanelHeader: React.FunctionComponent<
-  { children: React.ReactNode } & Omit<EuiFlyoutHeaderProps, 'children'>
-> = (props) => (
-  <>
-    <EuiFlyoutHeader
-      css={css`
-        padding: 0 !important;
-      `}
-      {...props}
-    />
-    <EuiSpacer />
-  </>
-);
+export const ITEM_HEIGHT = 40;
+export const SHOW_MORE_HEIGHT = 40;
+export const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
