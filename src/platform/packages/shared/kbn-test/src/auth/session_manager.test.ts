@@ -445,4 +445,83 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       );
     });
   });
+
+  describe('Session expiration behavior', () => {
+    const hostOptions = {
+      protocol: 'http' as 'http' | 'https',
+      hostname: 'my-test-deployment.test.elastic.cloud',
+      port: 5620,
+      username: 'elastic',
+      password: 'changeme',
+    };
+    const isCloud = true;
+    const samlSessionManagerOptions = {
+      hostOptions,
+      isCloud,
+      log,
+      cloudUsersFilePath,
+    };
+
+    const cookieInstance = Cookie.parse(
+      'sid=kbn_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
+    )!;
+
+    const cloudHostName = 'cloud.env.co';
+    const cloudEmail = 'viewer@elastic.co';
+    const cloudUsers = new Array<[Role, User]>();
+    cloudUsers.push(['viewer', { email: 'viewer@elastic.co', password: 'p1234' }]);
+    cloudUsers.push(['editor', { email: 'editor@elastic.co', password: 'p1234' }]);
+    const samlSMOptionsWithCloudHostName = {
+      ...samlSessionManagerOptions,
+      cloudHostName,
+    };
+    let samlSessionManager: SamlSessionManager;
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      process.env.TEST_CLOUD_HOST_NAME = 'cloud.env.co'; // Mock the environment variable
+      jest
+        .requireMock('../kbn_client/kbn_client')
+        .KbnClient.mockImplementation(() => ({ version: { get } }));
+      get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
+
+      samlSessionManager = new SamlSessionManager(samlSMOptionsWithCloudHostName);
+      createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, cloudEmail));
+      readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
+    });
+
+    test('should return a valid cached session if within session lifetime', async () => {
+      const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
+      const now = Date.now();
+
+      // Mock session creation
+      createCloudSAMLSessionMock.mockResolvedValue(
+        new Session(cookieInstance, cloudEmail, now - sessionLifetime + 1000) // Just within the valid lifetime
+      );
+
+      // Act
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+
+      // Assert
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(1); // No new session created
+    });
+
+    test('should create a new session if cached session is expired', async () => {
+      const sessionLifetime = 0.8 * 20 * 60 * 1000; // 80% of 20 minutes
+      const now = Date.now();
+
+      // Mock session creation
+      createCloudSAMLSessionMock.mockResolvedValue(
+        new Session(cookieInstance, cloudEmail, now - sessionLifetime - 1000) // Just beyond the valid lifetime
+      );
+
+      // Act
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+      await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleViewer);
+
+      // Assert
+      expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(2); // New session created
+    });
+  });
 });

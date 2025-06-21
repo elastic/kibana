@@ -50,6 +50,7 @@ export interface GetCookieOptions {
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
+  private static readonly SESSION_LIFE_SPAN: number = 20 * 60 * 1000; // 20 minutes in milliseconds
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
@@ -146,11 +147,20 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
     const cacheKey = spaceId ? `${role}:${spaceId}` : role;
 
-    // Check if session is cached and not forced to create the new one
+    // Check if a valid cached session exists and return it if not expired
     if (!forceNewSession && this.sessionCache.has(cacheKey)) {
-      return this.sessionCache.get(cacheKey)!;
+      const cachedSession = this.sessionCache.get(cacheKey)!;
+      const sessionLifetime = 0.8 * SamlSessionManager.SESSION_LIFE_SPAN; // 80% of session lifespan
+      const isSessionValid = Date.now() - cachedSession.createdAt < sessionLifetime;
+
+      if (isSessionValid) {
+        return cachedSession; // Return valid cached session
+      }
+      this.log.warning(`Session for role '${role}' expired.`);
+      this.sessionCache.delete(cacheKey); // Remove expired session
     }
 
+    // Create a new session if no valid cached session exists
     const session = await this.createSessionForRole(role);
     this.sessionCache.set(cacheKey, session);
 
