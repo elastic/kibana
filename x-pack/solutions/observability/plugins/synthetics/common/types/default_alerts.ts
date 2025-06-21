@@ -9,12 +9,12 @@ import { SanitizedRule, SanitizedRuleAction, RuleSystemAction } from '@kbn/alert
 import { SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE } from '../constants/synthetics_alerts';
 
 export type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
-type SYNTHETICS_DEFAULT_RULE = Omit<SanitizedRule<{}>, 'systemActions' | 'actions'> & {
+export type SyntheticsDefaultRule = Omit<SanitizedRule<{}>, 'systemActions' | 'actions'> & {
   actions: Array<SanitizedRuleAction | RuleSystemAction>;
   ruleTypeId: SanitizedRule['alertTypeId'];
 };
 
 export interface DEFAULT_ALERT_RESPONSE {
-  statusRule: SYNTHETICS_DEFAULT_RULE | null;
-  tlsRule: SYNTHETICS_DEFAULT_RULE | null;
+  statusRule: SyntheticsDefaultRule | null;
+  tlsRule: SyntheticsDefaultRule | null;
 }

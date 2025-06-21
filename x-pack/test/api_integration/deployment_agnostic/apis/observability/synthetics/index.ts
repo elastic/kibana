@@ -31,6 +31,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./test_now_monitor'));
+    loadTestFile(require.resolve('./simultaneous_default_alert_requests'));
     loadTestFile(require.resolve('./edit_private_location'));
   });
 }
