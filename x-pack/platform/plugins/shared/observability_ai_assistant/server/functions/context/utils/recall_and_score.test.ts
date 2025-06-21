@@ -7,11 +7,11 @@
 
 import { RecalledSuggestion, recallAndScore } from './recall_and_score';
 import { scoreSuggestions } from './score_suggestions';
-import { MessageRole, type Message } from '../../../common';
-import type { FunctionCallChatFunction } from '../../service/types';
+import { MessageRole, type Message } from '../../../../common';
+import type { FunctionCallChatFunction } from '../../../service/types';
 import { AnalyticsServiceStart } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
-import { recallRankingEventType } from '../../analytics/recall_ranking';
+import { recallRankingEventType } from '../../../analytics/recall_ranking';
 
 jest.mock('./score_suggestions', () => ({
   scoreSuggestions: jest.fn(),
@@ -103,7 +103,7 @@ describe('recallAndScore', () => {
         chat: mockChat,
         analytics: mockAnalytics,
         userPrompt: 'What is my favorite color?',
-        context: 'Some context',
+        screenDescription: 'Some context',
         messages: sampleMessages,
         logger: mockLogger,
         signal,
@@ -137,7 +137,7 @@ describe('recallAndScore', () => {
       chat: mockChat,
       analytics: mockAnalytics,
       userPrompt: 'test',
-      context: 'context',
+      screenDescription: 'context',
       messages: sampleMessages,
       logger: mockLogger,
       signal,
@@ -164,7 +164,7 @@ describe('recallAndScore', () => {
       chat: mockChat,
       analytics: mockAnalytics,
       userPrompt: 'test',
-      context: 'context',
+      screenDescription: 'context',
       messages: sampleMessages,
       logger: mockLogger,
       signal,
@@ -196,7 +196,7 @@ describe('recallAndScore', () => {
       chat: mockChat,
       analytics: mockAnalytics,
       userPrompt: "What's my favourite color?",
-      context: '',
+      screenDescription: '',
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
@@ -225,7 +225,7 @@ describe('recallAndScore', () => {
       chat: mockChat,
       analytics: mockAnalytics,
       userPrompt: "I'm looking at an alert and trying to understand why it was triggered",
-      context: 'User is analyzing an alert',
+      screenDescription: 'User is analyzing an alert',
       messages: contextualInsightsMessages,
       logger: mockLogger,
       signal,
@@ -251,7 +251,7 @@ describe('recallAndScore', () => {
       chat: mockChat,
       analytics: mockAnalytics,
       userPrompt: 'test',
-      context: 'context',
+      screenDescription: 'context',
       messages: sampleMessages,
       logger: mockLogger,
       signal,

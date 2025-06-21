@@ -8,11 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import { AnalyticsServiceStart } from '@kbn/core/server';
 import { scoreSuggestions } from './score_suggestions';
-import type { Message } from '../../../common';
-import type { ObservabilityAIAssistantClient } from '../../service/client';
-import type { FunctionCallChatFunction } from '../../service/types';
-import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
-import { RecalledEntry } from '../../service/knowledge_base_service';
+import type { Message } from '../../../../common';
+import type { ObservabilityAIAssistantClient } from '../../../service/client';
+import type { FunctionCallChatFunction } from '../../../service/types';
+import { RecallRanking, recallRankingEventType } from '../../../analytics/recall_ranking';
+import { RecalledEntry } from '../../../service/knowledge_base_service';
+import { getRewrittenUserPrompt } from './get_rewritten_prompt';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'esScore'>;
 
@@ -21,8 +22,7 @@ export async function recallAndScore({
   chat,
   analytics,
   userPrompt,
-  userMessageFunctionName,
-  context,
+  screenDescription,
   messages,
   logger,
   signal,
@@ -31,8 +31,7 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
-  userMessageFunctionName?: string;
-  context: string;
+  screenDescription: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
@@ -41,10 +40,16 @@ export async function recallAndScore({
   llmScores?: Array<{ id: string; llmScore: number }>;
   suggestions: RecalledSuggestion[];
 }> {
-  const queries = [
-    { text: userPrompt, boost: 3 },
-    { text: context, boost: 1 },
-  ].filter((query) => query.text.trim());
+  const rewrittenUserPrompt = await getRewrittenUserPrompt({
+    userPrompt,
+    screenDescription,
+    chat,
+    messages,
+    logger,
+    signal,
+  });
+
+  const queries = [{ text: rewrittenUserPrompt ?? userPrompt, boost: 1 }];
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
     ({ id, text, esScore }) => ({ id, text, esScore })
@@ -67,8 +72,7 @@ export async function recallAndScore({
       logger,
       messages,
       userPrompt,
-      userMessageFunctionName,
-      context,
+      screenDescription,
       signal,
       chat,
     });

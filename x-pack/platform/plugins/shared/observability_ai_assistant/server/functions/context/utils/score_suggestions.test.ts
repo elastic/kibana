@@ -8,10 +8,10 @@
 import { scoreSuggestions } from './score_suggestions';
 import { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
-import { MessageRole, StreamingChatResponseEventType } from '../../../common';
+import { MessageRole, StreamingChatResponseEventType } from '../../../../common';
 import { RecalledSuggestion } from './recall_and_score';
-import { FunctionCallChatFunction } from '../../service/types';
-import { ChatEvent } from '../../../common/conversation_complete';
+import { FunctionCallChatFunction } from '../../../service/types';
+import { ChatEvent } from '../../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
 
 const suggestions: RecalledSuggestion[] = [
@@ -21,7 +21,7 @@ const suggestions: RecalledSuggestion[] = [
 ];
 
 const userPrompt = 'What is my favourite color?';
-const context = 'Some context';
+const screenDescription = 'The user is currently looking at Discover';
 
 describe('scoreSuggestions', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
@@ -46,7 +46,7 @@ describe('scoreSuggestions', () => {
       suggestions,
       messages: normalConversationMessages,
       userPrompt,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -83,7 +83,7 @@ describe('scoreSuggestions', () => {
       messages: normalConversationMessages,
       userPrompt,
       userMessageFunctionName: 'score',
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -110,7 +110,7 @@ describe('scoreSuggestions', () => {
       suggestions,
       messages: normalConversationMessages,
       userPrompt,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -135,7 +135,7 @@ describe('scoreSuggestions', () => {
         suggestions,
         messages: normalConversationMessages,
         userPrompt,
-        context,
+        screenDescription,
         chat: mockChat,
         signal: new AbortController().signal,
         logger: mockLogger,
@@ -153,7 +153,7 @@ describe('scoreSuggestions', () => {
       messages: contextualInsightsMessages,
       userPrompt: lastUserMessage?.message.content!,
       userMessageFunctionName: lastUserMessage?.message.name,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
