@@ -34,10 +34,9 @@ describe('the source queries for privileged access detection', () => {
             | RENAME @timestamp AS event_timestamp
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
-            | EVAL is_privileged = labels.monitoring.privileged_users == "monitored"
-            | WHERE is_privileged == true
-            | STATS max_record_score = MAX(record_score), is_privileged = TOP(is_privileged, 1, "desc") by user.name
-            | WHERE is_privileged == true
+            | WHERE user.is_privileged == true
+            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 100, "desc") by user.name
+            | WHERE user.is_privileged == true
             | SORT max_record_score DESC
             | KEEP user.name
             | LIMIT 100
@@ -82,10 +81,9 @@ describe('the source queries for privileged access detection', () => {
             | RENAME @timestamp AS event_timestamp
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
-            | EVAL is_privileged = labels.monitoring.privileged_users == "monitored"
-            | WHERE is_privileged == true
-            | STATS max_record_score = MAX(record_score), is_privileged = TOP(is_privileged, 1, "desc") by user.name
-            | WHERE is_privileged == true
+            | WHERE user.is_privileged == true
+            | STATS max_record_score = MAX(record_score), user.is_privileged = TOP(user.is_privileged, 100, "desc") by user.name
+            | WHERE user.is_privileged == true
             | SORT max_record_score DESC
             | KEEP user.name
             | LIMIT 100
@@ -109,8 +107,7 @@ describe('the source queries for privileged access detection', () => {
             | RENAME @timestamp AS event_timestamp
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
-            | EVAL is_privileged = labels.monitoring.privileged_users == "monitored"
-            | WHERE is_privileged == true
+            | WHERE user.is_privileged == true
             | EVAL user_name_to_record_score = CONCAT(user.name, " : ", TO_STRING(record_score))
             | STATS user_name_to_record_score = VALUES(user_name_to_record_score) BY @timestamp = BUCKET(@timestamp, 24h)
             | MV_EXPAND user_name_to_record_score
@@ -158,8 +155,7 @@ describe('the source queries for privileged access detection', () => {
             | RENAME @timestamp AS event_timestamp
             | LOOKUP JOIN .entity_analytics.monitoring.users-default ON user.name
             | RENAME event_timestamp AS @timestamp
-            | EVAL is_privileged = labels.monitoring.privileged_users == "monitored"
-            | WHERE is_privileged == true
+            | WHERE user.is_privileged == true
             | EVAL user_name_to_record_score = CONCAT(user.name, " : ", TO_STRING(record_score))
             | STATS user_name_to_record_score = VALUES(user_name_to_record_score) BY @timestamp = BUCKET(@timestamp, 24h)
             | MV_EXPAND user_name_to_record_score
