@@ -6,12 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiSpacer, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
   useTableFilters,
@@ -23,12 +31,14 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
 import { getAttributesTitle } from './get_attributes_title';
+import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
 
 export function AttributesOverview({
   columns,
   columnsMeta,
   hit,
   dataView,
+  textBasedHits,
   filter,
   decreaseAvailableHeightBy,
   onAddColumn,
@@ -36,11 +46,13 @@ export function AttributesOverview({
 }: DocViewRenderProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { storage, uiSettings } = getUnifiedDocViewerServices();
+  const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const { searchTerm, onChangeSearchTerm } = useTableFilters({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
   });
+  const [areNullValuesHidden, setAreNullValuesHidden] = useLocalStorage(HIDE_NULL_VALUES, false);
 
   const flattened = hit.flattened;
 
@@ -53,22 +65,28 @@ export function AttributesOverview({
 
   const allFields = Object.keys(flattened);
 
-  // it filters out multifields that have a parent, to prevent entries for multifields like this: field, field.keyword, field.whatever
-  const filteredFields = useMemo(
-    () => allFields.filter(shouldShowFieldHandler),
-    [allFields, shouldShowFieldHandler]
-  );
-
   const groupedFields = useMemo(() => {
     const attributesFields: string[] = [];
     const resourceAttributesFields: string[] = [];
     const scopeAttributesFields: string[] = [];
     const lowerSearchTerm = searchTerm.toLowerCase();
-    for (const fieldName of filteredFields) {
+
+    allFields.reduce((acc, fieldName) => {
       const lowerFieldName = fieldName.toLowerCase();
-      if (!lowerFieldName.includes(lowerSearchTerm)) {
-        continue;
+
+      // it filters out multifields that have a parent, to prevent entries for multifields like this: field, field.keyword, field.whatever
+      if (!shouldShowFieldHandler(fieldName)) {
+        return acc;
       }
+
+      if (!lowerFieldName.includes(lowerSearchTerm)) {
+        return acc;
+      }
+
+      if (isEsqlMode && areNullValuesHidden && flattened[fieldName] == null) {
+        return acc;
+      }
+
       if (lowerFieldName.startsWith('resource.attributes.')) {
         resourceAttributesFields.push(fieldName);
       } else if (lowerFieldName.startsWith('scope.attributes.')) {
@@ -76,9 +94,12 @@ export function AttributesOverview({
       } else if (lowerFieldName.startsWith('attributes.')) {
         attributesFields.push(fieldName);
       }
-    }
+
+      return acc;
+    }, null);
+
     return { attributesFields, resourceAttributesFields, scopeAttributesFields };
-  }, [filteredFields, searchTerm]);
+  }, [allFields, flattened, searchTerm, shouldShowFieldHandler, isEsqlMode, areNullValuesHidden]);
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM)
@@ -90,6 +111,13 @@ export function AttributesOverview({
       title: attributesTitle,
       ariaLabel: attributesTitle,
       fields: groupedFields.attributesFields,
+      tooltipMessage: i18n.translate(
+        'unifiedDocViewer.docView.attributes.signalAttributesTooltip',
+        {
+          defaultMessage:
+            'Metadata added by the instrumentation library to describe the telemetry data (e.g., HTTP method, user agent).',
+        }
+      ),
     },
     {
       id: 'resource_attributes',
@@ -101,6 +129,13 @@ export function AttributesOverview({
         { defaultMessage: 'Resource attributes' }
       ),
       fields: groupedFields.resourceAttributesFields,
+      tooltipMessage: i18n.translate(
+        'unifiedDocViewer.docView.attributes.resourceAttributesTooltip',
+        {
+          defaultMessage:
+            'Metadata originally set at the source of the telemetry, such as in the SDK or agent that generated the data.',
+        }
+      ),
     },
     {
       id: 'scope_attributes',
@@ -112,8 +147,19 @@ export function AttributesOverview({
         { defaultMessage: 'Scope attributes' }
       ),
       fields: groupedFields.scopeAttributesFields,
+      tooltipMessage: i18n.translate('unifiedDocViewer.docView.attributes.scopeAttributesTooltip', {
+        defaultMessage:
+          'Metadata associated with the instrumentation scope (i.e., the library/module that produced the telemetry), helping identify its origin and version.',
+      }),
     },
   ];
+
+  const onHideNullValuesChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      setAreNullValuesHidden(e.target.checked);
+    },
+    [setAreNullValuesHidden]
+  );
 
   return (
     <EuiFlexGroup
@@ -149,6 +195,34 @@ export function AttributesOverview({
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          responsive={false}
+          wrap={true}
+          direction="row"
+          justifyContent="flexEnd"
+          alignItems="center"
+          gutterSize="m"
+        >
+          {isEsqlMode && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
+                  defaultMessage: 'Hide null fields',
+                  description: 'Switch label to hide fields with null values in the table',
+                })}
+                checked={areNullValuesHidden ?? false}
+                onChange={onHideNullValuesChange}
+                compressed
+                data-test-subj="unifiedDocViewerHideNullValuesSwitch"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
       <EuiFlexItem
         grow={true}
         css={css`
@@ -156,13 +230,14 @@ export function AttributesOverview({
         `}
       >
         <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {accordionConfigs.map(({ id, title, ariaLabel, fields }) => (
+          {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
             <React.Fragment key={id}>
               <EuiFlexItem grow={false}>
                 <AttributesAccordion
                   id={id}
                   title={title}
                   ariaLabel={ariaLabel}
+                  tooltipMessage={tooltipMessage}
                   fields={fields}
                   hit={hit}
                   dataView={dataView}
@@ -172,6 +247,7 @@ export function AttributesOverview({
                   onAddColumn={onAddColumn}
                   onRemoveColumn={onRemoveColumn}
                   filter={filter}
+                  isEsqlMode={isEsqlMode}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
