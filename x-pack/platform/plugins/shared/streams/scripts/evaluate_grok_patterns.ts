@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-console */
 
 /**
@@ -18,7 +17,7 @@
  * Run evaluation script using:
  *
  * ```bash
- * yarn run ts-node --transpile-only x-pack/platform/plugins/shared/streams/server/routes/internal/streams/processing/suggestions_handler.eval.ts
+ * yarn run ts-node --transpile-only x-pack/platform/plugins/shared/streams/scripts/evaluate_grok_patterns.ts
  * ```
  */
 
@@ -31,7 +30,7 @@ import chalk from 'chalk';
 import yargs from 'yargs/yargs';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
-import { getLogGroups } from './get_log_groups';
+import { getLogGroups } from '../server/routes/internal/streams/processing/get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
 const ES_USER = 'elastic';
