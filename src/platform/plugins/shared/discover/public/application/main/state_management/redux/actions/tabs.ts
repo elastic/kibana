@@ -54,6 +54,15 @@ export const setTabs: InternalStateThunkActionCreator<
       });
     }
 
+    const selectedTabRuntimeState = selectTabRuntimeState(
+      runtimeStateManager,
+      params.selectedTabId
+    );
+
+    if (selectedTabRuntimeState) {
+      selectedTabRuntimeState.scopedEbtManager$.getValue().setAsActiveManager();
+    }
+
     dispatch(
       internalStateSlice.actions.setTabs({
         ...params,
