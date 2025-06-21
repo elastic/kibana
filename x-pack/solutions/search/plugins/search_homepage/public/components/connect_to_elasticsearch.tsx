@@ -83,6 +83,10 @@ export const ConnectToElasticsearch = () => {
                         <EuiCopy textToCopy={elasticsearchUrl}>
                           {(copy) => (
                             <EuiButtonIcon
+                              aria-label={i18n.translate(
+                                'xpack.searchHomepage.connectToElasticsearch.copyElasticsearchUrlAriaLabel',
+                                { defaultMessage: 'Copy Elasticsearch URL' }
+                              )}
                               onClick={copy}
                               iconType="copyClipboard"
                               size="m"
