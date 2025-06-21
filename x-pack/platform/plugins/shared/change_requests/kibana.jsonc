@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/change-requests-plugin",
+  "owner": [
+    "@elastic/obs-knowledge-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "changeRequests",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "change_requests"
+    ],
+    "requiredPlugins": [
+      "features",
+      "security",
+      "spaces"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}
