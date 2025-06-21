@@ -110,6 +110,13 @@ export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
   }
 );
 
+export const ALERT_LINK_DASHBOARDS_LABEL_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboards.label.tooltipContent',
+  {
+    defaultMessage: `Dashboards let you visualize and analyze alerts created by this rule. When alerts are created, you can quickly access your selected dashboards from the alerts' details page.`,
+  }
+);
+
 export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
   {
@@ -308,6 +315,13 @@ export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
+  {
+    defaultMessage: `Save time by creating an investigation guide that shares step-by-step guidelines or links to helpful resources for investigating alerts. When alerts are created, you can find the investigation guide on the alerts' details page.`,
   }
 );
 
