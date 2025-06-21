@@ -1295,6 +1295,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
     subAction: 'run',
     subActionParams: {
       alerts,
+      groupedAlerts: null,
       groupingBy: [],
       rule,
       owner,
@@ -1302,6 +1303,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      internallyManagedAlerts: false,
       ...params,
     },
   };

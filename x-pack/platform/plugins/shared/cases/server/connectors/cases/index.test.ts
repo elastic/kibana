@@ -68,6 +68,7 @@ describe('getCasesConnectorType', () => {
       tags: ['my-tag'],
       consumer: 'test-consumer',
       producer: 'test-producer',
+      alertTypeId: 'test-rule-1',
     };
 
     const getParams = (overrides = {}) => ({
@@ -146,7 +147,9 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -191,7 +194,9 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -234,7 +239,9 @@ describe('getCasesConnectorType', () => {
                   "_index": "alert-index-2",
                 },
               ],
+              "groupedAlerts": null,
               "groupingBy": Array [],
+              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,

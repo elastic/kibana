@@ -65,6 +65,13 @@ const TimeWindowSchema = schema.string({
   },
 });
 
+export const CasesGroupedAlertsSchema = schema.object({
+  alerts: schema.arrayOf(AlertSchema),
+  comments: schema.maybe(schema.arrayOf(schema.string())),
+  grouping: schema.recordOf(schema.string(), schema.any()),
+  title: schema.maybe(schema.string()),
+});
+
 /**
  * The case connector does not have any configuration
  * or secrets.
@@ -74,6 +81,7 @@ export const CasesConnectorSecretsSchema = schema.object({});
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
+  groupedAlerts: schema.nullable(schema.arrayOf(CasesGroupedAlertsSchema)),
   groupingBy: GroupingSchema,
   owner: schema.string(),
   rule: RuleSchema,
@@ -85,6 +93,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
     max: MAX_OPEN_CASES,
   }),
   templateId: schema.nullable(schema.string()),
+  internallyManagedAlerts: schema.boolean({ defaultValue: false }),
 });
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
