@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import type { Writable } from 'stream';
-
+import type { Filter } from '@kbn/es-query';
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchClient } from '@kbn/search-types';
@@ -34,6 +34,7 @@ import type { ReportingConfigType } from '@kbn/reporting-server';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { CONTENT_TYPE_CSV } from '../constants';
 import type { JobParamsCSV } from '../types';
+import { overrideTimeRange } from './lib/override_time_range';
 import { getExportSettings, type CsvExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
@@ -237,6 +238,7 @@ export class CsvGenerator {
 
   public async generateData(): Promise<TaskRunResult> {
     const logger = this.logger;
+    console.log(`generate_csv searchsource ${JSON.stringify(this.job.searchSource)}`);
 
     const createSearchSource = async () => {
       try {
@@ -275,6 +277,13 @@ export class CsvGenerator {
 
     if (!index) {
       throw new Error(`The search must have a reference to an index pattern!`);
+    }
+
+    if (this.job.forceNow) {
+      this.logger.info(`Using forceNow: ${this.job.forceNow}`);
+
+      const currentFilters = searchSource.getField('filter') as Filter[] | Filter | undefined;
+      overrideTimeRange(currentFilters, this.job.forceNow);
     }
 
     const { maxSizeBytes, bom, escapeFormulaValues, timezone } = settings;

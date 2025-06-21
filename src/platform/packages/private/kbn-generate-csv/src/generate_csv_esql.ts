@@ -63,6 +63,7 @@ export class CsvESQLGenerator {
   ) {}
 
   public async generateData(): Promise<TaskRunResult> {
+    console.log(`generate_csv_eslq job ${JSON.stringify(this.job)}`);
     const settings = await getExportSettings(
       this.clients.uiSettings,
       this.taskInstanceFields,
