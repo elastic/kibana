@@ -14,12 +14,14 @@ import type {
   CoreStart,
   Plugin,
 } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { APP_ID } from '../common/constants';
+import { APP_ID, CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -47,6 +49,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 
 export class CasePlugin
   implements
@@ -66,6 +69,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private incrementalIdTaskManager?: IncrementalIdTaskManager;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -117,14 +121,39 @@ export class CasePlugin
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
-        taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
-        logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
-      });
+    core.uiSettings.register({
+      [CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID]: {
+        description: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.description', {
+          defaultMessage: 'Display the incremental id of a case in the relevant pages',
+        }),
+        name: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.name', {
+          defaultMessage: 'Show incremental id',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        readonly: false,
+        category: ['cases'],
+      },
+    });
+
+    if (plugins.taskManager) {
+      if (this.caseConfig.incrementalIdService.enabled) {
+        this.incrementalIdTaskManager = new IncrementalIdTaskManager(
+          plugins.taskManager,
+          this.caseConfig.incrementalIdService,
+          this.logger
+        );
+      }
+
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -188,6 +217,7 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
     }
 
     this.userProfileService.initialize({

@@ -23,6 +23,26 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  incrementalIdService: schema.object({
+    /**
+     * Whether the incremental id service should be enabled
+     */
+    enabled: schema.boolean({ defaultValue: true }),
+    /**
+     * The interval that the task should be scheduled at
+     */
+    taskInterValMinutes: schema.number({
+      defaultValue: 10,
+      min: 5,
+    }),
+    /**
+     * The initial delay the task will be started with
+     */
+    taskStartDelayMinutes: schema.number({
+      defaultValue: 10,
+      min: 1,
+    }),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
