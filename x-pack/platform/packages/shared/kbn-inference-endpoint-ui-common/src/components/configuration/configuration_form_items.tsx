@@ -19,7 +19,9 @@ import {
 
 import { ConfigEntryView } from '../../types/types';
 import { ConfigurationField } from './configuration_field';
+import { AdaptiveAllocationsTitle } from './adaptive_allocations_title';
 import * as LABELS from '../../translations';
+import { MAX_NUMBER_OF_ALLOCATIONS } from '../../constants';
 
 interface ConfigurationFormItemsProps {
   isLoading: boolean;
@@ -81,6 +83,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
 
         return (
           <EuiFlexItem key={key}>
+            {key === MAX_NUMBER_OF_ALLOCATIONS ? <AdaptiveAllocationsTitle /> : null}
             <EuiFormRow
               label={rowLabel}
               fullWidth

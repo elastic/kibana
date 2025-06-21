@@ -12,13 +12,21 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
+  isServerless,
 }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  return <InferenceServiceFormFields http={http} isEdit={isEdit} toasts={toasts} />;
+  return (
+    <InferenceServiceFormFields
+      http={http}
+      isEdit={isEdit}
+      isServerless={isServerless}
+      toasts={toasts}
+    />
+  );
 };
 
 // eslint-disable-next-line import/no-default-export

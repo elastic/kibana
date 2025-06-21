@@ -59,6 +59,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
+  isServerless: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

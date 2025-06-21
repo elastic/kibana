@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { getInferenceApiParams } from '@kbn/inference-endpoint-ui-common';
 import { Option, none, some } from 'fp-ts/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
@@ -43,6 +44,7 @@ export interface EditConnectorFlyoutProps {
   onClose: () => void;
   tab?: EditConnectorTabs;
   onConnectorUpdated?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const getConnectorWithoutSecrets = (
@@ -56,6 +58,7 @@ const getConnectorWithoutSecrets = (
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   actionTypeRegistry,
   connector,
+  isServerless: isServerlessProp,
   onClose,
   tab = EditConnectorTabs.Configuration,
   onConnectorUpdated,
@@ -63,7 +66,9 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const {
     docLinks,
     application: { capabilities },
+    isServerless: isServerlessContext,
   } = useKibana().services;
+  const isServerless = isServerlessProp ?? isServerlessContext;
 
   const isMounted = useRef(false);
   const canSave = hasSaveActionsCapability(capabilities);
@@ -177,8 +182,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
-      const { name, config, secrets } = data;
+      const connectorData = getInferenceApiParams(data, !!isServerless);
+      const { name, config, secrets } = connectorData;
       const validConnector = {
         id: connector.id,
         name: name ?? '',
@@ -208,6 +213,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       setShowFormErrors(true);
     }
   }, [
+    isServerless,
     onConnectorUpdated,
     submit,
     preSubmitValidator,
@@ -251,6 +257,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 actionTypeModel={actionTypeModel}
                 connector={getConnectorWithoutSecrets(connector)}
                 isEdit={isEdit}
+                isServerless={isServerless}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
               />
@@ -303,6 +310,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     showButtons,
     isSaved,
     isSaving,
+    isServerless,
     onClickSave,
     isFormModified,
     hasErrors,

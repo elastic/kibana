@@ -6,9 +6,11 @@
  */
 
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, cloneDeep } from 'lodash/fp';
 import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
+import type { FieldsConfiguration } from '../types/types';
 import * as LABELS from '../translations';
+import { DEFAULT_NUM_THREADS, MIN_ALLOCATIONS, ServiceProviderKeys } from '../constants';
 
 export interface TaskTypeOption {
   id: string;
@@ -79,11 +81,25 @@ export const getNonEmptyValidator = (
 
 export const mapProviderFields = (
   taskType: string,
-  newProvider: InferenceProvider
+  newProvider: InferenceProvider,
+  fieldOverrides?: { hidden: string[]; additional: FieldsConfiguration[] }
 ): ConfigEntryView[] => {
+  // fieldOverrides.additional
+  // e.g. [ { field: { default_value: 'value', ...}, other_field: { default_value: 'value', ...} } ]
+  if (fieldOverrides?.additional) {
+    fieldOverrides?.additional.forEach((additionalField) => {
+      const fieldKey = Object.keys(additionalField)[0];
+      if (!newProvider.configurations[fieldKey]) {
+        newProvider.configurations[fieldKey] = additionalField[fieldKey];
+      }
+    });
+  }
+
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) =>
-      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    .filter(
+      (pk) =>
+        (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType) &&
+        (fieldOverrides?.hidden ?? []).indexOf(pk) === -1
     )
     .map(
       (k): ConfigEntryView => ({
@@ -101,4 +117,26 @@ export const mapProviderFields = (
         supported_task_types: newProvider.configurations[k].supported_task_types ?? [],
       })
     );
+};
+
+export const getInferenceApiParams = (data: any, isServerless: boolean) => {
+  if (
+    isServerless &&
+    data?.config?.provider === ServiceProviderKeys.elasticsearch &&
+    data?.config?.providerConfig
+  ) {
+    const dataToSend = cloneDeep(data);
+    const maxAllocations = data.config.providerConfig.max_number_of_allocations;
+
+    dataToSend.config.providerConfig!.adaptive_allocations = {
+      enabled: true,
+      min_number_of_allocations: MIN_ALLOCATIONS,
+      ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+    };
+    // num_threads: Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+    dataToSend.config.providerConfig!.num_threads = DEFAULT_NUM_THREADS;
+    delete dataToSend?.config?.providerConfig?.max_number_of_allocations;
+
+    return dataToSend;
+  }
 };

@@ -19,19 +19,23 @@ import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
+  isServerless?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
   isEdit,
+  isServerless: isServerlessProp,
   registerPreSubmitValidator,
 }) => {
   const {
     application: { capabilities },
+    isServerless: isServerlessContext,
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
+  const isServerless = isServerlessProp ?? isServerlessContext;
 
   return (
     <>
@@ -62,6 +66,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               <FieldsComponent
                 readOnly={!canSave}
                 isEdit={isEdit}
+                isServerless={isServerless}
                 registerPreSubmitValidator={registerPreSubmitValidator}
               />
             </Suspense>

@@ -19,19 +19,20 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
+import { getInferenceApiParams } from '../utils/helpers';
 
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  isServerless?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
 }
@@ -41,6 +42,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   http,
   toasts,
   isEdit,
+  isServerless = false,
   onSubmitSuccess,
   inferenceEndpoint,
 }) => {
@@ -75,8 +77,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       return;
     }
 
-    mutate(data, !!isEdit);
-  }, [form, isEdit, mutate]);
+    mutate(getInferenceApiParams(data, isServerless) ?? data, !!isEdit);
+  }, [form, isEdit, isServerless, mutate]);
 
   const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');
 
@@ -98,6 +100,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
             http={http}
             toasts={toasts}
             isEdit={isEdit}
+            isServerless={isServerless}
             isPreconfigured={isPreconfigured}
           />
           <EuiSpacer size="m" />
