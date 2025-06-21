@@ -8,10 +8,8 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Rules Management - Prebuilt Rules - Prebuilt Rule (Customization Disabled)', function () {
+  describe('Rules Management - Prebuilt Rules (Common tests)', function () {
     this.tags('skipFIPS');
-    loadTestFile(require.resolve('./customization'));
-    loadTestFile(require.resolve('./export'));
-    loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
+    loadTestFile(require.resolve('./import'));
   });
 };
