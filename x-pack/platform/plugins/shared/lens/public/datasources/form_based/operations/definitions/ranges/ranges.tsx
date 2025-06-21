@@ -110,7 +110,6 @@ export const rangeOperation: OperationDefinition<
       operationType: 'range',
       sourceField: field.name,
       isBucketed: true,
-      scale: type === MODES.Histogram ? 'interval' : 'ordinal', // ordinal for Range
       params: {
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         type: columnParams?.type ?? MODES.Histogram,

@@ -238,7 +238,6 @@ export const termsOperation: OperationDefinition<
       label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       sourceField: field.name,
       isBucketed: true,
       params: {
