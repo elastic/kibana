@@ -204,33 +204,72 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
   return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
 };
 
+/**
+ * Converts and combined KQL Queries, filters and lucene queries to a single ES Query
+ * Given operator is used to combine KQL and lucene queries irrespective of filters
+ *
+ * It works under 3 assumptions:
+ *  - buildESQuery puts KQL queries in the `filter` clause
+ *  - buildESQuery puts  filters in the `filter` clause
+ *  - buildESQuery puts lucene queries in the `must` clause
+ *
+ * This assumptions are true as of writing of this change and are being tested. In case those change,
+ * and this function breaks, please update the function to reflect the changes in buildESQuery
+ *
+ * */
 export const convertToBuildEsQuery = ({
   config,
   dataViewSpec,
   queries,
   filters,
+  luceneQuery,
+  operator = 'and',
 }: {
   config: EsQueryConfig;
   dataViewSpec: DataViewSpec | undefined;
   queries: Query[];
   filters: Filter[];
+  luceneQuery?: Query;
+  /* Combines provided KQL Query and Lucene Query */
+  operator?: 'and' | 'or';
 }): [string, undefined] | [undefined, Error] => {
   try {
-    return [
-      JSON.stringify(
-        buildEsQuery(
-          dataViewSpecToViewBase(dataViewSpec),
-          queries,
-          filters.filter((f) => f.meta.disabled === false),
-          {
-            nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
-            ...config,
-            dateFormatTZ: undefined,
-          }
-        )
-      ),
-      undefined,
-    ];
+    const esDslQuery = buildEsQuery(
+      dataViewSpecToViewBase(dataViewSpec),
+      queries,
+      filters.filter((f) => f.meta.disabled === false),
+      {
+        nestedIgnoreUnmapped: true, // by default, prevent shard failures when unmapped `nested` fields are queried: https://github.com/elastic/kibana/issues/130340
+        ...config,
+        dateFormatTZ: undefined,
+        /*
+         * `filtersInMustClause` puts kql query in `must` instead of `filter` clause and helps us differentiate between kql query and actual filters
+         * ⚠️  Contrary to the name of config, it does not touch filters at all.
+         */
+        filtersInMustClause: true,
+      }
+    );
+
+    if (luceneQuery) {
+      const luceneDslQuery = buildEsQuery(
+        dataViewSpecToViewBase(dataViewSpec),
+        luceneQuery ?? [],
+        [],
+        {
+          ...config,
+          dateFormatTZ: undefined,
+        }
+      );
+      if (operator === 'or') {
+        // move `must` clause to `should`
+        esDslQuery.bool.should = [...esDslQuery.bool.must, ...luceneDslQuery.bool.must];
+        esDslQuery.bool.must = [];
+      } else {
+        esDslQuery.bool.must = [...esDslQuery.bool.must, ...luceneDslQuery.bool.must];
+      }
+    }
+
+    return [JSON.stringify(esDslQuery), undefined];
   } catch (error) {
     return [undefined, error];
   }
@@ -251,13 +290,14 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
 }: CombineQueries): CombinedQuery | null => {
-  const kuery: Query = { query: '', language: kqlQuery.language };
+  const query: Query = { query: '', language: kqlQuery.language };
+  const luceneQuery = kqlQuery.language === 'lucene' ? kqlQuery : undefined;
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
   } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
-      queries: [kuery],
+      queries: [query],
       dataViewSpec,
       filters,
     });
@@ -265,34 +305,49 @@ export const combineQueries = ({
     return {
       filterQuery,
       kqlError,
-      baseKqlQuery: kuery,
+      baseKqlQuery: query,
     };
   }
 
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
+  const dataProviderQueryString = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+  const dataProviderQuery: Query = {
+    query: dataProviderQueryString,
+    language: 'kuery',
+  };
 
-  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
-
-  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
-
-  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
-
-  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
-
-  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
-
-  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
+  let queries = [];
+  if (query.language === 'kuery') {
+    query.query = combineKQLQueryString(
+      operatorKqlQuery,
+      dataProviderQueryString,
+      kqlQuery.query as string
+    );
+    queries.push(query);
+  } else {
+    queries = [dataProviderQuery];
+  }
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config,
-    queries: [kuery],
+    queries,
     dataViewSpec,
     filters,
+    luceneQuery,
+    operator: operatorKqlQuery,
   });
 
   return {
     filterQuery,
     kqlError,
-    baseKqlQuery: kuery,
+    baseKqlQuery: query,
   };
+};
+
+export const combineKQLQueryString = (operator: 'and' | 'or', ...queryStrings: string[]) => {
+  return queryStrings
+    .filter(Boolean)
+    .map((q) => `${q}`)
+    .join(` (${operator}) `)
+    .trim();
 };

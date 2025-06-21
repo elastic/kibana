@@ -5,10 +5,53 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { DataProvider } from '../../../../common/types/timeline';
-import { convertToBuildEsQuery, buildGlobalQuery } from '.';
+import { convertToBuildEsQuery, buildGlobalQuery, combineQueries } from '.';
 import { mockDataViewSpec } from '../../mock';
+
+/** A search bar filter (displayed below the KQL / Lucene search bar ) */
+const filters = [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'exists',
+      key: '_id',
+      value: 'exists',
+    },
+    query: {
+      exists: {
+        field: '_id',
+      },
+    },
+  },
+];
+
+const dataProviders: DataProvider = {
+  and: [],
+  enabled: true,
+  id: 'some-id',
+  name: 'p1',
+  excluded: false,
+  kqlQuery: '',
+  queryMatch: {
+    field: 'host.name',
+    value: ['p1', 'p2'],
+    operator: 'includes',
+    displayField: 'host.name',
+    displayValue: '( p1 OR p2 )',
+  },
+};
+
+const config = {
+  allowLeadingWildcards: true,
+  queryStringOptions: {
+    analyze_wildcard: true,
+  },
+  ignoreFilterIfFieldNotInIndex: false,
+  dateFormatTZ: 'Browser',
+};
 
 describe('convertToBuildEsQuery', () => {
   /**
@@ -29,34 +72,6 @@ describe('convertToBuildEsQuery', () => {
     },
   ];
 
-  /** A search bar filter (displayed below the KQL / Lucene search bar ) */
-  const filters = [
-    {
-      meta: {
-        alias: null,
-        negate: false,
-        disabled: false,
-        type: 'exists',
-        key: '_id',
-        value: 'exists',
-      },
-      query: {
-        exists: {
-          field: '_id',
-        },
-      },
-    },
-  ];
-
-  const config = {
-    allowLeadingWildcards: true,
-    queryStringOptions: {
-      analyze_wildcard: true,
-    },
-    ignoreFilterIfFieldNotInIndex: false,
-    dateFormatTZ: 'Browser',
-  };
-
   it('should, by default, build a query where the `nested` fields syntax includes the `"ignore_unmapped":true` option', () => {
     const [converted, _] = convertToBuildEsQuery({
       config,
@@ -65,7 +80,7 @@ describe('convertToBuildEsQuery', () => {
       filters,
     });
 
-    expect(JSON.parse(converted ?? '')).to.eql({
+    expect(JSON.parse(converted ?? '')).toMatchObject({
       bool: {
         must: [],
         filter: [
@@ -180,7 +195,7 @@ describe('convertToBuildEsQuery', () => {
       filters,
     });
 
-    expect(JSON.parse(converted ?? '')).to.eql({
+    expect(JSON.parse(converted ?? '')).toMatchObject({
       bool: {
         must: [],
         filter: [
@@ -277,6 +292,312 @@ describe('convertToBuildEsQuery', () => {
       },
     });
   });
+
+  it('should combine lucene query, multiple kqlQueries and Filters with AND operator correctly', () => {
+    const luceneQuery = {
+      query: 'host.name: va1 OR val2',
+      language: 'lucene',
+    };
+
+    const kqlQuery1 = {
+      query: 'NOT user.name: "val1"',
+      language: 'kuery',
+    };
+
+    const kqlQuery2 = {
+      query: 'host.name: "val3" OR host.name: "val4"',
+      language: 'kuery',
+    };
+
+    const [converted, _] = convertToBuildEsQuery({
+      config,
+      queries: [kqlQuery1, kqlQuery2],
+      dataViewSpec: mockDataViewSpec,
+      filters,
+      luceneQuery,
+    });
+
+    expect(JSON.parse(converted ?? '')).toMatchObject({
+      bool: {
+        must: [
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'user.name': 'val1',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'host.name': 'val3',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'host.name': 'val4',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            query_string: {
+              query: 'host.name: va1 OR val2',
+              analyze_wildcard: true,
+            },
+          },
+        ],
+        filter: [
+          {
+            exists: {
+              field: '_id',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('should combine lucene query, kqlQuery and Filters with OR operator correctly', () => {
+    const luceneQuery = {
+      query: 'host.name: va1 OR val2',
+      language: 'lucene',
+    };
+
+    const kqlQuery = {
+      query: 'user.name: "val1" OR user.name: "val2"',
+      language: 'kuery',
+    };
+
+    const [converted, _] = convertToBuildEsQuery({
+      config,
+      queries: [kqlQuery],
+      dataViewSpec: mockDataViewSpec,
+      filters,
+      luceneQuery,
+      operator: 'or',
+    });
+
+    expect(JSON.parse(converted ?? '')).toMatchObject({
+      bool: {
+        should: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'user.name': 'val1',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          'user.name': 'val2',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            query_string: {
+              query: 'host.name: va1 OR val2',
+              analyze_wildcard: true,
+            },
+          },
+        ],
+        filter: [
+          {
+            exists: {
+              field: '_id',
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('combineQueries', () => {
+  describe('lucene query', () => {
+    describe('Mode: filter', () => {
+      const kqlMode = 'filter';
+      it('should combine filters + dataProvider and luceneQuery', () => {
+        const luceneQuery = {
+          query: 'host.name: va1 OR val2',
+          language: 'lucene',
+        };
+
+        const combinedQueries = combineQueries({
+          config,
+          dataProviders: [dataProviders],
+          kqlQuery: luceneQuery,
+          kqlMode,
+          filters,
+          dataViewSpec: mockDataViewSpec,
+          browserFields: {},
+        });
+
+        expect(JSON.parse(combinedQueries?.filterQuery as string)).toMatchObject({
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'host.name': 'p1',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'host.name': 'p2',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                query_string: {
+                  query: 'host.name: va1 OR val2',
+                  analyze_wildcard: true,
+                },
+              },
+            ],
+            filter: {
+              bool: {
+                must: [
+                  {
+                    exists: {
+                      field: '_id',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
+    });
+    describe('Mode: `search`', () => {
+      const kqlMode = 'search';
+      it('should combine filters + dataProvider and luceneQuery', () => {
+        const luceneQuery = {
+          query: 'host.name: va1 OR val2',
+          language: 'lucene',
+        };
+
+        const combinedQueries = combineQueries({
+          config,
+          dataProviders: [dataProviders],
+          kqlQuery: luceneQuery,
+          kqlMode,
+          filters: [],
+          dataViewSpec: mockDataViewSpec,
+          browserFields: {},
+        });
+
+        expect(JSON.parse(combinedQueries?.filterQuery as string)).toMatchObject({
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'host.name': 'p1',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'host.name': 'p2',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                query_string: {
+                  query: 'host.name: va1 OR val2',
+                  analyze_wildcard: true,
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
+  });
 });
 
 describe('buildGlobalQuery', () => {
@@ -301,6 +622,6 @@ describe('buildGlobalQuery', () => {
 
     const query = buildGlobalQuery(providers, {});
 
-    expect(query).to.equal('host.name : (p1 OR p2)');
+    expect(query).toBe('host.name : (p1 OR p2)');
   });
 });
