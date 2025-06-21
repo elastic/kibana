@@ -11,6 +11,8 @@ import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
+import * as z4 from 'zod/v4';
+import { createDocument, createSchema } from 'zod-openapi';
 import type { OasConverter } from './oas_converter';
 import {
   getXsrfHeaderForMethod,
@@ -53,6 +55,7 @@ export const processRouter = async ({
     try {
       const pathParams = getPathParameters(route.path);
       const validationSchemas = extractValidationSchemaFromRoute(route);
+      const responseValidationSchema = route.validationSchemas?.response;
       const contentType = extractContentType(route.options?.body);
 
       const parameters: OpenAPIV3.ParameterObject[] = [
@@ -117,6 +120,32 @@ export const processRouter = async ({
         [route.method]: operation,
       };
       assignToPaths(paths, route.path, path);
+
+      // If the route path includes 'zod-openapi', use the z3zod-openapi converter to convert the response
+      if (route.path.includes('zod-openapi')) {
+        if (z3zodOpenapiConverter && responseValidationSchema) {
+          const z3Responses = z3zodOpenapiConverter.convertResponses(responseValidationSchema);
+          Object.entries(z3Responses).forEach(([statusCode, response]) => {
+            operation.responses![statusCode] = {
+              ...operation.responses![statusCode],
+              ...response,
+            };
+          });
+        }
+      }
+
+      // IF route.path includes 'z4', use the z4 converter to convert the response
+      if (route.path.includes('z4')) {
+        if (z4Converter && responseValidationSchema) {
+          const z4Responses = z4Converter.convertResponses(responseValidationSchema);
+          Object.entries(z4Responses).forEach(([statusCode, response]) => {
+            operation.responses![statusCode] = {
+              ...operation.responses![statusCode],
+              ...response,
+            };
+          });
+        }
+      }
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
@@ -162,4 +191,43 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
   }
 
   return responses;
+};
+
+const z4Converter = {
+  convertResponses: (responses: Record<string, any>) => {
+    // Use z4.toJSONSchema for response body if available
+    const convertedResponses: Record<string, any> = {};
+    for (const [statusCode, response] of Object.entries(responses)) {
+      convertedResponses[statusCode] = {
+        description: response.description,
+        content: {
+          'application/json': {
+            schema: response.bodyV4
+              ? z4.toJSONSchema(response.bodyV4)
+              : { type: 'object', properties: {} },
+          },
+        },
+      };
+    }
+    return convertedResponses;
+  },
+};
+
+const z3zodOpenapiConverter = {
+  convertResponses: (responses: Record<string, any>) => {
+    // Use zod-openapi to convert responses
+    const convertedResponses: Record<string, any> = {};
+    for (const [statusCode, response] of Object.entries(responses)) {
+      convertedResponses[statusCode] = {
+        description: response.description,
+        content: {
+          'application/json': {
+            schema: createDocument(response.body),
+          },
+        },
+      };
+    }
+
+    return convertedResponses;
+  },
 };
