@@ -107,6 +107,10 @@ Terminology related to prebuilt rule customization:
 - **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
 - **upgrade to target version**: a process of upgrading a prebuilt rule to its latest version from Elastic. After the upgrade, all customizable field values in the rule will match those of the latest version from Elastic.
 
+Terminology related to prebuilt rule upgrade workflow:
+
+- **upgrade conflict**, **conflicting upgrade**: mostly it means the incoming rule upgrade has changes to the customized fields. Depending on the field type it may be possible to **solve** the conflict (a.k.a. **solvable conflict**, **auto-solving conflict**) otherwise the conflict is **non-solvable** (a.k.a. **unresolved conflict**). In any case the conflict means the prebuilt rule upgrade is unsafe and should be reviewed.
+
 Terminology related to the "rule source" object:
 
 - **Rule source**, also known as `ruleSource` and `rule_source`: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
@@ -115,7 +119,6 @@ Terminology related to the "rule source" object:
 Terminology related to UI and UX:
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-
 
 ## Common assumptions
 
