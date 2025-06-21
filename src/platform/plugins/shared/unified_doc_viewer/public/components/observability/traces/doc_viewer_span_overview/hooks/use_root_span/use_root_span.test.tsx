@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { TransactionProvider, useTransactionContext } from '.';
+import { RootSpanProvider, useRootSpanContext } from '.';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../../plugin', () => ({
@@ -50,24 +50,24 @@ beforeEach(() => {
   lastValueFromMock.mockReset();
 });
 
-describe('useTransaction hook', () => {
+describe('useRootSpan hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TransactionProvider transactionId="test-transaction" indexPattern="test-index">
+    <RootSpanProvider traceId="test-trace" transactionId="transaction-id" indexPattern="test-index">
       {children}
-    </TransactionProvider>
+    </RootSpanProvider>
   );
 
-  it('should start with loading true and transaction as null', async () => {
+  it('should start with loading true and trace as null', async () => {
     lastValueFromMock.mockResolvedValue({});
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should update transaction when data is fetched successfully', async () => {
-    const transactionName = 'Test Transaction';
+  it('should update trace when data is fetched successfully', async () => {
+    const transactionName = 'Test Trace';
     const transactionDuration = 1;
     lastValueFromMock.mockResolvedValue({
       rawResponse: {
@@ -84,50 +84,84 @@ describe('useTransaction hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction?.name).toBe(transactionName);
-    expect(result.current.transaction?.duration).toBe(transactionDuration);
+    expect(result.current.trace?.name).toBe(transactionName);
+    expect(result.current.trace?.duration).toBe(transactionDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors and set transaction to null, and show a toast error', async () => {
-    const errorMessage = 'Search error';
-    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
+  it('should update trace when OTEL data is fetched successfully', async () => {
+    const newWrapper = ({ children }: { children: React.ReactNode }) => (
+      <RootSpanProvider traceId="test-trace" indexPattern="test-index">
+        {children}
+      </RootSpanProvider>
+    );
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const transactionName = 'Test Trace';
+    const transactionDuration = 1;
+    lastValueFromMock.mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                [TRANSACTION_NAME_FIELD]: transactionName,
+                [TRANSACTION_DURATION_FIELD]: transactionDuration,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper: newWrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toBeNull();
+    expect(result.current.trace?.name).toBe(transactionName);
+    expect(result.current.trace?.duration).toBe(transactionDuration);
+    expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle errors and set trace to null, and show a toast error', async () => {
+    const errorMessage = 'Search error';
+    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
+
+    const { result } = renderHook(() => useRootSpanContext(), { wrapper });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.trace).toBeNull();
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'An error occurred while fetching the transaction',
+        title: 'An error occurred while fetching the trace',
         text: errorMessage,
       })
     );
   });
 
-  it('should set transaction to null and stop loading when transactionId is not provided', async () => {
-    const wrapperWithoutTransactionId = ({ children }: { children: React.ReactNode }) => (
-      <TransactionProvider transactionId={undefined} indexPattern="test-index">
+  it('should set trace to null and stop loading when traceId is not provided', async () => {
+    const wrapperWithoutTraceId = ({ children }: { children: React.ReactNode }) => (
+      <RootSpanProvider traceId={undefined} indexPattern="test-index">
         {children}
-      </TransactionProvider>
+      </RootSpanProvider>
     );
 
-    const { result } = renderHook(() => useTransactionContext(), {
-      wrapper: wrapperWithoutTransactionId,
+    const { result } = renderHook(() => useRootSpanContext(), {
+      wrapper: wrapperWithoutTraceId,
     });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toBeNull();
+    expect(result.current.trace).toBeNull();
     expect(lastValueFrom).not.toHaveBeenCalled();
   });
 });
