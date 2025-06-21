@@ -39,7 +39,9 @@ export const useQueryRuleFlyoutState = ({
   onSave,
 }: UseQueryRuleFlyoutStateProps) => {
   const [isFlyoutDirty, setIsFlyoutDirty] = useState<boolean>(false);
-  const { control, getValues, reset, setValue } = useFormContext<QueryRuleEditorForm>();
+  const { control, getValues, reset, setValue, formState, trigger } =
+    useFormContext<QueryRuleEditorForm>();
+
   const {
     fields: criteria,
     remove,
@@ -68,6 +70,16 @@ export const useQueryRuleFlyoutState = ({
     control,
     name: 'actions.ids',
   });
+
+  useEffect(() => {
+    trigger('actions.ids');
+  }, [actionIdsFields, trigger]);
+  useEffect(() => {
+    trigger('actions.docs');
+  }, [actionFields, trigger]);
+  useEffect(() => {
+    trigger('criteria');
+  }, [criteria, trigger]);
 
   const { data: indexNames } = useFetchIndexNames('');
 
@@ -292,6 +304,7 @@ export const useQueryRuleFlyoutState = ({
     criteriaCount,
     documentCount,
     dragEndHandle,
+    formState,
     getValues,
     handleAddCriteria,
     handleSave,

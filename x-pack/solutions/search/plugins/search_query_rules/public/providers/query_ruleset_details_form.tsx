@@ -9,6 +9,7 @@ import React from 'react';
 
 import { FormProvider, useForm } from 'react-hook-form';
 import { QueryRuleEditorForm } from '../types';
+import { queryRulesetDetailFormResolver } from '../utils/query_ruleset_detail_form_resolver';
 
 interface QueryRulesetDetailFormProvider {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ export const QueryRulesetDetailsForm: React.FC<
       type: 'pinned',
       actions: { docs: [], ids: [] },
     },
+    resolver: queryRulesetDetailFormResolver,
+    mode: 'onChange',
+    reValidateMode: 'onChange',
   });
 
   return <FormProvider {...form}> {children}</FormProvider>;

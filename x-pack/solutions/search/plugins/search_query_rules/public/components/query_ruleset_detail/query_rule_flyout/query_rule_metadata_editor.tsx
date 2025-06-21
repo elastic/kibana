@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
+import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiButtonIcon,
   EuiComboBox,
@@ -18,20 +19,23 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
+import { FieldError } from 'react-hook-form';
 
 interface QueryRuleMetadataEditorProps {
   onRemove: () => void;
   criteria: QueryRulesQueryRuleCriteria;
   onChange: (criteria: QueryRulesQueryRuleCriteria) => void;
+  error?: { values?: FieldError; metadata?: FieldError; type?: FieldError };
 }
 
 export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = ({
   onRemove,
   criteria,
   onChange,
+  error,
 }) => {
-  const [metadataField, setMetadataField] = React.useState<string>(criteria.metadata || '');
+  const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="row">
@@ -44,6 +48,8 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                 defaultMessage: 'Metadata field',
               }
             )}
+            isInvalid={!!error?.metadata}
+            error={error?.metadata ? error.metadata.message : undefined}
           >
             <EuiFieldText
               data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
@@ -190,6 +196,8 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       defaultMessage: 'Values',
                     }
                   )}
+                  isInvalid={!!error?.values}
+                  error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
