@@ -15,6 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { OverlayBannersService } from './banners';
 import { FlyoutService } from './flyout';
+import { useManagedFlyout, managedFlyoutService } from './flyout/managed';
 import { ModalService } from './modal';
 
 interface StartDeps {
@@ -34,6 +35,7 @@ export class OverlayService {
 
   public start({ targetDomElement, ...startDeps }: StartDeps): OverlayStart {
     const flyoutElement = document.createElement('div');
+    flyoutElement.setAttribute('data-test-subj', 'overlay-service-flyout');
     targetDomElement.appendChild(flyoutElement);
     const flyouts = this.flyoutService.start({
       targetDomElement: flyoutElement,
@@ -43,14 +45,24 @@ export class OverlayService {
     const banners = this.bannersService.start(startDeps);
 
     const modalElement = document.createElement('div');
+    modalElement.setAttribute('data-test-subj', 'overlay-service-modal');
     targetDomElement.appendChild(modalElement);
     const modals = this.modalService.start({
       targetDomElement: modalElement,
       ...startDeps,
     });
 
+    const managedFlyoutElement = document.createElement('div');
+    managedFlyoutElement.setAttribute('data-test-subj', 'overlay-service-managed-flyout');
+    targetDomElement.appendChild(managedFlyoutElement);
+    managedFlyoutService.start({
+      targetDomElement: managedFlyoutElement,
+      ...startDeps,
+    });
+
     return {
       banners,
+      useManagedFlyout,
       openFlyout: flyouts.open.bind(flyouts),
       openModal: modals.open.bind(modals),
       openConfirm: modals.openConfirm.bind(modals),

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutService } from './flyout_service';
-export { ManagedFlyoutService } from './managed';
+export { ManagedFlyoutService, managedFlyoutService } from './managed_flyout_service';
+export { useManagedFlyout } from './use_managed_flyout';

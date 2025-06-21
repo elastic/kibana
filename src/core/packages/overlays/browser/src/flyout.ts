@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+
 import type { EuiFlyoutProps, EuiFlyoutResizableProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 
@@ -41,3 +43,37 @@ export type OverlayFlyoutOpenOptions = Omit<
   onClose?: (flyout: OverlayRef) => void;
   isResizable?: boolean;
 };
+
+export interface ManagedFlyoutApi {
+  openFlyout: <TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ) => void;
+  nextFlyout: <TProps = any, TChildProps = any>(
+    entry: ManagedFlyoutEntry<TProps>,
+    props?: TProps,
+    childEntry?: ManagedFlyoutEntry<TChildProps>,
+    childProps?: TChildProps
+  ) => void;
+  openChildFlyout: <TProps = any>(entry: ManagedFlyoutEntry<TProps>, props?: TProps) => void;
+  closeFlyout: () => void;
+  isFlyoutOpen: () => boolean;
+  goBack: () => void;
+  canGoBack: () => boolean;
+  closeChildFlyout: () => void;
+}
+
+export type FlyoutPropsEnhanced = Omit<EuiFlyoutProps, 'onClose' | 'hideCloseButton' | 'size'> & {
+  size: number;
+};
+
+type FooterActions = Record<string, React.ReactElement>;
+
+export interface ManagedFlyoutEntry<TProps = any> {
+  flyoutProps?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => FlyoutPropsEnhanced;
+  renderBody: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => React.ReactElement;
+  renderHeader?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => React.ReactElement;
+  footerActions?: (managedFlyoutApi: ManagedFlyoutApi, props: TProps) => FooterActions;
+}
