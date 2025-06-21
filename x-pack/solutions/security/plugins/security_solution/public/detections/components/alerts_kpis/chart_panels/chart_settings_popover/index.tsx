@@ -9,7 +9,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { BUTTON_CLASS } from '../inspect';
+import { BUTTON_CLASS } from '../../../../../common/components/inspect';
 import * as i18n from './translations';
 
 interface Props {
