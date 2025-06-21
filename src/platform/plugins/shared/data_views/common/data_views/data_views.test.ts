@@ -434,6 +434,25 @@ describe('IndexPatterns', () => {
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
   });
 
+  test('caches fields toSpec calls', async () => {
+    const indexPatternSpec: DataViewSpec = {
+      runtimeFieldMap: {
+        a: {
+          type: 'keyword',
+          script: {
+            source: "emit('a');",
+          },
+        },
+      },
+      title: 'test',
+    };
+
+    const indexPattern = await indexPatterns.create(indexPatternSpec);
+    const firstSpec = indexPattern.fields.toSpec();
+    const secondSpec = indexPattern.fields.toSpec();
+    expect(firstSpec).toEqual(secondSpec);
+  });
+
   test('deletes the index pattern', async () => {
     const id = '1';
     const indexPattern = await indexPatterns.get(id);
@@ -935,6 +954,26 @@ describe('IndexPatterns', () => {
       indexPatterns.refreshFields(indexPattern);
       // @ts-expect-error
       expect(apiClient.getFieldsForWildcard.mock.calls[0][0].allowNoIndex).toBe(true);
+    });
+
+    test('refreshFields should return a new fields spec instance', async () => {
+      const indexPatternSpec: DataViewSpec = {
+        runtimeFieldMap: {
+          a: {
+            type: 'keyword',
+            script: {
+              source: "emit('a');",
+            },
+          },
+        },
+        title: 'test',
+      };
+
+      const indexPattern = await indexPatterns.create(indexPatternSpec);
+      const originalFieldsSpec = indexPattern.fields.toSpec();
+
+      await indexPatterns.refreshFields(indexPattern);
+      expect(indexPattern.fields.toSpec()).not.toBe(originalFieldsSpec);
     });
   });
 });

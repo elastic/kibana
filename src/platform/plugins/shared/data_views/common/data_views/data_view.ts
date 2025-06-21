@@ -340,6 +340,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
     if (existingField && existingField.isMapped) {
       // mapped field, remove runtimeField def
       existingField.runtimeField = undefined;
+      this.fields.clearSpecCache();
     } else {
       Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
         this.fields.remove(field);

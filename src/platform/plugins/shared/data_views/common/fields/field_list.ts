@@ -28,6 +28,12 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
    * @returns a new data view field instance
    */
   create(field: FieldSpec): DataViewField;
+
+  /**
+   * Clear the cached field spec map.
+   * This is used to avoid recalculating the spec every time `toSpec` is called.
+   */
+  clearSpecCache(): void;
   /**
    * Add field to field list.
    * @param field field spec to add field to list
@@ -97,6 +103,16 @@ export const fieldList = (
     private removeByGroup = (field: DataViewField) =>
       this.groups.get(field.type)?.delete(field.name);
 
+    /**
+     * @private
+     * @description
+     * This cache is used to store the result of the `toSpec` method, which converts the field list
+     * to a map of field specs by name. It is initialized to null and is cleared every time a field
+     * is added, removed, or updated. This is done to avoid recalculating the spec every time `toSpec`
+     * is called, which can be expensive if the field list is large.
+     */
+    private cachedFieldSpec: DataViewFieldMap | null = null;
+
     constructor() {
       super();
       specs.map((field) => this.add(field));
@@ -112,11 +128,16 @@ export const fieldList = (
       return new DataViewField({ ...field, shortDotsEnable });
     };
 
+    public clearSpecCache = () => {
+      this.cachedFieldSpec = null;
+    };
+
     public readonly add = (field: FieldSpec): DataViewField => {
       const newField = this.create(field);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
+      this.clearSpecCache();
       return newField;
     };
 
@@ -125,7 +146,9 @@ export const fieldList = (
       this.byName.delete(field.name);
 
       const fieldIndex = findIndex(this, { name: field.name });
+      if (fieldIndex === -1) return;
       this.splice(fieldIndex, 1);
+      this.clearSpecCache();
     };
 
     public readonly update = (field: FieldSpec) => {
@@ -135,12 +158,14 @@ export const fieldList = (
       this.setByName(newField);
       this.removeByGroup(newField);
       this.setByGroup(newField);
+      this.clearSpecCache();
     };
 
     public readonly removeAll = () => {
       this.length = 0;
       this.byName.clear();
       this.groups.clear();
+      this.clearSpecCache();
     };
 
     public readonly replaceAll = (spcs: FieldSpec[] = []) => {
@@ -153,12 +178,17 @@ export const fieldList = (
     }: {
       getFormatterForField?: DataView['getFormatterForField'];
     } = {}) {
-      return {
+      if (this.cachedFieldSpec) {
+        return this.cachedFieldSpec;
+      }
+      const toSpecResult = {
         ...this.reduce<DataViewFieldMap>((collector, field) => {
           collector[field.name] = field.toSpec({ getFormatterForField });
           return collector;
         }, {}),
       };
+      this.cachedFieldSpec = toSpecResult;
+      return toSpecResult;
     }
   }
 
