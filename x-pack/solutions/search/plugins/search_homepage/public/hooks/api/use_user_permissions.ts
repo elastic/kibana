@@ -11,6 +11,7 @@ import type { UserStartPrivilegesResponse } from '../../../common/types';
 import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
+import { GET_USER_PRIVILEGES_ROUTE } from '../../../common/routes';
 
 export const useUserPrivilegesQuery = (indexName: string) => {
   const { http } = useKibana().services;
