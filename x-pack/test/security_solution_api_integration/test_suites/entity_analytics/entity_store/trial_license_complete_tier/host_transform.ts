@@ -250,9 +250,9 @@ async function createDocumentsAndTriggerTransform(
 }
 
 async function enableEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const log = providerContext.getService('log');
   const supertest = providerContext.getService('supertest');
   const retry = providerContext.getService('retry');
-  const utils = EntityStoreUtils(providerContext.getService);
 
   const RETRIES = 5;
   let success: boolean = false;
@@ -270,8 +270,8 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
         .get('/api/entity_store/status')
         .query({ include_components: true })
         .expect(200);
-      if (body.status == 'error') {
-        console.log(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
+      if (body.status === 'error') {
+        log.error(`Expected body.status to be 'running', got 'error': ${JSON.stringify(body)}`);
         success = false;
         return true;
       }
@@ -283,7 +283,7 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     if (success) {
       break;
     } else {
-      console.log("Retrying Entity Store setup...");
+      log.info(`Retrying Entity Store setup...`);
       await cleanUpEntityStore(providerContext);
     }
   }
@@ -292,6 +292,7 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
 }
 
 async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
+  const log = providerContext.getService('log');
   const es = providerContext.getService('es');
   const utils = EntityStoreUtils(providerContext.getService);
   const attempts = 5;
@@ -299,13 +300,13 @@ async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<
 
   await utils.cleanEngines();
   for (const kind of ['host', 'user', 'service', 'generic']) {
-    const name : string = `entity_store_field_retention_${kind}_default_v1.0.0`;
+    const name: string = `entity_store_field_retention_${kind}_default_v1.0.0`;
     for (let currentAttempt = 0; currentAttempt < attempts; currentAttempt++) {
       try {
         await es.enrich.deletePolicy({ name }, { ignore: [404] });
-        break
+        break;
       } catch (e) {
-        console.log(`Error deleting policy ${name}: ${e.message} after ${currentAttempt} tries`);
+        log.error(`Error deleting policy ${name}: ${e.message} after ${currentAttempt} tries`);
       }
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
