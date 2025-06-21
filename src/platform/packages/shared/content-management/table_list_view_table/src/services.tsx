@@ -134,6 +134,9 @@ export interface TableListViewKibanaDependencies {
     userProfile: {
       bulkGet: UserProfileServiceStart['bulkGet'];
     };
+    rendering: {
+      addContext: (element: React.ReactNode) => React.ReactElement;
+    };
   };
   /**
    * The public API from the savedObjectsTaggingOss plugin.
@@ -201,7 +204,7 @@ export const TableListViewKibanaProvider: FC<
   PropsWithChildren<TableListViewKibanaDependencies>
 > = ({ children, ...services }) => {
   const { core, savedObjectsTagging, FormattedRelative } = services;
-  const { application, http, notifications, ...startServices } = core;
+  const { application, notifications, rendering } = core;
 
   const searchQueryParser = useMemo(() => {
     if (savedObjectsTagging) {
@@ -265,13 +268,13 @@ export const TableListViewKibanaProvider: FC<
             <FavoritesContextProvider
               favoritesClient={services.favorites}
               notifyError={(title, text) => {
-                notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
+                notifications.toasts.addDanger({ title: toMountPoint(title, rendering), text });
               }}
             >
               <TableListViewProvider
                 notifyError={(title, text) => {
                   notifications.toasts.addDanger({
-                    title: toMountPoint(title, startServices),
+                    title: toMountPoint(title, rendering),
                     text,
                   });
                 }}
