@@ -259,7 +259,7 @@ export class DiscoverPlugin
 
     const getDiscoverServicesInternal = async () => {
       const ebtManager = await getEmptyEbtManager();
-      const { profilesManager } = await this.createProfileServices(ebtManager);
+      const { profilesManager } = await this.createProfileServices();
       return this.getDiscoverServices({ core, plugins, profilesManager, ebtManager });
     };
 
@@ -277,7 +277,7 @@ export class DiscoverPlugin
     }
   }
 
-  private async createProfileServices(ebtManager: DiscoverEBTManager) {
+  private async createProfileServices() {
     const {
       RootProfileService,
       DataSourceProfileService,
@@ -291,8 +291,7 @@ export class DiscoverPlugin
     const profilesManager = new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
-      documentProfileService,
-      ebtManager
+      documentProfileService
     );
 
     return {
@@ -321,7 +320,7 @@ export class DiscoverPlugin
       dataSourceProfileService,
       documentProfileService,
       profilesManager,
-    } = await this.createProfileServices(ebtManager);
+    } = await this.createProfileServices();
     const services = await this.getDiscoverServices({
       core,
       plugins,

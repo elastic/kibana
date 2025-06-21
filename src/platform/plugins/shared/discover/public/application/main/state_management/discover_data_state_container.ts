@@ -160,7 +160,7 @@ export function getDataStateContainer({
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications, ebtManager } = services;
+  const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<void>(1);
@@ -248,11 +248,10 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
-          const { scopedProfilesManager$, currentDataView$ } = selectTabRuntimeState(
-            runtimeStateManager,
-            currentTabId
-          );
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
+            selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
+          const scopedEbtManager = scopedEbtManager$.getValue();
 
           const searchSessionId =
             (options.fetchMore && dataRequestParams.searchSessionId) ||
@@ -268,6 +267,7 @@ export function getDataStateContainer({
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
+            scopedEbtManager,
           };
 
           abortController?.abort();
@@ -275,7 +275,7 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreTracker = ebtManager.trackPerformanceEvent('discoverFetchMore');
+            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
 
             await fetchMoreDocuments({
               ...commonFetchParams,
@@ -321,7 +321,7 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllTracker = ebtManager.trackPerformanceEvent('discoverFetchAll');
+          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
 
           await fetchAll({
             ...commonFetchParams,

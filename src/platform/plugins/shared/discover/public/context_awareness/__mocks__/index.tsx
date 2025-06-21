@@ -169,12 +169,11 @@ export const createContextAwarenessMocks = ({
     documentProfileServiceMock.registerProvider(documentProfileProviderMock);
   }
 
-  const ebtManagerMock = new DiscoverEBTManager();
+  const scopedEbtManagerMock = new DiscoverEBTManager().createScopedEBTManager();
   const profilesManagerMock = new ProfilesManager(
     rootProfileServiceMock,
     dataSourceProfileServiceMock,
-    documentProfileServiceMock,
-    ebtManagerMock
+    documentProfileServiceMock
   );
 
   const profileProviderServices = createProfileProviderServicesMock();
@@ -190,7 +189,7 @@ export const createContextAwarenessMocks = ({
     contextRecordMock2,
     profilesManagerMock,
     profileProviderServices,
-    ebtManagerMock,
+    scopedEbtManagerMock,
   };
 };
 

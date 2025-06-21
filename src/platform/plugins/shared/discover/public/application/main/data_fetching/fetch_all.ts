@@ -36,6 +36,7 @@ import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
+import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -48,6 +49,7 @@ export interface CommonFetchParams {
   searchSessionId: string;
   services: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
+  scopedEbtManager: ScopedDiscoverEBTManager;
 }
 
 /**
@@ -71,13 +73,14 @@ export function fetchAll(
     appStateContainer,
     services,
     scopedProfilesManager,
+    scopedEbtManager,
     inspectorAdapters,
     savedSearch,
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
   } = params;
-  const { data, expressions, ebtManager } = services;
+  const { data, expressions } = services;
 
   try {
     const searchSource = savedSearch.searchSource.createChild();
@@ -122,7 +125,7 @@ export function fetchAll(
         })
       : fetchDocuments(searchSource, params);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
-    const fetchAllRequestOnlyTracker = ebtManager.trackPerformanceEvent(
+    const fetchAllRequestOnlyTracker = scopedEbtManager.trackPerformanceEvent(
       'discoverFetchAllRequestsOnly'
     );
 

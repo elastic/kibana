@@ -7,20 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './profiles';
-export { getMergedAccessor } from './composable_profile';
-export {
-  ProfilesManager,
-  ScopedProfilesManager,
-  ContextualProfileLevel,
-  type GetProfilesOptions,
-} from './profiles_manager';
-export {
-  useProfileAccessor,
-  useRootProfile,
-  useAdditionalCellActions,
-  useDefaultAdHocDataViews,
-  BaseAppWrapper,
-  type RootProfileState,
-} from './hooks';
+export { ScopedServicesProvider, useScopedServices } from './scoped_services_provider';
