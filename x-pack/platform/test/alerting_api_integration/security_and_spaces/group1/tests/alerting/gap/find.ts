@@ -18,6 +18,7 @@ import {
 export default function findGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('find gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -213,6 +214,7 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
             ];
 
             for (const testCase of testCases) {
+              log.info(`Testing: ${testCase.description}`);
               const response = await supertestWithoutAuth
                 .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/gaps/_find`)
                 .set('kbn-xsrf', 'foo')

@@ -54,6 +54,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
+  const log = getService('log');
 
   const alertsAsDataIndex = '.alerts-security.alerts-space1';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
@@ -242,7 +243,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(events[2]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[2].run_at
       );
-      expect(events[0]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
+      expect(events[2]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
         scheduleResult[0].schedule[2].interval
       );
 
@@ -250,7 +251,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       expect(events[3]?.kibana?.alert?.rule?.execution?.backfill?.start).to.eql(
         scheduleResult[0].schedule[3].run_at
       );
-      expect(events[0]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
+      expect(events[3]?.kibana?.alert?.rule?.execution?.backfill?.interval).to.eql(
         scheduleResult[0].schedule[3].interval
       );
 
@@ -362,7 +363,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             rule_type_id: 'test.patternFiringAutoRecoverFalse',
             params: {
               pattern: {
-                instance: ['timeout'],
+                instance: ['timeout', 'timeout', 'timeout', 'timeout', 'timeout'],
               },
             },
             schedule: { interval: '12h' },
@@ -526,6 +527,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .expect(200);
 
       const scheduleResult = response2.body;
+      log.info(`Scheduled backfill result: ${JSON.stringify(scheduleResult)}`);
 
       expect(scheduleResult.length).to.eql(1);
       expect(scheduleResult[0].schedule.length).to.eql(4);
@@ -559,6 +561,8 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         spaceId,
         new Map([['execute-backfill', { equal: 4 }]])
       );
+
+      log.info(`Event log events: ${JSON.stringify(events)}`);
 
       // each event log event should have these fields
       for (const e of events) {
