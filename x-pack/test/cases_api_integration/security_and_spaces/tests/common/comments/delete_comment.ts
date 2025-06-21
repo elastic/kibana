@@ -302,6 +302,9 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
         });
 
+        expect(resolvedCase.case.totalAlerts).to.eql(1);
+        expect(resolvedCase.case.totalComment).to.eql(2);
+
         const caseComments = resolvedCase.case.comments!;
 
         const userComment = caseComments?.find((comment) => comment.type === 'user');
@@ -325,7 +328,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const theCase = res.body.hits.hits[0]._source?.cases!;
 
-        // We added 3 attachments, 2 user and 1 alert and we deleted 1 of each
         expect(theCase.total_alerts).to.eql(0);
         expect(theCase.total_comments).to.eql(1);
       });

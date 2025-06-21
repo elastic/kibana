@@ -1929,7 +1929,9 @@ describe('update', () => {
         saved_objects: mockCases,
       });
 
-      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it('calculates metrics correctly', async () => {
