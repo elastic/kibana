@@ -57,8 +57,8 @@ export const AISearchWorkflow = ({ capability }: { capability: WorkflowProps }) 
 
           <EuiFlexGroup direction="column" gutterSize="xs">
             {capability.featureBullets.map((item: string, index: number) => (
-              <EuiFlexItem grow={false}>
-                <WorkflowFeatureBullet feature={item} key={index} />
+              <EuiFlexItem grow={false} key={index}>
+                <WorkflowFeatureBullet feature={item} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
