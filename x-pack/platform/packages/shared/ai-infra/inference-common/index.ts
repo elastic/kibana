@@ -26,6 +26,7 @@ export {
   type ToolCallsOf,
   type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -128,18 +129,13 @@ export {
   elasticModelIds,
 } from './src/inference_endpoints';
 
-export type {
-  InferenceTracingExportConfig,
-  InferenceTracingLangfuseExportConfig,
-  InferenceTracingPhoenixExportConfig,
-} from './src/tracing';
-
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 
 export {
   type BoundPromptAPI,
   type Prompt,
   type PromptAPI,
+  type PromptAPIResponse,
   type PromptCompositeResponse,
   type PromptFactory,
   type PromptOptions,

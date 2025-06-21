@@ -32,6 +32,7 @@ function determineCachePrefix() {
     js: babel.loadOptions(getBabelOptions(Path.resolve('foo.js'))),
     ts: babel.loadOptions(getBabelOptions(Path.resolve('foo.ts'))),
     tsx: babel.loadOptions(getBabelOptions(Path.resolve('foo.tsx'))),
+    text: babel.loadOptions(getBabelOptions(Path.resolve('foo.text'))),
   });
 
   return Crypto.createHash('sha256').update(json).digest('hex').slice(0, 10);

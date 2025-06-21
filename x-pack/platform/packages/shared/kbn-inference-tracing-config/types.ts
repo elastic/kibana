@@ -7,8 +7,6 @@
 
 /**
  * Configuration schema for the Langfuse exporter.
- *
- * @internal
  */
 export interface InferenceTracingLangfuseExportConfig {
   /**
@@ -29,10 +27,9 @@ export interface InferenceTracingLangfuseExportConfig {
    */
   scheduled_delay: number;
 }
+
 /**
  * Configuration schema for the Phoenix exporter.
- *
- * @internal
  */
 export interface InferenceTracingPhoenixExportConfig {
   /**
@@ -64,11 +61,6 @@ export interface InferenceTracingPhoenixExportConfig {
  *
  * @internal
  */
-export interface InferenceTracingExportConfig {
-  /**
-   * Defines to which system inference spans will be exported.
-   * Should be one of {@link InferenceTracingLangfuseExportConfig}
-   * or {@link InferenceTracingPhoenixExportConfig}
-   */
-  exporter?: InferenceTracingLangfuseExportConfig | InferenceTracingPhoenixExportConfig;
-}
+export type InferenceTracingExportConfig =
+  | { langfuse: InferenceTracingLangfuseExportConfig }
+  | { phoenix: InferenceTracingPhoenixExportConfig };
