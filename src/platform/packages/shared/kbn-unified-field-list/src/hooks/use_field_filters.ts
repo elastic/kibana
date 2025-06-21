@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { useRestorableStateInTabContent } from '@kbn/unified-tabs';
 import { type FieldTypeKnown, getFieldIconType, fieldNameWildcardMatcher } from '@kbn/field-utils';
 import { type FieldListFiltersProps } from '../components/field_list_filters';
-import { type FieldListItem, GetCustomFieldType } from '../types';
+import type { FieldListItem } from '../types';
+import { GetCustomFieldType } from '../types';
 
 const htmlId = htmlIdGenerator('fieldList');
 
@@ -52,8 +54,10 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   services,
 }: FieldFiltersParams<T>): FieldFiltersResult<T> {
-  const [selectedFieldTypes, setSelectedFieldTypes] = useState<FieldTypeKnown[]>([]);
-  const [nameFilter, setNameFilter] = useState<string>('');
+  const [{ nameFilter, selectedFieldTypes }, setState] = useRestorableStateInTabContent<{
+    nameFilter: string;
+    selectedFieldTypes: FieldTypeKnown[];
+  }>('unifiedFieldList.fieldFilters', getDefaultState);
   const screenReaderDescriptionId = useMemo(() => htmlId(), []);
   const docLinks = services.core.docLinks;
 
@@ -67,9 +71,11 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
         allFields,
         getCustomFieldType,
         onSupportedFieldFilter,
-        onChangeFieldTypes: setSelectedFieldTypes,
+        onChangeFieldTypes: (value) =>
+          setState((prevState) => ({ ...prevState, selectedFieldTypes: value })),
         nameFilter,
-        onChangeNameFilter: setNameFilter,
+        onChangeNameFilter: (value) =>
+          setState((prevState) => ({ ...prevState, nameFilter: value })),
         screenReaderDescriptionId,
       },
       onFilterField:
@@ -91,9 +97,15 @@ export function useFieldFilters<T extends FieldListItem = DataViewField>({
     allFields,
     getCustomFieldType,
     onSupportedFieldFilter,
-    setSelectedFieldTypes,
     nameFilter,
-    setNameFilter,
     screenReaderDescriptionId,
+    setState,
   ]);
+}
+
+function getDefaultState() {
+  return {
+    nameFilter: '',
+    selectedFieldTypes: [],
+  };
 }

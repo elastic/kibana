@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { BehaviorSubject } from 'rxjs';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
@@ -25,6 +26,11 @@ import {
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
+import {
+  TabContentContext,
+  type TabRestorableStatePerComponent,
+  useTabContentContextValueMemo,
+} from '../tab_content_context';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   items: TabItem[];
@@ -36,6 +42,9 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
+  restorableStatePerTabContentComponent$?: BehaviorSubject<
+    TabRestorableStatePerComponent | undefined
+  >;
 }
 
 export interface TabbedContentState {
@@ -53,7 +62,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   createItem,
   onChanged,
   getPreviewData,
+  restorableStatePerTabContentComponent$,
 }) => {
+  const tabContentContextValue = useTabContentContextValueMemo(
+    restorableStatePerTabContentComponent$
+  );
   const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
   const state = useMemo(
@@ -197,16 +210,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           getPreviewData={getPreviewData}
         />
       </EuiFlexItem>
-      {selectedItem ? (
-        <EuiFlexItem
-          data-test-subj="unifiedTabs_selectedTabContent"
-          role="tabpanel"
-          id={tabContentId}
-          aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
-        >
-          {renderContent(selectedItem)}
-        </EuiFlexItem>
-      ) : null}
+      <TabContentContext.Provider value={tabContentContextValue}>
+        {selectedItem ? (
+          <EuiFlexItem
+            data-test-subj="unifiedTabs_selectedTabContent"
+            role="tabpanel"
+            id={tabContentId}
+            aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
+          >
+            {renderContent(selectedItem)}
+          </EuiFlexItem>
+        ) : null}
+      </TabContentContext.Provider>
     </EuiFlexGroup>
   );
 };

@@ -12,6 +12,7 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo } fro
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
+import type { TabRestorableStatePerComponent } from '@kbn/unified-tabs';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -26,6 +27,7 @@ interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
+  restorableStatePerTabContentComponent?: TabRestorableStatePerComponent;
   scopedProfilesManager: ScopedProfilesManager;
   currentDataView: DataView;
 }
@@ -57,6 +59,9 @@ export const createTabRuntimeState = ({
   unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
     undefined
   ),
+  restorableStatePerTabContentComponent$: new BehaviorSubject<
+    TabRestorableStatePerComponent | undefined
+  >(undefined),
   scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
     profilesManager.createScopedProfilesManager()
   ),

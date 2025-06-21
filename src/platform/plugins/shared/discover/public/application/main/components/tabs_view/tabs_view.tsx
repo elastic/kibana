@@ -28,6 +28,8 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const restorableStatePerTabContentComponent$ =
+    props.runtimeStateManager.tabs.byId[currentTabId].restorableStatePerTabContentComponent$;
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
     (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
@@ -53,6 +55,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       createItem={createItem}
       getPreviewData={getPreviewData}
       renderContent={renderContent}
+      restorableStatePerTabContentComponent$={restorableStatePerTabContentComponent$}
       onChanged={onChanged}
     />
   );

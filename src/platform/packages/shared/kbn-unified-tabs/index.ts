@@ -13,4 +13,10 @@ export {
   TabbedContent as UnifiedTabs,
   type TabbedContentProps as UnifiedTabsProps,
 } from './src/components/tabbed_content';
+export {
+  useRestorableStateInTabContent,
+  createRestorableStatePerTabContentComponent,
+  type TabRestorableStatePerComponent,
+  type TabRestorableStatePerComponent$,
+} from './src/components/tab_content_context';
 export { useNewTabProps } from './src/hooks/use_new_tab_props';
