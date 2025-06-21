@@ -226,6 +226,7 @@ export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
   context: `default`,
   mappings: { fieldMap: {} },
   shouldWrite: true,
+  dangerouslyCreateAlertsInAllSpaces: true,
 };
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
@@ -272,6 +273,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
    * of this type runs.
    */
   isSpaceAware?: boolean;
+
+  /**
+   * Optional flag to indicate that these alerts should not be space aware. When set
+   * to true, alerts for this rule type will be created with the `*` space id.
+   */
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 
   /**
    * Optional secondary alias to use. This alias should not include the namespace.
@@ -362,6 +369,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceState,
   AlertInstanceContext
 >;
+
+export type UntypedRuleTypeAlerts = IRuleTypeAlerts<RuleAlertData>;
 
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;

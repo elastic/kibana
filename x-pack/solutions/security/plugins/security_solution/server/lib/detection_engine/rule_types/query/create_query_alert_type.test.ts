@@ -34,6 +34,11 @@ jest.mock('../utils/utils', () => ({
   checkForFrozenIndices: jest.fn(async () => []),
 }));
 
+jest.mock('@kbn/alerting-plugin/server', () => ({
+  ...jest.requireActual('@kbn/alerting-plugin/server'),
+  shouldCreateAlertsInAllSpaces: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('../utils/get_list_client', () => ({
   getListClient: jest.fn().mockReturnValue({
     listClient: jest.fn(),
