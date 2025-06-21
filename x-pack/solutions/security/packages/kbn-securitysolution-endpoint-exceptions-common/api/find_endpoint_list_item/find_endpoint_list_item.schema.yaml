@@ -9,7 +9,7 @@ paths:
       x-codegen-enabled: true
       operationId: FindEndpointListItems
       summary: Get endpoint exception list items
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items.
       parameters:
         - name: filter
           in: query
