@@ -21,8 +21,10 @@ const {
   GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
 } = testSubjectIds;
@@ -88,6 +90,12 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
+  async showEntityDetails(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
   async hideActionsOnEntity(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     const btnText = await this.testSubjects.getVisibleText(
@@ -107,6 +115,12 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEventsOfSameAction(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
     await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
+    await this.pageObjects.header.waitUntilLoadingHasFinished();
+  }
+
+  async showEventOrAlertDetails(nodeId: string): Promise<void> {
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 

@@ -268,7 +268,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('color of event of failed event should be warning', async () => {
+      it('color of event of failed event should be primary', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
@@ -296,7 +296,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(node).to.have.property('color');
 
           expect(node.color).equal(
-            node.shape === 'label' ? 'warning' : 'primary',
+            'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });
