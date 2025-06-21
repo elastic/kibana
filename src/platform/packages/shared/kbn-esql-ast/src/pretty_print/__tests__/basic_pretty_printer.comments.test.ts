@@ -109,10 +109,14 @@ describe('list expressions', () => {
   describe('tuple list', () => {
     test('can print comments around the tuple', () => {
       assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+      assertPrint('FROM a | WHERE b NOT IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
     });
 
     test('can print comments inside the tuple', () => {
       assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b NOT IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)'
+      );
       assertPrint(
         'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
       );
