@@ -17,6 +17,7 @@ import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
   DEFAULT_FLEET_SERVER_HOST_ID,
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../constants';
 
@@ -92,7 +93,10 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
       } as any;
     }
 
-    if (type === PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
+    if (
+      type === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE ||
+      type === PACKAGE_POLICY_SAVED_OBJECT_TYPE
+    ) {
       return {
         saved_objects: [
           {

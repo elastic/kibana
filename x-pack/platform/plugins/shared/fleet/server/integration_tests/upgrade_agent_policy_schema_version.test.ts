@@ -23,13 +23,11 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-} from '../constants';
+import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '../constants';
 import { upgradeAgentPolicySchemaVersion } from '../services/setup/upgrade_agent_policy_schema_version';
 import { AGENT_POLICY_INDEX } from '../../common';
 import { agentPolicyService } from '../services';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
 
 import { useDockerRegistry, waitForFleetSetup } from './helpers';
 
@@ -51,6 +49,7 @@ const fakeRequest = {
 describe('upgrade agent policy schema version', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
+  let agentPolicyType: string;
 
   const registryUrl = useDockerRegistry();
 
@@ -119,6 +118,7 @@ describe('upgrade agent policy schema version', () => {
   // Share the same servers for all the test to make test a lot faster (but test are not isolated anymore)
   beforeAll(async () => {
     await startServers();
+    agentPolicyType = await getAgentPolicySavedObjectType();
   });
 
   afterAll(async () => {
@@ -144,7 +144,7 @@ describe('upgrade agent policy schema version', () => {
       await soClient.bulkCreate([
         // up-to-date schema_version
         {
-          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: agentPolicyType,
           id: uuidv4(),
           attributes: {
             schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -153,7 +153,7 @@ describe('upgrade agent policy schema version', () => {
         },
         // out-of-date schema_version
         {
-          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: agentPolicyType,
           id: uuidv4(),
           attributes: {
             schema_version: '0.0.1',
@@ -162,7 +162,7 @@ describe('upgrade agent policy schema version', () => {
         },
         // missing schema_version
         {
-          type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+          type: agentPolicyType,
           id: uuidv4(),
           attributes: {
             revision: 1,
@@ -173,7 +173,7 @@ describe('upgrade agent policy schema version', () => {
       await upgradeAgentPolicySchemaVersion(soClient);
 
       const policies = await agentPolicyService.list(soClient, {
-        kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.schema_version:${FLEET_AGENT_POLICIES_SCHEMA_VERSION}`,
+        kuery: `${agentPolicyType}.schema_version:${FLEET_AGENT_POLICIES_SCHEMA_VERSION}`,
       });
       // all 3 should be up-to-date after upgrade
       expect(policies.total).toBe(3);

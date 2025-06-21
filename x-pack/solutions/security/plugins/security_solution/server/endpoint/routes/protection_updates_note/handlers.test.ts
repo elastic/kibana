@@ -20,6 +20,7 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getProtectionUpdatesNoteHandler, postProtectionUpdatesNoteHandler } from './handlers';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import type { EndpointAppContext } from '../../types';
@@ -121,7 +122,9 @@ describe('test protection updates note handler', () => {
         'policy-settings-protection-updates-note',
         { note: 'note' },
         {
-          references: [{ id: undefined, name: 'package_policy', type: 'ingest-package-policies' }],
+          references: [
+            { id: undefined, name: 'package_policy', type: PACKAGE_POLICY_SAVED_OBJECT_TYPE },
+          ],
           refresh: 'wait_for',
         }
       );

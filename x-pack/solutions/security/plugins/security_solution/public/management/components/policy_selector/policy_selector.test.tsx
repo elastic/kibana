@@ -13,7 +13,10 @@ import { allFleetHttpMocks } from '../../mocks';
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import {
+  packagePolicyRouteService,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getPolicyDetailPath } from '../../common/routing';
@@ -157,8 +160,7 @@ describe('PolicySelector component', () => {
         packagePolicyRouteService.getListPath(),
         {
           query: {
-            kuery:
-              '(ingest-package-policies.package.name: endpoint) AND ((ingest-package-policies.name:*foo*) OR (ingest-package-policies.description:*foo*))',
+            kuery: `(${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint) AND ((${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:*foo*) OR (${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.description:*foo*))`,
             page: 1,
             perPage: 20,
             sortField: 'name',
@@ -400,7 +402,7 @@ describe('PolicySelector component', () => {
       packagePolicyRouteService.getListPath(),
       {
         query: {
-          kuery: 'ingest-package-policies.package.name: endpoint',
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
           page: 1,
           perPage: 20,
           sortField: 'name',

@@ -19,7 +19,11 @@ import {
 
 import { inputsFormat } from '../../../common/constants';
 
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICIES_MAPPINGS } from '../../constants';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICIES_MAPPINGS,
+} from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
@@ -37,7 +41,7 @@ export const GetPackagePoliciesRequestSchema = {
         validate: (value: string) => {
           const validationObj = validateKuery(
             value,
-            [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+            [LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE],
             PACKAGE_POLICIES_MAPPINGS,
             true
           );
