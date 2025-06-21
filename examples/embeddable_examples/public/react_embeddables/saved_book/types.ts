@@ -14,20 +14,19 @@ import {
   PublishesUnsavedChanges,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import { BookItem } from '../../../common/book/content_management/schema';
 
-export interface BookAttributes {
-  bookTitle: string;
-  authorName: string;
-  numberOfPages: number;
-  bookSynopsis?: string;
+export { type BookItem };
+
+export interface BookSavedObject {
+  id: string;
+  attributes: BookItem;
 }
 
-export interface BookByValueSerializedState {
-  attributes: BookAttributes;
-}
+export type BookByValueSerializedState = BookItem;
 
 export interface BookByReferenceSerializedState {
-  savedBookId: string;
+  savedObjectId: string;
 }
 
 export interface HasSavedBookId {
@@ -40,10 +39,9 @@ export type BookSerializedState = SerializedTitles &
 /**
  * Book runtime state is a flattened version of all possible state keys.
  */
-export interface BookRuntimeState
-  extends BookAttributes,
-    Partial<BookByReferenceSerializedState>,
-    SerializedTitles {}
+export type BookRuntimeState = BookItem &
+  Partial<BookByReferenceSerializedState> &
+  SerializedTitles;
 
 export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &

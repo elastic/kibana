@@ -25,6 +25,7 @@ import {
   apiPublishesDataLoading,
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
 import { PageApi, PageState } from './types';
@@ -39,10 +40,15 @@ function deserializePanels(panels: PageState['panels']) {
   return { layout, childState };
 }
 
-export function getPageApi() {
+const defaultState = {
+  panels: [],
+  timeRange: { from: new Date().toISOString(), to: new Date().toISOString() },
+};
+
+export function getPageApi(embeddable: EmbeddableStart) {
   const initialUnsavedState = unsavedChangesSessionStorage.load();
-  const initialState = lastSavedStateSessionStorage.load();
-  const lastSavedState$ = new BehaviorSubject<PageState>(initialState);
+
+  const lastSavedState$ = new BehaviorSubject<PageState>(defaultState);
   const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
   const { layout: initialLayout, childState: initialChildState } = deserializePanels(
     initialUnsavedState?.panels ?? lastSavedState$.value.panels
@@ -52,8 +58,14 @@ export function getPageApi() {
 
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const timeRange$ = new BehaviorSubject<TimeRange>(
-    initialUnsavedState?.timeRange ?? initialState.timeRange
+    initialUnsavedState?.timeRange ?? defaultState.timeRange
   );
+
+  lastSavedStateSessionStorage.load(embeddable).then((lastSavedState) => {
+    lastSavedState$.next(lastSavedState);
+    if (!initialUnsavedState?.timeRange) timeRange$.next(lastSavedState.timeRange);
+  });
+
   const reload$ = new Subject<void>();
 
   function serializePage() {
@@ -174,7 +186,7 @@ export function getPageApi() {
         // simulate save await
         await new Promise((resolve) => setTimeout(resolve, 1000));
         lastSavedState$.next(serializedPage);
-        lastSavedStateSessionStorage.save(serializedPage);
+        await lastSavedStateSessionStorage.save(serializedPage, embeddable);
         unsavedChangesSessionStorage.clear();
       },
       layout$,

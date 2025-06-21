@@ -21,6 +21,7 @@ import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
+import { EmbeddableContentManagementRegistryPublic } from '../common/embeddable_content_management/registry';
 import { EnhancementsRegistry } from './enhancements/registry';
 import {
   EmbeddableSetup,
@@ -34,6 +35,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private appList?: ReadonlyMap<string, PublicAppInfo>;
   private appListSubscription?: Subscription;
   private enhancementsRegistry = new EnhancementsRegistry();
+  private embeddableContentManagementRegistry = new EmbeddableContentManagementRegistryPublic();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -44,6 +46,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerEnhancement: this.enhancementsRegistry.registerEnhancement,
+      registerEmbeddableContentManagementDefinition:
+        this.embeddableContentManagementRegistry.registerContentManagementDefinition,
     };
   }
 
@@ -68,6 +72,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
+      getEmbeddableContentManagementDefinition:
+        this.embeddableContentManagementRegistry.getContentManagementDefinition,
       getEnhancement: this.enhancementsRegistry.getEnhancement,
     };
 

@@ -13,13 +13,18 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext, initializeStateManager } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { defaultBookAttributes } from './book_state';
 import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
-import { BookAttributes, BookSerializedState } from './types';
+import { BookItem, BookSerializedState } from './types';
 
-export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
+export const registerCreateSavedBookAction = (
+  uiActions: UiActionsPublicStart,
+  core: CoreStart,
+  contentManagement: ContentManagementPublicStart
+) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SAVED_BOOK_ACTION_ID,
     getIconType: () => 'folderClosed',
@@ -29,22 +34,21 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      const newPanelStateManager = initializeStateManager<BookAttributes>(
+      const newPanelStateManager = initializeStateManager<BookItem>(
         defaultBookAttributes,
         defaultBookAttributes
       );
 
-      const { savedBookId } = await openSavedBookEditor({
+      const { savedObjectId } = await openSavedBookEditor({
         attributesManager: newPanelStateManager,
         parent: embeddable,
         isCreate: true,
         core,
+        contentManagement,
       });
 
       const bookAttributes = newPanelStateManager.getLatestState();
-      const initialState: BookSerializedState = savedBookId
-        ? { savedBookId }
-        : { attributes: bookAttributes };
+      const initialState: BookSerializedState = savedObjectId ? { savedObjectId } : bookAttributes;
 
       embeddable.addNewPanel<BookSerializedState>({
         panelType: SAVED_BOOK_ID,

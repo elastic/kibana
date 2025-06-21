@@ -78,7 +78,7 @@ export interface DashboardChildren {
 }
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState>;
+  getInitialInput?: () => Promise<Partial<DashboardState>>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 

@@ -66,7 +66,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
             });
 
             return {
-              getInitialInput: () => ({
+              getInitialInput: async () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
                 controlGroupState,

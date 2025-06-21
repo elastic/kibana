@@ -17,26 +17,35 @@ import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
 import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
 import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
-import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
+import { FIELD_LIST_ID } from '../common/field_list/constants';
 import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { BOOK_CONTENT_ID, BOOK_LATEST_VERSION } from '../common/book/content_management/schema';
+import { setKibanaServices } from './kibana_services';
+import { BookSerializedState } from './react_embeddables/saved_book/types';
 
 export interface SetupDeps {
+  contentManagement: ContentManagementPublicSetup;
   developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsStart;
 }
 
 export interface StartDeps {
+  contentManagement: ContentManagementPublicStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   embeddable: EmbeddableStart;
@@ -48,7 +57,10 @@ export interface StartDeps {
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
+  public setup(
+    core: CoreSetup<StartDeps>,
+    { contentManagement, embeddable, developerExamples }: SetupDeps
+  ) {
     setupApp(core, developerExamples);
 
     const startServicesPromise = core.getStartServices();
@@ -80,17 +92,55 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       const { getSavedBookEmbeddableFactory } = await import(
         './react_embeddables/saved_book/saved_book_react_embeddable'
       );
-      const [coreStart] = await startServicesPromise;
-      return getSavedBookEmbeddableFactory(coreStart);
+      const [coreStart, deps] = await startServicesPromise;
+      return getSavedBookEmbeddableFactory(coreStart, deps);
     });
 
     registerSearchEmbeddable(
       embeddable,
       new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
     );
+
+    embeddable.registerEmbeddableContentManagementDefinition('book', async () => {
+      const { bookCmDefinitions } = await import('../common/book/content_management/cm_services');
+      return bookCmDefinitions;
+    });
+    embeddable.registerEmbeddableContentManagementDefinition('field_list', async () => {
+      const { fieldListCmDefinitions } = await import(
+        '../common/field_list/content_management/cm_services'
+      );
+      return fieldListCmDefinitions;
+    });
+
+    contentManagement.registry.register({
+      id: BOOK_CONTENT_ID,
+      version: {
+        latest: BOOK_LATEST_VERSION,
+      },
+    });
+
+    embeddable.registerAddFromLibraryType({
+      onAdd: async (container, savedObject) => {
+        container.addNewPanel<BookSerializedState>(
+          {
+            panelType: BOOK_CONTENT_ID,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+            },
+          },
+          true
+        );
+      },
+      savedObjectType: BOOK_CONTENT_ID,
+      savedObjectName: 'Book',
+      getIconForSavedObject: () => 'article',
+    });
   }
 
   public start(core: CoreStart, deps: StartDeps) {
+    setKibanaServices(core, deps);
     registerCreateFieldListAction(deps.uiActions);
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
@@ -100,7 +150,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerCreateDataTableAction(deps.uiActions);
 
-    registerCreateSavedBookAction(deps.uiActions, core);
+    registerCreateSavedBookAction(deps.uiActions, core, deps.contentManagement);
   }
 
   public stop() {}

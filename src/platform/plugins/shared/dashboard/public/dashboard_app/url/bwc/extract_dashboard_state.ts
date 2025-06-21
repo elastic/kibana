@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DashboardState } from '../../../../common';
 import { extractControlGroupState } from './extract_control_group_state';
 import { extractSettings } from './extract_dashboard_settings';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 
-export function extractDashboardState(state?: unknown): Partial<DashboardState> {
+export async function extractDashboardState({
+  state,
+  embeddableService,
+}: {
+  state?: unknown;
+  embeddableService: EmbeddableStart;
+}): Promise<Partial<DashboardState>> {
   let dashboardState: Partial<DashboardState> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
@@ -26,10 +33,10 @@ export function extractDashboardState(state?: unknown): Partial<DashboardState> 
 
     if (typeof stateAsObject.viewMode === 'string')
       dashboardState.viewMode = stateAsObject.viewMode as DashboardState['viewMode'];
-
+    const panelsState = await extractPanelsState(stateAsObject, embeddableService);
     dashboardState = {
       ...dashboardState,
-      ...extractPanelsState(stateAsObject),
+      ...panelsState,
       ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject),
     };

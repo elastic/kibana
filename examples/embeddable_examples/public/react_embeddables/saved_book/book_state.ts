@@ -8,12 +8,14 @@
  */
 
 import { WithAllKeys } from '@kbn/presentation-publishing';
-import { BookAttributes } from './types';
+import { BookItem } from './types';
 
-export const defaultBookAttributes: WithAllKeys<BookAttributes> = {
+export const defaultBookAttributes: WithAllKeys<BookItem> = {
   bookTitle: 'Pillars of the earth',
-  authorName: 'Ken follett',
-  numberOfPages: 973,
-  bookSynopsis:
+  author: 'Ken follett',
+  pages: 973,
+  synopsis:
     'A spellbinding epic set in 12th-century England, The Pillars of the Earth tells the story of the struggle to build the greatest Gothic cathedral the world has known.',
+  published: 1989,
+  sequelTo: undefined,
 };

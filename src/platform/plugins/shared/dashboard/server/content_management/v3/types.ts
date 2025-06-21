@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   CreateIn,
   GetIn,
   SearchIn,
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { WithRequiredProperty } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { WithRequiredProperty } from '@kbn/utility-types';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import {
   dashboardItemSchema,
   controlGroupInputSchema,
   panelGridDataSchema,
+  sectionGridDataSchema,
   panelSchema,
   sectionSchema,
   dashboardAttributesSchema,
@@ -33,7 +36,6 @@ import {
   optionsSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
-import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 
@@ -44,7 +46,9 @@ export type DashboardPanel = Omit<TypeOf<typeof panelSchema>, 'panelConfig'> & {
   panelConfig: TypeOf<typeof panelSchema>['panelConfig'] & { [key: string]: any };
   gridData: GridData;
 };
-export type DashboardSection = TypeOf<typeof sectionSchema>;
+export type DashboardSection = Omit<TypeOf<typeof sectionSchema>, 'gridData'> & {
+  gridData: SectionGridData;
+};
 export type DashboardAttributes = Omit<TypeOf<typeof dashboardAttributesSchema>, 'panels'> & {
   panels: Array<DashboardPanel | DashboardSection>;
 };
@@ -57,6 +61,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
+export type SectionGridData = WithRequiredProperty<TypeOf<typeof sectionGridDataSchema>, 'i'>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;
@@ -83,12 +88,13 @@ export type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-export interface ItemAttrsToSavedObjectParams {
+export interface ItemToSavedObjectParams {
   attributes: DashboardAttributes;
-  incomingReferences?: SavedObjectReference[];
+  embeddable: EmbeddableStart;
+  references?: SavedObjectReference[];
 }
 
-export type ItemAttrsToSavedObjectReturn =
+export type ItemToSavedObjectReturn =
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];
@@ -100,7 +106,7 @@ export type ItemAttrsToSavedObjectReturn =
       error: Error;
     };
 
-export interface ItemAttrsToSavedObjectWithTagsParams extends ItemAttrsToSavedObjectParams {
+export interface ItemToSavedObjectWithTagsParams extends ItemToSavedObjectParams {
   replaceTagReferencesByName?: (
     params: ReplaceTagReferencesByNameParams
   ) => Promise<SavedObjectReference[]>;

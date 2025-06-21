@@ -139,10 +139,13 @@ export function DashboardApp({
    */
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-    const getInitialInput = () => {
+    const getInitialInput = async () => {
       let stateFromLocator: Partial<DashboardState> = {};
       try {
-        stateFromLocator = extractDashboardState(getScopedHistory().location.state);
+        stateFromLocator = await extractDashboardState({
+          embeddableService,
+          state: getScopedHistory().location.state,
+        });
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from locator. Error: ', e);
@@ -150,7 +153,7 @@ export function DashboardApp({
 
       let initialUrlState: Partial<DashboardState> = {};
       try {
-        initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
+        initialUrlState = await loadAndRemoveDashboardState(kbnUrlStateStorage, embeddableService);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn('Unable to extract dashboard state from URL. Error: ', e);

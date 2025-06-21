@@ -58,7 +58,7 @@ describe('DashboardRenderer', () => {
     const options = await (
       DashboardContainerRenderer as unknown as jest.Mock
     ).mock.calls[0][0].getCreationOptions();
-    const input = options.getInitialInput();
+    const input = await options.getInitialInput();
 
     expect(input).toEqual(
       expect.objectContaining({

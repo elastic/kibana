@@ -49,6 +49,7 @@ const createSetupContract = (): Setup => {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
     registerEnhancement: jest.fn(),
+    registerEmbeddableContentManagementDefinition: jest.fn(),
   };
   return setupContract;
 };
@@ -56,6 +57,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
+    getEmbeddableContentManagementDefinition: jest.fn(),
     getEnhancement: jest.fn(),
   };
   return startContract;

@@ -12,3 +12,5 @@ export type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '../server';
+
+export type { EmbeddableContentManagementDefinition, VersionableEmbeddableObject } from './types';

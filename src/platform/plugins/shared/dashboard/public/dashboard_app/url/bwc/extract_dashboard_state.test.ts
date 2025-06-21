@@ -10,11 +10,12 @@
 import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { extractDashboardState } from './extract_dashboard_state';
+import { embeddableService } from '../../../services/kibana_services';
 
 const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
 
 describe('extractDashboardState', () => {
-  test('should extract all DashboardState fields', () => {
+  test('should extract all DashboardState fields', async () => {
     const optionalState = {
       timeRange: {
         from: 'now-15m',
@@ -27,9 +28,12 @@ describe('extractDashboardState', () => {
       },
     };
     expect(
-      extractDashboardState({
-        ...DASHBOARD_STATE,
-        ...optionalState,
+      await extractDashboardState({
+        state: {
+          ...DASHBOARD_STATE,
+          ...optionalState,
+        },
+        embeddableService,
       })
     ).toEqual({
       ...DASHBOARD_STATE,

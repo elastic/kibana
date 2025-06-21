@@ -8,6 +8,29 @@
  */
 
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+
+export interface DashboardSetupDeps {
+  embeddable: EmbeddableSetup;
+  usageCollection?: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
+  contentManagement: ContentManagementServerSetup;
+}
+
+export interface DashboardStartDeps {
+  embeddable: EmbeddableStart;
+  taskManager: TaskManagerStartContract;
+  usageCollection?: UsageCollectionStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
+  share?: SharePluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}

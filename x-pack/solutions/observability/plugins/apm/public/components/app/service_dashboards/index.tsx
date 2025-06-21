@@ -100,7 +100,7 @@ export function ServiceDashboards() {
   }, [allAvailableDashboards, data]);
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const getInitialInput = () => ({
+    const getInitialInput = async () => ({
       viewMode: 'view' as ViewMode,
       timeRange: { from: rangeFrom, to: rangeTo },
     });
