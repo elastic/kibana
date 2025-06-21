@@ -24,10 +24,19 @@ import {
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import {
+  DOUBLE_BACKTICK,
+  SINGLE_TICK_REGEX,
+  UNSUPPORTED_AIOPS_FEATURES_LOGS_ESSENTIALS,
+} from '../shared/constants';
 import { ESQLFieldWithMetadata } from '../validation/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
+
+function isFunctionUnsupportedForLogsEssentials(functionName: string) {
+  const hiddenCommands = UNSUPPORTED_AIOPS_FEATURES_LOGS_ESSENTIALS.functions;
+  return hiddenCommands.has(functionName);
+}
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -130,6 +139,10 @@ export const filterFunctionDefinitions = (
 
   return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
     if (ignoreAsSuggestion) {
+      return false;
+    }
+
+    if (isFunctionUnsupportedForLogsEssentials(name)) {
       return false;
     }
 
