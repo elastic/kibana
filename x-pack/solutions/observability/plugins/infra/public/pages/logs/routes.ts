@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  logsAnomaliesTitle,
-  logCategoriesTitle,
-  settingsTitle,
-  streamTitle,
-} from '../../translations';
+import { logsAnomaliesTitle, logCategoriesTitle, settingsTitle } from '../../translations';
 
 export interface LogsRoute {
   id: string;
@@ -22,10 +17,9 @@ export interface LogsAppRoutes {
   logsAnomalies: LogsRoute;
   logsCategories: LogsRoute;
   settings: LogsRoute;
-  stream?: LogsRoute;
 }
 
-export const getLogsAppRoutes = ({ isLogsStreamEnabled }: { isLogsStreamEnabled: boolean }) => {
+export const getLogsAppRoutes = () => {
   const routes: LogsAppRoutes = {
     logsAnomalies: {
       id: 'anomalies',
@@ -43,14 +37,6 @@ export const getLogsAppRoutes = ({ isLogsStreamEnabled }: { isLogsStreamEnabled:
       path: '/settings',
     },
   };
-
-  if (isLogsStreamEnabled) {
-    routes.stream = {
-      id: 'stream',
-      title: streamTitle,
-      path: '/stream',
-    };
-  }
 
   return routes;
 };

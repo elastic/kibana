@@ -880,6 +880,12 @@ export class DataGridService extends FtrService {
     });
   }
 
+  public async waitForDataTableToLoad() {
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('docTable');
+    });
+  }
+
   public async getComparisonDisplay() {
     const display = await this.testSubjects.find('unifiedDataTableComparisonDisplay');
     return await display.getVisibleText();
