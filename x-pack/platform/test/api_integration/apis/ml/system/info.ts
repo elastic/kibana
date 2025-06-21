@@ -80,6 +80,8 @@ export default ({ getService }: FtrProviderContext) => {
     datafeeds: {
       scroll_size: 1000,
     },
+    showNodeInfo: true,
+    showLicenseInfo: true,
   };
 
   async function runRequest(user: USER) {
