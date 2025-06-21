@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  SECURITY_FEATURE_ID,
+} from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllAlerts } from '../../../../../../common/utils/security_solution';
 
@@ -25,7 +28,7 @@ const roleToAccessSecuritySolution = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
@@ -48,7 +51,7 @@ const roleToAccessSecuritySolutionWithDls = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          [SECURITY_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },

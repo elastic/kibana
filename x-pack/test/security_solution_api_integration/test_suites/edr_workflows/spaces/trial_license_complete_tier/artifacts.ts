@@ -26,6 +26,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { binaryToString } from '../../../detections_response/utils';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { createSupertestErrorLogger } from '../../utils';
@@ -62,9 +63,13 @@ export default function ({ getService }: FtrProviderContext) {
         { name: 'artifactManager' }
       );
 
-      if (artifactManagerRole.kibana[0].feature.siemV2.includes('global_artifact_management_all')) {
-        artifactManagerRole.kibana[0].feature.siemV2 =
-          artifactManagerRole.kibana[0].feature.siemV2.filter(
+      if (
+        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
+          'global_artifact_management_all'
+        )
+      ) {
+        artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID] =
+          artifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].filter(
             (privilege) => privilege !== 'global_artifact_management_all'
           );
       }
@@ -75,11 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       if (
-        !globalArtifactManagerRole.kibana[0].feature.siemV2.includes(
+        !globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].includes(
           'global_artifact_management_all'
         )
       ) {
-        globalArtifactManagerRole.kibana[0].feature.siemV2.push('global_artifact_management_all');
+        globalArtifactManagerRole.kibana[0].feature[SECURITY_FEATURE_ID].push(
+          'global_artifact_management_all'
+        );
       }
 
       const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([

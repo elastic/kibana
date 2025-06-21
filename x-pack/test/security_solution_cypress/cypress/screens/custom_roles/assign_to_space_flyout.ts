@@ -11,7 +11,7 @@ export const SPACE_SELECTOR_COMBO_BOX = '[data-test-subj="spaceSelectorComboBox"
 export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolution"]';
 
 // Sub-privileges
-export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
+export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV3"]';
 export const SECURITY_FEATURE_DESCRIPTION = '[aria-describedby="Security description text"]';
 
 export const CASES_FEATURE =
