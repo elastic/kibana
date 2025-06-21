@@ -2282,7 +2282,11 @@ describe('CasesService', () => {
       'observables',
       'incremental_id',
       'total_alerts',
-      'total_comments'
+      'total_comments',
+      'in_progress_at',
+      'time_to_acknowledge',
+      'time_to_resolve',
+      'time_to_investigate'
     );
 
     describe('getCaseIdsByAlertId', () => {

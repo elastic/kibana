@@ -298,6 +298,9 @@
       "matchBaseBranches": [
         "main"
       ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -458,6 +461,10 @@
       "reviewers": [
         "team:appex-sharedux"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "matchBaseBranches": [
         "main"
       ],
@@ -501,13 +508,18 @@
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is"
+        "@types/react-is",
+        "csstype"
       ],
       "reviewers": [
         "team:appex-sharedux"
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -562,6 +574,10 @@
         "@types/react-router-dom",
         "history",
         "@types/history"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -691,10 +707,10 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
-        "@reduxjs/toolkit"
+        "@reduxjs/toolkit",
+        "immer"
       ],
       "reviewers": [
-        "team:ml-ui",
         "team:kibana-visualizations",
         "team:security-solution"
       ],
@@ -1028,9 +1044,7 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
-        "cronstrue",
-        "immer"
+        "cronstrue"
       ],
       "reviewers": [
         "team:kibana-management"

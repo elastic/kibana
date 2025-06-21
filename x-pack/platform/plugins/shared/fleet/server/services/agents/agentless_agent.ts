@@ -44,6 +44,7 @@ import {
   RETRYABLE_HTTP_STATUSES,
   RETRYABLE_SERVER_CODES,
 } from '../../../common/constants/agentless';
+import { agentPolicyService } from '../agent_policy';
 
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
@@ -115,8 +116,9 @@ class AgentlessAgentService {
       and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
     const tlsConfig = this.createTlsConfig(agentlessConfig);
-
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
+    const secrets = this.getAgentlessSecrets();
+    const policyDetails = await this.getPolicyDetails(soClient, agentlessAgentPolicy);
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
@@ -127,6 +129,8 @@ class AgentlessAgentService {
         resources: agentlessAgentPolicy.agentless?.resources,
         cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
+        secrets,
+        policy_details: policyDetails,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
@@ -287,6 +291,21 @@ class AgentlessAgentService {
     return response;
   }
 
+  private getAgentlessSecrets() {
+    const deploymentSecrets = appContextService.getConfig()?.agentless?.deploymentSecrets;
+
+    if (!deploymentSecrets) return {};
+
+    return {
+      ...(deploymentSecrets?.fleetAppToken
+        ? { fleet_app_token: deploymentSecrets?.fleetAppToken }
+        : {}),
+      ...(deploymentSecrets?.elasticsearchAppToken
+        ? { elasticsearch_app_token: deploymentSecrets?.elasticsearchAppToken }
+        : {}),
+    };
+  }
+
   private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
     return {
       headers: {
@@ -300,6 +319,20 @@ class AgentlessAgentService {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
       }),
+    };
+  }
+
+  private async getPolicyDetails(
+    soClient: SavedObjectsClientContract,
+    agentlessAgentPolicy: AgentPolicy
+  ) {
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      agentlessAgentPolicy.id
+    );
+
+    return {
+      output_name: Object.keys(fullPolicy?.outputs || {})?.[0], // Agentless policies only have one output
     };
   }
 
