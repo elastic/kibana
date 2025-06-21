@@ -18,7 +18,7 @@ const METRICS_DEFAULT_STATE = {
   total: 0,
   max_items_per_list: 0,
   min_items_per_list: 0,
-  average_items_per_list: 0,
+  median_items_per_list: 0,
 };
 
 export const getListItemsOverview = async ({
@@ -35,7 +35,6 @@ export const getListItemsOverview = async ({
         items_per_list: {
           terms: {
             field: 'list_id',
-            size: 10000,
           },
         },
         min_items_per_list: {
@@ -48,9 +47,10 @@ export const getListItemsOverview = async ({
             buckets_path: 'items_per_list._count',
           },
         },
-        avg_items_per_list: {
-          avg_bucket: {
+        median_items_per_list: {
+          percentiles_bucket: {
             buckets_path: 'items_per_list._count',
+            percents: [50],
           },
         },
       },
@@ -63,7 +63,7 @@ export const getListItemsOverview = async ({
       total: hits.total.value,
       max_items_per_list: aggs.max_items_per_list.value,
       min_items_per_list: aggs.min_items_per_list.value,
-      average_items_per_list: aggs.avg_items_per_list.value,
+      median_items_per_list: aggs.median_items_per_list.values['50.0'],
     };
   } catch (error) {
     return { ...METRICS_DEFAULT_STATE, total: 0 };
