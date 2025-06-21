@@ -19,9 +19,9 @@ export const fetchHistoricalSummary = createSloServerRoute({
     },
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
+  handler: async ({ request, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient } = await getScopedClients({ request, logger });
+    const { scopedClusterClient } = await getScopedClients(request);
     const historicalSummaryClient = new HistoricalSummaryClient(scopedClusterClient.asCurrentUser);
 
     return await historicalSummaryClient.fetch(params.body);
