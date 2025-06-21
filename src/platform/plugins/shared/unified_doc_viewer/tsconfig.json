@@ -46,7 +46,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/apm-types-shared",
     "@kbn/object-utils",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/css-utils",
   ],
   "exclude": ["target/**/*"]
 }
