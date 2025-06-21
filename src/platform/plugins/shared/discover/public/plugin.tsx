@@ -58,7 +58,7 @@ import type {
 } from './types';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
-import { registerDiscoverEBTManagerAnalytics } from './ebt_manager';
+import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 
