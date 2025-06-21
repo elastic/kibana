@@ -54,16 +54,20 @@ export class AiAssistantManagementObservabilityPlugin
     >
 {
   private readonly config: ConfigSchema;
+  private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.config = context.config.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     core: CoreSetup<StartDependencies, AiAssistantManagementObservabilityPluginStart>,
     { home, management, observabilityAIAssistant }: SetupDependencies
   ): AiAssistantManagementObservabilityPluginSetup {
-    const title = i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
+    const title =  this.isServerless ? i18n.translate('xpack.observabilityAiAssistantManagement.app.titleServerless', {
+      defaultMessage: 'AI Assistant for Observability',
+    }) : i18n.translate('xpack.observabilityAiAssistantManagement.app.title', {
       defaultMessage: 'AI Assistant for Observability and Search',
     });
 
@@ -71,7 +75,9 @@ export class AiAssistantManagementObservabilityPlugin
       home.featureCatalogue.register({
         id: 'ai_assistant_observability',
         title,
-        description: i18n.translate('xpack.observabilityAiAssistantManagement.app.description', {
+        description: this.isServerless ? i18n.translate('xpack.observabilityAiAssistantManagement.app.descriptionServerless', {
+          defaultMessage: 'Manage your AI Assistant for Observability.',
+        }) : i18n.translate('xpack.observabilityAiAssistantManagement.app.description', {
           defaultMessage: 'Manage your AI Assistant for Observability and Search.',
         }),
         icon: 'sparkles',
