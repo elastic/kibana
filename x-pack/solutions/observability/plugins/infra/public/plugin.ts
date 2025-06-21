@@ -355,6 +355,7 @@ const getLogsNavigationEntries = ({
   // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
+  entries.push(createNavEntryFromRoute(routes.settings));
 
   return entries;
 };

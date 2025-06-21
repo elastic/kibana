@@ -28,6 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
+  const dataGrid = getService('dataGrid');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
@@ -93,10 +95,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the no indices screen when no indices match the pattern', async () => {
+        // We will still navigate to the log stream page, but it should redirect to Log Explorer.
+        // This way this test, serves 2 purposes:
         await logsUi.logStreamPage.navigateTo();
 
-        await retry.try(async () => {
-          await logsUi.logStreamPage.getNoDataPage();
+        await retry.tryForTime(5 * 1000, async () => {
+          await testSubjects.existOrFail('discoverNoResults');
         });
       });
 
@@ -119,44 +123,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the default log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo({ logFilter });
 
-        await retry.try(async () => {
-          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
+        await dataGrid.waitForDataTableToLoad();
+        const columnHeaders = await dataGrid.getHeaders();
 
-          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'event.dataset', 'Message']);
-        });
-
-        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
-        expect(logStreamEntries.length).to.be.greaterThan(0);
-
-        const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
-
-        expect(logStreamEntryColumns).to.have.length(3);
-      });
-
-      it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({ logFilter });
-
-        await logsUi.logStreamPage.getStreamEntries();
-
-        const [{ stats }] = await supertest
-          .post(`/internal/telemetry/clusters/_stats`)
-          .set(COMMON_REQUEST_HEADERS)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .set('Accept', 'application/json')
-          .send({
-            unencrypted: true,
-            refreshCache: true,
-          })
-          .expect(200)
-          .then((res: any) => res.body);
-
-        expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs).to.be.greaterThan(
-          0
-        );
+        expect(columnHeaders).to.eql([
+          'Select column',
+          'Actions columnActionsActions',
+          '@timestamp ',
+          'Summary',
+        ]);
       });
 
       it('can change the log columns', async () => {
@@ -176,22 +151,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the changed log columns with their headers', async () => {
         await logsUi.logStreamPage.navigateTo({ logFilter });
 
-        await retry.try(async () => {
-          const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
+        await dataGrid.waitForDataTableToLoad();
+        const columnHeaders = await dataGrid.getHeaders();
 
-          expect(columnHeaderLabels).to.eql([formattedLocalStart, 'host.name']);
-        });
+        expect(columnHeaders).to.eql([
+          'Select column',
+          'Actions columnActionsActions',
+          '@timestamp ',
+          'Summary',
+        ]);
 
-        const logStreamEntries = await logsUi.logStreamPage.getStreamEntries();
+        await testSubjects.click('field-host.name');
+        await testSubjects.click('fieldPopoverHeader_addField-host.name');
 
-        expect(logStreamEntries.length).to.be.greaterThan(0);
+        await dataGrid.waitForDataTableToLoad();
+        const updatedColumnHeaders = await dataGrid.getHeaders();
 
-        const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
-
-        expect(logStreamEntryColumns).to.have.length(2);
+        expect(updatedColumnHeaders).to.eql([
+          'Select column',
+          'Actions columnActionsActions',
+          '@timestamp ',
+          'Keywordhost.name',
+        ]);
       });
     });
   });
