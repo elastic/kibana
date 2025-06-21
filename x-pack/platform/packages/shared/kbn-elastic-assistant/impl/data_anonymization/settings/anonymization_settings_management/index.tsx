@@ -65,11 +65,14 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   }, [onClose, resetAnonymizationSettings]);
 
   const handleSave = useCallback(async () => {
-    await saveAnonymizationSettings();
-    toasts?.addSuccess({
-      iconType: 'check',
-      title: SETTINGS_UPDATED_TOAST_TITLE,
-    });
+    const updateSuccess = await saveAnonymizationSettings();
+    if (updateSuccess) {
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: SETTINGS_UPDATED_TOAST_TITLE,
+      });
+    }
+
     await refetch();
   }, [refetch, saveAnonymizationSettings, toasts]);
 
