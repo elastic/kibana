@@ -71,6 +71,10 @@ export interface DataViewEditorProps {
    * if set to true a link to the management page is shown
    */
   showManagementLink?: boolean;
+  /**
+   * if set to true the data view is managed
+   */
+  isManaged?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -24,6 +24,7 @@ const DataViewFlyoutContentContainer = ({
   editData,
   allowAdHocDataView,
   showManagementLink,
+  isManaged,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications, http },
@@ -99,6 +100,7 @@ const DataViewFlyoutContentContainer = ({
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
       dataViewEditorService={dataViewEditorService}
+      isManaged={isManaged}
     />
   );
 };
