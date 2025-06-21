@@ -18,9 +18,9 @@ import React, {
   SetStateAction,
   Dispatch,
   useMemo,
-  useEffect,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
+import useUnmount from 'react-use/lib/useUnmount';
 
 export interface RestorableStateContext<TState extends object> {
   initialState?: TState;
@@ -50,15 +50,10 @@ export const createRestorableStateProvider = <TState extends object>() => {
   ) {
     // TODO: Might make sense to use a BehaviorSubject instead to stabilize the reference
     const [initialState, setInitialState] = useState(currentInitialState);
-    const stableOnInitialStateChange = useLatest((newInitialState: TState) => {
+    const onInitialStateChange = useStableFunction((newInitialState: TState) => {
       setInitialState(newInitialState);
       currentOnInitialStateChange?.(newInitialState);
     });
-    const [onInitialStateChange] = useState(
-      (): typeof stableOnInitialStateChange.current => (newInitialState) => {
-        stableOnInitialStateChange.current?.(newInitialState);
-      }
-    );
 
     useImperativeHandle(
       ref,
@@ -93,7 +88,6 @@ export const createRestorableStateProvider = <TState extends object>() => {
       }
     );
 
-  // TODO: Better typings for all of this, maybe steal more from React?
   const useRestorableState = <TKey extends keyof TState>(
     key: TKey,
     initialValue: TState[TKey] | (() => TState[TKey]),
@@ -110,11 +104,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
       return initialValue;
     });
 
-    const stableOnInitialStateChange = useLatest((nextValue: TState[TKey]) => {
-      onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
-    });
-
-    const stableSetValue = useLatest<Dispatch<SetStateAction<TState[TKey]>>>((newValue) => {
+    const setValue = useStableFunction<Dispatch<SetStateAction<TState[TKey]>>>((newValue) => {
       _setValue((prevValue) => {
         const nextValue =
           typeof newValue === 'function'
@@ -124,16 +114,12 @@ export const createRestorableStateProvider = <TState extends object>() => {
         setTimeout(() => {
           // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
           // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
-          stableOnInitialStateChange.current(nextValue);
+          onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
         }, 0);
 
         return nextValue;
       });
     });
-
-    const [setValue] = useState(
-      (): typeof stableSetValue.current => (newValue) => stableSetValue.current(newValue)
-    );
 
     return [value, setValue] as const;
   };
@@ -144,22 +130,21 @@ export const createRestorableStateProvider = <TState extends object>() => {
       initialState?.[key] !== undefined ? initialState[key] : initialValue
     );
 
-    const stableOnInitialStateChange = useLatest(() => {
+    useUnmount(() => {
       onInitialStateChange?.({ ...initialState, [key]: valueRef.current } as TState);
     });
-
-    const [unmount] = useState(
-      (): typeof stableOnInitialStateChange.current => () => stableOnInitialStateChange.current()
-    );
-
-    useEffect(() => {
-      return () => {
-        unmount();
-      };
-    }, [unmount]);
 
     return valueRef;
   };
 
   return { withRestorableState, useRestorableState, useRestorableRef };
+};
+
+const useStableFunction = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {
+  const lastestFn = useLatest(fn);
+  const [stableFn] = useState(() => (...args: Parameters<T>) => {
+    return lastestFn.current(...args);
+  });
+
+  return stableFn;
 };
