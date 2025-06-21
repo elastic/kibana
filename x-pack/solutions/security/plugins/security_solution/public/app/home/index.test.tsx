@@ -642,6 +642,10 @@ describe('HomePage', () => {
       expect(mockUpdateUrlParam).toHaveBeenCalledWith({
         activeTab: 'query',
         isOpen: false,
+        query: {
+          expression: '',
+          kind: 'kuery',
+        },
       });
     });
 
