@@ -42,14 +42,10 @@ export enum FILTERS {
 }
 
 /**
-  Filter,
- * An enum to denote whether a filter is specific to an application's context or whether it should be applied globally.
+ * An interface to denote whether a filter is specific to an application's context or whether it should be applied globally.
  * @public
  */
-export enum FilterStateStore {
-  APP_STATE = 'appState',
-  GLOBAL_STATE = 'globalState',
-}
+export type FilterStateStore = 'appState' | 'globalState';
 
 export type FilterMetaParams =
   | Filter
