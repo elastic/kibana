@@ -17,6 +17,8 @@ Plugins are defined as classes and present themselves to Kibana through a simple
 or both. There is no architectural difference between a plugin in the browser and a plugin on the server. In both places, you describe your plugin similarly,
 and you interact with Core and other plugins in the same way.
 
+This anatomy of a plugin documentation applies to internal/built-in plugins. 3rd-party plugins should refer to the external plugin development guide [LINK](https://www.elastic.co/docs/extend/kibana/external-plugin-development).
+
 The basic file structure of a Kibana plugin named demo that has both client-side and server-side code would be:
 
 ```
@@ -39,52 +41,50 @@ plugins/
 
 `kibana.json` is a static manifest file that is used to identify the plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
-```json
+```jsonc
 {
-  "id": "examplePluginId",
-  "version": "1.0.0",
-  "kibanaVersion": "7.14.0",
-  "server": true,
-  "ui": true,
-  "configPath": "path/to/config",
-  "type": "standard",
-  "owner": {
-    "name": "Shared UX",
-    "githubTeam": "appex-sharedux"
-  },
+  "type": "plugin",
+  "id": "@kbn/example-plugin",
+  "owner": "@elastic/kibana-core",
   "description": "A description about this plugin!",
-  "requiredPlugins": ["data"],
-  "optionalPlugins": ["alerting"]
-  "requiredBundles": ["anotherPlugin"]
+  "plugin": {
+    "id": "examplePluginId",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+   "optionalPlugins": ["alerting"],
+   "requiredBundles": ["anotherPlugin"],
+   "group": "chat",
+   "visibility": "shared"
+  }
 }
+
 ```
+`type` - [Required] Declares the type of the package – in this case, it's a Kibana plugin.
 
-`id` - [Required] The id of your plugin can be anything, though it should be fairly unique, as every plugin in an installation needs to be unique. It must be snakeCase.
+`id` - [Required] The unique package ID for the plugin, used during build and packaging. According to the [manifest handler](https://github.com/elastic/kibana/blob/043ebe521e43b95d70dba1785096af7962ba63e1/src/platform/packages/private/kbn-repo-packages/modern/parse_package_manifest.js#L250-L252), id must be a string that starts with @kbn/` - in the form @scope/name.
 
-`version` - [Required] Note the version of your plugin. For internal plugins that don't specify a `kibanaVersion`, this will have to match the version of Kibana or ci will fail. Because teams won't want to be bumping this number for every release, internal plugins should set `kibanaVersion` to "kibana", and set this to anything.
-
-`kibanaVersion` - [Optional] If your plugin is only compatible with a specific version of Kibana, put it here. Internal, first-party plugins should set this to "kibana", otherwise they will need to bump this value, or the one in `version`, every time the Kibana version is bumped. When [#61087](https://github.com/elastic/kibana/issues/61087) is fixed, we will stop requiring this field for internal plugins.
-
-`server` - [Optional] If your plugin contains server-side code, this must be true.
-
-`ui` - [Optional] If your plugin contains client-side code, this must be true.
-
-`configPath` - [Optional] Every plugin might allow Kibana users to adjust configuration via kibana.yml file. If your plugin needs to read config from `kibana.yml , you should declare what property name it should have access to.
-
-`type` - [Optional] Should be either `preboot` or `standard` which specifies the type of plugin. Default value, if unspecified, is `standard`. There are two types of plugins:
-
-- preboot plugins are bootstrapped to prepare the environment before Kibana starts.
-- standard plugins define Kibana functionality while Kibana is running.
-
-`owner` - [Required] Help users of your plugin know who manages this plugin and how to get in touch. For internal developers, `Owner.name` should be the name of the team that manages this plugin. This should match the team that owns this code in the [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file (however, this is not currently enforced). Internal teams should also use a [GitHub team alias](https://github.com/orgs/elastic/teams) for `owner.githubTeam`. This value is used to create a link to `https://github.com/orgs/elastic/teams/${githubTeam}`, so leave the `elastic/` prefix should be left out. While many teams can contribute to a plugin, only a single team should be the primary owner.
+`owner` - [Required] The owner field, previously structured as an object with name and githubTeam, is now simplified to an array of strings or a single string referencing the full GitHub team (e.g., "@elastic/kibana-core"). The type expects an array, but there is a handler for single string as well. This change streamlines ownership resolution and aligns with GitHub-based tooling. The logical team responsibility and [CODEOWNERS](https://github.com/elastic/kibana/blob/main/.github/CODEOWNERS) file alignment remain just as important.
 
 `description` - [Required] Give your plugin a description to help other developers understand what it does. This is required for internal plugins.
 
-`requiredPlugins` - [Optional] If your plugin requires any other plugins to work, you must list them here by id. If any of the required plugins are disabled or not installed, then your plugin will be disabled.
+`plugin.id` - [Required] The id of your plugin can be anything, though it should be fairly unique, as every plugin in an installation needs to be unique. It must be snakeCase.
 
-`optionalPlugins` - [Optional] If your plugin has an optional dependency on other plugins, you must list them here by id. If any of the optional plugins are disabled or not installed, your plugin will still load, however that plugin's API contract will be undefined in the second parameter of the setup and start functions.
+`plugin.server` - [Optional] If your plugin contains server-side code, this must be true.
 
-`requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
+`plugin.browser` - [Optional] If your plugin contains client-side code, this must be true.
+
+`plugin.requiredPlugins` - [Optional] If your plugin requires any other plugins to work, you must list them here by id. If any of the required plugins are disabled or not installed, then your plugin will be disabled.
+
+`plugin.optionalPlugins` - [Optional] If your plugin has an optional dependency on other plugins, you must list them here by id. If any of the optional plugins are disabled or not installed, your plugin will still load, however that plugin's API contract will be undefined in the second parameter of the setup and start functions.
+
+`plugin.requiredBundles` - [Required in certain situations] Don't worry about getting this right. The build optimizer will complain if any of these values are incorrect.
+
+`group` - [Required] A field used to distinguish between solution and platform categories. Typical values include "search", "security", "observability", "platform", or "chat".
+
+`visibility` - [Optional] Determines plugin accessibility: "private": The plugin is only accessible from plugins that belong to the same group or "shared": The plugin is accessible from plugins from any group. This only applies to plugins with group: 'platform', as solution plugins are private by definition.
 
 <DocCallOut>
   You don't need to declare a dependency on a plugin if you only wish to access its types.
@@ -94,11 +94,11 @@ plugins/
 
 If you are developing in TypeScript (which we recommend), you will need to add a `tsconfig.json` file. Here is an example file that you would use if adding a plugin into the `examples` directory.
 
-```json
+```jsonc
 {
-  "extends": "../../tsconfig.json", // Extend kibana/tsconfig.json
+  "extends": "../../tsconfig.json", // Extends kibana/tsconfig.json
   "compilerOptions": {
-    "outDir": "./target/types"
+    "outDir": "target/types"
   },
   "include": [
     "index.ts",
@@ -110,9 +110,22 @@ If you are developing in TypeScript (which we recommend), you will need to add a
     "public/**/*.tsx",
     "server/**/*.ts"
   ],
-  "exclude": [],
-  // If you import another plugin's types, point to their `tsconfig.json` file.
-  "references": [{ "path": "../../src/core/tsconfig.json" }]
+  "exclude": [
+    "target/**/*"
+  ],
+  // If you import other plugins:
+  "kbn_references": [
+      "@kbn/core",
+      "@kbn/developer-examples-plugin"
+      // NOTE:
+      // Previously, references were specified using explicit paths to other plugins' tsconfig.json files, like:
+      // "references": [{ "path": "../../src/core/tsconfig.json" }]
+      //
+      // Now, Kibana uses simplified package aliases under "kbn_references" to refer to these dependencies,
+      // e.g., "@kbn/core" or "@kbn/developer-examples-plugin".
+      //
+      // This new approach makes references clearer, reduces path errors, and aligns with Kibana's package structure.
+    ]
 }
 ```
 
@@ -305,10 +318,12 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 
 ```
 {
-  "id": "demo",
-  "requiredPlugins": ["foobar"],
-  "server": true,
-  "ui": true
+  "plugin": {
+    "id": "demo",
+    "requiredPlugins": ["foobar"],
+    "server": true,
+    "browser": true
+  }
 }
 ```
 
