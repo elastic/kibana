@@ -177,7 +177,7 @@ export const RuleSettingsFlappingForm = (props: RuleSettingsFlappingFormProps) =
                 data-test-subj="ruleSettingsFlappingFormTooltipButton"
                 display="empty"
                 color="primary"
-                iconType="questionInCircle"
+                iconType="question"
                 aria-label="Flapping Off Info"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               />

@@ -192,7 +192,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             {i18n.translate('xpack.aiops.changePointDetection.pValueLabel', {
               defaultMessage: 'p-value',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),

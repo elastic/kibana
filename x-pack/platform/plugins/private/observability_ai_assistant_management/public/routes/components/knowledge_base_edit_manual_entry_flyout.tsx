@@ -178,7 +178,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             <EuiIconTip
               content="Global entries will be available to all users. User entries will only be available to the author."
               position="top"
-              type="iInCircle"
+              type="info"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -79,7 +79,7 @@ const InfoPopover: React.FunctionComponent<{
       button={
         <EuiButtonIcon
           display="empty"
-          iconType="iInCircle"
+          iconType="info"
           onClick={onTogglePopover}
           css={popoverStyles}
         />

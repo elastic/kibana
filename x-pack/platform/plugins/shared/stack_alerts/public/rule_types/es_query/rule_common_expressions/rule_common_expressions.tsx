@@ -163,7 +163,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
           <EuiIconTip
             position="right"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             content={i18n.translate('xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip', {
               defaultMessage:
                 'Specify the number of documents to pass to the configured actions when the threshold condition is met.',

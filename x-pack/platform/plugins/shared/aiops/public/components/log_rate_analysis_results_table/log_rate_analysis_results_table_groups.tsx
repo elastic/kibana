@@ -161,7 +161,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
             position="top"
             size="s"
             color="subdued"
-            type="questionInCircle"
+            type="question"
             className="eui-alignTop"
             content={i18n.translate(
               'xpack.aiops.logRateAnalysis.resultsTableGroups.groupColumnTooltip',

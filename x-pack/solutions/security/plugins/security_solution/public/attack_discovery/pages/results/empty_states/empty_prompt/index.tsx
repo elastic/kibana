@@ -88,7 +88,7 @@ const EmptyPromptComponent: React.FC<Props> = ({
                 content={i18n.RESPONSES_FROM_AI_SYSTEMS}
                 data-test-subj="responsesFromAiSystemsTooltip"
                 position="right"
-                type="iInCircle"
+                type="info"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -355,7 +355,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
               }
             ),
             type: 'icon',
-            icon: 'iInCircle',
+            icon: 'info',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {

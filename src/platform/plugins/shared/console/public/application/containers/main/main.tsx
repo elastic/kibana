@@ -198,7 +198,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
 
   const helpButton = (
     <NavIconButton
-      iconType="questionInCircle"
+      iconType="question"
       onClick={() => setIsHelpOpen(!isHelpOpen)}
       ariaLabel={MAIN_PANEL_LABELS.helpButton}
       dataTestSubj="consoleHelpButton"

@@ -147,7 +147,7 @@ export const RuleDetails = () => {
             <EuiFlexItem grow={false}>{RULE_INVESTIGATION_GUIDE_LABEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiIconTip
-                type="questionInCircle"
+                type="question"
                 content={
                   <p>
                     {i18n.translate(

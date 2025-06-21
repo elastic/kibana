@@ -58,7 +58,7 @@ const CustomHeaderCell = ({ title, tooltipContent }: { title: string; tooltipCon
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
         data-test-subj="inventoryCustomHeaderCellButton"
-        iconType="questionInCircle"
+        iconType="question"
         aria-label={tooltipContent}
         color="primary"
       />

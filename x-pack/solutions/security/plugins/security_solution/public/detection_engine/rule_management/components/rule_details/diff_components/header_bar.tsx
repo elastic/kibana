@@ -34,7 +34,7 @@ export const RuleDiffHeaderBar = () => {
           <EuiIconTip
             color="subdued"
             content={i18n.CURRENT_VERSION_DESCRIPTION}
-            type="iInCircle"
+            type="info"
             size="m"
             display="block"
           />
@@ -46,7 +46,7 @@ export const RuleDiffHeaderBar = () => {
           <EuiIconTip
             color="subdued"
             content={i18n.UPDATED_VERSION_DESCRIPTION}
-            type="iInCircle"
+            type="info"
             size="m"
           />
           <EuiTitle size="xxs">
