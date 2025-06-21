@@ -9,7 +9,9 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@ela
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { KeyInsightsPanel } from './components/key_insights_panel';
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 
 export interface OnboardingCallout {
@@ -24,6 +26,12 @@ export const PrivilegedUserMonitoring = ({
   onManageUserClicked: () => void;
 }) => {
   const spaceId = useSpaceId();
+  const { from, to } = useGlobalTime();
+
+  const timerange = {
+    from,
+    to,
+  };
   const [dismissCallout, setDismissCallout] = useState(false);
   const handleDismiss = useCallback(() => {
     setDismissCallout(true);
@@ -76,9 +84,7 @@ export const PrivilegedUserMonitoring = ({
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder={true}>
-              <span>{'TODO: Top risky privileged users'}</span>
-            </EuiPanel>
+            <KeyInsightsPanel timerange={timerange} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
