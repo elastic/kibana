@@ -37,6 +37,7 @@ export class PricingService {
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
   private pricingConfig: PricingConfigType;
+  private tiersClient: PricingTiersClient | undefined;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('pricing-service');
@@ -64,12 +65,18 @@ export class PricingService {
       this.configService.atPath<PricingConfigType>('pricing')
     );
 
+    this.tiersClient = new PricingTiersClient(
+      this.pricingConfig.tiers,
+      this.productFeaturesRegistry
+    );
+
     registerRoutes(http.createRouter(''), {
       pricingConfig: this.pricingConfig,
       productFeaturesRegistry: this.productFeaturesRegistry,
     });
 
     return {
+      isActiveProduct: this.tiersClient.isActiveProduct,
       registerProductFeatures: (features: PricingProductFeature[]) => {
         features.forEach((feature) => {
           this.productFeaturesRegistry.register(feature);
@@ -79,13 +86,12 @@ export class PricingService {
   }
 
   public start() {
-    const tiersClient = new PricingTiersClient(
-      this.pricingConfig.tiers,
-      this.productFeaturesRegistry
-    );
+    if (!this.tiersClient) {
+      throw new Error('Tiers client not initialized');
+    }
 
     return {
-      isFeatureAvailable: tiersClient.isFeatureAvailable,
+      isFeatureAvailable: this.tiersClient.isFeatureAvailable,
     };
   }
 }

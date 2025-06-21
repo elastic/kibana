@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IPricingTiersClient, PricingProductFeature } from '@kbn/core-pricing-common';
+import type {
+  IPricingTiersClient,
+  PricingProduct,
+  PricingProductFeature,
+} from '@kbn/core-pricing-common';
 
 /**
  * APIs to manage pricing product features during the setup phase.
@@ -18,6 +22,18 @@ import type { IPricingTiersClient, PricingProductFeature } from '@kbn/core-prici
  * @public
  */
 export interface PricingServiceSetup {
+  /**
+   * Check if a specific product is active in the current pricing tier configuration.
+   *
+   * @example
+   * ```ts
+   * // my-plugin/server/plugin.ts
+   * public setup(core: CoreSetup) {
+   *   const isActiveCompleteSecurity = core.pricing.isActiveProduct({ name: 'security', tier: 'complete' });
+   * }
+   * ```
+   */
+  isActiveProduct(product: PricingProduct): boolean;
   /**
    * Register product features that are available in specific pricing tiers.
    *
