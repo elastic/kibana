@@ -25,8 +25,15 @@ import { USER_PREVIEW_BANNER } from '../../document_details/right/components/use
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../network_details';
 import { RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
+import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
+import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
 
-const PREVIEW_FIELDS = [HOST_NAME_FIELD_NAME, USER_NAME_FIELD_NAME, SIGNAL_RULE_NAME_FIELD_NAME];
+const PREVIEW_FIELDS = [
+  HOST_NAME_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
+  SIGNAL_RULE_NAME_FIELD_NAME,
+  EVENT_SOURCE_FIELD_DESCRIPTOR,
+];
 
 // Helper function to check if the field has a preview link
 export const hasPreview = (field: string) =>
@@ -42,7 +49,8 @@ const getPreviewParams = (
   value: string,
   field: string,
   scopeId: string,
-  ruleId?: string
+  ruleId?: string,
+  indexName?: string
 ): PreviewParams | null => {
   if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
@@ -75,6 +83,15 @@ const getPreviewParams = (
       return {
         id: RulePreviewPanelKey,
         params: { ruleId, banner: RULE_PREVIEW_BANNER, isPreviewMode: true },
+      };
+    case EVENT_SOURCE_FIELD_DESCRIPTOR:
+      return {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: value,
+          scopeId,
+          indexName,
+        },
       };
     default:
       return null;
@@ -111,6 +128,11 @@ interface PreviewLinkProps {
    * React components to render, if none provided, the value will be rendered
    */
   children?: React.ReactNode;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  indexName?: string;
 }
 
 /**
@@ -123,13 +145,14 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   ruleId,
   isRulePreview,
   children,
+  indexName,
   'data-test-subj': dataTestSubj = FLYOUT_PREVIEW_LINK_TEST_ID,
 }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
 
   const onClick = useCallback(() => {
-    const previewParams = getPreviewParams(value, field, scopeId, ruleId);
+    const previewParams = getPreviewParams(value, field, scopeId, ruleId, indexName);
     if (previewParams) {
       openPreviewPanel({
         id: previewParams.id,
@@ -140,7 +163,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
         panel: 'preview',
       });
     }
-  }, [field, scopeId, value, telemetry, openPreviewPanel, ruleId]);
+  }, [field, scopeId, value, telemetry, openPreviewPanel, ruleId, indexName]);
 
   // If the field is not previewable, do not render link
   if (!hasPreview(field)) {

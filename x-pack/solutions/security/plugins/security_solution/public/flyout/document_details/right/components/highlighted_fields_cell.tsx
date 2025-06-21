@@ -43,6 +43,11 @@ export interface HighlightedFieldsCellProps {
    * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
    */
   showPreview?: boolean;
+  /**
+   * The indexName to be passed to the flyout preview panel
+   * when clicking on "Source event" id
+   */
+  indexName?: string;
 }
 
 /**
@@ -54,6 +59,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   originalField = '',
   scopeId = '',
   showPreview = false,
+  indexName,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -75,6 +81,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
                   value={value}
                   scopeId={scopeId}
                   data-test-subj={HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID}
+                  indexName={indexName}
                 />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <AgentStatus
