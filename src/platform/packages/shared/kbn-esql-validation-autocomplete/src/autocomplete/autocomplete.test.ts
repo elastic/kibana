@@ -38,10 +38,15 @@ const commandDefinitions = unmodifiedCommandDefinitions.filter(
   ({ name, hidden }) => !hidden && name !== 'rrf'
 );
 
-const getRecommendedQueriesSuggestionsFromTemplates = (fromCommand: string, timeField?: string) =>
+const getRecommendedQueriesSuggestionsFromTemplates = (
+  fromCommand: string,
+  timeField?: string,
+  categorizationField?: string
+) =>
   getRecommendedQueries({
     fromCommand,
     timeField,
+    categorizationField,
   });
 
 describe('autocomplete', () => {
@@ -91,7 +96,8 @@ describe('autocomplete', () => {
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
-      'dateField'
+      'dateField',
+      'textField'
     );
     testSuggestions('/', [
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
