@@ -79,5 +79,6 @@
     "@kbn/esql-utils",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/lens-plugin",
   ]
 }
