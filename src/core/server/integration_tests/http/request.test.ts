@@ -45,7 +45,10 @@ describe('KibanaRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
       it('returns false if no auth interceptor was registered', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
         router.get(
           {
@@ -63,7 +66,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns false if not authenticated on a route with authRequired: "optional"', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.notHandled());
         router.get(
@@ -82,7 +89,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns false if redirected on a route with authRequired: "optional"', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.redirected({ location: '/any' }));
         router.get(
@@ -101,7 +112,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns true if authenticated on a route with authRequired: "optional"', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         router.get(
@@ -120,7 +135,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns true if authenticated', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         router.get(
@@ -144,7 +163,11 @@ describe('KibanaRequest', () => {
   describe('route options', () => {
     describe('authRequired', () => {
       it('returns false if a route configured with "authRequired": false', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
@@ -163,7 +186,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns "optional" if a route configured with "authRequired": optional', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
@@ -182,7 +209,11 @@ describe('KibanaRequest', () => {
         });
       });
       it('returns true if a route configured with "authRequired": true', async () => {
-        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+          registerAuth,
+        } = await server.setup(setupDeps);
         registerAuth((req, res, t) => t.authenticated());
         const router = createRouter('/');
         router.get(
@@ -207,7 +238,10 @@ describe('KibanaRequest', () => {
     describe('aborted$', () => {
       it('emits once and completes when request aborted', async () => {
         expect.assertions(1);
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -242,7 +276,10 @@ describe('KibanaRequest', () => {
 
       it('emits once and completes when request aborted after the payload has been consumed', async () => {
         expect.assertions(1);
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -281,7 +318,10 @@ describe('KibanaRequest', () => {
       });
 
       it('completes & does not emit when request handled', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -307,7 +347,10 @@ describe('KibanaRequest', () => {
       });
 
       it('completes & does not emit when request rejected', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -335,7 +378,7 @@ describe('KibanaRequest', () => {
       it('does not complete before response has been sent', async () => {
         const {
           server: innerServer,
-          createRouter,
+          router: { create: createRouter },
           registerOnPreAuth,
         } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -374,7 +417,10 @@ describe('KibanaRequest', () => {
 
     describe('completed$', () => {
       it('emits once and completes when response is sent', async () => {
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -403,7 +449,10 @@ describe('KibanaRequest', () => {
 
       it('emits once and completes when response is aborted', async () => {
         expect.assertions(2);
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -437,7 +486,10 @@ describe('KibanaRequest', () => {
 
       it('emits once and completes when response is aborted after the payload has been consumed', async () => {
         expect.assertions(2);
-        const { server: innerServer, createRouter } = await server.setup(setupDeps);
+        const {
+          server: innerServer,
+          router: { create: createRouter },
+        } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
@@ -478,7 +530,10 @@ describe('KibanaRequest', () => {
 
   describe('request id', () => {
     it('accepts x-opaque-id header case-insensitively', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
@@ -501,7 +556,10 @@ describe('KibanaRequest', () => {
 
   describe('request uuid', () => {
     it('generates a UUID', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
@@ -520,7 +578,10 @@ describe('KibanaRequest', () => {
 
   describe('httpVersion and protocol', () => {
     it('returns the correct values', async () => {
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
         { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },

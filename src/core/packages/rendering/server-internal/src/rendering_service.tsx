@@ -106,7 +106,7 @@ export class RenderingService {
     i18n,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     registerBootstrapRoute({
-      router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
+      router: http.router.create<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
         baseHref: http.staticAssets.getHrefBase(),

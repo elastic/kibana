@@ -157,7 +157,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       incrementUsageCounter: coreUsageData.incrementUsageCounter,
     };
 
-    const router = http.createRouter('');
+    const router = http.router.create('');
     registerStatusRoute({
       router,
       ...commonRouteDeps,

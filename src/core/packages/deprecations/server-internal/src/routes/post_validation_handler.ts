@@ -31,7 +31,7 @@ export const registerApiDeprecationsPostValidationHandler = ({
   http,
   logger,
 }: Dependencies) => {
-  http.registerOnPostValidation(createRouteDeprecationsHandler({ coreUsageData, logger }));
+  http.router.registerOnPostValidation(createRouteDeprecationsHandler({ coreUsageData, logger }));
 };
 
 export function createRouteDeprecationsHandler({

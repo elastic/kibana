@@ -316,8 +316,9 @@ test('register route handler', async () => {
   const service = new HttpService({ coreId, configService, env, logger });
 
   await service.preboot(prebootDeps);
-  const { createRouter } = await service.setup(setupDeps);
-  const router = createRouter('/foo');
+  const httpSetup = await service.setup(setupDeps);
+
+  const router = httpSetup.router.create('/foo');
 
   expect(registerRouterMock).toHaveBeenCalledTimes(1);
   expect(registerRouterMock).toHaveBeenLastCalledWith(router);
@@ -474,10 +475,10 @@ test('passes versioned config to router', async () => {
 
   const service = new HttpService({ coreId, configService, env, logger });
   await service.preboot(prebootDeps);
-  const { createRouter } = await service.setup(setupDeps);
+  const httpSetup = await service.setup(setupDeps);
   await service.stop();
 
-  createRouter('/foo');
+  httpSetup.router.create('/foo');
 
   expect(Router).toHaveBeenCalledTimes(1);
   expect(Router).toHaveBeenNthCalledWith(

@@ -56,14 +56,20 @@ export interface InternalHttpServiceSetup
   staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
   prototypeHardening: boolean;
-  createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
-    path: string,
-    plugin?: PluginOpaqueId
-  ) => IRouter<Context>;
+  router: {
+    create: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
+      path: string,
+      plugin?: PluginOpaqueId
+    ) => IRouter<Context>;
+    /**
+     * @remark Router events should not be confused with Hapi lifecycle events. They are purely informational
+     *         and not designed to alter the request/response lifecycle.
+     */
+    registerOnPostValidation(
+      cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
+    ): void;
+  };
   rateLimiter: RateLimiterConfig;
-  registerOnPostValidation(
-    cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
-  ): void;
   registerRouterAfterListening: (router: IRouter) => void;
   registerStaticDir: (path: string, dirPath: string) => void;
   authRequestHeaders: IAuthHeadersStorage;

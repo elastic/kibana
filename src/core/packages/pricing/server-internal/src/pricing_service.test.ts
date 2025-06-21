@@ -30,7 +30,7 @@ describe('PricingService', () => {
     prebootHttp = httpServiceMock.createInternalPrebootContract();
     setupHttp = httpServiceMock.createInternalSetupContract();
     router = mockRouter.create();
-    setupHttp.createRouter.mockReturnValue(router);
+    setupHttp.router.create.mockReturnValue(router);
 
     mockConfig = {
       tiers: {
@@ -67,7 +67,7 @@ describe('PricingService', () => {
       await service.preboot({ http: prebootHttp });
       await service.setup({ http: setupHttp });
 
-      expect(setupHttp.createRouter).toHaveBeenCalledWith('');
+      expect(setupHttp.router.create).toHaveBeenCalledWith('');
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
         expect.objectContaining({

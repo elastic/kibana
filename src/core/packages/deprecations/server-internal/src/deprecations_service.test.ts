@@ -38,7 +38,7 @@ describe('DeprecationsService', () => {
     http = httpServiceMock.createInternalSetupContract();
     coreUsageData = coreUsageDataServiceMock.createSetupContract();
     router = httpServiceMock.createRouter();
-    http.createRouter.mockReturnValue(router);
+    http.router.create.mockReturnValue(router);
     const docLinks: DocLinksServiceSetup = docLinksServiceMock.createSetupContract();
     deprecationsCoreSetupDeps = { http, coreUsageData, logging: loggingMock, docLinks };
   });
@@ -54,7 +54,7 @@ describe('DeprecationsService', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
       // registers correct base api path
-      expect(http.createRouter).toBeCalledWith('/api/deprecations');
+      expect(http.router.create).toBeCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(

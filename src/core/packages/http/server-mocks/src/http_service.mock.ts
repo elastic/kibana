@@ -22,6 +22,7 @@ import type {
   HttpServiceSetup,
   HttpServiceStart,
   IStaticAssets,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
@@ -34,6 +35,7 @@ import type {
   InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
 import { sessionStorageMock } from './cookie_session_storage.mocks';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type InternalStaticAssetsMocked = jest.Mocked<InternalHttpServiceSetup['staticAssets']>;
@@ -54,13 +56,18 @@ export type HttpServiceSetupMock<
 export type InternalHttpServiceSetupMock = jest.Mocked<
   Omit<
     InternalHttpServiceSetup,
-    'basePath' | 'staticAssets' | 'createRouter' | 'authRequestHeaders' | 'auth'
+    'basePath' | 'staticAssets' | 'createRouter' | 'authRequestHeaders' | 'auth' | 'router'
   >
 > & {
   auth: AuthMocked;
   basePath: BasePathMocked;
   staticAssets: InternalStaticAssetsMocked;
-  createRouter: jest.MockedFunction<(path: string) => RouterMock>;
+  router: {
+    registerOnPostValidation: jest.MockedFunction<
+      (callback: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void) => void
+    >;
+    create: jest.MockedFunction<(path: string) => RouterMock>;
+  };
   authRequestHeaders: jest.Mocked<IAuthHeadersStorage>;
 };
 export type HttpServiceStartMock = jest.Mocked<HttpServiceStart> & {
@@ -174,12 +181,14 @@ const createInternalSetupContractMock = () => {
     registerOnPreAuth: jest.fn(),
     getDeprecatedRoutes: jest.fn(),
     getRegisteredDeprecatedApis: jest.fn(),
-    registerOnPostValidation: jest.fn(),
+    router: {
+      create: jest.fn().mockImplementation(() => mockRouter.create({})),
+      registerOnPostValidation: jest.fn(),
+    },
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
     registerOnPreResponse: jest.fn(),
-    createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     registerStaticDir: jest.fn(),
     basePath,
     csp: CspConfig.DEFAULT,
@@ -193,7 +202,7 @@ const createInternalSetupContractMock = () => {
     rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
-  mock.createRouter.mockImplementation(() => mockRouter.create());
+  mock.router.create.mockImplementation(() => mockRouter.create());
   mock.authRequestHeaders.get.mockReturnValue({ authorization: 'authorization-header' });
   mock.getServerInfo.mockReturnValue({
     hostname: 'localhost',
@@ -228,7 +237,7 @@ const createSetupContractMock = <
     },
   };
 
-  mock.createRouter.mockImplementation(() => internalMock.createRouter(''));
+  mock.createRouter.mockImplementation(() => internalMock.router.create(''));
 
   return mock;
 };
