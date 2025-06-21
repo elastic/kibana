@@ -64,6 +64,7 @@ import type {
 import type { ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_ebt_manager_registrations';
+import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -139,6 +140,10 @@ export class DiscoverPlugin
           },
         })
       );
+    }
+
+    if (plugins.inspector) {
+      plugins.inspector.registerView(getProfilesInspectorView());
     }
 
     const {

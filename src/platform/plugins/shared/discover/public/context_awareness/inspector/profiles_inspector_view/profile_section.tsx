@@ -7,6 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './context_awareness';
-export * from './data_table_record_with_context';
-export * from './profiles';
+import React from 'react';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+export function ProfileSection({
+  title,
+  children,
+}: {
+  title: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <EuiPanel hasBorder hasShadow={false}>
+      <EuiTitle size="s">
+        <h3>{title}</h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      {children}
+    </EuiPanel>
+  );
+}
