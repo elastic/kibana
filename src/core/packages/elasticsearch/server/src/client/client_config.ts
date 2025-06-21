@@ -33,27 +33,50 @@ export interface ElasticsearchApiToRedactInLogs {
  * @public
  */
 export interface ElasticsearchClientConfig {
+  /** {@inheritDoc IElasticsearchConfig.customHeaders} */
   customHeaders: Record<string, string>;
+  /** {@inheritDoc IElasticsearchConfig.requestHeadersWhitelist} */
   requestHeadersWhitelist: string[];
+  /** {@inheritDoc IElasticsearchConfig.maxSockets} */
   maxSockets: number;
+  /** {@inheritDoc IElasticsearchConfig.maxIdleSockets} */
   maxIdleSockets: number;
+  /** {@inheritDoc IElasticsearchConfig.maxResponseSize} */
   maxResponseSize?: ByteSizeValue;
+  /** {@inheritDoc IElasticsearchConfig.idleSocketTimeout} */
   idleSocketTimeout: Duration;
+  /** {@inheritDoc IElasticsearchConfig.compression} */
   compression: boolean;
+  /** {@inheritDoc IElasticsearchConfig.sniffOnStart} */
   sniffOnStart: boolean;
+  /** {@inheritDoc IElasticsearchConfig.sniffOnConnectionFault} */
   sniffOnConnectionFault: boolean;
+  /** {@inheritDoc IElasticsearchConfig.sniffInterval} */
   sniffInterval: false | Duration;
+  /** {@inheritDoc IElasticsearchConfig.username} */
   username?: string;
+  /** {@inheritDoc IElasticsearchConfig.password} */
   password?: string;
+  /** {@inheritDoc IElasticsearchConfig.serviceAccountToken} */
   serviceAccountToken?: string;
+  /** {@inheritDoc IElasticsearchConfig.hosts} */
   hosts: string[];
+  /** {@inheritDoc IElasticsearchConfig.keepAlive} */
   keepAlive?: boolean;
+  /** {@inheritDoc IElasticsearchConfig.pingTimeout} */
   pingTimeout?: Duration | number;
+  /** {@inheritDoc IElasticsearchConfig.requestTimeout} */
   requestTimeout?: Duration | number;
+  /** {@inheritDoc IElasticsearchConfig.caFingerprint} */
   caFingerprint?: string;
+  /** {@inheritDoc IElasticsearchConfig.ssl} */
   ssl?: ElasticsearchClientSslConfig;
+  /** {@inheritDoc IElasticsearchConfig.apisToRedactInLogs} */
   apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
+  /** {@inheritDoc IElasticsearchConfig.dnsCacheTtl} */
   dnsCacheTtl: Duration;
+  /** {@inheritDoc IElasticsearchConfig.serverMode} */
+  serverMode?: 'stack' | 'serverless';
 }
 
 /**

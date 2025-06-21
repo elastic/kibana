@@ -156,6 +156,12 @@ export interface IElasticsearchConfig {
    * Set to 0 to disable the cache (default Node.js behavior)
    */
   readonly dnsCacheTtl: Duration;
+
+  /**
+   * Setting to "serverless" changes some default behavior,
+   * like enabling compression and disabling features that assume the possibility of multiple Elasticsearch nodes.
+   */
+  readonly serverMode: 'stack' | 'serverless';
 }
 
 /**

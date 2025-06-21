@@ -77,6 +77,7 @@ describe('config schema', () => {
               "es-client-authentication",
             ],
             "requestTimeout": "PT30S",
+            "serverMode": "stack",
             "shardTimeout": "PT30S",
             "skipStartupConnectionCheck": false,
             "sniffInterval": false,

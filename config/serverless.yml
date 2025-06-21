@@ -112,6 +112,9 @@ core.lifecycle.disablePreboot: true
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
+# Applies some internal client defaults and optimizations for the Serverless architecture
+elasticsearch.serverMode: "serverless"
+
 # Enable elasticsearch response size circuit breaker
 elasticsearch.maxResponseSize: "100mb"
 
