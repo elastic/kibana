@@ -10,7 +10,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
-import type { DiscoverEBTContextProps } from './discover_ebt_manager';
+import type { DiscoverEBTContextProps } from './types';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
