@@ -75,6 +75,7 @@ const createInstance = async () => {
       application: applicationServiceMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
+      // @ts-expect-error for easy search
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),

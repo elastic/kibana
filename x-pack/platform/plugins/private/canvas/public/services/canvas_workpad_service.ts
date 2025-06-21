@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import { ResolvedSimpleSavedObject, SavedObject } from '@kbn/core/public';
 import {
   API_ROUTE_SHAREABLE_ZIP,

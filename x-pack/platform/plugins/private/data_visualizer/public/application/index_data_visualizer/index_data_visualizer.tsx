@@ -116,6 +116,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
+    // @ts-expect-error for easy search
     savedObjects: { client: savedObjectsClient },
     notifications: { toasts },
     savedSearch: savedSearchService,

@@ -36,6 +36,7 @@ const dataStart = dataPluginMock.createStartContract();
 const dataViewsStart = dataViewPluginMocks.createStartContract();
 
 // Replace mock to support syntax using `.then()` as used in transform code.
+// @ts-expect-error for easy search
 coreStart.savedObjects.client.find = jest.fn().mockResolvedValue({ savedObjects: [] });
 
 // Replace mock to support tests for `use_index_data`.
@@ -90,6 +91,7 @@ const appDependencies: AppDependencies = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   notifications: coreStart.notifications,
   uiSettings: coreStart.uiSettings,
+  // @ts-expect-error for easy search
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,

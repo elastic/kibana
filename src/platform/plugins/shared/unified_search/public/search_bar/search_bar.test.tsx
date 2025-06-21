@@ -90,6 +90,7 @@ function wrapSearchBarInContext(testProps: any) {
     },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
+    // @ts-expect-error for easy search
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,

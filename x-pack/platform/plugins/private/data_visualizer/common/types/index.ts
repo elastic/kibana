@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 export type { SupportedFieldType } from './job_field_type';

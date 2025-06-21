@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

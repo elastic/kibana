@@ -8,6 +8,7 @@
 import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+// @ts-expect-error for easy search
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';

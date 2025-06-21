@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import { SimpleSavedObject } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { GenericIcon } from '../helpers/style_choices';

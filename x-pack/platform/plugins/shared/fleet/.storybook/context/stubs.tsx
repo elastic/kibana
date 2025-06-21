@@ -19,6 +19,7 @@ type Stubs =
   | 'overlays'
   | 'savedObjects';
 
+// @ts-expect-error for easy search
 type StubbedStartServices = Pick<FleetStartServices, Stubs>;
 
 export const stubbedStartServices: StubbedStartServices = {
@@ -31,5 +32,6 @@ export const stubbedStartServices: StubbedStartServices = {
   fatalErrors: {} as FleetStartServices['fatalErrors'],
   navigation: {} as FleetStartServices['navigation'],
   overlays: {} as FleetStartServices['overlays'],
+  // @ts-expect-error for easy search
   savedObjects: {} as FleetStartServices['savedObjects'],
 };

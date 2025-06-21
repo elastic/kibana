@@ -15,6 +15,7 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
+  // @ts-expect-error for easy search
   SavedObjectsStart,
   ScopedHistory,
   ThemeServiceStart,

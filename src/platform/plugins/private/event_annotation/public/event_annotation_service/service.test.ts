@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// @ts-expect-error for easy search
 import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';

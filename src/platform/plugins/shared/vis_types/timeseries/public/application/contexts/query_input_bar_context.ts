@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+// @ts-expect-error for easy search
 import { CoreStart, IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
