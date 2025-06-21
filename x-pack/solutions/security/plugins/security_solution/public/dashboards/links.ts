@@ -33,7 +33,7 @@ export const dashboardsLinks: LinkItem = {
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
   globalNavPosition: 1,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.dashboards', {
       defaultMessage: 'Dashboards',
