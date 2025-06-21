@@ -7,7 +7,7 @@ source .buildkite/scripts/common/util.sh
 if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_start.sh"
 fi
-
+# no-op, ignore
 
 ts-node "$(dirname "${0}")/ci_stats_start.ts"
 
