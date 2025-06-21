@@ -8,6 +8,7 @@
  */
 
 import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { LensBreakdownIntervalsConfig } from '../types';
 
 export const getIntervalsColumn = ({
   field,
@@ -30,3 +31,12 @@ export const getIntervalsColumn = ({
     },
   };
 };
+
+export const fromIntervalsColumn = (
+  column: RangeIndexPatternColumn
+): LensBreakdownIntervalsConfig => {
+  return {
+    type: 'intervals',
+    field: column.sourceField,
+  };
+}

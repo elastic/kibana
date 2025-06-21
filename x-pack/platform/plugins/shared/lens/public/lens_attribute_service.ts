@@ -21,6 +21,9 @@ import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
 import { DOC_TYPE } from '../common/constants';
 import { SharingSavedObjectProps } from './types';
 import { LensRuntimeState, LensSavedObjectAttributes } from './react_embeddable/types';
+import { LensConfigBuilder, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import { createFormulaPublicApi } from './async_services';
+import { injectReferences } from './datasources/form_based/loader'
 
 type Reference = LensSavedObject['references'][number];
 
@@ -78,11 +81,30 @@ export function getLensAttributeService(
       managed: boolean;
     }> => {
       const { meta, item } = await savedObjectStore.load(savedObjectId);
+      const configBuilder = new LensConfigBuilder(
+        startDependencies.dataViews,
+        createFormulaPublicApi(),
+      );
+
+      (item.attributes.state as any).datasourceStates.formBased = 
+      { 
+        ...(item.attributes.state as any).datasourceStates.formBased,
+        ...injectReferences((item.attributes.state as any).datasourceStates.formBased, item.references),
+      };
+
+      const config = await configBuilder.reverseBuild(
+        item as unknown as LensRuntimeState,
+      );
+
+      console.log(JSON.stringify(config, null, 2));
+
+      const { references, ...attributes } = await configBuilder.build(config.config, config.options);
+
       return {
         attributes: {
-          ...item.attributes,
-          state: item.attributes.state as LensSavedObjectAttributes['state'],
-          references: item.references,
+          ...attributes,
+          state: attributes.state as LensSavedObjectAttributes['state'],
+          references,
         },
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,

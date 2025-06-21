@@ -8,6 +8,7 @@
  */
 
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { LensBreakdownDateHistogramConfig } from '../types';
 
 export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
 export const getHistogramColumn = ({
@@ -29,5 +30,16 @@ export const getHistogramColumn = ({
     scale: 'interval',
     sourceField: options?.sourceField ?? '@timestamp',
     params: { interval, ...rest },
+  };
+};
+
+export const fromHistogramColumn = (
+  column: DateHistogramIndexPatternColumn
+): LensBreakdownDateHistogramConfig => {
+  const { params } = column;
+  return {
+    type: 'dateHistogram',
+    field: column.sourceField,
+    minimumInterval: params?.interval ?? 'auto',
   };
 };
