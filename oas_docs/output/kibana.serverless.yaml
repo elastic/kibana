@@ -777,6 +777,9 @@ paths:
       summary: Delete a rule
       tags:
         - alerting
+      x-path-variations:
+        - POST `/s/{space_id}/api/alerting/rule/`
+        - POST `/api/alerting/rule/{id}`
     get:
       operationId: get-alerting-rule-id
       parameters:
@@ -2862,6 +2865,11 @@ paths:
       summary: Create a rule
       tags:
         - alerting
+      description: |
+        **All methods and paths for this operation:**
+
+        - `POST /s/{space_id}/api/alerting/rule/`
+        - `POST /api/alerting/rule/{id}`
     put:
       operationId: put-alerting-rule-id
       parameters:
@@ -3897,6 +3905,8 @@ paths:
       summary: Update a rule
       tags:
         - alerting
+      description: |
+        [Learn](../topic/topic-kibana-spaces) how to select a space for this request.
   /api/alerting/rule/{id}/_disable:
     post:
       operationId: post-alerting-rule-id-disable
