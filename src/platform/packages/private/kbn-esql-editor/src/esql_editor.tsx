@@ -172,9 +172,13 @@ export const ESQLEditor = memo(function ESQLEditor({
   });
   const onQueryUpdate = useCallback(
     (value: string) => {
+      if (!editorIsInline) {
+        // preventing a race condition in the inline editor mode
+        setCode(value);
+      }
       onTextLangQueryChange({ esql: value } as AggregateQuery);
     },
-    [onTextLangQueryChange]
+    [onTextLangQueryChange, setCode, editorIsInline]
   );
 
   const onQuerySubmit = useCallback(() => {
@@ -226,11 +230,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== fixedQuery) {
+      if (code !== fixedQuery && (editorIsInline || !isQueryLoading)) {
         setCode(fixedQuery);
       }
     }
-  }, [code, fixedQuery]);
+  }, [code, fixedQuery, isQueryLoading, editorIsInline]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
