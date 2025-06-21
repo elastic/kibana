@@ -6,17 +6,26 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { getApmTraceError } from './get_trace_items';
 import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
+  ERROR_MESSAGE,
   EXCEPTION_MESSAGE,
   EXCEPTION_TYPE,
-  ERROR_MESSAGE,
+  PROCESSOR_EVENT,
+  SPAN_ID,
   STATUS_CODE,
+  TRACE_ID,
 } from '../../../common/es_fields/apm';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { getApmTraceError } from './get_trace_items';
+
+export interface UnifiedTraceErrors {
+  apmErrors: Awaited<ReturnType<typeof getApmTraceError>>;
+  unprocessedOtelErrors: Awaited<ReturnType<typeof getUnprocessedOtelErrors>>;
+  totalErrors: number;
+}
 
 export async function getUnifiedTraceErrors({
   apmEventClient,
@@ -28,20 +37,27 @@ export async function getUnifiedTraceErrors({
   traceId: string;
   start: number;
   end: number;
-}) {
+}): Promise<UnifiedTraceErrors> {
   const [apmErrors, unprocessedOtelError] = await Promise.all([
     getApmTraceError({ apmEventClient, traceId, start, end }),
     getUnprocessedOtelErrors({ apmEventClient, traceId, start, end }),
   ]);
 
   return {
-    apmErrors: apmErrors.hits.hits.map((hit) => hit._source),
-    unprocessedOtelErrors: unprocessedOtelError.hits.hits.map((hit) => hit._source),
-    totalErrors: apmErrors.hits.hits.length + unprocessedOtelError.hits.hits.length,
+    apmErrors,
+    unprocessedOtelErrors: unprocessedOtelError,
+    totalErrors: apmErrors.length + unprocessedOtelError.length,
   };
 }
 
-function getUnprocessedOtelErrors({
+export const optionalFields = asMutableArray([
+  SPAN_ID,
+  ERROR_MESSAGE,
+  EXCEPTION_TYPE,
+  EXCEPTION_MESSAGE,
+] as const);
+
+async function getUnprocessedOtelErrors({
   apmEventClient,
   end,
   start,
@@ -52,7 +68,7 @@ function getUnprocessedOtelErrors({
   start: number;
   end: number;
 }) {
-  return apmEventClient.search(
+  const response = await apmEventClient.search(
     'get_unprocessed_errors_docs',
     {
       apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction, ProcessorEvent.error] },
@@ -77,7 +93,23 @@ function getUnprocessedOtelErrors({
           ],
         },
       },
+      fields: optionalFields,
     },
     { skipProcessorEventFilter: true }
   );
+
+  return response.hits.hits.map((hit) => {
+    const event = unflattenKnownApmEventFields(hit.fields);
+
+    return {
+      id: event.span?.id,
+      error: {
+        message: event.error?.message,
+        exception: {
+          type: event.exception?.type,
+          message: event.exception?.message,
+        },
+      },
+    };
+  });
 }

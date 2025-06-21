@@ -41,6 +41,10 @@ export interface FleetConfigType {
         ca?: string;
       };
     };
+    deploymentSecrets?: {
+      fleetAppToken?: string;
+      elasticsearchAppToken?: string;
+    };
     customIntegrations?: {
       enabled?: boolean;
     };
