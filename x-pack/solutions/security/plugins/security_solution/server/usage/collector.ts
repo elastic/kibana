@@ -14,6 +14,10 @@ import { getEndpointMetrics } from './endpoint/get_metrics';
 import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
 import { riskEngineMetricsSchema } from './risk_engine/schema';
 import { getRiskEngineMetrics } from './risk_engine/get_risk_engine_metrics';
+import { getExceptionsMetrics } from './exceptions/get_metrics';
+import { exceptionsMetricsSchema } from './exceptions/schema';
+import { valueListsMetricsSchema } from './value_lists/schema';
+import { getValueListsMetrics } from './value_lists/get_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
@@ -22,6 +26,8 @@ export interface UsageData {
   endpointMetrics: {};
   dashboardMetrics: DashboardMetrics;
   riskEngineMetrics: {};
+  exceptionsMetrics: {};
+  valueListsMetrics: {};
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -3746,33 +3752,45 @@ export const registerCollector: RegisterCollector = ({
         },
       },
       riskEngineMetrics: riskEngineMetricsSchema,
+      exceptionsMetrics: exceptionsMetricsSchema,
+      valueListsMetrics: valueListsMetricsSchema,
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const [detectionMetrics, endpointMetrics, dashboardMetrics, riskEngineMetrics] =
-        await Promise.allSettled([
-          getDetectionsMetrics({
-            eventLogIndex,
-            signalsIndex,
-            esClient,
-            savedObjectsClient,
-            logger,
-            mlClient: ml,
-            legacySignalsIndex,
-          }),
-          getEndpointMetrics({ esClient, logger }),
-          getDashboardMetrics({
-            savedObjectsClient,
-            logger,
-          }),
-          getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
-        ]);
+      const [
+        detectionMetrics,
+        endpointMetrics,
+        dashboardMetrics,
+        riskEngineMetrics,
+        exceptionsMetrics,
+        valueListsMetrics,
+      ] = await Promise.allSettled([
+        getDetectionsMetrics({
+          eventLogIndex,
+          signalsIndex,
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient: ml,
+          legacySignalsIndex,
+        }),
+        getEndpointMetrics({ esClient, logger }),
+        getDashboardMetrics({
+          savedObjectsClient,
+          logger,
+        }),
+        getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
+        getExceptionsMetrics({ esClient, logger, savedObjectsClient }),
+        getValueListsMetrics({ esClient, logger }),
+      ]);
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
         endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
         dashboardMetrics: dashboardMetrics.status === 'fulfilled' ? dashboardMetrics.value : {},
         riskEngineMetrics: riskEngineMetrics.status === 'fulfilled' ? riskEngineMetrics.value : {},
+        exceptionsMetrics: exceptionsMetrics.status === 'fulfilled' ? exceptionsMetrics.value : {},
+        valueListsMetrics: valueListsMetrics.status === 'fulfilled' ? valueListsMetrics.value : {},
       };
     },
   });
