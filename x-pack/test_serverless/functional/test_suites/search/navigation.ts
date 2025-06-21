@@ -230,7 +230,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
-
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });

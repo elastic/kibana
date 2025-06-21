@@ -119,6 +119,7 @@ export const QueryRulesSets = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'queryRulesSetDeleteButton',
           isPrimary: true,
           onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
             setRulesetToDelete(ruleset.ruleset_id);

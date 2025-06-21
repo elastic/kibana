@@ -120,6 +120,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      data-test-subj="searchQueryRulesQueryRuleFlyout"
       aria-labelledby="flyoutTitle"
       css={css({
         overflowY: 'hidden',
