@@ -83,6 +83,7 @@ const AlertRequired = rt.type({
 });
 // prettier-ignore
 const AlertOptional = rt.partial({
+  'actor.entity.id': schemaStringArray,
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,
@@ -112,7 +113,9 @@ const AlertOptional = rt.partial({
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,
+  'related.entity': schemaStringArray,
   tags: schemaStringArray,
+  'target.entity.id': schemaStringArray,
 });
 
 // prettier-ignore

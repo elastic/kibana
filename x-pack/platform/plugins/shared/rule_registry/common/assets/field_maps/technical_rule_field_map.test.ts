@@ -17,6 +17,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "date",
       },
+      "actor.entity.id": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "ecs.version": Object {
         "array": false,
         "required": false,
@@ -376,7 +381,17 @@ it('matches snapshot', () => {
         "required": false,
         "type": "version",
       },
+      "related.entity": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
       "tags": Object {
+        "array": true,
+        "required": false,
+        "type": "keyword",
+      },
+      "target.entity.id": Object {
         "array": true,
         "required": false,
         "type": "keyword",
