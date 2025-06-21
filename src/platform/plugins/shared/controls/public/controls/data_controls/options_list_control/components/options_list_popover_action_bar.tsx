@@ -69,6 +69,7 @@ export const OptionsListPopoverActionBar = ({
     invalidSelections,
     totalCardinality,
     field,
+    fieldName,
     allowExpensiveQueries,
   ] = useBatchedPublishingSubjects(
     componentApi.searchTechnique$,
@@ -76,6 +77,7 @@ export const OptionsListPopoverActionBar = ({
     componentApi.invalidSelections$,
     componentApi.totalCardinality$,
     componentApi.field$,
+    componentApi.fieldName$,
     componentApi.parentApi.allowExpensiveQueries$
   );
 
@@ -108,6 +110,7 @@ export const OptionsListPopoverActionBar = ({
             placeholder={OptionsListStrings.popover.getSearchPlaceholder(
               allowExpensiveQueries ? defaultSearchTechnique : 'exact'
             )}
+            aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
           />
         </EuiFormRow>
       )}
