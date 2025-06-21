@@ -12,6 +12,8 @@ export enum QueryKeys {
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
   SearchDocuments = 'searchDocuments',
+  FetchSampleDataStatus = 'fetchSampleDataStatus',
+  IngestSampleData = 'ingestSampleData',
 }
 
 export enum MutationKeys {
