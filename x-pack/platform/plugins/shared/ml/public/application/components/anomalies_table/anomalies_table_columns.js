@@ -118,7 +118,7 @@ export function getColumns(
       name: (
         <span>
           {i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
-            defaultMessage: 'Severity',
+            defaultMessage: 'Score',
           })}
           &nbsp;
           <EuiIconTip

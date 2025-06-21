@@ -16,6 +16,7 @@ import {
   EuiLoadingChart,
   EuiResizeObserver,
   EuiText,
+  transparentize,
 } from '@elastic/eui';
 
 import { throttle } from 'lodash';
@@ -39,8 +40,8 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
 import {
   getFormattedSeverityScore,
+  getThemeResolvedSeverityColor,
   ML_ANOMALY_THRESHOLD,
-  ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
@@ -333,7 +334,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         brushMask: {
           visible: showBrush,
-          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+          fill: isDarkTheme
+            ? transparentize(euiTheme.colors.backgroundBaseSubdued, 0.65)
+            : 'rgb(247,247,247,50%)',
         },
         brushArea: {
           visible: showBrush,
@@ -495,27 +498,42 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                               {
                                 start: ML_ANOMALY_THRESHOLD.LOW,
                                 end: ML_ANOMALY_THRESHOLD.WARNING,
-                                color: ML_SEVERITY_COLORS.LOW,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.LOW,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.WARNING,
                                 end: ML_ANOMALY_THRESHOLD.MINOR,
-                                color: ML_SEVERITY_COLORS.WARNING,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.WARNING,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.MINOR,
                                 end: ML_ANOMALY_THRESHOLD.MAJOR,
-                                color: ML_SEVERITY_COLORS.MINOR,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.MINOR,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.MAJOR,
                                 end: ML_ANOMALY_THRESHOLD.CRITICAL,
-                                color: ML_SEVERITY_COLORS.MAJOR,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.MAJOR,
+                                  euiTheme
+                                ),
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.CRITICAL,
                                 end: Infinity,
-                                color: ML_SEVERITY_COLORS.CRITICAL,
+                                color: getThemeResolvedSeverityColor(
+                                  ML_ANOMALY_THRESHOLD.CRITICAL,
+                                  euiTheme
+                                ),
                               },
                             ],
                           }}

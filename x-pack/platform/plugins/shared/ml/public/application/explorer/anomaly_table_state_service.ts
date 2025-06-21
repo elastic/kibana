@@ -27,10 +27,11 @@ import { ML_JOB_AGGREGATION, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import type { UrlStateService } from '@kbn/ml-url-state';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { TableSeverity } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity/select_severity';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -63,7 +64,7 @@ export class AnomalyTableStateService extends StateService {
     private readonly timefilter: TimefilterContract,
     private readonly anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private readonly anomalyTimelineStateService: AnomalyTimelineStateService,
-    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverity>,
+    private readonly tableSeverityUrlStateService: UrlStateService<TableSeverityState>,
     private readonly tableIntervalUrlStateService: UrlStateService<TableInterval>
   ) {
     super();
@@ -158,7 +159,7 @@ export class AnomalyTableStateService extends StateService {
     selectedJobs: ExplorerJob[],
     fieldName: string,
     tableInterval: string,
-    tableSeverity: number,
+    tableSeverity: SeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Observable<AnomaliesTableData | null> {
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);

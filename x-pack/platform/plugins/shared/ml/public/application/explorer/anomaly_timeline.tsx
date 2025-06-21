@@ -28,8 +28,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -57,7 +57,7 @@ import {
   type ViewBySwimLaneData,
 } from './explorer_utils';
 import { NoOverallData } from './components/no_overall_data';
-import { SeverityControl } from '../components/severity_control';
+import { SeverityLegendControl } from './components/severity_legend_control/severity_legend_control';
 import { AnomalyTimelineHelpPopover } from './anomaly_timeline_help_popover';
 import { MlTooltipComponent } from '../components/chart_tooltip';
 import { SwimlaneAnnotationContainer } from './swimlane_annotation_container';
@@ -69,6 +69,9 @@ import { Y_AXIS_LABEL_WIDTH } from './constants';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
+import type { SeverityOption } from './hooks/use_severity_options';
+import { useSeverityOptions } from './hooks/use_severity_options';
+import { useThresholdToSeverity } from './hooks/use_threshold_to_severity';
 
 function mapSwimlaneOptionsToEuiOptions(options: string[]) {
   return options.map((option) => ({
@@ -151,6 +154,41 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       anomalyTimelineStateService.getSelectedCells()
     );
     const swimLaneSeverity = useObservable(anomalyTimelineStateService.getSwimLaneSeverity$());
+
+    const severityOptions = useSeverityOptions();
+    const thresholdToSeverity = useThresholdToSeverity();
+
+    const [severityUpdate, setSeverityUpdate] = useState<SeverityOption[] | null>(null);
+
+    useDebounce(
+      () => {
+        if (severityUpdate) {
+          const thresholds = severityUpdate.map((severity) => severity.threshold);
+          anomalyTimelineStateService.setSeverity(thresholds);
+          setSeverityUpdate(null);
+        }
+      },
+      500,
+      [severityUpdate]
+    );
+
+    // Use local state for immediate feedback, fall back to URL state
+    const selectedSeverityOptions = useMemo(() => {
+      if (severityUpdate) {
+        return severityUpdate;
+      }
+
+      if (!swimLaneSeverity?.length) {
+        return severityOptions;
+      }
+
+      return thresholdToSeverity(swimLaneSeverity);
+    }, [severityUpdate, swimLaneSeverity, severityOptions, thresholdToSeverity]);
+
+    const handleSeverityChange = useCallback((newSelectedSeverities: SeverityOption[]) => {
+      setSeverityUpdate(newSelectedSeverities);
+    }, []);
+
     const viewBySwimlaneFieldName = useObservable(
       anomalyTimelineStateService.getViewBySwimlaneFieldName$()
     );
@@ -165,10 +203,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       anomalyTimelineStateService.getSwimLanePagination()
     );
 
-    const [severityUpdate, setSeverityUpdate] = useState(
-      anomalyTimelineStateService.getSwimLaneSeverity()
-    );
-
     const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType | undefined>();
 
     const timeRange = getTimeBoundsFromSelection(selectedCells);
@@ -179,15 +213,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
         )}`
       : null;
 
-    useDebounce(
-      () => {
-        if (severityUpdate === swimLaneSeverity) return;
-        anomalyTimelineStateService.setSeverity(severityUpdate!);
-      },
-      500,
-      [severityUpdate, swimLaneSeverity]
-    );
-
     const openCasesModalCallback = useCasesModal(
       ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       CASES_TOAST_MESSAGES_TITLES.ANOMALY_TIMELINE
@@ -197,7 +222,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       (swimLaneType: SwimlaneType) => {
         openCasesModalCallback({
           swimlaneType: swimLaneType,
-          ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
+          ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY
+            ? {
+                viewBy: viewBySwimlaneFieldName,
+              }
+            : {}),
           // For cases attachment, pass just the job IDs to maintain stale data
           jobIds: selectedJobs?.map((v) => v.id),
           timeRange: globalTimeRange,
@@ -373,7 +402,9 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           jobIds: mergedGroupsAndJobsIds,
           swimlaneType: selectedSwimlane,
           ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
-            ? { viewBy: viewBySwimlaneFieldName }
+            ? {
+                viewBy: viewBySwimlaneFieldName,
+              }
             : {}),
           ...(queryString !== undefined
             ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
@@ -454,7 +485,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="baseline">
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="baseline" wrap>
             {viewBySwimlaneOptions.length > 0 && (
               <>
                 <EuiFlexItem grow={false}>
@@ -474,12 +505,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               </>
             )}
 
-            <EuiFlexItem grow={true} css={{ maxWidth: '500px' }}>
-              <SeverityControl
-                value={severityUpdate ?? 0}
-                onChange={useCallback((update: number | undefined) => {
-                  setSeverityUpdate(update);
-                }, [])}
+            <EuiFlexItem grow={false} css={{ minWidth: '280px' }}>
+              <SeverityLegendControl
+                allSeverityOptions={severityOptions}
+                selectedSeverities={selectedSeverityOptions}
+                onChange={handleSeverityChange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

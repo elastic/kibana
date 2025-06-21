@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import {
   getAnomalyScoreExplanationImpactValue,
-  getSeverityColor,
   showActualForFunction,
   showTypicalForFunction,
   type MlAnomaliesTableRecord,
   type MlAnomalyRecordDoc,
   ML_JOB_AGGREGATION,
+  useSeverityColor,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import type { EntityCellFilter } from '../entity_cell';
@@ -641,13 +641,14 @@ export const AnomalyExplanationDetails: FC<{ anomaly: MlAnomaliesTableRecord }> 
 };
 
 const RecordScore: FC<{ score: number }> = ({ score }) => {
+  const color = useSeverityColor(score);
   return (
     <div
       css={{
         borderBottom: '2px solid',
       }}
       style={{
-        borderBottomColor: getSeverityColor(score),
+        borderBottomColor: color,
       }}
     >
       {score}
