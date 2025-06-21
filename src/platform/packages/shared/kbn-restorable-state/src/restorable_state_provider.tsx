@@ -21,8 +21,9 @@ import React, {
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
+import { BehaviorSubject } from 'rxjs';
 
-export interface RestorableStateContext<TState extends object> {
+export interface RestorableStateProviderProps<TState extends object> {
   initialState?: TState;
   onInitialStateChange?: (initialState: TState) => void;
 }
@@ -31,15 +32,22 @@ export interface RestorableStateProviderApi {
   refreshInitialState: () => void;
 }
 
+type RestorableStateContext<TState extends object> = Pick<
+  RestorableStateProviderProps<TState>,
+  'onInitialStateChange'
+> & {
+  initialState$: BehaviorSubject<TState | undefined>;
+};
+
 export const createRestorableStateProvider = <TState extends object>() => {
   const context = createContext<RestorableStateContext<TState>>({
-    initialState: undefined,
+    initialState$: new BehaviorSubject<TState | undefined>(undefined),
     onInitialStateChange: undefined,
   });
 
   const RestorableStateProvider = forwardRef<
     RestorableStateProviderApi,
-    PropsWithChildren<RestorableStateContext<TState>>
+    PropsWithChildren<RestorableStateProviderProps<TState>>
   >(function RestorableStateProvider(
     {
       initialState: currentInitialState,
@@ -48,32 +56,31 @@ export const createRestorableStateProvider = <TState extends object>() => {
     },
     ref
   ) {
-    // TODO: Might make sense to use a BehaviorSubject instead to stabilize the reference
-    const [initialState, setInitialState] = useState(currentInitialState);
+    const [initialState$] = useState(() => new BehaviorSubject(currentInitialState));
     const onInitialStateChange = useStableFunction((newInitialState: TState) => {
-      setInitialState(newInitialState);
+      initialState$.next(newInitialState);
       currentOnInitialStateChange?.(newInitialState);
     });
 
     useImperativeHandle(
       ref,
-      () => ({ refreshInitialState: () => setInitialState(currentInitialState) }),
-      [currentInitialState]
+      () => ({ refreshInitialState: () => initialState$.next(currentInitialState) }),
+      [currentInitialState, initialState$]
     );
 
-    const value = useMemo(
+    const value = useMemo<RestorableStateContext<TState>>(
       () => ({
-        initialState,
+        initialState$,
         onInitialStateChange,
       }),
-      [initialState, onInitialStateChange]
+      [initialState$, onInitialStateChange]
     );
 
     return <context.Provider value={value}>{children}</context.Provider>;
   });
 
   const withRestorableState = <TProps extends object>(Component: React.ComponentType<TProps>) =>
-    forwardRef<RestorableStateProviderApi, TProps & RestorableStateContext<TState>>(
+    forwardRef<RestorableStateProviderApi, TProps & RestorableStateProviderProps<TState>>(
       function RestorableStateProviderHOC({ initialState, onInitialStateChange, ...props }, ref) {
         return (
           <RestorableStateProvider
@@ -93,14 +100,17 @@ export const createRestorableStateProvider = <TState extends object>() => {
     initialValue: TState[TKey] | (() => TState[TKey]),
     shouldIgnoredRestoredValue?: (restoredValue: TState[TKey]) => boolean
   ) => {
-    const { initialState, onInitialStateChange } = useContext(context);
+    const { initialState$, onInitialStateChange } = useContext(context);
     const [value, _setValue] = useState(() => {
+      const initialState = initialState$.getValue();
+
       if (initialState && key in initialState && !shouldIgnoredRestoredValue?.(initialState[key])) {
         return initialState[key];
       }
       if (typeof initialValue === 'function') {
         return (initialValue as () => TState[TKey])();
       }
+
       return initialValue;
     });
 
@@ -111,11 +121,9 @@ export const createRestorableStateProvider = <TState extends object>() => {
             ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
             : newValue;
 
-        setTimeout(() => {
-          // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
-          // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
-          onInitialStateChange?.({ ...initialState, [key]: nextValue } as TState);
-        }, 0);
+        // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
+        // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
+        onInitialStateChange?.({ ...initialState$.getValue(), [key]: nextValue } as TState);
 
         return nextValue;
       });
@@ -125,13 +133,14 @@ export const createRestorableStateProvider = <TState extends object>() => {
   };
 
   const useRestorableRef = <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey]) => {
-    const { initialState, onInitialStateChange } = useContext(context);
+    const { initialState$, onInitialStateChange } = useContext(context);
+    const initialState = initialState$.getValue();
     const valueRef = useRef<TState[TKey]>(
       initialState?.[key] !== undefined ? initialState[key] : initialValue
     );
 
     useUnmount(() => {
-      onInitialStateChange?.({ ...initialState, [key]: valueRef.current } as TState);
+      onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current } as TState);
     });
 
     return valueRef;
