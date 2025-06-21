@@ -18,6 +18,7 @@ import type {
   WCISalesforcePluginSetupDependencies,
   WCISalesforcePluginStartDependencies,
 } from './types';
+import { registerRoutes } from './routes';
 import { getSalesforceIntegrationDefinition } from './integration';
 
 export class WCISalesforcePlugin
@@ -36,9 +37,15 @@ export class WCISalesforcePlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<WCISalesforcePluginStartDependencies>,
     { workchatApp }: WCISalesforcePluginSetupDependencies
   ): WCISalesforcePluginSetup {
+    const router = core.http.createRouter();
+    registerRoutes({
+      core,
+      logger: this.logger,
+      router,
+    });
     workchatApp.integrations.register(
       getSalesforceIntegrationDefinition({
         core,
