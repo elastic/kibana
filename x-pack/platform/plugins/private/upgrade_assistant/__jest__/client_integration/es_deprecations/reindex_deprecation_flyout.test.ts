@@ -71,47 +71,6 @@ describe('Reindex deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('opens a flyout when clicking in any part of the row', async () => {
-    const { actions, exists } = testBed;
-
-    await actions.table.clickReindexColumnAt('level', 0);
-    expect(exists('reindexDetails')).toBe(true);
-    await actions.reindexDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDetails')).toBe(false);
-
-    await actions.table.clickReindexColumnAt('message', 0);
-    expect(exists('reindexDetails')).toBe(true);
-    await actions.reindexDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDetails')).toBe(false);
-
-    await actions.table.clickReindexColumnAt('type', 0);
-    expect(exists('reindexDetails')).toBe(true);
-    await actions.reindexDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDetails')).toBe(false);
-
-    await actions.table.clickReindexColumnAt('index', 0);
-    expect(exists('reindexDetails')).toBe(true);
-    await actions.reindexDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDetails')).toBe(false);
-
-    await actions.table.clickReindexColumnAt('correctiveAction', 0);
-    expect(exists('reindexDetails')).toBe(true);
-    await actions.reindexDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDetails')).toBe(false);
-  });
-
-  it('renders a flyout with reindexing details', async () => {
-    const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-
-    expect(exists('reindexDetails')).toBe(true);
-    expect(find('reindexDetails.flyoutTitle').text()).toContain(
-      `Update ${reindexDeprecation.index}`
-    );
-  });
-
   it('renders error callout when reindex fails', async () => {
     httpRequestsMockHelpers.setStartReindexingResponse(MOCK_REINDEX_DEPRECATION.index!, undefined, {
       statusCode: 404,
@@ -120,7 +79,11 @@ describe('Reindex deprecation flyout', () => {
 
     const { actions, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('reindex', 0);
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
     await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
     await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
     expect(exists('reindexDetails')).toBe(true);
@@ -135,14 +98,32 @@ describe('Reindex deprecation flyout', () => {
 
     const { actions, exists } = testBed;
 
-    await actions.table.clickDeprecationRowAt('reindex', 0);
-    await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
+    await actions.table.clickDeprecationRowAt({
+      deprecationType: 'reindex',
+      index: 0,
+      action: 'reindex',
+    });
     await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
     expect(exists('reindexDetails.fetchFailedCallout')).toBe(true);
   });
 
   describe('reindexing progress', () => {
+    it('renders a flyout with index confirm step for reindex', async () => {
+      const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
+
+      expect(exists('reindexDetails')).toBe(true);
+      expect(find('reindexDetails.flyoutTitle').text()).toContain(
+        `Reindex ${reindexDeprecation.index}`
+      );
+    });
     it('has started but not yet reindexing documents', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
         reindexOp: {
@@ -157,7 +138,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -179,7 +164,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -201,7 +190,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -223,7 +216,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find, exists, component } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -255,7 +252,11 @@ describe('Reindex deprecation flyout', () => {
 
       const { actions, find } = testBed;
 
-      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'reindex',
+      });
       await actions.reindexDeprecationFlyout.clickReindexButton(); // details step
       await actions.reindexDeprecationFlyout.clickReindexButton(); // warning step
 
@@ -264,60 +265,6 @@ describe('Reindex deprecation flyout', () => {
       expect(find('impactedNodeListItem').at(0).text()).toContain(
         'MacBook-Pro.local (25% available)'
       );
-    });
-  });
-
-  describe('follower index', () => {
-    it('displays follower index callout and only shows mark as read-only button when index is a follower index', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
-        reindexOp: null,
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: {
-          ...defaultReindexStatusMeta,
-          isFollowerIndex: true,
-        },
-      });
-
-      await act(async () => {
-        testBed = await setupElasticsearchPage(httpSetup);
-      });
-
-      testBed.component.update();
-
-      const { actions, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      // Verify follower index callout is displayed
-      expect(exists('followerIndexCallout')).toBe(true);
-
-      // Verify only mark as read-only button is available (no reindex button)
-      expect(exists('startIndexReadonlyButton')).toBe(true);
-      expect(exists('startReindexingButton')).toBe(false);
-    });
-
-    it('shows both mark as read-only and reindex buttons for regular (non-follower) indices', async () => {
-      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
-        reindexOp: null,
-        warnings: [],
-        hasRequiredPrivileges: true,
-        meta: {
-          ...defaultReindexStatusMeta,
-          isFollowerIndex: false,
-        },
-      });
-
-      const { actions, exists } = testBed;
-
-      await actions.table.clickDeprecationRowAt('reindex', 0);
-
-      // Verify follower index callout is not displayed
-      expect(exists('followerIndexCallout')).toBe(false);
-
-      // Verify both buttons are available for regular indices
-      expect(exists('startIndexReadonlyButton')).toBe(true);
-      expect(exists('startReindexingButton')).toBe(true);
     });
   });
 });

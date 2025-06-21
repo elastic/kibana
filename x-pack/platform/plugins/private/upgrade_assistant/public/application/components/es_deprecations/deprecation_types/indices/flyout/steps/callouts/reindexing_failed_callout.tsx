@@ -30,7 +30,7 @@ export const ReindexingFailedCallOut: React.FunctionComponent<Props> = (props) =
       >
         {errorMessage}
       </EuiCallOut>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
     </Fragment>
   );
 };

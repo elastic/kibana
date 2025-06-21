@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { InitializingFlyoutStep } from './initializing_step';
+export { NoPrivilegesCallout } from './noRequiredPrivileges';
+export { FetchFailedCallout } from './fetchFailed';

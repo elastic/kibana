@@ -16,14 +16,13 @@ import {
   EuiFlyoutFooter,
   EuiLink,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   DataStreamMigrationWarning,
   DataStreamWarningTypes,
   DataStreamMetadata,
-  DataStreamResolutionType,
 } from '../../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../../app_context';
 import {
@@ -32,7 +31,9 @@ import {
   AffectExistingSetupsWarningCheckbox,
 } from './warnings';
 
-import { ReindexWarningCallout, ReadonlyWarningCallout } from './callouts';
+import { ReindexWarningCallout } from './callouts';
+import { DurationClarificationCallOut } from './warnings/warnings_callout';
+import { NodesLowSpaceCallOut } from '../../../../../common/nodes_low_disk_space';
 interface CheckedIds {
   [id: string]: boolean;
 }
@@ -51,15 +52,16 @@ export const idForWarning = (id: number) => `migrationWarning-${id}`;
  * Displays warning text about changes required to migrate this data stream. The user
  * must acknowledge each change before being allowed to proceed.
  */
-export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
-  hideWarningsStep: () => void;
+export const ConfirmMigrationReindexFlyoutStep: React.FunctionComponent<{
+  closeFlyout: () => void;
   startAction: () => void;
-  resolutionType: DataStreamResolutionType;
   warnings: DataStreamMigrationWarning[];
   meta: DataStreamMetadata;
-}> = ({ warnings, hideWarningsStep, startAction, resolutionType, meta }) => {
+  lastIndexCreationDateFormatted: string;
+}> = ({ closeFlyout, warnings, startAction, meta, lastIndexCreationDateFormatted }) => {
   const {
     services: {
+      api,
       core: { docLinks },
     },
   } = useAppContext();
@@ -71,6 +73,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
     }, {} as { [id: string]: boolean })
   );
 
+  const { data: nodes } = api.useLoadNodeDiskSpace();
   // Do not allow to proceed until all checkboxes are checked.
   const blockAdvance = Object.values(checkedIds).filter((v) => v).length < warnings.length;
 
@@ -85,72 +88,33 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
     }));
   };
 
-  const startActionButtonLabel =
-    resolutionType === 'reindex'
-      ? i18n.translate(
-          'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.startActionButtonLabel',
-          {
-            defaultMessage: 'Start reindexing',
-          }
-        )
-      : i18n.translate(
-          'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.startActionButtonLabel',
-          {
-            defaultMessage: 'Mark all read-only',
-          }
-        );
-
-  const actionClarification =
-    resolutionType === 'reindex' ? (
-      <>
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle"
-            defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
-            values={{
-              count: meta.indicesRequiringUpgradeCount,
-            }}
-          />
-        </p>
-        <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle"
-            defaultMessage="You can increase the speed of reindexing by changing throttling configuration on ES. Where changing throttling configuration allows you to utilize more resources to speed up the reindexing process. {learnMoreHtml}"
-            values={{
-              learnMoreHtml: (
-                <EuiLink href={links.upgradeAssistant.dataStreamReindex} target="_blank">
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </>
-    ) : (
-      <p>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle"
-          defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be marked as read-only."
-          values={{
-            count: meta.indicesRequiringUpgradeCount,
-          }}
-        />
-      </p>
-    );
-
   return (
     <>
       <EuiFlyoutBody>
+        <DurationClarificationCallOut
+          formattedDate={lastIndexCreationDateFormatted}
+          learnMoreUrl={meta.documentationUrl}
+        />
+        {nodes && nodes.length > 0 && <NodesLowSpaceCallOut nodes={nodes} />}
         {warnings.length > 0 && (
           <>
-            {resolutionType === 'reindex' && <ReindexWarningCallout />}
-            {resolutionType === 'readonly' && <ReadonlyWarningCallout />}
-            <EuiSpacer />
-            {actionClarification}
+            <ReindexWarningCallout />
+            <EuiText>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.speedUpMessage"
+                defaultMessage="You can increase the speed of reindexing by changing throttling configuration on ES. Where changing throttling configuration allows you to utilize more resources to speed up the reindexing process. {learnMoreHtml}"
+                values={{
+                  learnMoreHtml: (
+                    <EuiLink href={links.upgradeAssistant.dataStreamReindex} target="_blank">
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
+                        defaultMessage="Learn more"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
             <EuiSpacer size="m" />
             {warnings.map((warning, index) => {
               const WarningCheckbox = warningToComponentMap[warning.warningType];
@@ -173,14 +137,14 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
-              onClick={hideWarningsStep}
+              iconType="cross"
+              onClick={closeFlyout}
               flush="left"
-              data-test-subj="backButton"
+              data-test-subj="closeDataStreamConfirmStepButton"
             >
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.backButtonLabel"
-                defaultMessage="Back"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.confirmStep.closeButtonLabel"
+                defaultMessage="Close"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -192,7 +156,10 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
               disabled={blockAdvance}
               data-test-subj="startActionButton"
             >
-              {startActionButtonLabel}
+              <FormattedMessage
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.confirmStep.startActionButtonLabel"
+                defaultMessage="Start reindexing"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
