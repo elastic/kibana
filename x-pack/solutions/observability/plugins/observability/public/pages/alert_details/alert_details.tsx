@@ -59,6 +59,8 @@ import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
+import { ProximalAlertsCallout } from './proximal_alerts_callout';
+import { useGetTabId } from './hooks/use_get_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
@@ -90,6 +92,7 @@ const isTabId = (value: string): value is TabId => {
 };
 
 export function AlertDetails() {
+  const { services } = useKibana();
   const {
     cases: {
       helpers: { canUseCases },
@@ -100,12 +103,15 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-  } = useKibana().services;
-
+    application: { navigateToUrl },
+  } = services;
+  const { basePath } = http;
+  const { onPageReady } = usePerformanceContext();
   const { search } = useLocation();
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const passedTab = useGetTabId();
   const {
     isLoadingRelatedDashboards,
     suggestedDashboards,
@@ -174,8 +180,9 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      if (passedTab === 'overview' || passedTab === null) setActiveTabId('overview');
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [passedTab, alertDetail, ruleTypeRegistry]);
 
   useBreadcrumbs(
     [
@@ -198,6 +205,15 @@ export function AlertDetails() {
   const onUntrackAlert = useCallback(() => {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
+
+  const showRelatedAlertsFromCallout = () => {
+    handleSetTabId('related_alerts');
+    navigateToUrl(
+      `${basePath.prepend(
+        paths.observability.alerts
+      )}/${alertId}?tabId=related_alerts&filterProximal=true`
+    );
+  };
 
   usePageReady({
     isRefreshing: isLoading,
@@ -253,6 +269,10 @@ export function AlertDetails() {
 
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
+          <ProximalAlertsCallout
+            alertDetail={alertDetail}
+            switchTabs={showRelatedAlertsFromCallout}
+          />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
@@ -273,6 +293,11 @@ export function AlertDetails() {
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
+        <ProximalAlertsCallout
+          alertDetail={alertDetail}
+          switchTabs={showRelatedAlertsFromCallout}
+        />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />
