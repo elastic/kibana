@@ -43,7 +43,7 @@ export class ProductDocBasePlugin
     return {
       installation: {
         getStatus: () => installationService.getInstallationStatus(),
-        install: () => installationService.install(),
+        install: (params: { inferenceId?: string } = {}) => installationService.install(params),
         uninstall: () => installationService.uninstall(),
       },
     };

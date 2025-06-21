@@ -63,7 +63,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions = {}): Promise<void> {
-    const { request, force = false, wait = false } = options;
+    const { request, force = false, wait = false, inferenceId } = options;
 
     const { status } = await this.getStatus();
     if (!force && status === 'installed') {
@@ -78,11 +78,14 @@ export class DocumentationManager implements DocumentationManagerAPI {
     const taskId = await scheduleInstallAllTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
     });
 
     if (request) {
       this.auditService.asScoped(request).log({
-        message: `User is requesting installation of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        message:
+          `User is requesting installation of product documentation for AI Assistants. Task ID=[${taskId}]` +
+          (inferenceId ? `| Inference ID=[${inferenceId}]` : ''),
         event: {
           action: 'product_documentation_create',
           category: ['database'],
@@ -101,8 +104,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
+  // @TODO: add Inference ID?
   async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { request, wait = false } = options;
+    const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -111,7 +115,9 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
     if (request) {
       this.auditService.asScoped(request).log({
-        message: `User is requesting update of product documentation for AI Assistants. Task ID=[${taskId}]`,
+        message:
+          `User is requesting update of product documentation for AI Assistants. Task ID=[${taskId}]` +
+          (inferenceId ? `| Inference ID=[${inferenceId}]` : ''),
         event: {
           action: 'product_documentation_update',
           category: ['database'],

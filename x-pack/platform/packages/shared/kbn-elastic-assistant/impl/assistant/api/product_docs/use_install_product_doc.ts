@@ -11,7 +11,6 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { PerformInstallResponse } from '@kbn/product-doc-base-plugin/common/http_api/installation';
 import { REACT_QUERY_KEYS } from './const';
 import { useAssistantContext } from '../../../..';
-
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useInstallProductDoc() {
@@ -20,8 +19,8 @@ export function useInstallProductDoc() {
 
   return useMutation<PerformInstallResponse, ServerError, void>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
-    () => {
-      return productDocBase.installation.install();
+    (inferenceId?: string) => {
+      return productDocBase.installation.install({ inferenceId });
     },
     {
       onSuccess: () => {

@@ -8,12 +8,26 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-export const ensureDefaultElserDeployed = async ({ client }: { client: ElasticsearchClient }) => {
+export const ensureInferenceDeployed = async ({
+  client,
+  inferenceId,
+}: {
+  client: ElasticsearchClient;
+  inferenceId?: string;
+}) => {
+  if (!inferenceId) return;
   await client.inference.inference(
     {
-      inference_id: defaultInferenceEndpoints.ELSER,
+      inference_id: inferenceId,
       input: 'I just want to call the API to force the model to download and allocate',
     },
     { requestTimeout: 10 * 60 * 1000 }
   );
+};
+
+export const ensureDefaultElserDeployed = async ({ client }: { client: ElasticsearchClient }) => {
+  await ensureInferenceDeployed({
+    client,
+    inferenceId: defaultInferenceEndpoints.ELSER,
+  });
 };

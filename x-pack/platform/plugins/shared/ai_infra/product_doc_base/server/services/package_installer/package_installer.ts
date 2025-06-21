@@ -22,6 +22,7 @@ import {
   loadManifestFile,
   ensureDefaultElserDeployed,
   type ZipArchive,
+  ensureInferenceDeployed,
 } from './utils';
 import { majorMinor, latestVersion } from './utils/semver';
 import {
@@ -109,7 +110,8 @@ export class PackageInstaller {
     }
   }
 
-  async installAll({}: {}) {
+  async installAll(params: { inferenceId?: string } = {}) {
+    const { inferenceId } = params;
     const repositoryVersions = await fetchArtifactVersions({
       artifactRepositoryUrl: this.artifactRepositoryUrl,
     });
@@ -125,6 +127,7 @@ export class PackageInstaller {
       await this.installPackage({
         productName,
         productVersion: selectedVersion,
+        inferenceId,
       });
     }
   }
@@ -132,9 +135,11 @@ export class PackageInstaller {
   async installPackage({
     productName,
     productVersion,
+    inferenceId,
   }: {
     productName: ProductName;
     productVersion: string;
+    inferenceId?: string;
   }) {
     this.log.info(
       `Starting installing documentation for product [${productName}] and version [${productVersion}]`
@@ -150,6 +155,14 @@ export class PackageInstaller {
         productName,
         productVersion,
       });
+
+      if (inferenceId || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
+        // @TODO: Verify if inference is appropriate type before ensure deployment?
+        await ensureInferenceDeployed({
+          client: this.esClient,
+          inferenceId,
+        });
+      }
 
       if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
         await ensureDefaultElserDeployed({
@@ -181,7 +194,7 @@ export class PackageInstaller {
         mappings,
         manifestVersion,
         esClient: this.esClient,
-        elserInferenceId: this.elserInferenceId,
+        inferenceId: inferenceId ?? this.elserInferenceId,
         log: this.log,
       });
 
@@ -191,7 +204,7 @@ export class PackageInstaller {
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,
-        elserInferenceId: this.elserInferenceId,
+        inferenceId: inferenceId ?? this.elserInferenceId,
       });
       await this.productDocClient.setInstallationSuccessful(productName, indexName);
 

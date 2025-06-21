@@ -26,8 +26,12 @@ export class InstallationService {
     return await this.http.get<InstallationStatusResponse>(INSTALLATION_STATUS_API_PATH);
   }
 
-  async install(): Promise<PerformInstallResponse> {
-    const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH);
+  async install(params: { inferenceId?: string } = {}): Promise<PerformInstallResponse> {
+    const { inferenceId } = params;
+
+    const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH, {
+      body: JSON.stringify({ inferenceId }),
+    });
     if (!response.installed) {
       throw new Error('Installation did not complete successfully');
     }
