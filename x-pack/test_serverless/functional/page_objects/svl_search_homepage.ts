@@ -47,11 +47,42 @@ export function SvlSearchHomePageProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail('connectionDetailsEsUrl');
       await testSubjects.existOrFail('connectionDetailsCloudIdSwitch');
     },
-    async expectAPIKeyTabIsAvailable() {
-      await testSubjects.existOrFail('connectionDetailsTabBtn-apiKeys');
-      await testSubjects.click('connectionDetailsTabBtn-apiKeys');
-      await testSubjects.existOrFail('connectionDetailsApiKeyNameInput');
-      await testSubjects.existOrFail('connectionDetailsApiKeySubmitBtn');
+    async clickManageApiKeysLink() {
+      await testSubjects.existOrFail('manageApiKeysButton');
+      await testSubjects.click('manageApiKeysButton');
+    },
+    async expectToBeOnManageApiKeysPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/management/security/api_keys');
+    },
+    async expectToBeOnUploadDataPage() {
+      expect(await browser.getCurrentUrl()).contain('ml/filedatavisualizer');
+    },
+    async expectToBeOnCustomerEngineerPage() {
+      expect(await browser.getCurrentUrl()).contain('contact/ce-help');
+    },
+    async expectToBeOnCreateIndexPage() {
+      expect(await browser.getCurrentUrl()).contain('app/elasticsearch/indices/create');
+    },
+    async expectToBeOnObservabilityPage() {
+      expect(await browser.getCurrentUrl()).contain('manage-data/ingest');
+    },
+    async expectToBeOnSpacesCreatePage() {
+      expect(await browser.getCurrentUrl()).contain('observability/start');
+    },
+    async expectToBeOnSearchLabsPage() {
+      expect(await browser.getCurrentUrl()).contain('search-labs');
+    },
+    async expectToBeOnNotebooksExamplesPage() {
+      expect(await browser.getCurrentUrl()).contain('search-labs/tutorials/examples');
+    },
+    async expectToBeOnGetStartedDocumentationPage() {
+      expect(await browser.getCurrentUrl()).contain('docs/solutions/search/get-started');
+    },
+    async expectToBeOnCommunityPage() {
+      expect(await browser.getCurrentUrl()).contain('community/');
+    },
+    async expectToBeOnGiveFeedbackPage() {
+      expect(await browser.getCurrentUrl()).contain('kibana/feedback');
     },
     async createApiKeyInFlyout(keyName: string) {
       await testSubjects.existOrFail('connectionDetailsApiKeyNameInput');
