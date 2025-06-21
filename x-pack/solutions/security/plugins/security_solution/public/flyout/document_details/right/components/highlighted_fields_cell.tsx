@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
@@ -58,14 +59,24 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <>
+    <div
+      css={css`
+        div {
+          margin-bottom: ${euiTheme.size.xs};
+        }
+
+        div:last-child {
+          margin-bottom: 0;
+        }
+      `}
+    >
       {values != null &&
         values.map((value, i) => {
           return (
-            <EuiFlexItem
-              grow={false}
+            <div
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
@@ -83,11 +94,11 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
                   data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
                 />
               ) : (
-                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
+                <div data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</div>
               )}
-            </EuiFlexItem>
+            </div>
           );
         })}
-    </>
+    </div>
   );
 };

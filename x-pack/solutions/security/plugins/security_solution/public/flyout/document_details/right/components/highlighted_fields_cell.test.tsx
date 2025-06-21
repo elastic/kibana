@@ -176,4 +176,20 @@ describe('<HighlightedFieldsCell />', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('applies margin-bottom to non-last entries only', () => {
+    // render two values so we get a non-last and a last
+    const { getAllByTestId } = renderHighlightedFieldsCell(
+      ['first', 'second'],
+      'some.field',
+      false
+    );
+
+    const [firstEntry, secondEntry] = getAllByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID);
+
+    // non-last should have margin-bottom
+    expect(firstEntry).toHaveStyleRule('margin-bottom', '8px');
+    // last entry should not
+    expect(secondEntry).not.toHaveStyleRule('margin-bottom');
+  });
 });
