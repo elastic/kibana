@@ -49,6 +49,9 @@ const enhanceDataStreams = ({
         manage_data_stream_lifecycle: dataStreamsPrivileges
           ? dataStreamsPrivileges.index[dataStream.name].manage_data_stream_lifecycle
           : true,
+        read_failure_store: dataStreamsPrivileges
+          ? dataStreamsPrivileges.index[dataStream.name].read_failure_store
+          : true,
       },
     };
 
@@ -113,7 +116,7 @@ const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[])
       index: [
         {
           names,
-          privileges: ['delete_index', 'manage_data_stream_lifecycle'],
+          privileges: ['delete_index', 'manage_data_stream_lifecycle', 'read_failure_store'],
         },
       ],
     },
@@ -167,6 +170,13 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         const isLogsdbEnabled =
           (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
+        // Get failure store cluster settings
+        const failureStoreSettings = {
+          enabled:
+            persistent?.data_streams?.failure_store?.enabled ??
+            defaults?.data_streams?.failure_store?.enabled,
+        };
+
         // Only take the lifecycle of the first data stream since all data streams have the same global retention period
         const lifecycle = await getDataStreamLifecycle(client, dataStreams[0].name);
         // @ts-ignore - TS doesn't know about the `global_retention` property yet
@@ -181,7 +191,11 @@ export function registerGetAllRoute({ router, lib: { handleEsError }, config }: 
         });
 
         return response.ok({
-          body: deserializeDataStreamList(enhancedDataStreams, isLogsdbEnabled),
+          body: deserializeDataStreamList(
+            enhancedDataStreams,
+            isLogsdbEnabled,
+            failureStoreSettings
+          ),
         });
       } catch (error) {
         return handleEsError({ error, response });
@@ -233,6 +247,17 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsPrivileges = await getDataStreamsPrivileges(client, [dataStreams[0].name]);
           }
 
+          const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
+            include_defaults: true,
+          });
+
+          // Get failure store cluster settings
+          const failureStoreSettings = {
+            enabled:
+              persistent?.data_streams?.failure_store?.enabled ??
+              defaults?.data_streams?.failure_store?.enabled,
+          };
+
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
@@ -240,14 +265,14 @@ export function registerGetOneRoute({ router, lib: { handleEsError }, config }: 
             dataStreamsPrivileges,
             globalMaxRetention,
           });
-
-          const { persistent, defaults } = await client.asInternalUser.cluster.getSettings({
-            include_defaults: true,
-          });
           const isLogsdbEnabled =
             (persistent?.cluster?.logsdb?.enabled ?? defaults?.cluster?.logsdb?.enabled) === 'true';
 
-          const body = deserializeDataStream(enhancedDataStreams[0], isLogsdbEnabled);
+          const body = deserializeDataStream(
+            enhancedDataStreams[0],
+            isLogsdbEnabled,
+            failureStoreSettings
+          );
           return response.ok({ body });
         }
 

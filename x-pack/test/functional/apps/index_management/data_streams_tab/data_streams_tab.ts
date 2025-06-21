@@ -182,5 +182,53 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('configure failure store modal', function () {
+      it('allows to configure failure store from details panel', async () => {
+        // Open details flyout
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
+        // Open the configure failure store dialog
+        await testSubjects.click('manageDataStreamButton');
+        await testSubjects.click('configureFailureStoreButton');
+
+        // Verify modal is open
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+
+        // Enable failure store
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
+
+        // Submit the form
+        await testSubjects.click('saveButton');
+
+        // Expect to see a success toast
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Failure store enabled');
+        // Clear up toasts for next test
+        await toasts.dismissAll();
+      });
+
+      it('allows to disable failure store from details panel', async () => {
+        // Open details flyout
+        await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME_1);
+        // Open the configure failure store dialog
+        await testSubjects.click('manageDataStreamButton');
+        await testSubjects.click('configureFailureStoreButton');
+
+        // Verify modal is open
+        expect(await testSubjects.exists('configureFailureStoreModal')).to.be(true);
+
+        // Disable failure store (toggle off if it's on)
+        await testSubjects.click('enableDataStreamFailureStoreToggle > input');
+
+        // Submit the form
+        await testSubjects.click('saveButton');
+
+        // Expect to see a success toast
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Failure store disabled');
+        // Clear up toasts for next test
+        await toasts.dismissAll();
+      });
+    });
   });
 };
