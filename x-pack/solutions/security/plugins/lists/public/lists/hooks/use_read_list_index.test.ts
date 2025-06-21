@@ -19,8 +19,7 @@ const { wrapper: queryWrapper } = createQueryWrapperMock();
 
 // TODO: Port this code over to the package: x-pack/solutions/security/packages/kbn-securitysolution-list-hooks/src/use_read_list_index/index.test.ts once kibana has mocks in packages
 
-// FLAKY: https://github.com/elastic/kibana/issues/178026
-describe.skip('useReadListIndex', () => {
+describe('useReadListIndex', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 
   beforeEach(() => {
