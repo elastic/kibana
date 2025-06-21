@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
@@ -26,6 +27,7 @@ import {
 } from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
+import type { DatatableRenderProps } from './components/types';
 
 import type {
   GetCompatibleCellValueActions,
@@ -86,6 +88,104 @@ export async function getColumnCellValueActions(
   );
 }
 
+function getDatatableComponent(
+  dependencies: {
+    formatFactory: FormatFactory;
+    getType: Promise<(name: string) => IAggType | undefined>;
+    paletteService: PaletteRegistry;
+    uiSettings: IUiSettingsClient;
+    core: CoreSetup;
+  },
+  config: DatatableProps,
+  handlers: ILensInterpreterRenderHandlers,
+  resolvedGetType: (name: string) => IAggType | undefined,
+  performanceTracker: ReturnType<typeof createPerformanceTracker>
+): {
+  Component: React.ComponentType<
+    Pick<
+      DatatableRenderProps,
+      'rowHasRowClickTriggerActions' | 'columnCellValueActions' | 'columnFilterable'
+    >
+  >;
+  getRowHasRowClickTriggerActions: () => Promise<boolean[]>;
+} {
+  const getType = (meta?: DatatableColumnMeta): IAggType | undefined => {
+    if (meta?.sourceParams?.type === undefined) return;
+    return resolvedGetType(String(meta.sourceParams.type));
+  };
+
+  const { hasCompatibleActions, isInteractive } = handlers;
+
+  const renderComplete = () => {
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+    trackUiCounterEvents('table', handlers.getExecutionContext());
+    handlers.done();
+  };
+
+  const chartSizeEvent: ChartSizeEvent = {
+    name: 'chartSize',
+    data: {
+      maxDimensions: {
+        x: { value: 100, unit: 'percentage' },
+        y: { value: 100, unit: 'percentage' },
+      },
+    },
+  };
+
+  handlers.event(chartSizeEvent);
+
+  const getRowHasRowClickTriggerActions = async () =>
+    (hasCompatibleActions &&
+      config.data &&
+      (await Promise.all(
+        config.data.rows.map(async (_row, rowIndex) => {
+          try {
+            const hasActions = await hasCompatibleActions({
+              name: 'tableRowContextMenuClick',
+              data: {
+                rowIndex,
+                table: config.data,
+                columns: config.args.columns.map((column) => column.columnId),
+              },
+            });
+
+            return hasActions;
+          } catch {
+            return false;
+          }
+        })
+      ))) ||
+    [];
+
+  return {
+    Component: ({
+      rowHasRowClickTriggerActions,
+      columnCellValueActions,
+      columnFilterable,
+    }: Pick<
+      DatatableRenderProps,
+      'rowHasRowClickTriggerActions' | 'columnCellValueActions' | 'columnFilterable'
+    >) => (
+      <DatatableComponent
+        {...config}
+        formatFactory={dependencies.formatFactory}
+        dispatchEvent={handlers.event}
+        renderMode={handlers.getRenderMode()}
+        paletteService={dependencies.paletteService}
+        getType={getType}
+        rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+        columnCellValueActions={columnCellValueActions}
+        columnFilterable={columnFilterable}
+        interactive={isInteractive()}
+        theme={dependencies.core.theme}
+        renderComplete={renderComplete}
+        syncColors={config.syncColors}
+      />
+    ),
+    getRowHasRowClickTriggerActions,
+  };
+}
+
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType | undefined>;
@@ -109,90 +209,102 @@ export const getDatatableRenderer = (dependencies: {
       type: PERFORMANCE_TRACKER_TYPES.PANEL,
       subType: 'lens_datatable_renderer',
     });
-
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 
-    const resolvedGetType = await dependencies.getType;
-    const getType = (meta?: DatatableColumnMeta): IAggType | undefined => {
-      if (meta?.sourceParams?.type === undefined) return;
-      return resolvedGetType(String(meta.sourceParams.type));
-    };
+    const { Component, getRowHasRowClickTriggerActions } = getDatatableComponent(
+      dependencies,
+      config,
+      handlers,
+      await dependencies.getType,
+      performanceTracker
+    );
 
-    const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
-
-    const renderComplete = () => {
-      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
-      trackUiCounterEvents('table', handlers.getExecutionContext());
-      handlers.done();
-    };
-
-    const chartSizeEvent: ChartSizeEvent = {
-      name: 'chartSize',
-      data: {
-        maxDimensions: {
-          x: { value: 100, unit: 'percentage' },
-          y: { value: 100, unit: 'percentage' },
-        },
-      },
-    };
-
-    handlers.event(chartSizeEvent);
-
-    // An entry for each table row, whether it has any actions attached to
-    // ROW_CLICK_TRIGGER trigger.
-    let rowHasRowClickTriggerActions: boolean[] = [];
-    if (hasCompatibleActions) {
-      if (!!config.data) {
-        rowHasRowClickTriggerActions = await Promise.all(
-          config.data.rows.map(async (_row, rowIndex) => {
-            try {
-              const hasActions = await hasCompatibleActions({
-                name: 'tableRowContextMenuClick',
-                data: {
-                  rowIndex,
-                  table: config.data,
-                  columns: config.args.columns.map((column) => column.columnId),
-                },
-              });
-
-              return hasActions;
-            } catch {
-              return false;
-            }
-          })
-        );
-      }
-    }
-
-    const [startServices] = await dependencies.core.getStartServices();
-    const [columnCellValueActions, columnsFilterable] = await Promise.all([
-      getColumnCellValueActions(config, getCompatibleCellValueActions),
-      getColumnsFilterable(config.data, handlers),
-    ]);
-
+    const [startServices, rowHasRowClickTriggerActions, columnFilterable, columnCellValueActions] =
+      await Promise.all([
+        dependencies.core.getStartServices(),
+        // An entry for each table row, whether it has any actions attached to
+        // ROW_CLICK_TRIGGER trigger.
+        getRowHasRowClickTriggerActions(),
+        getColumnsFilterable(config.data, handlers),
+        getColumnCellValueActions(config, handlers.getCompatibleCellValueActions),
+      ]);
     performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...startServices}>
-        <DatatableComponent
-          {...config}
-          formatFactory={dependencies.formatFactory}
-          dispatchEvent={handlers.event}
-          renderMode={handlers.getRenderMode()}
-          paletteService={dependencies.paletteService}
-          getType={getType}
+        <Component
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          columnFilterable={columnFilterable}
           columnCellValueActions={columnCellValueActions}
-          columnFilterable={columnsFilterable}
-          interactive={isInteractive()}
-          theme={dependencies.core.theme}
-          renderComplete={renderComplete}
-          syncColors={config.syncColors}
         />
       </KibanaRenderContextProvider>,
       domNode
     );
+  },
+  loadComponent: async () => {
+    const resolvedGetType = await dependencies.getType;
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: 'lens_datatable_renderer',
+    });
+
+    return ({
+      config,
+      handlers,
+    }: {
+      config: DatatableProps;
+      handlers: ILensInterpreterRenderHandlers;
+    }) => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+      const { Component, getRowHasRowClickTriggerActions } = getDatatableComponent(
+        dependencies,
+        config,
+        handlers,
+        resolvedGetType,
+        performanceTracker
+      );
+      const { hasCompatibleActions, getCompatibleCellValueActions } = handlers;
+
+      const [lazyState, setState] = React.useState<{
+        cellValueActions: LensCellValueAction[][];
+        columnFilterable: boolean[] | undefined;
+        rowHasClickActions: boolean[] | undefined;
+      } | null>(null);
+
+      React.useEffect(() => {
+        const updateLazyState = async () => {
+          const [cellValueActions, columnFilterable, rowHasClickActions] = await Promise.all([
+            getColumnCellValueActions(config, getCompatibleCellValueActions),
+            getColumnsFilterable(config.data, handlers),
+            getRowHasRowClickTriggerActions(),
+          ]);
+          if (!isEqual(lazyState, { cellValueActions, columnFilterable, rowHasClickActions })) {
+            setState({ cellValueActions, columnFilterable, rowHasClickActions });
+          }
+        };
+        updateLazyState();
+      }, [
+        config,
+        getCompatibleCellValueActions,
+        getRowHasRowClickTriggerActions,
+        handlers,
+        hasCompatibleActions,
+        lazyState,
+      ]);
+
+      if (!lazyState) return null;
+      const { cellValueActions, columnFilterable, rowHasClickActions } = lazyState;
+
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
+      return (
+        <Component
+          rowHasRowClickTriggerActions={rowHasClickActions}
+          columnFilterable={columnFilterable}
+          columnCellValueActions={cellValueActions}
+        />
+      );
+    };
   },
 });
