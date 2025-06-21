@@ -122,6 +122,7 @@ const previouslyRegisteredTypes = [
   'query',
   'rules-settings',
   'sample-data-telemetry',
+  'scheduled_report',
   'search',
   'search-session',
   'search-telemetry',
