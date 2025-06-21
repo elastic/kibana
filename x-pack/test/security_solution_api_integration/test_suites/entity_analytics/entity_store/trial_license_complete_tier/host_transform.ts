@@ -288,7 +288,6 @@ async function enableEntityStore(providerContext: FtrProviderContext): Promise<v
     }
   }
   expect(success).ok();
-  return true;
 }
 
 async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<void> {
@@ -311,7 +310,6 @@ async function cleanUpEntityStore(providerContext: FtrProviderContext): Promise<
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
-  return true;
 }
 
 interface HostTransformResult {
