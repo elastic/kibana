@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-// add into kibana.dev.yml: feature_flags.overrides.featureFlagsStreams.contentPackUIEnabled: true
+import { StatusError } from './status_error';
 
-export const FeatureFlagStreamsContentPackUIEnabled = 'featureFlagsStreams.contentPackUIEnabled';
+export class QueryNotFoundError extends StatusError {
+  constructor(message: string) {
+    super(message, 404);
+    this.name = 'QueryNotFoundError';
+  }
+}
