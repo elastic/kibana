@@ -18,10 +18,11 @@ import React, {
   SetStateAction,
   Dispatch,
   useMemo,
+  useEffect,
 } from 'react';
 import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject, filter, map } from 'rxjs';
 
 export interface RestorableStateProviderProps<TState extends object> {
   initialState?: TState;
@@ -37,11 +38,13 @@ type RestorableStateContext<TState extends object> = Pick<
   'onInitialStateChange'
 > & {
   initialState$: BehaviorSubject<TState | undefined>;
+  initialStateRefresh$: Subject<TState | undefined>;
 };
 
 export const createRestorableStateProvider = <TState extends object>() => {
   const context = createContext<RestorableStateContext<TState>>({
     initialState$: new BehaviorSubject<TState | undefined>(undefined),
+    initialStateRefresh$: new Subject<TState | undefined>(),
     onInitialStateChange: undefined,
   });
 
@@ -57,6 +60,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
     ref
   ) {
     const [initialState$] = useState(() => new BehaviorSubject(currentInitialState));
+    const [initialStateRefresh$] = useState(() => new Subject<TState | undefined>());
     const onInitialStateChange = useStableFunction((newInitialState: TState) => {
       initialState$.next(newInitialState);
       currentOnInitialStateChange?.(newInitialState);
@@ -64,16 +68,22 @@ export const createRestorableStateProvider = <TState extends object>() => {
 
     useImperativeHandle(
       ref,
-      () => ({ refreshInitialState: () => initialState$.next(currentInitialState) }),
-      [currentInitialState, initialState$]
+      () => ({
+        refreshInitialState: () => {
+          initialState$.next(currentInitialState);
+          initialStateRefresh$.next(initialState$.getValue());
+        },
+      }),
+      [currentInitialState, initialState$, initialStateRefresh$]
     );
 
     const value = useMemo<RestorableStateContext<TState>>(
       () => ({
         initialState$,
+        initialStateRefresh$,
         onInitialStateChange,
       }),
-      [initialState$, onInitialStateChange]
+      [initialState$, initialStateRefresh$, onInitialStateChange]
     );
 
     return <context.Provider value={value}>{children}</context.Provider>;
@@ -94,6 +104,27 @@ export const createRestorableStateProvider = <TState extends object>() => {
         );
       }
     );
+
+  const useInitialStateRefresh = <TKey extends keyof TState>(
+    key: TKey,
+    refreshValue: Dispatch<TState[TKey]>
+  ) => {
+    const { initialStateRefresh$ } = useContext(context);
+    const stableRefreshValue = useStableFunction(refreshValue);
+
+    useEffect(() => {
+      const subscription = initialStateRefresh$
+        .pipe(
+          map((initialState) => initialState?.[key]),
+          filter((value): value is NonNullable<TState[TKey]> => value !== undefined)
+        )
+        .subscribe(stableRefreshValue);
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [initialStateRefresh$, key, stableRefreshValue]);
+  };
 
   const useRestorableState = <TKey extends keyof TState>(
     key: TKey,
@@ -129,6 +160,8 @@ export const createRestorableStateProvider = <TState extends object>() => {
       });
     });
 
+    useInitialStateRefresh(key, _setValue);
+
     return [value, setValue] as const;
   };
 
@@ -141,6 +174,10 @@ export const createRestorableStateProvider = <TState extends object>() => {
 
     useUnmount(() => {
       onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current } as TState);
+    });
+
+    useInitialStateRefresh(key, (newValue) => {
+      valueRef.current = newValue;
     });
 
     return valueRef;
