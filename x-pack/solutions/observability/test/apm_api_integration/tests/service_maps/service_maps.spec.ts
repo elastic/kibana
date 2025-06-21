@@ -149,8 +149,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).not.to.be.empty();
-            expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
-            expectSnapshot(orderBy(dataWithAnomalies, 'data.id').slice(0, 3)).toMatchInline(`
+            expectSnapshot(orderBy(dataWithAnomalies, 'data.id')).toMatchInline(`
                     Array [
                       Object {
                         "data": Object {
@@ -197,6 +196,70 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
                             "jobId": "apm-production-6117-high_mean_transaction_duration",
                             "serviceName": "opbeans-java",
                             "transactionType": "request",
+                          },
+                        },
+                      },
+                      Object {
+                        "data": Object {
+                          "agent.name": "nodejs",
+                          "id": "opbeans-node",
+                          "service.environment": "testing",
+                          "service.name": "opbeans-node",
+                          "serviceAnomalyStats": Object {
+                            "actualValue": 24819.2962962963,
+                            "anomalyScore": 0,
+                            "healthStatus": "healthy",
+                            "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                            "serviceName": "opbeans-node",
+                            "transactionType": "request",
+                          },
+                        },
+                      },
+                      Object {
+                        "data": Object {
+                          "agent.name": "python",
+                          "id": "opbeans-python",
+                          "service.environment": "production",
+                          "service.name": "opbeans-python",
+                          "serviceAnomalyStats": Object {
+                            "actualValue": 38862.7831325301,
+                            "anomalyScore": 0.0725701910161626,
+                            "healthStatus": "healthy",
+                            "jobId": "apm-production-6117-high_mean_transaction_duration",
+                            "serviceName": "opbeans-python",
+                            "transactionType": "request",
+                          },
+                        },
+                      },
+                      Object {
+                        "data": Object {
+                          "agent.name": "ruby",
+                          "id": "opbeans-ruby",
+                          "service.environment": "production",
+                          "service.name": "opbeans-ruby",
+                          "serviceAnomalyStats": Object {
+                            "actualValue": 62009.3356643357,
+                            "anomalyScore": 0,
+                            "healthStatus": "healthy",
+                            "jobId": "apm-production-6117-high_mean_transaction_duration",
+                            "serviceName": "opbeans-ruby",
+                            "transactionType": "request",
+                          },
+                        },
+                      },
+                      Object {
+                        "data": Object {
+                          "agent.name": "rum-js",
+                          "id": "opbeans-rum",
+                          "service.environment": "testing",
+                          "service.name": "opbeans-rum",
+                          "serviceAnomalyStats": Object {
+                            "actualValue": 1020870.96774194,
+                            "anomalyScore": 0,
+                            "healthStatus": "healthy",
+                            "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                            "serviceName": "opbeans-rum",
+                            "transactionType": "page-load",
                           },
                         },
                       },
