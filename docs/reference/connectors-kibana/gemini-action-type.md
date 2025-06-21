@@ -11,6 +11,12 @@ applies_to:
 
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
 
+::::{note}
+Refer to the [Google Gemini Models documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable) to check when specific models are retired.
+If you're using a model that is planned to be retired, switch to a different supported model to avoid outages.
+::::
+
+
 ## Create connectors in {{kib}} [define-gemini-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
