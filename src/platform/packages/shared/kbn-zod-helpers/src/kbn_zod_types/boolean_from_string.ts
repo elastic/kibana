@@ -21,15 +21,15 @@ class KbnZodBooleanFromString extends z.ZodUnion<any> implements KbnZodType {
 
   static create() {
     return new KbnZodBooleanFromString({
-      typeName: z.ZodFirstPartyTypeKind.ZodUnion,
+      typeName: z.ZodUnion,
       options: [z.enum(['true', 'false']), z.boolean()],
     }).describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.");
   }
 
-  override _parse(input: z.ParseInput): z.ParseReturnType<this['_output']> {
+  override _parse(input: z.input): z.output<this['_output']> {
     const result = super._parse(input); // Use ZodUnion's default parsing
 
-    if (z.isValid(result)) {
+    if (result.status === 'valid') {
       const value = result.value;
       return {
         status: 'valid',
