@@ -166,4 +166,18 @@ describe('injectAnalyzeWildcard', () => {
       }
     `);
   });
+
+  test('should throw error if the query is too deeply nested', async () => {
+    jest.resetModules();
+    jest.doMock('./constants', () => ({
+      MAX_QUERIES: 5,
+    }));
+
+    const { injectAnalyzeWildcard: injectAnalyzeWildcardMocked } = await import(
+      './inject_analyze_wildcard'
+    );
+    const query = getQuery();
+
+    expect(() => injectAnalyzeWildcardMocked(query)).toThrow('Query is too deeply nested');
+  });
 });
