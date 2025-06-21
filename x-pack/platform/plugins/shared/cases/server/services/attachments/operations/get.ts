@@ -249,7 +249,7 @@ export class AttachmentGetter {
     }
   }
 
-  public async getCaseCommentStats({
+  public async getCaseAttatchmentStats({
     caseIds,
   }: {
     caseIds: string[];
