@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { createRuntimeServices } from '@kbn/cypress-test-helper';
 import { SecurityRoleAndUserLoader } from '@kbn/test-suites-serverless/shared/lib';
 import type {
   LoadedRoleAndUser,

@@ -5227,6 +5227,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cypress-test-helper@link:src/platform/packages/shared/kbn-cypress-test-helper":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-enhanced-plugin@link:x-pack/platform/plugins/shared/dashboard_enhanced":
   version "0.0.0"
   uid ""
