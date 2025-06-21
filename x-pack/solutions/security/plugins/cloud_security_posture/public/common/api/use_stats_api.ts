@@ -16,29 +16,47 @@ export const CSPM_STATS_QUERY_KEY = ['csp_cspm_dashboard_stats'];
 export const KSPM_STATS_QUERY_KEY = ['csp_kspm_dashboard_stats'];
 
 export const getStatsRoute = (policyTemplate: PosturePolicyTemplate) => {
-  return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);
+  // return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);
+  return '/internal/cloud_security_posture/stats/{policy_template}'.replace(
+    '{policy_template}',
+    policyTemplate
+  );
 };
 
 export const useCspmStatsApi = (
-  options: UseQueryOptions<unknown, unknown, ComplianceDashboardDataV2, string[]>
+  options: UseQueryOptions<unknown, unknown, ComplianceDashboardDataV2, string[]>,
+  namespace?: string
 ) => {
   const { http } = useKibana().services;
   return useQuery(
     CSPM_STATS_QUERY_KEY,
     () =>
-      http.get<ComplianceDashboardDataV2>(getStatsRoute(CSPM_POLICY_TEMPLATE), { version: '2' }),
+      http.get<ComplianceDashboardDataV2>(STATS_ROUTE_PATH, {
+        version: '2',
+        query: {
+          policy_template: CSPM_POLICY_TEMPLATE,
+          namespace: namespace ? namespace : 'default',
+        },
+      }),
     options
   );
 };
 
 export const useKspmStatsApi = (
-  options: UseQueryOptions<unknown, unknown, ComplianceDashboardDataV2, string[]>
+  options: UseQueryOptions<unknown, unknown, ComplianceDashboardDataV2, string[]>,
+  namespace?: string
 ) => {
   const { http } = useKibana().services;
   return useQuery(
     KSPM_STATS_QUERY_KEY,
     () =>
-      http.get<ComplianceDashboardDataV2>(getStatsRoute(KSPM_POLICY_TEMPLATE), { version: '2' }),
+      http.get<ComplianceDashboardDataV2>(STATS_ROUTE_PATH, {
+        version: '2',
+        query: {
+          policy_template: KSPM_POLICY_TEMPLATE,
+          namespace: namespace ? namespace : 'default',
+        },
+      }),
     options
   );
 };

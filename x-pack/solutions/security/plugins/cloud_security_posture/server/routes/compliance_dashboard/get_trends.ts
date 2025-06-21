@@ -37,12 +37,15 @@ export interface ScoreTrendDoc {
   score_by_benchmark_id: ScoreByBenchmarkId;
 }
 
-export type Trends = Array<{
-  timestamp: string;
-  summary: Stats;
-  clusters: Record<string, Stats>;
-  benchmarks: Record<string, Stats>;
-}>;
+export type Trends = {
+  trends: Array<{
+    timestamp: string;
+    summary: Stats;
+    clusters: Record<string, Stats>;
+    benchmarks: Record<string, Stats>;
+  }>;
+  namespaces: string[];
+};
 export interface ScoreTrendAggregateResponse {
   by_namespace: {
     buckets: Array<{
@@ -72,6 +75,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate): SearchReq
   query: {
     bool: {
       filter: [{ term: { policy_template: policyTemplate } }],
+
       must: [
         {
           range: {
@@ -163,7 +167,8 @@ export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
 export const getTrends = async (
   esClient: ElasticsearchClient,
   policyTemplate: PosturePolicyTemplate,
-  logger: Logger
+  logger: Logger,
+  namespace: string = 'default'
 ): Promise<Trends> => {
   try {
     const trendsQueryResult = await esClient.search<unknown, ScoreTrendAggregateResponse>(
@@ -179,7 +184,7 @@ export const getTrends = async (
         return { [namespace]: { documents } };
       }) ?? [];
 
-    if (!scoreTrendDocs.length) return []; // No trends data available
+    if (!scoreTrendDocs.length) return { trends: [], namespaces: [] }; // No trends data available
     const result = Object.fromEntries(
       scoreTrendDocs.map((entry) => {
         const [key, value] = Object.entries(entry)[0];
@@ -187,7 +192,10 @@ export const getTrends = async (
       })
     );
 
-    return formatTrends(result.default); // Return the trends for the default namespace until namespace support will be visible to users.
+    const namsepaces = Object.keys(result);
+    const reponse = { trends: formatTrends(result[namespace]), namespaces: namsepaces };
+    // return formatTrends(result[namespace]); // Return the trends for the default namespace until namespace support will be visible to users.
+    return reponse;
   } catch (err) {
     logger.error(`Failed to fetch trendlines data ${err.message}`);
     logger.error(err);
