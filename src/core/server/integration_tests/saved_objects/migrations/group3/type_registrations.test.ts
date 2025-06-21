@@ -95,6 +95,7 @@ const previouslyRegisteredTypes = [
   'ingest-package-policies',
   'ingest_manager_settings',
   'inventory-view',
+  'investigation',
   'kql-telemetry',
   'legacy-url-alias',
   'lens',
