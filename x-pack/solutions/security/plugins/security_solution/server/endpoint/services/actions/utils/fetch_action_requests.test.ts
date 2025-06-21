@@ -11,6 +11,9 @@ import { applyActionListEsSearchMock } from '../mocks';
 import { fetchActionRequests } from './fetch_action_requests';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { createMockEndpointAppContextService } from '../../../mocks';
+import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/reference_data';
+import { set } from '@kbn/safer-lodash-set';
+import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -369,6 +372,45 @@ describe('fetchActionRequests()', () => {
                 {
                   bool: {
                     filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should include search filter for deleted integration policy tag when ref. data has one defined', async () => {
+      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+        set(
+          REF_DATA_KEY_INITIAL_VALUE[REF_DATA_KEYS.orphanResponseActionsSpace](),
+          'metadata.spaceId',
+          'bar'
+        )
+      );
+      fetchOptions.spaceId = 'bar';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(fetchOptions.endpointService.getInternalEsClient().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                          { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   },
                 },
                 { bool: { filter: [] } },
