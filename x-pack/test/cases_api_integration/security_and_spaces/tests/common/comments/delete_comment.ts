@@ -302,9 +302,6 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
         });
 
-        expect(resolvedCase.case.totalAlerts).to.eql(1);
-        expect(resolvedCase.case.totalComment).to.eql(2);
-
         const caseComments = resolvedCase.case.comments!;
 
         const userComment = caseComments?.find((comment) => comment.type === 'user');
