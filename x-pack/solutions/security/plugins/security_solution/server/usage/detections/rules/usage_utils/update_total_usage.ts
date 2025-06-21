@@ -12,7 +12,7 @@ import { updateAlertSuppressionUsage } from './update_alert_suppression_usage';
 export interface UpdateTotalUsageOptions {
   detectionRuleMetric: RuleMetric;
   updatedUsage: RulesTypeUsage;
-  totalType: 'custom_total' | 'elastic_total';
+  totalType: 'custom_total' | 'elastic_total' | 'elastic_customized_total';
 }
 
 export const updateTotalUsage = ({
