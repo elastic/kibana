@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import type { ServerlessProjectType } from '../common/constants/types';
 
 export class CasePlugin
   implements
@@ -159,8 +160,9 @@ export class CasePlugin
       return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
-    const isServerlessSecurity =
-      plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'security';
+    const serverlessProjectType = plugins.cloud?.isServerlessEnabled
+      ? (plugins.cloud?.serverless.projectType as ServerlessProjectType)
+      : undefined;
 
     registerConnectorTypes({
       actions: plugins.actions,
@@ -168,7 +170,7 @@ export class CasePlugin
       core,
       getCasesClient,
       getSpaceId,
-      isServerlessSecurity,
+      serverlessProjectType,
     });
 
     return {
