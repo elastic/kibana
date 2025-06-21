@@ -9,6 +9,7 @@ import {
   AssistantMessage,
   Message as InferenceMessage,
   MessageRole as InferenceMessageRole,
+  ToolDefinition,
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
@@ -28,22 +29,24 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
 
 export function convertMessagesForInference(
   messages: Message[],
-  logger: Pick<Logger, 'error'>
+  logger: Pick<Logger, 'error'>,
+  tools: Record<string, ToolDefinition> | undefined
 ): InferenceMessage[] {
   const inferenceMessages: InferenceMessage[] = [];
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
+      const functionCall = message.message.function_call;
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
         content: message.message.content ?? null,
-        ...(message.message.function_call?.name
+        ...(functionCall?.name
           ? {
               toolCalls: [
                 {
                   function: {
-                    name: message.message.function_call.name,
-                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
+                    name: functionCall.name,
+                    arguments: safeJsonParse(functionCall?.arguments, logger),
                   },
                   toolCallId: generateFakeToolCallId(),
                 },
@@ -68,10 +71,20 @@ export function convertMessagesForInference(
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
 
+      const isToolAvailable = !!tools?.[toolCallRequest.toolCalls![0].function.name];
+
+      const toolResponseWithWarning = {
+        ...JSON.parse(message.message.content ?? '{}'),
+        ...(isToolAvailable
+          ? {}
+          : {
+              _systemWarning: `The tool "${message.message.name}" used to generate this response is no longer available. Do not call this tool again.`,
+            }),
+      };
       inferenceMessages.push({
         name: message.message.name!,
         role: InferenceMessageRole.Tool,
-        response: JSON.parse(message.message.content ?? '{}'),
+        response: toolResponseWithWarning,
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 

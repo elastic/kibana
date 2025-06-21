@@ -137,21 +137,23 @@ export function registerQueryFunction({
 
       const actions = functions.getActions();
 
+      const tools = Object.fromEntries(
+        [...actions, ...esqlFunctions].map((fn) => [
+          fn.name,
+          { description: fn.description, schema: fn.parameters } as ToolDefinition,
+        ])
+      );
       const events$ = naturalLanguageToEsql({
         client: pluginsStart.inference.getClient({ request: resources.request }),
         connectorId,
         messages: convertMessagesForInference(
           // remove system message and query function request
           messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
-          resources.logger
+          resources.logger,
+          tools
         ),
         logger: resources.logger,
-        tools: Object.fromEntries(
-          [...actions, ...esqlFunctions].map((fn) => [
-            fn.name,
-            { description: fn.description, schema: fn.parameters } as ToolDefinition,
-          ])
-        ),
+        tools,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
       });
 

@@ -34,6 +34,7 @@ import {
   FunctionCallingMode,
   InferenceClient,
   ToolChoiceType,
+  ToolDefinition,
 } from '@kbn/inference-common';
 import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
@@ -459,17 +460,17 @@ export class ObservabilityAIAssistantClient {
   ): TStream extends true
     ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
     : Promise<ChatCompleteResponse> {
-    let tools: Record<string, { description: string; schema: any }> | undefined;
+    let tools: Record<string, ToolDefinition> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
 
     if (functions?.length) {
       tools = functions.reduce((acc, fn) => {
         acc[fn.name] = {
           description: fn.description,
-          schema: fn.parameters,
+          schema: fn.parameters as ToolDefinition['schema'],
         };
         return acc;
-      }, {} as Record<string, { description: string; schema: any }>);
+      }, {} as Record<string, ToolDefinition>);
 
       toolChoice = functionCall
         ? {
@@ -508,7 +509,11 @@ export class ObservabilityAIAssistantClient {
                 .chatComplete({
                   ...options,
                   stream: true,
-                  messages: convertMessagesForInference(redactedMessages, this.dependencies.logger),
+                  messages: convertMessagesForInference(
+                    redactedMessages,
+                    this.dependencies.logger,
+                    tools
+                  ),
                 })
                 // unredact complete assistant response event
                 .pipe(this.dependencies.anonymizationService.unredactChatCompletionEvent())
@@ -532,7 +537,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
-        messages: convertMessagesForInference(messages, this.dependencies.logger),
+        messages: convertMessagesForInference(messages, this.dependencies.logger, tools),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
