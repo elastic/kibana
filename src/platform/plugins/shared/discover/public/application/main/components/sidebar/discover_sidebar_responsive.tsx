@@ -21,6 +21,7 @@ import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
   type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListContainerInitialProps,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
@@ -39,7 +40,11 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDataViewsForPicker } from '../../state_management/redux';
+import {
+  useReactiveCurrentTabRuntimeState,
+  useDataViewsForPicker,
+} from '../../state_management/redux';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -82,6 +87,10 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
 };
 
 export interface DiscoverSidebarResponsiveProps {
+  /**
+   * Current tab state container
+   */
+  stateContainer: DiscoverStateContainer;
   /**
    * the selected columns displayed in the doc table in discover
    */
@@ -154,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const services = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
   const {
+    stateContainer,
     fieldListVariant,
     selectedDataView,
     columns,
@@ -382,6 +392,21 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
+  const unifiedFieldListContainerInitialProps$ = useReactiveCurrentTabRuntimeState(
+    stateContainer.runtimeStateManager,
+    (tab) => tab.unifiedFieldListInitialProps$
+  );
+
+  const onUnifiedFieldListContainerInitialPropsChanged = useCallback(
+    (nextPartialProps: Partial<UnifiedFieldListContainerInitialProps>) => {
+      unifiedFieldListContainerInitialProps$?.next({
+        ...unifiedFieldListContainerInitialProps$.getValue(),
+        ...nextPartialProps,
+      });
+    },
+    [unifiedFieldListContainerInitialProps$]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -394,6 +419,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
+            unifiedFieldListContainerInitialProps$={unifiedFieldListContainerInitialProps$}
+            onUnifiedFieldListContainerInitialPropsChanged={
+              onUnifiedFieldListContainerInitialPropsChanged
+            }
             additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
