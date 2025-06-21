@@ -22,6 +22,7 @@ import type {
   ESQLControlVariable,
   IndicesAutocompleteResult,
   RecommendedQuery,
+  RecommendedField,
 } from '@kbn/esql-types';
 import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
@@ -115,7 +116,7 @@ export interface EsqlPluginStartBase {
   getEditorExtensionsAutocomplete: (
     queryString: string,
     activeSolutionId: string
-  ) => Promise<{ recommendedQueries: RecommendedQuery[] }>;
+  ) => Promise<{ recommendedQueries: RecommendedQuery[]; recommendedFields: RecommendedField[] }>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;

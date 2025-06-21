@@ -284,8 +284,18 @@ export function getFieldsByTypeRetriever(
         ...options,
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryForFields)) ?? {
+        recommendedQueries: [],
+        recommendedFields: [],
+      };
+      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
+      return buildFieldsDefinitionsWithMetadata(
+        fields,
+        recommendedFieldsFromExtensions,
+        updatedOptions,
+        getVariables
+      );
     },
     getFieldsMap: helpers.getFieldsMap,
   };

@@ -94,6 +94,7 @@ const getFieldSuggestions = async (
   const getVariables = callbacks?.getVariables;
   const joinFields = buildFieldsDefinitionsWithMetadata(
     lookupIndexFields.filter((f) => !ignoredFields.includes(f.name)),
+    [],
     { supportsControls },
     getVariables
   );
