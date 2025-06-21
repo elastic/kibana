@@ -127,6 +127,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             'elasticsearch',
             'kibana',
             'get_dataset_info',
+            'get_connector_info',
             'execute_connector',
           ]);
         });

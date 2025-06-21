@@ -11,6 +11,10 @@ export const NAME = i18n.translate('xpack.stackConnectors.jira.title', {
   defaultMessage: 'Jira',
 });
 
+export const DESCRIPTION = i18n.translate('xpack.stackConnectors.jira.description', {
+  defaultMessage: 'Create and manage Jira issues.',
+});
+
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
   i18n.translate('xpack.stackConnectors.jira.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',

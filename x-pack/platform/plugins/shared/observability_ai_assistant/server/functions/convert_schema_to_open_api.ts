@@ -6,9 +6,9 @@
  */
 
 import joiToJsonSchema from 'joi-to-json';
-import type { Type } from '@kbn/config-schema';
+import Joi from 'joi';
 import { castArray, isPlainObject, forEach, unset } from 'lodash';
-import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
+import type { CompatibleJSONSchema } from '../../common/functions/types';
 
 function dropUnknownProperties(object: CompatibleJSONSchema) {
   if (!isPlainObject(object)) {
@@ -52,7 +52,14 @@ function dropUnknownProperties(object: CompatibleJSONSchema) {
   return object;
 }
 
-export function convertSchemaToOpenApi(typeSchema: Type<any>): CompatibleJSONSchema {
+interface ActionParamsSchema {
+  getSchema?: () => Joi.AnySchema;
+}
+
+export function convertSchemaToOpenApi(typeSchema: ActionParamsSchema): CompatibleJSONSchema {
+  if (!typeSchema || typeof typeSchema.getSchema !== 'function') {
+    throw new Error('Invalid schema. Expected a schema object with a getSchema method.');
+  }
   // @ts-ignore
   const plainOpenApiSchema = joiToJsonSchema(typeSchema.getSchema(), 'open-api');
 

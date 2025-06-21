@@ -64,6 +64,7 @@ export function getConnectorType(): ConnectorType<
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
+    description: i18n.DESCRIPTION,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,

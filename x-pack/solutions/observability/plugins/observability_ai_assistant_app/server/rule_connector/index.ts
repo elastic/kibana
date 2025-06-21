@@ -18,13 +18,6 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import {
-  EmailParamsSchema,
-  JiraParamsSchema,
-  PagerdutyParamsSchema,
-  SlackApiParamsSchema,
-  WebhookParamsSchema,
-} from '@kbn/stack-connectors-plugin/server';
 import { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import {
   ChatCompletionChunkEvent,
@@ -32,39 +25,13 @@ import {
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
-import { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
-import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/execute_connector';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import { ChatFunctionClient } from '@kbn/observability-ai-assistant-plugin/server/service/chat_function_client';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
-import { convertSchemaToOpenApi } from './convert_schema_to_open_api';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
 import { ALERT_STATUSES } from '../../common/constants';
 
 const CONNECTOR_PRIVILEGES = ['api:observabilityAIAssistant', 'app:observabilityAIAssistant'];
-
-const connectorParamsSchemas: Record<string, CompatibleJSONSchema> = {
-  '.slack': {
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      params: {
-        type: 'object',
-        properties: {
-          message: { type: 'string' },
-        },
-      },
-    },
-  },
-  '.slack_api': convertSchemaToOpenApi(SlackApiParamsSchema),
-  '.email': convertSchemaToOpenApi(EmailParamsSchema),
-  '.webhook': convertSchemaToOpenApi(WebhookParamsSchema),
-  '.jira': convertSchemaToOpenApi(JiraParamsSchema),
-  '.pagerduty': convertSchemaToOpenApi(PagerdutyParamsSchema),
-};
 
 const ParamsSchema = schema.object({
   connector: schema.string(),
@@ -190,9 +157,6 @@ async function executor(
     screenContexts: [],
     scopes: ['observability'],
   });
-  const actionsClient = await (
-    await resources.plugins.actions.start()
-  ).getActionsClientWithRequest(request);
 
   await Promise.all(
     params.prompts.map((prompt) =>
@@ -203,7 +167,6 @@ async function executor(
         alertDetailsContextService,
         client,
         functionClient,
-        actionsClient,
         execOptions.logger
       )
     )
@@ -219,7 +182,6 @@ async function executeAlertsChatCompletion(
   alertDetailsContextService: AlertDetailsContextualInsightsService,
   client: ObservabilityAIAssistantClient,
   functionClient: ChatFunctionClient,
-  actionsClient: PublicMethodsOf<ActionsClient>,
   logger: Logger
 ): Promise<void> {
   const alerts = {
@@ -240,19 +202,6 @@ async function executeAlertsChatCompletion(
     return;
   }
 
-  const connectorsList = await actionsClient.getAll().then((connectors) => {
-    return connectors.map((connector) => {
-      if (connector.actionTypeId in connectorParamsSchemas) {
-        return {
-          ...connector,
-          parameters: connectorParamsSchemas[connector.actionTypeId],
-        };
-      }
-
-      return connector;
-    });
-  });
-
   const backgroundInstruction = dedent(
     `You are called as a background process because alerts have changed state.
 As a background process you are not interacting with a user. Because of that DO NOT ask for user
@@ -261,25 +210,6 @@ If available, include the link of the conversation at the end of your answer.`
   );
 
   functionClient.registerInstruction(backgroundInstruction);
-
-  const hasSlackConnector = !!connectorsList.filter(
-    (connector) => connector.actionTypeId === '.slack'
-  ).length;
-
-  if (hasSlackConnector) {
-    const slackConnectorInstruction: RegisterInstructionCallback = ({ availableFunctionNames }) =>
-      availableFunctionNames.includes(EXECUTE_CONNECTOR_FUNCTION_NAME)
-        ? dedent(
-            `The execute_connector function can be used to invoke Kibana connectors.
-        To send to the Slack connector, you need the following arguments:
-        - the "id" of the connector
-        - the "params" parameter that you will fill with the message
-        Please include both "id" and "params.message" in the function arguments when executing the Slack connector..`
-          )
-        : undefined;
-
-    functionClient.registerInstruction(slackConnectorInstruction);
-  }
 
   const alertsContext = await getAlertsContext(
     params.rule,
@@ -338,28 +268,6 @@ If available, include the link of the conversation at the end of your answer.`
             role: MessageRole.User,
             name: 'get_alerts_context',
             content: JSON.stringify({ context: alertsContext }),
-          },
-        },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_connectors',
-              arguments: JSON.stringify({}),
-              trigger: MessageRole.Assistant as const,
-            },
-          },
-        },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
-            name: 'get_connectors',
-            content: JSON.stringify({
-              connectors: connectorsList,
-            }),
           },
         },
       ],

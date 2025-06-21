@@ -27,7 +27,7 @@ import {
   SlackApiConfigSchema,
 } from '../../../common/slack_api/schema';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
-import { SLACK_CONNECTOR_NAME } from './translations';
+import { SLACK_CONNECTOR_NAME, SLACK_CONNECTOR_DESCRIPTION } from './translations';
 import { api } from './api';
 import { createExternalService } from './service';
 
@@ -38,6 +38,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
     id: SLACK_API_CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: SLACK_CONNECTOR_NAME,
+    description: SLACK_CONNECTOR_DESCRIPTION,
     supportedFeatureIds: [
       UptimeConnectorFeatureId,
       AlertingConnectorFeatureId,
