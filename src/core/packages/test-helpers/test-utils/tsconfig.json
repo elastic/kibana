@@ -21,7 +21,8 @@
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-ui-settings-server-mocks"
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-http-server-internal"
   ],
   "exclude": [
     "target/**/*",
