@@ -93,7 +93,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     const btnText = await this.testSubjects.getVisibleText(
       GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
     );
-    expect(btnText).to.be('Hide actions on this entity');
+    expect(btnText).to.be('Hide actions done to this entity');
     await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
@@ -115,7 +115,7 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     const btnText = await this.testSubjects.getVisibleText(
       GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
     );
-    expect(btnText).to.be('Hide events with this action');
+    expect(btnText).to.be('Hide related events');
     await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }

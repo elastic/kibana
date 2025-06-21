@@ -7,10 +7,10 @@
 
 import React, { memo } from 'react';
 import { BaseEdge, getSmoothStepPath } from '@xyflow/react';
-import { useEuiTheme } from '@elastic/eui';
 import type { EdgeProps, EdgeViewModel } from '../types';
 import { getShapeHandlePosition } from './utils';
-import { getMarkerStart, getMarkerEnd } from './markers';
+import { getMarkerEnd } from './markers';
+import { useEdgeColor } from './styles';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -32,14 +32,9 @@ export const DefaultEdge = memo(
     targetPosition,
     data,
   }: EdgeProps) => {
-    const { euiTheme } = useEuiTheme();
     const color: EdgeColor = data?.color || 'primary';
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
-    const markerStart =
-      !data?.sourceShape || !NODES_WITHOUT_MARKER.includes(data?.sourceShape)
-        ? getMarkerStart(color)
-        : undefined;
     const markerEnd =
       !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
         ? getMarkerEnd(color)
@@ -69,11 +64,10 @@ export const DefaultEdge = memo(
           path={edgePath}
           interactionWidth={0}
           style={{
-            stroke: euiTheme.colors[color],
-            // Defaults to dashed when type is not available
-            ...(!data?.type || data?.type === 'dashed' ? dashedStyle : {}),
+            stroke: useEdgeColor(color),
+            // Defaults to solid when type is not available
+            ...(data?.type === 'dashed' ? dashedStyle : {}),
           }}
-          markerStart={markerStart}
           markerEnd={markerEnd}
         />
       </>
