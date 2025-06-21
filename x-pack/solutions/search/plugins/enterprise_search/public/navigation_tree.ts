@@ -90,24 +90,18 @@ export const getNavigationTreeDefinition = ({
                     );
                   },
                   link: 'enterpriseSearch',
-                },
-
-                {
-                  children: [
-                    {
-                      link: 'discover',
-                    },
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                      },
-                      link: 'dashboards',
-                    },
-                  ],
-                  id: 'analyze',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.analyze', {
-                    defaultMessage: 'Analyze',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                    defaultMessage: 'Home',
                   }),
+                },
+                {
+                  link: 'discover',
+                },
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                  },
+                  link: 'dashboards',
                 },
                 {
                   children: [
@@ -120,26 +114,6 @@ export const getNavigationTreeDefinition = ({
                         );
                       },
                       link: 'elasticsearchIndexManagement',
-                    },
-                    { link: 'enterpriseSearchContent:connectors' },
-                    { link: 'enterpriseSearchContent:webCrawlers' },
-                  ],
-                  id: 'data',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.data', {
-                    defaultMessage: 'Data',
-                  }),
-                },
-                {
-                  children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                      },
-                      id: 'dev_tools',
-                      link: 'dev_tools',
-                      title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                        defaultMessage: 'Dev Tools',
-                      }),
                     },
                     {
                       breadcrumbStatus: 'hidden',
@@ -208,21 +182,13 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
                     { link: 'searchQueryRules' },
+                    { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                   ],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
-                  }),
-                },
-                {
-                  children: [{ link: 'maps' }, { link: 'canvas' }, { link: 'graph' }],
-                  id: 'otherTools',
-                  renderAs: 'accordion',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.otherTools', {
-                    defaultMessage: 'Other tools',
                   }),
                 },
               ],
@@ -237,6 +203,16 @@ export const getNavigationTreeDefinition = ({
           footer: [
             {
               children: [
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                  },
+                  id: 'dev_tools',
+                  link: 'dev_tools',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                    defaultMessage: 'Dev Tools',
+                  }),
+                },
                 {
                   breadcrumbStatus: 'hidden',
                   children: [
