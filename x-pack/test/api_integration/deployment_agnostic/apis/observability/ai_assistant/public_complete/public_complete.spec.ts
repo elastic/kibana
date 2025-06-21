@@ -45,7 +45,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function callPublicChatComplete({
       actions,
       instructions,
-      format = 'default',
       persist = true,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
@@ -56,7 +55,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
-          query: { format },
           body: {
             messages,
             connectorId,
