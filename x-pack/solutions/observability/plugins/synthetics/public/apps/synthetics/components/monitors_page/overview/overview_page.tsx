@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect, useLocation } from 'react-router-dom';
-import { usePageReady } from '@kbn/ebt-tools';
 import { selectOverviewStatus } from '../../../state/overview_status';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
@@ -28,6 +27,7 @@ import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -41,9 +41,8 @@ export const OverviewPage: React.FC = () => {
   const { search } = useLocation();
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
-  const { loaded } = useSelector(selectOverviewStatus);
 
-  usePageReady({ isReady: loaded });
+  useSyntheticsPageReady();
 
   useEffect(() => {
     if (!locationsLoading && !locationsLoaded) {
