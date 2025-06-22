@@ -106,7 +106,6 @@ export function AlertDetails() {
     application: { navigateToUrl },
   } = services;
   const { basePath } = http;
-  const { onPageReady } = usePerformanceContext();
   const { search } = useLocation();
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
