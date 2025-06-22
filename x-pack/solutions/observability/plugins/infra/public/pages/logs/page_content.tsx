@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import {
@@ -18,10 +18,9 @@ import {
   type ObservabilityOnboardingLocatorParams,
 } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { safeDecode } from '@kbn/rison';
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { isDevMode } from '@kbn/xstate-utils';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { safeDecode } from '@kbn/rison';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -30,16 +29,18 @@ import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params'
 import { NotFoundPage } from '../404';
 import { getLogsAppRoutes } from './routes';
 
-const StreamPage = dynamic(() => import('./stream').then((mod) => ({ default: mod.StreamPage })));
 const LogEntryCategoriesPage = dynamic(() =>
   import('./log_entry_categories').then((mod) => ({ default: mod.LogEntryCategoriesPage }))
 );
+
 const LogEntryRatePage = dynamic(() =>
   import('./log_entry_rate').then((mod) => ({ default: mod.LogEntryRatePage }))
 );
+
 const LogsSettingsPage = dynamic(() =>
   import('./settings').then((mod) => ({ default: mod.LogsSettingsPage }))
 );
+
 const StateMachinePlayground = dynamic(() =>
   import('../../observability_logs/xstate_helpers').then((mod) => ({
     default: mod.StateMachinePlayground,
@@ -48,8 +49,6 @@ const StateMachinePlayground = dynamic(() =>
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const { application, share } = useKibana<{ share: SharePublicStart }>().services;
-
-  const isLogsStreamEnabled: boolean = useUiSetting(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
 
   const uiCapabilities = application?.capabilities;
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
@@ -60,7 +59,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-  const routes = getLogsAppRoutes({ isLogsStreamEnabled });
+  const routes = getLogsAppRoutes();
 
   const settingsLinkProps = useLinkProps({
     app: 'logs',
@@ -94,34 +93,30 @@ export const LogsPageContent: React.FunctionComponent = () => {
       )}
 
       <Routes>
-        {routes.stream ? (
-          <Route path={routes.stream.path} component={StreamPage} />
-        ) : (
-          <Route
-            path="/stream"
-            exact
-            render={(props) => {
-              const searchParams = new URLSearchParams(props.location.search);
-              const logFilterEncoded = searchParams.get('logFilter');
-              let locatorParams: LogsLocatorParams = {};
+        <Route
+          path="/stream"
+          exact
+          render={(props) => {
+            const searchParams = new URLSearchParams(props.location.search);
+            const logFilterEncoded = searchParams.get('logFilter');
+            let locatorParams: LogsLocatorParams = {};
 
-              if (logFilterEncoded) {
-                const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
-                locatorParams = {
-                  timeRange: logFilter?.timeRange,
-                  query: logFilter?.query,
-                  filters: logFilter?.filters,
-                  refreshInterval: logFilter?.refreshInterval,
-                };
-              }
+            if (logFilterEncoded) {
+              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
+              locatorParams = {
+                timeRange: logFilter?.timeRange,
+                query: logFilter?.query,
+                filters: logFilter?.filters,
+                refreshInterval: logFilter?.refreshInterval,
+              };
+            }
 
-              share.url.locators
-                .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                ?.navigate(locatorParams);
-              return null;
-            }}
-          />
-        )}
+            share.url.locators
+              .get<LogsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+              ?.navigate(locatorParams);
+            return null;
+          }}
+        />
         <Route path={routes.logsAnomalies.path} component={LogEntryRatePage} />
         <Route path={routes.logsCategories.path} component={LogEntryCategoriesPage} />
         <Route path={routes.settings.path} component={LogsSettingsPage} />
@@ -130,11 +125,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         )}
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
-        <RedirectWithQueryParams
-          from={'/'}
-          to={routes.stream?.path ?? routes.logsAnomalies.path}
-          exact
-        />
+        <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
 
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>

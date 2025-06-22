@@ -16,6 +16,7 @@
       "dataViews",
       "discover",
       "discoverShared",
+      "fieldFormats",
       "fieldsMetadata",
       "licensing",
       "indexManagement",
