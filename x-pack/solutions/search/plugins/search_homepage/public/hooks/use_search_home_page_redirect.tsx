@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import type { IndicesStatusResponse } from '../../common/types';
+import { useIndicesStatusQuery } from './api/use_indices_status_query';
+import { useUserPrivilegesQuery } from './api/use_user_permissions';
+import { generateRandomIndexName } from '../utils/indices';
 
 import { useKibana } from './use_kibana';
-import type { UserStartPrivilegesResponse } from '../../common/types';
 
-export const useSearchHomePageRedirect = (
-  indicesStatus?: IndicesStatusResponse,
-  userPrivileges?: UserStartPrivilegesResponse
-) => {
+export const useSearchHomePageRedirect = () => {
   const { application, http } = useKibana().services;
+  const indexName = useMemo(() => generateRandomIndexName(), []);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const { data: indicesStatus } = useIndicesStatusQuery();
+
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   return useEffect(() => {
     if (hasDoneRedirect) {
