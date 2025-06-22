@@ -10,14 +10,14 @@ import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { omit } from 'lodash';
-import { concatenateChatCompletionChunks, Message } from '../../../../common';
+import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../../common';
 import type { FunctionCallChatFunction } from '../../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../../common/utils/short_id_table';
-import { replaceLastUserMessage } from './tool_utils';
+import { getUserPromptFromMessages } from './get_user_prompt_from_messages';
 
-export const SCORE_FUNCTION_NAME = 'score';
+export const SCORE_FUNCTION_NAME = 'score_suggestions';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
@@ -35,7 +35,6 @@ const scoreFunctionArgumentsRt = t.type({
 export async function scoreSuggestions({
   suggestions,
   messages,
-  userPrompt,
   screenDescription,
   chat,
   signal,
@@ -43,7 +42,6 @@ export async function scoreSuggestions({
 }: {
   suggestions: RecalledSuggestion[];
   messages: Message[];
-  userPrompt: string;
   screenDescription: string;
   chat: FunctionCallChatFunction;
   signal: AbortSignal;
@@ -53,43 +51,19 @@ export async function scoreSuggestions({
   llmScores: Array<{ id: string; llmScore: number }>;
 }> {
   const shortIdTable = new ShortIdTable();
-
-  const newMessageContent = dedent(`User prompt:
-    <UserPrompt>
-    ${userPrompt}
-    </UserPrompt>
-
-    Screen description. This is the description of the screen that the user is currently on, and it may contain information relevant to the prompt:
-    <ScreenDescription>
-    ${screenDescription}
-    </ScreenDescription>
-
-    Documents to score. Please score the documents based on the criteria above.
-    <DocumentsToScore>
-    ${JSON.stringify(
-      suggestions.map((suggestion) => ({
-        ...omit(suggestion, 'esScore'), // Omit ES score to not bias the LLM
-        id: shortIdTable.take(suggestion.id), // Shorten id to save tokens
-      })),
-      null,
-      2
-    )}
-    </DocumentsToScore>
-    `);
+  const userPrompt = getUserPromptFromMessages(messages);
 
   const scoreFunction = {
     name: SCORE_FUNCTION_NAME,
-    description:
-      'Use this function to score documents based on how relevant they are to the conversation.',
+    description: `Scores documents for relevance based on the user's prompt, conversation history, and screen context.`,
     parameters: {
       type: 'object',
       properties: {
         scores: {
-          description: `The document IDs and their scores, as CSV. Example:
-
+          description: `A CSV string of document IDs and their integer scores (0-7). One per line, with no header. Example:
             my_id,7
             my_other_id,3
-            my_third_id,4
+            my_third_id,0
           `,
           type: 'string',
         },
@@ -101,15 +75,68 @@ export async function scoreSuggestions({
   const response = await lastValueFrom(
     chat('score_suggestions', {
       systemMessage: dedent(`You are a Document Relevance Scorer.
-        Given the following prompt, score the documents that are relevant to the prompt on a scale from 0 to 7,
-        0 being completely irrelevant, and 7 being extremely relevant. Information is relevant to the prompt if it helps in
-        answering the prompt. Judge the document according to the following criteria:
-        
-        - The document is relevant to the prompt, and the rest of the conversation
-        - The document has information relevant to the prompt that is not mentioned, or more detailed than what is available in the conversation
-        - The document has a high amount of information relevant to the prompt compared to other documents
-        - The document contains new information not mentioned before in the conversation or provides a correction to previously stated information.`),
-      messages: replaceLastUserMessage({ messages, newMessageContent, logger }),
+        Your sole task is to compare each *document* in <DocumentsToScore> against three sources of context:
+
+        1.  **<UserPrompt>** - what the user is asking right now.
+        2.  **<ConversationHistory>** - the ongoing dialogue (including earlier assistant responses).
+        3.  **<ScreenDescription>** - what the user is currently looking at in the UI.
+
+        For every document you must assign **one integer score from 0 to 7** (inclusive) that answers the question
+        “*How helpful is this document for the user's current need, given their prompt <UserPrompt>, conversation history <ConversationHistory> and screen description <ScreenDescription>?*”
+
+        ### Scoring rubric
+        Use the following scale to assign a score to each document. Be critical and consistent.
+        - **7:** Directly and completely answers the user's current need; almost certainly the top answer. 
+        - **5-6:** Highly relevant; addresses most aspects of the prompt or clarifies a key point. 
+        - **3-4:** Somewhat relevant; tangential, partial answer, or needs other docs to be useful. 
+        - **1-2:** Barely relevant; vague thematic overlap only. 
+        - **0:** Irrelevant; no meaningful connection.
+
+        ### Mandatory rules
+        1.  **Base every score only on the text provided**. Do not rely on outside knowledge.
+        2.  **Never alter, summarise, copy, or quote the documents**. Your output is *only* the scores.
+        3.  **Return the result exclusively by calling the provided function** \`${SCORE_FUNCTION_NAME}\`.
+            * Populate the single argument 'scores' with a CSV string.
+            * Format: '<documentId>,<score>' - one line per document, no header, no extra whitespace.
+        4.  **Do not output anything else** (no explanations, no JSON wrappers, no markdown). The function call itself is the entire response.
+
+        If you cannot parse any part of the input, still score whatever you can and give obviously unparsable docs a 0.
+
+        ---
+        CONTEXT AND DOCUMENTS TO SCORE
+        ---
+
+        <UserPrompt>
+        ${userPrompt}
+        </UserPrompt>
+
+        <ConversationHistory>
+        ${JSON.stringify(messages, null, 2)}
+        </ConversationHistory>
+
+        <ScreenDescription>
+        ${screenDescription}
+        </ScreenDescription>
+
+        <DocumentsToScore>
+        ${JSON.stringify(
+          suggestions.map((suggestion) => ({
+            ...omit(suggestion, 'esScore'), // Omit ES score to not bias the LLM
+            id: shortIdTable.take(suggestion.id), // Shorten id to save tokens
+          })),
+          null,
+          2
+        )}
+        </DocumentsToScore>`),
+      messages: [
+        {
+          '@timestamp': new Date().toISOString(),
+          message: {
+            role: MessageRole.User,
+            content: userPrompt,
+          },
+        },
+      ],
       functions: [scoreFunction],
       functionCall: SCORE_FUNCTION_NAME,
       signal,
@@ -133,7 +160,7 @@ export async function scoreSuggestions({
 
   const suggestionIds = suggestions.map((document) => document.id);
 
-  // get top 5 documents ids with scores > 4
+  // get top 5 documents ids
   const relevantDocumentIds = llmScores
     .filter(({ llmScore }) => llmScore > 4)
     .sort((a, b) => b.llmScore - a.llmScore)

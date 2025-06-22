@@ -21,7 +21,6 @@ export async function recallAndScore({
   recall,
   chat,
   analytics,
-  userPrompt,
   screenDescription,
   messages,
   logger,
@@ -30,7 +29,6 @@ export async function recallAndScore({
   recall: ObservabilityAIAssistantClient['recall'];
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
-  userPrompt: string;
   screenDescription: string;
   messages: Message[];
   logger: Logger;
@@ -41,7 +39,6 @@ export async function recallAndScore({
   suggestions: RecalledSuggestion[];
 }> {
   const rewrittenUserPrompt = await getRewrittenUserPrompt({
-    userPrompt,
     screenDescription,
     chat,
     messages,
@@ -49,7 +46,7 @@ export async function recallAndScore({
     signal,
   });
 
-  const queries = [{ text: rewrittenUserPrompt ?? userPrompt, boost: 1 }];
+  const queries = [{ text: rewrittenUserPrompt, boost: 1 }];
 
   const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
     ({ id, text, esScore }) => ({ id, text, esScore })
@@ -71,7 +68,6 @@ export async function recallAndScore({
       suggestions,
       logger,
       messages,
-      userPrompt,
       screenDescription,
       signal,
       chat,

@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '..';
 import { MessageAddEvent } from '../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../common/functions/types';
-import { Message, MessageRole } from '../../../common/types';
+import { Message } from '../../../common/types';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { recallAndScore } from './utils/recall_and_score';
 
@@ -61,23 +61,10 @@ export function registerContextFunction({
           return { content };
         }
 
-        const lastUserMessage = last(
-          messages.filter((message) => message.message.role === MessageRole.User)
-        );
-
-        if (!lastUserMessage?.message.content) {
-          resources.logger.warn(
-            'No user message found in the conversation history. Aborting querying the knowledge base.'
-          );
-          return { content };
-        }
-
-        const userPrompt = lastUserMessage.message.content;
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
-          userPrompt,
           screenDescription,
           messages: removeContextToolRequest(messages),
           signal,

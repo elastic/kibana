@@ -8,53 +8,61 @@
 import { Logger } from '@kbn/logging';
 import { lastValueFrom } from 'rxjs';
 import dedent from 'dedent';
-import { Message } from '../../../../common';
+import { Message, MessageRole } from '../../../../common';
 import { FunctionCallChatFunction } from '../../../service/types';
+import { getUserPromptFromMessages } from './get_user_prompt_from_messages';
 
 export async function getRewrittenUserPrompt({
-  userPrompt,
   screenDescription,
   chat,
   messages,
   logger,
   signal,
 }: {
-  userPrompt: string;
   screenDescription: string;
   chat: FunctionCallChatFunction;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
 }): Promise<string> {
+  const userPrompt = getUserPromptFromMessages(messages);
+
   try {
     const systemMessage = dedent(`
-      You are a Retrieval Assistant
-      Your sole task is to rewrite the provided user prompt into ONE self-contained query that will be embedded and sent to Elasticsearch to retrieve semantically similar documents.
-      The user is a human using the Elastic Stack (Kibana and Elasticsearch) to analyze their data.
+<ConversationHistory>
+${JSON.stringify(messages, null, 2)}
+</ConversationHistory>
 
-      Screen description. This provides context about what the user is looking at, which may help you in rewriting the user prompt:
-      <ScreenDescription>
-      ${screenDescription}
-      </ScreenDescription>
+<ScreenDescription>
+${screenDescription ? screenDescription : 'No screen context provided.'}
+</ScreenDescription>        
+        
+You are a retrieval query-rewriting assistant. Your ONLY task is to transform the user's last message (<UserPrompt>) into a single question that will be embedded and searched against "semantic_text" fields in Elasticsearch.
 
-      <UserPrompt>
-      ${userPrompt}
-      </UserPrompt>
+OUTPUT  
+Return **exactly one** natural-language question (≤ 50 tokens) and nothing else. End the response immediately after the question - no preamble, no code fences, no JSON.
 
-      Criteria:
-      - Output must be concise and maximally 50 tokens.
-      - Output must be plain text, no markdown or formatting.
-      - Expand vague prompts by adding clarifying context, but do not add any new information.
-      - Avoid hallucinating data or exact numbers not present in the original query.
-      - Pay special attention to the user prompt but consider the entire conversation history.
-      - You must only output the rewritten question. Nothing else`);
+RULES & STRATEGY  
+1. Produce a query every time; **never** ask the user follow-up questions.  
+2. Expand vague references (“this”, “it”, “here”, “service”) using clues from <ScreenDescription> or earlier user turns, but **never invent** facts, names, or numbers.  
+3. If context is still too thin for a precise query, output a broad, system-wide question.  
+   • If the user's words mention a topic (e.g., "latency", “errors”), center the broad question on that topic.
+4. Keep the query one sentence, declarative, with normal punctuation - no lists, no meta-commentary, no extra formatting."`);
 
     const chatResponse = await lastValueFrom(
       chat('rewrite_user_prompt', {
         stream: true,
         signal,
         systemMessage,
-        messages,
+        messages: [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: userPrompt,
+            },
+          },
+        ],
       })
     );
 
@@ -66,6 +74,6 @@ export async function getRewrittenUserPrompt({
   } catch (error) {
     logger.error(`Failed to rewrite the user prompt: "${userPrompt}"`);
     logger.error(error);
-    return '';
+    return userPrompt!;
   }
 }
