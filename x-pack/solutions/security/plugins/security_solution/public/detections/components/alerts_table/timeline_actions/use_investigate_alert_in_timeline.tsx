@@ -18,6 +18,7 @@ import { useApi } from '@kbn/securitysolution-list-hooks';
 import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
@@ -33,8 +34,12 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
-interface UseInvestigateInTimelineActionProps {
+interface UseInvestigateAlertInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
   onInvestigateInTimelineAlertClick?: () => void;
 }
@@ -89,10 +94,10 @@ const detectionExceptionList = (ecsData: Ecs): ExceptionListId[] => {
   return detectionExceptionsList;
 };
 
-export const useInvestigateInTimeline = ({
+export const useInvestigateAlertInTimeline = ({
   ecsRowData,
   onInvestigateInTimelineAlertClick,
-}: UseInvestigateInTimelineActionProps) => {
+}: UseInvestigateAlertInTimelineActionProps) => {
   const { addError } = useAppToasts();
   const {
     data: { search: searchStrategyClient },
@@ -138,11 +143,30 @@ export const useInvestigateInTimeline = ({
 
   const updateTimeline = useUpdateTimeline();
 
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const { dataView: experimentalDatView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.detections);
+
+  const alertsDefaultDataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDatView?.id ?? null : oldTimelineDataViewId),
+    [experimentalDatView?.id, newDataViewPickerEnabled, oldTimelineDataViewId]
+  );
+
+  const alertsFallbackIndexNames = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDatView?.getIndexPattern().split(',') ?? [] : []),
+    [experimentalDatView, newDataViewPickerEnabled]
+  );
+
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
       const newColumns = timeline.columns;
       const newColumnsOverride =
         !newColumns || isEmpty(newColumns) ? defaultUdtHeaders : newColumns;
+
+      const dataViewId = timeline.dataViewId ?? alertsDefaultDataViewId;
+      const indexNames = isEmpty(timeline.indexNames)
+        ? alertsFallbackIndexNames
+        : timeline.indexNames;
 
       await clearActiveTimeline();
       updateTimeline({
@@ -152,8 +176,9 @@ export const useInvestigateInTimeline = ({
         notes: [],
         timeline: {
           ...timeline,
+          dataViewId,
           columns: newColumnsOverride,
-          indexNames: timeline.indexNames ?? [],
+          indexNames,
           show: true,
           excludedRowRendererIds:
             timeline.timelineType !== TimelineTypeEnum.template
@@ -164,7 +189,7 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       });
     },
-    [updateTimeline, clearActiveTimeline]
+    [clearActiveTimeline, updateTimeline, alertsDefaultDataViewId, alertsFallbackIndexNames]
   );
 
   const investigateInTimelineAlertClick = useCallback(async () => {

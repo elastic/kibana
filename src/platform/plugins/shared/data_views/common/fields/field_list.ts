@@ -28,6 +28,12 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
    * @returns a new data view field instance
    */
   create(field: FieldSpec): DataViewField;
+
+  /**
+   * Clear the cached field spec map.
+   * This is used to avoid recalculating the spec every time `toSpec` is called.
+   */
+  clearSpecCache(): void;
   /**
    * Add field to field list.
    * @param field field spec to add field to list
@@ -112,10 +118,6 @@ export const fieldList = (
       specs.map((field) => this.add(field));
     }
 
-    private clearFieldSpecCache = () => {
-      this.cachedFieldSpec = null;
-    };
-
     public readonly getAll = () => [...this.byName.values()];
     public readonly getByName = (name: DataViewField['name']) => this.byName.get(name);
     public readonly getByType = (type: DataViewField['type']) => [
@@ -126,12 +128,16 @@ export const fieldList = (
       return new DataViewField({ ...field, shortDotsEnable });
     };
 
+    public clearSpecCache = () => {
+      this.cachedFieldSpec = null;
+    };
+
     public readonly add = (field: FieldSpec): DataViewField => {
       const newField = this.create(field);
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
-      this.clearFieldSpecCache();
+      this.clearSpecCache();
       return newField;
     };
 
@@ -142,7 +148,7 @@ export const fieldList = (
       const fieldIndex = findIndex(this, { name: field.name });
       if (fieldIndex === -1) return;
       this.splice(fieldIndex, 1);
-      this.clearFieldSpecCache();
+      this.clearSpecCache();
     };
 
     public readonly update = (field: FieldSpec) => {
@@ -152,14 +158,14 @@ export const fieldList = (
       this.setByName(newField);
       this.removeByGroup(newField);
       this.setByGroup(newField);
-      this.clearFieldSpecCache();
+      this.clearSpecCache();
     };
 
     public readonly removeAll = () => {
       this.length = 0;
       this.byName.clear();
       this.groups.clear();
-      this.clearFieldSpecCache();
+      this.clearSpecCache();
     };
 
     public readonly replaceAll = (spcs: FieldSpec[] = []) => {

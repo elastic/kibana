@@ -29,7 +29,7 @@ import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useExpandSection } from '../hooks/use_expand_section';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -150,7 +150,7 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render the component expanded if value is true in local storage', () => {
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+    (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);

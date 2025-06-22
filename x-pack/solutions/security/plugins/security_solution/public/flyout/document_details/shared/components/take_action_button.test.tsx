@@ -14,7 +14,7 @@ import { DocumentDetailsContext } from '../context';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
 jest.mock('../../../../common/lib/kibana');
@@ -29,7 +29,7 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
 jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline'
 );
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
@@ -44,7 +44,7 @@ describe('TakeActionButton', () => {
       },
     });
     (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
-    (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+    (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineActionItems: [{ name: 'test', onClick: jest.fn() }],
     });
     (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });

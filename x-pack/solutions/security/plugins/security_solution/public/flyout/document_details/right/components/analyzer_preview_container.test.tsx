@@ -23,14 +23,14 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline';
 
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree');
 jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline'
 );
 jest.mock('../../../../common/hooks/use_experimental_features');
 
@@ -79,7 +79,7 @@ describe('AnalyzerPreviewContainer', () => {
         alertIds: ['alertid'],
         statsNodes: mock.mockStatsNodes,
       });
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
 
@@ -108,7 +108,7 @@ describe('AnalyzerPreviewContainer', () => {
 
     it('should render error message and text in header', () => {
       (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
 
@@ -129,7 +129,7 @@ describe('AnalyzerPreviewContainer', () => {
         alertIds: ['alertid'],
         statsNodes: mock.mockStatsNodes,
       });
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
 
@@ -147,7 +147,7 @@ describe('AnalyzerPreviewContainer', () => {
         alertIds: ['alertid'],
         statsNodes: mock.mockStatsNodes,
       });
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
 
@@ -168,7 +168,7 @@ describe('AnalyzerPreviewContainer', () => {
         alertIds: ['alertid'],
         statsNodes: mock.mockStatsNodes,
       });
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
 
@@ -194,7 +194,7 @@ describe('AnalyzerPreviewContainer', () => {
         alertIds: ['alertid'],
         statsNodes: mock.mockStatsNodes,
       });
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
     });

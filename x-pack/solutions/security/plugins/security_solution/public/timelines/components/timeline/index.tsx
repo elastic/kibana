@@ -102,7 +102,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
+    SourcererScopeName.timeline,
+    false
+  );
 
   const selectedDataViewId = useMemo(
     () =>

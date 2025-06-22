@@ -14,11 +14,13 @@ import type {
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
 import type { EuiButtonIconProps } from '@elastic/eui';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useDataViewId } from '../../hooks/use_data_view_id';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';
@@ -64,8 +66,13 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   children,
   ...props
 }) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec(sourcererScopeId);
+  const experimentalDataViewId = dataViewSpec?.id ?? '';
   const getFieldSpec = useGetFieldSpec(sourcererScopeId);
-  const dataViewId = useDataViewId(sourcererScopeId);
+  const oldDataViewId = useDataViewId(sourcererScopeId);
+
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId;
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
   const dependencyKey = JSON.stringify(data);
@@ -74,13 +81,15 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
     () =>
       (Array.isArray(data) ? data : [data])
         .map(({ field, value }) => ({
-          field: getFieldSpec(field),
+          field: newDataViewPickerEnabled ? dataViewSpec.fields?.[field] : getFieldSpec(field),
           value,
         }))
         .filter((item): item is CellActionsData => !!item.field),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Use the dependencyKey to prevent unnecessary re-renders
-    [dependencyKey, getFieldSpec]
+    [dependencyKey, dataViewSpec, getFieldSpec, newDataViewPickerEnabled]
   );
+
+  console.log('FIELD DATA', fieldData, dataViewSpec);
 
   const metadataWithDataView = useMemo(() => ({ ...metadata, dataViewId }), [dataViewId, metadata]);
 

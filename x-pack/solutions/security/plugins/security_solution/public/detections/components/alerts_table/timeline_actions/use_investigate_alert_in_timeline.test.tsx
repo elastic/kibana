@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useInvestigateInTimeline } from './use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from './use_investigate_alert_in_timeline';
 import * as actions from '../actions';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
@@ -254,7 +254,7 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   );
 };
 
-describe('useInvestigateInTimeline', () => {
+describe('useInvestigateAlertInTimeline', () => {
   let mockSearchStrategyClient = {
     search: jest
       .fn()
@@ -279,7 +279,7 @@ describe('useInvestigateInTimeline', () => {
     jest.clearAllMocks();
   });
   test('creates a component and click handler', () => {
-    const { result } = renderHook(() => useInvestigateInTimeline(props), {
+    const { result } = renderHook(() => useInvestigateAlertInTimeline(props), {
       wrapper: TestProviders,
     });
     expect(result.current.investigateInTimelineActionItems).toBeTruthy();
@@ -288,7 +288,7 @@ describe('useInvestigateInTimeline', () => {
 
   describe('the click handler calls createTimeline once and only once', () => {
     test('runs 0 times on render, once on click', async () => {
-      const { result } = renderHook(() => useInvestigateInTimeline(props), {
+      const { result } = renderHook(() => useInvestigateAlertInTimeline(props), {
         wrapper: TestProviders,
       });
       const actionItem = result.current.investigateInTimelineActionItems[0];
@@ -311,7 +311,7 @@ describe('useInvestigateInTimeline', () => {
         };
         const ecsData = getEcsDataWithRuleTypeAndTimelineTemplate(ruleType);
         const { result } = renderHook(
-          () => useInvestigateInTimeline({ ...props, ecsRowData: ecsData }),
+          () => useInvestigateAlertInTimeline({ ...props, ecsRowData: ecsData }),
           {
             wrapper: TestProviders,
           }
@@ -358,7 +358,7 @@ describe('useInvestigateInTimeline', () => {
         };
         const ecsData: Ecs = getEcsDataWithRuleTypeAndTimelineTemplate(ruleType);
         const { result } = renderHook(
-          () => useInvestigateInTimeline({ ...props, ecsRowData: ecsData }),
+          () => useInvestigateAlertInTimeline({ ...props, ecsRowData: ecsData }),
           {
             wrapper: TestProviders,
           }
@@ -404,7 +404,7 @@ describe('useInvestigateInTimeline', () => {
         timelinePrivileges: { read: false },
       });
 
-      const { result } = renderHook(() => useInvestigateInTimeline(props), {
+      const { result } = renderHook(() => useInvestigateAlertInTimeline(props), {
         wrapper: TestProviders,
       });
       expect(result.current.investigateInTimelineActionItems).toHaveLength(0);

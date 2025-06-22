@@ -73,6 +73,7 @@ export const useInvestigateInTimeline = () => {
 
   const setSelectedDataView = useSelectDataView();
 
+  console.log('!!DEFAULT DATA VIEW', defaultDataView);
   const investigateInTimeline = useCallback(
     async ({
       query,
@@ -84,7 +85,7 @@ export const useInvestigateInTimeline = () => {
       const hasTemplateProviders =
         dataProviders && dataProviders.find((provider) => provider.type === 'template');
       const clearTimeline = hasTemplateProviders ? clearTimelineTemplate : clearTimelineDefault;
-
+      console.log('!!DEFAULT DATA VIEW', defaultDataView, keepDataView);
       if (dataProviders || filters || query) {
         // Reset the current timeline
         if (timeRange) {

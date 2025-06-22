@@ -153,16 +153,16 @@ const timelineActionsWithNonserializablePayloads = [
 
 const actionSanitizer = (action: AnyAction) => {
   if (action.type === sourcererActions.setDataView.type) {
-    return {
-      ...action,
-      payload: {
-        ...action.payload,
-        dataView: 'dataView',
-        browserFields: 'browserFields',
-        indexFields: 'indexFields',
-        fields: 'fields',
-      },
-    };
+    // return {
+    //   ...action,
+    //   payload: {
+    //     ...action.payload,
+    //     dataView: 'dataView',
+    //     browserFields: 'browserFields',
+    //     indexFields: 'indexFields',
+    //     fields: 'fields',
+    //   },
+    // };
   } else if (timelineActionsWithNonserializablePayloads.includes(action.type)) {
     const { type, payload } = action;
     if (type === timelineActions.addTimeline.type || type === timelineActions.updateTimeline.type) {

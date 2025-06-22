@@ -25,7 +25,8 @@ export interface UseDataViewSpecResult {
  * Returns an object with the dataViewSpec and status values for the given scopeName.
  */
 export const useDataViewSpec = (
-  scopeName: DataViewManagerScopeName = DataViewManagerScopeName.default
+  scopeName: DataViewManagerScopeName = DataViewManagerScopeName.default,
+  includeFields: boolean = true
 ): UseDataViewSpecResult => {
   const { dataView, status } = useDataView(scopeName);
 
@@ -42,6 +43,6 @@ export const useDataViewSpec = (
       };
     }
 
-    return { dataViewSpec: dataView?.toSpec?.(), status };
-  }, [dataView, status]);
+    return { dataViewSpec: dataView?.toSpec?.(includeFields), status };
+  }, [dataView, includeFields, status]);
 };

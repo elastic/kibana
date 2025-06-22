@@ -55,7 +55,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(scope);
+  const { dataViewSpec, status } = useDataViewSpec(scope, false);
 
   const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
     useSelector(sharedStateSelector);

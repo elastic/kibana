@@ -22,7 +22,7 @@ import {
 import { isActiveTimeline } from '../../../../helpers';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline';
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
@@ -246,7 +246,7 @@ export const TakeActionDropdown = memo(
     });
 
     // timeline interaction
-    const { investigateInTimelineActionItems } = useInvestigateInTimeline({
+    const { investigateInTimelineActionItems } = useInvestigateAlertInTimeline({
       ecsRowData: dataAsNestedObject,
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });

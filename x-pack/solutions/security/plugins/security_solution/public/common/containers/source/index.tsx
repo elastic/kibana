@@ -110,6 +110,7 @@ export const useFetchIndex = (
   const indexFieldsSearch = useCallback(
     (iNames: string[]) => {
       const asyncSearch = async () => {
+        console.trace('useFetchIndex is deprecated, use useDataView instead: ', indexNames);
         try {
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();

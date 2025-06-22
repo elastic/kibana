@@ -22,13 +22,13 @@ import {
 } from '../../../shared/components/test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline';
 
 jest.mock('../../shared/hooks/use_session_view_config');
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
+  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_alert_in_timeline'
 );
 
 const mockNavigateToSessionView = jest.fn();
@@ -70,7 +70,7 @@ describe('SessionPreviewContainer', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-      (useInvestigateInTimeline as jest.Mock).mockReturnValue({
+      (useInvestigateAlertInTimeline as jest.Mock).mockReturnValue({
         investigateInTimelineAlertClick: jest.fn(),
       });
     });

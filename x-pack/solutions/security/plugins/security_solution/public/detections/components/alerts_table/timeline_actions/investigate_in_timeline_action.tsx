@@ -14,7 +14,7 @@ import {
   ACTION_INVESTIGATE_IN_TIMELINE,
   ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
 } from '../translations';
-import { useInvestigateInTimeline } from './use_investigate_in_timeline';
+import { useInvestigateAlertInTimeline } from './use_investigate_alert_in_timeline';
 
 interface InvestigateInTimelineActionProps {
   ecsRowData?: Ecs | null;
@@ -29,7 +29,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
   buttonType,
   onInvestigateInTimelineAlertClick,
 }) => {
-  const { investigateInTimelineAlertClick } = useInvestigateInTimeline({
+  const { investigateInTimelineAlertClick } = useInvestigateAlertInTimeline({
     ecsRowData,
     onInvestigateInTimelineAlertClick,
   });

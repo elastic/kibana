@@ -96,19 +96,21 @@ export const useCreateTimeline = ({
         setTimelineFullScreen(false);
       }
 
-      setSelectedDataView({
-        id: dataViewId,
-        fallbackPatterns: selectedPatterns,
-        scope: DataViewManagerScopeName.timeline,
-      });
-
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: dataViewId,
-          selectedPatterns,
-        })
-      );
+      if (newDataViewPickerEnabled) {
+        setSelectedDataView({
+          id: dataViewId,
+          fallbackPatterns: selectedPatterns,
+          scope: DataViewManagerScopeName.timeline,
+        });
+      } else {
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: SourcererScopeName.timeline,
+            selectedDataViewId: dataViewId,
+            selectedPatterns,
+          })
+        );
+      }
 
       dispatch(
         timelineActions.createTimeline({

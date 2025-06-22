@@ -8,6 +8,7 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { EuiSkeletonText } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
@@ -48,11 +49,16 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
   });
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView, status: dataViewStatus } = useDataView(
+    SourcererScopeName.timeline
+  );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
+  if (dataViewStatus === 'loading') {
+    return <EuiSkeletonText data-test-subj="unifiedTimelineLoading" size="relative" />;
+  }
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
       <StyledUnifiedTableFlexItem grow={false}>{header}</StyledUnifiedTableFlexItem>

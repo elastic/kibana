@@ -164,7 +164,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const oldGetFieldSpec = useGetFieldSpec(sourcererScope);
+
+  const getFieldSpec = useCallback(
+    (fieldName: string) =>
+      newDataViewPickerEnabled ? dataViewSpec?.fields?.[fieldName] : oldGetFieldSpec(fieldName),
+    [dataViewSpec?.fields, newDataViewPickerEnabled, oldGetFieldSpec]
+  );
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {

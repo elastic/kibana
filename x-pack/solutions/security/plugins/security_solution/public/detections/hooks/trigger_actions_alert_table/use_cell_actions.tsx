@@ -9,6 +9,7 @@ import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { RenderContext } from '@kbn/response-ops-alerts-table/types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { UseDataGridColumnsSecurityCellActionsProps } from '../../../common/components/cell_actions';
 import { useDataGridColumnsSecurityCellActions } from '../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
@@ -19,6 +20,7 @@ import type {
   SecurityAlertsTableContext,
   GetSecurityAlertsTableProp,
 } from '../../components/alerts_table/types';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 export const useCellActionsOptions = (
   tableId: TableId,
@@ -34,24 +36,36 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const experimentalDataViewId = dataViewSpec?.id ?? '';
   const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
-  const dataViewId = useDataViewId(SourcererScopeName.detections);
+  const oldDataViewId = useDataViewId(SourcererScopeName.detections);
+
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId;
+
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
     [dataViewId, tableId]
   );
   const cellActionsFields: UseDataGridColumnsSecurityCellActionsProps['fields'] = useMemo(
     () =>
-      columns.map(
-        (column) =>
-          getFieldSpec(column.id) ?? {
-            name: '',
-            type: '', // When type is an empty string all cell actions are incompatible
-            aggregatable: false,
-            searchable: false,
-          }
+      columns.map((column) =>
+        newDataViewPickerEnabled
+          ? dataViewSpec?.fields?.[column.id] ?? {
+              name: '',
+              type: '', // When type is an empty string all cell actions are incompatible
+              aggregatable: false,
+              searchable: false,
+            }
+          : getFieldSpec(column.id) ?? {
+              name: '',
+              type: '', // When type is an empty string all cell actions are incompatible
+              aggregatable: false,
+              searchable: false,
+            }
       ),
-    [columns, getFieldSpec]
+    [columns, dataViewSpec?.fields, getFieldSpec, newDataViewPickerEnabled]
   );
 
   /**

@@ -65,6 +65,7 @@ export const AlertTableCellContextProvider = ({
     [browserFields, browserFieldsByName, columnHeaders]
   );
 
+  console.log("CELL VALUE CONTEXT", cellValueContext);
   return (
     <AlertTableCellContext.Provider value={cellValueContext}>
       {children}

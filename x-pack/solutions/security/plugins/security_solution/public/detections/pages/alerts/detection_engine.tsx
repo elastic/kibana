@@ -106,6 +106,7 @@ const StyledFullHeightContainer = styled.div`
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
+// eslint-disable-next-line complexity
 const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = () => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -175,7 +176,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     TableId.alertsOnAlertsPage
   );
 
-  const loading = userInfoLoading || listsConfigLoading;
+  const loading = userInfoLoading || listsConfigLoading || isLoadingIndexPattern;
   const {
     application: { navigateToUrl },
     data,
