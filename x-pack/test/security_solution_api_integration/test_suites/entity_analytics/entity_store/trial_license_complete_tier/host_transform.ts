@@ -26,7 +26,6 @@ export default function (providerContext: FtrProviderContext) {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
-  const utils = EntityStoreUtils(providerContext.getService);
 
   describe('@ess Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
