@@ -222,9 +222,20 @@ export class AnonymizationService {
     return this.rules.some((rule) => rule.enabled);
   }
   getAnonymizationInstruction(): string {
-    if (!this.isEnabled()) {
-      return '';
-    }
-    return 'Some entities in this conversation (like names, locations, or IDs) have been anonymized using placeholder hashes (e.g., `PER_123`, `LOC_abcd1234`). These tokens should be treated as distinct but semantically unknown entities. Do not try to infer their meaning. Refer to them as-is unless explicitly provided with a description.';
+    if (!this.isEnabled()) return '';
+
+    const nerClasses = ['PER', 'LOC', 'ORG', 'MISC'];
+    const regexClasses = this.rules
+      .filter((rule) => rule.type === 'regex' && rule.enabled)
+      .map((rule) => (rule as RegexAnonymizationRule).entityClass);
+
+    const allClasses = [...nerClasses, ...regexClasses];
+    const exampleTokens = allClasses.map((c) => `\`${c}_abc123\``).join(', ');
+
+    return `Some entities in this conversation have been anonymized using placeholder tokens (e.g., ${exampleTokens}).
+  These represent named entities such as people (PER), locations (LOC), organizations (ORG), and miscellaneous types (MISC), ${
+    regexClasses.length ? `as well as custom types like ${regexClasses.join(', ')}. ` : ''
+  }
+  Do not attempt to infer their meaning, type, or real-world identity. Refer to them exactly as they appear unless explicitly resolved or described.`;
   }
 }
