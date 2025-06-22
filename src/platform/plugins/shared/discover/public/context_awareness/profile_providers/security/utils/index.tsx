@@ -41,6 +41,7 @@ export const getSecurityTimelineRedirectUrl = ({
           from,
           to,
           kind: 'absolute',
+          linkTo: false,
         },
       },
     };

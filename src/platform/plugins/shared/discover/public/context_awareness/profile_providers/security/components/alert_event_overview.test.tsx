@@ -15,6 +15,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EcsFlat } from '@elastic/ecs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { encode } from '@kbn/rison';
+import { URLSearchParams } from 'url';
 
 jest.mock('../../../../hooks/use_discover_services');
 
@@ -43,7 +44,7 @@ const mockHit = {
 
 const mockDataView = dataViewMock;
 
-describe('AlertEventOverviewAccessor', () => {
+describe('AlertEventOverview', () => {
   beforeEach(() => {
     (useDiscoverServices as jest.Mock).mockReturnValue(mockDiscoverServices);
   });
@@ -102,24 +103,27 @@ describe('AlertEventOverviewAccessor', () => {
       } as unknown as DataTableRecord;
       render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
       const expectedURLJSON = {
-        timeline: {
+        timeline: encode({
           activeTab: 'query',
           isOpen: true,
           query: {
             expression: '_id: test-id',
             kind: 'kuery',
           },
-        },
+        }),
 
-        timeRange: {
+        timeRange: encode({
           timeline: {
-            from: mockRow['@timestamp'],
-            to: mockRow['@timestamp'],
-            linkTo: false,
+            timerange: {
+              from: mockRow['@timestamp'],
+              to: mockRow['@timestamp'],
+              kind: 'absolute',
+              linkTo: false,
+            },
           },
-        },
+        }),
 
-        timelineFlyout: {
+        timelineFlyout: encode({
           right: {
             id: 'document-details-right',
             params: {
@@ -127,13 +131,15 @@ describe('AlertEventOverviewAccessor', () => {
               scopeId: 'timeline-1',
             },
           },
-        },
+        }),
       };
 
+      const searchParams = new URLSearchParams(
+        `timeline=${expectedURLJSON.timeline}&timerange=${expectedURLJSON.timeRange}&timelineFlyout=${expectedURLJSON.timelineFlyout}`
+      );
+
       expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe(
-        `test-timeline-url?timeline=${encode(expectedURLJSON.timeline)}&timeRange=${encode(
-          expectedURLJSON.timeRange
-        )}&timelineFlyout=${encode(expectedURLJSON.timelineFlyout)}`
+        `test-timeline-url?${searchParams}`
       );
     });
   });
