@@ -52,5 +52,6 @@ export function useInstallProductDoc() {
         });
       },
     }
-  );x
+  );
+  x;
 }
