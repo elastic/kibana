@@ -24,12 +24,19 @@ export default function (providerContext: FtrProviderContext) {
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
 
-  const postGraph = (agent: Agent, body: GraphRequest, auth?: { user: string; pass: string }) => {
+  const postGraph = (
+    agent: Agent,
+    body: GraphRequest,
+    auth?: { user: string; pass: string },
+    spaceId?: string
+  ) => {
+    logger.debug(`POST ${spaceId ? `/s/${spaceId}` : ''}/internal/cloud_security_posture/graph`);
     let req = agent
-      .post('/internal/cloud_security_posture/graph')
+      .post(`${spaceId ? `/s/${spaceId}` : ''}/internal/cloud_security_posture/graph`)
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .set('kbn-xsrf', 'xxxx');
@@ -63,12 +70,18 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('Happy flows', () => {
       before(async () => {
+        await spacesService.create({
+          id: 'foo',
+          name: 'foo',
+          disabledFeatures: [],
+        });
         await esArchiver.loadIfNeeded(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
       });
 
       after(async () => {
+        await spacesService.delete('foo');
         await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
@@ -116,6 +129,54 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           }).expect(result(400, logger));
+        });
+
+        it('should return 400 when index patterns is an empty array', async () => {
+          await postGraph(supertest, {
+            query: {
+              originEventIds: [],
+              start: 'now-1d/d',
+              end: 'now/d',
+              indexPatterns: [],
+            },
+          }).expect(result(400, logger));
+        });
+
+        it('should return 400 when index patterns has empty string value', async () => {
+          await postGraph(supertest, {
+            query: {
+              originEventIds: [],
+              start: 'now-1d/d',
+              end: 'now/d',
+              indexPatterns: ['logs-*', ''],
+            },
+          }).expect(result(400, logger));
+        });
+
+        it('should return 400 when index patterns has illegal character (space, |)', async () => {
+          await postGraph(supertest, {
+            query: {
+              originEventIds: [],
+              start: 'now-1d/d',
+              end: 'now/d',
+              indexPatterns: ['logs-*', '.alerts-security-*| FROM *'],
+            },
+          }).expect(result(400, logger));
+        });
+
+        it('should return 500 when space id is invalid', async () => {
+          await postGraph(
+            supertest,
+            {
+              query: {
+                originEventIds: [],
+                start: 'now-1d/d',
+                end: 'now/d',
+              },
+            },
+            undefined,
+            encodeURIComponent('foo | FROM *').replace('*', '%2A')
+          ).expect(result(500, logger));
         });
       });
 

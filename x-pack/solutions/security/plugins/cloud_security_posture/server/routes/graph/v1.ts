@@ -9,6 +9,7 @@ import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   Color,
   EdgeDataModel,
@@ -35,6 +36,7 @@ interface GraphEdge {
   eventOutcome: string;
   isOrigin: boolean;
   isOriginAlert: boolean;
+  isAlert: boolean;
 }
 
 interface LabelEdges {
@@ -57,6 +59,7 @@ interface GetGraphParams {
   services: GraphContextServices;
   query: {
     originEventIds: OriginEventId[];
+    indexPatterns?: string[];
     spaceId?: string;
     start: string | number;
     end: string | number;
@@ -68,12 +71,16 @@ interface GetGraphParams {
 
 export const getGraph = async ({
   services: { esClient, logger },
-  query: { originEventIds, spaceId = 'default', start, end, esQuery },
+  query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
+  indexPatterns = indexPatterns ?? [`*.alerts-security.alerts-${spaceId}`, 'logs-*'];
+
   logger.trace(
-    `Fetching graph for [originEventIds: ${originEventIds.join(', ')}] in [spaceId: ${spaceId}]`
+    `Fetching graph for [originEventIds: ${originEventIds.join(
+      ', '
+    )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
   const results = await fetchGraph({
@@ -83,6 +90,7 @@ export const getGraph = async ({
     start,
     end,
     originEventIds,
+    indexPatterns,
     esQuery,
   });
 
@@ -143,6 +151,7 @@ const fetchGraph = async ({
   end,
   originEventIds,
   showUnknownTarget,
+  indexPatterns,
   esQuery,
 }: {
   esClient: IScopedClusterClient;
@@ -151,10 +160,24 @@ const fetchGraph = async ({
   end: string | number;
   originEventIds: OriginEventId[];
   showUnknownTarget: boolean;
+  indexPatterns: string[];
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `from logs-*
+
+  // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
+  // Regex to match invalid characters in index patterns: upper case characters, \, /, ?, ", <, >, |, (space), #, or ,
+  indexPatterns.forEach((indexPattern, idx) => {
+    if (!INDEX_PATTERN_REGEX.test(indexPattern)) {
+      throw new Error(
+        `Invalid index pattern [${indexPattern}] at index ${idx}. Cannot contain characters \\, /, ?, ", <, >, |, (space character), #, or ,`
+      );
+    }
+  });
+
+  const query = `FROM ${indexPatterns
+    .filter((indexPattern) => indexPattern.length > 0)
+    .join(',')} METADATA _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 | EVAL isOrigin = ${
     originEventIds.length > 0
@@ -166,11 +189,13 @@ const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
+| EVAL isAlert = _index LIKE "*.alerts-security.alerts-*"
 | STATS badge = COUNT(*),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user)
-    by actorIds = actor.entity.id,
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
+    BY actorIds = actor.entity.id,
       action = event.action,
       targetIds = target.entity.id,
       eventOutcome = event.outcome,
@@ -269,6 +294,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       targetIds,
       isOrigin,
       isOriginAlert,
+      isAlert,
       eventOutcome,
     } = record;
     const actorIdsArray = castArray(actorIds);
@@ -289,7 +315,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         nodesMap[id] = {
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
-          color: isOriginAlert ? 'danger' : 'primary',
+          color: isOriginAlert || isAlert ? 'danger' : 'primary',
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -312,7 +338,8 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
         const labelNode: LabelNodeDataModel = {
           id: edgeId + `label(${action})outcome(${eventOutcome})`,
           label: action,
-          color: isOriginAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
+          color:
+            isOriginAlert || isAlert ? 'danger' : eventOutcome === 'failed' ? 'warning' : 'primary',
           shape: 'label',
         };
 

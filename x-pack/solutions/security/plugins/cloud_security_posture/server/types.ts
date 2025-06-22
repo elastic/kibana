@@ -80,7 +80,7 @@ export interface CspApiRequestHandlerContext {
   agentService: AgentService;
   packagePolicyService: PackagePolicyClient;
   packageService: PackageService;
-  spaces?: SpacesPluginStart;
+  spacesService?: SpacesPluginStart['spacesService'];
 
   isPluginInitialized(): boolean;
 }
