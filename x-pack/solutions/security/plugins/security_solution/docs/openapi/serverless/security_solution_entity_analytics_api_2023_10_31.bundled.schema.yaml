@@ -430,24 +430,6 @@ paths:
       summary: Delete a monitored user
       tags:
         - Security Entity Analytics API
-    get:
-      operationId: GetPrivMonUser
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MonitoredUserDoc'
-          description: User details retrieved
-      summary: Retrieve a monitored user by ID
-      tags:
-        - Security Entity Analytics API
     put:
       operationId: UpdatePrivMonUser
       parameters:
@@ -492,6 +474,76 @@ paths:
                 type: array
           description: List of monitored users
       summary: List all monitored users
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
+      operationId: InstallPrivilegedAccessDetectionPackage
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Successful response
+      summary: >-
+        Installs the privileged access detection package for the Entity
+        Analytics privileged user monitoring experience
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        job_id:
+                          type: string
+                        state:
+                          enum:
+                            - closing
+                            - closed
+                            - opened
+                            - failed
+                            - opening
+                          type: string
+                      required:
+                        - job_id
+                        - state
+                    type: array
+                  ml_module_setup_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                  package_installation_status:
+                    enum:
+                      - complete
+                      - incomplete
+                    type: string
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+          description: Privileged access detection status retrieved
+      summary: >-
+        Gets the status of the privileged access detection package for the
+        Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
   /api/entity_store/enable:
@@ -1624,14 +1676,6 @@ components:
         labels:
           type: object
           properties:
-            monitoring:
-              type: object
-              properties:
-                privileged_users:
-                  enum:
-                    - monitored
-                    - deleted
-                  type: string
             source_indices:
               items:
                 type: string
@@ -1650,6 +1694,9 @@ components:
         user:
           type: object
           properties:
+            is_privileged:
+              description: Indicates if the user is privileged.
+              type: boolean
             name:
               type: string
     MonitoringEngineDescriptor:
