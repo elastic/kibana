@@ -99,10 +99,12 @@ export class MonitorConfigRepository {
     id,
     spaceId,
     normalizedMonitor,
+    savedObjectType,
   }: {
     id: string;
     normalizedMonitor: SyntheticsMonitor;
     spaceId: string;
+    savedObjectType?: string;
   }) {
     let { spaces } = normalizedMonitor;
     // Ensure spaceId is included in spaces
@@ -119,7 +121,7 @@ export class MonitorConfigRepository {
     };
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorSavedObjectType,
+      savedObjectType ?? syntheticsMonitorSavedObjectType,
       formatSecrets({
         ...normalizedMonitor,
         [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,

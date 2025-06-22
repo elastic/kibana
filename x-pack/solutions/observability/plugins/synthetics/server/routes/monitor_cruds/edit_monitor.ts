@@ -122,7 +122,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         previousMonitor.attributes.locations
       );
 
-      const validationResult = validateMonitor(editedMonitor as MonitorFields);
+      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId);
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;

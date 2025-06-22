@@ -69,8 +69,9 @@ export class MonitorValidationError extends Error {
 /**
  * Validates monitor fields with respect to the relevant Codec identified by object's 'type' property.
  * @param monitorFields {MonitorFields} The mixed type representing the possible monitor payload from UI.
+ * @param spaceId
  */
-export function validateMonitor(monitorFields: MonitorFields, spaceId?: string): ValidationResult {
+export function validateMonitor(monitorFields: MonitorFields, spaceId: string): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
 
@@ -166,7 +167,8 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId?: string):
       return {
         valid: false,
         reason: i18n.translate('xpack.synthetics.createMonitor.validation.invalidSpace', {
-          defaultMessage: 'Invalid space ID provided in monitor configuration.',
+          defaultMessage:
+            'Invalid space ID provided in monitor configuration. It should always include the current space ID.',
         }),
         details: '',
         payload: monitorFields,

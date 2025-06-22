@@ -57,9 +57,11 @@ export class AddEditMonitorAPI {
   async syncNewMonitor({
     id,
     normalizedMonitor,
+    savedObjectType,
   }: {
     id?: string;
     normalizedMonitor: SyntheticsMonitor;
+    savedObjectType?: string;
   }) {
     const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
@@ -75,6 +77,7 @@ export class AddEditMonitorAPI {
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
         spaceId,
+        savedObjectType,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(

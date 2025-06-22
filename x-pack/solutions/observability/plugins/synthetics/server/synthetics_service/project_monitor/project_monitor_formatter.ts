@@ -222,7 +222,7 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields),
+        validationResult: validateMonitor(normalizedMonitor as MonitorFields, this.spaceId),
         monitorId: monitor.id,
       });
 

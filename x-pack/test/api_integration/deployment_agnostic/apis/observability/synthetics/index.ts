@@ -9,6 +9,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsAPITests', () => {
+    loadTestFile(require.resolve('./legacy_and_multispace_monitor_api'));
     loadTestFile(require.resolve('./create_monitor_private_location'));
     loadTestFile(require.resolve('./create_monitor_project_private_location'));
     loadTestFile(require.resolve('./create_monitor_project'));
