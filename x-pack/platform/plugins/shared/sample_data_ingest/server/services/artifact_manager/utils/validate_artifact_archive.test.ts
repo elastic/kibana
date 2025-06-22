@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZipArchive } from '../utils/zip_archive';
+import type { ZipArchive } from '../../types';
 import { validateArtifactArchive } from './validate_artifact_archive';
 
 const createMockArchive = (entryPaths: string[]): ZipArchive => {
