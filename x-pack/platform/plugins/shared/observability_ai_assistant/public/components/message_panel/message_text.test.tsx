@@ -13,49 +13,49 @@ const renderComponent = (content: string, props: Partial<Parameters<typeof Messa
   render(<MessageText loading={false} content={content} onActionClick={jest.fn()} {...props} />);
 
 describe('MessageText', () => {
-  describe('anonymizationHighlightPlugin', () => {
+  describe('anonymizedHighlightPlugin', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('renders anonymized highlighted content with dedicated parser', () => {
-      const secret = 'John Doe';
-      const content = `Hi, my name is !{anonymizedContent(${secret})}.`;
+      const entity = 'John Doe';
+      const message = `Hi, my name is !{anonymized{"entityClass":"PER", "content": "${entity}"}}.`;
 
-      renderComponent(content);
+      renderComponent(message);
 
       const anonymizedNode = screen.getByTestId('anonymizedContent');
 
       // Ensure the highlighted anonymized elements are rendered
       expect(anonymizedNode).toBeInTheDocument();
-      expect(anonymizedNode).toHaveTextContent(secret);
+      expect(anonymizedNode).toHaveTextContent(entity);
 
       // Ensure original markup is not present in the DOM
-      expect(screen.queryByText(`!{anonymizedContent(${secret})}`)).not.toBeInTheDocument();
+      expect(screen.queryByText(message)).not.toBeInTheDocument();
     });
 
     it('renders multiple anonymized entities correctly', () => {
-      const first = '{Alice}';
-      const second = '((Bob()))))';
+      const firstEntity = '{Alice}';
+      const secondEntity = '((Bob()))))';
 
-      const content = `Names: !{anonymizedContent(${first})} and !{anonymizedContent(${second})}.`;
+      const message = `Names: !{anonymized{"entityClass":"PER", "content": "${firstEntity}"}} and !{anonymized{"entityClass":"PER", "content": "${secondEntity}"}}.`;
 
-      renderComponent(content);
+      renderComponent(message);
 
-      const anonymizedNodes = screen.getAllByTestId('anonymized_content');
+      const anonymizedNodes = screen.getAllByTestId('anonymizedContent');
       expect(anonymizedNodes.length).toBe(2);
-      expect(anonymizedNodes[0]).toHaveTextContent(first);
-      expect(anonymizedNodes[1]).toHaveTextContent(second);
+      expect(anonymizedNodes[0]).toHaveTextContent(firstEntity);
+      expect(anonymizedNodes[1]).toHaveTextContent(secondEntity);
 
       // Ensure original markup is not present in the DOM
-      expect(screen.queryByText('anonymizedContent')).not.toBeInTheDocument();
+      expect(screen.queryByText('anonymized')).not.toBeInTheDocument();
     });
 
     it('leaves plain text unchanged when no anonymized entities are present', () => {
-      const content = 'No anonymized entities here.';
-      renderComponent(content);
+      const message = 'No anonymized entities here.';
+      renderComponent(message);
 
-      expect(screen.getByText(content)).toBeInTheDocument();
+      expect(screen.getByText(message)).toBeInTheDocument();
     });
   });
 });

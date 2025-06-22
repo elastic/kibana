@@ -23,6 +23,7 @@ import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import { ChatActionClickHandler } from '../chat/types';
 import { CodeBlock, EsqlCodeBlock } from './esql_code_block';
+import { anonymizedHighlightPlugin } from './anonymized_highlight';
 interface Props {
   content: string;
   loading: boolean;
@@ -116,55 +117,6 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-const ANONYMIZED_CONTENT_REGEX = /!\{anonymizedContent\((.*?)\)\}/g;
-const anonymizationHighlightPlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => visitor(child, nodeAsParent));
-    }
-
-    if (node.type !== 'text' && node.type !== 'code') {
-      return;
-    }
-
-    // Split the text node around anonymized segments */
-    const textNode = node as Text | Code;
-    const parts: Node[] = [];
-
-    let lastIndex = 0;
-    for (const match of textNode.value.matchAll(ANONYMIZED_CONTENT_REGEX)) {
-      const [fullMatch, inner] = match;
-      const idx = match.index!;
-
-      if (idx > lastIndex) {
-        parts.push({ type: 'text', value: textNode.value.slice(lastIndex, idx) });
-      }
-      parts.push({ type: 'anonymizedContent', value: inner });
-
-      lastIndex = idx + fullMatch.length;
-    }
-
-    // No matches - leave node untouched
-    if (parts.length === 0) {
-      return;
-    }
-
-    // Trailing text after the last match.
-    if (lastIndex < textNode.value.length) {
-      parts.push({ type: 'text', value: textNode.value.slice(lastIndex) });
-    }
-
-    // Replace the original node with the new parts
-    const indexOfNode = parent!.children.indexOf(textNode);
-    parent!.children.splice(indexOfNode, 1, ...parts);
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
 export function MessageText({
   loading,
   content,
@@ -184,9 +136,7 @@ export function MessageText({
 
     processingPlugins[1][1].components = {
       ...components,
-      anonymizedContent: (props) => (
-        <EuiCode data-test-subj="anonymizedContent">{props.value}</EuiCode>
-      ),
+      anonymized: (props) => <EuiCode data-test-subj="anonymizedContent">{props.content}</EuiCode>,
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -241,8 +191,8 @@ export function MessageText({
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        anonymizationHighlightPlugin,
         ...parsingPlugins,
+        anonymizedHighlightPlugin,
       ],
       processingPluginList: processingPlugins,
     };

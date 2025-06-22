@@ -78,7 +78,12 @@ export interface ChatTimelineProps {
 // helper using detected entity positions to transform user messages into react node to add text highlighting
 export function highlightContent(
   content: string,
-  detectedEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
+  detectedEntities: Array<{
+    start_pos: number;
+    end_pos: number;
+    entity: string;
+    class_name: string;
+  }>
 ): React.ReactNode {
   // Sort the entities by start position
   const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
@@ -97,7 +102,12 @@ export function highlightContent(
     ) {
       parts.push(`${content.substring(entity.start_pos, entity.end_pos)}`);
     } else {
-      parts.push(`!{anonymizedContent(${content.substring(entity.start_pos, entity.end_pos)})}`);
+      parts.push(
+        `!{anonymized{"entityClass":"${entity.class_name}","content":"${content.substring(
+          entity.start_pos,
+          entity.end_pos
+        )}"}}`
+      );
     }
     lastIndex = entity.end_pos;
   });

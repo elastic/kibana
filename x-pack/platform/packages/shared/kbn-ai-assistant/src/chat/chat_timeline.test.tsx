@@ -8,27 +8,27 @@
 import { highlightContent } from './chat_timeline';
 
 describe('highlightContent', () => {
-  const entity = 'user@elastic.co';
+  const entity = 'John Doe';
 
   it('highlights anonymized entities', () => {
-    const content = `Contact me at ${entity} for details.`;
+    const content = `Hi, my name is ${entity}.`;
     const startPos = content.indexOf(entity);
     const endPos = startPos + entity.length;
 
     const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity: 'EMAIL' },
+      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
     ]);
 
-    expect(result).toBe(`Contact me at !{anonymizedContent(${entity})} for details.`);
+    expect(result).toBe(`Hi, my name is !{anonymized{"entityClass":"PER","content":"${entity}"}}.`);
   });
 
-  it('does not highlight entities that are inside inline code', () => {
-    const content = `Here is email in code \`${entity}\` and text.`;
+  it('does not highlight entities that are inside inlined code', () => {
+    const content = `Here is my full name, inlined in code \`${entity}\`.`;
     const startPos = content.indexOf(entity);
     const endPos = startPos + entity.length;
 
     const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity: 'EMAIL' },
+      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
     ]);
 
     // The content should remain unchanged because the entity is inside inline code.
@@ -45,7 +45,7 @@ describe('highlightContent', () => {
     const endPos = startPos + entity.length;
 
     const result = highlightContent(content, [
-      { start_pos: startPos, end_pos: endPos, entity: 'EMAIL' },
+      { start_pos: startPos, end_pos: endPos, entity, class_name: 'PER' },
     ]);
 
     // The content should remain unchanged because the entity is inside a fenced code block.
