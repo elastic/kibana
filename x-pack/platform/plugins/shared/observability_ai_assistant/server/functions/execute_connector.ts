@@ -95,7 +95,7 @@ export function registerGetConnectorInfoFunction({
           return {
             actionTypeId: connector.actionTypeId,
             params: convertSchemaToOpenApi(paramsSchema),
-            description: `use this connector to ${actionType.description}` || '',
+            description: actionType.description,
           };
         })
       );
