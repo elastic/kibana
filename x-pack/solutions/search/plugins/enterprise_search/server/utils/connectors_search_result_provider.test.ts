@@ -11,7 +11,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 import { getConnectorsSearchResultProvider } from './connectors_search_result_provider';
 
@@ -45,7 +45,7 @@ describe('Enterprise Search - connectors search provider', () => {
     title: connectorNameMap[name].name,
     type: 'Connector',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/${connectorNameMap[name].id}`,
+      path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/${connectorNameMap[name].id}`,
       prependBasePath: true,
     },
     icon: '/kbn/images/connector.svg',

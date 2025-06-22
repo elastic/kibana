@@ -189,7 +189,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should load the Logs tab section when clicking on it', async () => {
-            await testSubjects.existOrFail('hostsView-logs');
+            await testSubjects.existOrFail('embeddedSavedSearchDocTable');
           });
         });
 

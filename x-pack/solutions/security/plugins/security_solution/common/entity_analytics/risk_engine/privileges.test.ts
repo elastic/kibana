@@ -29,7 +29,10 @@ describe('getMissingRiskEnginePrivileges', () => {
     const missingPrivileges = getMissingRiskEnginePrivileges(noClusterPrivileges);
 
     expect(missingPrivileges).toEqual({
-      clusterPrivileges: ['manage_index_templates', 'manage_transform', 'manage_ingest_pipelines'],
+      clusterPrivileges: {
+        enable: ['manage_index_templates', 'manage_transform', 'manage_ingest_pipelines'],
+        run: ['manage_transform'],
+      },
       indexPrivileges: [],
     });
   });
@@ -54,7 +57,7 @@ describe('getMissingRiskEnginePrivileges', () => {
     const missingPrivileges = getMissingRiskEnginePrivileges(noIndexPrivileges);
 
     expect(missingPrivileges).toEqual({
-      clusterPrivileges: [],
+      clusterPrivileges: { enable: [], run: [] },
       indexPrivileges: [['risk-score.risk-score-*', ['read', 'write']]],
     });
   });

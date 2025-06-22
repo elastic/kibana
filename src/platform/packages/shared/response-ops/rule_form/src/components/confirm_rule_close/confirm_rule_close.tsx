@@ -34,6 +34,7 @@ export const ConfirmRuleClose = (props: ConfirmRuleCloseRuleProps) => {
       title={RULE_FORM_CANCEL_MODAL_TITLE}
       confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
       cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
+      aria-label={RULE_FORM_CANCEL_MODAL_TITLE}
     >
       <EuiText>
         <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>

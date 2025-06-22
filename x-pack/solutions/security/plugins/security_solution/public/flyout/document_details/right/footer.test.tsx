@@ -11,8 +11,10 @@ import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
+import { CHAT_BUTTON_TEST_ID } from './components/test_ids';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAssistant } from './hooks/use_assistant';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
@@ -30,16 +32,28 @@ jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
 jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
+jest.mock('./hooks/use_assistant');
+
+const renderPanelFooter = (isPreview: boolean) =>
+  render(
+    <TestProviders>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
+        <PanelFooter isRulePreview={isPreview} />
+      </DocumentDetailsContext.Provider>
+    </TestProviders>
+  );
 
 describe('PanelFooter', () => {
+  beforeEach(() => {
+    jest.mocked(useAssistant).mockReturnValue({
+      showAssistantOverlay: jest.fn(),
+      showAssistant: true,
+      promptContextId: '',
+    });
+  });
+
   it('should not render the take action dropdown if preview mode', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={true} />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const { queryByTestId } = renderPanelFooter(true);
 
     expect(queryByTestId(FLYOUT_FOOTER_TEST_ID)).not.toBeInTheDocument();
   });
@@ -57,14 +71,27 @@ describe('PanelFooter', () => {
     });
     (useAddToCaseActions as jest.Mock).mockReturnValue({ addToCaseActionItems: [] });
 
-    const wrapper = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={false} />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
-    expect(wrapper.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
+    const { getByTestId } = renderPanelFooter(false);
+
+    expect(getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render chat button', () => {
+    const { getByTestId } = renderPanelFooter(false);
+
+    expect(getByTestId(CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render chat button', () => {
+    jest.mocked(useAssistant).mockReturnValue({
+      showAssistantOverlay: jest.fn(),
+      showAssistant: false,
+      promptContextId: '',
+    });
+
+    const { queryByTestId } = renderPanelFooter(true);
+
+    expect(queryByTestId(CHAT_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

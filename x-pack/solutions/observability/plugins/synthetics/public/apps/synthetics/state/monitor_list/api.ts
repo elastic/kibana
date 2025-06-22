@@ -37,6 +37,7 @@ function toMonitorManagementListQueryArgs(
     searchFields: [],
     internal: true,
     showFromAllSpaces: pageState.showFromAllSpaces,
+    useLogicalAndFor: pageState.useLogicalAndFor,
   };
 }
 

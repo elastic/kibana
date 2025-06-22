@@ -40,3 +40,5 @@ export const metricStateDefaults: Required<
   iconAlign: 'left',
   valueFontMode: 'default',
 };
+
+export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

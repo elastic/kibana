@@ -7,8 +7,7 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import sortBy from 'lodash/sortBy';
-import partition from 'lodash/partition';
+import { sortBy, partition } from 'lodash';
 
 import {
   DetectionAlert,

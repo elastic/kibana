@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NEW_CHAT = i18n.translate(
+export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.elasticAssistant.assistant.newChatByTitle.newChatByTitleButton',
   {
-    defaultMessage: 'Chat',
+    defaultMessage: 'Ask AI Assistant',
   }
 );

@@ -38,7 +38,7 @@ export const Basic = {
         {...params}
         languageId="plainText"
         onChange={action('on change')}
-        value="Hello!"
+        placeholder="Type something here"
         height={200}
       />
     );

@@ -36,7 +36,7 @@ export const registerCreateEuiMarkdownAction = (uiActions: UiActionsStart) => {
       embeddable.addNewPanel<MarkdownEditorSerializedState>(
         {
           panelType: EUI_MARKDOWN_ID,
-          initialState: { content: '# hello world!' },
+          serializedState: { rawState: { content: '# hello world!' } },
         },
         true
       );

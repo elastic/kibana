@@ -13,6 +13,13 @@ import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
+import type { CoreStart } from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { createDefaultDataView } from '../../utils/create_default_data_view';
+
+jest.mock('../../utils/create_default_data_view', () => ({
+  createDefaultDataView: jest.fn(),
+}));
 
 const mockDataViewsService = {
   get: jest.fn(),
@@ -24,8 +31,22 @@ const mockDataViewsService = {
   getAllDataViewLazy: jest.fn().mockReturnValue([]),
 } as unknown as DataViewsServicePublic;
 
+const http = {} as unknown as CoreStart['http'];
+const application = {} as unknown as CoreStart['application'];
+const uiSettings = {} as unknown as CoreStart['uiSettings'];
+const spaces = {} as unknown as SpacesPluginStart;
+
 const mockDispatch = jest.fn();
-const mockGetState = jest.fn(() => mockDataViewManagerState);
+const mockGetState = jest.fn(() => {
+  const state = structuredClone(mockDataViewManagerState);
+
+  state.dataViewManager.default.dataViewId = null;
+  state.dataViewManager.detections = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.timeline = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.analyzer = structuredClone(state.dataViewManager.default);
+
+  return state;
+});
 
 const mockListenerApi = {
   dispatch: mockDispatch,
@@ -37,11 +58,24 @@ describe('createInitListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    listener = createInitListener({ dataViews: mockDataViewsService });
+    listener = createInitListener({
+      dataViews: mockDataViewsService,
+      http,
+      application,
+      uiSettings,
+      spaces,
+    });
+
+    jest.mocked(createDefaultDataView).mockResolvedValue({
+      defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID },
+      kibanaDataViews: [],
+    } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
   });
 
   it('should load the data views and dispatch further actions', async () => {
-    await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
+
+    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 
@@ -49,14 +83,33 @@ describe('createInitListener', () => {
       sharedDataViewManagerSlice.actions.setDataViews([])
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      sharedDataViewManagerSlice.actions.setDefaultDataViewId(
+        DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID
+      )
+    );
+
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [
-          DataViewManagerScopeName.default,
-          DataViewManagerScopeName.detections,
-          DataViewManagerScopeName.timeline,
-          DataViewManagerScopeName.analyzer,
-        ],
+        scope: DataViewManagerScopeName.default,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.timeline,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewManagerScopeName.detections,
       })
     );
   });
@@ -69,7 +122,7 @@ describe('createInitListener', () => {
     });
 
     it('should dispatch error correctly', async () => {
-      await listener.effect(sharedDataViewManagerSlice.actions.init(), mockListenerApi);
+      await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
       expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
         sharedDataViewManagerSlice.actions.error()

@@ -66,6 +66,7 @@ export interface BaseParams {
   objectType: string;
   title: string;
   version: string; // to handle any state migrations
+  forceNow?: string;
   layout?: LayoutParams; // png & pdf only
   pagingStrategy?: CsvPagingStrategy; // csv only
 }
@@ -112,6 +113,7 @@ export interface ReportingServerInfo {
 export interface ReportingHealthInfo {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
+  areNotificationsEnabled: boolean;
 }
 
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
@@ -151,6 +153,7 @@ export interface ReportSource {
   created_at: string; // timestamp in UTC
   '@timestamp'?: string; // creation timestamp, only used for data streams compatibility
   status: JOB_STATUS;
+  scheduled_report_id?: string;
 
   /*
    * `output` is only populated if the report job is completed or failed.
@@ -167,6 +170,7 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
+  space_id?: string;
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC

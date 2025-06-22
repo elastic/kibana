@@ -21,6 +21,7 @@ jest.mock(
   '@kbn/kibana-utils-plugin/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage'
 );
 jest.mock('../../../common/hooks/use_space_id');
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const stubSecurityDataView = createStubDataView({
   spec: {

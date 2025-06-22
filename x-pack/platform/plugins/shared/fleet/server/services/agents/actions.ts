@@ -79,7 +79,6 @@ export async function createAgentAction(
       signature: signedBody.signature,
     };
   }
-
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),

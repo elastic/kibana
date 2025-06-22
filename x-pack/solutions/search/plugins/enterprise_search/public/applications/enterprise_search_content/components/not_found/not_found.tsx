@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../../../../common/constants';
 import { PageTemplateProps } from '../../../shared/layout';
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -17,7 +17,7 @@ export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
     <EnterpriseSearchContentPageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
-      <NotFoundPrompt productSupportUrl={ENTERPRISE_SEARCH_CONTENT_PLUGIN.SUPPORT_URL} />
+      <NotFoundPrompt productSupportUrl={ENTERPRISE_SEARCH_DATA_PLUGIN.SUPPORT_URL} />
     </EnterpriseSearchContentPageTemplate>
   );
 };

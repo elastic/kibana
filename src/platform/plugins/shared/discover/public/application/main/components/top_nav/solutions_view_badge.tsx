@@ -53,8 +53,6 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
           iconSide="right"
           onClick={() => setIsPopoverOpen((value) => !value)}
           onClickAriaLabel={onClickAriaLabel}
-          iconOnClick={() => setIsPopoverOpen((value) => !value)}
-          iconOnClickAriaLabel={onClickAriaLabel}
         >
           {badgeText}
         </EuiBadge>

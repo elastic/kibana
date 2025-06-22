@@ -41,7 +41,7 @@ const createAggField = (ctx: AggFieldContext) => {
   return aggField;
 };
 
-export const createStatsCommand = (ctx: StatsCommandContext, src: string): ESQLCommand<'stats'> => {
+export const createStatsCommand = (ctx: StatsCommandContext): ESQLCommand<'stats'> => {
   const command = createCommand('stats', ctx);
 
   if (ctx._stats) {

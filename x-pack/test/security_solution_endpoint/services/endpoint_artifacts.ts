@@ -188,7 +188,7 @@ export class EndpointArtifactsTestResources extends FtrService {
   }
 
   async createArtifact(
-    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+    listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number] | typeof ENDPOINT_LIST_ID,
     overrides: Partial<CreateExceptionListItemSchema> = {},
     options?: ArtifactCreateOptions
   ): Promise<ArtifactTestData> {

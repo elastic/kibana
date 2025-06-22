@@ -7,11 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EuiConfirmModal, EUI_MODAL_CANCEL_BUTTON, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PIPELINE_EDITOR } from './constants';
 
 export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDeletePipeline }) {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       buttonColor="danger"
@@ -37,6 +39,8 @@ export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDelet
           values={{ id }}
         />
       }
+      titleProps={{ id: modalTitleId }}
+      aria-labelledby={modalTitleId}
     >
       <p>{PIPELINE_EDITOR.DELETE_PIPELINE_MODAL_MESSAGE}</p>
     </EuiConfirmModal>

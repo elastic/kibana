@@ -99,9 +99,24 @@ describe('inline cast expression', () => {
   });
 });
 
-describe('list literal expression', () => {
-  test('can print source left comment', () => {
-    assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+describe('list expressions', () => {
+  describe('literal list', () => {
+    test('can print source left comment', () => {
+      assertPrint('FROM a | STATS /* 1 */ /* 2 */ [1, 2, 3] /* 3 */');
+    });
+  });
+
+  describe('tuple list', () => {
+    test('can print comments around the tuple', () => {
+      assertPrint('FROM a | WHERE b IN /* 1 */ /* 2 */ (1, 2, 3) /* 3 */');
+    });
+
+    test('can print comments inside the tuple', () => {
+      assertPrint('FROM a | WHERE b IN (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */)');
+      assertPrint(
+        'FROM a | WHERE b IN /* 0 */ (/* 1 */ 1 /* 2 */, /* 3 */ 2 /* 4 */, /* 5 */ 3 /* 6 */) /* 7 */'
+      );
+    });
   });
 });
 
@@ -211,6 +226,20 @@ describe('commands', () => {
 
     test('around JOIN conditions', () => {
       assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
+    });
+  });
+
+  describe('RERANK', () => {
+    test('comments around all elements', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field /*4*/ WITH /*5*/ id /*6*/'
+      );
+    });
+
+    test('comments around all elements, two fields', () => {
+      assertPrint(
+        'FROM a | /*0*/ RERANK /*1*/ "query" /*2*/ ON /*3*/ field1 /*4*/, /*5*/ field2 /*6*/ WITH /*7*/ id1 /*8*/'
+      );
     });
   });
 });

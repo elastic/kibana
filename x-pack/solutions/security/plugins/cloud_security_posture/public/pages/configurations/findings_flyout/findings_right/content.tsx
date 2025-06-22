@@ -46,7 +46,7 @@ export const MissingFieldsCallout = ({
 
   return (
     <EuiCallOut
-      style={{
+      css={{
         borderRadius: 4,
         overflow: 'hidden',
       }}

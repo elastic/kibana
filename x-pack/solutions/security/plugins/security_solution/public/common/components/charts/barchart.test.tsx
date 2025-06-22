@@ -6,9 +6,9 @@
  */
 
 import type { AxisStyle } from '@elastic/charts';
-import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
-import type { ReactWrapper, ShallowWrapper } from 'enzyme';
-import { mount, shallow } from 'enzyme';
+import { BarSeries, Axis, ScaleType } from '@elastic/charts';
+import type { RenderResult } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -26,6 +26,18 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('@elastic/charts', () => {
+  const actual = jest.requireActual('@elastic/charts');
+
+  return {
+    ...actual,
+    BarSeries: jest.fn(() => <div data-test-subj="bar-series-mock" />),
+    Axis: jest.fn(() => <div data-test-subj="axis-mock" />),
+    Chart: jest.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
+    Settings: jest.fn(() => <div data-test-subj="settings-mock" />),
+  };
+});
+
 jest.mock('../../lib/kibana');
 
 jest.mock('uuid', () => {
@@ -34,6 +46,9 @@ jest.mock('uuid', () => {
     v4: jest.fn(() => 'uuid.v4()'),
   };
 });
+
+const MockedBarSeries = BarSeries as jest.MockedFunction<typeof BarSeries>;
+const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -138,8 +153,11 @@ const mockConfig = {
   customHeight: 324,
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('BarChartBaseComponent', () => {
-  let shallowWrapper: ShallowWrapper;
   const mockBarChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIps',
@@ -154,14 +172,14 @@ describe('BarChartBaseComponent', () => {
   ];
 
   describe('render', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
+    beforeEach(() => {
+      render(
         <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
     it('should render two bar series', () => {
-      expect(shallowWrapper.find(Chart)).toHaveLength(1);
+      expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
     });
   });
 
@@ -207,8 +225,8 @@ describe('BarChartBaseComponent', () => {
       },
     };
 
-    beforeAll(() => {
-      shallowWrapper = shallow(
+    beforeEach(() => {
+      render(
         <BarChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -218,102 +236,94 @@ describe('BarChartBaseComponent', () => {
       );
     });
 
-    it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
+    it(`should render ${mockBarChartData.length} BarSeries`, () => {
+      expect(screen.getAllByTestId('bar-series-mock')).toHaveLength(mockBarChartData.length);
     });
 
     it('should render BarSeries with given xScaleType', () => {
-      expect(shallowWrapper.find(BarSeries).first().prop('xScaleType')).toEqual(
-        configs.series.xScaleType
-      );
+      expect(MockedBarSeries.mock.calls[0][0].xScaleType).toEqual(configs.series.xScaleType);
     });
 
     it('should render BarSeries with given yScaleType', () => {
-      expect(shallowWrapper.find(BarSeries).first().prop('yScaleType')).toEqual(
-        configs.series.yScaleType
-      );
+      expect(MockedBarSeries.mock.calls[0][0].yScaleType).toEqual(configs.series.yScaleType);
     });
 
     it('should render BarSeries with given barSeriesStyle', () => {
-      expect(shallowWrapper.find(BarSeries).first().prop('barSeriesStyle')).toEqual(
+      expect(MockedBarSeries.mock.calls[0][0].barSeriesStyle).toEqual(
         configs.series.barSeriesStyle
       );
     });
 
     it('should render xAxis with given tick formatter', () => {
-      expect(shallowWrapper.find(Axis).first().prop('tickFormat')).toBeUndefined();
+      expect(MockedAxis.mock.calls[0][0].tickFormat).toBeUndefined();
     });
 
     it('should render xAxis style', () => {
-      expect(shallowWrapper.find(Axis).first().prop('style')).toEqual(mockXAxisStyle);
+      expect(MockedAxis.mock.calls[0][0].style).toEqual(mockXAxisStyle);
     });
 
     it('should render yAxis with given tick formatter', () => {
-      expect(shallowWrapper.find(Axis).last().prop('style')).toEqual(mockYAxisStyle);
+      expect(MockedAxis.mock.calls[1][0].style).toEqual(mockYAxisStyle);
     });
   });
 
   describe('render with default configs if no customized configs given', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
+    beforeEach(() => {
+      render(
         <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(shallow).toMatchSnapshot();
-      expect(shallowWrapper.find(BarSeries)).toHaveLength(mockBarChartData.length);
+      expect(screen.getByTestId('chart-mock')).toMatchSnapshot();
+      expect(screen.getAllByTestId('bar-series-mock')).toHaveLength(mockBarChartData.length);
     });
 
     it('should render BarSeries with default xScaleType: Linear', () => {
-      expect(shallowWrapper.find(BarSeries).first().prop('xScaleType')).toEqual(ScaleType.Linear);
+      expect(MockedBarSeries.mock.calls[0][0].xScaleType).toEqual(ScaleType.Linear);
     });
 
     it('should render BarSeries with default yScaleType: Linear', () => {
-      expect(shallowWrapper.find(BarSeries).first().prop('yScaleType')).toEqual(ScaleType.Linear);
+      expect(MockedBarSeries.mock.calls[0][0].yScaleType).toEqual(ScaleType.Linear);
     });
 
     it('should not format xTicks value', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
+      expect(MockedAxis.mock.calls[0][0].tickFormat).toBeUndefined();
     });
 
     it('should not format yTicks value', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
+      expect(MockedAxis.mock.calls[1][0].tickFormat).toBeUndefined();
     });
   });
 
   describe('no render', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
-        <BarChartBaseComponent height={null} width={null} data={mockBarChartData} />
-      );
+    beforeEach(() => {
+      render(<BarChartBaseComponent height={null} width={null} data={mockBarChartData} />);
     });
 
-    it('should not render without height and width', () => {
-      expect(shallowWrapper.find(Chart)).toHaveLength(0);
+    it('should not render Chart without height and width', () => {
+      expect(screen.queryByTestId('chart-mock')).not.toBeInTheDocument();
     });
   });
 });
 
 describe.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
-  let shallowWrapper: ShallowWrapper;
-
-  beforeAll(() => {
-    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
+  beforeEach(() => {
+    render(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
   it(`should render chart`, () => {
-    expect(shallowWrapper.find('BarChartBase')).toHaveLength(1);
-    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
+    expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
+    expect(screen.queryByTestId('chartHolderText')).not.toBeInTheDocument();
   });
 
   it('it does NOT render a draggable legend because stackByField is not provided', () => {
-    expect(shallowWrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(false);
+    expect(screen.queryByTestId('draggable-legend')).not.toBeInTheDocument();
   });
 });
 
-describe.each(chartDataSets)('BarChart with stackByField', () => {
-  let wrapper: ReactWrapper;
+describe('BarChart with stackByField', () => {
+  let wrapper: RenderResult;
 
   const data = [
     {
@@ -355,8 +365,8 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
 
   const stackByField = 'process.name';
 
-  beforeAll(() => {
-    wrapper = mount(
+  beforeEach(() => {
+    wrapper = render(
       <TestProviders>
         <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
       </TestProviders>
@@ -364,23 +374,22 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
   });
 
   it('it renders a draggable legend', () => {
-    expect(wrapper.find('[data-test-subj="draggable-legend"]').exists()).toBe(true);
+    expect(screen.getByTestId('draggable-legend')).toBeInTheDocument();
   });
 
-  data.forEach((datum) => {
-    test(`it renders the expected draggable legend text for datum ${datum.key}`, () => {
-      const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
-        stackByField
-      )}-${escapeDataProviderId(datum.key)}`;
-      expect(wrapper.find(`div[data-provider-id="${dataProviderId}"]`).first().text()).toEqual(
-        datum.key
-      );
-    });
+  test.each(data)('it renders the expected draggable legend text for datum $key', ({ key }) => {
+    const dataProviderId = `draggableId.content.draggable-legend-item-uuid_v4()-${escapeDataProviderId(
+      stackByField
+    )}-${escapeDataProviderId(key)}`;
+
+    expect(
+      wrapper.container.querySelector(`div[data-provider-id="${dataProviderId}"]`)
+    ).toHaveTextContent(key);
   });
 });
 
-describe.each(chartDataSets)('BarChart with custom color', () => {
-  let wrapper: ReactWrapper;
+describe('BarChart with custom color', () => {
+  let wrapper: RenderResult;
 
   const data = [
     {
@@ -427,30 +436,31 @@ describe.each(chartDataSets)('BarChart with custom color', () => {
 
   const stackByField = 'process.name';
 
-  beforeAll(() => {
-    wrapper = mount(
+  beforeEach(() => {
+    wrapper = render(
       <TestProviders>
         <BarChartComponent configs={mockConfig} barChart={data} stackByField={stackByField} />
       </TestProviders>
     );
   });
 
-  expectedColors.forEach((color, i) => {
-    test(`it renders the expected legend color ${color} for legend item ${i}`, () => {
-      expect(wrapper.find(`div [color="${color}"]`).exists()).toBe(true);
-    });
-  });
+  test.each(expectedColors)(
+    'it renders the expected legend color %s for legend item $#',
+    (color) => {
+      expect(wrapper.container.querySelector(`div [color="${color}"]`)).toBeInTheDocument();
+    }
+  );
 });
 
 describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', (data) => {
-  let shallowWrapper: ShallowWrapper;
+  let wrapper: RenderResult;
 
-  beforeAll(() => {
-    shallowWrapper = shallow(<BarChartComponent configs={mockConfig} barChart={data} />);
+  beforeEach(() => {
+    wrapper = render(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
   it(`should render a ChartPlaceHolder`, () => {
-    expect(shallowWrapper.find('BarChartBase')).toHaveLength(0);
-    expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
+    expect(wrapper.queryByTestId('chart-mock')).not.toBeInTheDocument();
+    expect(wrapper.getByTestId('chartHolderText')).toBeInTheDocument();
   });
 });

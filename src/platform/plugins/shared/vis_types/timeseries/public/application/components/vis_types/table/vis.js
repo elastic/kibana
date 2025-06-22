@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { visStyles } from '../_vis_types';
 
 import {
   createCachedFieldValueFormatter,
@@ -274,7 +275,7 @@ class TableVis extends Component {
     return (
       <RenderCounter initialRender={initialRender}>
         <RedirectAppLinks coreStart={getCoreStart()} className="tvbVis" data-test-subj="tableView">
-          <div className="tvbVis" data-test-subj="tableView">
+          <div className="tvbVis" css={visStyles} data-test-subj="tableView">
             <table className="table">
               <thead>{header}</thead>
               <tbody>{rows}</tbody>

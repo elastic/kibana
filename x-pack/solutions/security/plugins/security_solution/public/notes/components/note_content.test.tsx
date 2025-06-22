@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { NoteContent } from './note_content';
 import { NOTE_CONTENT_BUTTON_TEST_ID, NOTE_CONTENT_POPOVER_TEST_ID } from './test_ids';
@@ -13,7 +14,7 @@ import { NOTE_CONTENT_BUTTON_TEST_ID, NOTE_CONTENT_POPOVER_TEST_ID } from './tes
 const note = 'note-text';
 
 describe('NoteContent', () => {
-  it('should render a note and the popover', () => {
+  it('should render a note and the popover', async () => {
     const { getByTestId, getByText } = render(<NoteContent note={note} />);
 
     const button = getByTestId(NOTE_CONTENT_BUTTON_TEST_ID);
@@ -21,7 +22,7 @@ describe('NoteContent', () => {
     expect(button).toBeInTheDocument();
     expect(getByText(note)).toBeInTheDocument();
 
-    button.click();
+    await userEvent.click(button);
 
     expect(getByTestId(NOTE_CONTENT_POPOVER_TEST_ID)).toBeInTheDocument();
   });

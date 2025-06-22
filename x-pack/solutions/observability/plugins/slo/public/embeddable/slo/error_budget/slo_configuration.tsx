@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -31,16 +32,21 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
   const [hasError, setHasError] = useState(false);
 
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'configurationFlyout',
+  });
+
   const onConfirmClick = () =>
     onCreate({
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
     });
+
   return (
-    <EuiFlyout onClose={onCancel} style={{ minWidth: 550 }}>
+    <EuiFlyout onClose={onCancel} css={{ minWidth: 550 }} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.errorBudgetEmbeddable.config.sloSelector.headerTitle', {
               defaultMessage: 'Error budget burn down configuration',
             })}

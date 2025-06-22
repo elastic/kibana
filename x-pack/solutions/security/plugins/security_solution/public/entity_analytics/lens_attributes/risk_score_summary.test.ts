@@ -24,7 +24,7 @@ jest.mock('../../sourcerer/containers', () => ({
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 describe('getRiskScoreSummaryAttributes', () => {

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Page } from '@playwright/test';
+import { Page, BrowserContext } from '@playwright/test';
 
 export class OtelKubernetesFlowPage {
   page: Page;
+  context: BrowserContext;
 
-  constructor(page: Page) {
+  constructor(page: Page, context: BrowserContext) {
     this.page = page;
+    this.context = context;
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -26,11 +28,53 @@ export class OtelKubernetesFlowPage {
       .click();
   }
 
-  public async clickClusterOverviewDashboardCTA() {
-    await this.page
+  public async switchInstrumentationInstructions(language: 'nodejs' | 'java' | 'python' | 'go') {
+    await this.page.getByTestId(language).click();
+  }
+
+  public async getAnnotateAllResourceSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet')
+      .textContent();
+  }
+
+  public async getRestartDeploymentSnippet() {
+    return await this.page
+      .getByTestId('observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet')
+      .textContent();
+  }
+
+  public async openClusterOverviewDashboardInNewTab(): Promise<Page> {
+    const dashboardURL = await this.page
       .getByTestId(
         'observabilityOnboardingDataIngestStatusActionLink-kubernetes_otel-cluster-overview'
       )
-      .click();
+      .getAttribute('href');
+
+    if (dashboardURL) {
+      const newPage = await this.context.newPage();
+
+      await newPage.goto(dashboardURL);
+
+      return newPage;
+    } else {
+      throw new Error('Dashboard URL not found');
+    }
+  }
+
+  public async openServiceInventoryInNewTab(): Promise<Page> {
+    const serviceInventoryURL = await this.page
+      .getByTestId('observabilityOnboardingDataIngestStatusActionLink-services')
+      .getAttribute('href');
+
+    if (serviceInventoryURL) {
+      const newPage = await this.context.newPage();
+
+      await newPage.goto(serviceInventoryURL);
+
+      return newPage;
+    } else {
+      throw new Error('Service Inventory URL not found');
+    }
   }
 }

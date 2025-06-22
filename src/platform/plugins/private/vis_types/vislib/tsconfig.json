@@ -38,6 +38,8 @@
     "@kbn/config-schema",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-render",
+    "@kbn/ui-actions-plugin",
+    "@kbn/embeddable-plugin",
   ],
   "exclude": [
     "target/**/*",

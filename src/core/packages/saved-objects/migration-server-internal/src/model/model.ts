@@ -10,7 +10,9 @@
 import * as Either from 'fp-ts/Either';
 import * as Option from 'fp-ts/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import { getVirtualVersionsFromMappings } from '@kbn/core-saved-objects-base-server-internal';
 
+import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal/src/model_version/constants';
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
@@ -42,12 +44,12 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
-  buildRemoveAliasActions,
   MigrationType,
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  getPrepareCompatibleMigrationStateProperties,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -71,7 +73,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (Either.isLeft<unknown, unknown>(resW)) {
+  if (Either.isLeft<unknown>(resW)) {
     if (isTypeof(resW.left, 'retryable_es_client_error')) {
       // Retry the same step after an exponentially increasing delay.
       return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
@@ -137,10 +139,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // The target index .kibana WILL be pointing to if we reindex. E.g: ".kibana_8.8.0_001"
     const newVersionTarget = stateP.versionIndex;
 
+    let mappings = source ? indices[source]?.mappings : undefined;
+
+    if (mappings) {
+      const mappingVersions = getVirtualVersionsFromMappings({
+        mappings,
+        source: 'mappingVersions',
+        minimumVirtualVersion: initialModelVersion,
+      });
+
+      if (mappingVersions) {
+        mappings = {
+          ...mappings,
+          _meta: {
+            ...mappings._meta,
+            mappingVersions,
+          },
+        };
+      }
+    }
+
     const postInitState = {
       aliases,
       sourceIndex: Option.fromNullable(source),
-      sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
+      sourceIndexMappings: Option.fromNullable(mappings),
       versionIndexReadyActions: Option.none,
     };
 
@@ -537,27 +559,39 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (res.right.unknownDocs.length) {
+      if (res.right.type === 'cleanup_started') {
+        if (res.right.unknownDocs.length) {
+          logs = [
+            ...stateP.logs,
+            { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ];
+        }
+
         logs = [
-          ...stateP.logs,
-          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ...logs,
+          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+            level: 'warning' as const,
+            message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+          })),
         ];
+
+        return {
+          ...stateP,
+          logs,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+          deleteByQueryTaskId: res.right.taskId,
+        };
+      } else if (res.right.type === 'cleanup_not_needed') {
+        // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+        return {
+          ...stateP,
+          logs,
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+          ...getPrepareCompatibleMigrationStateProperties(stateP),
+        };
+      } else {
+        throwBadResponse(stateP, res.right);
       }
-
-      logs = [
-        ...logs,
-        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
-          level: 'warning' as const,
-          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
-        })),
-      ];
-
-      return {
-        ...stateP,
-        logs,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
-        deleteByQueryTaskId: res.right.taskId,
-      };
     } else {
       const reason = extractUnknownDocFailureReason(
         stateP.migrationDocLinks.resolveMigrationFailures,
@@ -579,27 +613,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex.value;
       return {
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexMappings: mergeMappingMeta(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings.value
-        ),
-        preTransformDocsActions: [
-          // Point the version alias to the source index. This let's other Kibana
-          // instances know that a migration for the current version is "done"
-          // even though we may be waiting for document transformations to finish.
-          { add: { index: source!, alias: stateP.versionAlias } },
-          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
-        ],
+        ...getPrepareCompatibleMigrationStateProperties(stateP),
       };
     } else {
       if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {

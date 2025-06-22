@@ -26,6 +26,7 @@ import {
 } from '../../translations';
 import { getErrorToastText } from '../../helpers';
 import { replaceNewlineLiterals } from '../../../helpers';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 export interface Props {
   http: HttpSetup;
@@ -61,6 +62,8 @@ export const usePollApi = ({
   const connectorIdRef = useRef<string | undefined>(undefined);
 
   const [didInitialFetch, setDidInitialFetch] = useState(false);
+
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   useEffect(() => {
     connectorIdRef.current = connectorId;
@@ -191,10 +194,13 @@ export const usePollApi = ({
           }
         );
         setStats(allStats);
-        // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
-        timeoutIdRef.current = setTimeout(() => {
-          pollApi();
-        }, 5000);
+
+        if (!attackDiscoveryAlertsEnabled) {
+          // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
+          timeoutIdRef.current = setTimeout(() => {
+            pollApi();
+          }, 5000);
+        }
       }
     } catch (error) {
       setStatus(null);
@@ -205,7 +211,7 @@ export const usePollApi = ({
         text: getErrorToastText(error),
       });
     }
-  }, [connectorId, handleResponse, http, toasts]);
+  }, [connectorId, handleResponse, http, attackDiscoveryAlertsEnabled, toasts]);
 
   return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi, stats, setStatus };
 };

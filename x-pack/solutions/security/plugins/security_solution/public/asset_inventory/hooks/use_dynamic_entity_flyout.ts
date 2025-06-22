@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
   ServicePanelKey,
-  UniversalEntityPanelKey,
+  GenericEntityPanelKey,
   UserPanelKey,
 } from '../../flyout/entity_details/shared/constants';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
@@ -79,7 +79,14 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
 
       default:
         openFlyout({
-          right: { id: UniversalEntityPanelKey, params: { entityDocId, scopeId, contextId } },
+          right: {
+            id: GenericEntityPanelKey,
+            params: {
+              entityDocId,
+              scopeId,
+              contextId,
+            },
+          },
         });
         break;
     }

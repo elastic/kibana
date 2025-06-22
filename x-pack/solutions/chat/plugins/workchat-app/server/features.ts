@@ -36,6 +36,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           read: [],
         },
         ui: [...capabilityGroups.ui.all],
+        // composedOf: [{ feature: WORKCHAT_FRAMEWORK_FEATURE_ID, privileges: ['all'] }],
       },
       read: {
         app: ['kibana', WORKCHAT_APP_ID],
@@ -46,6 +47,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           read: [integrationTypeName, agentTypeName],
         },
         ui: [...capabilityGroups.ui.read],
+        // composedOf: [{ feature: WORKCHAT_FRAMEWORK_FEATURE_ID, privileges: ['read'] }],
       },
     },
   });

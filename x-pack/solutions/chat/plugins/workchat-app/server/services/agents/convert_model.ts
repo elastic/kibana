@@ -23,6 +23,10 @@ export const savedObjectToModel = ({ attributes }: SavedObject<AgentAttributes>)
     },
     configuration: attributes.configuration,
     public: attributes.access_control.public,
+    avatar: {
+      color: attributes.avatar?.color,
+      text: attributes.avatar?.text,
+    },
   };
 };
 
@@ -35,6 +39,7 @@ export const updateToAttributes = ({
     agent_name: updatedFields.name,
     description: updatedFields.description,
     configuration: updatedFields.configuration,
+    avatar: updatedFields.avatar,
   };
 };
 
@@ -43,11 +48,13 @@ export const createRequestToRaw = ({
   id,
   user,
   creationDate,
+  color,
 }: {
   createRequest: AgentCreateRequest;
   id: string;
   user: UserNameAndId;
   creationDate: Date;
+  color: string;
 }): AgentAttributes => {
   return {
     agent_id: id,
@@ -59,6 +66,10 @@ export const createRequestToRaw = ({
     user_name: user.name,
     access_control: {
       public: createRequest.public,
+    },
+    avatar: {
+      color: color || createRequest.avatar.color,
+      text: createRequest.avatar.text,
     },
   };
 };

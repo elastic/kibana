@@ -41,7 +41,6 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
-  isServerless?: boolean;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
@@ -66,7 +65,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
-    isServerless,
   } = props;
 
   const {
@@ -85,6 +83,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     ruleTypeRegistry,
     actionTypeRegistry,
     fieldsMetadata,
+    contentManagement,
   } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
@@ -104,6 +103,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
       ruleTypeRegistry,
       actionTypeRegistry,
       fieldsMetadata,
+      contentManagement,
     };
 
     // Passing the MetaData type all the way down the component hierarchy is unnecessary, this type is
@@ -145,7 +145,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
           showMustacheAutocompleteSwitch={showMustacheAutocompleteSwitch}
           initialValues={initialValues}
           initialMetadata={initialMetadata}
-          isServerless={isServerless}
         />
       );
     }
@@ -176,7 +175,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
-    isServerless,
+    contentManagement,
     id,
     ruleTypeId,
     validConsumers,

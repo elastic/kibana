@@ -57,6 +57,7 @@ const gradient = {
   Temperature: 'temperature' as const,
   Complementary: 'complementary' as const,
   Status: 'status' as const,
+  CompareTo: 'compare_to' as const,
 };
 
 /**

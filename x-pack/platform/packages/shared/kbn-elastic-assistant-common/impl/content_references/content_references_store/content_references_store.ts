@@ -6,14 +6,10 @@
  */
 
 import { ContentReference } from '../../schemas';
-import { ContentReferencesStore } from '../types';
+import { ContentReferencesStore, Options } from '../types';
 
 const CONTENT_REFERENCE_ID_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-interface Options {
-  disabled?: boolean;
-}
 
 /**
  * Creates a new ContentReferencesStore used for storing references (also known as citations)
@@ -57,5 +53,6 @@ export const newContentReferencesStore: (options?: Options) => ContentReferences
   return {
     add,
     getStore,
+    options,
   };
 };

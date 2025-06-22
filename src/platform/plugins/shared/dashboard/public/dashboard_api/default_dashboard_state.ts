@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from './types';
+import { DashboardState } from '../../common';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   viewMode: 'view',
@@ -16,6 +16,7 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   description: '',
   filters: [],
   panels: {},
+  sections: {},
   title: '',
   tags: [],
 

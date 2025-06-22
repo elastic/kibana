@@ -13,6 +13,7 @@ import { PieVisualizationState } from '../../../common/types';
 import { DimensionEditor, DimensionEditorProps } from './dimension_editor';
 import { getKbnPalettes } from '@kbn/palettes';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 const darkMode = false;
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
@@ -39,7 +40,7 @@ describe('DimensionEditor', () => {
           colorMapping: {
             assignments: [],
             specialAssignments: [
-              { rule: { type: 'other' }, color: { type: 'loop' }, touched: false },
+              { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
             ],
             paletteId: 'default',
             colorMode: { type: 'categorical' },
@@ -49,6 +50,7 @@ describe('DimensionEditor', () => {
     };
 
     const mockFrame = createMockFramePublicAPI();
+    const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
     mockFrame.datasourceLayers = Object.fromEntries(
       defaultState.layers.map(({ layerId: id }) => [id, createMockDatasource(id).publicAPIMock])
     );
@@ -67,6 +69,7 @@ describe('DimensionEditor', () => {
       palettes,
       isDarkMode: darkMode,
       paletteService: paletteServiceMock,
+      formatFactory: fieldFormatsMock.deserialize,
     };
 
     buildProps = (props = {}) => {

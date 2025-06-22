@@ -34,6 +34,7 @@ import { statusConfig } from '@kbn/core-status-server-internal';
 import { uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
 import { config as pluginsConfig } from '@kbn/core-plugins-server-internal';
 import { featureFlagsConfig } from '@kbn/core-feature-flags-server-internal';
+import { pricingConfig } from '@kbn/core-pricing-server-internal';
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
 import { coreConfig } from './core_config';
@@ -59,6 +60,7 @@ export function registerServiceConfig(configService: ConfigService) {
     pathConfig,
     pidConfig,
     pluginsConfig,
+    pricingConfig,
     savedObjectsConfig,
     savedObjectsMigrationConfig,
     serverlessConfig,

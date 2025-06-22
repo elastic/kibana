@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { joinIndices } from '../../../__tests__/helpers';
-import {
-  getPosition,
-  joinIndicesToSuggestions,
-  suggestionIntersection,
-  suggestionUnion,
-} from './util';
+import { getPosition, suggestionIntersection, suggestionUnion } from './util';
 import { SuggestionRawDefinition } from '../../types';
 
 describe('getPosition()', () => {
@@ -58,21 +52,6 @@ describe('getPosition()', () => {
     expect(getPosition('LEFT  JOIN  index ON', {} as any).pos).toBe('on');
     expect(getPosition('LEFT  JOIN  index ON ', {} as any).pos).toBe('after_on');
     expect(getPosition('LEFT  JOIN  index ON  ', {} as any).pos).toBe('after_on');
-  });
-});
-
-describe('joinIndicesToSuggestions()', () => {
-  test('converts join indices to suggestions', () => {
-    const suggestions = joinIndicesToSuggestions(joinIndices);
-    const labels = suggestions.map((s) => s.label);
-
-    expect(labels).toEqual([
-      'join_index',
-      'join_index_with_alias',
-      'lookup_index',
-      'join_index_alias_1',
-      'join_index_alias_2',
-    ]);
   });
 });
 

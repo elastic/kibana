@@ -181,6 +181,8 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
         id: 7160,
       },
       name: 'elasticsearch-js',
+      // There are some properties missing below which are not important for this mock
+      // @ts-expect-error
       connection: {
         url: new URL('http://localhost:9200/'),
         id: 'http://localhost:9200/',
@@ -189,8 +191,6 @@ export const generateEsApiResponseMock = <TBody extends Record<string, any>>(
         resurrectTimeout: 0,
         _openRequests: 0,
         status: 'alive',
-        // There are some properties missing below which is not important for this mock
-        // @ts-expect-error
         roles: {
           master: true,
           data: true,

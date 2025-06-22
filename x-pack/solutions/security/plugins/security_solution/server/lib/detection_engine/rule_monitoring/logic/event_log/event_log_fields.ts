@@ -42,6 +42,9 @@ export const RULE_EXECUTION_INDEXING_DURATION_MS =
 export const RULE_EXECUTION_GAP_DURATION_S =
   `${RULE_EXECUTION_METRICS}.execution_gap_duration_s` as const;
 
+export const RULE_EXECUTION_FROZEN_INDICES_QUERIED_COUNT =
+  `${RULE_EXECUTION_METRICS}.frozen_indices_queried_count` as const;
+
 export const RULE_EXECUTION_SCHEDULE_DELAY_NS = 'kibana.task.schedule_delay' as const;
 
 export const NUMBER_OF_ALERTS_GENERATED = `${RULE_EXECUTION_METRICS}.alert_counts.new` as const;

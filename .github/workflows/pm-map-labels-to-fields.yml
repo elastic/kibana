@@ -1,0 +1,60 @@
+name: Map issue labels to project fields
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+
+jobs:
+  map-labels-to-fields:
+    name: 'Map issue labels to project fields'
+    runs-on: ubuntu-latest
+    if: github.repository == 'elastic/kibana'
+    steps:
+      - name: Checkout Actions
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: 'elastic/kibana-github-actions'
+          ref: main
+          path: ./actions
+
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
+
+      - name: Update every issue in project 1525 (https://github.com/orgs/elastic/projects/1525)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 1525
+          owner: 'elastic'
+
+      - name: Update every issue in project 1538 (https://github.com/orgs/elastic/projects/1538)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 1538
+          owner: 'elastic'
+
+      - name: Update every issue in project 787 (https://github.com/orgs/elastic/projects/787)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 787
+          owner: 'elastic'
+
+      - name: Update every issue in project 859 (https://github.com/orgs/elastic/projects/859)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 859
+          owner: 'elastic'
+
+      - name: Update every issue in project 1326 (https://github.com/orgs/elastic/projects/1326)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 1326
+          owner: 'elastic'

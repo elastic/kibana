@@ -10,11 +10,11 @@ import React, { createContext, useContext, type FC, type PropsWithChildren } fro
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
-  CoreSetup,
   I18nStart,
   IUiSettingsClient,
   ThemeServiceStart,
   UserProfileService,
+  NotificationsStart,
 } from '@kbn/core/public';
 import type { HttpStart } from '@kbn/core/public';
 
@@ -33,7 +33,7 @@ export interface DatePickerDependencies {
   /**
    * notifications service
    */
-  notifications: CoreSetup['notifications'];
+  notifications: NotificationsStart;
   /**
    * Kibana Security User Profile Service
    */

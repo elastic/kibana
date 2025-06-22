@@ -21,10 +21,10 @@ Role-based access control (RBAC) in {{kib}} relies upon the [application privile
 
 When {{kib}} first starts up, it executes the following `POST` request against {{es}}. This synchronizes the definition of the privileges with various `actions` which are later used to authorize a user:
 
-```js
+```js subs=true
 POST /_security/privilege
 Content-Type: application/json
-Authorization: Basic {kib} changeme
+Authorization: Basic {{kib}} changeme
 
 {
    "kibana-.kibana":{
@@ -256,7 +256,7 @@ public setup(core, { features }) {
     },
     privilegesTooltip: i18n.translate('xpack.features.devToolsPrivilegesTooltip', {
      defaultMessage:
-       'User should also be granted the appropriate {es} cluster and index privileges',
+       'User should also be granted the appropriate Elasticsearch cluster and index privileges',
    }),
   });
 }
@@ -268,8 +268,12 @@ Unlike the Canvas example, Dev Tools does not require access to any saved object
 server.route({
  path: '/api/console/proxy',
  method: 'POST',
+ security: {
+  authz: {
+    requiredPrivileges: ['console'],
+  },
+ },
  config: {
-   tags: ['access:console'],
    handler: async (req, h) => {
      // ...
    }

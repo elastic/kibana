@@ -382,6 +382,10 @@ export default function (providerContext: FtrProviderContext) {
               type: 'osquery-saved-query',
             },
             {
+              id: 'sample_security_ai_prompt',
+              type: 'security-ai-prompt',
+            },
+            {
               id: 'sample_tag',
               type: 'tag',
             },
@@ -553,6 +557,11 @@ export default function (providerContext: FtrProviderContext) {
             type: 'epm-packages-assets',
           },
           {
+            id: '848d7b69-26d1-52c1-8afc-65e627b34812',
+            path: 'all_assets-0.2.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
+            type: 'epm-packages-assets',
+          },
+          {
             id: '8c665f28-a439-5f43-b5fd-8fda7b576735',
             path: 'all_assets-0.2.0/manifest.yml',
             type: 'epm-packages-assets',
@@ -613,6 +622,7 @@ export default function (providerContext: FtrProviderContext) {
         latest_install_failed_attempts: [],
         verification_status: 'unknown',
         verification_key_id: null,
+        previous_version: '0.1.0',
       });
     });
   });

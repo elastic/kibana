@@ -14,6 +14,8 @@ import { appContextService } from '../../services/app_context';
 
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
+import { licenseService } from '../../services/license';
+
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
   getFollowerIndexInfo,
@@ -49,7 +51,7 @@ describe('getFollowerIndexInfo', () => {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn() },
+      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
     };
 
     mockedLogger = loggerMock.create();
@@ -142,6 +144,35 @@ describe('getFollowerIndexInfo', () => {
       error: 'Follower index fleet-synced-integrations-ccr-remote1 paused',
     });
   });
+
+  it('should return error if follow stats have fatal error', async () => {
+    esClientMock.ccr.followInfo.mockResolvedValue({
+      follower_indices: [
+        {
+          follower_index: 'fleet-synced-integrations-ccr-remote1',
+          status: 'active',
+        },
+      ],
+    } as any);
+    esClientMock.ccr.followStats.mockResolvedValue({
+      indices: [
+        {
+          shards: [
+            {
+              fatal_exception: {
+                reason: 'java.lang.IllegalArgumentException: port out of range:93001',
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(await getFollowerIndexInfo(esClientMock, mockedLogger)).toEqual({
+      error:
+        'Follower index fleet-synced-integrations-ccr-remote1 fatal exception: java.lang.IllegalArgumentException: port out of range:93001',
+    });
+  });
 });
 
 describe('fetchAndCompareSyncedIntegrations', () => {
@@ -185,7 +216,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
   });
 
-  it('should return status = synchronizing if there are integrations on sync index but none are installed yet', async () => {
+  it('should return synchronizing status if there are integrations on sync index but none are installed yet', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -196,11 +227,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'fleet_server',
+                  package_version: '1.67.3',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
                 },
               ],
             },
@@ -220,18 +259,96 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           sync_status: 'synchronizing',
           package_name: 'elastic_agent',
           package_version: '2.2.0',
+          install_status: { main: 'installed' },
           updated_at: '2025-03-20T14:18:40.076Z',
         },
         {
           sync_status: 'synchronizing',
           package_name: 'system',
           package_version: '1.67.3',
+          install_status: { main: 'installed' },
           updated_at: '2025-03-20T14:18:40.111Z',
+        },
+        {
+          package_name: 'fleet_server',
+          package_version: '1.67.3',
+          updated_at: '2025-03-20T14:18:40.111Z',
+          sync_status: 'synchronizing',
+          install_status: { main: 'not_installed' },
         },
       ],
     });
   });
-  it('should compare integrations installed on remote with the ones on sync index', async () => {
+  it('should return a warning for integrations not found in registry', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              integrations: [
+                {
+                  package_name: 'custom-pkg',
+                  package_version: '1.0.0',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any);
+    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      page: 1,
+      per_page: 10000,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'epm-packages',
+          id: 'custom-pkg',
+          attributes: {
+            version: '1.0.0',
+            install_status: 'install_failed',
+            latest_install_failed_attempts: [
+              {
+                created_at: '2025-06-10T15:30:31.614Z',
+                target_version: '0.0.2',
+                error: {
+                  name: 'PackageNotFoundError',
+                  message: '[agentless_package_links] package not found in registry',
+                },
+              },
+            ],
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+      ],
+    });
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClientMock,
+      soClientMock,
+      'fleet-synced-integrations-ccr-*',
+      mockedLogger
+    );
+    expect(res).toEqual({
+      integrations: [
+        {
+          sync_status: 'warning',
+          package_name: 'custom-pkg',
+          package_version: '1.0.0',
+          install_status: { main: 'installed', remote: 'not_installed' },
+          updated_at: expect.any(String),
+          warning: {
+            message:
+              'This integration must be manually installed on the remote cluster. Automatic updates and remote installs are not supported.',
+            title: "Integration can't be automatically synced",
+          },
+        },
+      ],
+    });
+  });
+
+  it('should return completed state when the integrations are correctly synced', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -242,11 +359,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -293,11 +412,207 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           package_name: 'elastic_agent',
           package_version: '2.2.0',
           sync_status: 'completed',
+          install_status: { main: 'installed', remote: 'installed' },
           updated_at: expect.any(String),
         },
         {
           package_name: 'system',
           package_version: '1.67.3',
+          sync_status: 'completed',
+          install_status: { main: 'installed', remote: 'installed' },
+          updated_at: expect.any(String),
+        },
+      ],
+    });
+  });
+
+  it('should return a warning when integration failed to uninstall if is_sync_uninstall_enabled', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              integrations: [
+                {
+                  package_name: 'elastic_agent',
+                  package_version: '2.2.0',
+                  updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'system',
+                  package_version: '1.67.3',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'nginx',
+                  package_version: '0.7.0',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
+                },
+              ],
+              remote_es_hosts: [
+                {
+                  name: 'remote1',
+                  hosts: ['http://localhost:9500'],
+                  sync_integrations: true,
+                  sync_uninstalled_integrations: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any);
+    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      page: 1,
+      per_page: 10000,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'epm-packages',
+          id: 'elastic_agent',
+          attributes: {
+            version: '2.2.0',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+        {
+          type: 'epm-packages',
+          id: 'system',
+          attributes: {
+            version: '1.67.3',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+        {
+          type: 'epm-packages',
+          id: 'nginx',
+          attributes: {
+            version: '0.7.0',
+            install_status: 'installed',
+            updated_at: '2025-03-26T14:06:27.611Z',
+            latest_uninstall_failed_attempts: [
+              {
+                created_at: '2025-03-26T14:06:27.611Z',
+                error: {
+                  message: 'failed to uninstall',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClientMock,
+      soClientMock,
+      'fleet-synced-integrations-ccr-*',
+      mockedLogger
+    );
+    expect(res).toEqual({
+      integrations: [
+        {
+          package_name: 'elastic_agent',
+          package_version: '2.2.0',
+          sync_status: 'completed',
+          install_status: { main: 'installed', remote: 'installed' },
+          updated_at: expect.any(String),
+        },
+        {
+          package_name: 'system',
+          package_version: '1.67.3',
+          sync_status: 'completed',
+          install_status: { main: 'installed', remote: 'installed' },
+          updated_at: expect.any(String),
+        },
+        {
+          warning: {
+            message: 'failed to uninstall at Wed, 26 Mar 2025 14:06:27 GMT',
+            title: 'Integration was uninstalled, but removal from remote cluster failed.',
+          },
+          install_status: {
+            main: 'not_installed',
+            remote: 'installed',
+          },
+          package_name: 'nginx',
+          package_version: '0.7.0',
+          sync_status: 'warning',
+          updated_at: expect.any(String),
+        },
+      ],
+    });
+  });
+  it('should return status = completed when integration was uninstalled from both clusters if is_sync_uninstall_enabled', async () => {
+    esClientMock.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              integrations: [
+                {
+                  package_name: 'nginx',
+                  package_version: '0.7.0',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
+                },
+              ],
+              remote_es_hosts: [
+                {
+                  name: 'remote1',
+                  hosts: ['http://localhost:9500'],
+                  sync_integrations: true,
+                  sync_uninstalled_integrations: true,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    } as any);
+    (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+      page: 1,
+      per_page: 10000,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'epm-packages',
+          id: 'elastic_agent',
+          attributes: {
+            version: '2.2.0',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+        {
+          type: 'epm-packages',
+          id: 'system',
+          attributes: {
+            version: '1.67.3',
+            install_status: 'installed',
+          },
+          updated_at: '2025-03-26T14:06:27.611Z',
+        },
+      ],
+    });
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClientMock,
+      soClientMock,
+      'fleet-synced-integrations-ccr-*',
+      mockedLogger
+    );
+    expect(res).toEqual({
+      integrations: [
+        {
+          install_status: {
+            main: 'not_installed',
+            remote: 'not_installed',
+          },
+          package_name: 'nginx',
+          package_version: '0.7.0',
           sync_status: 'completed',
           updated_at: expect.any(String),
         },
@@ -316,16 +631,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'synthetics',
                   package_version: '1.4.1',
                   updated_at: '2025-03-17T15:21:14.092Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -352,7 +670,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           id: 'system',
           attributes: {
             version: '1.67.2',
-            install_status: 'install',
+            install_status: 'installed',
           },
           updated_at: '2025-03-26T14:06:27.611Z',
         },
@@ -361,7 +679,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           id: 'synthetics',
           attributes: {
             version: '1.4.1',
-            install_status: 'not_installed',
+            install_status: 'install_failed',
             latest_install_failed_attempts: [
               {
                 created_at: '2023-06-20T08:47:31.457Z',
@@ -386,20 +704,23 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         {
           package_name: 'elastic_agent',
           package_version: '2.2.0',
+          install_status: { main: 'installed' },
           sync_status: 'synchronizing',
           updated_at: expect.any(String),
         },
         {
           package_name: 'system',
           package_version: '1.67.3',
+          install_status: { main: 'installed', remote: 'installed' },
           sync_status: 'failed',
           updated_at: expect.any(String),
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: not_installed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
+          install_status: { main: 'installed', remote: 'install_failed' },
           sync_status: 'failed',
           updated_at: expect.any(String),
         },
@@ -468,6 +789,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -546,6 +868,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
             updated_at: expect.any(String),
           },
         ],
@@ -575,7 +898,123 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
-    it('should return status = completed if custom assets are equal', async () => {
+    it('should return failed state if custom asset failure is found', async () => {
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [
+            {
+              user_agent: {
+                field: 'user_agent',
+              },
+            },
+          ],
+        },
+      });
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: {
+              template: {
+                mappings: {
+                  properties: {
+                    new_field: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      esClientMock = {
+        search: searchMockWithCustomAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+              latest_custom_asset_install_failed_attempts: {
+                'component_template:logs-system.auth@custom': {
+                  created_at: '2023-06-20T08:47:31.457Z',
+                  error: {
+                    message: 'installation failure',
+                  },
+                  type: 'component_template',
+                  name: 'logs-system.auth@custom',
+                },
+                'ingest_pipeline:logs-system.auth@custom': {
+                  created_at: '2023-06-20T08:47:31.457Z',
+                  error: {
+                    message: 'installation failure',
+                  },
+                  type: 'ingest_pipeline',
+                  name: 'logs-system.auth@custom',
+                },
+              },
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        mockedLogger
+      );
+
+      expect(res).toEqual({
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
+            updated_at: expect.any(String),
+          },
+        ],
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'failed',
+            type: 'component_template',
+            error:
+              'Failed to update component template logs-system.auth@custom - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'failed',
+            type: 'ingest_pipeline',
+            error:
+              'Failed to update ingest pipeline logs-system.auth@custom - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT',
+          },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
+        },
+      });
+    });
+
+    it('should return completed status if custom assets are equal', async () => {
       (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
           processors: [
@@ -645,6 +1084,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           {
             package_name: 'system',
             package_version: '1.67.3',
+            install_status: { main: 'installed', remote: 'installed' },
             sync_status: 'completed',
             updated_at: expect.any(String),
           },
@@ -674,7 +1114,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         },
       });
     });
-    it('should return status = synchronizing if versions do not match', async () => {
+    it('should return synchronizing status if versions do not match', async () => {
       const searchMockWithVersionedPipeline = jest.fn().mockResolvedValue({
         hits: {
           hits: [
@@ -685,6 +1125,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -789,6 +1230,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
             updated_at: expect.any(String),
           },
         ],
@@ -867,6 +1309,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           {
             package_name: 'system',
             package_version: '1.67.3',
+            install_status: { main: 'installed', remote: 'installed' },
             sync_status: 'completed',
             updated_at: expect.any(String),
           },
@@ -885,6 +1328,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -949,6 +1393,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           {
             package_name: 'system',
             package_version: '1.67.3',
+            install_status: { main: 'installed', remote: 'installed' },
             sync_status: 'completed',
             updated_at: expect.any(String),
           },
@@ -967,6 +1412,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -1044,6 +1490,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       expect(res).toEqual({
         custom_assets: {
           'component_template:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1051,6 +1498,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1063,6 +1511,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
             updated_at: expect.any(String),
           },
         ],
@@ -1080,6 +1529,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -1116,6 +1566,10 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [],
+      });
 
       const res = await fetchAndCompareSyncedIntegrations(
         esClientMock,
@@ -1126,6 +1580,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       expect(res).toEqual({
         custom_assets: {
           'component_template:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1133,6 +1588,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1145,6 +1601,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
             updated_at: expect.any(String),
           },
         ],
@@ -1225,6 +1682,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
+            install_status: { main: 'installed', remote: 'installed' },
             updated_at: expect.any(String),
           },
         ],
@@ -1250,12 +1708,13 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn() },
+      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
     };
 
     soClientMock = savedObjectsClientMock.create();
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     (installCustomAsset as jest.Mock).mockClear();
   });
@@ -1268,6 +1727,17 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return empty integrations array if license is less than Enterprise', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
       integrations: [],
     });
@@ -1307,6 +1777,13 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
               leader_index: 'fleet-synced-integrations',
               status: 'active',
               parameters: {},
+            },
+          ],
+        }),
+        followStats: jest.fn().mockResolvedValue({
+          indices: [
+            {
+              shards: [{}],
             },
           ],
         }),

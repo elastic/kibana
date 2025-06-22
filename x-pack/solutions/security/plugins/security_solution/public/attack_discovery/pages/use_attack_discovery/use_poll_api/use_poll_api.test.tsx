@@ -11,6 +11,9 @@ import { renderHook, act } from '@testing-library/react';
 import { attackDiscoveryStatus, usePollApi } from './use_poll_api';
 import moment from 'moment/moment';
 import { kibanaMock } from '../../../../common/mock';
+import { useKibana } from '../../../../common/lib/kibana';
+
+jest.mock('../../../../common/lib/kibana');
 
 const http: HttpSetupMock = coreMock.createSetup().http;
 const setApproximateFutureTime = jest.fn();
@@ -104,6 +107,8 @@ const mockStats = [
   },
 ];
 
+const getBooleanValueMock = jest.fn();
+
 describe('usePollApi', () => {
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
@@ -112,9 +117,21 @@ describe('usePollApi', () => {
   afterAll(() => {
     jest.useRealTimers();
   });
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    getBooleanValueMock.mockReturnValue(false);
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: getBooleanValueMock,
+        },
+      },
+    });
   });
+
   test('should render initial state with null status and data', () => {
     const { result } = renderHook(() => usePollApi(defaultProps));
     expect(result.current.status).toBeNull();

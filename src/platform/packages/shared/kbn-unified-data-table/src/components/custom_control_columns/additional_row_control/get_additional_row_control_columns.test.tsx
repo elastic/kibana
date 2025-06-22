@@ -9,6 +9,33 @@
 
 import { getAdditionalRowControlColumns } from './get_additional_row_control_columns';
 import { mockRowAdditionalLeadingControls } from '../../../../__mocks__/external_control_columns';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { UnifiedDataTableContext } from '../../../table_context';
+import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
+import { userEvent } from '@testing-library/user-event';
+import { RowControlColumn } from '@kbn/discover-utils';
+
+const setup = (rowControlColumns: RowControlColumn[]) => {
+  const columns = getAdditionalRowControlColumns(rowControlColumns);
+
+  render(
+    <UnifiedDataTableContext.Provider value={dataTableContextComplexMock}>
+      {columns.map((Column, idx) => (
+        <Column
+          key={idx}
+          setCellProps={jest.fn()}
+          rowIndex={0}
+          colIndex={0}
+          columnId="actions"
+          isExpandable
+          isExpanded
+          isDetails
+        />
+      ))}
+    </UnifiedDataTableContext.Provider>
+  );
+};
 
 describe('getAdditionalRowControlColumns', () => {
   it('should work correctly for 0 controls', () => {
@@ -18,35 +45,46 @@ describe('getAdditionalRowControlColumns', () => {
   });
 
   it('should work correctly for 1 control', () => {
-    const columns = getAdditionalRowControlColumns([mockRowAdditionalLeadingControls[0]]);
+    // Given
+    const rowControlColumnMock = mockRowAdditionalLeadingControls[0];
 
-    expect(columns.map((column) => column.id)).toEqual([
-      `additionalRowControl_${mockRowAdditionalLeadingControls[0].id}`,
-    ]);
+    // When
+    setup([rowControlColumnMock]);
+
+    // Then
+    expect(screen.getByTestId(rowControlColumnMock.id)).toBeVisible();
   });
 
   it('should work correctly for 2 controls', () => {
-    const columns = getAdditionalRowControlColumns([
-      mockRowAdditionalLeadingControls[0],
-      mockRowAdditionalLeadingControls[1],
-    ]);
+    // Given
+    const mocks = [mockRowAdditionalLeadingControls[0], mockRowAdditionalLeadingControls[1]];
 
-    expect(columns.map((column) => column.id)).toEqual([
-      `additionalRowControl_${mockRowAdditionalLeadingControls[0].id}`,
-      `additionalRowControl_${mockRowAdditionalLeadingControls[1].id}`,
-    ]);
+    // When
+    setup(mocks);
+
+    // Then
+    expect(screen.getByTestId(mocks[0].id)).toBeVisible();
+    expect(screen.getByTestId(mocks[1].id)).toBeVisible();
   });
 
-  it('should work correctly for 3 and more controls', () => {
-    const columns = getAdditionalRowControlColumns([
+  it('should work correctly for 3 and more controls', async () => {
+    // Given
+    const user = userEvent.setup();
+    const mocks = [
       mockRowAdditionalLeadingControls[0],
       mockRowAdditionalLeadingControls[1],
       mockRowAdditionalLeadingControls[2],
-    ]);
+    ];
 
-    expect(columns.map((column) => column.id)).toEqual([
-      `additionalRowControl_${mockRowAdditionalLeadingControls[0].id}`,
-      `additionalRowControl_menuControl`,
-    ]);
+    // When
+    setup(mocks);
+
+    // Then
+    expect(screen.getByTestId(mocks[0].id)).toBeVisible();
+
+    // The other elements are hidden under the menu button
+    await user.click(screen.getByTestId('unifiedDataTable_additionalRowControl_actionsMenu'));
+    expect(screen.getByTestId(mocks[1].id)).toBeVisible();
+    expect(screen.getByTestId(mocks[2].id)).toBeVisible();
   });
 });

@@ -8,7 +8,7 @@
 import { Routes, Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { useLinkExists } from '../../../common/links/links';
+import { useLinkAuthorized } from '../../../common/links';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_list';
@@ -18,7 +18,7 @@ import { NoPrivilegesPage } from '../../../common/components/no_privileges';
  * Provides the routing container for the hosts related views
  */
 export const HostIsolationExceptionsContainer = memo(() => {
-  const canAccessHostIsolationExceptionsLink = useLinkExists(
+  const canAccessHostIsolationExceptionsLink = useLinkAuthorized(
     SecurityPageName.hostIsolationExceptions
   );
   if (!canAccessHostIsolationExceptionsLink) {

@@ -98,13 +98,8 @@ export const AlertSummaryWidgetFullSize = ({
             <Axis
               id="bottom"
               position={Position.Bottom}
-              timeAxisLayerCount={2}
               gridLine={{
                 visible: true,
-              }}
-              style={{
-                tickLine: { size: 0, padding: 4 },
-                tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
               }}
             />
             <Axis
@@ -124,6 +119,7 @@ export const AlertSummaryWidgetFullSize = ({
             />
             <LineSeries
               id="Active"
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="key"

@@ -13,7 +13,6 @@ import {
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
   ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
-  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
@@ -94,9 +93,6 @@ describe(
               'have.text',
               'Do not suppress alerts for events with missing fields'
             );
-
-            // suppression functionality should be under Tech Preview
-            cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
           });
 
           // Platinum license is required for configuration to apply

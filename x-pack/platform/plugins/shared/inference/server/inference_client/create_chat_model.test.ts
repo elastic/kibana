@@ -108,7 +108,6 @@ describe('createChatModel', () => {
     expect(InferenceChatModelMock).toHaveBeenCalledWith({
       chatComplete: inferenceClient.chatComplete,
       connector,
-      logger,
       temperature: 0.3,
     });
   });

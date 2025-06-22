@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render, fireEvent } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
@@ -24,7 +24,6 @@ describe('Users Table Component', () => {
   const loadPage = jest.fn();
 
   let store = createMockStore();
-  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createMockStore();
@@ -46,19 +45,19 @@ describe('Users Table Component', () => {
 
   describe('Rendering', () => {
     test('it renders the default Users table', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+      render(
+        <TestProviders store={store}>
           <UsersTable {...defaultProps} />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
-      expect(wrapper.find('Connect(UsersTableComponent)')).toMatchSnapshot();
+      expect(screen.getByTestId('table-users-loading-false')).toMatchSnapshot();
     });
   });
 
   describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <UsersTable {...defaultProps} />
         </TestProviders>
@@ -68,15 +67,13 @@ describe('Users Table Component', () => {
         field: 'name',
       });
 
-      wrapper.find('.euiTable thead tr th button').first().simulate('click');
-
-      wrapper.update();
+      fireEvent.click(container.querySelector('.euiTable thead tr th button')!);
 
       expect(store.getState().network.details.queries?.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('User');
+      expect(container.querySelector('.euiTable thead tr th button')?.textContent).toEqual('User');
     });
   });
 });

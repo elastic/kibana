@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import { toastsServiceMock } from './toasts_service.mock';
+import { createNotificationCoordinatorMock } from './notification_coordinator.mock';
 
 const createSetupContractMock = () => {
-  const setupContract: MockedKeys<NotificationsSetup> = {
+  const setupContract: DeeplyMockedKeys<NotificationsSetup> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createSetupContract(),
+    coordinator: createNotificationCoordinatorMock(),
   };
   return setupContract;
 };

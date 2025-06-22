@@ -18,10 +18,7 @@ import type { CustomizationCallback, DiscoverCustomizationContext } from '../../
 import {
   type DiscoverInternalState,
   InternalStateProvider,
-  createInternalStateStore,
-  createRuntimeStateManager,
   internalStateActions,
-  CurrentTabProvider,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -34,9 +31,10 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-
-// TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-export const TABS_ENABLED = false;
+import { TABS_ENABLED } from '../../constants';
+import { ChartPortalsRenderer } from './components/chart';
+import { useStateManagers } from './state_management/hooks/use_state_managers';
+import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -68,26 +66,28 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-  const [runtimeStateManager] = useState(() => createRuntimeStateManager());
-  const [internalState] = useState(() =>
-    createInternalStateStore({
-      services,
-      customizationContext,
-      runtimeStateManager,
-      urlStateStorage,
-    })
-  );
+
+  const { internalState, runtimeStateManager } = useStateManagers({
+    services,
+    urlStateStorage,
+    customizationContext,
+  });
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
       const { dataViews } = services;
-      const [hasESData, hasUserDataView, defaultDataViewExists] = await Promise.all([
-        dataViews.hasData.hasESData().catch(() => false),
-        dataViews.hasData.hasUserDataView().catch(() => false),
-        dataViews.defaultDataViewExists().catch(() => false),
-        internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-      ]);
+      const [hasESData, hasUserDataView, defaultDataViewExists, userAndSpaceIds] =
+        await Promise.all([
+          dataViews.hasData.hasESData().catch(() => false),
+          dataViews.hasData.hasUserDataView().catch(() => false),
+          dataViews.defaultDataViewExists().catch(() => false),
+          getUserAndSpaceIds(services),
+          internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+        ]);
+
+      internalState.dispatch(internalStateActions.initializeTabs(userAndSpaceIds));
+
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
@@ -144,13 +144,13 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        {TABS_ENABLED ? (
-          <TabsView {...sessionViewProps} />
-        ) : (
-          <CurrentTabProvider currentTabId={internalState.getState().tabs.unsafeCurrentId}>
+        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
+          {TABS_ENABLED ? (
+            <TabsView {...sessionViewProps} />
+          ) : (
             <DiscoverSessionView {...sessionViewProps} />
-          </CurrentTabProvider>
-        )}
+          )}
+        </ChartPortalsRenderer>
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
   );

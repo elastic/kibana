@@ -23,7 +23,7 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "@npm//node-libs-browser",
+  "@npm//node-stdlib-browser",
 ]
 
 filegroup(

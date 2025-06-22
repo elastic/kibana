@@ -9,6 +9,8 @@ import { AsyncLocalStorage } from 'async_hooks';
 
 import { LRUCache } from 'lru-cache';
 
+import type { TemplateDelegate } from '@kbn/handlebars';
+
 import type { AssetsMap, PackagePolicyAssetsMap } from '../../../../common/types';
 
 import type { PackageInfo } from '../../../../common';
@@ -27,7 +29,7 @@ class CacheSession {
 
   private _agentTemplateAssetsMap?: LRUCache<string, PackagePolicyAssetsMap>;
 
-  private _handlebarsCompiledTemplate?: LRUCache<string, HandlebarsTemplateDelegate>;
+  private _handlebarsCompiledTemplate?: LRUCache<string, TemplateDelegate>;
 
   private _isSpaceAwarenessEnabledCache?: boolean;
 
@@ -60,7 +62,7 @@ class CacheSession {
 
   getHandlebarsCompiledTemplateCache() {
     if (!this._handlebarsCompiledTemplate) {
-      this._handlebarsCompiledTemplate = new LRUCache<string, HandlebarsTemplateDelegate>({
+      this._handlebarsCompiledTemplate = new LRUCache<string, TemplateDelegate>({
         max: HANDLEBARS_COMPILE_TEMPLATE_CACHE_SIZE,
       });
     }
@@ -128,10 +130,7 @@ export function getHandlebarsCompiledTemplateCache(tplStr: string) {
   return cacheStore.getStore()?.getHandlebarsCompiledTemplateCache()?.get(tplStr);
 }
 
-export function setHandlebarsCompiledTemplateCache(
-  tplStr: string,
-  tpl: HandlebarsTemplateDelegate
-) {
+export function setHandlebarsCompiledTemplateCache(tplStr: string, tpl: TemplateDelegate) {
   return cacheStore.getStore()?.getHandlebarsCompiledTemplateCache()?.set(tplStr, tpl);
 }
 

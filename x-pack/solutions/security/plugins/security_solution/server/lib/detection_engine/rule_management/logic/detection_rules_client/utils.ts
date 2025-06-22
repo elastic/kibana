@@ -61,3 +61,35 @@ export class RuleResponseValidationError extends Error {
     this.ruleId = ruleId;
   }
 }
+
+/**
+ * Given a rule from the file system and the set of installed rules this will merge the exception lists
+ * from the installed rules onto the rules from the file system.
+ * @param latestPrebuiltRule The latest prepackaged rule version that might have exceptions_lists
+ * @param existingRule The installed rules which might have user driven exceptions_lists
+ */
+export const mergeExceptionLists = (
+  latestPrebuiltRule: RuleResponse,
+  existingRule: RuleResponse
+): RuleResponse => {
+  if (latestPrebuiltRule.exceptions_list != null) {
+    if (existingRule.exceptions_list != null) {
+      const uniqueExceptionsLists = latestPrebuiltRule.exceptions_list.filter(
+        (potentialDuplicateList) =>
+          existingRule.exceptions_list.every(
+            (list) => list.list_id !== potentialDuplicateList.list_id
+          )
+      );
+      return {
+        ...latestPrebuiltRule,
+        exceptions_list: [...uniqueExceptionsLists, ...existingRule.exceptions_list],
+      };
+    } else {
+      return latestPrebuiltRule;
+    }
+  } else {
+    // Carry over the previous version's exception list
+    latestPrebuiltRule.exceptions_list = existingRule.exceptions_list;
+    return latestPrebuiltRule;
+  }
+};

@@ -7,6 +7,8 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import { errorHandler } from '../error_handler';
+import { stringify } from '../../utils/stringify';
 import { ActionStatusRequestSchema } from '../../../../common/api/endpoint';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
@@ -62,22 +64,29 @@ export const actionStatusRequestHandler = function (
   const logger = endpointContext.logFactory.get('actionStatusApi');
 
   return async (context, req, res) => {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const agentIDs: string[] = Array.isArray(req.query.agent_ids)
-      ? [...new Set(req.query.agent_ids)]
-      : [req.query.agent_ids];
+    logger.debug(() => `Retrieving action status for: ${stringify(req.query.agent_ids)}`);
 
-    const response = await getPendingActionsSummary(
-      esClient,
-      endpointContext.service.getEndpointMetadataService(),
-      logger,
-      agentIDs
-    );
+    try {
+      const spaceId = (await context.securitySolution).getSpaceId();
+      const agentIDs: string[] = Array.isArray(req.query.agent_ids)
+        ? [...new Set(req.query.agent_ids)]
+        : [req.query.agent_ids];
 
-    return res.ok({
-      body: {
-        data: response,
-      },
-    });
+      if (endpointContext.service.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+        await endpointContext.service
+          .getInternalFleetServices(spaceId)
+          .ensureInCurrentSpace({ agentIds: agentIDs });
+      }
+
+      const response = await getPendingActionsSummary(endpointContext.service, spaceId, agentIDs);
+
+      return res.ok({
+        body: {
+          data: response,
+        },
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
+    }
   };
 };

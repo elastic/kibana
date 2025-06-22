@@ -68,6 +68,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Importing a new custom rule missing a `version` field**](#scenario-importing-a-new-custom-rule-missing-a-version-field)
     - [**Scenario: Importing an existing custom rule missing a `version` field**](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
   - [Licensing](#licensing)
+    - [**Scenario: Importing a mixture of new prebuilt and custom rules under insufficient license**](#scenario-importing-a-mixture-of-new-prebuilt-and-custom-rules-under-insufficient-license)
+    - [**Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules under insufficient license**](#scenario-importing-a-mixture-of-prebuilt-and-custom-rules-on-top-of-existing-rules-under-insufficient-license)
 
 ## Useful information
 
@@ -659,4 +661,34 @@ And the updated rule's "version" field should stay unchanged
 
 ### Licensing
 
-TODO: describe licensing restrictions that apply to rule import.
+#### **Scenario: Importing a mixture of new prebuilt and custom rules under insufficient license**
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And an import payload contains a mix of non-customized prebuilt, customized prebuilt, and custom rules
+And the prebuilt rules have a base version in the installed package
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are not installed or created yet
+When the user imports these rules
+Then the rules should be created
+And the created rules should be correctly identified as prebuilt or custom
+And the created rules' parameters should match the import payload
+```
+
+#### **Scenario: Importing a mixture of prebuilt and custom rules on top of existing rules under insufficient license**
+
+**Automation**: 1 API integration test, 1 e2e test.
+
+```Gherkin
+Given a Kibana instance running under an insufficient license
+And an import payload contains non-customized prebuilt, customized prebuilt, and custom rules
+And the prebuilt rules have a base version in the installed package
+And the custom rules' rule_id does NOT match any rule assets from the installed package
+And the rules are already installed or created
+When the user imports these rules
+Then the rules should be updated
+And the updated rules should be correctly identified as prebuilt or custom
+And the updated rules' parameters should match the import payload
+```

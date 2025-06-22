@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { ChangePointEmbeddableRuntimeState } from '../embeddables/change_point_chart/types';
+import type { ChangePointEmbeddableState } from '../embeddables/change_point_chart/types';
 import type { EmbeddableChangePointChartType } from '../embeddables/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import type { EmbeddablePatternAnalysisType } from '../embeddables/pattern_analysis/embeddable_pattern_analysis_factory';
@@ -24,7 +24,7 @@ type SupportedEmbeddableTypes =
 
 type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
-    ? ChangePointEmbeddableRuntimeState
+    ? ChangePointEmbeddableState
     : T extends EmbeddablePatternAnalysisType
     ? PatternAnalysisEmbeddableRuntimeState
     : T extends EmbeddableLogRateAnalysisType

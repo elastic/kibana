@@ -10,7 +10,7 @@
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap, tap } from 'rxjs';
 import { ParentIgnoreSettings } from '../../../common';
 
 export interface ControlGroupFetchContext {
@@ -23,7 +23,8 @@ export function controlGroupFetch$(
   ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>,
   parentApi: Partial<PublishesUnifiedSearch> & {
     unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
-  }
+  },
+  onReload?: () => void
 ): Observable<ControlGroupFetchContext> {
   return ignoreParentSettings$.pipe(
     switchMap((parentIgnoreSettings) => {
@@ -40,7 +41,7 @@ export function controlGroupFetch$(
         observables.push(parentApi.timeRange$);
       }
       if (apiPublishesReload(parentApi)) {
-        observables.push(parentApi.reload$);
+        observables.push(onReload ? parentApi.reload$.pipe(tap(onReload)) : parentApi.reload$);
       }
       return observables.length ? merge(...observables) : new BehaviorSubject(undefined);
     }),

@@ -39,7 +39,6 @@ export function AddDataContextMenu() {
   const button = (
     <EuiHeaderLink
       color="primary"
-      iconType="indexOpen"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
       data-test-subj="inventoryAddDataHeaderContextMenu"
     >
@@ -84,7 +83,7 @@ export function AddDataContextMenu() {
         {
           name: addDataItem,
           key: 'addData',
-          href: onboardingLocator?.getRedirectUrl({ category: '' }),
+          href: onboardingLocator?.getRedirectUrl({}),
           icon: 'plusInCircle',
           'data-test-subj': 'inventoryHeaderMenuAddData',
           onClick: () => {

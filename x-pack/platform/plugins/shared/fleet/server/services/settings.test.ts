@@ -17,7 +17,7 @@ import type { Settings } from '../types';
 import { DeleteUnenrolledAgentsPreconfiguredError } from '../errors';
 
 import { appContextService } from './app_context';
-import { getSettings, saveSettings, settingsSetup } from './settings';
+import { createDefaultSettings, getSettings, saveSettings, settingsSetup } from './settings';
 import { auditLoggingService } from './audit_logging';
 import { fleetServerHostService } from './fleet_server_host';
 
@@ -39,6 +39,10 @@ describe('settingsSetup', () => {
     jest.resetAllMocks();
     mockedAppContextService.getCloud.mockReset();
     mockedAppContextService.getConfig.mockReset();
+    mockedAppContextService.getExperimentalFeatures.mockReset();
+  });
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
   });
   it('should create settings if there is no settings', async () => {
     const soClientMock = savedObjectsClientMock.create();
@@ -106,9 +110,95 @@ describe('settingsSetup', () => {
 
     expect(soClientMock.create).not.toBeCalled();
   });
+
+  it('should update prerelease_integrations_enabled if settings exist and prereleaseEnabledByDefault is true', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+    });
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: { prerelease_integrations_enabled: false },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: { prerelease_integrations_enabled: true },
+      references: [],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).toHaveBeenCalled();
+  });
+
+  it('should not update settings if prereleaseEnabledByDefault is false', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: false,
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+    });
+
+    soClientMock.find.mockResolvedValueOnce({
+      total: 1,
+      page: 0,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: { prerelease_integrations_enabled: false },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('getSettings', () => {
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+  });
+  afterEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReset();
+  });
   it('should call audit logger', async () => {
     const soClient = savedObjectsClientMock.create();
 
@@ -185,6 +275,10 @@ describe('getSettings', () => {
 describe('saveSettings', () => {
   afterEach(() => {
     mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
+    mockedAppContextService.getExperimentalFeatures.mockReset();
+  });
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
   });
   describe('when settings object exists', () => {
     it('should call audit logger', async () => {
@@ -377,5 +471,85 @@ describe('saveSettings', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(DeleteUnenrolledAgentsPreconfiguredError);
     }
+  });
+});
+describe('createDefaultSettings', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  beforeEach(() => {
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+  });
+
+  it('should return default settings with prerelease_integrations_enabled set to true if config.prereleaseEnabledByDefault is true', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: true });
+  });
+
+  it('should return default settings with prerelease_integrations_enabled set to false if config.prereleaseEnabledByDefault is false', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: false,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: false });
+  });
+
+  it('should return default settings with prerelease_integrations_enabled as false if config is not defined', () => {
+    mockedAppContextService.getConfig.mockReturnValue(undefined);
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: false });
+  });
+
+  it('should return default settings with use_space_awareness_migration_status:success if feature flag is enabled', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    mockedAppContextService.getExperimentalFeatures.mockReturnValueOnce({
+      useSpaceAwareness: true,
+    } as any);
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({
+      prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
+    });
   });
 });

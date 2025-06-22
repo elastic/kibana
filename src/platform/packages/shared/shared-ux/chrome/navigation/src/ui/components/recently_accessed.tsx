@@ -16,6 +16,7 @@ import type { Observable } from 'rxjs';
 import { useNavigation as useServices } from '../../services';
 
 import { getI18nStrings } from '../i18n_strings';
+import { isSpecialClick } from '../../utils';
 
 const MAX_RECENTLY_ACCESS_ITEMS = 5;
 
@@ -51,7 +52,11 @@ export const RecentlyAccessed: FC<Props> = ({
           title: label,
           href,
           'data-test-subj': `nav-recentlyAccessed-item nav-recentlyAccessed-item-${id}`,
-          onClick: (e: React.MouseEvent) => {
+          onClick: (e: React.MouseEvent<HTMLElement>) => {
+            if (isSpecialClick(e)) {
+              return;
+            }
+
             e.preventDefault();
             navigateToUrl(href);
           },

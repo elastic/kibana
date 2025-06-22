@@ -57,44 +57,43 @@ const createActions = (testBed: TestBed) => {
     },
   };
 
+  const openFilterByIndex = async (index: number) => {
+    await act(async () => {
+      // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+      find('kibanaDeprecations')
+        .find('.euiSearchBar__filtersHolder')
+        .find('.euiPopover')
+        .find('button.euiFilterButton')
+        .at(index)
+        .simulate('click');
+    });
+
+    component.update();
+
+    // Wait for the filter dropdown to be displayed
+    await new Promise(requestAnimationFrame);
+  };
+
   const searchBarActions = {
     openTypeFilterDropdown: async () => {
-      await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('kibanaDeprecations')
-          .find('.euiSearchBar__filtersHolder')
-          .find('.euiPopover')
-          .find('button.euiFilterButton')
-          .at(0)
-          .simulate('click');
-      });
-
-      component.update();
+      await openFilterByIndex(1);
     },
 
-    clickCriticalFilterButton: async () => {
-      await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('kibanaDeprecations')
-          .find('.euiSearchBar__filtersHolder')
-          .find('button.euiFilterButton')
-          .at(0)
-          .simulate('click');
-      });
-
-      component.update();
+    openStatusFilterDropdown: async () => {
+      await openFilterByIndex(0);
     },
 
-    filterByConfigType: async () => {
+    filterByTitle: async (title: string) => {
       // We need to read the document "body" as the filter dropdown (an EuiSelectable)
       // is added in a portalled popover and not inside the component DOM tree.
-      // The "Config" option is expected to be the first item.
-      const configTypeFilterButton: HTMLButtonElement | null = document.body.querySelector(
-        '.euiSelectableList .euiSelectableListItem'
+      const filterButton: HTMLButtonElement | null = document.body.querySelector(
+        `.euiSelectableListItem[title=${title}]`
       );
 
+      expect(filterButton).not.toBeNull();
+
       await act(async () => {
-        configTypeFilterButton!.click();
+        filterButton!.click();
       });
 
       component.update();

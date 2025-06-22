@@ -12,8 +12,12 @@ import { Fields } from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
 import { getNestedParentPath } from './get_nested_parent_path';
 
-export const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
-  const nestedParentPath = getNestedParentPath(fieldPath, fields);
+export const buildObjectRecursive = (
+  fieldPath: string,
+  fields: Fields,
+  fieldsKeys: string[]
+): Partial<Ecs> => {
+  const nestedParentPath = getNestedParentPath(fieldPath, fieldsKeys);
   if (!nestedParentPath) {
     return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
   }
@@ -23,6 +27,6 @@ export const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial
   return set(
     {},
     nestedParentPath,
-    subFields.map((subField) => buildObjectRecursive(subPath, subField))
+    subFields.map((subField) => buildObjectRecursive(subPath, subField, Object.keys(subField)))
   );
 };

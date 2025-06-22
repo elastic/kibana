@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 
@@ -67,7 +67,7 @@ const ContextPillsComponent: React.FC<Props> = ({
             {description}
           </EuiButtonEmpty>
         );
-        return (
+        return description.length > 0 ? (
           <EuiFlexItem grow={false} key={id}>
             {selectedPromptContexts[id] != null ? (
               button
@@ -75,7 +75,7 @@ const ContextPillsComponent: React.FC<Props> = ({
               <EuiToolTip content={tooltip}>{button}</EuiToolTip>
             )}
           </EuiFlexItem>
-        );
+        ) : null;
       })}
     </EuiFlexGroup>
   );

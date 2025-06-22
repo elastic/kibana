@@ -1,76 +1,149 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyPage component renders actions with descriptions 1`] = `
-<EmptyPrompt
-  actions={
-    <EuiFlexGroup
-      justifyContent="center"
+<div
+  class="euiPanel euiPanel--transparent euiEmptyPrompt e1h6ddlx0 emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-EmptyPrompt"
+>
+  <div
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+  >
+    <div
+      class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
-      <EuiFlexItem
-        grow={false}
-        style={
-          Object {
-            "maxWidth": 283,
-          }
-        }
+      <span
+        color="subdued"
+        data-euiicon-type="logoSecurity"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+    >
+      <div
+        class="euiText euiTitle emotion-euiText-m-euiTitle-m"
       >
-        <EuiCard
-          description="My Description"
-          footer={
-            <EuiButton
-              data-test-subj="empty-page-actions-action"
-              fill={true}
-              href="my/url/from/nowwhere"
+        <h2>
+          My Super Title
+        </h2>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+          style="max-width: 283px;"
+        >
+          <div
+            class="euiPanel euiPanel--plain euiPanel--paddingMedium euiCard emotion-euiPanel-grow-m-m-plain-hasShadow-euiCard-center"
+          >
+            <div
+              class="euiCard__main emotion-euiCard__main-vertical"
             >
-              Do Something
-            </EuiButton>
-          }
-          title={false}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  }
-  iconType="logoSecurity"
-  title={
-    <EuiText>
-      <h2>
-        My Super Title
-      </h2>
-    </EuiText>
-  }
-/>
+              <div
+                class="euiCard__content emotion-euiCard__content-vertical"
+              >
+                <p
+                  class="euiTitle euiCard__title emotion-euiTitle-s"
+                  id="generated-idTitle"
+                >
+                  <span
+                    class="emotion-euiCard__text-center"
+                  />
+                </p>
+                <div
+                  class="euiText emotion-euiText-s-euiCard__description"
+                  id="generated-idDescription"
+                >
+                  <p>
+                    My Description
+                  </p>
+                </div>
+              </div>
+              <div
+                class="emotion-euiCard__footer"
+              >
+                <a
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+                  data-test-subj="empty-page-actions-action"
+                  href="my/url/from/nowwhere"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      Do Something
+                    </span>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`EmptyPage component renders actions without descriptions 1`] = `
-<EmptyPrompt
-  actions={
-    <EuiFlexGroup
-      justifyContent="center"
+<div
+  class="euiPanel euiPanel--transparent euiEmptyPrompt e1h6ddlx0 emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical-EmptyPrompt"
+>
+  <div
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+  >
+    <div
+      class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
-      <EuiFlexItem
-        grow={false}
-        style={
-          Object {
-            "maxWidth": 283,
-          }
-        }
+      <span
+        color="subdued"
+        data-euiicon-type="logoSecurity"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+    >
+      <div
+        class="euiText euiTitle emotion-euiText-m-euiTitle-m"
       >
-        <EuiButton
-          data-test-subj="empty-page-actions-action"
-          href="my/url/from/nowwhere"
+        <h2>
+          My Super Title
+        </h2>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-center-stretch-row"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-growZero"
+          style="max-width: 283px;"
         >
-          Do Something
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  }
-  iconType="logoSecurity"
-  title={
-    <EuiText>
-      <h2>
-        My Super Title
-      </h2>
-    </EuiText>
-  }
-/>
+          <a
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+            data-test-subj="empty-page-actions-action"
+            href="my/url/from/nowwhere"
+            rel="noreferrer"
+          >
+            <span
+              class="emotion-euiButtonDisplayContent"
+            >
+              <span
+                class="eui-textTruncate"
+              >
+                Do Something
+              </span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 `;

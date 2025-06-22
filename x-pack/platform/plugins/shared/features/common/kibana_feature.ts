@@ -46,7 +46,7 @@ export interface KibanaFeatureConfig {
   /**
    * An optional description that will appear as subtext underneath the feature name
    */
-  description?: string;
+  description?: string | null;
 
   /**
    * The category for this feature.

@@ -234,7 +234,14 @@ describe('Initializing the store', () => {
 
       expect(store.getState()).toEqual({
         lens: expect.objectContaining({
-          persistedDoc: { ...defaultDoc, type: DOC_TYPE },
+          persistedDoc: expect.objectContaining({
+            ...defaultDoc,
+            type: DOC_TYPE,
+            state: {
+              ...defaultDoc.state,
+              visualization: 'testVis initial state',
+            },
+          }),
           query: defaultDoc.state.query,
           isLoading: false,
           activeDatasourceId: 'testDatasource',

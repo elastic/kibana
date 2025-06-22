@@ -16,18 +16,43 @@ import { trackLandingLinkClick } from '../../common/lib/telemetry/trackers';
 import { useGlobalQueryString } from '../../common/utils/global_query_string';
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.landing.pageTitle', {
-  defaultMessage: 'Entity Analytics',
+  defaultMessage: 'Entity analytics',
 });
 
 export const EntityAnalyticsLandingPage = () => {
-  const { links = [] } = useRootNavLink(SecurityPageName.entityAnalyticsLanding) ?? {};
+  const entityAnalyticsLandingNavLink = useRootNavLink(SecurityPageName.entityAnalyticsLanding);
+  const entityAnalyticsLandinglinks =
+    entityAnalyticsLandingNavLink &&
+    'links' in entityAnalyticsLandingNavLink &&
+    Array.isArray(entityAnalyticsLandingNavLink.links)
+      ? entityAnalyticsLandingNavLink.links
+      : [];
+  const entityAnalyticsOverviewNavLink = useRootNavLink(SecurityPageName.entityAnalyticsOverview);
+  const entityAnalyticsOverviewlinks =
+    entityAnalyticsOverviewNavLink &&
+    'links' in entityAnalyticsOverviewNavLink &&
+    Array.isArray(entityAnalyticsOverviewNavLink.links)
+      ? entityAnalyticsOverviewNavLink.links
+      : [];
   const urlState = useGlobalQueryString();
 
   return (
     <SecuritySolutionPageWrapper>
       <HeaderPage title={PAGE_TITLE} />
-      <LandingLinksImages items={links} urlState={urlState} onLinkClick={trackLandingLinkClick} />
+      <LandingLinksImages
+        items={entityAnalyticsLandinglinks}
+        urlState={urlState}
+        onLinkClick={trackLandingLinkClick}
+      />
       <SpyRoute pageName={SecurityPageName.entityAnalyticsLanding} />
+      <br />
+      <br />
+      <LandingLinksImages
+        items={entityAnalyticsOverviewlinks}
+        urlState={urlState}
+        onLinkClick={trackLandingLinkClick}
+      />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsOverview} />
     </SecuritySolutionPageWrapper>
   );
 };

@@ -9,15 +9,18 @@ import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import { PLUGIN_ID } from '../../common';
+import { SEARCH_PLAYGROUND_CHAT_PATH, SEARCH_PLAYGROUND_SEARCH_PATH } from '../routes';
 
-export type PlaygroundLocatorParams = { 'default-index': string } & SerializableRecord;
-
-const PLAYGROUND_URL = '/chat';
+export type PlaygroundLocatorParams = {
+  'default-index': string;
+  search?: boolean;
+} & SerializableRecord;
 
 export class PlaygroundLocatorDefinition implements LocatorDefinition<PlaygroundLocatorParams> {
   public readonly getLocation = async (params: PlaygroundLocatorParams) => {
     const defaultIndex = params['default-index'];
-    const path = `${PLAYGROUND_URL}${defaultIndex ? `?default-index=${defaultIndex}` : ''}`;
+    const basePath = params.search ? SEARCH_PLAYGROUND_SEARCH_PATH : SEARCH_PLAYGROUND_CHAT_PATH;
+    const path = `${basePath}${defaultIndex ? `?default-index=${defaultIndex}` : ''}`;
 
     return {
       app: PLUGIN_ID,

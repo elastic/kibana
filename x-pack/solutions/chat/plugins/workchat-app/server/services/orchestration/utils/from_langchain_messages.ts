@@ -12,6 +12,7 @@ import {
   isHumanMessage,
 } from '@langchain/core/messages';
 import type { ToolCall as LangchainToolCall } from '@langchain/core/messages/tool';
+import { AppLogger } from '../../../utils';
 import {
   createUserMessage,
   createAssistantMessage,
@@ -36,6 +37,9 @@ export const messageFromLangchain = (message: BaseMessage) => {
 };
 
 const convertLangchainToolCall = (toolCall: LangchainToolCall): ToolCall => {
+  AppLogger.getInstance().debug(
+    `Calling tool: ${toolCall.name} with args: ${JSON.stringify(toolCall.args)}`
+  );
   return {
     toolCallId: toolCall.id!, // TODO: figure out a default, e.g {messageId}_{callIndex}
     toolName: toolCall.name,

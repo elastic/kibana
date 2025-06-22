@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { AggregationsDateHistogramAggregate } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
+import {
+  AggregationsMultiBucketAggregateBase,
+  AggregationsTermsAggregateBase,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { buildEsQuery } from '@kbn/es-query';
 import { ChangePointType } from '@kbn/es-types/src';
 import { SignificantEventsGetResponse } from '@kbn/streams-schema';
-import { get, isArray, isEmpty } from 'lodash';
+import { get, isArray, isEmpty, keyBy } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
+import { getRuleIdFromQueryLink } from '../../../lib/streams/assets/query/helpers/query';
+import { SecurityError } from '../../../lib/streams/errors/security_error';
 
 export async function readSignificantEvents(
   params: { name: string; from: Date; to: Date; bucketSize: string },
@@ -23,109 +28,140 @@ export async function readSignificantEvents(
   const { assetClient, scopedClusterClient } = dependencies;
   const { name, from, to, bucketSize } = params;
 
-  const assetQueries = await assetClient.getAssetLinks(name, ['query']);
-  if (isEmpty(assetQueries)) {
+  const queryLinks = await assetClient.getAssetLinks(name, ['query']);
+  if (isEmpty(queryLinks)) {
     return [];
   }
 
-  const searchRequests = assetQueries.flatMap((asset) => {
-    return [
-      { index: name },
+  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => getRuleIdFromQueryLink(queryLink));
+  const ruleIds = Object.keys(queryLinkByRuleId);
+
+  const response = await scopedClusterClient.asCurrentUser
+    .search<
+      unknown,
       {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: from.toISOString(),
-                    lte: to.toISOString(),
-                  },
+        by_rule: AggregationsTermsAggregateBase<{
+          key: string;
+          doc_count: number;
+          occurrences: AggregationsMultiBucketAggregateBase<{
+            key_as_string: string;
+            key: number;
+            doc_count: 0;
+          }>;
+          change_points: {
+            type: {
+              [key in ChangePointType]: { p_value: number; change_point: number };
+            };
+          };
+        }>;
+      }
+    >({
+      index: '.alerts-streams.alerts-default',
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from.toISOString(),
+                  lte: to.toISOString(),
                 },
               },
-              buildQuery(asset.query.kql.query),
-            ],
-          },
-        },
-        aggs: {
-          occurrences: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: bucketSize,
-              extended_bounds: {
-                min: from.toISOString(),
-                max: to.toISOString(),
+            },
+            {
+              terms: {
+                'kibana.alert.rule.uuid': ruleIds,
               },
             },
+          ],
+        },
+      },
+      aggs: {
+        by_rule: {
+          terms: {
+            field: 'kibana.alert.rule.uuid',
+            size: 10000,
           },
-          change_points: {
-            change_point: {
-              buckets_path: 'occurrences>_count',
+          aggs: {
+            occurrences: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: bucketSize,
+                extended_bounds: {
+                  min: from.toISOString(),
+                  max: to.toISOString(),
+                },
+              },
+            },
+            change_points: {
+              // @ts-expect-error
+              change_point: {
+                buckets_path: 'occurrences>_count',
+              },
             },
           },
         },
       },
-    ];
-  });
+    })
+    .catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new SecurityError(
+          `Cannot read significant events, insufficient privileges: ${err.message}`,
+          { cause: err }
+        );
+      }
+      throw err;
+    });
 
-  const response = await scopedClusterClient.asCurrentUser.msearch<
-    unknown,
-    {
-      occurrences: AggregationsDateHistogramAggregate;
+  if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
+    return queryLinks.map((queryLink) => ({
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: [],
       change_points: {
         type: {
-          [key in ChangePointType]: { p_value: number; change_point: number };
-        };
-      };
-    }
-  >({ searches: searchRequests });
+          stationary: { p_value: 0, change_point: 0 },
+        },
+      },
+    }));
+  }
 
-  const significantEvents = response.responses.map((queryResponse, queryIndex) => {
-    const query = assetQueries[queryIndex];
-    if ('error' in queryResponse) {
-      return {
-        id: query.query.id,
-        title: query.query.title,
-        kql: query.query.kql,
-        occurrences: [],
-        change_points: {},
-      };
-    }
-
-    const buckets = get(queryResponse, 'aggregations.occurrences.buckets');
-    const changePoints = get(queryResponse, 'aggregations.change_points') ?? {};
+  const significantEvents = response.aggregations.by_rule.buckets.map((bucket) => {
+    const ruleId = bucket.key;
+    const queryLink = queryLinkByRuleId[ruleId];
+    const occurrences = get(bucket, 'occurrences.buckets');
+    const changePoints = get(bucket, 'change_points') ?? {};
 
     return {
-      id: query.query.id,
-      title: query.query.title,
-      kql: query.query.kql,
-      occurrences: isArray(buckets)
-        ? buckets.map((bucket) => ({
-            date: bucket.key_as_string,
-            count: bucket.doc_count,
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: isArray(occurrences)
+        ? occurrences.map((occurrence) => ({
+            date: occurrence.key_as_string,
+            count: occurrence.doc_count,
           }))
         : [],
       change_points: changePoints,
     };
   });
 
-  // changePoints type is not inferred correclty
-  return significantEvents as SignificantEventsGetResponse;
-}
-
-function buildQuery(kql: string) {
-  try {
-    return buildEsQuery(
-      undefined,
-      {
-        query: kql,
-        language: 'kuery',
+  const foundSignificantEventsIds = significantEvents.map((event) => event.id);
+  const notFoundSignificantEvents = queryLinks
+    .filter((queryLink) => !foundSignificantEventsIds.includes(queryLink.query.id))
+    .map((queryLink) => ({
+      id: queryLink.query.id,
+      title: queryLink.query.title,
+      kql: queryLink.query.kql,
+      occurrences: [],
+      change_points: {
+        type: {
+          stationary: { p_value: 0, change_point: 0 },
+        },
       },
-      [],
-      { allowLeadingWildcards: true }
-    );
-  } catch (err) {
-    return { match_all: {} };
-  }
+    }));
+
+  return [...significantEvents, ...notFoundSignificantEvents];
 }

@@ -9,6 +9,7 @@ export * from './create_slo';
 export * from './delete_slo';
 export * from './delete_slo_instances';
 export * from './find_slo';
+export * from './bulk_purge_rollup_data';
 export * from './get_slo';
 export * from './historical_summary_client';
 export * from './resource_installer';

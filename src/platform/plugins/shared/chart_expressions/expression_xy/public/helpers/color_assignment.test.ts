@@ -13,6 +13,7 @@ import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayersFieldFormats } from './layers';
+import { DatatablesWithFormatInfo } from './data_layers';
 
 describe('color_assignment', () => {
   const tables: Record<string, Datatable> = {
@@ -108,14 +109,16 @@ describe('color_assignment', () => {
     },
   } as unknown as LayersFieldFormats;
 
-  const formattedDatatables = {
+  const formattedDatatables: DatatablesWithFormatInfo = {
     first: {
       table: tables['1'],
       formattedColumns: {},
+      invertedRawValueMap: new Map(tables['1'].columns.map((c) => [c.id, new Map()])),
     },
     second: {
       table: tables['2'],
       formattedColumns: {},
+      invertedRawValueMap: new Map(tables['2'].columns.map((c) => [c.id, new Map()])),
     },
   };
 
@@ -184,6 +187,9 @@ describe('color_assignment', () => {
       const newFormattedDatatables = {
         first: {
           formattedColumns: formattedDatatables.first.formattedColumns,
+          invertedRawValueMap: new Map(
+            formattedDatatables.first.table.columns.map((c) => [c.id, new Map()])
+          ),
           table: {
             ...formattedDatatables.first.table,
             rows: [{ split1: complexObject }, { split1: 'abc' }],
@@ -212,6 +218,7 @@ describe('color_assignment', () => {
         first: {
           formattedColumns: formattedDatatables.first.formattedColumns,
           table: { ...formattedDatatables.first.table, columns: [] },
+          invertedRawValueMap: new Map(),
         },
         second: formattedDatatables.second,
       };
@@ -274,6 +281,9 @@ describe('color_assignment', () => {
             ...formattedDatatables.first.table,
             rows: [{ split1: 'abc' }, { split1: { aProp: 123 } }],
           },
+          invertedRawValueMap: new Map(
+            formattedDatatables.first.table.columns.map((c) => [c.id, new Map()])
+          ),
         },
         second: formattedDatatables.second,
       };
@@ -292,10 +302,11 @@ describe('color_assignment', () => {
 
     it('should handle missing columns', () => {
       const newLayers = [{ ...layers[0], table: { ...tables['1'], columns: [] } }, layers[1]];
-      const newFormattedDatatables = {
+      const newFormattedDatatables: DatatablesWithFormatInfo = {
         first: {
           formattedColumns: formattedDatatables.first.formattedColumns,
           table: { ...formattedDatatables.first.table, columns: [] },
+          invertedRawValueMap: new Map(),
         },
         second: formattedDatatables.second,
       };

@@ -14,6 +14,12 @@ import type { PolicyFormComponentCommonProps } from '../../types';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   {
+    name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.dns', {
+      defaultMessage: 'DNS',
+    }),
+    protectionField: 'dns',
+  },
+  {
     name: i18n.translate('xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.file', {
       defaultMessage: 'File',
     }),
@@ -30,6 +36,15 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
       defaultMessage: 'Network',
     }),
     protectionField: 'network',
+  },
+  {
+    name: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.mac.events.security',
+      {
+        defaultMessage: 'Security',
+      }
+    ),
+    protectionField: 'security',
   },
 ];
 

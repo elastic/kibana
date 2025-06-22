@@ -52,7 +52,7 @@ describe('SiemMigrationsService', () => {
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {
@@ -100,7 +100,7 @@ describe('SiemMigrationsService', () => {
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {

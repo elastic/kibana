@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { expectToReject } from '@kbn/test-suites-xpack-observability/apm_api_integration/common/utils/expect_to_reject';
 import type { RoleCredentials } from '../../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { expectToReject } from '../../../../../../../apm_api_integration/common/utils/expect_to_reject';
 import type { ApmApiError } from '../../../../../services/apm_api';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {

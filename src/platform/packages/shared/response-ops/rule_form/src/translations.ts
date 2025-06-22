@@ -103,6 +103,20 @@ export const ALERT_FLAPPING_DETECTION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ALERT_LINK_DASHBOARDS_TITLE = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Related dashboards',
+  }
+);
+
+export const ALERT_LINK_DASHBOARDS_PLACEHOLDER = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDefinition.alertLinkDashboardsTitle',
+  {
+    defaultMessage: 'Link related dashboards for investigation',
+  }
+);
+
 export const SCHEDULE_TITLE_PREFIX = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleSchedule.scheduleTitlePrefix',
   {
@@ -213,6 +227,13 @@ export const RULE_ALERT_DELAY_BELOW_MINIMUM_TEXT = i18n.translate(
   }
 );
 
+export const RULE_INVESTIGATION_GUIDE_TOO_LONG_TEXT = (length: number, maxLength: number) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.error.investigationGuideTooLongText', {
+    defaultMessage:
+      'Investigation guide is too long. Current length: {length}. Max length: {maxLength}.',
+    values: { length, maxLength },
+  });
+
 export const INTERVAL_MINIMUM_TEXT = (minimum: string) =>
   i18n.translate('responseOpsRuleForm.ruleForm.error.belowMinimumText', {
     defaultMessage: 'Interval must be at least {minimum}.',
@@ -255,17 +276,6 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
-export const RULE_DETAILS_TITLE = i18n.translate('responseOpsRuleForm.ruleForm.ruleDetails.title', {
-  defaultMessage: 'Rule name and tags',
-});
-
-export const RULE_DETAILS_DESCRIPTION = i18n.translate(
-  'responseOpsRuleForm.ruleForm.ruleDetails.description',
-  {
-    defaultMessage: 'Define a name and tags for your rule.',
-  }
-);
-
 export const RULE_NAME_INPUT_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleNameInputTitle',
   {
@@ -291,6 +301,13 @@ export const RULE_TAG_PLACEHOLDER = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetails.ruleTagsPlaceholder',
   {
     defaultMessage: 'Add tags',
+  }
+);
+
+export const RULE_INVESTIGATION_GUIDE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleDetails.investigationGuide.editor.title',
+  {
+    defaultMessage: 'Investigation guide',
   }
 );
 
@@ -564,7 +581,7 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
-    defaultMessage: 'Rule definition',
+    defaultMessage: 'Definition',
   }
 );
 
@@ -599,7 +616,7 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
-    defaultMessage: 'Rule details',
+    defaultMessage: 'Details',
   }
 );
 

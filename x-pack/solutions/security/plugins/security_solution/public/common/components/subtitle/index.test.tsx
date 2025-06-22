@@ -5,66 +5,104 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
+import { render, screen } from '@testing-library/react';
 
 import { TestProviders } from '../../mock';
 import { Subtitle } from '.';
 
 describe('Subtitle', () => {
   test('it renders', () => {
-    const wrapper = shallow(<Subtitle items="Test subtitle" />);
-
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  test('it renders one subtitle string item', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Subtitle items="Test subtitle" />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(1);
+    const container = screen.getByTestId('subtitle');
+
+    expect(container).toBeInTheDocument();
+    expect(container).toMatchSnapshot();
+  });
+
+  test('it uses custom data-test-subj for wrapper when provided', () => {
+    render(
+      <TestProviders>
+        <Subtitle items="Test subtitle" data-test-subj="custom-subtitle-test" />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('custom-subtitle-test')).toBeInTheDocument();
+    expect(screen.queryByTestId('subtitle')).not.toBeInTheDocument();
+  });
+
+  test('it renders one subtitle string item', () => {
+    const { container } = render(
+      <TestProviders>
+        <Subtitle items="Test subtitle" />
+      </TestProviders>
+    );
+
+    const textItem = container.querySelectorAll('.siemSubtitle__item--text');
+    expect(textItem.length).toEqual(1);
+    expect(textItem[0]).toHaveTextContent('Test subtitle');
   });
 
   test('it renders multiple subtitle string items', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <Subtitle items={['Test subtitle 1', 'Test subtitle 2']} />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(2);
+    const textItems = container.querySelectorAll('.siemSubtitle__item--text');
+    expect(textItems.length).toEqual(2);
+    expect(textItems[0]).toHaveTextContent('Test subtitle 1');
+    expect(textItems[1]).toHaveTextContent('Test subtitle 2');
   });
 
   test('it renders one subtitle React.ReactNode item', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <Subtitle items={<span>{'Test subtitle'}</span>} />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(1);
+    const nodeItems = container.querySelectorAll('.siemSubtitle__item--node');
+    expect(nodeItems.length).toEqual(1);
+    expect(nodeItems[0]).toHaveTextContent('Test subtitle');
   });
 
   test('it renders multiple subtitle React.ReactNode items', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
-        <Subtitle items={[<span>{'Test subtitle 1'}</span>, <span>{'Test subtitle 2'}</span>]} />
+        <Subtitle
+          items={[
+            <span key="1">{'Test subtitle 1'}</span>,
+            <span key="2">{'Test subtitle 2'}</span>,
+          ]}
+        />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(2);
+    const nodeItems = container.querySelectorAll('.siemSubtitle__item--node');
+    expect(nodeItems.length).toEqual(2);
+    expect(nodeItems[0]).toHaveTextContent('Test subtitle 1');
+    expect(nodeItems[1]).toHaveTextContent('Test subtitle 2');
   });
 
   test('it renders multiple subtitle items of mixed type', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
-        <Subtitle items={['Test subtitle 1', <span>{'Test subtitle 2'}</span>]} />
+        <Subtitle items={['Test subtitle 1', <span key="2">{'Test subtitle 2'}</span>]} />
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item').length).toEqual(2);
+    const items = container.querySelectorAll('.siemSubtitle__item');
+    expect(items.length).toEqual(2);
+    expect(items[0]).toHaveTextContent('Test subtitle 1');
+    expect(items[1]).toHaveTextContent('Test subtitle 2');
   });
 });

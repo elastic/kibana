@@ -66,9 +66,11 @@ describe('Color mapping - color generation', () => {
             color: {
               type: 'loop',
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],
@@ -102,9 +104,11 @@ describe('Color mapping - color generation', () => {
               paletteId: KbnPalette.Neutral,
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],
@@ -143,7 +147,7 @@ describe('Color mapping - color generation', () => {
         assignments: [
           {
             color: { type: 'colorCode', colorCode: 'red' },
-            rule: { type: 'matchExactly', values: ['configuredAssignment'] },
+            rules: [{ type: 'raw', value: 'configuredAssignment' }],
             touched: false,
           },
         ],
@@ -168,17 +172,17 @@ describe('Color mapping - color generation', () => {
         assignments: [
           {
             color: { type: 'colorCode', colorCode: 'red' },
-            rule: { type: 'auto' },
+            rules: [], // auto
             touched: false,
           },
           {
             color: { type: 'colorCode', colorCode: 'blue' },
-            rule: { type: 'matchExactly', values: ['blueCat'] },
+            rules: [{ type: 'raw', value: 'blueCat' }],
             touched: false,
           },
           {
             color: { type: 'colorCode', colorCode: 'green' },
-            rule: { type: 'auto' },
+            rules: [], // auto
             touched: false,
           },
         ],
@@ -267,8 +271,8 @@ describe('Color mapping - color generation', () => {
       {
         ...DEFAULT_COLOR_MAPPING_CONFIG,
         assignments: [
-          { color: { type: 'gradient' }, rule: { type: 'auto' }, touched: false },
-          { color: { type: 'gradient' }, rule: { type: 'auto' }, touched: false },
+          { color: { type: 'gradient' }, rules: [], touched: false },
+          { color: { type: 'gradient' }, rules: [], touched: false },
         ],
 
         colorMode: {
@@ -290,9 +294,11 @@ describe('Color mapping - color generation', () => {
               colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
               paletteId: KbnPalette.Neutral,
             },
-            rule: {
-              type: 'other',
-            },
+            rules: [
+              {
+                type: 'other',
+              },
+            ],
             touched: false,
           },
         ],

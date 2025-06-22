@@ -6,8 +6,10 @@
  */
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { Subject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -22,6 +24,7 @@ import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -32,6 +35,29 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
 
   const telemetryService = new StreamsTelemetryService();
   telemetryService.setup(coreSetup.analytics);
+
+  const dataMock = dataPluginMock.createStartContract();
+
+  const start = new Date(new Date().getTime() - 15 * 60 * 1000);
+  const end = new Date();
+
+  jest.spyOn(dataMock.query.timefilter.timefilter, 'useTimefilter').mockReturnValue({
+    timeState: {
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      asAbsoluteTimeRange: {
+        from: start.toISOString(),
+        to: end.toISOString(),
+        mode: 'absolute',
+      },
+      start: start.getTime(),
+      end: end.getTime(),
+    },
+    timeState$: new Subject(),
+    refresh: jest.fn(),
+  });
 
   return {
     appParams,
@@ -45,6 +71,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         share: {} as unknown as SharePublicStart,
         navigation: {} as unknown as NavigationPublicStart,
         savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         licensing: {} as unknown as LicensingPluginStart,
         indexManagement: {} as unknown as IndexManagementPluginStart,

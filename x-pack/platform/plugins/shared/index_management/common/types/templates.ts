@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataRetention, DataStream, IndexMode } from './data_streams';
+import { DataRetention, DataStream, DataStreamOptions, IndexMode } from './data_streams';
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
@@ -43,6 +43,7 @@ export interface TemplateDeserialized {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
+    data_stream_options?: DataStreamOptions;
   };
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only

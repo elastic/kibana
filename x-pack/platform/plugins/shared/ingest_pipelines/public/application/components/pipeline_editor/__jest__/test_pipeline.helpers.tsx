@@ -14,7 +14,8 @@ import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
-import { uiMetricService, apiService } from '../../../services';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import { uiMetricService, apiService, documentationService } from '../../../services';
 import { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
@@ -197,7 +198,10 @@ export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupRe
   };
 };
 
-export const setupEnvironment = initHttpRequests;
+export const setupEnvironment = () => {
+  documentationService.setup(docLinksServiceMock.createStartContract());
+  return initHttpRequests();
+};
 
 type TestSubject =
   | 'addDocumentsButton'

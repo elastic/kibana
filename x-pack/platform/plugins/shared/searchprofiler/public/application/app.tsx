@@ -8,8 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
-
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  UseEuiTheme,
+} from '@elastic/eui';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,
   ProfileTree,
@@ -23,6 +33,17 @@ import {
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
 import { Targets } from './types';
+
+const componentStyles = {
+  appRoot: ({ euiTheme }: UseEuiTheme) =>
+    css([
+      {
+        overflow: 'hidden',
+        flexShrink: 1,
+      }, // adding dev tool top bar to the body offset
+      kbnFullBodyHeightCss(`(${euiTheme.size.base} * 3)`),
+    ]),
+};
 
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();
@@ -82,9 +103,11 @@ export const App = () => {
     return null;
   };
 
+  const styles = useMemoCss(componentStyles);
+
   return (
     <>
-      <EuiPage className="prfDevTool__page appRoot">
+      <EuiPage className="prfDevTool__page" css={styles.appRoot}>
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
           <EuiPanel className="prfDevTool__page__pageBodyContent">

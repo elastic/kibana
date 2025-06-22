@@ -5,24 +5,21 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
 
 export interface UseAlertSuppressionReturn {
   isSuppressionEnabled: boolean;
 }
 
-export const useAlertSuppression = (isEqlSequenceQuery = false): UseAlertSuppressionReturn => {
-  const isAlertSuppressionForSequenceEQLRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForSequenceEqlRuleEnabled'
-  );
-
+export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
   const isSuppressionEnabledForRuleType = useCallback(() => {
-    if (isEqlSequenceQuery) {
-      return isAlertSuppressionForSequenceEQLRuleEnabled;
+    if (!ruleType) {
+      return false;
     }
 
-    return true;
-  }, [isAlertSuppressionForSequenceEQLRuleEnabled, isEqlSequenceQuery]);
+    return isSuppressibleAlertRule(ruleType);
+  }, [ruleType]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

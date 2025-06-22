@@ -11,6 +11,15 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const ERROR_MESSAGES = {
+  notFound: {
+    title: <FormattedMessage id="xpack.queryRules.notFoundTitle" defaultMessage="Not found" />,
+    body: (
+      <FormattedMessage
+        id="xpack.queryRuleset.notFoundDescription"
+        defaultMessage="Requested resource was not found. Check if the URL is correct."
+      />
+    ),
+  },
   generic: {
     title: <FormattedMessage id="xpack.queryRules.errorTitle" defaultMessage="An error occurred" />,
     body: (
@@ -36,9 +45,9 @@ const ERROR_MESSAGES = {
   },
 };
 
-export const ErrorPrompt: React.FC<{ errorType: 'missingPermissions' | 'generic' }> = ({
-  errorType,
-}) => {
+export const ErrorPrompt: React.FC<{
+  errorType: 'missingPermissions' | 'generic' | 'notFound';
+}> = ({ errorType }) => {
   return (
     <EuiEmptyPrompt
       iconType="logoElasticsearch"

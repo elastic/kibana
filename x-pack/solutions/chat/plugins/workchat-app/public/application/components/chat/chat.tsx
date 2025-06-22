@@ -13,6 +13,7 @@ import { ConversationEventChanges } from '../../../../common/chat_events';
 import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
+import { useInitialMessage } from '../../context/initial_message_context';
 import { ChatInputForm } from './chat_input_form';
 import { ChatConversation } from './conversation/chat_conversation';
 import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
@@ -49,6 +50,7 @@ export const Chat: React.FC<ChatProps> = ({
   connectorId,
 }) => {
   const { conversation } = useConversation({ conversationId });
+  const { initialMessage, clearInitialMessage } = useInitialMessage();
   const {
     sendMessage,
     conversationEvents,
@@ -65,6 +67,13 @@ export const Chat: React.FC<ChatProps> = ({
   useEffect(() => {
     setConversationEvents(conversation?.events ?? []);
   }, [conversation, setConversationEvents]);
+
+  useEffect(() => {
+    if (initialMessage && agentId && connectorId) {
+      sendMessage(initialMessage);
+      clearInitialMessage();
+    }
+  }, [initialMessage, agentId, connectorId, sendMessage, clearInitialMessage]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -107,7 +116,7 @@ export const Chat: React.FC<ChatProps> = ({
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ChatInputForm disabled={false} loading={false} onSubmit={onSubmit} />
+        <ChatInputForm disabled={!agentId || !connectorId} loading={false} onSubmit={onSubmit} />
       </EuiFlexItem>
     </>
   );

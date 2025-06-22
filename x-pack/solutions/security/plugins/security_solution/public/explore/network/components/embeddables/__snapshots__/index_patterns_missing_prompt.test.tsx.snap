@@ -1,63 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
-<EuiEmptyPrompt
-  actions={
-    <EuiButton
-      color="primary"
-      fill={true}
-      href="/test/base/path/app/management/kibana/dataViews"
-      target="_blank"
+<div
+  class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+>
+  <div
+    class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+  >
+    <div
+      class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
     >
-      Configure index patterns
-    </EuiButton>
-  }
-  body={
-    <React.Fragment>
-      <p>
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="To display map data, you must define SIEM indices ({defaultIndex}) and Kibana index patterns with matching glob patterns. When using {beats}, you can run the {setup} command on your hosts to automatically create the index patterns. For example: {example}."
-          id="xpack.securitySolution.components.embeddables.indexPatternsMissingPrompt.errorDescription1"
-          values={
-            Object {
-              "beats": <a
-                href="https://www.elastic.co/guide/en/beats/libbeat/mocked-test-branch/getting-started.html"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                beats
-              </a>,
-              "defaultIndex": <a
-                href="/test/base/path/app/management/kibana/settings"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                securitySolution:defaultIndex
-              </a>,
-              "example": <EuiCode>
-                ./packetbeat setup
-              </EuiCode>,
-              "setup": <EuiCode>
-                setup
-              </EuiCode>,
-            }
-          }
-        />
-      </p>
-      <p>
-        <Memo(MemoizedFormattedMessage)
-          defaultMessage="You can also configure index patterns manually in Kibana."
-          id="xpack.securitySolution.components.embeddables.indexPatternsMissingPrompt.errorDescription2"
-        />
-      </p>
-    </React.Fragment>
-  }
-  iconType="gisApp"
-  title={
-    <h2>
-      Required index patterns not configured
-    </h2>
-  }
-  titleSize="xs"
-/>
+      <span
+        color="subdued"
+        data-euiicon-type="gisApp"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+    >
+      <h2
+        class="euiTitle emotion-euiTitle-xs"
+      >
+        Required index patterns not configured
+      </h2>
+      <div
+        class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+      />
+      <div
+        class="euiText emotion-euiText-m-euiTextColor-subdued"
+      >
+        <p>
+          To display map data, you must define SIEM indices (
+          <a
+            href="/test/base/path/app/management/kibana/settings"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            securitySolution:defaultIndex
+          </a>
+          ) and Kibana index patterns with matching glob patterns. When using 
+          <a
+            href="https://www.elastic.co/docs/reference/beats"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            beats
+          </a>
+          , you can run the 
+          <code>
+            setup
+          </code>
+           command on your hosts to automatically create the index patterns. For example: 
+          <code>
+            ./packetbeat setup
+          </code>
+          .
+        </p>
+        <p>
+          You can also configure index patterns manually in Kibana.
+        </p>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+      />
+      <a
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        href="/test/base/path/app/management/kibana/dataViews"
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate"
+          >
+            Configure index patterns
+          </span>
+        </span>
+      </a>
+    </div>
+  </div>
+</div>
 `;

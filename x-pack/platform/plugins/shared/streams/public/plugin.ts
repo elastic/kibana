@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-
+import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
@@ -35,15 +35,13 @@ export class Plugin implements StreamsPluginClass {
 
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
-    return {
-      status$: createStreamsStatusObservable(pluginSetup, this.repositoryClient, this.logger),
-    };
+    return {};
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(pluginsStart, this.repositoryClient, this.logger),
+      status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
     };
   }
 
@@ -56,14 +54,19 @@ const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
 
 const createStreamsStatusObservable = once(
   (
-    deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
+    core: CoreStart,
     repositoryClient: StreamsRepositoryClient,
     logger: Logger
   ): Observable<StreamsStatus> => {
-    const isObservabilityServerless =
-      deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability';
+    const { application, uiSettings } = core;
+    const hasCapabilities = application.capabilities?.streams?.show;
+    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
 
-    if (isObservabilityServerless) {
+    if (!hasCapabilities) {
+      return from([DISABLED_STATUS]);
+    }
+
+    if (isUIEnabled) {
       return from([ENABLED_STATUS]);
     }
 

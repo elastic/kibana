@@ -211,6 +211,7 @@ function renderTestCases(
       expect(getScriptPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         baseHref: '/mock-server-basepath',
+        themeName: 'borealis',
       });
     });
 

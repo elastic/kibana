@@ -11,8 +11,10 @@ import React from 'react';
 import { EmptyPrompt } from '.';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { TestProviders } from '../../../../../common/mock';
+import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 jest.mock('../../../../../assistant/use_assistant_availability');
+jest.mock('../../../use_kibana_feature_flags');
 
 describe('EmptyPrompt', () => {
   const alertsCount = 20;
@@ -22,6 +24,10 @@ describe('EmptyPrompt', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
   });
 
   describe('when the user has the assistant privilege', () => {

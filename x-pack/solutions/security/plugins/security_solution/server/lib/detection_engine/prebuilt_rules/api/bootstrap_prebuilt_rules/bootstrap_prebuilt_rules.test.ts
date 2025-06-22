@@ -10,6 +10,7 @@ import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules';
 import type { Installation, RegistryPackage } from '@kbn/fleet-plugin/common';
 import { requestContextMock, serverMock } from '../../../routes/__mocks__';
 import { getBootstrapRulesRequest } from '../../../routes/__mocks__/request_responses';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 const packageMock: RegistryPackage = {
   name: 'detection_engine',
@@ -43,6 +44,7 @@ describe('bootstrap_prebuilt_rules_route', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    clients.productFeaturesService = createProductFeaturesServiceMock([]);
 
     bootstrapPrebuiltRulesRoute(server.router);
   });

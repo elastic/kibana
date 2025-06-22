@@ -15,6 +15,7 @@ import { useLensDispatch, updateIndexPatterns } from '../../../state_management'
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import type { LayerConfigurationProps } from './types';
 import { useLensSelector } from '../../../state_management';
+import { ConfigPanelWrapperProps } from '../../../editor_frame_service/editor_frame/config_panel/types';
 
 export function LayerConfiguration({
   attributes,
@@ -59,7 +60,7 @@ export function LayerConfiguration({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const layerPanelsProps = {
+  const layerPanelsProps: ConfigPanelWrapperProps = {
     attributes,
     lensAdapters,
     dataLoading$,

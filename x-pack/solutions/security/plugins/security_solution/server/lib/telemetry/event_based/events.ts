@@ -15,6 +15,7 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexTemplatesStats,
   IndicesSettings,
   IndicesStats,
 } from '../indices.metadata.types';
@@ -477,6 +478,14 @@ export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
             type: 'keyword',
             _meta: { description: 'The name of the index.' },
           },
+          index_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Index mode.' },
+          },
+          source_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Source mode.' },
+          },
           default_pipeline: {
             type: 'keyword',
             _meta: {
@@ -646,6 +655,103 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
         },
       },
       _meta: { description: 'ILM stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream: {
+            type: 'boolean',
+            _meta: {
+              description: 'Datastream dataset',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source, if enabled',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
     },
   },
 };
@@ -1007,7 +1113,7 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   prebuiltMatch: boolean;
   eventName: string;
 }> = {
-  eventType: SiemMigrationsEventTypes.TranslationSucess,
+  eventType: SiemMigrationsEventTypes.TranslationSuccess,
   schema: {
     eventName: {
       type: 'keyword',
@@ -1233,6 +1339,70 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const SIEM_MIGRATIONS_MIGRATION_ABORTED: EventTypeOpts<{
+  model: string;
+  reason: string;
+  migrationId: string;
+  duration: number;
+  completed: number;
+  failed: number;
+  total: number;
+  eventName: string;
+}> = {
+  eventType: SiemMigrationsEventTypes.MigrationAborted,
+  schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The LLM model that was used',
+      },
+    },
+    reason: {
+      type: 'keyword',
+      _meta: {
+        description: 'The reason of the migration abort',
+      },
+    },
+    migrationId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Unique identifier for the migration',
+      },
+    },
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration of the migration in milliseconds',
+      },
+    },
+    completed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules successfully migrated',
+      },
+    },
+    failed: {
+      type: 'long',
+      _meta: {
+        description: 'Number of rules that failed to migrate',
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of rules to migrate',
+      },
+    },
+  },
+};
+
 export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
@@ -1306,8 +1476,10 @@ export const events = [
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,

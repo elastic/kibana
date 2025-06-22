@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash';
 import { useEffect, useState } from 'react';
 
 export const useCurrentWindowWidth = () => {

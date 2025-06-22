@@ -34,6 +34,8 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  getElasticManagedLlmConnector,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -44,6 +46,7 @@ import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE 
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
 import { useGenAIConnectors } from '../hooks/use_genai_connectors';
 import { useConversation } from '../hooks/use_conversation';
+import { useElasticLlmCalloutsStatus } from '../hooks/use_elastic_llm_callouts_status';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatHeader } from './chat_header';
 import { ChatTimeline } from './chat_timeline';
@@ -291,75 +294,74 @@ export function ChatBody({
     }
   });
 
-  const handleActionClick = ({
-    message,
-    payload,
-  }: {
-    message: Message;
-    payload: ChatActionClickPayload;
-  }) => {
-    setStickToBottom(true);
-    switch (payload.type) {
-      case ChatActionClickType.executeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'execute_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                }),
-                trigger: MessageRole.User,
+  const handleActionClick = useCallback(
+    ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
+      setStickToBottom(true);
+      switch (payload.type) {
+        case ChatActionClickType.executeEsqlQuery:
+          next(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'execute_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                  }),
+                  trigger: MessageRole.User,
+                },
               },
-            },
-          })
-        );
-        break;
+            })
+          );
+          break;
 
-      case ChatActionClickType.updateVisualization:
-        const visualizeQueryResponse = message;
+        case ChatActionClickType.updateVisualization:
+          const visualizeQueryResponse = message;
 
-        const visualizeQueryResponseData = JSON.parse(visualizeQueryResponse.message.data ?? '{}');
+          const visualizeQueryResponseData = JSON.parse(
+            visualizeQueryResponse.message.data ?? '{}'
+          );
 
-        next(
-          messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              name: 'visualize_query',
-              content: visualizeQueryResponse.message.content,
-              data: JSON.stringify({
-                ...visualizeQueryResponseData,
-                userOverrides: payload.userOverrides,
-              }),
-              role: MessageRole.User,
-            },
-          })
-        );
-        break;
-      case ChatActionClickType.visualizeEsqlQuery:
-        next(
-          messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
+          next(
+            messages.slice(0, messages.indexOf(visualizeQueryResponse)).concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
                 name: 'visualize_query',
-                arguments: JSON.stringify({
-                  query: payload.query,
-                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                content: visualizeQueryResponse.message.content,
+                data: JSON.stringify({
+                  ...visualizeQueryResponseData,
+                  userOverrides: payload.userOverrides,
                 }),
-                trigger: MessageRole.User,
+                role: MessageRole.User,
               },
-            },
-          })
-        );
-        break;
-    }
-  };
+            })
+          );
+          break;
+        case ChatActionClickType.visualizeEsqlQuery:
+          next(
+            messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'visualize_query',
+                  arguments: JSON.stringify({
+                    query: payload.query,
+                    intention: VisualizeESQLUserIntention.visualizeAuto,
+                  }),
+                  trigger: MessageRole.User,
+                },
+              },
+            })
+          );
+          break;
+      }
+    },
+    [messages, next]
+  );
 
   const handleConversationAccessUpdate = async (access: ConversationAccess) => {
     await updateConversationAccess(access);
@@ -377,6 +379,20 @@ export function ChatBody({
     await archiveConversation(id, isArchived);
     conversation.refresh();
   };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+
+  const showElasticLlmCalloutInChat =
+    !!elasticManagedLlm &&
+    connectors.selectedConnector === elasticManagedLlm.id &&
+    !conversationCalloutDismissed &&
+    tourCalloutDismissed;
+
+  const showKnowledgeBaseReIndexingCallout =
+    knowledgeBase.status.value?.enabled === true &&
+    knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY &&
+    knowledgeBase.status.value?.isReIndexing === true;
 
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
@@ -518,12 +534,13 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               ) : (
                 <ChatTimeline
                   conversationId={conversationId}
                   messages={messages}
-                  knowledgeBase={knowledgeBase}
                   chatService={chatService}
                   currentUser={conversationUser}
                   isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
@@ -544,6 +561,8 @@ export function ChatBody({
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
+                  showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
                 />
               )}
             </EuiPanel>
@@ -674,6 +693,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
+          isConversationApp={!showLinkToConversationsApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

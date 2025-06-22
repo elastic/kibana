@@ -22,9 +22,9 @@ describe('Route utilities', () => {
     let httpRequestMock: Mutable<KibanaRequest<{ action_id: string }>>;
 
     beforeEach(() => {
-      const endpointGenerator = new EndpointActionGenerator('seed');
+      const actionGenerator = new EndpointActionGenerator('seed');
 
-      actionRequestMock = endpointGenerator.generate();
+      actionRequestMock = actionGenerator.generate();
       testSetupMock = createHttpApiTestSetupMock();
 
       httpRequestMock = testSetupMock.createRequestMock({
@@ -34,8 +34,8 @@ describe('Route utilities', () => {
       applyEsClientSearchMock({
         esClientMock: testSetupMock.getEsClientMock(),
         index: ENDPOINT_ACTIONS_INDEX,
-        response: endpointGenerator.toEsSearchResponse([
-          endpointGenerator.toEsSearchHit(actionRequestMock),
+        response: actionGenerator.toEsSearchResponse([
+          actionGenerator.toEsSearchHit(actionRequestMock),
         ]),
       });
     });

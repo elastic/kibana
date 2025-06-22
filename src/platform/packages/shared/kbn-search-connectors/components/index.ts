@@ -8,4 +8,6 @@
  */
 
 export * from './configuration';
+export { ConnectorSchedulingComponent } from './scheduling';
 export * from './sync_jobs';
+export * from './decorative_horizontal_stepper/decorative_horizontal_stepper';

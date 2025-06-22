@@ -52,7 +52,6 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
 
   const topContainerClass = css`
     padding-bottom: ${euiTheme.size.m};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
   const inputFlexItemClass = css`

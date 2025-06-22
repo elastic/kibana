@@ -11,7 +11,7 @@ import type {
   IngestProcessorContainer,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle, StreamDefinition } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -98,7 +98,7 @@ export interface DeleteDatastreamAction {
 
 export interface UpsertDotStreamsDocumentAction {
   type: 'upsert_dot_streams_document';
-  request: StreamDefinition;
+  request: Streams.all.Definition;
 }
 
 export interface DeleteDotStreamsDocumentAction {

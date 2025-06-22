@@ -38,7 +38,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+  capabilities: `${SECURITY_FEATURE_ID}.show`,
   links: [
     {
       id: SecurityPageName.rules,
@@ -53,6 +53,7 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
+      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -100,7 +101,7 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: [`${SECURITY_FEATURE_ID}.show`],
+      capabilities: `${SECURITY_FEATURE_ID}.detections`,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',

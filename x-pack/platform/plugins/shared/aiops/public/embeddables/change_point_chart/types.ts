@@ -42,5 +42,3 @@ export interface ChangePointEmbeddableState extends SerializedTitles, Serialized
   partitions?: string[];
   maxSeriesToPlot?: number;
 }
-
-export type ChangePointEmbeddableRuntimeState = ChangePointEmbeddableState;

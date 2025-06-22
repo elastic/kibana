@@ -39,7 +39,7 @@ describe('config schema', () => {
       ConfigSchema.validate(
         {
           overrides: {
-            featureA: { name: 'new name', hidden: true },
+            featureA: { name: 'new name', description: 'new description', hidden: true },
             featureB: {
               order: 100,
               category: 'management',
@@ -73,6 +73,7 @@ describe('config schema', () => {
       Object {
         "overrides": Object {
           "featureA": Object {
+            "description": "new description",
             "hidden": true,
             "name": "new name",
           },
@@ -108,6 +109,27 @@ describe('config schema', () => {
                 },
               },
             },
+          },
+        },
+      }
+    `);
+  });
+
+  it('can override `description` when it is `null`', () => {
+    expect(
+      ConfigSchema.validate(
+        {
+          overrides: {
+            featureA: { description: null },
+          },
+        },
+        { serverless: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overrides": Object {
+          "featureA": Object {
+            "description": null,
           },
         },
       }

@@ -78,7 +78,7 @@ const getStyles = (
     donutTextWrapper: css`
       top: ${isChartEmbeddablesEnabled && !dataExists ? '66%' : '34%'};
       width: 100%;
-      max-width: 77px;
+      max-width: 75%;
       position: absolute; // Make this position absolute in order to overlap the text onto the donut
       z-index: 1;
 
@@ -139,7 +139,7 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
                 <EuiText
                   className={className}
                   size="s"
-                  style={dataExists ? undefined : emptyLabelStyle}
+                  css={dataExists ? undefined : emptyLabelStyle}
                 >
                   {label}
                 </EuiText>
@@ -178,7 +178,7 @@ export const DonutChart = ({
             : '';
 
         if (!isEmpty(level.trim())) {
-          onPartitionClick(level.toLowerCase());
+          onPartitionClick(level);
         }
       }
     },

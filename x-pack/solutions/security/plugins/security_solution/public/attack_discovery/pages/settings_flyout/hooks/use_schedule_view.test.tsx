@@ -34,13 +34,19 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
+const getBooleanValueMock = jest.fn();
 
 describe('useScheduleView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    getBooleanValueMock.mockReturnValue(false);
+
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: getBooleanValueMock,
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },

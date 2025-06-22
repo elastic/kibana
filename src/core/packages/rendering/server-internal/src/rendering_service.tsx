@@ -248,7 +248,10 @@ export class RenderingService {
     const commonStylesheetPaths = getCommonStylesheetPaths({
       baseHref: staticAssetsHrefBase,
     });
+    const themeName = this.themeName$.getValue();
+
     const scriptPaths = getScriptPaths({
+      themeName,
       darkMode,
       baseHref: staticAssetsHrefBase,
     });
@@ -304,7 +307,7 @@ export class RenderingService {
         },
         theme: {
           darkMode,
-          name: this.themeName$.getValue(),
+          name: themeName,
           version: themeVersion,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),

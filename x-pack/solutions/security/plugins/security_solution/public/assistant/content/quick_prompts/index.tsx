@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PromptTypeEnum,
-  type PromptResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptTypeEnum, type PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { APP_UI_ID } from '../../../../common';
 import * as i18n from './translations';
 import {

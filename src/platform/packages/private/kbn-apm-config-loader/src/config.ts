@@ -15,6 +15,7 @@ import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import { getFlattenedObject } from '@kbn/std';
+import type { TelemetryConfig } from '@kbn/telemetry-config';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -52,6 +53,7 @@ const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
 };
 
 interface KibanaRawConfig {
+  telemetry?: TelemetryConfig;
   elastic?: {
     apm?: ApmConfigSchema;
   };
@@ -94,6 +96,10 @@ export class ApmConfiguration {
     }
 
     return baseConfig;
+  }
+
+  public getTelemetryConfig(): TelemetryConfig | undefined {
+    return this.rawKibanaConfig.telemetry;
   }
 
   public isUsersRedactionEnabled(): boolean {

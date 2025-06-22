@@ -20,6 +20,21 @@ import { ApiConfig } from '../conversations/common_attributes.gen';
 import { NonEmptyString } from '../common_attributes.gen';
 
 /**
+ * An query condition to filter alerts
+ */
+export type Query = z.infer<typeof Query>;
+export const Query = z.object({
+  query: z.union([z.string(), z.object({}).catchall(z.unknown())]),
+  language: z.string(),
+});
+
+/**
+ * The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+ */
+export type Filters = z.infer<typeof Filters>;
+export const Filters = z.array(z.unknown());
+
+/**
  * An attack discovery schedule params
  */
 export type AttackDiscoveryScheduleParams = z.infer<typeof AttackDiscoveryScheduleParams>;
@@ -40,7 +55,9 @@ export const AttackDiscoveryScheduleParams = z.object({
     })
   ),
   end: z.string().optional(),
-  filter: z.object({}).catchall(z.unknown()).optional(),
+  query: Query.optional(),
+  filters: Filters.optional(),
+  combinedFilter: z.object({}).catchall(z.unknown()).optional(),
   size: z.number(),
   start: z.string().optional(),
 });
@@ -54,7 +71,7 @@ export const IntervalSchedule = z.object({
 });
 
 /**
- * Optionally groups actions by use cases. Use `default` for alert notifications.
+ * Groups actions by use cases. Use `default` for alert notifications.
  */
 export type AttackDiscoveryScheduleActionGroup = z.infer<typeof AttackDiscoveryScheduleActionGroup>;
 export const AttackDiscoveryScheduleActionGroup = z.string();
@@ -123,7 +140,7 @@ export const AttackDiscoveryScheduleAction = z.object({
    * The action type used for sending notifications.
    */
   actionTypeId: z.string(),
-  group: AttackDiscoveryScheduleActionGroup,
+  group: AttackDiscoveryScheduleActionGroup.optional(),
   id: AttackDiscoveryScheduleActionId,
   params: AttackDiscoveryScheduleActionParams,
   uuid: NonEmptyString.optional(),

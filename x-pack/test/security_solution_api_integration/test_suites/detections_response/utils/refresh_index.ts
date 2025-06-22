@@ -37,9 +37,9 @@ export const refreshIndex = async (es: Client, index?: string) => {
 export const refreshSavedObjectIndices = async (es: Client) => {
   // Refresh indices to prevent a race condition between a write and subsequent read operation. To
   // fix it deterministically we have to refresh saved object indices and wait until it's done.
-  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES, ignore_unavailable: true });
 
   // Additionally, we need to clear the cache to ensure that the next read operation will
   // not return stale data.
-  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES });
+  await es.indices.clearCache({ index: ALL_SAVED_OBJECT_INDICES, ignore_unavailable: true });
 };

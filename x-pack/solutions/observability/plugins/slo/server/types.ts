@@ -40,7 +40,7 @@ export interface SLOPluginSetupDependencies {
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;

@@ -1,3 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`BarChartBaseComponent render with default configs if no customized configs given should 2 render BarSeries 1`] = `[Function]`;
+exports[`BarChartBaseComponent render with default configs if no customized configs given should 2 render BarSeries 1`] = `
+<div
+  data-test-subj="chart-mock"
+>
+  <div
+    data-test-subj="settings-mock"
+  />
+  <div
+    data-test-subj="bar-series-mock"
+  />
+  <div
+    data-test-subj="bar-series-mock"
+  />
+  <div
+    data-test-subj="axis-mock"
+  />
+  <div
+    data-test-subj="axis-mock"
+  />
+</div>
+`;

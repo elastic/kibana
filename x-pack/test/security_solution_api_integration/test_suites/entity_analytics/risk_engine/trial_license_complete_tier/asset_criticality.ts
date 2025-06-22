@@ -71,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
           assetCriticalityIndexResult['.asset-criticality.asset-criticality-default']?.mappings
         ).to.eql({
           _meta: {
-            version: 3,
+            version: 4,
           },
           dynamic: 'strict',
           properties: {
@@ -142,6 +142,20 @@ export default ({ getService }: FtrProviderContext) => {
                   },
                 },
                 name: {
+                  type: 'keyword',
+                },
+              },
+            },
+            entity: {
+              properties: {
+                asset: {
+                  properties: {
+                    criticality: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                id: {
                   type: 'keyword',
                 },
               },

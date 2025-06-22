@@ -10,7 +10,7 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
 import { useKibana } from '../../common/lib/kibana';
-import { type DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
@@ -20,10 +20,11 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  * selected data view.
  */
 export const useDataView = (
-  dataViewManagerScope: DataViewManagerScopeName
+  dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
 ): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
   const {
     services: { dataViews },
+    notifications,
   } = useKibana();
 
   const { dataViewId, status: internalStatus } = useSelector(
@@ -38,12 +39,22 @@ export const useDataView = (
         return setRetrievedDataView(undefined);
       }
 
-      // TODO: remove conditional .get call when new data view picker is stabilized
-      // this is due to the fact that many of our tests mock kibana hook and do not provide proper
-      // double for dataViews service
-      setRetrievedDataView(await dataViews?.get(dataViewId));
+      try {
+        // TODO: remove conditional .get call when new data view picker is stabilized
+        // this is due to the fact that many of our tests mock kibana hook and do not provide proper
+        // double for dataViews service
+        const currDv = await dataViews?.get(dataViewId);
+        setRetrievedDataView(currDv);
+      } catch (error) {
+        setRetrievedDataView(undefined);
+        // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
+        notifications?.toasts?.danger({
+          title: 'Error retrieving data view',
+          body: `Error: ${error?.message ?? 'unknown'}`,
+        });
+      }
     })();
-  }, [dataViews, dataViewId, internalStatus]);
+  }, [dataViews, dataViewId, internalStatus, notifications]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {

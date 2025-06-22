@@ -72,7 +72,6 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
-        'unifiedHistogram',
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes

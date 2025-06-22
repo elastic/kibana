@@ -138,6 +138,12 @@ describe('resolve()', () => {
         ],
         "alertTypeId": "123",
         "alias_target_id": "2",
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.479Z,
@@ -322,6 +328,12 @@ describe('resolve()', () => {
         ],
         "alertTypeId": "123",
         "alias_target_id": "2",
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.479Z,
@@ -517,6 +529,12 @@ describe('resolve()', () => {
         ],
         "alertTypeId": "123",
         "alias_target_id": "2",
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
           "lastExecutionDate": 2019-02-12T21:01:22.479Z,
