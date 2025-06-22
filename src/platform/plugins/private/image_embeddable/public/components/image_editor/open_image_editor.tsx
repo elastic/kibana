@@ -18,6 +18,21 @@ import { FileImageMetadata, imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';
 import { ImageViewerContext } from '../image_viewer/image_viewer_context';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
+
+const ConfigEditorFlyout = React.lazy(() => import('./image_editor_flyout'));
+
+const FallbackComponent = (
+  <EuiPanel className="eui-textCenter">
+    <EuiLoadingSpinner size="l" />
+  </EuiPanel>
+);
+
+const ImageEditorFlyout1 = withSuspense(
+  ConfigEditorFlyout,
+  FallbackComponent
+);
 
 export const openImageEditor = async ({
   parentApi,
@@ -26,10 +41,15 @@ export const openImageEditor = async ({
   parentApi: CanAddNewPanel;
   initialImageConfig?: ImageConfig;
 }): Promise<ImageConfig> => {
-  const { ImageEditorFlyout } = await import('./image_editor_flyout');
+
+  var t0 = performance.now();
+
 
   const { overlays, http, security, rendering } = coreServices;
-  const user = await security.authc.getCurrentUser();
+
+
+  var t1 = performance.now();
+  console.log('what is this crap', t1-t0  );
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
   /**
@@ -65,8 +85,8 @@ export const openImageEditor = async ({
               validateUrl: createValidateUrl(http.externalUrl),
             }}
           >
-            <ImageEditorFlyout
-              user={user}
+            <ImageEditorFlyout1
+              getCurrentUser={security.authc.getCurrentUser}
               onCancel={onCancel}
               onSave={onSave}
               initialImageConfig={initialImageConfig}
@@ -76,9 +96,7 @@ export const openImageEditor = async ({
         rendering
       ),
       {
-        onClose: () => {
-          onCancel();
-        },
+        onClose: onCancel,
         size: 'm',
         maxWidth: 500,
         paddingSize: 'm',
@@ -87,6 +105,10 @@ export const openImageEditor = async ({
         'aria-labelledby': 'image-editor-flyout-title',
       }
     );
+
+
+    var t1 = performance.now();
+    console.log('what is this crap', t1-t0  );
 
     overlayTracker?.openOverlay(flyoutSession);
   });

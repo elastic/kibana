@@ -11,7 +11,7 @@ import React from 'react';
 import { skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiTitle } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
@@ -26,11 +26,31 @@ import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 const LazyLinksEditor = React.lazy(() => import('../components/editor/links_editor'));
 
+// const FallbackComponent = (
+//   <EuiPanel className="eui-textCenter">
+//     <EuiLoadingSpinner size="l" />
+//   </EuiPanel>
+// );
+
+const title = 'Create Links Panel';
+
+const FallbackComponent = <>
+<EuiFlyoutHeader hasBorder>
+  <EuiTitle size="s">
+    <h1 id="addPanelsFlyout">
+      {title || 'Loading...' }
+    </h1>
+  </EuiTitle>
+</EuiFlyoutHeader>
+<EuiFlyoutBody>
+  <EuiSkeletonText/>
+</EuiFlyoutBody>
+</>
+
+
 const LinksEditor = withSuspense(
   LazyLinksEditor,
-  <EuiPanel className="eui-textCenter">
-    <EuiLoadingSpinner size="l" />
-  </EuiPanel>
+  FallbackComponent
 );
 
 /**
@@ -43,17 +63,9 @@ export async function openEditorFlyout({
   initialState?: LinksRuntimeState;
   parentDashboard?: unknown;
 }): Promise<LinksRuntimeState | undefined> {
-  if (!initialState) {
-    /**
-     * When creating a new links panel, the tooltip from the "Add panel" popover interacts badly with the flyout
-     * and can cause a "double opening" animation if the flyout opens before the tooltip has time to unmount; so,
-     * when creating a new links panel, we need to slow down the process a little bit so that the tooltip has time
-     * to disappear before we try to open the flyout.
-     *
-     * This does not apply to editing existing links panels, since there is no tooltip for this action.
-     */
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
+
+  var t0 = performance.now();
+
 
   const overlayTracker =
     parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
@@ -63,7 +75,8 @@ export async function openEditorFlyout({
       ? parentDashboard.savedObjectId$.value
       : undefined;
 
-  return new Promise<LinksRuntimeState | undefined>((resolve) => {
+
+  const promiseResult = new Promise<LinksRuntimeState | undefined>((resolve) => {
     const flyoutId = `linksEditorFlyout-${uuidv4()}`;
 
     const closeEditorFlyout = (editorFlyout: OverlayRef) => {
@@ -73,6 +86,7 @@ export async function openEditorFlyout({
         editorFlyout.close();
       }
     };
+
 
     /**
      * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
@@ -88,6 +102,7 @@ export async function openEditorFlyout({
         links: newLinks,
         layout: newLayout,
       };
+      
 
       if (initialState?.savedObjectId) {
         const { attributes, references } = serializeLinksAttributes(newState);
@@ -106,6 +121,7 @@ export async function openEditorFlyout({
       }
     };
 
+
     const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
       const newState = {
         ...initialState,
@@ -115,6 +131,7 @@ export async function openEditorFlyout({
       resolve(newState);
       closeEditorFlyout(editorFlyout);
     };
+
 
     const onCancel = () => {
       resolve(undefined);
@@ -145,9 +162,12 @@ export async function openEditorFlyout({
         'data-test-subj': 'links--panelEditor--flyout',
       }
     );
+    var t1 = performance.now();
+    console.log('THI5',t1 - t0);
 
     if (overlayTracker) {
       overlayTracker.openOverlay(editorFlyout);
     }
   });
+  return promiseResult
 }

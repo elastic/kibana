@@ -230,6 +230,8 @@ export function initializeEditApi(
   const openConfigurationPanel = async (
     { showOnly }: { showOnly: boolean } = { showOnly: false }
   ) => {
+
+    var t0 = performance.now();
     // save the initial state in case it needs to revert later on
     const firstState = getState();
 
@@ -245,9 +247,13 @@ export function initializeEditApi(
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
     });
+
+    var t1 = performance.now();
+    console.log('openConfigurationPanel1', t1-t0  );
     if (ConfigPanel) {
       mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
     }
+    console.log('openConfigurationPanel2', t1-t0  );
   };
 
   return {
@@ -267,6 +273,7 @@ export function initializeEditApi(
        * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
       onEdit: async () => {
+        console.log('onEdit called???');
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }

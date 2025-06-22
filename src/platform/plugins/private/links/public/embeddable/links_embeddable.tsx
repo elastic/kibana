@@ -226,7 +226,12 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         onEdit: async () => {
+          var t0 = performance.now();
           const { openEditorFlyout } = await import('../editor/open_editor_flyout');
+
+
+          var t1 = performance.now();
+          console.log('onEdit links',t1 - t0);
           const newState = await openEditorFlyout({
             initialState: {
               ...stateManager.getLatestState(),
@@ -234,6 +239,9 @@ export const getLinksEmbeddableFactory = () => {
             },
             parentDashboard: parentApi,
           });
+
+          var t1 = performance.now();
+          console.log('onEdit links',t1 - t0);
           if (!newState) return;
 
           // if the by reference state has changed during this edit, reinitialize the panel.
@@ -253,6 +261,7 @@ export const getLinksEmbeddableFactory = () => {
           }
 
           stateManager.reinitializeState(newState);
+
         },
       });
 

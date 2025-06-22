@@ -100,6 +100,8 @@ export const getAlertsTableEmbeddableFactory = (
       },
       getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
+
+        var t0 = performance.now();
         try {
           const newTableConfig = await openConfigEditor({
             coreServices,
@@ -110,6 +112,9 @@ export const getAlertsTableEmbeddableFactory = (
         } catch {
           // The user closed without saving, discard the edits
         }
+
+    var t1 = performance.now();
+    console.log('onEdit alerts',t1 - t0);
       },
     });
 

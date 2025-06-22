@@ -28,7 +28,7 @@ import { registerFieldListPanelPlacementSetting } from './react_embeddables/fiel
 import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
-import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable'; //TODO!
 
 export interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

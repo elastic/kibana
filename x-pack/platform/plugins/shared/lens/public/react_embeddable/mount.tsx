@@ -34,6 +34,8 @@ export function mountInlinePanel(
     container?: HTMLElement | null;
   } = {}
 ) {
+
+  var t0 = performance.now();
   const dataTestSubjFinal = dataTestSubj ?? 'customizeLens';
   if (container) {
     ReactDOM.render(InlinePanel, container);
@@ -68,6 +70,9 @@ export function mountInlinePanel(
     if (uuid) {
       overlayTracker?.openOverlay(handle, { focusedPanelId: uuid });
     }
+
+    var t1 = performance.now();
+    console.log('mountInlinePanel',t1 - t0);
   }
 }
 

@@ -45,6 +45,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
+  console.log(groups);
   useEffect(() => {
     if (!searchTerm) {
       return setFilteredGroups(groups ?? []);
@@ -174,3 +175,5 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
     </>
   );
 }
+
+export default AddPanelFlyout;

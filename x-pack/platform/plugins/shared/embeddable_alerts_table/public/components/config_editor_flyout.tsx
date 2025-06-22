@@ -287,3 +287,5 @@ export const ConfigEditorFlyout = ({
     </>
   );
 };
+
+export default ConfigEditorFlyout;

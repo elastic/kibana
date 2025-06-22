@@ -13,9 +13,24 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
-import { AddPanelFlyout } from './add_panel_flyout';
+// import { AddPanelFlyout } from './add_panel_flyout';
 import { useDashboardApi } from '../../../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../../../services/kibana_services';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
+
+const AddPanelFlyout = React.lazy(() => import('./add_panel_flyout'));
+
+const FallbackComponent = (
+  <EuiPanel className="eui-textCenter">
+    <EuiLoadingSpinner size="l" />
+  </EuiPanel>
+);
+
+const AddPanelFlyout1 = withSuspense(
+  AddPanelFlyout,
+  FallbackComponent
+);
 
 export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
   const dashboardApi = useDashboardApi();
@@ -31,7 +46,7 @@ export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
     const overlayRef = coreServices.overlays.openFlyout(
       toMountPoint(
         React.createElement(function () {
-          return <AddPanelFlyout dashboardApi={dashboardApi} />;
+          return <AddPanelFlyout1 dashboardApi={dashboardApi} />;
         }),
         coreServices
       ),

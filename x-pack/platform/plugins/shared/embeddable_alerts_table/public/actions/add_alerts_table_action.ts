@@ -40,11 +40,16 @@ export const getAddAlertsTableAction = (
       return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
     },
     execute: async ({ embeddable }) => {
+
+      var t0 = performance.now();
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
       const tableConfig = await openConfigEditor({
         coreServices,
         parentApi: embeddable,
-      });
+      }); //TODO
+
+    var t1 = performance.now();
+    console.log('getAddAlertsTableAction',t1 - t0);
       await embeddable.addNewPanel(
         {
           panelType: EMBEDDABLE_ALERTS_TABLE_ID,

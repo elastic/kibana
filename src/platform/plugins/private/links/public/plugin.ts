@@ -110,6 +110,8 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
+
+                    var t0 = performance.now();
                     const [{ openEditorFlyout }, { deserializeLinksSavedObject }] =
                       await Promise.all([
                         import('./editor/open_editor_flyout'),
@@ -117,7 +119,13 @@ export class LinksPlugin
                       ]);
                     const linksSavedObject = await getLinksClient().get(savedObjectId);
                     const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
+
+                    var t1 = performance.now();
+                    console.log('onEdit links',t1 - t0);
                     await openEditorFlyout({ initialState });
+
+                    var t1 = performance.now();
+                    console.log('onEdit links',t1 - t0);
                   },
                 },
                 description,
