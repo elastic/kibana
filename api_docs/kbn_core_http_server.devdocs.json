@@ -3614,6 +3614,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
@@ -3875,6 +3879,22 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
               },
               {
                 "plugin": "observability",
@@ -4387,22 +4407,6 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -6330,6 +6334,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/schedule/schedule_from_jobparams.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/public/generate_from_jobparams.ts"
               },
               {
@@ -6647,6 +6655,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/aad/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -8615,6 +8631,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/resilient_simulation.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/scheduled.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/test_helpers/create_mock_reportingplugin.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -11932,6 +11956,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
               },
               {
@@ -12033,6 +12065,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14681,10 +14721,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/get.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/list.ts"
               },
               {
@@ -14750,6 +14786,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/policy/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16355,6 +16395,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -16629,6 +16673,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/update.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/update.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -16842,6 +16890,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/delete.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/delete_all_route.ts"
               },
               {
                 "plugin": "securitySolution",

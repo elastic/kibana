@@ -403,6 +403,7 @@ export interface DocLinks {
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
     monitorLogs: string;
+    logsStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;

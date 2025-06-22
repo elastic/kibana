@@ -1,0 +1,184 @@
+{
+  "id": "@kbn/core-chrome-layout-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.ChromeLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "ChromeLayout",
+        "description": [
+          "\nThe main Chrome layout component.\nSets up the layout and required global css.\n"
+        ],
+        "signature": [
+          "({ children, ...props }: ",
+          "ChromeLayoutComponentProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.ChromeLayout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, ...props }",
+            "description": [],
+            "signature": [
+              "ChromeLayoutComponentProps"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The rendered ChromeLayout component."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.LayoutConfigProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "LayoutConfigProvider",
+        "description": [
+          "\nProvider of the layout config"
+        ],
+        "signature": [
+          "({ value, children }: ",
+          "LayoutConfigProviderProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.LayoutConfigProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ value, children }",
+            "description": [],
+            "signature": [
+              "LayoutConfigProviderProps"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.LayoutConfigProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LayoutConfigProviderProps",
+        "description": [
+          "\nProps for the LayoutConfigProvider component."
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.LayoutConfigProviderProps.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarWidth?: number | undefined; sidebarPanelWidth?: number | undefined; }"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-components",
+            "id": "def-common.LayoutConfigProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.ChromeLayoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ChromeLayoutProps",
+        "description": [
+          "\nProps for the ChromeLayout component."
+        ],
+        "signature": [
+          "ChromeLayoutComponentProps"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.LayoutConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutConfig",
+        "description": [
+          "\nConfiguration for the layout."
+        ],
+        "signature": [
+          "{ bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarWidth?: number | undefined; sidebarPanelWidth?: number | undefined; }"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
