@@ -37,7 +37,8 @@ export const ElasticAssistantTestProviders = ({ children, services }: Props) => 
           http: mockHttp,
           elasticAssistantSharedState,
           notifications,
-          aiAssistantManagementSelection: {} as unknown as AIAssistantManagementSelectionPluginPublicStart,
+          aiAssistantManagementSelection:
+            {} as unknown as AIAssistantManagementSelectionPluginPublicStart,
           ...services,
         }}
       >

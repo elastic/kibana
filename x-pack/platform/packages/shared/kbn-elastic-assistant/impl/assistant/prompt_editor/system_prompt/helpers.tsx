@@ -11,8 +11,8 @@ import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
-import { EMPTY_PROMPT } from './translations';
 import styled from '@emotion/styled';
+import { EMPTY_PROMPT } from './translations';
 
 interface GetOptionFromPromptProps extends PromptResponse {
   content: string;

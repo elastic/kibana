@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -23,7 +24,6 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { isSecuritySolutionAccessible } from './helpers_access';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
@@ -90,7 +90,6 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
-
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
