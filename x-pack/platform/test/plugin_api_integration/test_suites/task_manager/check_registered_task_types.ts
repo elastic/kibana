@@ -88,6 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.torq',
         'actions:.webhook',
         'actions:.xmatters',
+        'actions:.xsoar',
         'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
@@ -171,6 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
         'report:execute',
+        'report:execute-scheduled',
         'risk_engine:risk_scoring',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
@@ -190,6 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
         'slo:temp-summary-cleanup-task',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'unusedUrlsCleanupTask',
       ]);
     });
   });

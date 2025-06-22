@@ -38,6 +38,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.MONITOR_QUERY_ID]: stringToJsonFormatter,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.MAX_ATTEMPTS]: null,
+  [ConfigKey.MAINTENANCE_WINDOWS]: null,
   retest_on_failure: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
