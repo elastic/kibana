@@ -104,13 +104,13 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  // @TODO: add Inference ID?
   async update(options: DocUpdateOptions = {}): Promise<void> {
     const { request, wait = false, inferenceId } = options;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
       logger: this.logger,
+      inferenceId,
     });
 
     if (request) {
@@ -179,7 +179,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
 
     const installStatus = await this.docInstallClient.getInstallationStatus();
     const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
-    return { status: overallStatus };
+    return { status: overallStatus, installStatus };
   }
 }
 

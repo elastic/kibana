@@ -335,16 +335,10 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
       resetStateAndCloseFlyout();
     }
   }, [createEntry, duplicateKBItem, resetStateAndCloseFlyout]);
-  const currentInferenceId =
-    knowledgeBase.status.value?.currentInferenceId ??
-    knowledgeBase.status.value?.endpoint?.inference_id;
 
   return (
     <>
-      <ProductDocumentationManagement
-        status={kbStatus?.product_documentation_status}
-        inferenceId={currentInferenceId}
-      />
+      <ProductDocumentationManagement status={kbStatus?.product_documentation_status} />
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
         <EuiText size={'m'}>
           <FormattedMessage

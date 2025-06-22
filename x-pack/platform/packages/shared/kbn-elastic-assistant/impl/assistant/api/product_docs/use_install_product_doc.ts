@@ -17,7 +17,7 @@ export function useInstallProductDoc() {
   const { productDocBase, toasts } = useAssistantContext();
   const queryClient = useQueryClient();
 
-  return useMutation<PerformInstallResponse, ServerError, void>(
+  return useMutation<PerformInstallResponse, ServerError, string | undefined>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
     (inferenceId?: string) => {
       return productDocBase.installation.install({ inferenceId });

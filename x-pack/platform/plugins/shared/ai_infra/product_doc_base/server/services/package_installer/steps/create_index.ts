@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MappingTypeMapping, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { internalElserInferenceId } from '../../../../common/consts';
 import { isLegacySemanticTextVersion } from '../utils';
 
 export const createIndex = async ({
@@ -48,15 +47,8 @@ export const overrideInferenceSettings = (
     if ('type' in current && current.type === 'semantic_text') {
       current.inference_id = inferenceId;
       if (modelSettingsToOverride) {
-        // @TODO: replace with modelSettingsToOverride
         // @ts-expect-error - model_settings is not typed, but exists for semantic_text field
-        current.model_settings = {
-          service: 'elasticsearch',
-          task_type: 'text_embedding',
-          dimensions: 384,
-          similarity: 'cosine',
-          element_type: 'float',
-        };
+        current.model_settings = modelSettingsToOverride;
       }
     }
     if ('properties' in current && current.properties) {

@@ -25,4 +25,5 @@ export interface ProductDocInstallStatus {
 export interface ProductInstallState {
   status: InstallationStatus;
   version?: string;
+  failureReason?: string;
 }

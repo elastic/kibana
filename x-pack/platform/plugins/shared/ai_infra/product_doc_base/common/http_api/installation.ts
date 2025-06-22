@@ -19,6 +19,7 @@ export interface InstallationStatusResponse {
 
 export interface PerformInstallResponse {
   installed: boolean;
+  failureReason?: string;
 }
 
 export interface UninstallResponse {

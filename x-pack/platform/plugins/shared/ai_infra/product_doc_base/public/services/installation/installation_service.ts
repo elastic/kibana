@@ -32,8 +32,11 @@ export class InstallationService {
     const response = await this.http.post<PerformInstallResponse>(INSTALL_ALL_API_PATH, {
       body: JSON.stringify({ inferenceId }),
     });
+
     if (!response.installed) {
-      throw new Error('Installation did not complete successfully');
+      throw new Error(
+        `Installation did not complete successfully.\n${response.failureReason ?? ''}`
+      );
     }
     return response;
   }

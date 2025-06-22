@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InstallationStatus } from '../../../common/install_status';
+import type { InstallationStatus, ProductInstallState } from '../../../common/install_status';
 
 /**
  * APIs to manage the product documentation.
@@ -39,6 +39,7 @@ export interface DocumentationManagerAPI {
  */
 export interface DocGetStatusResponse {
   status: InstallationStatus;
+  installStatus?: Record<string, ProductInstallState>;
 }
 
 /**

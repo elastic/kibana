@@ -17,6 +17,7 @@ import {
   UninstallResponse,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
+import { ProductInstallState } from '../../common/install_status';
 
 export const registerInstallationRoutes = ({
   router,
@@ -81,11 +82,21 @@ export const registerInstallationRoutes = ({
       });
 
       // check status after installation in case of failure
-      const { status } = await documentationManager.getStatus();
+      const { status, installStatus } = await documentationManager.getStatus();
 
+      let failureReason = null;
+      if (status === 'error' && installStatus) {
+        failureReason = Object.values(installStatus)
+          .filter(
+            (product: ProductInstallState) => product.status === 'error' && product.failureReason
+          )
+          .map((product: ProductInstallState) => product.failureReason)
+          .join('\n');
+      }
       return res.ok<PerformInstallResponse>({
         body: {
           installed: status === 'installed',
+          ...(failureReason ? { failureReason } : {}),
         },
       });
     }

@@ -15,6 +15,7 @@ import {
 } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { cloneDeep } from 'lodash';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   downloadToDisk,
@@ -75,7 +76,15 @@ export class PackageInstaller {
    * Make sure that the currently installed doc packages are up to date.
    * Will not upgrade products that are not already installed
    */
-  async ensureUpToDate({}: {}) {
+  async ensureUpToDate(params: { inferenceId?: string } = {}) {
+    const { inferenceId } = params;
+    let inferenceInfo;
+    if (inferenceId) {
+      const inferenceEndpoints = await this.esClient.inference.get({
+        inference_id: inferenceId,
+      });
+      inferenceInfo = inferenceEndpoints.endpoints[0];
+    }
     const [repositoryVersions, installStatuses] = await Promise.all([
       fetchArtifactVersions({
         artifactRepositoryUrl: this.artifactRepositoryUrl,
@@ -105,10 +114,10 @@ export class PackageInstaller {
     });
 
     for (const { productName, productVersion } of toUpdate) {
-      // @TODO: add inferenceId
       await this.installPackage({
         productName,
         productVersion,
+        customInference: inferenceInfo,
       });
     }
   }
@@ -126,8 +135,6 @@ export class PackageInstaller {
       });
       inferenceInfo = inferenceEndpoints.endpoints[0];
     }
-    // @TODO: remove
-    console.log(`--@@inferenceInfo`, inferenceInfo);
 
     for (const productName of allProducts) {
       const availableVersions = repositoryVersions[productName];
@@ -152,13 +159,14 @@ export class PackageInstaller {
   }: {
     productName: ProductName;
     productVersion: string;
-    customInference?: string;
+    customInference?: InferenceInferenceEndpointInfo;
   }) {
     this.log.info(
       `Starting installing documentation for product [${productName}] and version [${productVersion}]`
     );
 
     productVersion = majorMinor(productVersion);
+    const inferenceId = customInference?.inference_id ?? this.elserInferenceId;
 
     await this.uninstallPackage({ productName });
 
@@ -170,9 +178,9 @@ export class PackageInstaller {
       });
 
       if (customInference || this.elserInferenceId !== defaultInferenceEndpoints.ELSER) {
-        if (customInference.task_type !== 'text_embedding') {
+        if (customInference?.task_type !== 'text_embedding') {
           throw new Error(
-            `Inference [${inferenceId}]'s task type ${inferenceModelSettings.task_type} is not supported. Please use a model with task type 'text_embedding'.`
+            `Inference [${inferenceId}]'s task type ${customInference?.task_type} is not supported. Please use a model with task type 'text_embedding'.`
           );
         }
         await ensureInferenceDeployed({
@@ -187,7 +195,11 @@ export class PackageInstaller {
         });
       }
 
-      const artifactFileName = getArtifactName({ productName, productVersion });
+      const artifactFileName = getArtifactName({
+        productName,
+        productVersion,
+        inferenceId: customInference?.inference_id ?? this.elserInferenceId,
+      });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
@@ -195,7 +207,6 @@ export class PackageInstaller {
       await downloadToDisk(artifactUrl, artifactPath);
 
       zipArchive = await openZipArchive(artifactPath);
-
       validateArtifactArchive(zipArchive);
 
       const [manifest, mappings] = await Promise.all([
@@ -207,24 +218,13 @@ export class PackageInstaller {
       const indexName = getProductDocIndexName(productName);
 
       const modifiedMappings = cloneDeep(mappings);
-      const modelSettingsToOverride = customInference
-        ? {
-            service: customInference.service,
-            task_type: customInference.task_type,
-          }
-        : undefined;
-      overrideInferenceSettings(
-        modifiedMappings,
-        inferenceId ?? this.elserInferenceId,
-        customInference
-      );
+      overrideInferenceSettings(modifiedMappings, inferenceId!);
 
       await createIndex({
         indexName,
         mappings: modifiedMappings, // Mappings will be overridden by the inference ID and inference type
         manifestVersion,
         esClient: this.esClient,
-        inferenceId: inferenceId ?? this.elserInferenceId,
         log: this.log,
       });
 
@@ -234,7 +234,7 @@ export class PackageInstaller {
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,
-        inferenceId: inferenceId ?? this.elserInferenceId,
+        inferenceId,
       });
       await this.productDocClient.setInstallationSuccessful(productName, indexName);
 
@@ -242,11 +242,17 @@ export class PackageInstaller {
         `Documentation installation successful for product [${productName}] and version [${productVersion}]`
       );
     } catch (e) {
+      let message = e.message;
+      if (message.includes('End of central directory record signature not found.')) {
+        message =
+          `No artifact available for product [${productName}]/[${productVersion}] for Inference ID [${inferenceId}]. ` +
+          e.message;
+      }
       this.log.error(
-        `Error during documentation installation of product [${productName}]/[${productVersion}] : ${e.message}`
+        `Error during documentation installation of product [${productName}]/[${productVersion}] : ${message}`
       );
 
-      await this.productDocClient.setInstallationFailed(productName, e.message);
+      await this.productDocClient.setInstallationFailed(productName, message);
       throw e;
     } finally {
       zipArchive?.close();

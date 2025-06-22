@@ -71,12 +71,18 @@ function options(y: yargs.Argv) {
       demandOption: true,
       default: process.env.KIBANA_EMBEDDING_CLUSTER_PASSWORD,
     })
+    .option('inferenceId', {
+      describe: 'The inference id to use for the artifacts',
+      string: true,
+    })
     .locale('en');
 }
 
 export function runScript() {
   yargs(process.argv.slice(2))
     .command('*', 'Build knowledge base artifacts', options, async (argv) => {
+      // @TODO: remove
+      console.log(`--@@argv`, argv);
       // argv contains additional entries - let's keep our input clear
       const taskConfig: TaskConfig = {
         productNames: argv.productName,
@@ -89,6 +95,7 @@ export function runScript() {
         embeddingClusterUrl: argv.embeddingClusterUrl!,
         embeddingClusterUsername: argv.embeddingClusterUsername!,
         embeddingClusterPassword: argv.embeddingClusterPassword!,
+        inferenceId: argv.inferenceId,
       };
 
       return buildArtifacts(taskConfig);

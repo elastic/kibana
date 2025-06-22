@@ -20,7 +20,7 @@ export function useInstallProductDoc() {
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  return useMutation<PerformInstallResponse, ServerError, void>(
+  return useMutation<PerformInstallResponse, ServerError, string | undefined>(
     [REACT_QUERY_KEYS.INSTALL_PRODUCT_DOC],
     (inferenceId?: string) => {
       return productDocBase!.installation.install({ inferenceId });
@@ -52,5 +52,5 @@ export function useInstallProductDoc() {
         });
       },
     }
-  );
+  );x
 }

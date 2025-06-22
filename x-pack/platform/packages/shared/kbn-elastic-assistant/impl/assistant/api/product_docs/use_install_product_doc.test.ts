@@ -39,7 +39,7 @@ describe('useInstallProductDoc', () => {
       wrapper: TestProviders,
     });
 
-    result.current.mutate();
+    result.current.mutate(undefined);
     await waitFor(() => result.current.isSuccess);
 
     expect(mockAddSuccess).toHaveBeenCalledWith(
@@ -54,7 +54,7 @@ describe('useInstallProductDoc', () => {
       wrapper: TestProviders,
     });
 
-    result.current.mutate();
+    result.current.mutate(undefined);
     await waitFor(() => result.current.isError);
 
     expect(mockAddError).toHaveBeenCalledWith(
