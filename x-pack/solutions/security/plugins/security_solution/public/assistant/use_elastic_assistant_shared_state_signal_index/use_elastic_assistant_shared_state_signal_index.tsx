@@ -17,6 +17,6 @@ export const useElasticAssistantSharedStateSignalIndex = () => {
     if (!signalIndexName) {
       return elasticAssistantSharedState.signalIndex.setSignalIndex(undefined);
     }
-    return elasticAssistantSharedState.signalIndex.setSignalIndex(undefined);
+    return elasticAssistantSharedState.signalIndex.setSignalIndex(signalIndexName);
   }, [signalIndexName, elasticAssistantSharedState]);
 };

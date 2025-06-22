@@ -23,7 +23,7 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
-import { EuiThemeProvider } from './src/context/eui_theme_context/eui_theme_provider';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { isSecuritySolutionAccessible } from './helpers_access';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
@@ -90,6 +90,7 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
+
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
@@ -98,7 +99,7 @@ export class ElasticAssistantPublicPlugin
             ...services,
           }}
         >
-          <EuiThemeProvider>
+          <KibanaThemeProvider {...coreStart}>
             <ReactQueryClientProvider>
               <AssistantSpaceIdProvider>
                 <AssistantProvider>
@@ -109,7 +110,7 @@ export class ElasticAssistantPublicPlugin
                 </AssistantProvider>
               </AssistantSpaceIdProvider>
             </ReactQueryClientProvider>
-          </EuiThemeProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       targetDomElement
