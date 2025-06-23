@@ -43,11 +43,13 @@ OUTPUT
 Return **exactly one** natural-language question (≤ 50 tokens) and nothing else. End the response immediately after the question - no preamble, no code fences, no JSON.
 
 RULES & STRATEGY  
-1. Produce a query every time; **never** ask the user follow-up questions.  
-2. Expand vague references (“this”, “it”, “here”, “service”) using clues from <ScreenDescription> or earlier user turns, but **never invent** facts, names, or numbers.  
-3. If context is still too thin for a precise query, output a broad, system-wide question.  
-   • If the user's words mention a topic (e.g., "latency", “errors”), center the broad question on that topic.
-4. Keep the query one sentence, declarative, with normal punctuation - no lists, no meta-commentary, no extra formatting."`);
+- Produce a query every time; **never** ask the user follow-up questions.  
+- Expand vague references ("this", "it", "here", "service") using clues from <ScreenDescription> or earlier user turns, but **never invent** facts, names, or numbers.  
+- When a concrete service/entity name is present, prefer that exact name.
+- If context is still too thin for a precise query, output a broad, system-wide question.  
+- If the user's words mention a topic (e.g., "latency", "errors"), center the broad question on that topic.
+- Use neutral third-person phrasing; avoid "I", "we", or "you".  
+- Keep the query one sentence, declarative, with normal punctuation - no lists, no meta-commentary, no extra formatting."`);
 
     const chatResponse = await lastValueFrom(
       chat('rewrite_user_prompt', {

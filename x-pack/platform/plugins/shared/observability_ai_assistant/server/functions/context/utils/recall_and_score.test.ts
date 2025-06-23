@@ -17,25 +17,10 @@ jest.mock('./score_suggestions', () => ({
   scoreSuggestions: jest.fn(),
 }));
 
-export const sampleMessages: Message[] = [
-  {
-    '@timestamp': '2025-03-13T14:53:11.240Z',
-    message: { role: MessageRole.User, content: 'test' },
-  },
-];
-
 export const normalConversationMessages: Message[] = [
   {
     '@timestamp': '2025-03-12T21:00:13.980Z',
     message: { role: MessageRole.User, content: 'What is my favourite color?' },
-  },
-  {
-    '@timestamp': '2025-03-12T21:00:14.920Z',
-    message: {
-      function_call: { name: 'context', trigger: MessageRole.Assistant },
-      role: MessageRole.Assistant,
-      content: '',
-    },
   },
 ];
 
@@ -67,14 +52,6 @@ export const contextualInsightsMessages: Message[] = [
       name: 'get_contextual_insight_instructions',
     },
   },
-  {
-    '@timestamp': '2025-03-12T21:01:21.984Z',
-    message: {
-      function_call: { name: 'context', trigger: MessageRole.Assistant },
-      role: MessageRole.Assistant,
-      content: '',
-    },
-  },
 ];
 
 describe('recallAndScore', () => {
@@ -102,9 +79,8 @@ describe('recallAndScore', () => {
         recall: mockRecall,
         chat: mockChat,
         analytics: mockAnalytics,
-        userPrompt: 'What is my favorite color?',
         screenDescription: 'Some context',
-        messages: sampleMessages,
+        messages: normalConversationMessages,
         logger: mockLogger,
         signal,
       });
@@ -136,9 +112,8 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      userPrompt: 'test',
       screenDescription: 'context',
-      messages: sampleMessages,
+      messages: normalConversationMessages,
       logger: mockLogger,
       signal,
     });
@@ -163,9 +138,8 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      userPrompt: 'test',
       screenDescription: 'context',
-      messages: sampleMessages,
+      messages: normalConversationMessages,
       logger: mockLogger,
       signal,
     });
@@ -173,8 +147,7 @@ describe('recallAndScore', () => {
     expect(scoreSuggestions).toHaveBeenCalledWith({
       suggestions: recalledDocs,
       logger: mockLogger,
-      messages: sampleMessages,
-      userPrompt: 'test',
+      messages: normalConversationMessages,
       userMessageFunctionName: undefined,
       context: 'context',
       signal,
@@ -195,7 +168,6 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      userPrompt: "What's my favourite color?",
       screenDescription: '',
       messages: normalConversationMessages,
       logger: mockLogger,
@@ -224,7 +196,6 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      userPrompt: "I'm looking at an alert and trying to understand why it was triggered",
       screenDescription: 'User is analyzing an alert',
       messages: contextualInsightsMessages,
       logger: mockLogger,
@@ -250,9 +221,8 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      userPrompt: 'test',
       screenDescription: 'context',
-      messages: sampleMessages,
+      messages: normalConversationMessages,
       logger: mockLogger,
       signal,
     });

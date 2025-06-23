@@ -13,9 +13,9 @@ import {
   MessageAddEvent,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
-import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/recall_and_score';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
 import {
   KnowledgeBaseDocument,
   LlmProxy,

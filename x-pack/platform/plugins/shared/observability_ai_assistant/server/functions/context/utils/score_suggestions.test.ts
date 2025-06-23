@@ -8,7 +8,7 @@
 import { scoreSuggestions } from './score_suggestions';
 import { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
-import { MessageRole, StreamingChatResponseEventType } from '../../../../common';
+import { StreamingChatResponseEventType } from '../../../../common';
 import { RecalledSuggestion } from './recall_and_score';
 import { FunctionCallChatFunction } from '../../../service/types';
 import { ChatEvent } from '../../../../common/conversation_complete';
@@ -20,7 +20,6 @@ const suggestions: RecalledSuggestion[] = [
   { id: 'doc3', text: 'Less relevant document 3', esScore: 0.3 },
 ];
 
-const userPrompt = 'What is my favourite color?';
 const screenDescription = 'The user is currently looking at Discover';
 
 describe('scoreSuggestions', () => {
@@ -45,7 +44,6 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
       screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
@@ -81,8 +79,6 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
-      userMessageFunctionName: 'score',
       screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
@@ -109,7 +105,6 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
       screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
@@ -134,7 +129,6 @@ describe('scoreSuggestions', () => {
       scoreSuggestions({
         suggestions,
         messages: normalConversationMessages,
-        userPrompt,
         screenDescription,
         chat: mockChat,
         signal: new AbortController().signal,
@@ -144,15 +138,9 @@ describe('scoreSuggestions', () => {
   });
 
   it('should handle scenarios where the last user message is a tool response', async () => {
-    const lastUserMessage = contextualInsightsMessages
-      .filter((message) => message.message.role === MessageRole.User)
-      .pop();
-
     const result = await scoreSuggestions({
       suggestions,
       messages: contextualInsightsMessages,
-      userPrompt: lastUserMessage?.message.content!,
-      userMessageFunctionName: lastUserMessage?.message.name,
       screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,

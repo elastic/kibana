@@ -176,10 +176,10 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
   },
   params: t.type({
     body: t.type({
-      prompt: t.string,
-      context: t.string,
+      screenDescription: t.string,
       connectorId: t.string,
       scopes: t.array(assistantScopeType),
+      messages: t.array(messageRt),
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -187,7 +187,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       resources
     );
 
-    const { connectorId, prompt, context } = resources.params.body;
+    const { connectorId, screenDescription, messages } = resources.params.body;
 
     const response$ = from(
       recallAndScore({
@@ -200,10 +200,9 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
             simulateFunctionCalling,
             signal,
           }),
-        screenDescription: context,
+        screenDescription,
         logger: resources.logger,
-        messages: [],
-        userPrompt: prompt,
+        messages,
         recall: client.recall,
         signal,
       })
