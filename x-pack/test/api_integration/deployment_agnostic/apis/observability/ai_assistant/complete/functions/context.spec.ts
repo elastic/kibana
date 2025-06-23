@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
-      llmProxy.interceptQueryRewrite('My rewritten prompt is this!');
+      void llmProxy.interceptQueryRewrite('This is a rewritten user prompt.');
       ({ getDocumentsToScore } = llmProxy.interceptScoreToolChoice(log));
 
       void llmProxy.interceptWithResponse('Your favourite color is blue.');
