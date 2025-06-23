@@ -183,3 +183,5 @@ export { getNewSelectedPromptContext } from './impl/data_anonymization/get_new_s
 export { getCombinedMessage } from './impl/assistant/prompt/helpers';
 export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_complete';
 export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+
+export { useFindPrompts } from './impl/assistant/api/security_ai_prompts/use_find_prompts';

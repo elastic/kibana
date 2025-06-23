@@ -1473,10 +1473,17 @@ export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
 );
 
 export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetailsV2',
   {
     defaultMessage:
-      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
+      'Please provide a comprehensive analysis of each selected Elastic Security detection rule. For each rule, include:\n' +
+      '- The rule name and a brief summary of its purpose.\n' +
+      '- The full detection query as published in Elastic’s official detection rules repository.\n' +
+      '- An in-depth explanation of how the query works, including key fields, logic, and detection techniques.\n' +
+      '- The relevance of the rule to modern threats or attack techniques (e.g., MITRE ATT&CK mapping).\n' +
+      '- Typical implications and recommended response actions for an organization if this rule triggers.\n' +
+      '- Any notable false positive considerations or tuning recommendations.\n' +
+      'Format your response using markdown with clear headers for each rule, code blocks for queries, and concise bullet points for explanations.',
   }
 );
 

@@ -26,6 +26,9 @@ import {
   DEFEND_INSIGHTS,
   ALERT_SUMMARY_500,
   ALERT_SUMMARY_SYSTEM_PROMPT,
+  RULE_ANALYSIS,
+  DATA_QUALITY_ANALYSIS,
+  ALERT_EVALUATION,
 } from './prompts';
 
 export const promptGroupId = {
@@ -267,21 +270,21 @@ export const localPrompts: Prompt[] = [
     promptId: promptDictionary.alertEvaluation,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
-      default: 'ALERT EVALUATION',
+      default: ALERT_EVALUATION,
     },
   },
   {
     promptId: promptDictionary.dataQualityAnalysis,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
-      default: 'DATA QUALITY ANALYSIS',
+      default: DATA_QUALITY_ANALYSIS,
     },
   },
   {
     promptId: promptDictionary.ruleAnalysis,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
-      default: 'RULE ANALYSIS',
+      default: RULE_ANALYSIS,
     },
   },
 ];

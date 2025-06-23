@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import { HttpHandler, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   API_VERSIONS,
@@ -18,7 +18,7 @@ import {
 export interface UseFindPromptsParams {
   context: {
     isAssistantEnabled: boolean;
-    http: HttpSetup;
+    httpFetch: HttpHandler;
     toasts: IToasts;
   };
   signal?: AbortSignal | undefined;
@@ -36,7 +36,7 @@ export interface UseFindPromptsParams {
  */
 
 export const useFindPrompts = (payload: UseFindPromptsParams) => {
-  const { isAssistantEnabled, http, toasts } = payload.context;
+  const { isAssistantEnabled, httpFetch, toasts } = payload.context;
 
   const QUERY = {
     connector_id: payload.params.connector_id,
@@ -56,7 +56,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
     CACHING_KEYS,
     async () =>
       getPrompts({
-        http,
+        httpFetch,
         signal: payload.signal,
         toasts,
         query: QUERY,
@@ -75,18 +75,18 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
 };
 
 const getPrompts = async ({
-  http,
+  httpFetch,
   signal,
   toasts,
   query,
 }: {
-  http: HttpSetup;
+  httpFetch: HttpHandler;
   toasts: IToasts;
   signal?: AbortSignal | undefined;
   query: FindSecurityAIPromptsRequestQuery;
 }) => {
   try {
-    return await http.fetch<FindSecurityAIPromptsResponse>(
+    return await httpFetch<FindSecurityAIPromptsResponse>(
       ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
       {
         method: 'GET',
