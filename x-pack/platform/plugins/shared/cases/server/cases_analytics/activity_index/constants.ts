@@ -33,6 +33,11 @@ export const CAI_ACTIVITY_SOURCE_QUERY: QueryDslQueryContainer = {
             },
             {
               term: {
+                'cases-user-actions.type': 'delete_case',
+              },
+            },
+            {
+              term: {
                 'cases-user-actions.type': 'category',
               },
             },
@@ -83,6 +88,11 @@ export const getActivitySynchronizationSourceQuery = (
             {
               term: {
                 'cases-user-actions.type': 'severity',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'delete_case',
               },
             },
             {
