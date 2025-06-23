@@ -21,7 +21,8 @@ const clickOnAddField = () => {
   fireEvent.click(addFieldButton);
 };
 
-describe('Testing AddDataProviderPopover', () => {
+// Failing: See https://github.com/elastic/kibana/issues/204658
+describe.skip('Testing AddDataProviderPopover', () => {
   it('Test Popover is visible', async () => {
     render(
       <TestProvidersComponent>

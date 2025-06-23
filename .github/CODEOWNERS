@@ -567,9 +567,6 @@ src/platform/test/interactive_setup_api_integration/plugins/test_endpoints @elas
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
@@ -2684,9 +2681,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 
 # Shared UX
 /x-pack/test_serverless/api_integration/test_suites/common/favorites @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200985
-^/src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
-^/src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
-^/src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
+/src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
+/src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
+/src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
+/src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
 ^/src/platform/test/functional/page_objects/files_management.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200017#discussion_r1840477291
 ^/src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
@@ -2708,6 +2706,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
 ^/src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
+/src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
 /x-pack/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
 ^/src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
 ^/src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
@@ -2720,6 +2719,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 ^/src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 ^/src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 ^/src/platform/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
+/x-pack/solutions/search/test/api_integration/apis/guided_onboarding @elastic/appex-sharedux
 /x-pack/test/banners_functional @elastic/appex-sharedux
 /x-pack/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux

@@ -8,9 +8,11 @@
 import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { withSpan } from '@kbn/apm-utils';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { findGaps } from '../find_gaps';
+import { findGapsSearchAfter } from '../find_gaps';
 import type { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import type { BackfillSchedule } from '../../../application/backfill/result/types';
@@ -18,6 +20,8 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { mgetGaps } from '../mget_gaps';
+import type { ScheduledItem } from './utils';
+import { findOverlappingIntervals, toScheduledItem } from './utils';
 
 interface UpdateGapsParams {
   ruleId: string;
@@ -35,46 +39,54 @@ interface UpdateGapsParams {
 
 const CONFLICT_STATUS_CODE = 409;
 const MAX_RETRIES = 3;
-const PAGE_SIZE = 500;
+const PAGE_SIZE = 1000;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const prepareGapForUpdate = async (
   gap: Gap,
   {
-    backfillSchedule,
+    scheduledItems,
     savedObjectsRepository,
     shouldRefetchAllBackfills,
+    logger,
     backfillClient,
     actionsClient,
     ruleId,
   }: {
-    backfillSchedule?: BackfillSchedule[];
+    scheduledItems: ScheduledItem[];
     savedObjectsRepository: ISavedObjectsRepository;
     shouldRefetchAllBackfills?: boolean;
+    logger: Logger;
     backfillClient: BackfillClient;
     actionsClient: ActionsClient;
     ruleId: string;
   }
 ) => {
-  const hasFailedBackfillTask = backfillSchedule?.some(
+  const hasFailedBackfillTask = scheduledItems.some(
     (scheduleItem) =>
       scheduleItem.status === adHocRunStatus.ERROR || scheduleItem.status === adHocRunStatus.TIMEOUT
   );
 
-  if (backfillSchedule && !hasFailedBackfillTask) {
-    updateGapFromSchedule({
-      gap,
-      backfillSchedule,
-    });
+  if (scheduledItems.length > 0 && !hasFailedBackfillTask) {
+    await withSpan(
+      { name: 'updateGaps.prepareGapForUpdate.updateGapFromSchedule', type: 'rules' },
+      async () => {
+        updateGapFromSchedule({
+          gap,
+          scheduledItems,
+        });
+      }
+    );
   }
 
-  if (hasFailedBackfillTask || !backfillSchedule || shouldRefetchAllBackfills) {
+  if (hasFailedBackfillTask || scheduledItems.length === 0 || shouldRefetchAllBackfills) {
     await calculateGapStateFromAllBackfills({
       gap,
       savedObjectsRepository,
       ruleId,
       backfillClient,
       actionsClient,
+      logger,
     });
   }
 
@@ -109,19 +121,32 @@ const updateGapBatch = async (
 ): Promise<boolean> => {
   try {
     // Prepare all gaps for update
-    const updatedGaps = [];
-    for (const gap of gaps) {
-      // we do async request only if there errors in backfill or no backfill schedule
-      const updatedGap = await prepareGapForUpdate(gap, {
-        backfillSchedule,
-        savedObjectsRepository,
-        shouldRefetchAllBackfills,
-        backfillClient,
-        actionsClient,
-        ruleId,
-      });
-      updatedGaps.push(updatedGap);
-    }
+    const updatedGaps: Gap[] = [];
+    const scheduledItems = (backfillSchedule ?? [])
+      .map((backfill) => {
+        try {
+          return toScheduledItem(backfill);
+        } catch (error) {
+          logger.error(`Error processing a scheduled item while updating gaps: ${error.message}`);
+          return undefined;
+        }
+      })
+      .filter((scheduledItem): scheduledItem is ScheduledItem => scheduledItem !== undefined);
+    await withSpan({ name: 'updateGaps.prepareGapsForUpdate', type: 'rule' }, async () => {
+      for (const { gap, scheduled } of findOverlappingIntervals(gaps, scheduledItems)) {
+        // we do async request only if there errors in backfill or no backfill schedule
+        const updatedGap = await prepareGapForUpdate(gap, {
+          scheduledItems: scheduled,
+          savedObjectsRepository,
+          shouldRefetchAllBackfills,
+          logger,
+          backfillClient,
+          actionsClient,
+          ruleId,
+        });
+        updatedGaps.push(updatedGap);
+      }
+    });
 
     // Convert gaps to the format expected by updateDocuments
     const gapsToUpdate = updatedGaps
@@ -139,7 +164,10 @@ const updateGapBatch = async (
     }
 
     // Attempt bulk update
-    const bulkResponse = await alertingEventLogger.updateGaps(gapsToUpdate);
+    const bulkResponse = await withSpan(
+      { name: 'updateGaps.alertingEventLogger.updateGaps', type: 'rule' },
+      () => alertingEventLogger.updateGaps(gapsToUpdate)
+    );
 
     if (bulkResponse.errors) {
       if (retryCount >= MAX_RETRIES) {
@@ -199,8 +227,8 @@ const updateGapBatch = async (
 
 /**
  * Update gaps for a given rule
- * Trying to fetch gaps in batches
- * Prepare them for update
+ * Using search_after pagination to process more than 10,000 gaps with stable sorting
+ * Prepare gaps for update
  * Update them in bulk
  * If there are conflicts, retry the failed gaps
  */
@@ -225,46 +253,73 @@ export const updateGaps = async (params: UpdateGapsParams) => {
 
   try {
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
-    let currentPage = 1;
     let hasErrors = false;
+    let searchAfter: SortResults[] | undefined;
+    let pitId: string | undefined;
+    let iterationCount = 0;
+    // Circuit breaker to prevent infinite loops
+    // It should be enough to update 50,000,000 gaps
+    // 100000 * 500 = 50,000,000 millions gaps
+    const MAX_ITERATIONS = 100000;
 
-    while (true) {
-      const { data: gaps } = await findGaps({
-        eventLogClient,
-        logger,
-        params: {
-          ruleId,
-          start: start.toISOString(),
-          end: end.toISOString(),
-          page: currentPage,
-          perPage: PAGE_SIZE,
-          statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
-        },
-      });
+    try {
+      while (true) {
+        if (iterationCount >= MAX_ITERATIONS) {
+          logger.warn(
+            `Circuit breaker triggered: Reached maximum number of iterations (${MAX_ITERATIONS}) while updating gaps for rule ${ruleId}`
+          );
+          break;
+        }
+        iterationCount++;
 
-      if (gaps.length > 0) {
-        const success = await updateGapBatch(gaps, {
-          backfillSchedule,
-          savedObjectsRepository,
-          shouldRefetchAllBackfills,
-          backfillClient,
-          actionsClient,
-          alertingEventLogger,
-          logger,
-          ruleId,
+        const gapsResponse = await findGapsSearchAfter({
           eventLogClient,
+          logger,
+          params: {
+            ruleId,
+            start: start.toISOString(),
+            end: end.toISOString(),
+            perPage: PAGE_SIZE,
+            statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
+            sortField: '@timestamp',
+            sortOrder: 'asc',
+            searchAfter,
+            pitId,
+          },
         });
 
-        if (!success) {
-          hasErrors = true;
+        const { data: gaps, searchAfter: nextSearchAfter, pitId: nextPitId } = gapsResponse;
+        pitId = nextPitId;
+
+        if (gaps.length > 0) {
+          const success = await updateGapBatch(gaps, {
+            backfillSchedule,
+            savedObjectsRepository,
+            shouldRefetchAllBackfills,
+            backfillClient,
+            actionsClient,
+            alertingEventLogger,
+            logger,
+            ruleId,
+            eventLogClient,
+          });
+
+          if (!success) {
+            hasErrors = true;
+          }
         }
-      }
 
-      if (gaps.length === 0 || gaps.length < PAGE_SIZE) {
-        break;
-      }
+        // Exit conditions: no more results or no next search_after
+        if (gaps.length === 0 || !nextSearchAfter) {
+          break;
+        }
 
-      currentPage++;
+        searchAfter = nextSearchAfter;
+      }
+    } finally {
+      if (pitId) {
+        await eventLogClient.closePointInTime(pitId);
+      }
     }
 
     if (hasErrors) {
