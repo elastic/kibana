@@ -10,14 +10,17 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import { useFileSelectorContext } from './file_drop_zone';
 
-export const EmptyPrompt: FC<{ inputRef: React.RefObject<HTMLInputElement> }> = ({ inputRef }) => {
+export const EmptyPrompt: FC = () => {
+  const { onFileSelectorClick } = useFileSelectorContext();
+
   const uploading = (
     <EuiLink
       onClick={(e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        inputRef.current?.click();
+        onFileSelectorClick();
       }}
     >
       <FormattedMessage id="indexEditor.emptyPrompt.uploadingLink" defaultMessage="uploading" />

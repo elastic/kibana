@@ -18,6 +18,22 @@ import { FilesPreview } from './file_preview';
 
 const acceptedFiles = ['.csv'];
 
+export interface FileSelectorContextType {
+  onFileSelectorClick: () => void;
+}
+
+export const FileSelectorContext = React.createContext<FileSelectorContextType>({
+  onFileSelectorClick: () => null,
+});
+
+export const useFileSelectorContext = (): FileSelectorContextType => {
+  const context = React.useContext(FileSelectorContext);
+  if (!context) {
+    throw new Error('useFileSelectorContext must be used within a FileSelectorProvider');
+  }
+  return context;
+};
+
 export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   children,
   noResults,
@@ -46,6 +62,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
   });
+
+  const onFileSelectorClick = useCallback(() => {
+    inputRef.current?.click();
+  }, [inputRef]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -105,17 +125,19 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   let content: React.ReactNode = children;
 
   if (noResults && !showFilePreview) {
-    content = <EmptyPrompt inputRef={inputRef} />;
+    content = <EmptyPrompt />;
   } else if (showFilePreview) {
     content = <FilesPreview />;
   }
 
   return (
-    <div {...getRootProps()} css={{ height: '100%' }}>
-      {isDragActive ? <div css={overlayDraggingFile} /> : null}
-      {isUploading || isAnalyzing ? loadingIndicator : null}
-      <input {...getInputProps()} />
-      {content}
-    </div>
+    <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
+      <div {...getRootProps({ css: { height: '100%' } })}>
+        {isDragActive ? <div css={overlayDraggingFile} /> : null}
+        {isUploading || isAnalyzing ? loadingIndicator : null}
+        <input {...getInputProps()} />
+        {content}
+      </div>
+    </FileSelectorContext.Provider>
   );
 };
