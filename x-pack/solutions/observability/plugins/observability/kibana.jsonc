@@ -46,7 +46,8 @@
       "logsShared",
       "licensing",
       "navigation",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "esql"
     ],
     "optionalPlugins": [
       "discover",
