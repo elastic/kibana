@@ -330,14 +330,15 @@ export const getCategorizeColumns = (esql: string): string[] => {
   if (!renameCommand) {
     return columns;
   }
-  const renameOptions: ESQLCommandOption[] = [];
+  const renameFunctions: ESQLFunction[] = [];
   walk(renameCommand, {
-    visitCommandOption: (node) => renameOptions.push(node),
+    visitFunction: (node) => renameFunctions.push(node),
   });
 
-  renameOptions.forEach(({ args }) => {
-    const oldColumn = (args[0] as ESQLColumn).name;
-    const newColumn = (args[1] as ESQLColumn).name;
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
     if (columns.includes(oldColumn)) {
       columns[columns.indexOf(oldColumn)] = newColumn;
     }
@@ -400,12 +401,6 @@ export function processSingleQuery(query: string): {
 
   const visitor = new Visitor()
     .on('visitExpression', (_ctx) => {})
-    .on('visitRenameExpression', (ctx) => {
-      const [_, newArg] = ctx.node.args;
-      const existingColumns = userDefinedColumns.get(indexPattern) || [];
-      const updatedColumns = [...existingColumns, (newArg as ESQLColumn).text];
-      userDefinedColumns.set(indexPattern, updatedColumns);
-    })
     .on('visitGrokCommand', (ctx) => {
       const [_, pattern] = ctx.node.args;
       const dissectPattern = unquoteTemplate(String((pattern as ESQLLiteral).value));
@@ -441,6 +436,21 @@ export function processSingleQuery(query: string): {
           ];
           userDefinedColumns.set(indexPattern, updatedColumns);
         }
+      }
+      if (node.name === 'as') {
+        const [_, newArg] = ctx.node.args;
+        const existingColumns = userDefinedColumns.get(indexPattern) || [];
+        const updatedColumns = [...existingColumns, (newArg as ESQLColumn).text];
+        userDefinedColumns.set(indexPattern, updatedColumns);
+        // if (args.length === 2) {
+        //   const [leftArg, _] = args;
+        //   const existingColumns = userDefinedColumns.get(indexPattern) || [];
+        //   const updatedColumns = [
+        //     ...existingColumns,
+        //     (leftArg as ESQLColumn).text.replace(/`/g, ''),
+        //   ];
+        //   userDefinedColumns.set(indexPattern, updatedColumns);
+        // }
       }
     })
     .on('visitCommandOption', (ctx) => {
@@ -507,3 +517,23 @@ export function getSourceFieldsFromQueries(queries: string[]): Map<string, strin
 
   return consolidatedFields;
 }
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
+};
