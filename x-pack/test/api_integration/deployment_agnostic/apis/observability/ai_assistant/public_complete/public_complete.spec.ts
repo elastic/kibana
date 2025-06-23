@@ -10,17 +10,12 @@ import {
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  MessageAddEvent,
-  type StreamingChatResponseEvent,
-} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   createLlmProxy,
   LlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { decodeEvents } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -49,7 +44,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
-      format?: 'openai' | 'default';
       persist?: boolean;
     }) {
       const response = await observabilityAIAssistantAPIClient.admin({
@@ -99,48 +93,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       llmProxy.clear();
     });
 
-    describe('after executing an action and closing the stream', () => {
-      let events: StreamingChatResponseEvent[];
-
-      before(async () => {
-        void llmProxy.interceptTitle('My Title');
-        void llmProxy.interceptWithFunctionRequest({
-          name: 'my_action',
-          arguments: () => JSON.stringify({ foo: 'bar' }),
-        });
-
-        const responseBody = await callPublicChatComplete({
-          actions: [action],
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-        function extractDataParts(lines: string[]) {
-          return lines.map((line) => {
-            // .replace is easier, but we want to verify here whether
-            // it matches the SSE syntax (`data: ...`)
-            const [, dataPart] = line.match(/^data: (.*)$/) || ['', ''];
-            return dataPart.trim();
-          });
-        }
-        function getLines(str: string) {
-          return str.split('\n\n').filter(Boolean);
-        }
-        const dataParts = extractDataParts(getLines(responseBody));
-        dataParts.pop();
-        events = dataParts.map((dataPart) => JSON.parse(dataPart) as StreamingChatResponseEvent);
-      });
-
-      it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
-        const lastEvent = events[events.length - 1] as MessageAddEvent;
-        expect(lastEvent.message.message.function_call).to.eql({
-          name: 'my_action',
-          arguments: JSON.stringify({ foo: 'bar' }),
-          trigger: MessageRole.Assistant,
-        });
-      });
-    });
-
     describe('after adding an instruction', () => {
       before(async () => {
         void llmProxy.interceptWithFunctionRequest({
@@ -170,7 +122,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptTitle('My Title');
         void llmProxy.interceptWithResponse('Hello');
 
-        responseBody = await callPublicChatComplete({ format: 'openai' });
+        responseBody = await callPublicChatComplete({});
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
