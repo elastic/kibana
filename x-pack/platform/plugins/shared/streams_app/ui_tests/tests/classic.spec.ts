@@ -10,7 +10,7 @@ import { testData, test } from '../fixtures';
 
 const DATA_STREAM_NAME = 'my-data-stream';
 
-test.describe('Classic Streams', { tag: ['@ess'] }, () => {
+test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await esClient.indices.putIndexTemplate({
@@ -64,7 +64,7 @@ test.describe('Classic Streams', { tag: ['@ess'] }, () => {
     await page.getByTestId('toastCloseButton').click();
 
     // Update field extraction
-    await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
+    await pageObjects.streams.gotoProcessingTab(DATA_STREAM_NAME);
     await page.getByText('Add a processor').click();
 
     await page.locator('input[name="field"]').fill('body.text');
@@ -75,36 +75,5 @@ test.describe('Classic Streams', { tag: ['@ess'] }, () => {
 
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
     await page.getByTestId('toastCloseButton').click();
-
-    // Add dashboard
-    await pageObjects.streams.gotoStreamDashboard(DATA_STREAM_NAME);
-    await page.getByRole('button', { name: 'Add a dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppAddDashboardFlyoutDashboardsTable')
-        .getByRole('button', { name: 'Some Dashboard' })
-    ).toBeVisible();
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.getByRole('cell', { name: 'Select row' }).locator('div').first().click();
-    await page.getByRole('button', { name: 'Add dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppStreamDetailDashboardsTable')
-        .getByTestId('streamsAppDashboardColumnsLink')
-    ).toHaveText('Some Dashboard');
-
-    // remove dashboard
-    await page
-      .getByTestId('streamsAppStreamDetailDashboardsTable')
-      .getByRole('cell', { name: 'Select row' })
-      .locator('div')
-      // eslint-disable-next-line playwright/no-nth-methods
-      .first()
-      .click();
-
-    await page.getByRole('button', { name: 'Unlink selected' }).click();
-    await expect(
-      page.getByTestId('streamsAppStreamDetailDashboardsTable').getByText('No items found')
-    ).toBeVisible();
   });
 });

@@ -209,6 +209,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
+    hideAgentlessSelector: !!addIntegrationFlyoutProps,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -284,10 +285,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
 
   useEffect(() => {
-    if (integration && integrationToEnable !== integration) {
+    if (
+      (integration || integrationToEnable) &&
+      integrationToEnable !== integration &&
+      addIntegrationFlyoutProps
+    ) {
       setIntegrationToEnable(integration);
     }
-  }, [integration, integrationToEnable]);
+  }, [integration, integrationToEnable, addIntegrationFlyoutProps]);
 
   useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
@@ -423,7 +428,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
+            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { set } from '@kbn/safer-lodash-set';
-import { uniq, cloneDeep } from 'lodash';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import type { Serializable } from '@kbn/utility-types';
@@ -287,7 +287,7 @@ export function renewIDs<T = unknown>(
   forRenewIds: string[],
   getNewId: (id: string) => string | undefined
 ): T {
-  obj = cloneDeep(obj);
+  obj = structuredClone(obj);
   const recursiveFn = (
     item: Serializable,
     parent?: Record<string, Serializable> | Serializable[],

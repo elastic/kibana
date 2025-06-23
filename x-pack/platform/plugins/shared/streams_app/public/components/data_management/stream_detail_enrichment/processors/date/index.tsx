@@ -28,7 +28,7 @@ import { DateFormatsField } from './date_formats_field';
 
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 import {
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
   useSimulatorSelector,
 } from '../../state_management/stream_enrichment_state_machine';
 import { DateFormState } from '../../types';
@@ -43,7 +43,7 @@ export const DateProcessorForm = () => {
 
   const form = useFormContext<DateFormState>();
 
-  const definition = useStreamsEnrichmentSelector((snapshot) => snapshot.context.definition);
+  const definition = useStreamEnrichmentSelector((snapshot) => snapshot.context.definition);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );

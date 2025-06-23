@@ -18,8 +18,11 @@ import {
   EuiLink,
   EuiPopover,
   EuiToolTipProps,
+  UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { MountPoint } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -52,7 +55,6 @@ import {
   serverlessService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
-import './_dashboard_top_nav.scss';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
@@ -113,6 +115,8 @@ export function InternalDashboardTopNav({
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
+  const styles = useMemoCss(topNavStyles);
+
   /**
    * focus on the top header when title or view mode is changed
    */
@@ -159,8 +163,8 @@ export function InternalDashboardTopNav({
                 aria-label={topNavStrings.settings.description}
                 size="s"
                 type="pencil"
-                className="dshTitleBreadcrumbs__updateIcon"
                 onClick={() => openSettingsFlyout(dashboardApi)}
+                css={styles.updateIcon}
               />
             </>
           ) : (
@@ -195,7 +199,14 @@ export function InternalDashboardTopNav({
         }
       );
     }
-  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
+  }, [
+    redirectTo,
+    dashboardTitle,
+    dashboardApi,
+    viewMode,
+    customLeadingBreadCrumbs,
+    styles.updateIcon,
+  ]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
@@ -341,7 +352,7 @@ export function InternalDashboardTopNav({
   );
 
   return (
-    <div className="dashboardTopNav">
+    <div css={styles.container}>
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"
@@ -389,3 +400,24 @@ export function InternalDashboardTopNav({
     </div>
   );
 }
+
+const topNavStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.kbnBody &': {
+        width: '100%',
+        position: 'sticky',
+        zIndex: euiTheme.levels.mask,
+        top: `var(--euiFixedHeadersOffset, ${euiTheme.size.base})`,
+        background: euiTheme.colors.backgroundBasePlain,
+      },
+    }),
+  updateIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.kbnBody &': {
+        marginLeft: euiTheme.size.xs,
+        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
+        cursor: 'pointer',
+      },
+    }),
+};

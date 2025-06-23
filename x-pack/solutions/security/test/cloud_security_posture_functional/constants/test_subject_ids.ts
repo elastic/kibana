@@ -69,4 +69,6 @@ export const testSubjectIds = {
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
   SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
+  NAMESPACE_INPUT: 'namespaceInput',
+  ADVANCED_OPTION_ACCORDION: 'advancedOptionsAccordion',
 };
