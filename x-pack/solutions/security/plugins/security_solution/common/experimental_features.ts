@@ -191,7 +191,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
 
   /**
    * Enables scheduing gaps fill for rules
