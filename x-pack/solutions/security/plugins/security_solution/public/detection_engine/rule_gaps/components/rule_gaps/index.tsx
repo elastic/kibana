@@ -19,15 +19,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiBetaBadge,
   EuiProgress,
   EuiText,
   EuiHealth,
   EuiSuperDatePicker,
+  EuiTextColor,
 } from '@elastic/eui';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -203,10 +202,12 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     sortOrder: sort.direction,
   });
 
+  const totalItemCount = data?.total ?? 0;
+  const MaxItemCount = 10000;
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: data?.total ?? 0,
+    totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
   const columns = getGapsTableColumns(hasCRUDPermissions, ruleId, enabled);
@@ -262,7 +263,6 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <HeaderSection title={'Gaps'} subtitle={'Rule gaps'} />
-            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -290,7 +290,15 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {totalItemCount > MaxItemCount && (
+            <EuiTextColor color="danger">
+              {i18n.GAPS_TABLE_TOTAL_GAPS_LABEL(totalItemCount, MaxItemCount)}
+            </EuiTextColor>
+          )}
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           {timelines.getLastUpdated({
             showUpdating: isLoading,
