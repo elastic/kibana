@@ -184,6 +184,16 @@ export const lastValueOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   input: 'field',
+  scale: (column, dataview) => {
+    if (!dataview) {
+      return 'ratio';
+    }
+    const field = dataview.getFieldByName(column.sourceField);
+    if (!field) {
+      return 'ratio';
+    }
+    return getScale(field?.type);
+  },
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
