@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state';
-import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
 import { useDatasetQualityWarnings } from '../../../hooks/use_dataset_quality_warnings';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -97,11 +97,7 @@ export default function Warnings() {
       )}
       {!statsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
-          <EuiCallOut
-            title={noAccessToFailureStoreWarningDescription}
-            color="warning"
-            iconType="warning"
-          />
+          <FailureStoreWarning />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
