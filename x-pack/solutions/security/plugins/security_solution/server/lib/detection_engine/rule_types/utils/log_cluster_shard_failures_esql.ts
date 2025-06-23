@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types';
-import type { EsqlTable } from '../esql/esql_request';
+import type { EsqlTable, EsqlEsqlShardFailure } from '../esql/esql_request';
 import * as i18n from '../translations';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 
