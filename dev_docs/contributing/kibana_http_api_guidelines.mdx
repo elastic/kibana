@@ -160,22 +160,29 @@ Resource developers often fall back to the API layer for validation checks, that
 
 If your API can validate inputs upfront and return all the errors in one go, do it\! Terraform handles it and shows them in a helpful way:
 
-```go
-var diags diag.Diagnostics
-diags = append(diags, diag.Diagnostic{
-    Severity: diag.Error,
-    Summary:  "Invalid index setting",
-    Detail:   "Setting 'codec' cannot be changed after index creation",
-})
-diags = append(diags, diag.Diagnostic{
-    Severity: diag.Error,
-    Summary:  "Invalid mapping change",
-    Detail:   "Cannot change field datatype in existing mapping",
-})
+```typescript
+// PUT /api/alerting/rule/{id}
+...
+  response: {
+    200: {
+      body: () => ruleResponseSchemaV1,
+      description: 'Indicates a successful call.',
+    },
+    400: {
+      description: 'Indicates an invalid schema or parameters.',
+    },
+    403: {
+      description: 'Indicates that this call is forbidden.',
+    },
+    404: {
+      description: 'Indicates a rule with the given ID does not exist.',
+    },
+    409: {
+      description: 'Indicates that the rule has already been updated by another user.',
+    },
+  },
+...
 ```
-
-[Fleet Agent Policy Update](https://github.com/elastic/terraform-provider-elasticstack/blob/main/internal/fleet/agent_policy/update.go)
-
 When validation only happens during execution, catching errors early becomes impossible. For example, ILM policy structure errors only surface during API calls:
 
 ```bash
