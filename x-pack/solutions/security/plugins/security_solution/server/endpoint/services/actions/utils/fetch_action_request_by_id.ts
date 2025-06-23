@@ -90,5 +90,10 @@ export const fetchActionRequestById = async <
     actionRequest.agent.policy = actionRequest.agent.policy ? [actionRequest.agent.policy] : [];
   }
 
+  // Ensure `tags` is an array
+  if (!Array.isArray(actionRequest.tags)) {
+    actionRequest.tags = actionRequest.tags ? [actionRequest.tags] : [];
+  }
+
   return actionRequest;
 };
