@@ -17,7 +17,7 @@ export const VectorSearch: React.FC = () => {
   const vectorSearchText = {
     image: `${assetBasePath}/vector_search.svg`,
     imageAlt: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.vectorSearch.imageAlt', {
-      defaultMessage: 'Vector Search',
+      defaultMessage: 'Vector search',
     }),
     heading: i18n.translate('xpack.searchHomepage.aiSearchCapabilities.vectorSearch.title', {
       defaultMessage: 'Store and search your vector embeddings',
