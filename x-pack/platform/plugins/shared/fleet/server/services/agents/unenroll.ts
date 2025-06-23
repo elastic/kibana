@@ -30,7 +30,10 @@ import {
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agentId: string
+  agentId: string,
+  options?: {
+    skipAgentlessValidation?: boolean;
+  }
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
@@ -39,7 +42,7 @@ async function unenrollAgentIsAllowed(
     );
   }
 
-  if (agentPolicy?.supports_agentless) {
+  if (!options?.skipAgentlessValidation && agentPolicy?.supports_agentless) {
     throw new FleetError(`Cannot unenroll agentless agent ${agentId}`);
   }
 
@@ -52,12 +55,15 @@ export async function unenrollAgent(
   agentId: string,
   options?: {
     force?: boolean;
+    skipAgentlessValidation?: boolean;
     revoke?: boolean;
   }
 ) {
   await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
   if (!options?.force) {
-    await unenrollAgentIsAllowed(soClient, esClient, agentId);
+    await unenrollAgentIsAllowed(soClient, esClient, agentId, {
+      skipAgentlessValidation: options?.skipAgentlessValidation,
+    });
   }
   if (options?.revoke) {
     return forceUnenrollAgent(esClient, soClient, agentId);

@@ -6,25 +6,9 @@
  */
 
 import React from 'react';
-import { EuiDescriptionList, useEuiTheme, EuiIcon, EuiCopy } from '@elastic/eui';
+import { EuiDescriptionList, useEuiTheme } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui';
-import { css } from '@emotion/react';
-
-const CopyButton = ({ copyText }: { copyText: string }) => (
-  <EuiCopy textToCopy={copyText}>
-    {(copy) => (
-      <EuiIcon
-        css={css`
-          :hover {
-            cursor: pointer;
-          }
-        `}
-        onClick={copy}
-        type="copy"
-      />
-    )}
-  </EuiCopy>
-);
+import { CopyButton } from './copy_button';
 
 const getModifiedTitlesListItems = (listItems?: EuiDescriptionListProps['listItems']) =>
   listItems
@@ -54,7 +38,6 @@ export const CspInlineDescriptionList = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const modifiedTitlesListItems = getModifiedTitlesListItems(listItems);
-
   return (
     <EuiDescriptionList
       data-test-subj={testId}
@@ -62,15 +45,17 @@ export const CspInlineDescriptionList = ({
       titleProps={{
         style: {
           background: 'initial',
-          color: euiTheme.colors.subduedText,
+          color: euiTheme.colors.textSubdued,
           fontSize,
           paddingRight: 0,
           paddingInline: 0,
+          marginInline: 'unset',
+          marginInlineEnd: euiTheme.size.xs,
         },
       }}
       descriptionProps={{
         style: {
-          color: euiTheme.colors.subduedText,
+          color: euiTheme.colors.textSubdued,
           marginRight: euiTheme.size.xs,
           fontSize,
         },

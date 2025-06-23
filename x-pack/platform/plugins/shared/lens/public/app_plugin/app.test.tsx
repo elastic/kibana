@@ -28,13 +28,12 @@ import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import { setState, LensAppState } from '../state_management';
 import { coreMock } from '@kbn/core/public/mocks';
 import { LensSerializedState } from '..';
 import { createMockedField, createMockedIndexPattern } from '../datasources/form_based/mocks';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VisualizeEditorContext } from '../types';
@@ -48,13 +47,13 @@ jest.mock('lodash', () => ({
   debounce: (fn: unknown) => fn,
 }));
 
-const defaultSavedObjectId: string = faker.random.uuid();
+const defaultSavedObjectId: string = faker.string.uuid();
 
 const waitToLoad = async () =>
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 
 function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
-  return cloneDeep({ ...defaultDoc, ...propsOverrides });
+  return structuredClone({ ...defaultDoc, ...propsOverrides });
 }
 
 describe('Lens App', () => {
@@ -233,7 +232,7 @@ describe('Lens App', () => {
   });
 
   describe('breadcrumbs', () => {
-    const breadcrumbDocSavedObjectId = faker.random.uuid();
+    const breadcrumbDocSavedObjectId = faker.string.uuid();
     const breadcrumbDoc = getLensDocumentMock({
       savedObjectId: breadcrumbDocSavedObjectId,
       title: 'Daaaaaaadaumching!',
@@ -603,7 +602,7 @@ describe('Lens App', () => {
         expect(lensStore.getState().lens.applyChangesCounter).toBe(1);
       });
       it('adds to the recently accessed list on save', async () => {
-        const savedObjectId = faker.random.uuid();
+        const savedObjectId = faker.string.uuid();
         await save({ savedObjectId, prevSavedObjectId: 'prevId', comesFromDashboard: false });
         expect(services.chrome.recentlyAccessed.add).toHaveBeenCalledWith(
           `/app/lens#/edit/${savedObjectId}`,

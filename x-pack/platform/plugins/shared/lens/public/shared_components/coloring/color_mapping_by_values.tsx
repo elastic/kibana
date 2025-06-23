@@ -24,7 +24,7 @@ interface ColorMappingByValuesProps {
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
-  dataBounds?: DataBounds;
+  dataBounds: DataBounds;
 }
 
 export function ColorMappingByValues<T>({

@@ -73,11 +73,6 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
                 name: 'Rules Settings Link',
                 onClick: () => history.push('/rules_settings_link'),
               },
-              {
-                id: 'alerts_filters_form',
-                name: 'Alerts filters form',
-                onClick: () => history.push('/alerts_filters_form'),
-              },
             ],
           },
           {

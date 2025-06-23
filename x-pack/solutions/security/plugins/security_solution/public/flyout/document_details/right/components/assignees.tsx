@@ -18,8 +18,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertHeaderBlock } from './alert_header_block';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
@@ -34,7 +32,6 @@ import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
   ASSIGNEES_EMPTY_TEST_ID,
   ASSIGNEES_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
 } from './test_ids';
 
 const UpdateAssigneesButton: FC<{
@@ -71,16 +68,16 @@ export interface AssigneesProps {
   onAssigneesUpdated?: () => void;
 
   /**
-   * Boolean to indicate whether it is a preview flyout
+   * Boolean to indicate whether to show assignees
    */
-  isPreview?: boolean;
+  showAssignees?: boolean;
 }
 
 /**
  * Document assignees details displayed in flyout right section header
  */
-export const Assignees: FC<AssigneesProps> = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }) => {
+export const Assignees = memo(
+  ({ eventId, assignedUserIds, onAssigneesUpdated, showAssignees = true }: AssigneesProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
@@ -159,16 +156,8 @@ export const Assignees: FC<AssigneesProps> = memo(
     ]);
 
     return (
-      <AlertHeaderBlock
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.assignedTitle"
-            defaultMessage="Assignees"
-          />
-        }
-        data-test-subj={ASSIGNEES_TITLE_TEST_ID}
-      >
-        {isPreview ? (
+      <>
+        {!showAssignees ? (
           <div data-test-subj={ASSIGNEES_EMPTY_TEST_ID}>{getEmptyTagValue()}</div>
         ) : (
           <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj={ASSIGNEES_TEST_ID}>
@@ -180,7 +169,7 @@ export const Assignees: FC<AssigneesProps> = memo(
             <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
           </EuiFlexGroup>
         )}
-      </AlertHeaderBlock>
+      </>
     );
   }
 );

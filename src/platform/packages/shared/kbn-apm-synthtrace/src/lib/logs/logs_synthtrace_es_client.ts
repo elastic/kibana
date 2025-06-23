@@ -28,10 +28,12 @@ interface Pipeline {
 }
 
 export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
-  constructor(options: { client: Client; logger: Logger } & LogsSynthtraceEsClientOptions) {
+  constructor(
+    options: { client: Client; logger: Logger; pipeline?: Pipeline } & LogsSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
-      pipeline: logsPipeline(),
+      pipeline: logsPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
     });
     this.dataStreams = ['logs-*-*'];
     this.indices = ['cloud-logs-*-*'];
@@ -148,7 +150,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async createCustomPipeline(processors: IngestProcessorContainer[], id = LogsCustom) {
     try {
-      this.client.ingest.putPipeline({
+      await this.client.ingest.putPipeline({
         id,
         processors,
         version: 1,
@@ -161,7 +163,7 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
 
   async deleteCustomPipeline(id = LogsCustom) {
     try {
-      this.client.ingest.deletePipeline({
+      await this.client.ingest.deletePipeline({
         id,
       });
       this.logger.info(`Custom pipeline deleted: ${id}`);
@@ -169,13 +171,9 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
       this.logger.error(`Custom pipeline deletion failed: ${id} - ${err.message}`);
     }
   }
-
-  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
-    return logsPipeline({ includeSerialization });
-  }
 }
 
-function logsPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
+function logsPipeline({ includeSerialization = true }: Pipeline) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization
       ? [getSerializeTransform<LogDocument>()]

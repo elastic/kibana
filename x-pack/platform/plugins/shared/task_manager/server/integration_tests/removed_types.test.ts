@@ -30,7 +30,8 @@ jest.mock('../monitoring/workload_statistics', () => {
   };
 });
 
-describe('unrecognized task types', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208459
+describe.skip('unrecognized task types', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
@@ -124,6 +125,15 @@ describe('unrecognized task types', () => {
       } catch (err) {
         // ignore errors and retry
       }
+    });
+
+    // wait until the task finishes
+    await retry(async () => {
+      const hasRun = await taskManagerPlugin
+        .get('mark_removed_tasks_as_unrecognized')
+        .then((t) => t.runAt != null)
+        .catch(() => false);
+      expect(hasRun).toBe(true);
     });
 
     await retry(async () => {

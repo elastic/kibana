@@ -25,9 +25,6 @@ describe('readPrebuiltDevToolContentRoute', () => {
   let { context } = requestContextMock.createTools();
 
   beforeEach(() => {
-    jest.resetModules();
-    jest.resetAllMocks();
-
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 

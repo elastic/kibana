@@ -20,6 +20,8 @@ jest.mock('../../../../common/utils/route/use_route_spy');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../timelines/containers/details');
 jest.mock('./use_get_fields_data');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const eventId = 'eventId';
 const indexName = 'indexName';
@@ -53,6 +55,7 @@ describe('useEventDetails', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: {},
+      sourcererDataView: {},
     });
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, [], {}, {}, jest.fn()]);
     jest.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
@@ -63,7 +66,6 @@ describe('useEventDetails', () => {
     expect(hookResult.result.current.dataAsNestedObject).toEqual({});
     expect(hookResult.result.current.dataFormattedForFieldBrowser).toEqual([]);
     expect(hookResult.result.current.getFieldsData('test')).toEqual('test');
-    expect(hookResult.result.current.indexPattern).toEqual({});
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.refetchFlyoutData()).toEqual(undefined);
     expect(hookResult.result.current.searchHit).toEqual({});

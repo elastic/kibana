@@ -53,7 +53,11 @@ export const CreateArchivesSources: Task = {
             resolve(REPO_ROOT, 'config'),
             build.resolvePathForPlatform(platform, 'config'),
             {
-              select: ['serverless.yml', 'serverless.{es,oblt,security}.yml'],
+              select: [
+                'serverless.yml',
+                'serverless.{chat,es,oblt,security}.yml',
+                'serverless.security.{search_ai_lake,essentials,complete}.yml',
+              ],
             }
           );
           log.debug(

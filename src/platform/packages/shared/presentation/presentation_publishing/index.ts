@@ -17,6 +17,8 @@ export {
   areComparatorsEqual,
   diffComparators,
   initializeStateManager,
+  shouldLogStateDiff,
+  logStateDiff,
 } from './state_manager';
 export {
   apiCanAccessViewMode,

@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render control column with proper header', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           // First control column has no title, so empty string, leading control column has title
-          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', '', '', '']);
+          expect(await dataGrid.getControlColumnHeaderFields()).to.eql(['', 'Actions']);
         });
       });
 
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the degraded icon in the leading control column if degraded doc exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 2);
+          const cellElement = await dataGrid.getCellElement(1, 1);
           const degradedButton = await cellElement.findByTestSubject('docTableDegradedDocExist');
           expect(degradedButton).to.not.be.empty();
         });
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the disabled degraded icon in the leading control column when degraded doc does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 2);
+          const cellElement = await dataGrid.getCellElement(0, 1);
           const degradedDisableButton = await cellElement.findByTestSubject(
             'docTableDegradedDocDoesNotExist'
           );
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the stacktrace icon in the leading control column when stacktrace exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(4, 3);
+          const cellElement = await dataGrid.getCellElement(4, 1);
           const stacktraceButton = await cellElement.findByTestSubject('docTableStacktraceExist');
           expect(stacktraceButton).to.not.be.empty();
         });
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the stacktrace icon disabled in the leading control column when stacktrace does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 3);
+          const cellElement = await dataGrid.getCellElement(1, 1);
           const stacktraceButton = await cellElement.findByTestSubject(
             'docTableStacktraceDoesNotExist'
           );

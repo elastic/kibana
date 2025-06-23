@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
-import type { Subscription } from 'rxjs';
-import { BehaviorSubject, map } from 'rxjs';
-import { appLinks$ } from './links';
+import { map } from 'rxjs';
+import { applicationLinksUpdater } from '../../app/links/application_links_updater';
 import type { SecurityPageName } from '../../app/types';
-import type { SecurityNavLink, AppLinkItems, NavigationLink } from './types';
+import type { AppLinkItems, NavigationLink } from './types';
 
-export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[] =>
-  appLinks.map<SecurityNavLink>((link) => ({
+/**
+ * @deprecated use `applicationLinks` instead
+ * This is going to be cleaned when the classic navigation is removed
+ */
+export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] =>
+  appLinks.map<NavigationLink>((link) => ({
     id: link.id,
     title: link.title,
     ...(link.categories != null && { categories: link.categories }),
@@ -32,50 +34,20 @@ export const formatNavigationLinks = (appLinks: AppLinkItems): SecurityNavLink[]
     }),
   }));
 
+const navLinks$ = applicationLinksUpdater.links$.pipe(map(formatNavigationLinks));
+
 /**
- * Navigation links observable based on Security AppLinks,
- * It is used to generate the side navigation items
+ * @deprecated use `applicationLinks` instead
+ * This is going to be cleaned when the classic navigation is removed
  */
-export const internalNavLinks$ = appLinks$.pipe(map(formatNavigationLinks));
-
-export const navLinksUpdater$ = new BehaviorSubject<NavigationLink[]>([]);
-export const navLinks$ = navLinksUpdater$.asObservable();
-
-let currentSubscription: Subscription;
-export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) => {
-  if (currentSubscription) {
-    currentSubscription.unsubscribe();
-  }
-  if (isSolutionNavEnabled) {
-    // import solution nav links only when solution nav is enabled
-    lazySolutionNavLinks().then((createSolutionNavLinks$) => {
-      currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
-        navLinksUpdater$.next(links);
-      });
-    });
-  } else {
-    currentSubscription = internalNavLinks$.subscribe((links) => {
-      navLinksUpdater$.next(links);
-    });
-  }
-};
-
-// includes internal security links only
-export const useSecurityInternalNavLinks = (): SecurityNavLink[] => {
-  return useObservable(internalNavLinks$, []);
-};
-
-// includes internal security links and externals links to other applications such as discover, ml, etc.
 export const useNavLinks = (): NavigationLink[] => {
-  return useObservable(navLinks$, navLinksUpdater$.value); // use default value from updater subject to prevent re-renderings
+  return useObservable(navLinks$, []); // use default value from updater subject to prevent re-renderings
 };
 
+/**
+ * @deprecated use `applicationLinks` instead
+ * This is going to be cleaned when the classic navigation is removed
+ */
 export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undefined => {
   return useNavLinks().find(({ id }) => id === linkId);
 };
-
-const lazySolutionNavLinks = async () =>
-  import(
-    /* webpackChunkName: "solution_nav_links" */
-    '../../app/solution_navigation/links/nav_links'
-  ).then(({ createSolutionNavLinks$ }) => createSolutionNavLinks$);

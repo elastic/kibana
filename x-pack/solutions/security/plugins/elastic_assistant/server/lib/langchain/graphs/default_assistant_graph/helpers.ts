@@ -14,6 +14,8 @@ import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assist
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { AgentFinish } from 'langchain/agents';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -24,9 +26,11 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
+  isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  telemetry: AnalyticsServiceSetup;
   telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
 }
@@ -37,9 +41,11 @@ interface StreamGraphParams {
  * @param apmTracer
  * @param assistantGraph
  * @param inputs
+ * @param isEnabledKnowledgeBase
  * @param logger
  * @param onLlmResponse
  * @param request
+ * @param telemetry
  * @param telemetryTracer
  * @param traceOptions
  */
@@ -47,9 +53,11 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
+  isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
   request,
+  telemetry,
   telemetryTracer,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
@@ -67,6 +75,16 @@ export const streamGraph = async ({
   const handleStreamEnd = (finalResponse: string, isError = false) => {
     if (didEnd) {
       return;
+    }
+    if (isError) {
+      telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+        actionTypeId: request.body.actionTypeId,
+        model: request.body.model,
+        errorMessage: finalResponse,
+        assistantStreamingEnabled: true,
+        isEnabledKnowledgeBase,
+        errorLocation: 'handleStreamEnd',
+      });
     }
     if (onLlmResponse) {
       onLlmResponse(

@@ -61,7 +61,6 @@
     "@kbn/dev-utils",
     "@kbn/utility-types",
     "@kbn/dev-proc-runner",
-    "@kbn/enterprise-search-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/core-http-common",
     "@kbn/event-annotation-plugin",
@@ -80,5 +79,7 @@
     "@kbn/data-grid-in-table-search",
     "@kbn/scout-info",
     "@kbn/esql-utils",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
   ]
 }

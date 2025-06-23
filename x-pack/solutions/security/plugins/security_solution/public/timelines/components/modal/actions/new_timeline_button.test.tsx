@@ -16,13 +16,11 @@ import { RowRendererValues } from '../../../../../common/api/timeline';
 import { defaultUdtHeaders } from '../../timeline/body/column_headers/default_headers';
 
 jest.mock('../../../../common/components/discover_in_timeline/use_discover_in_timeline_context');
-jest.mock('../../../../common/hooks/use_selector');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
   return {
     ...original,
-    useSelector: jest.fn(),
     useDispatch: () => jest.fn(),
   };
 });
@@ -53,8 +51,19 @@ describe('NewTimelineButton', () => {
   });
 
   it('should call the correct action with clicking on the new timeline button', async () => {
-    const dataViewId = '';
-    const selectedPatterns: string[] = [];
+    const dataViewId = 'security-solution';
+    const selectedPatterns: string[] = [
+      'apm-*-transaction*',
+      'auditbeat-*',
+      'endgame-*',
+      'filebeat-*',
+      'logs-*',
+      'packetbeat-*',
+      'traces-apm*',
+      'winlogbeat-*',
+      '-*elastic-cloud-logs-*',
+      '.siem-signals-spacename',
+    ];
 
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 

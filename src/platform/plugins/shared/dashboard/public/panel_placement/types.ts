@@ -21,13 +21,14 @@ export interface PanelPlacementSettings {
 
 export interface PanelPlacementReturn {
   newPanelPlacement: Omit<GridData, 'i'>;
-  otherPanels: DashboardLayout;
+  otherPanels: DashboardLayout['panels'];
 }
 
 export interface PanelPlacementProps {
   width: number;
   height: number;
-  currentPanels: DashboardLayout;
+  currentPanels: DashboardLayout['panels'];
+  sectionId?: string; // section where panel is being placed
 }
 
 export type GetPanelPlacementSettings<SerializedState extends object = object> = (

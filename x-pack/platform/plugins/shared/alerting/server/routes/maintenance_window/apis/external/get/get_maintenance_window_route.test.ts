@@ -50,6 +50,10 @@ describe('getMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
+        "availability": Object {
+          "since": "8.19.0",
+          "stability": "stable",
+        },
         "summary": "Get maintenance window details.",
         "tags": Array [
           "oas-tag:maintenance-window",

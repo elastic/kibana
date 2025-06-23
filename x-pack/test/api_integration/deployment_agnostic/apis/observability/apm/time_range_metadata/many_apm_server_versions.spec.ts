@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm, timerange } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
@@ -100,8 +100,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: endLegacy.toISOString(),
               end: end.toISOString(),
-              enableContinuousRollups: true,
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },
@@ -128,8 +126,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: endLegacy.toISOString(),
-              enableContinuousRollups: true,
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },
@@ -150,8 +146,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: end.toISOString(),
-              enableContinuousRollups: true,
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },
@@ -269,7 +263,9 @@ function generateTraceDataForService({
     );
 
   const apmPipeline = (base: Readable) => {
-    return synthtrace.getDefaultPipeline({ versionOverride: '8.5.0' })(base);
+    return synthtrace.resolvePipelineType(ApmSynthtracePipelineSchema.Default, {
+      versionOverride: '8.5.0',
+    })(base);
   };
 
   return synthtrace.index(events, isLegacy ? apmPipeline : undefined);

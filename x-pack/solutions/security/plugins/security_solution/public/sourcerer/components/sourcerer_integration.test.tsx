@@ -72,6 +72,7 @@ const patternListNoSignals = sortWithExcludesAtEnd(
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
+  sourcererDataView: {},
 };
 
 describe('Sourcerer integration tests', () => {

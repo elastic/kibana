@@ -119,10 +119,6 @@ export function collectUserDefinedColumns(
       // TODO - add these as userDefinedColumns
     })
     .on('visitExpression', (_ctx) => {}) // required for the types :shrug:
-    .on('visitRenameExpression', (ctx) => {
-      const [oldArg, newArg] = ctx.node.args;
-      addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
-    })
     .on('visitFunctionCallExpression', (ctx) => {
       const node = ctx.node;
 
@@ -131,7 +127,10 @@ export function collectUserDefinedColumns(
         return;
       }
 
-      if (node.name === '=') {
+      if (node.name === 'as') {
+        const [oldArg, newArg] = ctx.node.args;
+        addToUserDefinedColumns(oldArg, newArg, fields, userDefinedColumns);
+      } else if (node.name === '=') {
         addUserDefinedColumnFromAssignment(node, userDefinedColumns, fields);
       } else {
         addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
@@ -160,6 +159,9 @@ export function collectUserDefinedColumns(
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
         // BY and WITH can contain userDefinedColumns
         ret.push(...ctx.visitOptions());
+      }
+      if (ctx.node.name === 'fork') {
+        ret.push(...ctx.visitSubQueries());
       }
       return ret;
     })

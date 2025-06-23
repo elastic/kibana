@@ -341,7 +341,10 @@ export interface BulkActionErrorResponse {
   attributes?: BulkActionAttributes;
 }
 
-export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
+export type QueryOrIds =
+  | { query: string; ids?: undefined; gapRange?: { start: string; end: string } }
+  | { query?: undefined; ids: string[] };
+
 type PlainBulkAction = {
   type: Exclude<
     BulkActionType,
@@ -398,6 +401,8 @@ export async function performBulkAction({
     duplicate:
       bulkAction.type === BulkActionTypeEnum.duplicate ? bulkAction.duplicatePayload : undefined,
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
+    gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
+    gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

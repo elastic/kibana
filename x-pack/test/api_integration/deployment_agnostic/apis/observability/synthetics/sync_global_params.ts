@@ -203,16 +203,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    it('sync global params', async () => {
-      const apiResponse = await supertestAPI
-        .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ key: 'test', value: 'test' });
-
-      expect(apiResponse.status).eql(200);
-    });
-
     it('added params to for previously added integration', async () => {
       const apiResponse = await supertestWithAuth.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -322,12 +312,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .expect(200);
 
       expect(getResponseAfterDelete.body.length).eql(0);
-
-      await supertestAPI
-        .get(SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .expect(200);
 
       const apiResponse = await supertestWithAuth.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'

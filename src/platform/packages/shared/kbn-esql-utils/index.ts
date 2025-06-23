@@ -41,6 +41,9 @@ export {
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
   replaceESQLQueryIndexPattern,
+  getCategorizeColumns,
+  extractCategorizeTokens,
+  getArgsFromRenameFunction,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

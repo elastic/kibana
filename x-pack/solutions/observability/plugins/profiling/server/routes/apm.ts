@@ -85,7 +85,7 @@ export function registerTopNFunctionsAPMTransactionsRoute({
                   ],
                 },
               },
-              aggregationField: 'transaction.name',
+              aggregationFields: ['transaction.name'],
               indices: transactionIndices.split(','),
               stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
               limit: 1000,

@@ -51,7 +51,7 @@ In that scenario, we should:
 The integration test mentioned in the previous section also detects those scenarios.
 
 Here, we need to check:
-- that `REMOVED_TYPES` (`src/core/packages/saved-objects/base-server-internal/src/constants.ts`) was properly updated
+- that `REMOVED_TYPES` (`src/core/packages/saved-objects/server-internal/src/constants.ts`) was properly updated
   - (but, again, the integration test will fail otherwise)
 - that no other existing SO types may be referencing this type
   - can't really be automated, will likely need to ask the owning team directly

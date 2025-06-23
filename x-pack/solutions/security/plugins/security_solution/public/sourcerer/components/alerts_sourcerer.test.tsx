@@ -72,6 +72,7 @@ describe('sourcerer on alerts page or rules details page', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       ...sourcererDataView,
       indicesExist: true,
+      sourcererDataView: {},
     });
 
     render(

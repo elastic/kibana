@@ -57,6 +57,15 @@ export function HeaderMenu(): React.ReactElement | null {
             )}
             <EuiHeaderLink
               color="primary"
+              href={http.basePath.prepend('/app/slos/management')}
+              iconType="pencil"
+            >
+              {i18n.translate('xpack.slo.home.manage', {
+                defaultMessage: 'Manage SLOs',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink
+              color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}
               iconType="brush"
             >

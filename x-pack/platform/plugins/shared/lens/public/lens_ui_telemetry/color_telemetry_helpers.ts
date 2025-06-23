@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ColorMapping, NeutralPalette, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
+import { ColorMapping, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { isEqual } from 'lodash';
+import { KbnPalette } from '@kbn/palettes';
 import { nonNullable } from '../utils';
 
 const COLOR_MAPPING_PREFIX = 'color_mapping_';
@@ -83,18 +84,15 @@ const getUnassignedTermsType = (
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.type === 'loop'
           ? 'loop'
           : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX]?.color.paletteId ===
-            NeutralPalette.id
-          ? NeutralPalette.id
+            KbnPalette.Neutral
+          ? KbnPalette.Neutral
           : 'palette'
       }`
     : undefined;
 };
 
 const getTotalTermsCount = (assignments: ColorMapping.Config['assignments']) =>
-  assignments.reduce(
-    (acc, cur) => ('values' in cur.rule ? acc + cur.rule.values.length : acc + 1),
-    0
-  );
+  assignments.reduce((acc, { rules }) => acc + rules.length, 0);
 
 const getAvgCountTermsPerColor = (
   assignments: ColorMapping.Config['assignments'],

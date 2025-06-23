@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
 import { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelState } from '../common/dashboard_container/types';
+import { DashboardPanelMap, DashboardSectionMap } from '../common';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -75,6 +75,7 @@ export const mockControlGroupApi = {
   esqlVariables$: new BehaviorSubject(undefined),
   dataViews$: new BehaviorSubject(undefined),
   hasUnsavedChanges$: new BehaviorSubject(false),
+  children$: new BehaviorSubject([]),
 } as unknown as ControlGroupApi;
 
 export function buildMockDashboardApi({
@@ -126,24 +127,67 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     timeRestore: false,
     viewMode: 'view',
     panels: {},
+    sections: {},
     ...overrides,
   };
 }
 
-export function getSampleDashboardPanel(
-  overrides: Partial<DashboardPanelState> & {
-    explicitInput: { id: string };
-    type: string;
+export function getMockDashboardPanels(
+  withSections: boolean = false,
+  overrides?: {
+    panels?: DashboardPanelMap;
+    sections?: DashboardSectionMap;
   }
-): DashboardPanelState {
-  return {
-    gridData: {
-      h: 15,
-      w: 15,
-      x: 0,
-      y: 0,
-      i: overrides.explicitInput.id,
+): { panels: DashboardPanelMap; sections: DashboardSectionMap } {
+  const panels = {
+    '1': {
+      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      type: 'lens',
+      explicitInput: { id: '1' },
     },
-    ...overrides,
+    '2': {
+      gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
+      type: 'lens',
+      explicitInput: { id: '2' },
+    },
+    ...overrides?.panels,
   };
+  if (!withSections) return { panels, sections: {} };
+
+  return {
+    panels: {
+      ...panels,
+      '3': {
+        gridData: { x: 0, y: 0, w: 6, h: 6, i: '3', sectionId: 'section1' },
+        type: 'lens',
+        explicitInput: { id: '3' },
+      },
+      '4': {
+        gridData: { x: 0, y: 0, w: 6, h: 6, i: '4', sectionId: 'section2' },
+        type: 'lens',
+        explicitInput: { id: '4' },
+      },
+    },
+    sections: {
+      section1: {
+        id: 'section1',
+        title: 'Section One',
+        collapsed: true,
+        gridData: {
+          y: 6,
+          i: 'section1',
+        },
+      },
+      section2: {
+        id: 'section2',
+        title: 'Section Two',
+        collapsed: false,
+        gridData: {
+          y: 7,
+          i: 'section2',
+        },
+      },
+      ...overrides?.sections,
+    },
+  } as any;
 }

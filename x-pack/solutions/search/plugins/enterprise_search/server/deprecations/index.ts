@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { SecurityApiKey, SecurityGetUserResponse } from '@elastic/elasticsearch/lib/api/types';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext, RegisterDeprecationsConfig } from '@kbn/core-deprecations-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
@@ -22,11 +24,17 @@ export const getRegisteredDeprecations = (
   return {
     getDeprecations: async (ctx: GetDeprecationsContext) => {
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
-      const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
+      const [crawlerDetails, nativeConnectorsDetails, accountCleanups] = await Promise.all([
         getCrawlerDeprecations(ctx, docsUrl),
         getNativeConnectorDeprecations(ctx, docsUrl),
+        getEnterpriseSearchAccountCleanups(ctx, config),
       ]);
-      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails];
+      return [
+        ...entSearchDetails,
+        ...crawlerDetails,
+        ...nativeConnectorsDetails,
+        ...accountCleanups,
+      ];
     },
   };
 };
@@ -275,4 +283,124 @@ export async function getNativeConnectorDeprecations(
 
     return deprecations;
   }
+}
+
+export interface IEnterpriseSearchAccountCleanupAccounts {
+  esUser?: SecurityGetUserResponse;
+  credentialTokenIds: string[];
+  esCloudApiKeys: string[];
+}
+
+export const getEnterpriseSearchAccountCleanupAccounts = async (
+  client: ElasticsearchClient
+): Promise<IEnterpriseSearchAccountCleanupAccounts> => {
+  const esUser = await client.security.getUser({ username: 'enterprise_search' });
+
+  const esCloudApiKeysResponse =
+    (await client.security.getApiKey({ username: 'cloud-internal-enterprise_search-server' }))
+      .api_keys || [];
+
+  const esCloudApiKeys = esCloudApiKeysResponse.map((apiKey: SecurityApiKey) => apiKey.id);
+
+  const esServerCredentials =
+    (await client.security.getServiceCredentials({
+      namespace: 'elastic',
+      service: 'enterprise-search-server',
+    })) || undefined;
+
+  const credentialTokenIds: string[] = [];
+  if (esServerCredentials) {
+    Object.entries(esServerCredentials.tokens).forEach(([tokenId]) => {
+      credentialTokenIds.push(tokenId);
+    });
+  }
+
+  return {
+    esUser,
+    credentialTokenIds,
+    esCloudApiKeys,
+  } as IEnterpriseSearchAccountCleanupAccounts;
+};
+
+export async function getEnterpriseSearchAccountCleanups(
+  ctx: GetDeprecationsContext,
+  config: ConfigType
+): Promise<DeprecationsDetails[]> {
+  if (config.host && config.host.length > 0) {
+    // if Enterprise Search is still configured, we can't clean up the accounts
+    return [];
+  }
+
+  const client = ctx.esClient.asCurrentUser;
+
+  const { esUser, credentialTokenIds, esCloudApiKeys } =
+    await getEnterpriseSearchAccountCleanupAccounts(client);
+
+  if (!esUser && credentialTokenIds.length === 0 && esCloudApiKeys.length === 0) {
+    return [];
+  }
+
+  let message =
+    'There are leftover accounts or credentials from the Enterprise Search service.' +
+    ' It is not necessary to remove or invalidate these items to proceed with the' +
+    ' upgrade, but it is recommended to do so for security reasons.\n\n';
+  const manualStepsToAdd = [];
+
+  if (esUser) {
+    message += "- Remove the 'enterprise_search' user account\n";
+    manualStepsToAdd.push(
+      "Remove the 'enterprise_search' user account via `DELETE /_security/user/enterprise_search`"
+    );
+  }
+
+  if (credentialTokenIds.length > 0) {
+    message += "- Invalidate any 'elastic/enterprise-search-server' service account credentials\n";
+    credentialTokenIds.forEach((tokenId: string) => {
+      manualStepsToAdd.push(
+        "Invalidate the 'elastic/enterprise-search-server' token '" +
+          tokenId +
+          "' via `DELETE /_security/service/elastic/enterprise-search-server/credential/token/" +
+          tokenId +
+          '`'
+      );
+    });
+  }
+
+  if (esCloudApiKeys.length > 0) {
+    message += "- Invalidate any 'cloud-internal-enterprise_search-server' API keys\n";
+    esCloudApiKeys.forEach((apiKey) => {
+      manualStepsToAdd.push(
+        "Invalidate the 'cloud-internal-enterprise_search-server' API key '" +
+          apiKey +
+          "' via `DELETE /_security/api_key` passing the API key id in the body"
+      );
+    });
+  }
+
+  message +=
+    "\n\nAlternatively, you can use the 'Quick resolve' button to remove these items automatically.";
+
+  const deprecation: DeprecationsDetails = {
+    level: 'warning',
+    deprecationType: 'feature',
+    title: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchaccounts.title', {
+      defaultMessage: 'Enterprise Search user accounts and credentials should be removed',
+    }),
+    message: {
+      type: 'markdown',
+      content: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchaccounts.message', {
+        defaultMessage: message,
+      }),
+    },
+    correctiveActions: {
+      manualSteps: manualStepsToAdd,
+      api: {
+        method: 'POST',
+        path: '/internal/enterprise_search/deprecations/clean_ent_search_accounts',
+        body: {},
+      },
+    },
+  };
+
+  return [deprecation];
 }

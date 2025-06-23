@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { DataStreamOptions } from '../../../../../../../common/types/data_streams';
 import { Forms, ComponentTemplateDeserialized } from '../../../shared_imports';
 import { WizardContent } from '../component_template_form';
 import { StepReview } from './step_review';
@@ -15,10 +16,11 @@ interface Props {
   getComponentTemplateData: (wizardContent: WizardContent) => ComponentTemplateDeserialized;
   dataStreams?: string[];
   canRollover?: boolean;
+  dataStreamOptions?: DataStreamOptions;
 }
 
 export const StepReviewContainer = React.memo(
-  ({ getComponentTemplateData, dataStreams, canRollover }: Props) => {
+  ({ getComponentTemplateData, dataStreams, canRollover, dataStreamOptions }: Props) => {
     const { getData } = Forms.useMultiContentContext<WizardContent>();
 
     const wizardContent = getData();
@@ -30,6 +32,7 @@ export const StepReviewContainer = React.memo(
         dataStreams={dataStreams}
         canRollover={canRollover}
         componentTemplate={componentTemplate}
+        dataStreamOptions={dataStreamOptions}
       />
     );
   }

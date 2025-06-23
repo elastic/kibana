@@ -15,10 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../common/discover/group1'),
       require.resolve('../../common/discover/group2'),
-      require.resolve('../../common/discover/group3'),
-      require.resolve('../../common/discover/group4'),
-      require.resolve('../../common/discover/group5'),
-      require.resolve('../../common/discover/group6'),
     ],
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 5',

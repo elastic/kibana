@@ -195,7 +195,6 @@ describe('filterByAgent', () => {
           'deactivate_all_instrumentations',
           'deactivate_instrumentations',
           'logging_level',
-          'recording',
           'send_logs',
           'send_metrics',
           'send_traces',

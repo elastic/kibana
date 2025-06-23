@@ -133,6 +133,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async clickAndValidateMetricChartActionOptions() {
       const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
+
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
       await testSubjects.existOrFail('embeddablePanelAction-openInLens');

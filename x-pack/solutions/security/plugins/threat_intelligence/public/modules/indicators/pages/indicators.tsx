@@ -37,7 +37,7 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
 const IndicatorsPageContent: VFC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView, browserFields } = useSourcererDataView();
 
   const columnSettings = useColumnSettings();
 
@@ -91,7 +91,6 @@ const IndicatorsPageContent: VFC = () => {
           dateRange={dateRange}
           series={series}
           timeRange={timeRange}
-          indexPattern={indexPattern}
           field={selectedField}
           onFieldChange={onFieldChange}
           isFetching={isFetchingAggregatedIndicators}
@@ -100,7 +99,6 @@ const IndicatorsPageContent: VFC = () => {
 
         <IndicatorsTable
           browserFields={browserFields}
-          indexPattern={indexPattern}
           columnSettings={columnSettings}
           pagination={pagination}
           indicatorCount={indicatorCount}

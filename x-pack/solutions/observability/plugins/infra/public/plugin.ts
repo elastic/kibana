@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  AppDeepLinkLocations,
-  ApplicationStart,
-} from '@kbn/core/public';
+import type { PluginInitializerContext, AppDeepLinkLocations } from '@kbn/core/public';
 import {
   type AppMountParameters,
   type AppUpdater,
@@ -19,7 +15,6 @@ import {
   AppStatus,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
 import type { MetricsExplorerLocatorParams } from '@kbn/observability-shared-plugin/common';
 import { METRICS_EXPLORER_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import {
@@ -32,24 +27,18 @@ import {
   map,
   firstValueFrom,
 } from 'rxjs';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import {
   ASSET_DETAILS_LOCATOR_ID,
   INVENTORY_LOCATOR_ID,
   type AssetDetailsLocatorParams,
   type InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import { OBSERVABILITY_ENABLE_LOGS_STREAM } from '@kbn/management-settings-ids';
 import type { NavigationEntry } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { ADD_LOG_STREAM_ACTION_ID, LOG_STREAM_EMBEDDABLE } from './components/log_stream/constants';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -64,7 +53,6 @@ import type {
   InfraClientStartExports,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
-import type { LogStreamSerializedState } from './components/log_stream/types';
 import {
   hostsTitle,
   inventoryTitle,
@@ -97,8 +85,6 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
-    const isLogsStreamEnabled = core.uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
-
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
@@ -138,25 +124,18 @@ export class Plugin implements InfraClientPluginClass {
       messageFields: this.config.sources?.default?.fields?.message,
     });
 
-    const startDep$AndAccessibleFlag$ = combineLatest([
-      from(core.getStartServices()),
-      core.settings.client.get$<boolean>(enableInfrastructureHostsView),
-    ]).pipe(
-      switchMap(([[{ application }], isInfrastructureHostsViewEnabled]) =>
-        combineLatest([
-          of(application),
-          of(isInfrastructureHostsViewEnabled),
-          getLogsExplorerAccessible$(application),
-        ])
+    const startDep$AndAccessibleFlag$ = from(core.getStartServices()).pipe(
+      switchMap(([{ application }]) =>
+        combineLatest([of(application), getLogsExplorerAccessible$(application)])
       )
     );
 
-    const logRoutes = getLogsAppRoutes({ isLogsStreamEnabled });
+    const logRoutes = getLogsAppRoutes();
 
     /** !! Need to be kept in sync with the deepLinks in x-pack/solutions/observability/plugins/infra/public/plugin.ts */
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndAccessibleFlag$.pipe(
-        map(([application, isInfrastructureHostsViewEnabled, isLogsExplorerAccessible]) => {
+        map(([application, isLogsExplorerAccessible]) => {
           const { infrastructure, logs } = application.capabilities;
           return [
             ...(logs.show
@@ -192,15 +171,11 @@ export class Plugin implements InfraClientPluginClass {
                             },
                           ]
                         : []),
-                      ...(isInfrastructureHostsViewEnabled
-                        ? [
-                            {
-                              label: hostsTitle,
-                              app: 'metrics',
-                              path: '/hosts',
-                            },
-                          ]
-                        : []),
+                      {
+                        label: hostsTitle,
+                        app: 'metrics',
+                        path: '/hosts',
+                      },
                     ],
                   },
                 ]
@@ -209,18 +184,6 @@ export class Plugin implements InfraClientPluginClass {
         })
       )
     );
-
-    pluginsSetup.embeddable.registerReactEmbeddableFactory(LOG_STREAM_EMBEDDABLE, async () => {
-      const { getLogStreamEmbeddableFactory } = await import(
-        './components/log_stream/log_stream_react_embeddable'
-      );
-      const [coreStart, pluginDeps, pluginStart] = await core.getStartServices();
-      return getLogStreamEmbeddableFactory({
-        coreStart,
-        pluginDeps,
-        pluginStart,
-      });
-    });
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createLogThresholdRuleType(core, pluginsSetup.share.url)
@@ -253,10 +216,8 @@ export class Plugin implements InfraClientPluginClass {
 
     // !! Need to be kept in sync with the routes in x-pack/solutions/observability/plugins/infra/public/pages/metrics/index.tsx
     const getInfraDeepLinks = ({
-      hostsEnabled,
       metricsExplorerEnabled,
     }: {
-      hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
       const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
@@ -268,18 +229,14 @@ export class Plugin implements InfraClientPluginClass {
           path: '/inventory',
           visibleIn,
         },
-        ...(hostsEnabled
-          ? [
-              {
-                id: 'hosts',
-                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-                  defaultMessage: 'Hosts',
-                }),
-                path: '/hosts',
-                visibleIn,
-              },
-            ]
-          : []),
+        {
+          id: 'hosts',
+          title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+            defaultMessage: 'Hosts',
+          }),
+          path: '/hosts',
+          visibleIn,
+        },
         ...(metricsExplorerEnabled
           ? [
               {
@@ -318,7 +275,6 @@ export class Plugin implements InfraClientPluginClass {
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
       deepLinks: getInfraDeepLinks({
-        hostsEnabled: core.settings.client.get<boolean>(enableInfrastructureHostsView),
         metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
       }),
       mount: async (params: AppMountParameters) => {
@@ -343,20 +299,13 @@ export class Plugin implements InfraClientPluginClass {
       },
     });
 
-    startDep$AndAccessibleFlag$.subscribe(
-      ([_startServices, isInfrastructureHostsViewEnabled, _isLogsExplorerAccessible]: [
-        ApplicationStart,
-        boolean,
-        boolean
-      ]) => {
-        this.appUpdater$.next(() => ({
-          deepLinks: getInfraDeepLinks({
-            hostsEnabled: isInfrastructureHostsViewEnabled,
-            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
-          }),
-        }));
-      }
-    );
+    startDep$AndAccessibleFlag$.subscribe(([_applicationStart, _isLogsExplorerAccessible]) => {
+      this.appUpdater$.next(() => ({
+        deepLinks: getInfraDeepLinks({
+          metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+        }),
+      }));
+    });
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
@@ -364,49 +313,10 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const { http, uiSettings } = core;
-    const isLogsStreamEnabled = uiSettings.get(OBSERVABILITY_ENABLE_LOGS_STREAM, false);
+    const { http } = core;
     const inventoryViews = this.inventoryViews.start({ http });
     const metricsExplorerViews = this.metricsExplorerViews?.start({ http });
     const telemetry = this.telemetry.start();
-
-    if (isLogsStreamEnabled) {
-      plugins.uiActions.registerAction<EmbeddableApiContext>({
-        id: ADD_LOG_STREAM_ACTION_ID,
-        grouping: [ADD_PANEL_OTHER_GROUP],
-        order: 30,
-        getDisplayName: () =>
-          i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
-            defaultMessage: 'Log stream (deprecated)',
-          }),
-        getDisplayNameTooltip: () =>
-          i18n.translate('xpack.infra.logStreamEmbeddable.description', {
-            defaultMessage:
-              'Add a table of live streaming logs. For a more efficient experience, we recommend using the Discover Page to create a saved Discover session instead of using Log stream.',
-          }),
-        getIconType: () => 'logsApp',
-        isCompatible: async ({ embeddable }) => {
-          return apiCanAddNewPanel(embeddable);
-        },
-        execute: async ({ embeddable }) => {
-          if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-          embeddable.addNewPanel<LogStreamSerializedState>(
-            {
-              panelType: LOG_STREAM_EMBEDDABLE,
-              serializedState: {
-                rawState: {
-                  title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
-                    defaultMessage: 'Log stream',
-                  }),
-                },
-              },
-            },
-            true
-          );
-        },
-      });
-      plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LOG_STREAM_ACTION_ID);
-    }
 
     const startContract: InfraClientStartExports = {
       inventoryViews,
@@ -442,13 +352,10 @@ const getLogsNavigationEntries = ({
     });
   }
 
-  // Display Stream nav entry when Logs Stream is enabled
-  if (routes.stream) entries.push(createNavEntryFromRoute(routes.stream));
   // Display always Logs Anomalies and Logs Categories entries
   entries.push(createNavEntryFromRoute(routes.logsAnomalies));
   entries.push(createNavEntryFromRoute(routes.logsCategories));
-  // Display Logs Settings entry when Logs Stream is not enabled
-  if (!routes.stream) entries.push(createNavEntryFromRoute(routes.settings));
+  entries.push(createNavEntryFromRoute(routes.settings));
 
   return entries;
 };

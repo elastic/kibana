@@ -18,8 +18,16 @@ import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
+import type {
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedState,
+  StructuredDatasourceStates,
+} from './types';
 import { loadESQLAttributes } from './esql';
+import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
+import { FormBasedPersistedState } from '../datasources/form_based/types';
+import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -137,4 +145,17 @@ export function extractInheritedViewModeObservable(
     return extractInheritedViewModeObservable(parentApi.parentApi);
   }
   return new BehaviorSubject<ViewMode>('view');
+}
+
+export function getStructuredDatasourceStates(
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+): StructuredDatasourceStates {
+  return {
+    formBased: ((datasourceStates as DatasourceStates)?.formBased?.state ??
+      datasourceStates?.formBased ??
+      undefined) as FormBasedPersistedState,
+    textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
+      datasourceStates?.textBased ??
+      undefined) as TextBasedPersistedState,
+  };
 }

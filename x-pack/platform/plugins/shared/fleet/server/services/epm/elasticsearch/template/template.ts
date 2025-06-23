@@ -311,12 +311,25 @@ function _generateMappings(
         matchingType = field.object_type_mapping_type ?? '*';
         break;
       case 'ip':
+        dynProperties.type = field.object_type;
+        matchingType = field.object_type_mapping_type ?? 'string';
+        break;
       case 'keyword':
+        dynProperties = keyword(field, true);
+        matchingType = field.object_type_mapping_type ?? 'string';
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
+        break;
       case 'match_only_text':
       case 'text':
       case 'wildcard':
-        dynProperties.type = field.object_type;
         matchingType = field.object_type_mapping_type ?? 'string';
+        const textMapping = generateTextMappingForDynamic(field);
+        dynProperties = { ...dynProperties, ...textMapping, type: field.object_type };
+        if (field.multi_fields) {
+          dynProperties.fields = generateMultiFields(field.multi_fields);
+        }
         break;
       case 'scaled_float':
         dynProperties = scaledFloat(field);
@@ -717,6 +730,17 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   const mapping: IndexTemplateMapping = {
     ignore_above: DEFAULT_IGNORE_ABOVE,
   };
+  if (field.null_value) {
+    mapping.null_value = field.null_value;
+  }
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
+//  This is a duplicate of the above function, but without the default 'ignore_above' value for dynamic mappings. We dont want to enforce due to backwards compatibility
+function generateTextMappingForDynamic(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
   if (field.null_value) {
     mapping.null_value = field.null_value;
   }

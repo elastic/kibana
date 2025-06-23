@@ -108,16 +108,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
     },
 
-    async cpuProfilingPromptMissing() {
-      return testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
-    },
-
     async profilingTabExists() {
       return testSubjects.existOrFail('infraAssetDetailsProfilingTab');
-    },
-
-    async profilingTabMissing() {
-      return testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
     },
 
     async getOverviewTabHostMetricCharts(metric: string) {

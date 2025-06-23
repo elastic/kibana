@@ -9,7 +9,14 @@
 
 import React from 'react';
 
-import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiButtonColor,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
@@ -27,8 +34,9 @@ export interface TryInConsoleButtonProps {
   consolePlugin?: ConsolePluginStart;
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
+  color?: EuiButtonColor;
   showIcon?: boolean;
-  type?: 'link' | 'button' | 'emptyButton';
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
   onClick?: () => void;
 }
@@ -38,6 +46,7 @@ export const TryInConsoleButton = ({
   consolePlugin,
   sharePlugin,
   content = RUN_IN_CONSOLE,
+  color,
   showIcon = true,
   type = 'emptyButton',
   telemetryId,
@@ -87,12 +96,21 @@ export const TryInConsoleButton = ({
   };
 
   const commonProps = {
-    'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    'data-test-subj':
+      type === 'link'
+        ? 'tryInConsoleLink'
+        : type === 'contextMenuItem'
+        ? 'tryInConsoleContextMenuItem'
+        : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
   };
   const iconType = showIcon ? 'play' : undefined;
+
+  const noPadding = css({
+    padding: 0,
+  });
 
   switch (type) {
     case 'link':
@@ -103,10 +121,16 @@ export const TryInConsoleButton = ({
           {content}
         </EuiButton>
       );
+    case 'contextMenuItem':
+      return (
+        <EuiContextMenuItem icon={iconType} hasPanel={false} css={noPadding} {...commonProps}>
+          {content}
+        </EuiContextMenuItem>
+      );
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={iconType} color={color} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );

@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
+import { apm } from '@elastic/apm-rum';
 
+import { getErrorBoundaryLabels } from '../../lib';
 import type { KibanaErrorBoundaryServices } from '../../types';
-import { useErrorBoundary } from '../services/error_boundary_services';
+import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
 
 interface SectionErrorBoundaryProps {
@@ -63,7 +65,10 @@ class SectionErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error('Error caught by Kibana React Section Error Boundary'); // eslint-disable-line no-console
+    apm.captureError(error, {
+      labels: getErrorBoundaryLabels('SectionFatalReactError'),
+    });
+    console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);

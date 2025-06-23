@@ -18,6 +18,14 @@ describe('getLocationObservable', () => {
 
   beforeEach(() => {
     history = createBrowserHistory();
+    history.push('/foo'); // Set an initial location
+  });
+
+  it('falls back to window.location if history.location does not exist', async () => {
+    // Hard-mocking because history.location is always present. But our logic has the fallback just in case.
+    history.location = undefined as any;
+    const location$ = getLocationObservable({ pathname: '/window-foo', hash: '' }, history);
+    expect(await firstValueFrom(location$)).toEqual('/window-foo');
   });
 
   it('emits with the initial location', async () => {
@@ -53,6 +61,7 @@ describe('getLocationObservable', () => {
   });
 
   it('includes the hash when present', async () => {
+    history.push({ pathname: '/foo', hash: '#/index' }); // Set an initial location with hash
     const location$ = getLocationObservable({ pathname: '/foo', hash: '#/index' }, history);
     const locations: string[] = [];
     location$.subscribe((location) => locations.push(location));

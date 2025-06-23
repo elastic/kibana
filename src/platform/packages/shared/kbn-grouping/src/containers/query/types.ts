@@ -43,6 +43,8 @@ export interface GroupingQueryArgs {
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];
   to: string;
+  multiValueFieldsToFlatten?: string[];
+  countByKeyForMultiValueFields?: string;
 }
 
 export interface MainAggregation extends NamedAggregation {

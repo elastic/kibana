@@ -449,7 +449,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: generateIngestPipeline(this._definition.name, this._definition, {
+          isServerless: this.dependencies.isServerless,
+        }),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -460,7 +462,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name, this.dependencies.isServerless),
+        request: generateIndexTemplate(this._definition.name),
       },
       {
         type: 'upsert_datastream',
@@ -535,7 +537,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: generateIngestPipeline(this._definition.name, this._definition, {
+          isServerless: this.dependencies.isServerless,
+        }),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
@@ -562,10 +566,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    actions.push({
-      type: 'upsert_dot_streams_document',
-      request: this._definition,
-    });
+    const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
+
+    if (definitionChanged) {
+      actions.push({
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      });
+    }
 
     return actions;
   }

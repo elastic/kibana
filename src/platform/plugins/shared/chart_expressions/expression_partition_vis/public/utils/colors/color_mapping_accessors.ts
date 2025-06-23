@@ -8,14 +8,13 @@
  */
 
 import { NodeColorAccessor, PATH_KEY } from '@elastic/charts';
-import { lightenColor } from '@kbn/charts-plugin/public';
-import { MultiFieldKey } from '@kbn/data-plugin/common';
+import { decreaseOpacity } from '@kbn/charts-plugin/public';
 import { getColorFactory } from '@kbn/coloring';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { MultiFieldKey } from '@kbn/data-plugin/common';
 import { ChartTypes } from '../../../common/types';
 
 export function getCategoryKeys(category: string | MultiFieldKey): string | string[] {
-  return isMultiFieldKey(category) ? category.keys.map(String) : `${category}`;
+  return MultiFieldKey.isInstance(category) ? category.keys.map(String) : `${category}`;
 }
 
 /**
@@ -34,8 +33,8 @@ const getPieFillColor =
     // first two are: small multiple and pie whole center.
     const category = getCategoryKeys(path[2].value);
     const color = getColorFn(category);
-    // increase the lightness of the color on each layer.
-    return lightenColor(color, layerIndex + 1, numOfLayers);
+    // progressively decrease opacity of base color on each layer.
+    return decreaseOpacity(color, layerIndex + 1, numOfLayers);
   };
 
 /**

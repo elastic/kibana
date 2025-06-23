@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { TestProviders } from '../../mock';
 import { MarkdownRenderer } from './renderer';

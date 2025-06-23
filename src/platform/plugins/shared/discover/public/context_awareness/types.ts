@@ -57,6 +57,7 @@ export interface AppMenuExtensionParams {
   isEsqlMode: boolean;
   dataView: DataView | undefined;
   adHocDataViews: DataView[];
+  authorizedRuleTypeIds: string[];
   onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
 }
 
@@ -181,6 +182,16 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * Function to set the expanded document, which is displayed in a flyout
+   * @param record - The record to display in the flyout
+   * @param options.initialTabId - The tabId to display in the flyout
+   */
+  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
+  /**
+   * Flag to indicate if Flyout opening controls must be rendered or not
+   */
+  isDocViewerEnabled: boolean;
 }
 
 /**

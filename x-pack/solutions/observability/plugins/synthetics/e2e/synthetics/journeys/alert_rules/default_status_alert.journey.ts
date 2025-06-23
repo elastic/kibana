@@ -111,7 +111,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name: 'Test Monitor',
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -176,7 +176,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     const reasonMessage = getReasonMessage({
       name,
       location: 'North America - US Central',
-      status: 'down',
+      reason: 'down',
       checks: {
         downWithinXChecks: 1,
         down: 1,
@@ -196,7 +196,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
   step('Deleting the monitor recovers the alert', async () => {
     await services.deleteTestMonitorByQuery('"Test Monitor 2"');
-    await page.click(byTestId('alert-status-filter-recovered-button'));
+    const recoveredFilter = 'kibana.alert.status : "recovered" ';
+    await page.getByTestId('queryInput').fill(recoveredFilter);
+    await page.click(byTestId('querySubmitButton'));
+    await page.getByTestId('optionsList-control-0').hover();
+    await page.getByTestId('control-action-0-erase').click();
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
 
@@ -204,7 +208,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
       expect(await alertsCount.isVisible()).toBe(true);
     });
 
-    await page.click(byTestId('alert-status-filter-active-button'));
+    await page.getByTestId('queryInput').fill('kibana.alert.status : "active" ');
+    await page.click(byTestId('querySubmitButton'));
     await syntheticsApp.waitForLoadingToFinish();
     await page.waitForTimeout(10 * 1000);
 

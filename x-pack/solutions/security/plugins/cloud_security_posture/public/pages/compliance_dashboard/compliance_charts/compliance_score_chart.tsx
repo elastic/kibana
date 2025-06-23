@@ -11,6 +11,7 @@ import {
   Axis,
   Chart,
   niceTimeFormatByDay,
+  ScaleType,
   Settings,
   timeFormatter,
   Tooltip,
@@ -224,7 +225,8 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         // EuiChart is using this id in the tooltip label
         id="Posture Score"
         data={epochTimeTrend}
-        xScaleType="time"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />

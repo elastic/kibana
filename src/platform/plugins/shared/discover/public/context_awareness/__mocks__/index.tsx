@@ -26,8 +26,16 @@ import {
 import type { ProfileProviderServices } from '../profile_providers/profile_provider_services';
 import { ProfilesManager } from '../profiles_manager';
 import { DiscoverEBTManager } from '../../plugin_imports/discover_ebt_manager';
-import { createLogsContextServiceMock } from '@kbn/discover-utils/src/__mocks__';
+import {
+  createApmErrorsContextServiceMock,
+  createLogsContextServiceMock,
+  createTracesContextServiceMock,
+} from '@kbn/discover-utils/src/__mocks__';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
+import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
+
+export const FEATURE_ID_1 = 'discover:feature1';
+export const FEATURE_ID_2 = 'discover:feature2';
 
 export const createContextAwarenessMocks = ({
   shouldRegisterProviders = true,
@@ -62,6 +70,7 @@ export const createContextAwarenessMocks = ({
 
   const dataSourceProfileProviderMock: DataSourceProfileProvider = {
     profileId: 'data-source-profile',
+    restrictedToProductFeature: FEATURE_ID_1,
     profile: {
       getCellRenderers: jest.fn((prev) => (params) => ({
         ...prev(params),
@@ -189,5 +198,12 @@ const createProfileProviderServicesMock = () => {
   return {
     logsContextService: createLogsContextServiceMock(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
-  } as ProfileProviderServices;
+    tracesContextService: createTracesContextServiceMock(),
+    apmErrorsContextService: createApmErrorsContextServiceMock(),
+    core: {
+      pricing: pricingServiceMock.createStartContract() as ReturnType<
+        typeof pricingServiceMock.createStartContract
+      >,
+    },
+  } as unknown as ProfileProviderServices;
 };

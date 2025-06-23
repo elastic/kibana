@@ -48,7 +48,7 @@ export class AutoDeploy {
       {
         method: 'POST',
         version: '1',
-        body: JSON.stringify({ input: '' }),
+        body: JSON.stringify({ input: 'test' }),
       }
     );
   }
@@ -87,5 +87,9 @@ export class AutoDeploy {
       }
       await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL * 1000));
     }
+  }
+
+  public static shouldAutoDeploy(inferenceId: string | null) {
+    return inferenceId !== null && inferenceId.startsWith('.');
   }
 }

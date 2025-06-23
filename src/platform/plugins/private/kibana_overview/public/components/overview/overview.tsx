@@ -11,7 +11,6 @@ import './overview.scss';
 
 import { snakeCase } from 'lodash';
 import React, { FC, useState, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -34,6 +33,7 @@ import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FetchResult } from '@kbn/newsfeed-plugin/public';
 import {
   FeatureCatalogueEntry,
@@ -63,19 +63,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
-  const {
-    http,
-    docLinks,
-    dataViews,
-    share,
-    application,
-    chrome,
-    dataViewEditor,
-    customBranding,
-    theme,
-  } = services;
+  const { http, docLinks, dataViews, share, application, chrome, dataViewEditor, customBranding } =
+    services;
   const addBasePath = http.basePath.prepend;
-  const currentTheme = useObservable(theme.theme$, { darkMode: false });
+  const isDarkMode = useKibanaIsDarkMode();
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
@@ -148,9 +139,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                 trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
               }}
               image={addBasePath(
-                `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${
-                  currentTheme.darkMode ? 'dark' : 'light'
-                }.svg`
+                `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${isDarkMode ? 'dark' : 'light'}.svg`
               )}
               title={app.title}
               titleElement="h3"

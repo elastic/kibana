@@ -66,6 +66,7 @@ export const MACHINE_LEARNING_LANDING_URL = '/app/security/ml';
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
 export const ALERTS_URL = '/app/security/alerts';
+export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
@@ -79,6 +80,19 @@ export const exceptionsListDetailsUrl = (listId: string) =>
 export const DISCOVER_URL = '/app/discover';
 export const OSQUERY_URL = '/app/osquery';
 export const FLEET_URL = '/app/fleet';
+export const VISUALIZE_URL = '/app/visualize';
+export const MAPS_URL = '/app/maps';
+export const LENS_URL = '/app/lens';
+export const APP_DASHBOARDS_URL = '/app/dashboards';
 
 // Entity Analytics
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
+
+export const SIEM_MIGRATIONS_TRANSLATED_RULES_URL = 'app/security/siem_migrations/rules';
+
+// Alerting
+export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
+export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Custom Role Creation
+export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';

@@ -13,8 +13,11 @@ import { BucketColumns, ChartTypes } from '../../../common/types';
 import { createMockPieParams, createMockVisData } from '../../mocks';
 import { getPaletteRegistry } from '../../__mocks__/palettes';
 import { getLayers } from './get_layers';
+import { getKbnPalettes } from '@kbn/palettes';
 
 describe('getLayers', () => {
+  const palettes = getKbnPalettes({ darkMode: false });
+
   it('preserves slice order for multi-metric layer', () => {
     const visData = createMockVisData();
     const columns: BucketColumns[] = [
@@ -43,6 +46,7 @@ describe('getLayers', () => {
       {},
       [],
       getPaletteRegistry(),
+      palettes,
       {},
       fieldFormatsMock,
       false,
@@ -153,6 +157,7 @@ describe('getLayers', () => {
       {},
       [],
       getPaletteRegistry(),
+      palettes,
       {},
       fieldFormatsMock,
       false,

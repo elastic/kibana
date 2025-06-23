@@ -227,6 +227,60 @@ Object {
     },
     Object {
       "correctiveAction": Object {
+        "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.25",
+      "index": "apm-7.17.7-transaction.000001",
+      "level": "critical",
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
+    Object {
+      "correctiveAction": Object {
+        "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.25",
+      "index": "apm-7.17.7-span.000001",
+      "level": "critical",
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
+    Object {
+      "correctiveAction": Object {
+        "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.25",
+      "index": "apm-7.17.7-onboarding.25-05-27",
+      "level": "critical",
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
+    Object {
+      "correctiveAction": Object {
         "metadata": Object {
           "excludedActions": Array [],
           "ignoredIndicesRequiringUpgrade": Array [],
@@ -269,7 +323,7 @@ Object {
       "url": "https://github.com/elastic/elasticsearch/pull/117172",
     },
   ],
-  "totalCriticalDeprecations": 9,
+  "totalCriticalDeprecations": 12,
   "totalCriticalHealthIssues": 0,
 }
 `;

@@ -8,7 +8,7 @@
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { initializeTitleManager, PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -21,7 +21,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -41,7 +41,7 @@ function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
     // Static props
     type: DOC_TYPE,
-    uuid: faker.random.uuid(),
+    uuid: faker.string.uuid(),
     // Shared Embeddable Observables
     title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
     hideTitle$: new BehaviorSubject<boolean | undefined>(false),
@@ -81,9 +81,9 @@ function getDefaultLensApiMock() {
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
-    createAlertRule: jest.fn(),
+    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
-      id: faker.random.uuid(),
+      id: faker.string.uuid(),
       status: 'rendered',
       timeToEvent: 1000,
     }),
@@ -122,7 +122,7 @@ export function getLensAttributesMock(attributes?: Partial<LensRuntimeState['att
   return deepMerge(getDefaultLensSerializedStateMock().attributes!, attributes ?? {});
 }
 
-export function getLensApiMock(overrides: Partial<LensApi> = {}) {
+export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
   return {
     ...getDefaultLensApiMock(),
     ...overrides,
@@ -131,7 +131,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}) {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.random.uuid(),
+    savedObjectId: faker.string.uuid(),
     ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };
@@ -192,26 +192,28 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(
-        () =>
-          ({
-            api: {
-              enhancements: { dynamicActions: {} },
-              setDynamicActions: jest.fn(),
-              dynamicActionsState$: {},
-            } as unknown as EmbeddableDynamicActionsManager['api'],
-            anyStateChange$: of(undefined),
-            comparators: {
-              enhancements: jest.fn(),
-            },
-            getLatestState: jest.fn(),
-            reinitializeState: jest.fn(),
-            startDynamicActions: jest.fn(),
-          } as EmbeddableDynamicActionsManager)
-      ),
+      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
+}
+
+export function mockDynamicActionsManager() {
+  return {
+    api: {
+      enhancements: { dynamicActions: {} },
+      setDynamicActions: jest.fn(),
+      dynamicActionsState$: {},
+    } as unknown as EmbeddableDynamicActionsManager['api'],
+    anyStateChange$: of(undefined),
+    comparators: {
+      enhancements: jest.fn(),
+    },
+    getLatestState: jest.fn(),
+    serializeState: jest.fn(),
+    reinitializeState: jest.fn(),
+    startDynamicActions: jest.fn(),
+  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (
@@ -322,8 +324,9 @@ export function createUnifiedSearchApi(
   };
 }
 
-export function createEsqlVariablesApi() {
+export function createParentApiMock(overrides: object = {}) {
   return {
     esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
+    ...overrides,
   };
 }

@@ -34,7 +34,6 @@ import {
 } from '../../../../../common/translations';
 import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
 import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
-import { useDatasetQualityDetailsContext } from '../../context';
 import { TrendDocsChart } from './trend_docs_chart';
 
 const trendDocsTooltip = (
@@ -61,8 +60,8 @@ const degradedDocsTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
-  const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
+  const { timeRange, updateTimeRange, docsTrendChart, canUserReadFailureStore } =
+    useDatasetQualityDetailsState();
   const {
     dataView,
     breakdown,
@@ -82,7 +81,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     [updateTimeRange, timeRange.refresh]
   );
 
-  const accordionTitle = !isFailureStoreEnabled ? (
+  const accordionTitle = !canUserReadFailureStore ? (
     <EuiFlexItem
       css={css`
         flex-direction: row;
@@ -128,7 +127,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
-            {isFailureStoreEnabled && (
+            {canUserReadFailureStore && (
               <EuiButtonGroup
                 data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
                 legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {

@@ -8,12 +8,12 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { combineLatest, skip } from 'rxjs';
+import { skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridPanelDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -21,23 +21,23 @@ export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) =>
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.activePanel$,
-        gridLayoutStateManager.proposedGridLayout$,
-      ])
+      const styleSubscription = gridLayoutStateManager.activePanelEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe(([activePanel, proposedGridLayout]) => {
+        .subscribe((activePanel) => {
           if (!dragPreviewRef.current) return;
-
-          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
+          const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+          const sectionId = activePanel?.targetSection;
+          if (!activePanel || !sectionId || !gridLayout[sectionId]?.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowId].panels[activePanel.id];
+            const panel = gridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
-            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            dragPreviewRef.current.style.gridRowStart = `${`gridRow-${sectionId}`} ${
+              panel.row + 1
+            }`;
+            dragPreviewRef.current.style.gridRowEnd = `span ${panel.height}`;
           }
         });
 

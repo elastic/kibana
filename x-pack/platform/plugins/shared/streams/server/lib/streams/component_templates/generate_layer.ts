@@ -16,10 +16,12 @@ import {
   isDslLifecycle,
   isIlmLifecycle,
   isRoot,
+  namespacePrefixes,
 } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
+import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
@@ -50,6 +52,14 @@ export function generateLayer(
     }
 
     properties[field] = property;
+    const matchingPrefix = namespacePrefixes.find((prefix) => field.startsWith(prefix));
+    if (matchingPrefix) {
+      const aliasName = field.substring(matchingPrefix.length);
+      properties[aliasName] = {
+        type: 'alias',
+        path: field,
+      };
+    }
   });
 
   return {
@@ -58,9 +68,13 @@ export function generateLayer(
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
       mappings: {
-        subobjects: false,
         dynamic: false,
-        properties,
+        properties: isRoot(name)
+          ? {
+              ...baseMappings,
+              ...properties,
+            }
+          : properties,
       },
     },
     version: ASSET_VERSION,

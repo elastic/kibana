@@ -31,7 +31,7 @@ export {
   useGlobalUiSetting$,
 } from './ui_settings';
 
-export { useDarkMode } from './dark_mode';
+export { useDarkMode } from './dark_mode/use_dark_mode';
 
 export { useExecutionContext } from './use_execution_context';
 

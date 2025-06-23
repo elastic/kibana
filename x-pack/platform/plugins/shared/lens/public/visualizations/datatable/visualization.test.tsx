@@ -27,13 +27,14 @@ import {
   DatatableColumnFn,
   DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { getColorStops } from '../../shared_components/coloring';
+import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../shared_components/coloring', () => {
   return {
     ...jest.requireActual('../../shared_components/coloring'),
-    getColorStops: jest.fn().mockReturnValue([]),
+    getPaletteDisplayColors: jest.fn().mockReturnValue([]),
   };
 });
 
@@ -438,7 +439,7 @@ describe('Datatable Visualization', () => {
       let params: VisualizationConfigProps<DatatableVisualizationState>;
 
       beforeEach(() => {
-        (getColorStops as jest.Mock).mockReturnValue(mockStops);
+        (getPaletteDisplayColors as jest.Mock).mockReturnValue(mockStops);
       });
 
       describe('rows', () => {
@@ -483,7 +484,7 @@ describe('Datatable Visualization', () => {
         it.each<ColumnState['colorMode']>(['cell', 'text'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
-            (getColorStops as jest.Mock).mockReturnValue([]);
+            (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[0].accessors).toEqual([
               { columnId: 'b' },
@@ -532,7 +533,7 @@ describe('Datatable Visualization', () => {
         it.each<ColumnState['colorMode']>(['cell', 'text'])(
           'should not include palette if colorMode is %s but stops is empty',
           (colorMode) => {
-            (getColorStops as jest.Mock).mockReturnValue([]);
+            (getPaletteDisplayColors as jest.Mock).mockReturnValue([]);
             params.state.columns[0].colorMode = colorMode;
             expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
               { columnId: 'b' },
@@ -923,6 +924,25 @@ describe('Datatable Visualization', () => {
           alignment: [],
         })
       );
+    });
+
+    it('sets density based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).density).toEqual([
+        DataGridDensity.NORMAL,
+      ]);
+
+      for (const DENSITY of [
+        DataGridDensity.COMPACT,
+        DataGridDensity.NORMAL,
+        DataGridDensity.EXPANDED,
+      ]) {
+        expect(
+          getDatatableExpressionArgs({
+            ...defaultExpressionTableState,
+            density: DENSITY,
+          }).density
+        ).toEqual([DENSITY]);
+      }
     });
 
     describe('palette/colorMapping/colorMode', () => {

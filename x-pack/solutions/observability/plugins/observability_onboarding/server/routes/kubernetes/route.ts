@@ -65,7 +65,11 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
+      createShipperApiKey(
+        client.asCurrentUser,
+        params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
+        true
+      ),
       getAgentVersionInfo(fleetPluginStart, kibanaVersion, params.body.agentVersionPattern),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),

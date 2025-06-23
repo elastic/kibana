@@ -7,6 +7,7 @@
 
 import type { ValuesType } from 'utility-types';
 import { FromToolSchema, ToolSchema } from './tool_schema';
+import { ToolMessage } from './messages';
 
 type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'] extends {
   function: infer TToolName;
@@ -17,6 +18,21 @@ type ToolsOfChoice<TToolOptions extends ToolOptions> = TToolOptions['toolChoice'
       : TToolOptions['tools']
     : TToolOptions['tools']
   : TToolOptions['tools'];
+
+type ToolCallbacksOfTools<TTools extends Record<string, ToolDefinition> | undefined> =
+  TTools extends Record<string, ToolDefinition>
+    ? {
+        [TName in keyof TTools & string]: (
+          toolCall: ToolCall<TName, ToolResponseOf<TTools[TName]>>
+        ) => Promise<ToolMessage['response']>;
+      }
+    : never;
+
+export type ToolCallbacksOf<TToolOptions extends ToolOptions> = TToolOptions extends {
+  tools?: Record<string, ToolDefinition>;
+}
+  ? ToolCallbacksOfTools<TToolOptions['tools']>
+  : never;
 
 /**
  * Utility type to infer the tool calls response shape.

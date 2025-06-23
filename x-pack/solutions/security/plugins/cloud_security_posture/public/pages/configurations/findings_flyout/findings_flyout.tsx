@@ -38,11 +38,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
-import { isNativeCspFinding } from '../../../common/utils/is_native_csp_finding';
+import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
   getVendorName,
-} from '../../../common/utils/get_vendor_name';
+} from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { truthy } from '../../../../common/utils/helpers';
 import { benchmarksNavigation } from '../../../common/navigation/constants';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';

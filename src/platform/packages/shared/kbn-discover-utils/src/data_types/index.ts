@@ -8,3 +8,5 @@
  */
 
 export * from './logs';
+export * from './traces';
+export * from './apm';

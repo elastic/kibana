@@ -19,6 +19,7 @@ import type { RootContext } from './root_profile';
  * Indicates the category of the data source (e.g. logs, alerts, etc.)
  */
 export enum DataSourceCategory {
+  Traces = 'traces',
   Logs = 'logs',
   Default = 'default',
 }

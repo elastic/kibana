@@ -902,8 +902,13 @@ describe('Ad Hoc Task Runner', () => {
     expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
       'abc',
-      { refresh: false, namespace: undefined }
+      { refresh: true, namespace: undefined }
     );
+
+    // Verify that updateGaps was called after delete
+    const deleteCallOrder = internalSavedObjectsRepository.delete.mock.invocationCallOrder[0];
+    const updateGapsCallOrder = mockUpdateGaps.mock.invocationCallOrder[0];
+    expect(updateGapsCallOrder).toBeGreaterThan(deleteCallOrder);
 
     expect(mockUpdateGaps).toHaveBeenCalledWith({
       ruleId: RULE_ID,
@@ -983,7 +988,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1045,7 +1050,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1107,7 +1112,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1171,7 +1176,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1328,7 +1333,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         'abc',
-        { refresh: false, namespace: undefined }
+        { refresh: true, namespace: undefined }
       );
 
       testAlertingEventLogCalls({
@@ -1477,7 +1482,7 @@ describe('Ad Hoc Task Runner', () => {
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledWith(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         mockedAdHocRunSO.id,
-        { namespace: undefined, refresh: false }
+        { namespace: undefined, refresh: true }
       );
 
       testAlertingEventLogCalls({

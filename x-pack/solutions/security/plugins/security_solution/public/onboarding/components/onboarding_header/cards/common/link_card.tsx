@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
-import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 import { useCardStyles } from './link_card.styles';
 import type { OnboardingHeaderCardId } from '../../constants';
 import { TELEMETRY_HEADER_CARD } from '../../constants';
+import { useOnboardingContext } from '../../../onboarding_context';
 
 interface LinkCardProps {
   id: OnboardingHeaderCardId;
@@ -28,11 +28,13 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
   ({ id, icon, title, description, onClick, href, target, linkText }) => {
     const cardStyles = useCardStyles();
     const cardClassName = classNames(cardStyles, 'headerCard');
-
+    const {
+      telemetry: { reportLinkClick },
+    } = useOnboardingContext();
     const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
-      trackOnboardingLinkClick(`${TELEMETRY_HEADER_CARD}_${id}`);
+      reportLinkClick?.(`${TELEMETRY_HEADER_CARD}_${id}`);
       onClick?.();
-    }, [id, onClick]);
+    }, [id, onClick, reportLinkClick]);
 
     return (
       <EuiCard

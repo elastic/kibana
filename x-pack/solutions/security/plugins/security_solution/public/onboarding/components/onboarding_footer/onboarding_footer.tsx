@@ -6,12 +6,21 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { useFooterItems } from './footer_items';
-import { trackOnboardingLinkClick } from '../lib/telemetry';
 import type { OnboardingFooterLinkItemId } from './constants';
 import { TELEMETRY_FOOTER_LINK } from './constants';
+import { useOnboardingContext } from '../onboarding_context';
 
 export const OnboardingFooter = React.memo(() => {
   const styles = useFooterStyles();
@@ -43,31 +52,46 @@ interface FooterLinkItemProps {
 
 export const FooterLinkItem = React.memo<FooterLinkItemProps>(
   ({ id, title, icon, description, link }) => {
+    const {
+      telemetry: { reportLinkClick },
+    } = useOnboardingContext();
+
     const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
-      trackOnboardingLinkClick(`${TELEMETRY_FOOTER_LINK}_${id}`);
-    }, [id]);
+      reportLinkClick?.(`${TELEMETRY_FOOTER_LINK}_${id}`);
+    }, [id, reportLinkClick]);
 
     return (
       <EuiFlexItem>
-        <img src={icon} alt={title} height="64" width="64" />
-        <EuiSpacer size="m" />
-        <EuiTitle size="xxs" className="itemTitle">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="xs">{description}</EuiText>
-        <EuiSpacer size="m" />
-        <EuiText size="xs">
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiLink
-            data-test-subj="footerLinkItem"
-            onClick={onClickWithReport}
-            href={link.href}
-            target="_blank"
-          >
-            {link.title}
-          </EuiLink>
-        </EuiText>
+        <EuiPanel
+          color="plain"
+          grow={false}
+          borderRadius="m"
+          paddingSize="none"
+          hasBorder={true}
+          className="itemPanel"
+        >
+          <span className="itemIconWrapper">
+            <EuiIcon type={icon} className="itemIcon" />
+          </span>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs" className="itemTitle">
+            <h3>{title}</h3>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs">{description}</EuiText>
+          <EuiSpacer size="m" />
+          <EuiText size="xs">
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiLink
+              data-test-subj="footerLinkItem"
+              onClick={onClickWithReport}
+              href={link.href}
+              target="_blank"
+            >
+              {link.title}
+            </EuiLink>
+          </EuiText>
+        </EuiPanel>
       </EuiFlexItem>
     );
   }

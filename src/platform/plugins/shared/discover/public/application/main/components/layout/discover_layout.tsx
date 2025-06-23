@@ -37,6 +37,7 @@ import {
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -45,6 +46,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
+import type { DiscoverTopNavProps } from '../top_nav/discover_topnav';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
@@ -64,7 +66,13 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useInternalStateSelector } from '../../state_management/redux';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
-const TopNavMemoized = React.memo(DiscoverTopNav);
+
+const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
+  // QueryClientProvider is used to allow querying the authorized rules api hook
+  <QueryClientProvider client={new QueryClient()}>
+    <DiscoverTopNav {...props} />
+  </QueryClientProvider>
+));
 
 export interface DiscoverLayoutProps {
   stateContainer: DiscoverStateContainer;

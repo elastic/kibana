@@ -13,18 +13,24 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
 export async function clearKnowledgeBase(es: Client) {
-  return es.deleteByQuery({
-    index: resourceNames.indexPatterns.kb,
-    conflicts: 'proceed',
-    query: { match_all: {} },
-    refresh: true,
-  });
+  return pRetry(
+    () => {
+      return es.deleteByQuery({
+        index: resourceNames.indexPatterns.kb,
+        conflicts: 'proceed',
+        query: { match_all: {} },
+        refresh: true,
+      });
+    },
+    { retries: 5 }
+  );
 }
 
 export async function waitForKnowledgeBaseIndex(
@@ -261,6 +267,16 @@ export async function getKnowledgeBaseEntriesFromEs(es: Client) {
   });
 
   return res.hits.hits;
+}
+
+export async function addKnowledgeBaseEntryToEs(es: Client, entry: KnowledgeBaseEntry) {
+  const result = await es.index({
+    index: resourceNames.writeIndexAlias.kb,
+    document: entry,
+    refresh: true,
+  });
+
+  return result;
 }
 
 export function getKnowledgeBaseEntriesFromApi({

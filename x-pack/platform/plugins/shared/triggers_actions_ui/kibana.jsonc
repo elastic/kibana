@@ -33,7 +33,8 @@
       "controls",
       "embeddable",
       "fieldsMetadata",
-      "uiActions"
+      "uiActions",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "cloud",

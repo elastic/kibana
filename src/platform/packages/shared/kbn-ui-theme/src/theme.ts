@@ -41,3 +41,7 @@ export const euiThemeVars: Theme = new Proxy(isDarkMode ? euiDarkVars : euiLight
     return Reflect.get(isDarkMode ? euiDarkVars : euiLightVars, accessedKey, ...rest);
   },
 });
+
+export function getEuiThemeVars(theme: { darkMode: boolean }) {
+  return theme.darkMode ? v8Dark : v8Light;
+}

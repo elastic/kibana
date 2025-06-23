@@ -162,7 +162,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserP
               }
               expandDetails={openPanelFirstTab}
               isPreviewMode={isPreviewMode}
-              isPreview={scopeId === TableId.rulePreview}
+              isRulePreview={scopeId === TableId.rulePreview}
             />
             <UserPanelHeader
               userName={userName}

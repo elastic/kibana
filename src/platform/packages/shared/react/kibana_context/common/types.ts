@@ -31,4 +31,5 @@ export interface KibanaTheme {
  */
 export interface ThemeServiceStart {
   theme$: Observable<KibanaTheme>;
+  getTheme?(): KibanaTheme;
 }

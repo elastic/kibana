@@ -155,34 +155,40 @@ export const pagePathGetters: {
     return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
   },
   integration_create: () => [INTEGRATIONS_BASE_PATH, `/create`],
-  integration_details_overview: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
-    const qs = stringify({ integration, addAgentToPolicyId });
+  integration_details_overview: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/overview${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_policies: ({
+    pkgkey,
+    integration,
+    addAgentToPolicyId,
+    returnAppId,
+    returnPath,
+  }) => {
+    const qs = stringify({ integration, addAgentToPolicyId, returnAppId, returnPath });
     return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
   },
-  integration_details_assets: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_settings: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/settings${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_configs: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/configs${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_custom: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/custom${integration ? `?integration=${integration}` : ''}`,
-  ],
-  integration_details_api_reference: ({ pkgkey, integration }) => [
-    INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/api-reference${integration ? `?integration=${integration}` : ''}`,
-  ],
+  integration_details_assets: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/assets${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_settings: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/settings${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_configs: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/configs${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_custom: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/custom${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_api_reference: ({ pkgkey, integration, returnAppId, returnPath }) => {
+    const qs = stringify({ integration, returnAppId, returnPath });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/api-reference${qs ? `?${qs}` : ''}`];
+  },
   integration_policy_edit: ({ packagePolicyId }) => [
     INTEGRATIONS_BASE_PATH,
     `/edit-integration/${packagePolicyId}`,

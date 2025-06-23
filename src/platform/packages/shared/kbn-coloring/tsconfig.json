@@ -23,6 +23,9 @@
     "@kbn/data-plugin",
     "@kbn/ui-theme",
     "@kbn/visualization-utils",
+    "@kbn/palettes",
+    "@kbn/field-formats-plugin",
+    "@kbn/expressions-plugin",
   ],
   "exclude": [
     "target/**/*",

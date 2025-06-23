@@ -19,10 +19,10 @@ import {
   EuiButtonIcon,
   EuiButtonEmpty,
   EuiCopy,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -36,20 +36,19 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-
-const codeFontCSS = css`
-  font-family: ${euiThemeVars.euiCodeFontFamily};
-`;
+import { truncateAndPreserveHighlightTags } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
-  /* ECS mapping for the key */
+  /** ECS mapping for the key */
   property: string;
-  /* Value for the mapping, which will be displayed */
+  /** Formatted value from the mapping, which will be displayed */
   value: string;
-  /* Optional callback to render the value */
+  /** The raw value from the mapping, can be an object */
+  rawValue: unknown;
+  /** Optional callback to render the formatted value */
   renderValue?: (value: string) => React.ReactNode;
-  /* Props to forward to the trigger Badge */
+  /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
       onClick: () => void;
@@ -63,14 +62,16 @@ export function CellActionsPopover({
   onFilter,
   property,
   value,
+  rawValue,
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
-      onFilter(property, value, operator);
+      onFilter(property, rawValue, operator);
     }
   };
 
@@ -94,9 +95,19 @@ export function CellActionsPopover({
         data-test-subj="dataTableCellActionPopoverTitle"
       >
         <EuiFlexItem style={{ maxWidth: '200px' }}>
-          <EuiText size="s" css={codeFontCSS}>
+          <EuiText
+            size="s"
+            className="eui-textBreakWord"
+            css={css`
+              font-family: ${euiTheme.font.familyCode};
+            `}
+          >
             <strong>{property}</strong>{' '}
-            {typeof renderValue === 'function' ? renderValue(value) : value}
+            {typeof renderValue === 'function'
+              ? renderValue(value)
+              : rawValue != null && typeof rawValue !== 'object'
+              ? (rawValue as React.ReactNode)
+              : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -157,8 +168,12 @@ export function CellActionsPopover({
 }
 
 export interface FieldBadgeWithActionsProps
-  extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
+  extends Pick<
+    CellActionsPopoverProps,
+    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+  > {
   icon?: EuiBadgeProps['iconType'];
+  color?: string;
 }
 
 interface FieldBadgeWithActionsDependencies {
@@ -175,28 +190,28 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
+  rawValue,
+  color = 'hollow',
 }: FieldBadgeWithActionsPropsAndDependencies) {
+  const MAX_LENGTH = 20;
+
   return (
     <CellActionsPopover
       onFilter={onFilter}
       property={property}
       value={value}
+      rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
-        <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">
-          {truncateMiddle(value)}
+        <EuiBadge {...popoverTriggerProps} color={color} iconType={icon} iconSide="left">
+          <span
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{
+              __html: truncateAndPreserveHighlightTags(value, MAX_LENGTH),
+            }}
+          />
         </EuiBadge>
       )}
     />
   );
-}
-
-const MAX_LENGTH = 20;
-
-function truncateMiddle(value: string): string {
-  if (value.length < MAX_LENGTH) {
-    return value;
-  }
-  const halfLength = MAX_LENGTH / 2;
-  return `${value.slice(0, halfLength)}...${value.slice(-halfLength)}`;
 }

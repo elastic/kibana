@@ -10,7 +10,14 @@
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiButtonGroup,
+  EuiSpacer,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import {
   IconSelectSetting,
   DimensionEditorSection,
@@ -338,6 +345,7 @@ const AnnotationEditorControls = ({
           label={i18n.translate('eventAnnotationComponents.xyChart.lineColor.label', {
             defaultMessage: 'Color',
           })}
+          swatches={euiPaletteColorBlind()}
         />
         <ConfigPanelGenericSwitch
           label={i18n.translate('eventAnnotationComponents.xyChart.annotation.hide', {

@@ -24,6 +24,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         ruleKqlBar: true,
         isMustacheAutocompleteOn: false,
         showMustacheAutocompleteSwitch: false,
+        alertDeletionSettingsEnabled: true,
       },
     });
 

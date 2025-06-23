@@ -29,7 +29,6 @@ import { createJourneyScreenshotBlocksRoute } from './pings/journey_screenshot_b
 import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
 import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
-import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
@@ -80,7 +79,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
-  syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
   updateDefaultAlertingRoute,

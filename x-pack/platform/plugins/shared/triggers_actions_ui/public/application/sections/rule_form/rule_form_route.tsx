@@ -27,6 +27,7 @@ export const RuleFormRoute = () => {
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
+    contentManagement,
     chrome,
     isServerless,
     setBreadcrumbs,
@@ -74,6 +75,7 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
         isServerless={isServerless}

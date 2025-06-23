@@ -20,12 +20,14 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { KbnPalettes } from '@kbn/palettes';
 import {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XScaleType,
+  PointVisibility,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes, AxisModes } from '../../common/constants';
 import {
@@ -49,6 +51,7 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
+  palettes: KbnPalettes;
   formattedDatatables: DatatablesWithFormatInfo;
   syncColors: boolean;
   timeZone: string;
@@ -62,6 +65,7 @@ interface Props {
   uiState?: PersistedState;
   singleTable?: boolean;
   isDarkMode: boolean;
+  pointVisibility?: PointVisibility;
 }
 
 export const DataLayers: FC<Props> = ({
@@ -75,6 +79,7 @@ export const DataLayers: FC<Props> = ({
   minBarHeight,
   formatFactory,
   paletteService,
+  palettes,
   fittingFunction,
   emphasizeFitting,
   yAxesConfiguration,
@@ -87,6 +92,7 @@ export const DataLayers: FC<Props> = ({
   uiState,
   singleTable,
   isDarkMode,
+  pointVisibility,
 }) => {
   // for singleTable mode we should use y accessors from all layers for creating correct series name and getting color
   const allYAccessors = layers.flatMap((layer) => layer.accessors);
@@ -141,9 +147,6 @@ export const DataLayers: FC<Props> = ({
             ? JSON.parse(columnToLabel)
             : {};
 
-          // what if row values are not primitive? That is the case of, for instance, Ranges
-          // remaps them to their serialized version with the formatHint metadata
-          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
@@ -163,6 +166,7 @@ export const DataLayers: FC<Props> = ({
             formatFactory,
             columnToLabelMap,
             paletteService,
+            palettes,
             formattedDatatableInfo,
             syncColors,
             yAxis,
@@ -177,6 +181,7 @@ export const DataLayers: FC<Props> = ({
             singleTable,
             multipleLayersWithSplits,
             isDarkMode,
+            pointVisibility,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

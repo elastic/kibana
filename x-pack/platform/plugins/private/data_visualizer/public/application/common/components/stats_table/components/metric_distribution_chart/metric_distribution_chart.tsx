@@ -63,7 +63,7 @@ export const MetricDistributionChart: FC<Props> = ({
     }
   );
 
-  const theme = useDataVizChartTheme();
+  const theme = useDataVizChartTheme({ disableGridLines: true });
 
   const styles = useColumnChartStyles();
 

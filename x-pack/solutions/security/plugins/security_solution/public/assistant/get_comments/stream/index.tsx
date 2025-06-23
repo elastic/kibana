@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { MessageRole } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';

@@ -62,3 +62,7 @@ export {
 } from './src/shared/resources_helpers';
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
+
+export { getRecommendedQueriesTemplatesFromExtensions } from './src/autocomplete/recommended_queries/suggestions';
+
+export { esqlFunctionNames } from './src/definitions/generated/function_names';

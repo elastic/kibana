@@ -6,12 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
+  createFailedLogRecord,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
   getLogsForDataset,
+  processors,
   productionNamespace,
 } from './data';
 
@@ -22,6 +25,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'observabilityLogsExplorer',
     'datasetQuality',
   ]);
+  const retry = getService('retry');
   const synthtrace = getService('logSynthtraceEsClient');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
@@ -31,10 +35,24 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
+  const failedDatasetName = datasetNames[1];
+
   describe('Dataset quality table', () => {
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
+
+      await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
+      await synthtrace.createComponentTemplate({
+        name: 'synth.2@custom',
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
+      await synthtrace.createIndexTemplate(IndexTemplateName.Synht2);
+
       // Ingest basic logs
       await synthtrace.index([
         // Ingest basic logs
@@ -53,6 +71,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
         }),
+        createFailedLogRecord({
+          to: new Date().toISOString(),
+          count: 2,
+          dataset: failedDatasetName,
+        }),
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 4,
+          dataset: failedDatasetName,
+        }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
     });
@@ -60,6 +88,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     after(async () => {
       await synthtrace.clean();
       await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
+      await synthtrace.deleteComponentTemplate('synth.2@custom');
+      await synthtrace.deleteCustomPipeline('synth.2@pipeline');
     });
 
     it('shows sort by dataset name and show namespace', async () => {
@@ -88,14 +119,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const activityCells = await lastActivityCol.getCellTexts();
-      const lastActivityCell = activityCells[activityCells.length - 1];
-      const restActivityCells = activityCells.slice(0, -1);
+      const degradedActivityCell = activityCells[activityCells.length - 1];
+      const failedActivityCell = activityCells[activityCells.length - 2];
+      const restActivityCells = activityCells.slice(0, -2);
 
-      // The first cell of lastActivity should have data
-      expect(lastActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      // The following lastActivity cells should have data
+      expect(degradedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(failedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
       // The rest of the rows must show no activity
       expect(restActivityCells).to.eql([
-        PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
       ]);
@@ -114,7 +146,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       const sizeColCellTexts = await cols.Size.getCellTexts();
       const sizeGreaterThanZero = sizeColCellTexts[3];
-      const sizeEqualToZero = sizeColCellTexts[2];
+      const sizeEqualToZero = sizeColCellTexts[1];
 
       expect(sizeGreaterThanZero).to.not.eql('0.0 KB');
       expect(sizeEqualToZero).to.eql('0.0 B');
@@ -139,9 +171,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
       // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.eql(datasetName);
+      await retry.try(async () => {
+        const datasetSelectorText =
+          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
+        expect(datasetSelectorText).to.eql(datasetName);
+      });
 
       // Return to Dataset Quality Page
       await PageObjects.datasetQuality.navigateTo();
@@ -158,7 +192,18 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();
       const rows = await PageObjects.datasetQuality.getDatasetTableRows();
-      expect(rows.length).to.eql(activeDatasets.length);
+      expect(rows.length).to.eql(activeDatasets.length); // Return to Previous state
+      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
+    });
+
+    describe('Failed docs', () => {
+      it('shows failed docs percentage', async () => {
+        const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+        const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
+        const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+        expect(failedDocsColCellTexts).to.eql(['0%', '0%', '20%', '0%']);
+      });
     });
   });
 }

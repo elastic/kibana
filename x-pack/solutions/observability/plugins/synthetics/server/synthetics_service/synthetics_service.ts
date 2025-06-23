@@ -126,20 +126,20 @@ export class SyntheticsService {
           installedPackage.name === 'synthetics' &&
           installedPackage.install_status === 'installed'
         ) {
-          this.logger.info('Installed synthetics index templates');
+          this.logger.debug('Installed synthetics index templates');
           this.indexTemplateExists = true;
         } else if (
           installedPackage.name === 'synthetics' &&
           installedPackage.install_status === 'install_failed'
         ) {
-          this.logger.warn(new IndexTemplateInstallationError());
+          const e = new IndexTemplateInstallationError();
+          this.logger.error(e.message, { error: e });
           this.indexTemplateExists = false;
         }
       }
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(new IndexTemplateInstallationError().message, { error: e });
       this.indexTemplateInstalling = false;
-      this.logger.warn(new IndexTemplateInstallationError());
     }
   }
 
@@ -156,8 +156,8 @@ export class SyntheticsService {
           .map((loc) => loc.id)
           .join(',')} Synthetics service locations from manifest: ${this.config.manifestUrl}`
       );
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(`Error registering service locations, Error: ${error.message}`, { error });
     }
   }
 
@@ -477,16 +477,17 @@ export class SyntheticsService {
           });
 
           await syncAllLocations(PER_PAGE);
-        } catch (e) {
-          this.logger.error(`Failed to run Synthetics sync task with error: ${e.message}`);
-          this.logger.error(e);
+        } catch (error) {
+          this.logger.error(`Failed to run Synthetics sync task, Error: ${error.message}`, {
+            error,
+          });
 
           sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
             reason: 'Failed to push configs to service',
-            message: e?.message,
+            message: error?.message,
             type: 'pushConfigsError',
-            code: e?.code,
-            status: e.status,
+            code: error?.code,
+            status: error.status,
             stackVersion: service.server.stackVersion,
           });
         }

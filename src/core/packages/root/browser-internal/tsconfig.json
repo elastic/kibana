@@ -69,6 +69,8 @@
     "@kbn/core-injected-metadata-common-internal",
     "@kbn/core-feature-flags-browser-internal",
     "@kbn/react-mute-legacy-root-warning",
+    "@kbn/core-pricing-browser-internal",
+    "@kbn/core-pricing-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

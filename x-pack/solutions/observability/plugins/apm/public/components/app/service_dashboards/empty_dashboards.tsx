@@ -8,14 +8,14 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
-import { useTheme } from '../../../hooks/use_theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 interface Props {
   actions: React.ReactNode;
 }
 
 export function EmptyDashboards({ actions }: Props) {
-  const theme = useTheme();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <>
@@ -23,11 +23,7 @@ export function EmptyDashboards({ actions }: Props) {
         hasShadow={false}
         hasBorder={false}
         icon={
-          <EuiImage
-            size="fullWidth"
-            src={theme.darkMode ? dashboardsDark : dashboardsLight}
-            alt=""
-          />
+          <EuiImage size="fullWidth" src={isDarkMode ? dashboardsDark : dashboardsLight} alt="" />
         }
         title={
           <h2>

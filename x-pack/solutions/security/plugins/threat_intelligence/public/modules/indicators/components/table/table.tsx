@@ -25,7 +25,7 @@ import {
 import { CellActions } from './cell_actions';
 import { cellPopoverRendererFactory } from './cell_popover_renderer';
 import { cellRendererFactory } from './cell_renderer';
-import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
+import { BrowserFields } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from '../../hooks/use_table_context';
@@ -51,7 +51,6 @@ export interface IndicatorsTableProps {
    */
   isLoading?: boolean;
   isFetching?: boolean;
-  indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   columnSettings: ColumnSettingsValue;
 }

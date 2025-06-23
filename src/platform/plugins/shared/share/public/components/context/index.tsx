@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
@@ -29,8 +27,6 @@ export interface IShareContext extends ShareContext {
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
-  theme: ThemeServiceSetup;
-  i18n: I18nStart;
   publicAPIEnabled?: boolean;
   anchorElement?: HTMLElement;
 }

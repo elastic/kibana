@@ -17,7 +17,7 @@ import { isCategoryAnomaly, logEntryRateJobType } from '../../../../../../common
 import type { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
-import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';
+import { LogEntryExampleMessageTable } from './log_entry_example';
 import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 
 const EXAMPLE_COUNT = 5;
@@ -73,21 +73,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
             onReload={getLogEntryExamples}
           >
             {logEntryExamples.length > 0 ? (
-              <>
-                <LogEntryExampleMessageHeaders dateTime={logEntryExamples[0].timestamp} />
-                {logEntryExamples.map((example, exampleIndex) => (
-                  <LogEntryExampleMessage
-                    key={exampleIndex}
-                    id={example.id}
-                    dataset={example.dataset}
-                    message={example.message}
-                    timestamp={example.timestamp}
-                    tiebreaker={example.tiebreaker}
-                    timeRange={timeRange}
-                    anomaly={anomaly}
-                  />
-                ))}
-              </>
+              <LogEntryExampleMessageTable
+                examples={logEntryExamples}
+                timeRange={timeRange}
+                anomaly={anomaly}
+              />
             ) : null}
           </LogEntryExampleMessages>
         </EuiFlexItem>

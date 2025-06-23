@@ -205,6 +205,7 @@ export const AnalyticsCollectionCard: React.FC<
             data={data}
             xAccessor={0}
             yAccessors={[1]}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             curve={CurveType.CURVE_BASIS}

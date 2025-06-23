@@ -21,6 +21,7 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  STREAMS: 'streams',
   SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
@@ -98,4 +99,5 @@ export const getEsQueryConfig = (params?: GetEsQueryConfigParamType): EsQueryCon
  * TODO: Remove when checks for specific rule type ids is not needed
  *in the codebase.
  */
-export const isSiemRuleType = (ruleTypeId: string) => ruleTypeId.startsWith('siem.');
+export const isSiemRuleType = (ruleTypeId: string) =>
+  ruleTypeId.startsWith('siem.') || ruleTypeId === 'attack-discovery';

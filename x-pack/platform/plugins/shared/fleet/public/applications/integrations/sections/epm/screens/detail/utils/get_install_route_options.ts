@@ -31,6 +31,7 @@ interface GetInstallPkgRouteOptionsParams {
   isFirstTimeAgentUser: boolean;
   isGuidedOnboardingActive: boolean;
   isAgentlessIntegration?: boolean;
+  isAgentlessDefault?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
@@ -54,6 +55,7 @@ export const getInstallPkgRouteOptions = ({
   isExperimentalAddIntegrationPageEnabled,
   isGuidedOnboardingActive,
   isAgentlessIntegration,
+  isAgentlessDefault,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
@@ -61,7 +63,8 @@ export const getInstallPkgRouteOptions = ({
     isExperimentalAddIntegrationPageEnabled &&
     isCloud &&
     (isFirstTimeAgentUser || isGuidedOnboardingActive) &&
-    !packageExemptFromStepsLayout;
+    !packageExemptFromStepsLayout &&
+    !isAgentlessDefault;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useMultiPageLayout,
