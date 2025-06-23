@@ -12,6 +12,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
+import { PrivilegedAccessDetectionsPanel } from './components/privileged_access_detection';
 
 export interface OnboardingCallout {
   userCount: number;
@@ -85,11 +86,7 @@ export const PrivilegedUserMonitoring = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          <span>{'TODO: Top privileged access detections'}</span>
-        </EuiPanel>
-      </EuiFlexItem>
+      {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
         <UserActivityPrivilegedUsersPanel sourcererDataView={sourcererDataView} />
       </EuiFlexItem>
