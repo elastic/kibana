@@ -18,12 +18,12 @@ jest.mock('../../lib/prompt');
 const mockResponse = [{ promptId: 'systemPrompt', prompt: 'This is a prompt' }];
 describe('Find security AI prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
     const mockUser1 = {
       username: 'my_username',
       authentication_realm: {
