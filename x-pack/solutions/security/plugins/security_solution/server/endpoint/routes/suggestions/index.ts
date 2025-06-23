@@ -130,7 +130,7 @@ export const getEndpointSuggestionsRequestHandler = (
         suggestionMethod = termsAggSuggestions;
         index = METADATA_UNITED_INDEX;
 
-        let agentPolicyIds: string[] = [];
+        const agentPolicyIds: string[] = [];
         const fleetService = securitySolutionContext.getInternalFleetServices();
         const endpointPackagePolicies = await fleetService.packagePolicy.fetchAllItems(
           savedObjects.client,

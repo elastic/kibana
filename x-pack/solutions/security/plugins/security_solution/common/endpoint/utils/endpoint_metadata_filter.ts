@@ -22,7 +22,7 @@ export function buildBaseEndpointMetadataFilter(policyIds?: string[]): QueryDslQ
     must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
   };
 
-  let baseFilters: QueryDslQueryContainer[] = [
+  const baseFilters: QueryDslQueryContainer[] = [
     // doc contains both agent and metadata
     { exists: { field: 'united.endpoint.agent.id' } },
     { exists: { field: 'united.agent.agent.id' } },
