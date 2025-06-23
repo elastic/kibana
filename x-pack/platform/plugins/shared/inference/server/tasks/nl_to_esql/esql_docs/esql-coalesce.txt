@@ -30,3 +30,10 @@ ROW a=null, b="b"
 | a    | b   | EVAL_COALESCE_a_b |
 |------|-----|-------------------|
 | null | "b" | "b"               |
+
+COALESCE supports any number of rest parameters:
+
+```esql
+ROW x=null, y=null, z="z"
+| EVAL first_non_null = COALESCE(x, y, z)
+```

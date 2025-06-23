@@ -25,9 +25,24 @@ FROM employees
 
 ### Example 2
 
-Use wildcards to drop all columns with names matching a pattern:
+This example shows how to drop columns that match a more complex pattern using wildcards.
 
 ```esql
 FROM employees
-| DROP height*
+| DROP emp_*
 ```
+
+### Example 3
+
+This example demonstrates how to use the `DROP` command in conjunction with other commands like `KEEP` and `SORT`.
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height, weight
+| DROP weight
+| SORT height DESC
+```
+
+### Limitations
+- The `DROP` command does not support nested fields.
+- It cannot be used to drop columns of unsupported types as specified in the ES|QL limitations.

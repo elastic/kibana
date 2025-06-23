@@ -30,3 +30,8 @@ ROW a = "hello"
 ```
 
 This example finds the position of the substring `"ll"` within the string `"hello"`. The result is `3`.
+
+## Notes
+
+- String positions start from `1`.
+- If the substring cannot be found, the function returns `0`.

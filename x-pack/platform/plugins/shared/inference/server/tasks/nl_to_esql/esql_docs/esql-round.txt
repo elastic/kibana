@@ -26,3 +26,13 @@ FROM employees
 ```
 
 This example converts the `height` column from meters to feet and rounds the result to one decimal place.
+
+```esql
+FROM sales
+| KEEP product_name, revenue
+| EVAL rounded_revenue = ROUND(revenue, -2)
+```
+
+## Notes
+
+If "decimals" is a negative number, the ROUND function rounds to the number of digits left of the decimal point.

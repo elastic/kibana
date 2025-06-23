@@ -22,3 +22,12 @@ ROW d = 100.0
 ```
 
 Calculate the square root of the value `100.0`.
+
+### Example 2
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL sqrt_height = SQRT(height)
+```
+Keep only the first_name, last_name, height columns, and then create a new `sqrt_height` which equals to the square root of all the values in the height column.

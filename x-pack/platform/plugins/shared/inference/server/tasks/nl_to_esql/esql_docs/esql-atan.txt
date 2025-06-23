@@ -20,3 +20,8 @@ ROW a=12.9
 ```
 
 Calculate the arctangent of the value `12.9` and store the result in a new column named `atan`.
+
+```esql
+ROW x=5.0, y=3.0
+| EVAL atan_yx = ATAN(y / x)
+```

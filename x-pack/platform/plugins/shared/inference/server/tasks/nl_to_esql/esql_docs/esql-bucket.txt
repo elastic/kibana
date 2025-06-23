@@ -24,6 +24,16 @@ The start of the range. Can be a number, a date, or a date expressed as a string
 
 The end of the range. Can be a number, a date, or a date expressed as a string.
 
+## Important notes:
+
+BUCKET can operate in two modes:
+- one where the bucket size is computed based on a bucket count recommendation and a range,
+- and another where the bucket size is provided directly.
+
+When the bucket size is provided directly for time interval, it is expressed as a **timespan literal**, e.g.
+- GOOD: `BUCKET(@timestamp, 1 month)`
+- BAD: `BUCKET(@timestamp, "month")`
+
 ## Examples
 
 ### Example 1: Using a target number of buckets, a start of a range, and an end of a range
@@ -85,7 +95,7 @@ This example creates a histogram of salaries, dividing the range into 20 buckets
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
+| STATS c = COUNT(*) BY b = BUCKET(salary, 5000.)
 | SORT b
 ```
 

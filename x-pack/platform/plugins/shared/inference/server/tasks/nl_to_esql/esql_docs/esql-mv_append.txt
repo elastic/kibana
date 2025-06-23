@@ -18,7 +18,21 @@ The second multi-value field to concatenate.
 
 ## Examples
 
-No examples are provided in the source documentation.
+### Example 1
+
+```esql
+ROW a = ["foo", "bar"], b = ["baz", "qux"]
+| EVAL c = MV_APPEND(a, b)
+| KEEP a, b, c
+```
+
+### Example 2
+
+```esql
+ROW x = [1, 2, 3], y = [4, 5, 6]
+| EVAL z = MV_APPEND(x, y)
+| KEEP x, y, z
+```
 
 ## Limitations
 

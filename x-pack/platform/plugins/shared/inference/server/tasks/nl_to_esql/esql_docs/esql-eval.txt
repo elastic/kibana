@@ -19,6 +19,18 @@ The `EVAL` command allows you to add new columns with calculated values to your 
 - The value to assign to the column. This can be a literal, an expression, or a function.
 - You can reference columns defined earlier in the same `EVAL` command.
 
+## Notes
+
+EVAL supports the following types of functions:
+- Mathematical functions
+- String functions
+- Date-time functions
+- Type conversation functions
+- Conditional functions and expressions
+- Multi-value functions
+
+Aggregation functions are NOT supported for EVAL.
+
 ## Examples
 
 ### Adding new calculated columns
@@ -63,3 +75,16 @@ FROM employees
 | EVAL height * 3.281
 | STATS avg_height_feet = AVG(`height * 3.281`)
 ```
+
+Any number of evaluations can be performed in a single EVAL command
+
+```esql
+FROM triangle
+| EVAL cos = COS(angle), tan = TAN(angle), sin = SIN(angle), acos=ACOS(angle), asin=ASIN(angle)
+| SORT angle DESC
+| LIMIT 10
+```
+
+### Limitations
+- If a column with the same name already exists, the existing column is dropped.
+- If a column name is used more than once, only the rightmost duplicate creates a column.

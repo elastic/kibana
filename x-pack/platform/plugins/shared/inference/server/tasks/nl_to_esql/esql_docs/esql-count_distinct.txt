@@ -44,3 +44,9 @@ ROW words="foo;bar;baz;qux;quux;foo"
 ```
 
 This example splits the `words` string into multiple values using the `SPLIT` function and counts the unique values. The result is the number of distinct words in the string.
+
+### Notes
+
+- Computing exact counts requires loading values into a set and returning its size, which doesn't scale well for high-cardinality sets or large values due to memory usage and communication overhead.
+- The HyperLogLog++ algorithm's accuracy depends on the leading zeros of hashed values, and the exact distributions of hashes in a dataset can affect the accuracy of the cardinality.
+- Even with a low threshold, the error remains very low (1-6%) even when counting millions of items.

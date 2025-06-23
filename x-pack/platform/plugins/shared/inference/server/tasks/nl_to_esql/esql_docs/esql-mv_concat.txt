@@ -25,7 +25,7 @@ ROW a=["foo", "zoo", "bar"]
 | EVAL j = MV_CONCAT(a, ", ")
 ```
 
-Concatenates the values in the multivalued column `a` into a single string, separated by `", "`.
+Concatenates the values in the array ["foo", "zoo", "bar"] with a comma and a space as the delimiter:
 
 ### Example 2: Concatenating non-string values
 

@@ -28,7 +28,10 @@ Classify employees based on the number of languages they speak:
 
 ```esql
 FROM employees
-| EVAL type = CASE(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")
+| EVAL type = CASE(
+    languages <= 1, "monolingual",
+    languages <= 2, "bilingual",
+    "polyglot")
 | KEEP emp_no, languages, type
 ```
 

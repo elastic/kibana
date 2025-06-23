@@ -29,3 +29,11 @@ ROW str = "Hello World"
 | EVAL str = REPLACE(str, "World", "Universe")
 | KEEP str
 ```
+
+Another example could be replacing digits in a string with a specific character:
+
+```esql
+ROW str = "User123"
+| EVAL str = REPLACE(str, "\\d", "*")
+| KEEP str
+```

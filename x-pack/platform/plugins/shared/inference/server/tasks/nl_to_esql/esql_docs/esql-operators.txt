@@ -200,4 +200,18 @@ Filters data based on string patterns using regular expressions.
 FROM employees
 | WHERE first_name RLIKE "J.*"
 ```
+
+### Cast `::`
+
+The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
+
+Examples:
+
+```esql
+FROM employees
+| EVAL salary = salary::double
+```
+
+```esql
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
 ```

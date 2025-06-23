@@ -48,3 +48,9 @@ ROW end_23=TO_DATETIME("2023-12-31T23:59:59.999Z"),
 
 - The function’s supported units and ES|QL’s time span literals are distinct and not interchangeable.
 - Supported abbreviations align with other established implementations but may differ from Elasticsearch’s date-time nomenclature.
+
+## Notes
+
+- If the `startTimestamp` is later than the `endTimestamp`, the function will return a negative value.
+
+- It's important to note that while there is some overlap between the units supported by this function and ESQL's time span literals, these sets are not interchangeable. Also, the abbreviations supported by this function are shared with other established products and may not align with the date-time nomenclature used by Elasticsearch.

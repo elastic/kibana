@@ -35,3 +35,8 @@ FROM employees
 ```
 
 This example calculates the 80th percentile of the maximum values in a multivalued column `salary_change`. The `MV_MAX` function is used to determine the maximum value per row before applying the `PERCENTILE` function.
+
+## Notes
+
+- PERCENTILE is usually approximate.
+- PERCENTILE is also non-deterministic. This means you can get slightly different results using the same data.

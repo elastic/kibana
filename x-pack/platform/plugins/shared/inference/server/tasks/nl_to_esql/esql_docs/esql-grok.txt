@@ -14,8 +14,8 @@ The column containing the string you want to structure. If the column has multip
 
 #### `pattern`
 
-A grok pattern.  
-- If a field name conflicts with an existing column, the existing column is discarded.  
+A grok pattern.
+- If a field name conflicts with an existing column, the existing column is discarded.
 - If a field name is used more than once, a multi-valued column will be created with one value for each occurrence of the field name.
 
 ## Examples
@@ -60,3 +60,10 @@ FROM addresses
 | KEEP city.name, zip_code
 | GROK zip_code """%{WORD:zip_parts} %{WORD:zip_parts}"""
 ```
+
+### Limitations
+
+- If a field name conflicts with an existing column, the existing column is discarded.
+- If a field name is used more than once, a multi-valued column will be created with one value per each occurrence of the field name.
+- The `GROK` command does not support configuring custom patterns or multiple patterns.
+- The `GROK` command is not subject to Grok watchdog settings.

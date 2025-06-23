@@ -30,8 +30,8 @@ Extracts the minimum value from the multivalued column `a`, resulting in `min_a 
 #### Example 2
 
 ```esql
-ROW a=["foo", "bar"]
-| EVAL min_a = MV_MIN(a)
+FROM bag_of_numbers
+| EVAL min = MV_MIN(numbers)
 ```
 
-Extracts the minimum value from the multivalued column `a` by comparing the strings lexicographically, resulting in `min_a = "bar"`.
+Extracts the minimum value from the multivalued column `numbers` by comparing the values lexicographically.

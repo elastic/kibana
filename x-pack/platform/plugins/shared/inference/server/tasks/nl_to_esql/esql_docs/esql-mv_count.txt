@@ -22,3 +22,11 @@ ROW a=["foo", "zoo", "bar"]
 ```
 
 Count the number of values in the multivalued column `a`.
+
+### Example 2
+
+```esql
+FROM bag_of_numbers
+| EVAL count = MV_COUNT(numbers)
+```
+Count the number of element in a multivalued field `numbers`
