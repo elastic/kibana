@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import {
   convertPanelSectionMapsToPanelsArray,

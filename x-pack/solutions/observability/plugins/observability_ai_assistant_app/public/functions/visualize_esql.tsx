@@ -42,11 +42,14 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  VisualizeESQLFunctionArguments,
-  VisualizeQueryResponse,
+import {
+  type VisualizeESQLFunctionArguments,
+  type VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
+
 import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+
+const VISUALIZE_QUERY_NAME = 'visualize_query';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -391,7 +394,7 @@ export function registerVisualizeQueryRenderFunction({
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
-    'visualize_query',
+    VISUALIZE_QUERY_NAME,
     ({
       arguments: { query, userOverrides, intention },
       response,

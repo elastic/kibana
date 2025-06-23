@@ -17,6 +17,23 @@ export type {
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
+export {
+  TASK_ID,
+  SAVED_OBJECT_TYPE,
+  DEFAULT_URL_LIMIT,
+  DEFAULT_URL_EXPIRATION_CHECK_INTERVAL,
+  DEFAULT_URL_EXPIRATION_DURATION,
+} from './unused_urls_task';
+
+export {
+  durationToSeconds,
+  getDeleteUnusedUrlTaskInstance,
+  deleteUnusedUrls,
+  fetchUnusedUrlsFromFirstNamespace,
+  runDeleteUnusedUrlsTask,
+  scheduleUnusedUrlsCleanupTask,
+} from './unused_urls_task';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SharePlugin } = await import('./plugin');
   return new SharePlugin(initializerContext);

@@ -8,7 +8,14 @@
  */
 
 import React, { lazy, Suspense, useState } from 'react';
-import { EuiButton, EuiDescribedFormGroup } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToken,
+  EuiToolTip,
+} from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HttpStart } from '@kbn/core/public';
@@ -39,7 +46,18 @@ export const AlertDeleteDescriptiveFormGroup = ({
   return (
     <>
       <EuiDescribedFormGroup
-        title={<h3>{i18n.RULE_SETTINGS_TITLE}</h3>}
+        title={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <h3>{i18n.RULE_SETTINGS_TITLE}</h3>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.RULE_SETTINGS_TECH_PREVIEW_DESCRIPTION}>
+                <EuiToken className="eui-alignBottom" iconType="flask" size="m" shape="circle" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         description={
           <EuiText color="subdued" size="s">
             <p>{i18n.RULE_SETTINGS_DESCRIPTION}</p>

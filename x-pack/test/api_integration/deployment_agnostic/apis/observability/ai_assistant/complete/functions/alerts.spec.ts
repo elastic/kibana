@@ -45,6 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const samlAuth = getService('samlAuth');
   const alertingApi = getService('alertingApi');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const kibanaServer = getService('kibanaServer');
 
   describe('alerts', function () {
     // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
@@ -62,6 +63,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     const end = 'now';
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       internalReqHeader = samlAuth.getInternalRequestHeader();
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
@@ -136,6 +138,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteRules({ getService, roleAuthc, internalReqHeader });
 
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should execute the function without any errors', async () => {

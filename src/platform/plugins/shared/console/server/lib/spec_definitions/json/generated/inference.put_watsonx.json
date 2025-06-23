@@ -8,7 +8,9 @@
     },
     "url_components": {
       "task_type": [
-        "text_embedding"
+        "text_embedding",
+        "chat_completion",
+        "completion"
       ]
     },
     "methods": [

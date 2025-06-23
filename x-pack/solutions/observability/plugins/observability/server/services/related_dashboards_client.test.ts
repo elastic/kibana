@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import Boom from '@hapi/boom';
 import { RelatedDashboardsClient } from './related_dashboards_client';
 import { Logger } from '@kbn/core/server';
 import { IContentClient } from '@kbn/content-management-plugin/server/types';
@@ -604,6 +604,38 @@ describe('RelatedDashboardsClient', () => {
           { id: 'dashboard2', title: 'Dashboard 2', matchedBy: { linked: true } },
         ]);
       });
+
+      it('should handle linked dashboards not found gracefully', async () => {
+        const mockAlert = {
+          getRuleId: jest.fn().mockReturnValue('rule-id'),
+        } as unknown as AlertData;
+
+        // @ts-ignore next-line
+        client.setAlert(mockAlert);
+
+        alertsClient.getRuleById = jest.fn().mockResolvedValue({
+          artifacts: {
+            dashboards: [{ id: 'dashboard1' }, { id: 'dashboard2' }],
+          },
+        });
+
+        dashboardClient.get = jest
+          .fn()
+          .mockResolvedValueOnce({
+            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+          })
+          .mockRejectedValueOnce(new Boom.Boom('Dashboard not found', { statusCode: 404 }));
+
+        // @ts-ignore next-line
+        const result = await client.getLinkedDashboards();
+
+        expect(result).toEqual([
+          { id: 'dashboard1', title: 'Dashboard 1', matchedBy: { linked: true } },
+        ]);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Linked dashboard with id dashboard2 not found. Skipping.'
+        );
+      });
     });
 
     describe('getLinkedDashboardsByIds', () => {
@@ -638,7 +670,9 @@ describe('RelatedDashboardsClient', () => {
       });
 
       it('should handle errors when fetching dashboards', async () => {
-        dashboardClient.get = jest.fn().mockRejectedValue(new Error('Dashboard fetch failed'));
+        dashboardClient.get = jest
+          .fn()
+          .mockRejectedValue(new Boom.Boom('Dashboard fetch failed', { statusCode: 500 }));
 
         // @ts-ignore next-line
         await expect(client.getLinkedDashboardsByIds(['dashboard1'])).rejects.toThrow(

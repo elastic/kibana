@@ -1935,7 +1935,7 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
-          type: 'date_period',
+          type: 'time_duration',
           optional: false,
         },
         {
@@ -2966,8 +2966,8 @@ const knnDefinition: FunctionDefinition = {
   ],
   validate: undefined,
   examples: [
-    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc',
-    'from colors metadata _score\n| where knn(rgb_vector, [0,255,255], {"k": 4})\n| sort _score desc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc, color asc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0,255,255], {"k": 4})\n| sort _score desc, color asc',
   ],
 };
 
@@ -4742,7 +4742,6 @@ const matchPhraseDefinition: FunctionDefinition = {
     defaultMessage:
       'Use `MATCH_PHRASE` to perform a `match_phrase` on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.\n\nMatchPhrase can be used on text fields, as well as other field types like keyword, boolean, or date types.\nMatchPhrase is not supported for semantic_text or numeric types.\n\nMatchPhrase can use function named parameters to specify additional options for the\nmatch_phrase query.\nAll `match_phrase` query parameters are supported.\n\n`MATCH_PHRASE` returns true if the provided query matches the row.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
   signatures: [
@@ -10674,6 +10673,7 @@ const stGeohexToStringDefinition: FunctionDefinition = {
     Location.WHERE,
     Location.STATS,
     Location.STATS_BY,
+    Location.STATS_WHERE,
     Location.COMPLETION,
   ],
   validate: undefined,

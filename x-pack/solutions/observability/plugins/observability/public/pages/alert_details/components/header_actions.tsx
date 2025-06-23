@@ -39,6 +39,7 @@ export interface HeaderActionsProps {
   alertIndex?: string;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
+  onUpdate?: () => void;
 }
 
 export function HeaderActions({
@@ -46,6 +47,7 @@ export function HeaderActions({
   alertIndex,
   alertStatus,
   onUntrackAlert,
+  onUpdate,
 }: HeaderActionsProps) {
   const { services } = useKibana();
   const {
@@ -121,14 +123,13 @@ export function HeaderActions({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="bellSlash"
-            onClick={handleOpenSnoozeModal}
-            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-            data-test-subj="snooze-rule-button"
+            iconType="plus"
+            onClick={handleAddToCase}
+            data-test-subj="add-to-case-button"
           >
             <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                defaultMessage: 'Snooze the rule',
+              {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                defaultMessage: 'Add to case',
               })}
             </EuiText>
           </EuiButton>
@@ -158,13 +159,14 @@ export function HeaderActions({
                 <EuiButtonEmpty
                   size="s"
                   color="text"
-                  iconType="plus"
-                  onClick={handleAddToCase}
-                  data-test-subj="add-to-case-button"
+                  iconType="bellSlash"
+                  onClick={handleOpenSnoozeModal}
+                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                  data-test-subj="snooze-rule-button"
                 >
                   <EuiText size="s">
-                    {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                      defaultMessage: 'Add to case',
+                    {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
+                      defaultMessage: 'Snooze the rule',
                     })}
                   </EuiText>
                 </EuiButtonEmpty>
@@ -232,6 +234,7 @@ export function HeaderActions({
           }}
           onSubmit={() => {
             setRuleConditionsFlyoutOpen(false);
+            onUpdate?.();
             refetch();
           }}
         />
