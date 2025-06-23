@@ -285,12 +285,14 @@ describe('MonitorConfigRepository', () => {
           attributes: {
             name: 'Updated Monitor 1',
           },
+          soType: 'synthetics-monitor-multi-space',
         },
         {
           id: 'test-id-2',
           attributes: {
             name: 'Updated Monitor 2',
           },
+          soType: 'synthetics-monitor',
         },
       ] as any;
 
@@ -322,7 +324,7 @@ describe('MonitorConfigRepository', () => {
           attributes: { name: 'Updated Monitor 1' },
         },
         {
-          type: syntheticsMonitorSavedObjectType,
+          type: 'synthetics-monitor',
           id: 'test-id-2',
           attributes: { name: 'Updated Monitor 2' },
         },
@@ -451,14 +453,14 @@ describe('MonitorConfigRepository', () => {
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser
       ).toHaveBeenCalledWith({
         filter,
-        type: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
+        type: syntheticsMonitorSavedObjectType,
         perPage: 500,
         namespaces: [spaceId],
       });
 
       expect(pointInTimeFinderMock.find).toHaveBeenCalled();
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockDecryptedMonitors);
+      expect(result).toEqual([...mockDecryptedMonitors, ...mockDecryptedMonitors]);
     });
 
     it('should handle finder.close errors', async () => {
@@ -487,7 +489,7 @@ describe('MonitorConfigRepository', () => {
       const result = await repository.findDecryptedMonitors({ spaceId });
 
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
-      expect(result).toEqual(mockDecryptedMonitors);
+      expect(result).toEqual([...mockDecryptedMonitors, ...mockDecryptedMonitors]);
       // Should not throw an error when close fails
     });
   });
