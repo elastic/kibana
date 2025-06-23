@@ -11,6 +11,7 @@
     "id": "aiops",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "aiops"],
     "requiredPlugins": [
       "charts",
       "data",

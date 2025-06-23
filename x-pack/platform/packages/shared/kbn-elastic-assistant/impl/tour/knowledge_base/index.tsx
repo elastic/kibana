@@ -20,6 +20,7 @@ import { VideoToast } from './video_toast';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { knowledgeBaseTourStepOne, tourConfig } from './step_config';
 import * as i18n from './translations';
+import { useTourStorageKey } from '../common/hooks/use_tour_storage_key';
 
 export interface TourState {
   currentTourStep: number;
@@ -48,10 +49,8 @@ const KnowledgeBaseTourComp: React.FC<{
 }> = ({ children, isKbSettingsPage = false }) => {
   const { navigateToApp } = useAssistantContext();
 
-  const [tourState, setTourState] = useLocalStorage<TourState>(
-    NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE,
-    tourConfig
-  );
+  const tourStorageKey = useTourStorageKey(NEW_FEATURES_TOUR_STORAGE_KEYS.KNOWLEDGE_BASE);
+  const [tourState, setTourState] = useLocalStorage<TourState>(tourStorageKey, tourConfig);
 
   const advanceToVideoStep = useCallback(
     () =>
