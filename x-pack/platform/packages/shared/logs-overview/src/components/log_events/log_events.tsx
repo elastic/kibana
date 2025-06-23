@@ -41,7 +41,12 @@ export const LogEvents = React.memo<LogEventsProps>(
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <LogEventsResultContent />
+          <LogEventsContent
+            dependencies={dependencies}
+            documentFilters={documentFilters}
+            logsSource={logsSource}
+            timeRange={timeRange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -56,6 +61,15 @@ export type LogEventsContentDependencies = LogEventsResultContentDependencies & 
   search: ISearchGeneric;
 };
 
-export const LogEventsContent = React.memo<LogEventsContentProps>(({ dependencies }) => {
-  return <LogEventsResultContent />;
-});
+export const LogEventsContent = React.memo<LogEventsContentProps>(
+  ({ dependencies, documentFilters, logsSource, timeRange }) => {
+    return (
+      <LogEventsResultContent
+        dependencies={dependencies}
+        documentFilters={documentFilters}
+        logsSource={logsSource}
+        timeRange={timeRange}
+      />
+    );
+  }
+);

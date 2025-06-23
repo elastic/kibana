@@ -22,7 +22,8 @@ import { Grouping } from '../shared/grouping_selector';
 
 export type LogsOverviewProps = LogsOverviewContentProps & {
   dependencies: LogsOverviewDependencies;
-  logsSource?: LogsSourceConfiguration;
+  documentFilters: QueryDslQueryContainer[] | undefined;
+  logsSource: LogsSourceConfiguration | undefined;
 };
 
 export type LogsOverviewDependencies = LogsOverviewContentDependencies & {
