@@ -244,6 +244,16 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
     await expect(validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default']));
   });
 
+  it('should exclude the policy itself', async () => {
+    packagePolicyServiceMock.list.mockResolvedValue({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      items: [packagePolicy1],
+    });
+    await expect(validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default']));
+  });
+
   it('should not throw if there are no other policies with the same package name', async () => {
     packagePolicyServiceMock.list.mockResolvedValue({
       total: 1,
