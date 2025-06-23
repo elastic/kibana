@@ -167,7 +167,7 @@ export const createRuntimeServices = async ({
       ({ username, password } = superuserResponse);
 
       if (superuserResponse.created) {
-        log.info(`Kibana user [${username}] was crated with password [${password}]`);
+        log.info(`Kibana user [${username}] was created with password [${password}]`);
       }
     }
   }
