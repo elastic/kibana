@@ -64,7 +64,8 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-http-browser",
     "@kbn/response-ops-recurring-schedule-form",
-    "@kbn/core-mount-utils-browser-internal"
+    "@kbn/core-mount-utils-browser-internal",
+    "@kbn/core-user-profile-browser"
   ],
   "exclude": ["target/**/*"]
 }
