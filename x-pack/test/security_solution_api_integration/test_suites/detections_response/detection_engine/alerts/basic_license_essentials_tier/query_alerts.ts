@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe.only('@ess @serverless @serverlessQA query_signals_route and find_alerts_route', () => {
+  describe('@ess @serverless @serverlessQA query_signals_route and find_alerts_route', () => {
     beforeEach(async () => {
       await deleteAllAlerts(supertest, log, es);
     });
