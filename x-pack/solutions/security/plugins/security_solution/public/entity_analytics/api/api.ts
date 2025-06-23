@@ -232,7 +232,7 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
     /**
-     * Search indices for privilege monitoring import
+     * Register a data source for privilege monitoring engine
      */
     const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
       http.fetch<SearchPrivilegesIndicesResponse>(

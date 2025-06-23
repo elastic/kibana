@@ -10,8 +10,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CreateIndexModal } from './create_index_modal';
 import { TestProviders } from '../../../../common/mock';
 
-// GENERATE UNIT TESTS FOR THIS FILE AND DO NOT RECREATE THE HEADER
-
 const mockCreatePrivMonImportIndex = jest.fn().mockResolvedValue({});
 jest.mock('../../../api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
