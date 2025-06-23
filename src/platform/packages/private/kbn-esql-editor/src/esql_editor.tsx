@@ -49,6 +49,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -106,6 +107,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   controlsContext,
   esqlVariables,
   expandToFitQueryOnMount,
+  dataErrorsControl,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -633,7 +635,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       const markers = [];
 
       if (parserErrors.length) {
-        markers.push(...parserErrors);
+        if (dataErrorsControl?.enabled === false) {
+          markers.push(...filterDataErrors(parserErrors));
+        } else {
+          markers.push(...parserErrors);
+        }
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
@@ -641,7 +647,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return;
       }
     },
-    [parseMessages]
+    [parseMessages, dataErrorsControl?.enabled]
   );
 
   useDebounceWithOptions(
@@ -668,7 +674,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code]
+    [serverErrors, serverWarning, code, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -942,6 +948,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        dataErrorsControl={dataErrorsControl}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

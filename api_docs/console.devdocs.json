@@ -43,7 +43,9 @@
             "section": "def-public.AppSetupUIPluginDependencies",
             "text": "AppSetupUIPluginDependencies"
           },
-          ", never>"
+          ", ",
+          "AppPluginSetupDependencies",
+          ">"
         ],
         "path": "src/platform/plugins/shared/console/public/plugin.ts",
         "deprecated": false,
@@ -92,7 +94,9 @@
             "signature": [
               "({ notifications, getStartServices, http }: ",
               "CoreSetup",
-              "<{}, unknown>, { devTools, home, share, usageCollection }: ",
+              "<",
+              "AppPluginSetupDependencies",
+              ", unknown>, { devTools, home, share, usageCollection }: ",
               {
                 "pluginId": "console",
                 "scope": "public",
@@ -122,7 +126,9 @@
                 "description": [],
                 "signature": [
                   "CoreSetup",
-                  "<{}, unknown>"
+                  "<",
+                  "AppPluginSetupDependencies",
+                  ", unknown>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
@@ -415,6 +421,66 @@
                 "text": "UsageCollectionStart"
               },
               " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.AppStartUIPluginDependencies.licensing",
+            "type": "Object",
+            "tags": [],
+            "label": "licensing",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "licensing",
+                "scope": "public",
+                "docId": "kibLicensingPluginApi",
+                "section": "def-public.LicensingPluginStart",
+                "text": "LicensingPluginStart"
+              }
             ],
             "path": "src/platform/plugins/shared/console/public/types/plugin_dependencies.ts",
             "deprecated": false,

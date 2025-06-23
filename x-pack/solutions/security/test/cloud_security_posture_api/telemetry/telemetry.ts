@@ -14,7 +14,7 @@ import { data } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
