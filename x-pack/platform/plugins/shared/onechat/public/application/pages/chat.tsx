@@ -8,6 +8,6 @@
 import React from 'react';
 
 export const OnechatChatPage = () => {
-  // TODO: Integrate with Chat UI: https://github.com/elastic/search-team/issues/10045
+  // TODO: Integrate with Chat UI
   return <div>OnechatChatPage</div>;
 };

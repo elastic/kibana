@@ -12,7 +12,7 @@ export const useOnechatBaseTools = () => {
   const { toolsService } = useOnechatServices();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['listOnechatBaseTools'],
+    queryKey: ['tools', 'baseTools', 'list'],
     queryFn: () => toolsService.list(),
   });
 

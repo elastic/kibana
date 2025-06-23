@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -22,21 +23,13 @@ import { useOnechatBaseTools } from '../../hooks/use_tools';
 
 const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
   {
+    field: 'id',
     name: i18n.translate('xpack.onechat.tools.base.toolIdLabel', { defaultMessage: 'Tool' }),
     valign: 'top',
-    render: ({ id, meta }: ToolDescriptor) => (
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        <EuiText size="s">
-          <strong>{id}</strong>
-        </EuiText>
-        <EuiFlexGroup>
-          {meta.tags.map((tag) => (
-            <EuiBadge key={tag} color="primary">
-              {tag}
-            </EuiBadge>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexGroup>
+    render: (id: string) => (
+      <EuiText size="s">
+        <strong>{id}</strong>
+      </EuiText>
     ),
   },
   {
@@ -44,7 +37,7 @@ const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
     name: i18n.translate('xpack.onechat.tools.base.toolDescriptionLabel', {
       defaultMessage: 'Description',
     }),
-    width: '80%',
+    width: '60%',
     valign: 'top',
     render: (description: string) => {
       // Remove spaces after newlines, prevents from unintentionally rendering as code blocks
@@ -52,6 +45,25 @@ const columns: Array<EuiBasicTableColumn<ToolDescriptor>> = [
         <EuiMarkdownFormat textSize="s">
           {description.replaceAll(/(?<=\n)\s+/g, '')}
         </EuiMarkdownFormat>
+      );
+    },
+  },
+  {
+    field: 'meta.tags',
+    name: i18n.translate('xpack.onechat.tools.base.tagsLabel', {
+      defaultMessage: 'Tags',
+    }),
+    width: '15%',
+    valign: 'top',
+    render: (tags: string[]) => {
+      return (
+        <EuiBadgeGroup>
+          {tags.map((tag) => (
+            <EuiBadge key={tag} color="primary">
+              {tag}
+            </EuiBadge>
+          ))}
+        </EuiBadgeGroup>
       );
     },
   },
