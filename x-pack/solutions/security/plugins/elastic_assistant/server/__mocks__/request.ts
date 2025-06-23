@@ -6,11 +6,12 @@
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES } from '../../common/constants';
-import type {
+import {
   CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
@@ -165,6 +166,13 @@ export const getCurrentUserPromptsRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+  });
+
+export const getCurrentUserSecurityAIPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+    query: { prompt_group_id: 'aiAssistant', prompt_ids: ['systemPrompt'] },
   });
 
 export const getCurrentUserAlertSummaryRequest = () =>
