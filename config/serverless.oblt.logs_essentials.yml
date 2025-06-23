@@ -15,7 +15,6 @@ xpack.fleet.internal.registry.excludePackages: [
   # Oblt integrations
   'synthetics',
   'uptime',
-  'synthetics_dashboards',
   # Security integrations
   'endpoint',
   'beaconing',
