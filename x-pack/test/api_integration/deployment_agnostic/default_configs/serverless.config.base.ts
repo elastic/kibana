@@ -115,6 +115,12 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
             ? ['xpack.security.authc.native_roles.enabled=true']
             : []),
           ...esServerArgsFromController[options.serverlessProject],
+          ...(options.tier && options.tier === 'oblt_logs_essentials'
+            ? [
+                'serverless.project_type=observability',
+                'serverless.observability.tier=logs_essentials',
+              ]
+            : []),
         ],
       },
       kbnTestServer: {

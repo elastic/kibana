@@ -52,7 +52,6 @@ describe('getOutdatedDocumentsQuery', () => {
 
     return createType({
       name: 'test-type',
-      switchToModelVersionAt: '8.0.0',
       modelVersions,
       mappings: {
         dynamic: false,
