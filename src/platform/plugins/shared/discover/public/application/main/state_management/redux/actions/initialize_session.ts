@@ -38,6 +38,7 @@ import { TABS_ENABLED } from '../../../../../constants';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
 import { disconnectTab, clearAllTabs } from './tabs';
+import { selectTab } from '../selectors';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -82,7 +83,12 @@ export const initializeSession: InternalStateThunkActionCreator<
       scopedProfilesManager$,
       scopedEbtManager$,
     } = selectTabRuntimeState(runtimeStateManager, tabId);
-    let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
+    const tabState = selectTab(getState(), tabId);
+
+    let urlState = cleanupUrlState(
+      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      services.uiSettings
+    );
 
     /**
      * New tab initialization with the restored data if available
@@ -105,36 +111,29 @@ export const initializeSession: InternalStateThunkActionCreator<
     }
 
     if (TABS_ENABLED && !wasTabInitialized) {
-      const tabGlobalStateFromLocalStorage =
-        tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);
+      const tabInitialGlobalState = tabState.initialGlobalState;
 
-      if (tabGlobalStateFromLocalStorage?.filters) {
-        services.filterManager.setGlobalFilters(cloneDeep(tabGlobalStateFromLocalStorage.filters));
+      if (tabInitialGlobalState?.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(tabInitialGlobalState.filters));
       }
 
-      if (tabGlobalStateFromLocalStorage?.timeRange) {
-        services.timefilter.setTime(tabGlobalStateFromLocalStorage.timeRange);
+      if (tabInitialGlobalState?.timeRange) {
+        services.timefilter.setTime(tabInitialGlobalState.timeRange);
       }
-      if (tabGlobalStateFromLocalStorage?.refreshInterval) {
-        services.timefilter.setRefreshInterval(tabGlobalStateFromLocalStorage.refreshInterval);
+      if (tabInitialGlobalState?.refreshInterval) {
+        services.timefilter.setRefreshInterval(tabInitialGlobalState.refreshInterval);
       }
 
-      const tabAppStateFromLocalStorage = tabsStorageManager.loadTabAppStateFromLocalCache(tabId);
+      const tabInitialAppState = tabState.initialAppState;
 
-      if (tabAppStateFromLocalStorage) {
-        initialUrlState = tabAppStateFromLocalStorage;
+      if (tabInitialAppState) {
+        urlState = cloneDeep(tabInitialAppState);
       }
     }
-
-    /**
-     * "No data" checks
-     */
 
     const discoverSessionLoadTracker = scopedEbtManager$
       .getValue()
       .trackPerformanceEvent('discoverLoadSavedSearch');
-
-    const urlState = cleanupUrlState(initialUrlState, services.uiSettings);
 
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)

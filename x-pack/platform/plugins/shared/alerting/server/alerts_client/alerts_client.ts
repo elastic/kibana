@@ -64,6 +64,7 @@ import {
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
   isAlertImproving,
+  shouldCreateAlertsInAllSpaces,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
@@ -488,6 +489,11 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
+    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
+      ruleTypeId: this.ruleType.id,
+      ruleTypeAlertDef: this.ruleType.alerts,
+      logger: this.options.logger,
+    });
     const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
@@ -526,6 +532,7 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
             })
           );
         } else {
@@ -548,6 +555,7 @@ export class AlertsClient<
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
+              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
             })
           );
         }
@@ -582,6 +590,7 @@ export class AlertsClient<
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
                 kibanaVersion: this.options.kibanaVersion,
+                dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: trackedAlert,
