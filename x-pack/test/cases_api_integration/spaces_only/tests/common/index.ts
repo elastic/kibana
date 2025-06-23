@@ -35,5 +35,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
      */
     loadTestFile(require.resolve('./internal/bulk_create_attachments'));
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
+
+    /**
+     * Cases analytics
+     */
+    loadTestFile(require.resolve('./cases/analytics_index/creation'));
   });
 };
