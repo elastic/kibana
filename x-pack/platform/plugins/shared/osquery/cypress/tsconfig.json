@@ -32,7 +32,6 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/cypress-test-helper",
