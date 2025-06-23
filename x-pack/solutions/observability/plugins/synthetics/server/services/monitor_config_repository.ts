@@ -53,15 +53,16 @@ export class MonitorConfigRepository {
   ) {}
 
   async get(id: string) {
-    const results = await Promise.allSettled([
-      this.soClient.get<EncryptedSyntheticsMonitorAttributes>(syntheticsMonitorSavedObjectType, id),
-      this.soClient.get<EncryptedSyntheticsMonitorAttributes>(
-        legacySyntheticsMonitorTypeSingle,
-        id
-      ),
+    // we need to resolve both syntheticsMonitorSavedObjectType and legacySyntheticsMonitorTypeSingle
+    const results = await this.soClient.bulkGet<EncryptedSyntheticsMonitorAttributes>([
+      { type: syntheticsMonitorSavedObjectType, id },
+      { type: legacySyntheticsMonitorTypeSingle, id },
     ]);
-
-    return getSuccessfulResult(results);
+    const resolved = results.saved_objects.find((obj) => obj?.attributes);
+    if (!resolved) {
+      throw new Error('Monitor not found');
+    }
+    return resolved;
   }
 
   async getDecrypted(
@@ -133,10 +134,16 @@ export class MonitorConfigRepository {
     );
   }
 
-  async createBulk({ monitors }: { monitors: Array<{ id: string; monitor: MonitorFields }> }) {
+  async createBulk({
+    monitors,
+    savedObjectType,
+  }: {
+    monitors: Array<{ id: string; monitor: MonitorFields }>;
+    savedObjectType?: string;
+  }) {
     const newMonitors = monitors.map(({ id, monitor }) => ({
       id,
-      type: syntheticsMonitorSavedObjectType,
+      type: savedObjectType ?? syntheticsMonitorSavedObjectType,
       attributes: formatSecrets({
         ...monitor,
         [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
@@ -150,7 +157,7 @@ export class MonitorConfigRepository {
     return result.saved_objects;
   }
 
-  update(
+  async update(
     id: string,
     data: SyntheticsMonitorWithSecretsAttributes,
     decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>
@@ -163,11 +170,10 @@ export class MonitorConfigRepository {
     if (isEqual(prevSpaces, spaces)) {
       return this.soClient.update<MonitorFields>(soType, id, data);
     } else {
-      return this.soClient.delete(soType, id, { force: true }).then(() => {
-        return this.soClient.create(syntheticsMonitorSavedObjectType, data, {
-          id,
-          ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
-        });
+      await this.soClient.delete(soType, id, { force: true });
+      return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
+        id,
+        ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
       });
     }
   }
@@ -179,12 +185,13 @@ export class MonitorConfigRepository {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
+      soType: string;
     }>;
     namespace?: string;
   }) {
     return this.soClient.bulkUpdate<MonitorFields>(
-      monitors.map(({ attributes, id }) => ({
-        type: syntheticsMonitorSavedObjectType,
+      monitors.map(({ attributes, id, soType }) => ({
+        type: soType,
         id,
         attributes,
         namespace,
@@ -214,29 +221,37 @@ export class MonitorConfigRepository {
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
-    const finder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          filter,
-          type: syntheticsMonitorSOTypes,
-          perPage: 500,
-          namespaces: [spaceId],
-        }
-      );
+    const getDecrypted = async (soType: string) => {
+      // Handle legacy filter if the type is legacy
+      const legacyFilter =
+        soType === legacySyntheticsMonitorTypeSingle ? this.handleLegacyFilter(filter) : filter;
+      const finder =
+        await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+          {
+            filter: legacyFilter,
+            type: soType,
+            perPage: 500,
+            namespaces: [spaceId],
+          }
+        );
 
-    const decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> =
-      [];
-    for await (const result of finder.find()) {
-      decryptedMonitors.push(...result.saved_objects);
-    }
+      const decryptedMonitors: Array<
+        SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>
+      > = [];
+      for await (const result of finder.find()) {
+        decryptedMonitors.push(...result.saved_objects);
+      }
 
-    finder.close().catch(() => {});
+      finder.close().catch(() => {});
 
-    return decryptedMonitors;
-  }
+      return decryptedMonitors;
+    };
 
-  async delete(monitorId: string) {
-    return this.soClient.delete(syntheticsMonitorSavedObjectType, monitorId);
+    const [decryptedMonitors, legacyDecryptedMonitors] = await Promise.all([
+      getDecrypted(syntheticsMonitorSavedObjectType),
+      getDecrypted(legacySyntheticsMonitorTypeSingle),
+    ]);
+    return [...decryptedMonitors, ...legacyDecryptedMonitors];
   }
 
   async bulkDelete(

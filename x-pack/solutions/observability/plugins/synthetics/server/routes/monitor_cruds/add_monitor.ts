@@ -107,7 +107,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const normalizedMonitor = validationResult.decodedMonitor;
 
-      const err = await validatePermissions(routeContext, normalizedMonitor.locations);
+      // Parallelize permission and unique name validation
+      const [err, nameError] = await Promise.all([
+        validatePermissions(routeContext, normalizedMonitor.locations),
+        addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name),
+      ]);
+
       if (err) {
         return response.forbidden({
           body: {
@@ -115,7 +120,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           },
         });
       }
-      const nameError = await addMonitorAPI.validateUniqueMonitorName(normalizedMonitor.name);
       if (nameError) {
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },

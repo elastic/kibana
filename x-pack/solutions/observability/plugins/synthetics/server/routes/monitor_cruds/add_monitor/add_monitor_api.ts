@@ -9,7 +9,11 @@ import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
@@ -316,7 +320,10 @@ export class AddEditMonitorAPI {
     try {
       const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
       if (encryptedMonitor) {
-        await monitorConfigRepository.delete(newMonitorId);
+        await monitorConfigRepository.bulkDelete([
+          { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
+          { id: newMonitorId, type: legacySyntheticsMonitorTypeSingle },
+        ]);
 
         const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
         await deleteMonitorAPI.execute({

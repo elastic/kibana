@@ -46,7 +46,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
           filter: `${syntheticsMonitorSavedObjectType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
           sortField: ConfigKey.JOURNEY_ID,
           sortOrder: 'asc',
-          searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
+          searchAfter: decodedSearchAfter ? decodedSearchAfter.split(',') : undefined,
         });
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],

@@ -59,11 +59,17 @@ describe('MonitorConfigRepository', () => {
         references: [],
       };
 
-      soClient.get.mockResolvedValue(mockMonitor);
+      soClient.bulkGet.mockResolvedValue({ saved_objects: [mockMonitor] });
 
       const result = await repository.get(id);
 
-      expect(soClient.get).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'synthetics-monitor-multi-space', id },
+        {
+          type: 'synthetics-monitor',
+          id,
+        },
+      ]);
       expect(result).toBe(mockMonitor);
     });
 
@@ -71,7 +77,7 @@ describe('MonitorConfigRepository', () => {
       const id = 'test-id';
       const error = new Error(`Failed to get monitor with id ${id}: Not found`);
 
-      soClient.get.mockRejectedValue(error);
+      soClient.bulkGet.mockRejectedValue(error);
 
       await expect(repository.get(id)).rejects.toThrow(
         /Failed to get monitor with id test-id: Not found/
@@ -334,6 +340,7 @@ describe('MonitorConfigRepository', () => {
         perPage: 10,
         sortField: 'name',
         sortOrder: 'asc' as const,
+        filter: `${syntheticsMonitorAttributes}.enabled:true`,
       };
 
       const mockFindResult = {
@@ -373,6 +380,11 @@ describe('MonitorConfigRepository', () => {
       expect(soClient.find).toHaveBeenCalledWith({
         type: syntheticsMonitorSavedObjectType,
         ...options,
+      });
+
+      expect(soClient.find).toHaveBeenLastCalledWith({
+        type: legacySyntheticsMonitorTypeSingle,
+        ...{ ...options, filter: 'synthetics-monitor.attributes.enabled:true' },
       });
 
       expect(result).toStrictEqual(mockFindResult);
@@ -477,20 +489,6 @@ describe('MonitorConfigRepository', () => {
       expect(pointInTimeFinderMock.close).toHaveBeenCalled();
       expect(result).toEqual(mockDecryptedMonitors);
       // Should not throw an error when close fails
-    });
-  });
-
-  describe('delete', () => {
-    it('should delete a monitor by id', async () => {
-      const id = 'test-id';
-      const mockDeleteResult = { success: true };
-
-      soClient.delete.mockResolvedValue(mockDeleteResult);
-
-      const result = await repository.delete(id);
-
-      expect(soClient.delete).toHaveBeenCalledWith(syntheticsMonitorSavedObjectType, id);
-      expect(result).toBe(mockDeleteResult);
     });
   });
 

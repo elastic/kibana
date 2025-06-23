@@ -34,30 +34,6 @@ jest.mock('../../saved_objects/synthetics_monitor/process_monitors', () => ({
   getAllMonitors: jest.fn(),
 }));
 
-// jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
-//   per_page: 10,
-//   saved_objects: [
-//     {
-//       id: 'mon-1',
-//       attributes: {
-//         enabled: false,
-//         locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-//       },
-//     },
-//     {
-//       id: 'mon-2',
-//       attributes: {
-//         enabled: true,
-//         locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
-//         schedule: {
-//           number: '10',
-//           unit: 'm',
-//         },
-//       },
-//     },
-//   ],
-// } as any);
-
 describe('current status route', () => {
   const testMonitors = [
     {

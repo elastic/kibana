@@ -8,6 +8,7 @@
 import { AddEditMonitorAPI } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
+import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 
 describe('AddNewMonitorsPublicAPI', () => {
   it('should normalize schedule', async function () {
@@ -268,6 +269,59 @@ describe('AddNewMonitorsPublicAPI', () => {
         maintenance_windows: [],
         spaces: [],
       });
+    });
+  });
+
+  describe('validateUniqueMonitorName', () => {
+    it('should return an error message if the monitor name already exists', async () => {
+      const api = new AddEditMonitorAPI({
+        monitorConfigRepository: {
+          find: async () => ({ total: 1 }),
+        },
+      } as any);
+
+      const result = await api.validateUniqueMonitorName('test-monitor');
+      expect(result).toBe('Monitor name must be unique, "test-monitor" already exists.');
+    });
+
+    it('should not return an error message if the monitor name is unique', async () => {
+      const api = new AddEditMonitorAPI({
+        monitorConfigRepository: {
+          find: async () => ({ total: 0 }),
+        },
+      } as any);
+
+      const result = await api.validateUniqueMonitorName('unique-monitor');
+      expect(result).toBeUndefined();
+    });
+
+    it('should not return an error message if the monitor name is the same as the one being edited', async () => {
+      let receivedFilter: string | undefined;
+      const api = new AddEditMonitorAPI({
+        monitorConfigRepository: {
+          find: async (options: { filter: string }) => {
+            receivedFilter = options.filter;
+            return { total: 0 };
+          },
+        },
+      } as any);
+
+      const result = await api.validateUniqueMonitorName('test-monitor', 'monitor-id');
+      expect(result).toBeUndefined();
+      expect(receivedFilter).toBe(
+        `${syntheticsMonitorAttributes}.name.keyword:"test-monitor" and not (${syntheticsMonitorAttributes}.config_id: monitor-id)`
+      );
+    });
+
+    it('should return an error message if the monitor name is used by another monitor when editing', async () => {
+      const api = new AddEditMonitorAPI({
+        monitorConfigRepository: {
+          find: async () => ({ total: 1 }),
+        },
+      } as any);
+
+      const result = await api.validateUniqueMonitorName('test-monitor', 'monitor-id');
+      expect(result).toBe('Monitor name must be unique, "test-monitor" already exists.');
     });
   });
 });
