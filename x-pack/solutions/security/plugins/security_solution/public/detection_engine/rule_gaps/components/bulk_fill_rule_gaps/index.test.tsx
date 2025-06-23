@@ -8,14 +8,14 @@
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ManualRuleRunModal } from '.';
-import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { BulkFillRuleGapsModal } from '.';
+import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 
 const convertToDatePickerFormat = (date: moment.Moment) => {
   return `${date.format('L')} ${date.format('LT')}`;
 };
 
-describe('ManualRuleRunModal', () => {
+describe('BulkFillRuleGapsModal', () => {
   const onCancelMock = jest.fn();
   const onConfirmMock = jest.fn();
 
@@ -31,7 +31,10 @@ describe('ManualRuleRunModal', () => {
   });
 
   beforeEach(() => {
-    render(<ManualRuleRunModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
+    render(
+      <BulkFillRuleGapsModal onCancel={onCancelMock} onConfirm={onConfirmMock} rulesCount={10} />
+    );
+
     timeRangeForm = screen.getByTestId('schedule-bulk-action-modal-time-range-form');
     startDatePicker = timeRangeForm.getElementsByClassName('start-date-picker')[0];
     endDatePicker = timeRangeForm.getElementsByClassName('end-date-picker')[0];
@@ -67,7 +70,7 @@ describe('ManualRuleRunModal', () => {
     expect(confirmModalConfirmButton).toBeEnabled();
 
     const now = moment();
-    const startDate = now.clone().subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS, 'd');
+    const startDate = now.clone().subtract(MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS, 'd');
 
     fireEvent.change(startDatePicker, {
       target: {
@@ -77,7 +80,7 @@ describe('ManualRuleRunModal', () => {
 
     expect(confirmModalConfirmButton).toBeDisabled();
     expect(timeRangeForm).toHaveTextContent(
-      'Manual rule run cannot be scheduled earlier than 90 days ago'
+      'Rule gap fills cannot be scheduled earlier than 90 days ago'
     );
   });
 
@@ -92,6 +95,8 @@ describe('ManualRuleRunModal', () => {
     });
 
     expect(confirmModalConfirmButton).toBeDisabled();
-    expect(timeRangeForm).toHaveTextContent('Manual rule run cannot be scheduled for the future');
+    expect(timeRangeForm).toHaveTextContent(
+      'Select a different time range. Future gap fills are not supported.'
+    );
   });
 });
