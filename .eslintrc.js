@@ -2268,8 +2268,6 @@ module.exports = {
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
         'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)
 
-        // FIXME tomsonpl @kbn/osquery-plugin depends on @kbn/security-solution-plugin (security/private) (cypress code => cypress code)
-        'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
 
