@@ -17,6 +17,7 @@ import {
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { esqlQueryToOptions } from '@kbn/presentation-controls';
 import { dataService } from '../../services/kibana_services';
+import { ControlGroupApi } from '../../control_group/types';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -43,7 +44,10 @@ export const selectionComparators: StateComparators<
   title: 'referenceEquality',
 };
 
-export function initializeESQLControlSelections(initialState: ESQLControlState) {
+export function initializeESQLControlSelections(
+  initialState: ESQLControlState,
+  parentApi: ControlGroupApi
+) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -61,6 +65,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     }
   }
 
+  // For Values From Query controls, update values on dashboard load/reload
   async function updateAvailableOptions() {
     const controlType = controlType$.getValue();
     if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
@@ -72,6 +77,8 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
       availableOptions$.next(options);
     }
   }
+  updateAvailableOptions();
+  const reloadSubscription = parentApi.reload$?.subscribe(updateAvailableOptions);
 
   // derive ESQL control variable from state.
   const getEsqlVariable = () => ({
@@ -82,14 +89,17 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     type: variableType$.value,
   });
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
-  const subscriptions = combineLatest([variableName$, variableType$, selectedOptions$]).subscribe(
-    () => esqlVariable$.next(getEsqlVariable())
-  );
-
-  updateAvailableOptions();
+  const variableSubscriptions = combineLatest([
+    variableName$,
+    variableType$,
+    selectedOptions$,
+  ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {
-    cleanup: () => subscriptions.unsubscribe(),
+    cleanup: () => {
+      variableSubscriptions.unsubscribe();
+      reloadSubscription?.unsubscribe();
+    },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
