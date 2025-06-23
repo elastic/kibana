@@ -97,7 +97,7 @@ describe('fieldList', () => {
 
   it('gets a field by name with getByName()', () => {
     expect(list.getByName('foo')).toBeInstanceOf(DataViewField);
-    expect(list.getByName('foo')!.name).toBe('foo');
+    expect(list.getByName('foo')?.name).toBe('foo');
     expect(list.getByName('notfound')).toBeUndefined();
   });
 
@@ -114,8 +114,10 @@ describe('fieldList', () => {
   });
 
   it('removes a field with remove()', () => {
-    const field = list.getByName('foo')!;
-    list.remove(field);
+    const field = list.getByName('foo');
+    if (field) {
+      list.remove(field);
+    }
     expect(list.length).toBe(0);
     expect(list.getByName('foo')).toBeUndefined();
     expect(list.getByType('string').length).toBe(0);
@@ -132,8 +134,8 @@ describe('fieldList', () => {
     list.update(updatedField);
     const field = list.getByName('bar');
     expect(field).toBeInstanceOf(DataViewField);
-    expect(field!.aggregatable).toBe(true);
-    expect(field!.customLabel).toBe('Updated Label');
+    expect(field?.aggregatable).toBe(true);
+    expect(field?.customLabel).toBe('Updated Label');
   });
 
   it('removes all fields with removeAll()', () => {
