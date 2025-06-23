@@ -40,9 +40,7 @@ POST /api/processSpaceUpdate
 POST /api/triggerIndexRebalance
 ```
 
-Mapping resource-oriented APIs to a declarative model means users can describe the desired state rather than the steps to achieve it. While action-oriented endpoints sometimes become necessary, knowing the trade-offs helps you make informed decisions.
-
-#### Ideal
+#### Example
 
 The [Index Lifecycle Management API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ilm-put-lifecycle) (PUT /\_ilm/policy/\{policy\}) declaratively defines the desired lifecycle state rather than imperatively executing phase transitions:
 
@@ -120,7 +118,7 @@ A better API design would separate these concerns with different endpoints or pr
 
 ### Design human-friendly APIs
 
-When humans can easily understand your API, machines can too. APIs with clear, descriptive field names and logical resource structures make both manual testing and Terraform resource development much smoother.
+APIs with clear, descriptive field names and logical resource structures make both manual testing and Terraform resource development much smoother.
 
 #### Use intuitive field names
 
@@ -160,7 +158,7 @@ Resource developers often fall back to the API layer for validation checks, that
 
 ### Return errors early—and all at once
 
-If your API can validate inputs upfront and return all the errors in one go, do it\! Terraform handles it and show them in a helpful way:
+If your API can validate inputs upfront and return all the errors in one go, do it\! Terraform handles it and shows them in a helpful way:
 
 ```go
 var diags diag.Diagnostics
@@ -189,13 +187,13 @@ Detail: [allocate] exclude doesn't support values of type: VALUE_STRING
 
 The cost of not catching errors early is interrupted workflow, repetitive plan/apply failures and frustrated consumers.
 
-##### No side effects during HTTP GET or read requests
+### No side effects during HTTP GET or read requests
 
-Terraform might call \`refresh\` multiple times, and Terraform Cloud could do it even more. If your API creates objects, updates data, or does anything else during a GET request, you’re in for trouble. Terraform expects GET requests to be harmless and side-effect-free.
+Terraform expects GET requests to be non-destructive and side-effect-free. If your API creates objects, updates data, or does anything else during a GET request, you’re in for trouble.
 
 If you have to have side effects (like updating a ‘last-read’ timestamp), consumers have to work around it by, for example, limiting the number of times something’s read or building custom tooling to handle state drift.
 
-##### Standardize patterns across your API
+### Standardize patterns across your API
 
 Consistency is key for Terraform resource development. Using standard patterns make reusable abstractions and helper functions possible.
 
@@ -237,10 +235,6 @@ Many Kibana APIs have extensive configuration options. Requiring users to specif
 
 A resource returned from a GET request should match as closely as possible to what a user specifies in a PUT request. When users don't specify values that affect critical behavior, consider returning those computed values too.
 
-**Why this matters for import operations**
-
-Terraform import brings existing resources under management by reading their current state. If your API returns different data than what users originally configured, it can cause [import state loss bugs](https://github.com/elastic/terraform-provider-elasticstack/issues/53).
-
 ```bash
 # User creates resource with minimal config
 POST /api/resource { "name": "my-resource" }
@@ -256,6 +250,10 @@ GET /api/resource/my-resource
 
 # Terraform can't detect if defaults changed!
 ```
+
+**Why this matters for import operations**
+
+Terraform import brings existing resources under management by reading their current state. If your API returns different data than what users originally configured, it can cause [import state loss bugs](https://github.com/elastic/terraform-provider-elasticstack/issues/53).
 
 **Handling defaults strategically**
 
@@ -293,15 +291,9 @@ Consider these approaches:
    }
    ```
 
-**The import problem**
-
-When defaults aren't handled carefully, Terraform import operations can lose state. The imported resource might not match the original configuration, forcing users to make unnecessary changes or causing configuration drift.
-
-Choose your approach based on your API's complexity, but prioritize consistency between what users send and what they receive back.
-
 ### Be predictable
 
-Terraform relies on the same input resulting in the same output..  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.  
+Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.  
 
 Constantly changing fields in API responses create a difficult situation for Terraform implementations because they cause constant drift. 
 
@@ -354,7 +346,7 @@ Including and separating them makes it easier for the TF provider to specificall
 
 Terraform expects fields to maintain the same data type throughout a resource's lifecycle. When a field that was once a string suddenly becomes an array or object, it forces breaking changes that disrupt existing user configurations.
 
-THis is exactly what happened when Elasticsearch APIs [changed field types](https://github.com/elastic/terraform-provider-elasticstack/issues/926):
+This is exactly what happened when Elasticsearch APIs [changed field types](https://github.com/elastic/terraform-provider-elasticstack/issues/926):
 
 ```terraform
 # Version 1.0 - field was a string
@@ -368,7 +360,9 @@ resource "elasticstack_transform" "example" {
 }
 ```
 
-This change broke every existing Terraform configuration using that field.
+Another example is when the Kibana SLO API changed `group_by` from `string` to `string | string[]`. 
+
+Changing a field to make it more lenient might look harmless on the surface but means that the API will return values clients don't expect.
 
 **Design for consistency**
 
