@@ -16,7 +16,7 @@ import {
 import { AstNodeParserFields, Builder } from '../../builder';
 import { ESQLAstField, ESQLAstRerankCommand } from '../../types';
 import { firstItem, resolveItem } from '../../visitor/utils';
-import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
+import { createColumn, createCommand } from '../factories';
 import { getPosition } from '../helpers';
 import { collectBooleanExpression, getConstant } from '../walkers';
 
