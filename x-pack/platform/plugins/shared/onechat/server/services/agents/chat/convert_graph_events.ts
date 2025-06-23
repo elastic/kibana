@@ -26,7 +26,6 @@ import {
   toolIdentifierFromToolCall,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
-import { getToolCalls } from './utils/from_langchain_messages';
 
 export type ConvertedEvents =
   | MessageChunkEvent

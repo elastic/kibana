@@ -13,7 +13,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StructuredTool, DynamicStructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
-import { getToolCalls, extractTextContent } from '../chat/utils/from_langchain_messages';
+import { extractToolCalls, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import {
   getIdentifyResearchGoalPrompt,
   getReflectionPrompt,
@@ -168,7 +168,7 @@ export const createResearcherAgentGraph = async ({
         backlog: state.backlog,
       })
     );
-    const toolCalls = getToolCalls(response);
+    const toolCalls = extractToolCalls(response);
 
     log.trace(() => `performSearch - toolCalls: ${stringify(toolCalls)}`);
 
@@ -182,7 +182,7 @@ export const createResearcherAgentGraph = async ({
       if (toolCall && toolResult) {
         const actionResult: ActionResult = {
           researchGoal: nextItem.question,
-          toolName: toolCall.toolId.toolId,
+          toolName: toolCall.toolName,
           arguments: toolCall.args,
           response: toolResult.result,
         };

@@ -11,8 +11,17 @@ export enum AgentType {
   conversational = 'conversational',
 }
 
+/**
+ * Execution mode for agents
+ */
 export enum AgentMode {
+  /**
+   * Normal (Q/A) mode
+   */
   normal = 'normal',
+  /**
+   * Deep-research mode
+   */
   researcher = 'researcher',
 }
 

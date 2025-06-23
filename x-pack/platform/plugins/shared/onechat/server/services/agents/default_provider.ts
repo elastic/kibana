@@ -27,27 +27,23 @@ export const createDefaultAgentProvider = (): AgentProviderWithId => {
     },
     get: ({ agentId }) => {
       if (agentId === OneChatDefaultAgentId) {
-        return createDefaultAgentDescriptor({ agentId: OneChatDefaultAgentProviderId });
+        return createDefaultAgentDescriptor();
       }
       throw createAgentNotFoundError({ agentId: toSerializedAgentIdentifier(agentId) });
     },
     list: () => {
-      return [createDefaultAgentDescriptor({ agentId: OneChatDefaultAgentProviderId })];
+      return [createDefaultAgentDescriptor()];
     },
   };
 
   return provider;
 };
 
-const createDefaultAgentDescriptor = ({
-  agentId,
-}: {
-  agentId: string;
-}): ConversationalAgentDefinition => {
+const createDefaultAgentDescriptor = (): ConversationalAgentDefinition => {
   return {
     type: AgentType.conversational,
     id: OneChatDefaultAgentId,
     description: 'Default onechat agent',
-    handler: createHandler({ agentId }),
+    handler: createHandler({ agentId: OneChatDefaultAgentId }),
   };
 };

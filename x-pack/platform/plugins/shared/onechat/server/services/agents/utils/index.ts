@@ -10,3 +10,4 @@ export { createInternalRegistry } from './create_registry';
 export { addRoundCompleteEvent } from './add_round_complete_event';
 export { extractRound } from './extract_round';
 export { getToolCalls } from './tool_calls';
+export { conversationToLangchainMessages } from './to_langchain_messages';

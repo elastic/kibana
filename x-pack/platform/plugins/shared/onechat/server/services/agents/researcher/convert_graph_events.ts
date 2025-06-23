@@ -23,6 +23,7 @@ import {
   createMessageEvent,
   createReasoningEvent,
   extractTextContent,
+  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { StateType } from './graph';
 import { lastReflectionResult, firstResearchGoalResult } from './backlog';
@@ -31,8 +32,10 @@ export type ResearcherAgentEvents = MessageChunkEvent | MessageCompleteEvent | R
 
 export const convertGraphEvents = ({
   graphName,
+  toolIdMapping,
 }: {
   graphName: string;
+  toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();

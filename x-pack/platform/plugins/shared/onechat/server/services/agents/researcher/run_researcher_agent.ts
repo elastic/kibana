@@ -8,10 +8,9 @@
 import { from, filter, shareReplay } from 'rxjs';
 import { BuiltinToolIds, builtinToolProviderId } from '@kbn/onechat-common';
 import { AgentHandlerContext } from '@kbn/onechat-server';
-import { isStreamEvent } from '@kbn/onechat-genai-utils/langchain';
+import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
-import { toLangchainTool, conversationToLangchainMessages } from '../chat/utils';
-import { addRoundCompleteEvent, extractRound } from '../utils';
+import { addRoundCompleteEvent, extractRound, conversationToLangchainMessages } from '../utils';
 import { createResearcherAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import { RunAgentParams, RunAgentResponse } from '../run_agent';
@@ -59,13 +58,17 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
     ],
   });
 
+  const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
+    tools: researcherTools,
+    logger,
+    request,
+  });
+
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
     ignoreSteps: true,
   });
-
-  const langchainTools = researcherTools.map((tool) => toLangchainTool({ tool, logger }));
 
   const agentGraph = await createResearcherAgentGraph({
     logger,
@@ -91,7 +94,7 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
 
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
-    convertGraphEvents({ graphName: agentGraphName }),
+    convertGraphEvents({ graphName: agentGraphName, toolIdMapping }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

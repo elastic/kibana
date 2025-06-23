@@ -12,7 +12,6 @@ import {
   isToolCallStep,
 } from '@kbn/onechat-common';
 import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
-import { toolIdToLangchain } from './tool_provider_to_langchain_tools';
 
 /**
  * Converts a conversation to langchain format
@@ -75,7 +74,7 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
     tool_calls: [
       {
         id: toolCall.toolCallId,
-        name: toolIdToLangchain(toolCall.toolId),
+        name: toolCall.toolId.toolId,
         args: toolCall.args,
         type: 'tool_call',
       },
