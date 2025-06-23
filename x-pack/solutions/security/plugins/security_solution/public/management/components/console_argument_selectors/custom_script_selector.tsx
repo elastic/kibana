@@ -41,6 +41,11 @@ const INITIAL_DISPLAY_LABEL = i18n.translate(
   { defaultMessage: 'Click to select script' }
 );
 
+const TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.consoleArgumentSelectors.customScriptSelector.tooltipText',
+  { defaultMessage: 'Click to choose script' }
+);
+
 /**
  * State for the custom script selector component
  */
@@ -169,11 +174,13 @@ export const CustomScriptSelector = (agentType: ResponseActionAgentType) => {
         }}
         closePopover={handleClosePopover}
         button={
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} onClick={handleOpenPopover}>
-              <div title={valueText}>{valueText || INITIAL_DISPLAY_LABEL}</div>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiToolTip content={TOOLTIP_TEXT} position="top" display="block">
+            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false} onClick={handleOpenPopover}>
+                <div title={valueText}>{valueText || INITIAL_DISPLAY_LABEL}</div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiToolTip>
         }
       >
         {state.isPopoverOpen && (
