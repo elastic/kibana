@@ -19,6 +19,7 @@ import {
   SemanticCodeExamples,
 } from '../../../code_examples/create_index';
 import { useOnboardingTokenQuery } from '../../../hooks/api/use_onboarding_data';
+import { DEFAULT_WORKER_ID } from '@kbn/monaco/src/register_globals';
 
 const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
   switch (type) {
@@ -63,10 +64,12 @@ function onboardingTokenToWorkflowId(token: string | undefined | null): Workflow
   }
 }
 
+const DEFAULT_WORKFLOW_ID: WorkflowId = 'semantic';
+
 export const useWorkflow = () => {
   const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
   const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || 'default');
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || DEFAULT_WORKFLOW_ID);
   const { data } = useOnboardingTokenQuery();
 
   useEffect(() => {
