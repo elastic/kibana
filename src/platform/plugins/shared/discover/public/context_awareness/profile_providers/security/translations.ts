@@ -33,3 +33,24 @@ export const noEcsDescriptionReason = i18n.translate(
     defaultMessage: "This field doesn't have a description because it's not part of ECS.",
   }
 );
+
+export const aboutSectionTitle = i18n.translate(
+  'discover.profile.security.flyout.aboutSectionTitle',
+  {
+    defaultMessage: 'About',
+  }
+);
+
+export const descriptionSectionTitle = i18n.translate(
+  'discover.profile.security.flyout.descriptionSectionTitle',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const reasonSectionTitle = i18n.translate(
+  'discover.profile.security.flyout.reasonSectionTitle',
+  {
+    defaultMessage: 'Reason',
+  }
+);

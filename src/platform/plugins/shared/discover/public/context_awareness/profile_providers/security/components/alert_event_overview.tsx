@@ -98,21 +98,27 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
       style={{ paddingBlock: '20px' }}
     >
       <EuiFlexItem>
-        <ExpandableSection title={'About'}>
-          <EuiText data-test-subj="about">{getEcsAllowedValueDescription(eventCategory)}</EuiText>
+        <ExpandableSection title={i18n.aboutSectionTitle}>
+          <EuiText size="s" data-test-subj="about">
+            {getEcsAllowedValueDescription(eventCategory)}
+          </EuiText>
         </ExpandableSection>
       </EuiFlexItem>
       {description ? (
         <EuiFlexItem>
-          <ExpandableSection title={'Description'}>
-            <EuiText data-test-subj="description">{description}</EuiText>
+          <ExpandableSection title={i18n.descriptionSectionTitle}>
+            <EuiText size="s" data-test-subj="description">
+              {description}
+            </EuiText>
           </ExpandableSection>
         </EuiFlexItem>
       ) : null}
       {isAlert ? (
         <EuiFlexItem>
-          <ExpandableSection title={'Reason'}>
-            <EuiText data-test-subj="reason">{reason}</EuiText>
+          <ExpandableSection title={i18n.reasonSectionTitle}>
+            <EuiText size="s" data-test-subj="reason">
+              {reason}
+            </EuiText>
           </ExpandableSection>
         </EuiFlexItem>
       ) : null}
