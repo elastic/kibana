@@ -213,7 +213,7 @@ export const GAPS_FILL_ALL_GAPS_DRY_RUN_FAILED_MODAL_CLOSE_BUTTON_LABEL = i18n.t
 export const GAPS_FILL_ALL_GAPS_DRY_RUN_MODAL_HEADING = i18n.translate(
   'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalHeading',
   {
-    defaultMessage: 'Unable to schedule gap fills for disabled rule',
+    defaultMessage: 'Unable to schedule gap fills for a disabled rule',
   }
 );
 
