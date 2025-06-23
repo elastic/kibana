@@ -102,7 +102,7 @@ export const BulkActionBase = z.object({
 });
 
 /**
- * User screen context.
+ * IDs for a specific prompt within a group of prompts.
  */
 export type PromptIdSet = z.infer<typeof PromptIdSet>;
 export const PromptIdSet = z.object({

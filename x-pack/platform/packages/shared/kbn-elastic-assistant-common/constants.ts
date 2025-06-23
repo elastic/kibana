@@ -67,6 +67,12 @@ export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
 export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
 
+// Security AI Prompts (prompt integraiton
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/security_ai_prompts` as const;
+export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;

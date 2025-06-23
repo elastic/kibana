@@ -24,13 +24,20 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import useObservable from 'react-use/lib/useObservable';
+import { useFindPrompts } from '@kbn/elastic-assistant/impl/assistant/api/security_ai_prompts/use_find_prompts';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { PROMPT_CONTEXTS } from './content/prompt_contexts';
+import {
+  DATA_QUALITY_DASHBOARD_CATEGORY,
+  getPromptContexts,
+  PROMPT_CONTEXT_ALERT_CATEGORY,
+  PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
+  PROMPT_CONTEXT_EVENT_CATEGORY,
+} from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
@@ -219,6 +226,24 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
+  const fetchedPrompts = useFindPrompts({
+    context: {
+      isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+      http,
+      toasts,
+    },
+    params: {
+      prompt_group_id: 'aiAssistant',
+      prompt_ids: ['alertEvaluation', 'dataQualityAnalysis', 'ruleAnalysis'],
+    },
+  });
+  console.log('fetchedPrompts', fetchedPrompts);
+  const PROMPT_CONTEXTS = getPromptContexts({
+    [PROMPT_CONTEXT_ALERT_CATEGORY]: 'string',
+    [PROMPT_CONTEXT_EVENT_CATEGORY]: 'string',
+    [DATA_QUALITY_DASHBOARD_CATEGORY]: 'string',
+    [PROMPT_CONTEXT_DETECTION_RULES_CATEGORY]: 'string',
+  });
   return (
     <ElasticAssistantProvider
       actionTypeRegistry={actionTypeRegistry}

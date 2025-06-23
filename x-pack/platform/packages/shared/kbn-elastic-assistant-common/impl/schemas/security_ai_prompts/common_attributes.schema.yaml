@@ -1,0 +1,46 @@
+openapi: 3.0.0
+info:
+  title: Common Security AI Prompts Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PromptIdsSet:
+      description: Set of prompt IDs for a specific group of prompts.
+      type: object
+      required:
+        - promptIds
+        - promptGroupId
+      properties:
+        promptIds:
+          type: array
+          description: Array of IDs for a specific prompts
+          minItems: 1
+          items:
+            type: string
+          example:
+            - "systemPrompt"
+            - "userPrompt"
+        promptGroupId:
+          type: string
+          description: The unique identifier for a group of prompts.
+          example: "aiAssistant"
+    PromptItem:
+      type: object
+      properties:
+        promptId:
+          type: string
+          example: systemPrompt
+        prompt:
+          type: string
+          example: This is the prompt
+      required:
+        - promptId
+        - prompt
+
+    PromptItemArray:
+      type: array
+      description: Prompt array by prompt group id and prompt id.
+      items:
+        $ref: '#/components/schemas/PromptItem'

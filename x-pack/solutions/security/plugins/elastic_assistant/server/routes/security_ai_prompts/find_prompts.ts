@@ -8,22 +8,26 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { API_VERSIONS, ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND } from '@kbn/elastic-assistant-common';
 import {
-  FindPromptsRequestQuery,
-  FindPromptsResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas';
+  API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+  FindSecurityAIPromptsRequestQuery,
+  FindSecurityAIPromptsResponse,
+} from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import { getPrompt } from '../../lib/prompt';
+import { getPromptsByGroupId } from '../../lib/prompt';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
 
-export const getPromptsByPromptGroupId = (router: ElasticAssistantPluginRouter, logger: Logger) => {
+export const findSecurityAIPromptsRoute = (
+  router: ElasticAssistantPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .get({
-      access: 'public',
-      path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
+      access: 'internal',
+      path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -32,14 +36,23 @@ export const getPromptsByPromptGroupId = (router: ElasticAssistantPluginRouter, 
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindPromptsRequestQuery),
+            query: buildRouteValidationWithZod(FindSecurityAIPromptsRequestQuery),
+          },
+          response: {
+            200: {
+              body: { custom: buildRouteValidationWithZod(FindSecurityAIPromptsResponse) },
+            },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<FindPromptsResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<FindSecurityAIPromptsResponse>> => {
         const assistantResponse = buildResponse(response);
 
         try {
@@ -58,24 +71,18 @@ export const getPromptsByPromptGroupId = (router: ElasticAssistantPluginRouter, 
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
-          const prompts = await getPrompt({
+          const prompts = await getPromptsByGroupId({
             actionsClient,
-            connectorId: request.body.connectorId,
-            // promptIds is promptId and promptGroupId
-            ...promptIds,
+            connectorId: query.connector_id,
+            promptGroupId: query.prompt_group_id,
+            promptIds: query.prompt_ids,
             savedObjectsClient,
           });
 
-          if (result) {
-            return response.ok({
-              body: {
-                total: prompts.length,
-                data: prompts,
-              },
-            });
-          }
           return response.ok({
-            body: { perPage: query.per_page, page: query.page, data: [], total: 0 },
+            body: {
+              prompts,
+            },
           });
         } catch (err) {
           const error = transformError(err);
