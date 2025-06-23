@@ -118,10 +118,17 @@ export function PreviewTable({
     return canonicalColumnOrder.map((column) => ({
       id: column,
       displayAsText: column,
-      actions: false as false,
+      actions:
+        Boolean(setVisibleColumns) || Boolean(setSorting)
+          ? {
+              showHide: Boolean(setVisibleColumns),
+              showSortAsc: Boolean(setSorting),
+              showSortDesc: Boolean(setSorting),
+            }
+          : (false as false),
       initialWidth: visibleColumns.length > 10 ? 250 : undefined,
     }));
-  }, [canonicalColumnOrder, visibleColumns.length]);
+  }, [canonicalColumnOrder, setSorting, setVisibleColumns, visibleColumns.length]);
 
   return (
     <EuiDataGrid
