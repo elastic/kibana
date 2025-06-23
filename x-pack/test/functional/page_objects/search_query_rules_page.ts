@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-
+  const comboBox = getService('comboBox');
+  const browser = getService('browser');
   return {
     QueryRulesEmptyPromptPage: {
       TEST_IDS: {
@@ -180,12 +181,14 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         RULE_FLYOUT_PIN_MORE_BUTTON: 'searchQueryRulesPinMoreButton',
         RULE_FLYOUT_METADATA_ADD_BUTTON: 'searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton',
         RULE_FLYOUT_DOCUMENT_DRAGGABLE_ID: 'editableResultDocumentId',
+        RULE_FLYOUT_DOCUMENT_INDEX: 'editableResultIndexSelector',
         RULE_FLYOUT_ACTION_TYPE_EXCLUDE: 'searchQueryRulesQueryRuleActionTypeExclude',
         RULE_FLYOUT_ACTION_TYPE_PINNED: 'searchQueryRulesQueryRuleActionTypePinned',
         RULE_FLYOUT_CRITERIA_CUSTOM: 'searchQueryRulesQueryRuleCriteriaCustom',
         RULE_FLYOUT_CRITERIA_ALWAYS: 'searchQueryRulesQueryRuleCriteriaAlways',
         RULE_FLYOUT_CRITERIA_METADATA_BLOCK: 'searchQueryRulesQueryRuleMetadataEditor',
         RULE_FLYOUT_CRITERIA_METADATA_BLOCK_FIELD: 'searchQueryRulesQueryRuleMetadataEditorField',
+        RULE_FLYOUT_CRITERIA_METADATA_BLOCK_VALUES: 'searchQueryRulesQueryRuleMetadataEditorValues',
       },
       async expectRuleFlyoutToExist() {
         await testSubjects.existOrFail(this.TEST_IDS.RULE_FLYOUT);
@@ -218,7 +221,12 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           await this.changeDocumentIdField(id);
         }
       },
-      async changeMetadata(id: number, newValue: string = '') {
+      async changeDocumentIndexField(id: number, newValue: string = '') {
+        await comboBox.setCustom(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_INDEX, newValue);
+        // Press tab to ensure the value is set correctly
+        await browser.pressKeys(['tab']);
+      },
+      async changeMetadataField(id: number, newValue: string = '') {
         const metadataFields = await testSubjects.findAll(
           this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK
         );
@@ -231,8 +239,14 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           await targetField.type(newValue);
         } else {
           await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_METADATA_ADD_BUTTON);
-          await this.changeMetadata(id);
+          await this.changeMetadataField(id);
         }
+      },
+      async changeMetadataValues(id: number, newValue: string = '') {
+        await comboBox.setCustom(
+          this.TEST_IDS.RULE_FLYOUT_CRITERIA_METADATA_BLOCK_VALUES,
+          newValue
+        );
       },
     },
   };

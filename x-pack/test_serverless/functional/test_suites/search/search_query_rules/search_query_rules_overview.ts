@@ -87,8 +87,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageNavigated(
           'my-test-ruleset'
         );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutToExist();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIndexField(
+          0,
+          'my-index-000001'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIdField(
+          0,
+          'W08XfZcBY'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataValues(0, 'pugs');
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataField(
+          0,
+          'my_query_field'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
       });
       after(async () => {
         try {
@@ -98,6 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
       });
     });
+
     describe('Adding a new ruleset in a non-empty deployment', () => {
       before(async () => {
         await createTestRuleset('my-test-ruleset');
@@ -112,8 +129,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageNavigated(
           'my-test-ruleset-2'
         );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.expectRuleFlyoutToExist();
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIndexField(
+          0,
+          'my-index-000001'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeDocumentIdField(
+          0,
+          'W08XfZcBY'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataValues(0, 'pugs');
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataField(
+          0,
+          'my_query_field'
+        );
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageBackButtonToExist();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.expectQueryRulesDetailPageSaveButtonToExist();
+        await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
       });
       after(async () => {
         try {
@@ -175,7 +208,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickActionTypePinned();
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickActionTypeExclude();
-        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadata(0, 'my_query_field');
+        await pageObjects.searchQueryRules.QueryRulesRuleFlyout.changeMetadataField(
+          0,
+          'my_query_field'
+        );
         await pageObjects.searchQueryRules.QueryRulesRuleFlyout.clickUpdateButton();
         await pageObjects.searchQueryRules.QueryRulesDetailPage.clickQueryRulesDetailPageSaveButton();
       });
