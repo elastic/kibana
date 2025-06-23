@@ -18,7 +18,7 @@ describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
     const { getByTestId, rerender } = render(
-      <AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>
+      <AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>
     );
 
     // The data-test-subj attribute is used for querying
@@ -32,7 +32,7 @@ describe('AppWrapper', () => {
     `);
 
     act(() => chromeVisible$.next(false));
-    rerender(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    rerender(<AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>);
     expect(getByTestId('kbnAppWrapper hiddenChrome')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -43,7 +43,7 @@ describe('AppWrapper', () => {
     `);
 
     act(() => chromeVisible$.next(true));
-    rerender(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    rerender(<AppWrapper chromeVisible={chromeVisible$.value}>app-content</AppWrapper>);
     expect(getByTestId('kbnAppWrapper visibleChrome')).toMatchInlineSnapshot(`
       <div
         class="kbnAppWrapper"

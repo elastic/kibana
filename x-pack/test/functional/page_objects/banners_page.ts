@@ -8,7 +8,6 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class BannersPageObject extends FtrService {
-  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   isTopBannerVisible() {

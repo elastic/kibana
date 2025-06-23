@@ -59,34 +59,15 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     position: relative; // This is temporary for apps that relied on this being present on \`.application\`
   }
 
-  // Conditionally override :root CSS fixed header variable.
-  .kbnBody--hasHeaderBanner {
-    // TODO: check if this is still needed, as it was added to support the legacy fixed layout
-    // Prevent banners from covering full screen data grids
-    .euiDataGrid--fullScreen {
-      height: calc(100vh - var(--kbnHeaderBannerHeight));
-      top: var(--kbnHeaderBannerHeight);
-    }
+  #kibana-body .euiDataGrid--fullScreen {
+    height: calc(100vh - var(--kbnHeaderBannerHeight));
+    top: var(--kbnHeaderBannerHeight);
   }
 
   // Set a body CSS variable for the app container to use - calculates the total
   // height of all fixed headers + the sticky action menu toolbar
   .kbnBody--hasProjectActionMenu {
     --kbnAppHeadersOffset: var(--kbnProjectHeaderAppActionMenuHeight);
-  }
-
-  .euiDataGrid__restrictBody {
-    .headerGlobalNav,
-    .kbnQueryBar {
-      display: none;
-    }
-  }
-
-  .euiDataGrid__restrictBody.euiBody--headerIsFixed {
-    .euiFlyout {
-      top: 0;
-      height: 100%;
-    }
   }
 `;
 

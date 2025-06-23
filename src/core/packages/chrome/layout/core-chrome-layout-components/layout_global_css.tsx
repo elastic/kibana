@@ -10,6 +10,7 @@
 import React from 'react';
 import { Global, css } from '@emotion/react';
 import { useLayoutState } from './layout_state_context';
+import { useEuiTheme } from '@elastic/eui';
 
 /**
  * Sets up global CSS for the layout using the CSS variables (custom properties) approach.
@@ -70,6 +71,8 @@ export const LayoutGlobalCSS = () => {
     sidebarPanelWidth,
   } = useLayoutState();
 
+  const { euiTheme } = useEuiTheme();
+
   const banner = css`
     --kbn-layout--banner-top: 0;
     --kbn-layout--banner-left: 0;
@@ -122,6 +125,13 @@ export const LayoutGlobalCSS = () => {
     --kbn-layout--footer-width: var(--kbn-layout--application-width);
   `;
 
+  // we want to place layout slots eui's flyouts
+  const common = css`
+    --kbn-layout--slot-zIndex: ${typeof euiTheme.levels.flyout === 'number'
+      ? euiTheme.levels.flyout + 50
+      : euiTheme.levels.flyout};
+  `;
+
   const styles = css`
     :root {
       ${banner}
@@ -130,6 +140,7 @@ export const LayoutGlobalCSS = () => {
       ${sidebar}
       ${application}
       ${footer}
+      ${common}
     }
   `;
 

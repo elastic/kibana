@@ -27,7 +27,7 @@ interface SimpleDebugOverlayProps {
 
 export const SimpleDebugOverlay: React.FC<SimpleDebugOverlayProps> = ({
   label = 'Debug Overlay',
-  background = 'rgba(0,153,255,0.15)',
+  background = '#e6f4ff',
   color = '#0099ff',
   style = {},
   children,

@@ -16,7 +16,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
   width: var(--kbn-layout--banner-width);
   height: var(--kbn-layout--banner-height);
-  z-index: ${euiTheme.levels.header};
+  z-index: var(--kbn-layout--slot-zIndex);
 `;
 
 export const styles = {

@@ -15,7 +15,7 @@ const root: EmotionFn = ({ euiTheme }) => css`
   overflow: hidden;
   grid-area: header;
   height: var(--kbn-layout--header-height);
-  z-index: ${euiTheme.levels.header};
+  z-index: var(--kbn-layout--slot-zIndex);
 `;
 
 export const styles = {

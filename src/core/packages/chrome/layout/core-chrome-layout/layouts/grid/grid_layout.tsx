@@ -24,7 +24,7 @@ import type {
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
-const defaultLayoutConfig: ChromeLayoutConfig = {
+const layoutConfig: ChromeLayoutConfig = {
   headerHeight: 96,
   bannerHeight: 32,
 
@@ -63,21 +63,12 @@ export class GridLayout implements LayoutService {
       const chromeVisible = useObservable(chromeVisible$, false);
       const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
 
-      const layoutConfig = React.useMemo<ChromeLayoutConfig>(
-        () => ({
-          ...defaultLayoutConfig,
-          // Use the default header height if chrome is visible, otherwise set it to 0 while displaying {chromelessHeader}
-          headerHeight: chromeVisible ? 96 : 0,
-        }),
-        [chromeVisible]
-      );
-
       return (
         <>
           <GridLayoutGlobalStyles />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
-              header={chromeVisible ? chromeHeader : chromelessHeader}
+              header={chromeVisible && chromeHeader}
               sidebar={
                 chromeVisible && debug ? <SimpleDebugOverlay label="Debug Sidebar" /> : undefined
               }
@@ -98,9 +89,12 @@ export class GridLayout implements LayoutService {
               }
             >
               <>
+                {/* If chrome is not visible, we use the chromeless header to display the*/}
+                {/* data-test-subj and fixed loading bar*/}
+                {!chromeVisible && chromelessHeader}
+
                 <div id="globalBannerList">{bannerComponent}</div>
-                <AppWrapper chromeVisible$={chromeVisible$}>
-                  {/* TODO: test and fix this */}
+                <AppWrapper chromeVisible={chromeVisible}>
                   {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
                   <div id={APP_FIXED_VIEWPORT_ID} />
 

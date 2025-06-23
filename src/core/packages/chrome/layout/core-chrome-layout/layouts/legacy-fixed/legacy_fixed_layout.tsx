@@ -12,6 +12,7 @@ import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
 import { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+import useObservable from 'react-use/lib/useObservable';
 
 /**
  * Service for providing layout component wired to other core services.
@@ -30,6 +31,9 @@ export class LegacyFixedLayout implements LayoutService {
     const chromeVisible$ = chrome.getIsVisible$();
 
     return React.memo(() => {
+      // TODO: optimize initial value to avoid unnecessary re-renders
+      const chromeVisible = useObservable(chromeVisible$, false);
+
       return (
         <>
           {/* Global Styles that apply across the entire app */}
@@ -41,7 +45,7 @@ export class LegacyFixedLayout implements LayoutService {
           {/* banners$.subscribe() for things like the No data banner */}
           <div id="globalBannerList">{bannerComponent}</div>
           {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chromeVisible$}>
+          <AppWrapper chromeVisible={chromeVisible}>
             {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
             <div id={APP_FIXED_VIEWPORT_ID} />
             {/* The actual plugin/app */}
