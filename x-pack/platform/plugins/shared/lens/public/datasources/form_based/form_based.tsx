@@ -175,8 +175,10 @@ export function columnToOperation(
     );
   }
 
-  const scale = 'scale' in operationDefinition && typeof operationDefinition.scale === 'function' ? 
-    operationDefinition.scale(column, dataView as IndexPattern) : operationDefinition.scale as 'ratio' | 'ordinal' | 'interval' ?? 'ratio';
+  const scale =
+    'scale' in operationDefinition && typeof operationDefinition.scale === 'function'
+      ? operationDefinition.scale(column, dataView as IndexPattern)
+      : (operationDefinition.scale as 'ratio' | 'ordinal' | 'interval') ?? 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),

@@ -152,7 +152,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       );
     },
     getDefaultLabel: (column, columns, indexPattern) =>
-    labelLookup(getSafeName(column.sourceField, indexPattern), column),
+      labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }, columnParams) => {
       return {
         label: labelLookup(field.displayName, previousColumn),

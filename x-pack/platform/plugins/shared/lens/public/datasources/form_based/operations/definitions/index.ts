@@ -262,7 +262,11 @@ interface BaseOperationDefinitionProps<
    * Should be i18n-ified.
    */
   displayName: string;
-  scale?: 'ratio' | 'ordinal' | 'interval' | ((column: C, dataView?: IndexPattern) => 'ratio' | 'ordinal' | 'interval' | undefined);
+  scale?:
+    | 'ratio'
+    | 'ordinal'
+    | 'interval'
+    | ((column: C, dataView?: IndexPattern) => 'ratio' | 'ordinal' | 'interval' | undefined);
   /**
    * The default label is assigned by the editor
    */
