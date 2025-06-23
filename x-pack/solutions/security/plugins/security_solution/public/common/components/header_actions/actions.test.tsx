@@ -76,6 +76,7 @@ jest.mock('../../lib/kibana', () => {
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useNavigateTo: jest.fn().mockReturnValue({
