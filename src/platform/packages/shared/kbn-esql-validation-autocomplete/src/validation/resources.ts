@@ -19,6 +19,7 @@ import {
   buildQueryForFieldsForStringSources,
   buildQueryForFieldsFromSource,
   buildQueryForFieldsInPolicies,
+  hasEnrichCommand,
 } from './helpers';
 import type { ESQLFieldWithMetadata, ESQLPolicy } from './types';
 
@@ -52,7 +53,7 @@ export async function retrievePolicies(
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
-  if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
+  if (!callbacks || !hasEnrichCommand(commands)) {
     return new Map();
   }
 
