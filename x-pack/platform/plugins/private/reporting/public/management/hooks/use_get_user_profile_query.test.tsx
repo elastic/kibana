@@ -10,8 +10,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
 import { UserProfileService } from '@kbn/core/public';
 import { QueryClientProvider } from '@tanstack/react-query';
+import * as reactQuery from '@tanstack/react-query';
 import { PropsWithChildren } from 'react';
 import { testQueryClient } from '../test_utils/test_query_client';
+
+const useQuerySpy = jest.spyOn(reactQuery, 'useQuery');
 
 const mockUserProfileService = {
   getCurrent: jest.fn(),
@@ -45,13 +48,16 @@ describe('useGetUserProfileQuery', () => {
     expect(result.current.data).toEqual(mockProfile);
   });
 
-  it('does not call getCurrent if userProfileService is not provided', async () => {
+  it('should not enable the query if userProfileService is not provided', async () => {
     const { result } = renderHook(() => useGetUserProfileQuery({ userProfileService: undefined }), {
       wrapper,
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-
+    expect(useQuerySpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
     expect(result.current.data).toBeUndefined();
   });
 });
