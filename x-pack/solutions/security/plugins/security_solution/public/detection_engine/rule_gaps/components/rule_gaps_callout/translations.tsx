@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const RULE_GAPS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.ruleGaps.callout.title',
   {
-    defaultMessage: 'Rule execution gaps detected',
+    defaultMessage: 'Rule execution gaps detected in the past 24 hours',
   }
 );
 
@@ -21,10 +21,10 @@ export const RULE_GAPS_CALLOUT_DASHBOARD = i18n.translate(
   }
 );
 
-export const RULE_GAPS_CALLOUT_READ_DOCS = i18n.translate(
-  'xpack.securitySolution.ruleGaps.callout.readDocs',
+export const RULE_GAPS_CALLOUT_MONITORING_TAB = i18n.translate(
+  'xpack.securitySolution.ruleGaps.callout.monitoringTab',
   {
-    defaultMessage: 'Read docs',
+    defaultMessage: 'Monitoring tab',
   }
 );
 

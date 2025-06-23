@@ -26,7 +26,7 @@ import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to
 import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
 import {
   RULE_GAPS_CALLOUT_DASHBOARD,
-  RULE_GAPS_CALLOUT_READ_DOCS,
+  RULE_GAPS_CALLOUT_MONITORING_TAB,
   RULE_GAPS_CALLOUT_TITLE,
 } from './translations';
 
@@ -101,18 +101,16 @@ export const RuleGapsCallout = () => {
           <p>
             <FormattedMessage
               id="xpack.securitySolution.ruleGaps.callout.message"
-              defaultMessage="Gaps in rule coverage were detected over the past 24 hours. {link} to learn which rules are affected and to begin remediating gaps."
+              defaultMessage="Gaps in rule executions might lead to missing alerts. Go to the Rule Monitoring tab to find affected rules and begin remediating gaps. {link}"
               values={{
                 link: (
                   <EuiLink
-                    href={getSecuritySolutionUrl({
-                      deepLinkId: SecurityPageName.rules,
-                      path: AllRulesTabs.monitoring,
-                    })}
+                    href={docLinks.links.siem.gapsTable}
                     data-test-subj="monitoringLogsLink"
+                    target="_blank"
                   >
                     {i18n.translate('xpack.securitySolution.ruleGaps.callout.messageLink', {
-                      defaultMessage: 'Check the Rule Monitoring tab',
+                      defaultMessage: 'Learn more.',
                     })}
                   </EuiLink>
                 ),
@@ -123,18 +121,25 @@ export const RuleGapsCallout = () => {
             {spaceId && (
               <EuiButton
                 href={getSecuritySolutionUrl({
-                  deepLinkId: SecurityPageName.dashboards,
-                  path: `security-detection-rule-monitoring-${spaceId}`,
+                  deepLinkId: SecurityPageName.rules,
+                  path: AllRulesTabs.monitoring,
                 })}
                 fill
                 color="warning"
                 size="s"
               >
-                {RULE_GAPS_CALLOUT_DASHBOARD}
+                {RULE_GAPS_CALLOUT_MONITORING_TAB}
               </EuiButton>
             )}
-            <EuiButtonEmpty href={`${docLinks.links.siem.gapsTable}`} color="warning" size="s">
-              {RULE_GAPS_CALLOUT_READ_DOCS}
+            <EuiButtonEmpty
+              href={getSecuritySolutionUrl({
+                deepLinkId: SecurityPageName.dashboards,
+                path: `security-detection-rule-monitoring-${spaceId}`,
+              })}
+              color="warning"
+              size="s"
+            >
+              {RULE_GAPS_CALLOUT_DASHBOARD}
             </EuiButtonEmpty>
           </EuiFlexGroup>
         </>
