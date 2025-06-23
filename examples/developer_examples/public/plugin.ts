@@ -28,13 +28,13 @@ export class DeveloperExamplesPlugin implements Plugin<DeveloperExamplesSetup, v
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         const [coreStart] = await core.getStartServices();
-        const { analytics, i18n, theme, userProfile } = coreStart;
+        const { rendering } = coreStart;
         return renderApp(
           {
-            startServices: { analytics, i18n, theme, userProfile },
             examples,
             navigateToApp: (appId: string) => coreStart.application.navigateToApp(appId),
             getUrlForApp: (appId: string) => coreStart.application.getUrlForApp(appId),
+            rendering,
           },
           params.element
         );

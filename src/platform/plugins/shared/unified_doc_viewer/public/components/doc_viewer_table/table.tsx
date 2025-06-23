@@ -50,7 +50,12 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  TableFilters,
+  TableFiltersProps,
+  useTableFilters,
+} from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
@@ -178,7 +183,10 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
+    storage,
+    storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
+  });
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {

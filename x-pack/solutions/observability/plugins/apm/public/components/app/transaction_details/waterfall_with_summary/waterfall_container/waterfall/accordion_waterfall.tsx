@@ -27,6 +27,7 @@ import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,
+  IWaterfallGetRelatedErrorsHref,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
@@ -44,6 +45,7 @@ interface AccordionWaterfallProps {
   displayLimit?: number;
   isEmbeddable?: boolean;
   scrollElement?: Element;
+  getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
 }
 
 type WaterfallProps = Omit<
@@ -185,7 +187,14 @@ const VirtualRow = React.memo(
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const theme = useTheme();
-  const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
+  const {
+    duration,
+    waterfallItemId,
+    onClickWaterfallItem,
+    getRelatedErrorsHref,
+    timelineMargins,
+    node,
+  } = props;
   const {
     criticalPathSegmentsById,
     getErrorCount,
@@ -251,6 +260,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               onClick={onWaterfallItemClick}
               segments={segments}
               isEmbeddable={isEmbeddable}
+              getRelatedErrorsHref={getRelatedErrorsHref}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
