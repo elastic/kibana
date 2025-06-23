@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { orderBy } from 'lodash';
 import { stringify } from 'query-string';
 import { REPORTING_REDIRECT_APP, buildKibanaPath } from '@kbn/reporting-common';
 import type { ScheduledReportApiJSON, BaseParamsV2 } from '@kbn/reporting-common/types';
@@ -61,6 +62,8 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
     http,
     toasts,
   });
+
+  const sortedList = orderBy(scheduledList?.data || [], ['created_at'], ['desc']);
 
   const tableColumns: Array<EuiBasicTableColumn<ScheduledReportApiJSON>> = [
     {
@@ -281,7 +284,7 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
       <EuiSpacer size={'l'} />
       <EuiBasicTable
         data-test-subj="reportSchedulesTable"
-        items={scheduledList?.data || []}
+        items={sortedList}
         columns={tableColumns}
         loading={isLoading}
         pagination={{
