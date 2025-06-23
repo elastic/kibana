@@ -2966,8 +2966,8 @@ const knnDefinition: FunctionDefinition = {
   ],
   validate: undefined,
   examples: [
-    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc',
-    'from colors metadata _score\n| where knn(rgb_vector, [0,255,255], {"k": 4})\n| sort _score desc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0, 120, 0])\n| sort _score desc, color asc',
+    'from colors metadata _score\n| where knn(rgb_vector, [0,255,255], {"k": 4})\n| sort _score desc, color asc',
   ],
 };
 
