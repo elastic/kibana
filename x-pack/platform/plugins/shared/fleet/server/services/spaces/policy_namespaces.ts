@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import { appContextService } from '../app_context';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 
-import type { PackagePolicy } from '../../types';
+import type { AgentPolicy, PackagePolicy } from '../../types';
 import { packagePolicyService } from '../package_policy';
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
@@ -95,7 +95,8 @@ export async function validateAdditionalDatastreamsPermissionsForSpace({
 }
 
 export async function validatePackagePoliciesUniqueNameAcrossSpaces(
-  packagePolicies: PackagePolicy[]
+  packagePolicies: PackagePolicy[],
+  newSpaceIds: string[] = []
 ) {
   if (packagePolicies === undefined || packagePolicies.length === 0) return;
   const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -108,10 +109,16 @@ export async function validatePackagePoliciesUniqueNameAcrossSpaces(
         spaceId: '*',
       });
 
-      if (items && items.length > 1)
-        throw new PackagePolicyNameExistsError(
-          `An integration policy with the name ${pkgPolicy.name} already exists. Please rename it or choose a different name.`
-        );
+      const filteredItems = items.filter((item) => item.id !== pkgPolicy.id);
+      newSpaceIds.forEach((spaceId) => {
+        const results = filteredItems.find((item) => item.spaceIds?.includes(spaceId));
+
+        if (results) {
+          throw new PackagePolicyNameExistsError(
+            `An integration policy with the name ${pkgPolicy.name} already exists in space "${spaceId}". Please rename it or choose a different name.`
+          );
+        }
+      });
     },
     {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,

@@ -41,7 +41,7 @@ export async function updateAgentPolicySpaces({
   currentSpaceId: string;
   newSpaceIds: string[];
   authorizedSpaces: string[];
-  options?: { force?: boolean };
+  options?: { force?: boolean; validateUniqueName?: boolean };
 }) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !newSpaceIds || newSpaceIds.length === 0) {
@@ -73,7 +73,9 @@ export async function updateAgentPolicySpaces({
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
   }
-  await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies);
+  if (options?.validateUniqueName) {
+    await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies, newSpaceIds);
+  }
 
   if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
     throw new FleetError(
