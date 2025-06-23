@@ -347,9 +347,9 @@ describe('ResponseActionsClientImpl base class', () => {
           id: ['one'],
           policy: [
             {
-              agentId: '1-2-3',
+              agentId: 'one',
               agentPolicyId: expect.any(String),
-              elasticAgentId: '1-2-3',
+              elasticAgentId: 'one',
               integrationPolicyId: expect.any(String),
             },
           ],
@@ -520,7 +520,19 @@ describe('ResponseActionsClientImpl base class', () => {
               input_type: 'endpoint',
               type: 'INPUT_ACTION',
             },
-            agent: { id: ['one'] },
+            agent: {
+              id: ['one'],
+              policy: [
+                {
+                  agentId: 'one',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: 'one',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
+            },
+            originSpaceId: 'default',
+            tags: [],
             meta: { one: 1 },
             user: { id: 'foo' },
           });
