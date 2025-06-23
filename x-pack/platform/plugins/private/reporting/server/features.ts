@@ -80,27 +80,27 @@ export function registerFeatures({
   }
 
   features.registerKibanaFeature({
-      id: 'manageReporting',
-      name: i18n.translate('xpack.reporting.features.manageScheduledReportsFeatureName', {
-        defaultMessage: 'Manage Scheduled Reports',
-      }),
-      description: i18n.translate(
-        'xpack.reporting.features.manageScheduledReportsFeatureDescription',
-        {
-          defaultMessage: 'View and manage scheduled reports for all users in this space.',
-        }
-      ),
-      category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: [],
-      privileges: {
-        all: {
-          api: [API_PRIVILEGES.MANAGE_SCHEDULED_REPORTING],
-          savedObject: { all: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE], read: [] },
-          ui: ['show'],
-        },
-        // No read-only mode currently supported
-        read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+    id: 'manageReporting',
+    name: i18n.translate('xpack.reporting.features.manageScheduledReportsFeatureName', {
+      defaultMessage: 'Manage Scheduled Reports',
+    }),
+    description: i18n.translate(
+      'xpack.reporting.features.manageScheduledReportsFeatureDescription',
+      {
+        defaultMessage: 'View and manage scheduled reports for all users in this space.',
+      }
+    ),
+    category: DEFAULT_APP_CATEGORIES.management,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: [],
+    privileges: {
+      all: {
+        api: [API_PRIVILEGES.MANAGE_SCHEDULED_REPORTING],
+        savedObject: { all: [SCHEDULED_REPORT_SAVED_OBJECT_TYPE], read: [] },
+        ui: ['show'],
       },
-    });
+      // No read-only mode currently supported
+      read: { disabled: true, savedObject: { all: [], read: [] }, ui: [] },
+    },
+  });
 }
