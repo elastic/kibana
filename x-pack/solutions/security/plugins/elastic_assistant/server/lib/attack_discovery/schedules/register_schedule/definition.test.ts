@@ -31,30 +31,6 @@ describe('getAttackDiscoveryScheduleType', () => {
       telemetry: mockTelemetry,
     });
 
-<<<<<<< HEAD
-    expect(scheduleType).toEqual(
-      expect.objectContaining({
-        id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-        name: 'Attack Discovery Schedule',
-        actionGroups: [{ id: 'default', name: 'Default' }],
-        defaultActionGroupId: 'default',
-        category: 'securitySolution',
-        producer: 'assistant',
-        solution: 'security',
-        priority: TaskPriority.Low,
-        schemas: {
-          params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
-        },
-        actionVariables: {
-          context: [{ name: 'server', description: 'the server' }],
-        },
-        minimumLicenseRequired: 'basic',
-        isExportable: false,
-        autoRecoverAlerts: false,
-        alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
-      })
-    );
-=======
     expect(scheduleType).toEqual({
       id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
       name: 'Attack Discovery Schedule',
@@ -64,6 +40,7 @@ describe('getAttackDiscoveryScheduleType', () => {
       category: 'securitySolution',
       producer: 'siem',
       solution: 'security',
+      priority: TaskPriority.NormalLongRunning,
       schemas: {
         params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
       },
@@ -77,6 +54,5 @@ describe('getAttackDiscoveryScheduleType', () => {
       executor: expect.anything(),
       validate: expect.anything(),
     });
->>>>>>> main
   });
 });

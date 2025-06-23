@@ -517,7 +517,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: TaskPriority.Low,
+          priority: TaskPriority.NormalLongRunning,
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
@@ -530,6 +530,15 @@ describe('Create Lifecycle', () => {
         };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
+      expect(registry.get('test').priority).toEqual(TaskPriority.NormalLongRunning);
+
+      expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:test': {
+          title: 'Test',
+          priority: TaskPriority.NormalLongRunning,
+        },
+      });
     });
 
     test('throws if RuleType priority provided is invalid', () => {
@@ -548,7 +557,7 @@ describe('Create Lifecycle', () => {
             id: 'backToAwesome',
             name: 'Back To Awesome',
           },
-          priority: 100 as TaskPriority,
+          priority: TaskPriority.Low as TaskPriority.Normal, // Have to cast to force this error case
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
@@ -561,7 +570,7 @@ describe('Create Lifecycle', () => {
         };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       expect(() => registry.register(ruleType)).toThrowError(
-        new Error(`Rule type \"test\" has invalid priority: 100.`)
+        new Error(`Rule type \"test\" has invalid priority: 1.`)
       );
     });
 

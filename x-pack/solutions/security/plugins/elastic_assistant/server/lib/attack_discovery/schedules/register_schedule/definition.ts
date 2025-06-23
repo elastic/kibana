@@ -36,7 +36,7 @@ export const getAttackDiscoveryScheduleType = ({
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: 'siem',
     solution: 'security',
-    priority: TaskPriority.Low,
+    priority: TaskPriority.NormalLongRunning,
     validate: {
       params: {
         validate: (object: unknown) => {
