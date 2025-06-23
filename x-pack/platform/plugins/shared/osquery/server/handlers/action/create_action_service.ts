@@ -13,6 +13,11 @@ import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';
 
+export interface CreateActionOptions {
+  alertData?: ParsedTechnicalFields & { _index: string };
+  space?: { id: string };
+}
+
 export const createActionService = (osqueryContext: OsqueryAppContext) => {
   let licenseSubscription: Subscription | null = null;
   const licenses: OsqueryActiveLicenses = { isActivePlatinumLicense: false };
@@ -21,13 +26,19 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
     licenses.isActivePlatinumLicense = license.isActive && license.hasAtLeast('platinum');
   });
 
+  const logger = osqueryContext.logFactory.get('createActionService');
+
   const create = async (
     params: CreateLiveQueryRequestBodySchema,
-    alertData?: ParsedTechnicalFields & { _index: string }
+    options?: CreateActionOptions
   ) => {
     const error = validateLicense(licenses);
 
-    return createActionHandler(osqueryContext, params, { alertData, error });
+    return createActionHandler(osqueryContext, params, {
+      alertData: options?.alertData,
+      space: options?.space,
+      error,
+    });
   };
 
   const stop = () => {
@@ -39,5 +50,6 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
   return {
     create,
     stop,
+    logger,
   };
 };
