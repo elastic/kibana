@@ -12,11 +12,11 @@ import {
   TRANSLATED_RULE_QUERY_VIEWER,
   TRANSLATED_RULE_RESULT_BADGE,
   TRANSLATED_RULES_RESULT_TABLE,
-} from '../../../screens/siem_migrations';
-import { deleteConnectors } from '../../../tasks/api_calls/common';
-import { createBedrockConnector } from '../../../tasks/api_calls/connectors';
-import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+} from '../../../../screens/siem_migrations';
+import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import {
   editTranslatedRuleByRow,
   saveUpdatedTranslatedRuleQuery,
@@ -25,8 +25,8 @@ import {
   navigateToTranslatedRulesPage,
   openReprocessDialog,
   reprocessWithoutPrebuiltRulesMatching,
-} from '../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../urls/navigation';
+} from '../../../../tasks/siem_migrations';
+import { GET_STARTED_URL } from '../../../../urls/navigation';
 
 describe(
   'Rule Migrations - Translated Rules Page',
