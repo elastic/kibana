@@ -15,7 +15,12 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  ExportShare,
+  ExportShareDerivatives,
+} from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { durationToNumber } from '@kbn/reporting-common';
@@ -30,6 +35,7 @@ import {
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
@@ -41,6 +47,7 @@ export interface ReportingPublicPluginSetupDependencies {
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
   intl: InjectedIntl;
+  actions: ActionsPublicPluginSetup;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -108,6 +115,7 @@ export class ReportingPublicPlugin
       screenshotMode: screenshotModeSetup,
       share: shareSetup,
       uiActions: uiActionsSetup,
+      actions: actionsSetup,
     } = setupDeps;
 
     const startServices$: Observable<StartServices> = from(getStartServices()).pipe(
@@ -157,15 +165,17 @@ export class ReportingPublicPlugin
         const { docTitle } = coreStart.chrome;
         docTitle.change(this.title);
 
-        const umountAppCallback = await mountManagementSection(
+        const umountAppCallback = await mountManagementSection({
           coreStart,
-          licensing.license$,
-          data,
-          share,
-          this.config,
+          license$: licensing.license$,
+          dataService: data,
+          shareService: share,
+          config: this.config,
           apiClient,
-          params
-        );
+          params,
+          actionsService: actionsSetup,
+          notificationsService: coreStart.notifications,
+        });
 
         return () => {
           docTitle.reset();
@@ -233,6 +243,22 @@ export class ReportingPublicPlugin
         })
       );
     }
+
+    import('./management/integrations/scheduled_report_share_integration').then(
+      async ({
+        shouldRegisterScheduledReportShareIntegration,
+        createScheduledReportShareIntegration,
+      }) => {
+        if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
+          shareSetup.registerShareIntegration<ExportShareDerivatives>(
+            createScheduledReportShareIntegration({
+              apiClient,
+              services: { ...core, ...setupDeps },
+            })
+          );
+        }
+      }
+    );
 
     this.startServices$ = startServices$;
     return this.getContract(apiClient, startServices$);

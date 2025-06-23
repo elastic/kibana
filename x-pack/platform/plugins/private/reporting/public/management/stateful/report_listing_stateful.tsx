@@ -32,6 +32,7 @@ export const ReportListingStateful: FC<ListingPropsInternal> = (props) => {
   const ilmPolicyContextValue = useIlmPolicyStatus();
   const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
   const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
+
   return (
     <>
       <EuiPageHeader

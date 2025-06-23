@@ -13,6 +13,7 @@ import {
   LENS_APP_LOCATOR,
   VISUALIZE_APP_LOCATOR,
 } from '@kbn/deeplinks-analytics';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 export const ALLOWED_JOB_CONTENT_TYPES = [
   'application/json',
@@ -40,6 +41,13 @@ export const LICENSE_TYPE_CLOUD_STANDARD = 'standard' as const;
 export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
+export const SCHEDULED_REPORT_VALID_LICENSES: LicenseType[] = [
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
+];
 
 /*
  * Notifications
