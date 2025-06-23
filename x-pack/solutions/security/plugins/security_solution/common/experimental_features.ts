@@ -191,12 +191,17 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the storing of gaps in the event log
    */
-  storeGapsInEventLogEnabled: false,
+  storeGapsInEventLogEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
+
+  /**
+   * Enables the rule's bulk action to manage alert suppression
+   */
+  bulkEditAlertSuppressionEnabled: false,
 
   /**
    * Enables the new data ingestion hub
@@ -256,10 +261,24 @@ export const allowedExperimentalValues = Object.freeze({
    */
   eventCollectionDataReductionBannerEnabled: true,
 
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
+
   /**
    * Automatically installs the security AI prompts package
    */
   securityAIPromptsEnabled: false,
+
+  /**
+   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Release: 8.19/9.1
+   */
+  microsoftDefenderEndpointRunScriptEnabled: false,
+
+  /**
+   * Enables advanced mode for Trusted Apps creation and update
+   */
+  trustedAppsAdvancedMode: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

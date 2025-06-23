@@ -204,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
       dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+      manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
       discover: [
         'all',
@@ -252,6 +253,8 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'allFlappingSettings',
         'readFlappingSettings',
+        'allAlertDeleteSettings',
+        'readAlertDeleteSettings',
       ],
       maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
       streams: ['all', 'read', 'minimal_all', 'minimal_read'],

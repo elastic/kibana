@@ -41,6 +41,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+  muteScreenReader?: boolean; // Changes aria-live from "polite" to "off" - it's useful when the numbers change due to something not directly related to the field list and we want to avoid announcing it.
   'data-test-subj'?: string;
 }
 
@@ -51,6 +52,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   renderFieldItem,
   scrollToTopResetCounter,
   screenReaderDescriptionId,
+  muteScreenReader,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
@@ -143,7 +145,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
-              aria-live="polite"
+              aria-live={muteScreenReader ? 'off' : 'polite'}
               id={screenReaderDescriptionId}
               data-test-subj={`${dataTestSubject}__ariaDescription`}
             >

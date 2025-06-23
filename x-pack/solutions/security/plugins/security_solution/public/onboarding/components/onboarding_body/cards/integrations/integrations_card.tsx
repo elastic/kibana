@@ -14,12 +14,13 @@ import type { IntegrationCardMetadata } from '../../../../../common/lib/integrat
 import { SecurityIntegrations } from '../../../../../common/lib/integrations/components';
 import { IntegrationCardTopCallout } from '../common/integrations/callouts/integration_card_top_callout';
 import { IntegrationContextProvider } from '../../../../../common/lib/integrations/hooks/integration_context';
+import { INTEGRATION_TABS } from '../../../../../common/lib/integrations/configs/integration_tabs_configs';
 
 export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> = React.memo(
   ({ checkCompleteMetadata }) => {
     const {
       spaceId,
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useOnboardingContext();
 
     if (!checkCompleteMetadata) {
@@ -28,7 +29,11 @@ export const IntegrationsCard: OnboardingCardComponent<IntegrationCardMetadata> 
 
     return (
       <OnboardingCardContentPanel>
-        <IntegrationContextProvider spaceId={spaceId} trackLinkClick={trackLinkClick}>
+        <IntegrationContextProvider
+          spaceId={spaceId}
+          reportLinkClick={reportLinkClick}
+          integrationTabs={INTEGRATION_TABS}
+        >
           <SecurityIntegrations
             checkCompleteMetadata={checkCompleteMetadata}
             topCalloutRenderer={IntegrationCardTopCallout}

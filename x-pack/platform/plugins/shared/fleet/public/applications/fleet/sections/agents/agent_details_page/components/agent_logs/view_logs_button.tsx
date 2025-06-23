@@ -58,7 +58,7 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     });
   }, [endTime, logStreamQuery, discoverLogsLocator, startTime]);
 
-  return authz.fleet.readAgents && discoverLogsLocator ? (
+  return authz.fleet.readAgents && logsUrl ? (
     <EuiButton href={logsUrl} iconType="discoverApp" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"

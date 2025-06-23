@@ -123,6 +123,10 @@ export class FeatureRegistry {
         feature.name = featureOverride.name;
       }
 
+      if (typeof featureOverride.description !== 'undefined') {
+        feature.description = featureOverride.description;
+      }
+
       if (featureOverride.category) {
         feature.category = DEFAULT_APP_CATEGORIES[featureOverride.category];
       }

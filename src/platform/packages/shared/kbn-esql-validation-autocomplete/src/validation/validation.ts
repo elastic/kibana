@@ -118,6 +118,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getJoinIndices: [],
   getTimeseriesIndices: [],
   getEditorExtensions: [],
+  getInferenceEndpoints: [],
 };
 
 /**
@@ -405,7 +406,7 @@ export function validateSources(
 
     if (source.sourceType === 'index') {
       const index = source.index;
-      const sourceName = source.cluster ? source.name : index?.valueUnquoted;
+      const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
       if (sourceExists(sourceName, availableSources) && !hasWildcard(sourceName)) {

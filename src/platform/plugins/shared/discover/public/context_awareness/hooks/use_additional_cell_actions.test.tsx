@@ -30,7 +30,6 @@ import {
   type DiscoverCellActionExecutionContext,
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 let mockUuid = 0;
 
@@ -237,12 +236,12 @@ describe('createCellAction', () => {
         ...context,
         data: [
           {
-            field: new DataViewField({
-              name: 'test',
-              type: 'string',
-              aggregatable: true,
-              searchable: true,
-            }),
+            field: {
+              name: '',
+              type: '',
+              aggregatable: false,
+              searchable: false,
+            },
           },
         ],
         metadata: { instanceId: 'test', dataView: dataViewWithTimefieldMock },

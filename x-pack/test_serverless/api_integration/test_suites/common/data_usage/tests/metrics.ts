@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 import http from 'http';
 
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import { transformMetricsData } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics_handler';
+import { SupertestWithRoleScopeType } from '../../../../services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from '../mock_api';
 import { mockAutoOpsResponse } from '../mock_data';
@@ -25,7 +25,7 @@ const from = nowMinus24Hours.toISOString();
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const mockAutoopsApiService = setupMockServer();
   describe('Metrics', function () {
     let mockApiServer: http.Server;

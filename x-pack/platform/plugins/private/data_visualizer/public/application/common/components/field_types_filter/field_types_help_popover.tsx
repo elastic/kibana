@@ -84,6 +84,7 @@ export const FieldTypesHelpPopover: FC<{
     const helpButton = (
       <EuiFilterButton
         grow={false}
+        isSelected={isHelpOpen}
         onClick={onHelpClick}
         data-test-subj="fieldTypesHelpButton"
         className="dataVisualizerFieldTypesHelp__button"

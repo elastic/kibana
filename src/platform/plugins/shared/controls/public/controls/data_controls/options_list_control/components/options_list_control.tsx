@@ -9,6 +9,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import classNames from 'classnames';
 
 import {
   EuiFilterButton,
@@ -176,7 +177,7 @@ export const OptionsListControl = ({
     <EuiFilterGroup
       fullWidth
       compressed={isCompressed(componentApi)}
-      className={controlPanelClassName}
+      className={classNames('optionsList__filterGroup', controlPanelClassName)}
     >
       <EuiInputPopover
         id={popoverId}

@@ -87,6 +87,9 @@ export interface FleetConfigType {
   autoUpgrades?: {
     retryDelays?: string[];
   };
+  integrationsHomeOverride?: string;
+  prereleaseEnabledByDefault?: boolean;
+  hideDashboards?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

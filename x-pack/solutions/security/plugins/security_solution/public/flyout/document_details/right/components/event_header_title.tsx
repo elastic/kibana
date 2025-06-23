@@ -13,7 +13,7 @@ import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_f
 import { useDocumentDetailsContext } from '../../shared/context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
-import { getField, getEventTitle } from '../../shared/utils';
+import { getEventTitle, getField } from '../../shared/utils';
 
 /**
  * Event details flyout right section header
@@ -32,7 +32,7 @@ export const EventHeaderTitle = memo(() => {
 
   return (
     <>
-      <DocumentSeverity />
+      <DocumentSeverity getFieldsData={getFieldsData} />
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />

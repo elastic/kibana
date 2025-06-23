@@ -94,7 +94,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'timePicker']);
 
-  describe('anomaly explorer', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/196307
+  describe.skip('anomaly explorer', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

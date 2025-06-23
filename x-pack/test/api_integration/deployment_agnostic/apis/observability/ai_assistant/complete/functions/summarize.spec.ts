@@ -50,8 +50,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           arguments: JSON.stringify({
             title: 'My Title',
             text: 'Hello world',
-            is_correction: false,
-            confidence: 'high',
             public: false,
           }),
         },

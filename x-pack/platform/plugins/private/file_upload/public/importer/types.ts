@@ -49,7 +49,8 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: Array<IngestPipeline | undefined>
+    pipeline: Array<IngestPipeline | undefined>,
+    existingIndex?: boolean
   ): Promise<InitializeImportResponse>;
   initializeWithoutCreate(
     index: string,

@@ -3,6 +3,14 @@
 xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
+
+## Plugins that are inaccessible in the UI
+xpack.securitySolutionServerless.inaccessibleApps:
+  - dashboards
+  - visualize
+  - maps
+  - lens
+
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
 xpack.alerting.rulesSettings.enabled: false
@@ -18,5 +26,9 @@ xpack.features.overrides:
 
 # Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
+xpack.fleet.hideDashboards: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
 xpack.fleet.prereleaseEnabledByDefault: true
+
+# Pin the prebuilt rules package version to the version that contains promotion rules
+xpack.securitySolution.prebuiltRulesPackageVersion: '9.0.5-beta.1'

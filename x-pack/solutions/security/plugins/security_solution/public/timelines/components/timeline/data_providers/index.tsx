@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { rgba } from 'polished';
 import { useDispatch } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Empty } from './empty';
 import { Providers } from './providers';
@@ -37,15 +38,15 @@ const DropTargetDataProvidersContainer = styled.div`
   position: relative;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
-    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
-    border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
+    background: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSuccess};
+    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderStrongSuccess};
 
     & .timeline-drop-area-empty__text {
-      color: ${({ theme }) => theme.eui.euiColorSuccess};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
 
     & .euiFormHelpText {
-      color: ${({ theme }) => theme.eui.euiColorSuccess};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
   }
 `;
@@ -55,15 +56,15 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
   border-radius: 5px;
-  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
+  padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
   max-height: 33vh;
   min-height: 100px;
   overflow: auto;
   resize: vertical;
-  background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
+  background-color: ${({ theme }) => theme.euiTheme.components.forms.background};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
@@ -106,7 +107,14 @@ const CustomTooltipDiv = styled.div`
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
-  const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const dataProviders = useDeepEqualSelector(

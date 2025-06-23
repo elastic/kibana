@@ -25,6 +25,6 @@ export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = 
       )
   ),
   checkComplete: checkAssistantCardComplete,
-  capabilitiesRequired: [['securitySolutionAssistant.ai-assistant']],
+  capabilitiesRequired: ['securitySolutionAssistant.ai-assistant'],
   licenseTypeRequired: 'enterprise',
 };

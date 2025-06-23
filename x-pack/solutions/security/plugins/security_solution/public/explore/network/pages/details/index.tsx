@@ -13,6 +13,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -59,6 +61,9 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
@@ -105,8 +110,25 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
-    useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView } = useDataView();
+  const { dataViewSpec } = useDataViewSpec();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const ip = decodeIpv6(detailName);
   const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
@@ -115,7 +137,7 @@ const NetworkDetailsComponent: React.FC = () => {
     try {
       return [
         buildEsQuery(
-          indexPattern,
+          dataViewSpecToViewBase(sourcererDataView),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -124,7 +146,7 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, networkDetailsFilter, query, uiSettings]);
+  }, [globalFilters, networkDetailsFilter, query, sourcererDataView, uiSettings]);
 
   const additionalFilters = useMemo(
     () => (rawFilteredQuery ? [rawFilteredQuery] : []),
@@ -166,6 +188,10 @@ const NetworkDetailsComponent: React.FC = () => {
     }),
     [detailName, flowTarget]
   );
+
+  const indexPattern = useMemo(() => {
+    return dataViewSpecToViewBase(sourcererDataView);
+  }, [sourcererDataView]);
 
   return (
     <div data-test-subj="network-details-page">

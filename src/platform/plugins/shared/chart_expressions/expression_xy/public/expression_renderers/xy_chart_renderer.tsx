@@ -59,7 +59,6 @@ export interface GetStartDeps {
   activeCursor: ChartsPluginStart['activeCursor'];
   paletteService: PaletteRegistry;
   timeZone: string;
-  useLegacyTimeAxis: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   usageCollection?: UsageCollectionStart;
   timeFormat: string;
@@ -295,7 +294,6 @@ export const getXyChartRenderer = ({
             timeZone={deps.timeZone}
             timeFormat={deps.timeFormat}
             eventAnnotationService={deps.eventAnnotationService}
-            useLegacyTimeAxis={deps.useLegacyTimeAxis}
             minInterval={calculateMinInterval(deps.data.datatableUtilities, config)}
             interactive={handlers.isInteractive()}
             onClickValue={onClickValue}

@@ -102,7 +102,7 @@ useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: fa
 
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
 jest.mock('../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({

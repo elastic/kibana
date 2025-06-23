@@ -288,6 +288,7 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -379,6 +380,7 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -387,6 +389,7 @@ import type {
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationIntegrationsStatsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
   GetRuleMigrationPrivilegesResponse,
@@ -411,7 +414,7 @@ import type {
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
-  UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -813,7 +816,7 @@ For detailed information on Kibana actions and alerting, and additional API call
   /**
    * Creates a new rule migration and returns the corresponding migration_id
    */
-  async createRuleMigration() {
+  async createRuleMigration(props: CreateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
@@ -822,6 +825,7 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1669,6 +1673,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the stats of all the integrations for all the rule migrations, including the number of rules associated with the integration
+   */
+  async getRuleMigrationIntegrationsStats() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrationsStats`);
+    return this.kbnClient
+      .request<GetRuleMigrationIntegrationsStatsResponse>({
+        path: '/internal/siem_migrations/rules/integrations/stats',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves all available prebuilt rules (installed and installable)
    */
   async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
@@ -2313,6 +2332,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async runEntityAnalyticsMigrations() {
+    this.log.info(`${new Date().toISOString()} Calling API RunEntityAnalyticsMigrations`);
+    return this.kbnClient
+      .request<RunEntityAnalyticsMigrationsResponse>({
+        path: '/internal/entity_analytics/migrations/run',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Run a shell command on an endpoint.
    */
@@ -2531,12 +2562,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
-      .request<UpdateRuleMigrationResponse>({
+      .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PATCH',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2641,6 +2673,9 @@ export interface CreateAssetCriticalityRecordProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
@@ -2912,6 +2947,7 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;

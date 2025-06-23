@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -26,9 +27,7 @@ import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
@@ -56,6 +55,10 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  /**
+   * DataViewSpec object to use internally to fetch the data
+   */
+  dataViewSpec: DataViewSpec;
   defaultFilters?: Filter[];
   /**
    * Default values to display in the group selection dropdown.
@@ -72,8 +75,6 @@ export interface AlertsTableComponentProps {
   groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  runtimeMappings: RunTimeMappings;
-  signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
 }
@@ -135,8 +136,6 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
-
   const {
     services: { storage, telemetry },
   } = useKibana();
@@ -174,7 +173,10 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
-  const fields = useMemo(() => Object.values(indexPattern.fields || {}), [indexPattern]);
+  const fields = useMemo(
+    () => Object.values(props.dataViewSpec.fields || {}),
+    [props.dataViewSpec]
+  );
 
   const groupingOptions = useMemo(
     () => props.defaultGroupingOptions || DEFAULT_GROUPING_OPTIONS,
@@ -334,16 +336,18 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
+          runtimeMappings={props.dataViewSpec.runtimeFieldMap as RunTimeMappings}
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
+          signalIndexName={props.dataViewSpec.title}
         />
       );
     },
     [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
-  if (isEmpty(selectedPatterns)) {
+  if (isEmpty(props.dataViewSpec.title)) {
     return null;
   }
 

@@ -83,6 +83,9 @@ export const configSchema = schema.object({
   disabledRuleTypes: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
   ),
+  enabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
   maintenanceWindow: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),

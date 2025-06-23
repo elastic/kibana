@@ -40,6 +40,7 @@ export {
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
   createOutputParser,
+  ConsoleLang,
 } from './src/console';
 
 export type { ParsedRequest } from './src/console';

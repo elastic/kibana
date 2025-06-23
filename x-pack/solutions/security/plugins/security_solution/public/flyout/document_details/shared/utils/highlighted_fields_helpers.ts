@@ -11,13 +11,15 @@ import type { HighlightedFieldsTableRow } from '../../right/components/highlight
 
 /**
  * Converts the highlighted fields to a format that can be consumed by the HighlightedFields component
- * @param highlightedFields
- * @param scopeId
+ * @param highlightedFields field/value pairs
+ * @param scopeId used in the alerts page for CellActions
+ * @param isPreview used in the alerts page for CellActions and also to hide PreviewLinks
+ * @param showCellActions used in alert summary page to hide CellActions entirely
  */
 export const convertHighlightedFieldsToTableRow = (
   highlightedFields: UseHighlightedFieldsResult,
   scopeId: string,
-  isPreview: boolean
+  showCellActions: boolean
 ): HighlightedFieldsTableRow[] => {
   const fieldNames = Object.keys(highlightedFields);
   return fieldNames.map((fieldName) => {
@@ -35,7 +37,7 @@ export const convertHighlightedFieldsToTableRow = (
         ...(overrideFieldName ? { originalField: fieldName } : {}),
         values,
         scopeId,
-        isPreview,
+        showCellActions,
       },
     };
   });

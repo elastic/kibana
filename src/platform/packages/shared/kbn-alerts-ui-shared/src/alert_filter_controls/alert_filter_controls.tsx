@@ -47,6 +47,10 @@ export type AlertFilterControlsProps = Omit<
     dataViews: DataViewsPublicPluginStart;
     storage: typeof Storage;
   };
+  /**
+   * Disable data view cache management
+   */
+  preventCacheClearOnUnmount?: boolean;
 };
 
 /**
@@ -91,6 +95,7 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
       dataViews,
       storage,
     },
+    preventCacheClearOnUnmount,
     ...restFilterItemGroupProps
   } = props;
   const [loadingPageFilters, setLoadingPageFilters] = useState(true);
@@ -120,8 +125,14 @@ export const AlertFilterControls = (props: AlertFilterControlsProps) => {
       }
     }
 
-    return () => dataViews.clearInstanceCache();
-  }, [dataView, dataViewSpec, dataViews, isLoadingDataView]);
+    return () => {
+      if (preventCacheClearOnUnmount) {
+        return;
+      }
+
+      dataViews.clearInstanceCache();
+    };
+  }, [dataView, dataViewSpec, dataViews, preventCacheClearOnUnmount, isLoadingDataView]);
 
   const handleFilterChanges = useCallback(
     (newFilters: Filter[]) => {

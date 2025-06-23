@@ -35,5 +35,6 @@ export default createTestConfig({
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
     // Enables /internal/cloud_security_posture/graph API
     `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
   ],
 });

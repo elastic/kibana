@@ -20,6 +20,7 @@ import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -60,6 +61,7 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
@@ -85,7 +87,14 @@ export const USER_PREVIEW_BANNER = {
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  const { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({

@@ -20,9 +20,6 @@ import {
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClientFactory,
 } from '../url_service/short_urls/short_url_client_factory';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 const navigate = jest.fn(async () => {});
 const getUrl = jest.fn(
   async (location: KibanaLocation, params: LocatorGetUrlParams): Promise<string> => {
@@ -55,14 +52,11 @@ const mockShareContext: IShareContext = {
   allowShortUrl: true,
   anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
   urlService: service,
-  theme: themeServiceMock.createStartContract(),
   objectTypeMeta: { title: 'title' },
   objectType: 'type',
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
-  toasts: toastsServiceMock.createStartContract(),
-  i18n: i18nServiceMock.createStartContract(),
 };
 
 const mockGenerateExport = jest.fn();

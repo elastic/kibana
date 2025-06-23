@@ -191,14 +191,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     artifactTasks.push(Tasks.CreateDockerContexts);
   }
 
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     // createRunner for each task to ensure each task gets its own Build instance
     artifactTasks.map(async (task) => await createRunner({ config, log, bufferLogs: true })(task))
   );
 
+  log.write('--- Finalizing Kibana artifacts');
+
+  if (results.some((result) => result.status === 'rejected')) {
+    throw new Error('One or more artifact tasks failed. Check the logs for details.');
+  }
+
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
    */
-  log.write('--- Finalizing Kibana artifacts');
   await globalRun(Tasks.WriteShaSums);
 }

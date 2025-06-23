@@ -8,58 +8,59 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/server/plugin_contract';
-import { USAGE_SERVICE_USAGE_URL } from './constants';
-import { productTypes } from '../common/config';
+
+import { commonConfigSchema, exposeToBrowser } from '../common/config';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 
-export const configSchema = schema.object({
+const tlsConfig = schema.object({
+  certificate: schema.string(),
+  key: schema.string(),
+  ca: schema.string(),
+});
+export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
+
+const usageApiConfig = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  productTypes,
+  url: schema.maybe(schema.string()),
+  tls: schema.maybe(tlsConfig),
+});
+export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
+
+export const serverConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
   /**
    * Usage Reporting: the interval between runs of the endpoint task
    */
 
-  usageReportingTaskInterval: schema.string({ defaultValue: '5m' }),
+  usageReportingTaskInterval: schema.string({ defaultValue: ENDPOINT_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: the interval between runs of the cloud security task
    */
-
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
+
+  /**
+   * Usage Reporting: the interval between runs of the ai4soc metering task
+   */
+
+  ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: timeout value for how long the task should run.
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
-  /**
-   * Usage Reporting: the URL to send usage data to
-   */
-  usageReportingApiUrl: schema.string({ defaultValue: USAGE_SERVICE_USAGE_URL }),
-  /**
-   * For internal use. A list of string values (comma delimited) that will enable experimental
-   * type of functionality that is not yet released. Valid values for this settings need to
-   * be defined in:
-   * `x-pack/solutions/security/plugins/security_solution_serverless/common/experimental_features.ts`
-   * under the `allowedExperimentalValues` object
-   *
-   * @example
-   * xpack.securitySolutionServerless.enableExperimental:
-   *   - someCrazyServerlessFeature
-   *   - someEvenCrazierServerlessFeature
-   */
-  enableExperimental: schema.arrayOf(schema.string(), {
-    defaultValue: () => [],
-  }),
+  usageApi: usageApiConfig,
 });
+const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);
+
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ServerlessSecuritySchema> = {
-  exposeToBrowser: {
-    enableExperimental: true,
-    productTypes: true,
-  },
+  exposeToBrowser,
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(

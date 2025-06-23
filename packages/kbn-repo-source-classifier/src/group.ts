@@ -19,39 +19,46 @@ const DEFAULT_MODULE_ATTRS: ModuleAttrs = {
   visibility: 'shared',
 };
 
+const SOLUTIONS = ['observability', 'security', 'search'];
+
 const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugins']
-  .map<Record<string, ModuleAttrs>>((type) => ({
-    [`src/platform/${type}/shared`]: {
-      group: 'platform',
-      visibility: 'shared',
-    },
-    [`src/platform/${type}/private`]: {
-      group: 'platform',
-      visibility: 'private',
-    },
-    [`x-pack/platform/${type}/shared`]: {
-      group: 'platform',
-      visibility: 'shared',
-    },
-    [`x-pack/platform/${type}/private`]: {
-      group: 'platform',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/observability/${type}`]: {
-      group: 'observability',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/security/${type}`]: {
-      group: 'security',
-      visibility: 'private',
-    },
-    [`x-pack/solutions/search/${type}`]: {
-      group: 'search',
-      visibility: 'private',
-    },
-  }))
+  .map<Record<string, ModuleAttrs>>((type) => {
+    const entries: Record<string, ModuleAttrs> = {
+      [`src/platform/${type}/shared`]: {
+        group: 'platform',
+        visibility: 'shared',
+      },
+      [`src/platform/${type}/private`]: {
+        group: 'platform',
+        visibility: 'private',
+      },
+      [`x-pack/platform/${type}/shared`]: {
+        group: 'platform',
+        visibility: 'shared',
+      },
+      [`x-pack/platform/${type}/private`]: {
+        group: 'platform',
+        visibility: 'private',
+      },
+    };
+    for (const solution of SOLUTIONS) {
+      entries[`x-pack/solutions/${solution}/${type}`] = {
+        group: solution as ModuleGroup,
+        visibility: 'private',
+      };
+      entries[`x-pack/solutions/${solution}/${type}/test`] = {
+        group: solution as ModuleGroup,
+        visibility: 'private',
+      };
+    }
+    return entries;
+  })
   .reduce((acc, current) => ({ ...acc, ...current }), {
     'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    'x-pack/platform/test': {
       group: 'platform',
       visibility: 'shared',
     },

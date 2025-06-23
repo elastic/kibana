@@ -38,6 +38,7 @@ const previouslyRegisteredTypes = [
   'cases-comments',
   'cases-configure',
   'cases-connector-mappings',
+  'cases-incrementing-id', // Added in 8.19/9.1 to allow for incremental numerical ids in cases
   'cases-rules',
   'cases-sub-case',
   'cases-user-actions',
@@ -94,6 +95,7 @@ const previouslyRegisteredTypes = [
   'ingest-package-policies',
   'ingest_manager_settings',
   'inventory-view',
+  'investigation',
   'kql-telemetry',
   'legacy-url-alias',
   'lens',
@@ -120,6 +122,7 @@ const previouslyRegisteredTypes = [
   'query',
   'rules-settings',
   'sample-data-telemetry',
+  'scheduled_report',
   'search',
   'search-session',
   'search-telemetry',

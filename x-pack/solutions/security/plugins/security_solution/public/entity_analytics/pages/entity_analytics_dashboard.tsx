@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -25,11 +26,36 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    loading: oldIsSourcererLoading,
+    sourcererDataView: oldSourcererDataViewSpec,
+  } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView, status } = useDataView();
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec();
+
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const indicesExist = useMemo(
+    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
+    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+  );
+  const isSourcererLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
+    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
+  );
+
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const entityTypes = useStoreEntityTypes();
@@ -39,7 +65,7 @@ const EntityAnalyticsComponent = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={dataViewSpec} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">

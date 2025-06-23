@@ -64,6 +64,10 @@ export const combineFindAttackDiscoveryFilters = ({
     ...(alertIds && alertIds.length > 0
       ? [`(${alertIds.map((id) => `${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "${id}"`).join(' OR ')})`]
       : []),
+
+    ...(alertIds && alertIds.length > 0
+      ? [`(${alertIds.map((id) => `${ALERT_ATTACK_DISCOVERY_ALERT_IDS}: "${id}"`).join(' OR ')})`]
+      : []),
     ...(start ? [`@timestamp >= "${start}"`] : []),
     ...(end ? [`@timestamp <= "${end}"`] : []),
   ];
