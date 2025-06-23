@@ -9,7 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction, last } from 'lodash';
+import { isString, once, pull, isFunction, last, first } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
@@ -235,18 +235,28 @@ export class LlmProxy {
   }
 
   interceptScoreToolChoice(log: ToolingLog) {
-    let documents: KnowledgeBaseDocument[] = [];
+    function extractDocumentsToScore(source: string): KnowledgeBaseDocument[] {
+      const [, raw] = source.match(/<DocumentsToScore>\s*(\[[\s\S]*?\])\s*<\/DocumentsToScore>/i)!;
+      const jsonString = raw.trim().replace(/\\"/g, '"');
+      const documentsToScore = JSON.parse(jsonString);
+      log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
+      return documentsToScore;
+    }
+    let documentsToScore: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
       name: SCORE_SUGGESTIONS_FUNCTION_NAME,
-      // @ts-expect-error
       when: (requestBody) =>
+        // @ts-expect-error
         requestBody.tool_choice?.function?.name === SCORE_SUGGESTIONS_FUNCTION_NAME,
       arguments: (requestBody) => {
-        const lastMessage = last(requestBody.messages)?.content as string;
-        log.debug(`interceptScoreToolChoice: ${lastMessage}`);
-        documents = extractDocumentsFromMessage(lastMessage, log);
-        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+        const systemMessage = first(requestBody.messages)?.content as string;
+        const userMessage = last(requestBody.messages)?.content as string;
+        log.debug(`interceptScoreToolChoice: ${userMessage}`);
+        documentsToScore = extractDocumentsToScore(systemMessage);
+        const scores = documentsToScore
+          .map((doc: KnowledgeBaseDocument) => `${doc.id},7`)
+          .join(';');
 
         return JSON.stringify({ scores });
       },
@@ -254,9 +264,9 @@ export class LlmProxy {
 
     return {
       simulator,
-      getDocuments: async () => {
+      getDocumentsToScore: async () => {
         await simulator;
-        return documents;
+        return documentsToScore;
       },
     };
   }
@@ -397,9 +407,4 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
-}
-
-function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
-  const matches = content.match(/\{[\s\S]*?\}/g)!;
-  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

@@ -81,7 +81,7 @@ export async function scoreSuggestions({
         2.  **<ConversationHistory>** - the ongoing dialogue (including earlier assistant responses).
         3.  **<ScreenDescription>** - what the user is currently looking at in the UI.
 
-        For every document you must assign **one integer score from 0 to 7** (inclusive) that answers the question
+        For every document you must assign one integer score from 0 to 7 (inclusive) that answers the question
         “*How helpful is this document for the user's current need, given their prompt <UserPrompt>, conversation history <ConversationHistory> and screen description <ScreenDescription>?*”
 
         ### Scoring rubric
