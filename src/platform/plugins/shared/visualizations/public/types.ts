@@ -10,6 +10,7 @@
 import type {
   CoreStart,
   SavedObjectsMigrationVersion,
+  // @ts-expect-error for easy search
   ResolvedSimpleSavedObject,
 } from '@kbn/core/public';
 import {

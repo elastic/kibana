@@ -409,6 +409,7 @@ describe('Discover state', () => {
       mockServices.data.search.searchSource.create = jest
         .fn()
         .mockReturnValue(savedSearchMock.searchSource);
+      // @ts-expect-error for easy search
       mockServices.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
         saved_object: {
           attributes: {

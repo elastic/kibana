@@ -7,6 +7,7 @@
 
 // custom edits or fixes for default kibana types which are incomplete
 
+// @ts-expect-error for easy search
 import type { SimpleSavedObject } from '@kbn/core/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 

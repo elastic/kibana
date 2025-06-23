@@ -103,6 +103,7 @@ const useTableListViewProps = (
     services: {
       application,
       history,
+      // @ts-expect-error for easy search
       savedObjects,
       savedObjectsTagging,
       toastNotifications,

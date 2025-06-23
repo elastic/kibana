@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error for easy search
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 
 /**

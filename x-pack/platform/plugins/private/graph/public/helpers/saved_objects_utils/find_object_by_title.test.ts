@@ -6,6 +6,7 @@
  */
 
 import { findObjectByTitle } from './find_object_by_title';
+// @ts-expect-error for easy search
 import { SimpleSavedObject } from '@kbn/core/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 
