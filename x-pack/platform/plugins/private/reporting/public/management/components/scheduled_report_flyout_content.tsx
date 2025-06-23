@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
-import { REPORTING_MANAGEMENT_HOME } from '@kbn/reporting-common';
+import { REPORTING_MANAGEMENT_SCHEDULES } from '@kbn/reporting-common';
 import {
   FIELD_TYPES,
   Form,
@@ -96,7 +96,7 @@ export const ScheduledReportFlyoutContent = ({
   } = useGetReportingHealthQuery({ http });
   const reportingPageLink = useMemo(
     () => (
-      <EuiLink href={http.basePath.prepend(REPORTING_MANAGEMENT_HOME)}>
+      <EuiLink href={http.basePath.prepend(REPORTING_MANAGEMENT_SCHEDULES)}>
         {i18n.REPORTING_PAGE_LINK_TEXT}
       </EuiLink>
     ),
