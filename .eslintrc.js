@@ -2301,7 +2301,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/**/*.ts'],
+      files: ['x-pack/**/cypress/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
