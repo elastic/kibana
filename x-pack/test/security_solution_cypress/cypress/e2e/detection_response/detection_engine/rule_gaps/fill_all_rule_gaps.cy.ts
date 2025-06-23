@@ -42,7 +42,7 @@ describe(
       deleteAlertsAndRules();
 
       createRule(
-        getNewRule({ rule_id: '1', name: `Rule 1`, enabled: true, interval: '5s', from: 'now-1s' })
+        getNewRule({ rule_id: '1', name: `Rule 1`, enabled: true, interval: '1m', from: 'now-1m' })
       ).then((response) => {
         cy.wrap(response.body.id).as('ruleId');
       });

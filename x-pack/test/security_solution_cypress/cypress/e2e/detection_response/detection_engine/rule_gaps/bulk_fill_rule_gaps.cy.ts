@@ -45,8 +45,8 @@ describe(
             rule_id: ruleId,
             name: `Rule ${ruleId}`,
             enabled: true,
-            interval: '5s',
-            from: 'now-1s',
+            interval: '1m',
+            from: 'now-1m',
           })
         );
       });
