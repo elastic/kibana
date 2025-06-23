@@ -62,6 +62,7 @@ const FormView: React.FC<FormViewProps> = ({
         error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
+        aria-label={i18n.MESSAGE_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -103,6 +104,7 @@ const FormView: React.FC<FormViewProps> = ({
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
         labelAppend={OptionalFieldLabel}
+        aria-label={i18n.ALIAS_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}

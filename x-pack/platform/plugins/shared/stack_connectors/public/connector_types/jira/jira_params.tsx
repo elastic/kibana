@@ -289,6 +289,12 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
             defaultMessage: 'Summary',
           })}
+          aria-label={i18n.translate(
+            'xpack.stackConnectors.components.jira.summaryFieldAriaLabel',
+            {
+              defaultMessage: 'Summary',
+            }
+          )}
         >
           <TextFieldWithMessageVariables
             index={index}

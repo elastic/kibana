@@ -36,6 +36,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             fullWidth
             label={i18n.ENTITY_FIELD_LABEL}
             helpText={i18n.OPSGENIE_ENTITY_HELP}
+            aria-label={i18n.ENTITY_FIELD_LABEL}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -52,6 +53,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
             fullWidth
             label={i18n.SOURCE_FIELD_LABEL}
             helpText={i18n.OPSGENIE_SOURCE_HELP}
+            aria-label={i18n.SOURCE_FIELD_LABEL}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -69,6 +71,7 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
         fullWidth
         label={i18n.USER_FIELD_LABEL}
         helpText={i18n.OPSGENIE_USER_HELP}
+        aria-label={i18n.USER_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}

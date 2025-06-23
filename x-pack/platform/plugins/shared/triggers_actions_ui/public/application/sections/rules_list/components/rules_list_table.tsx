@@ -478,6 +478,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
               color="subdued"
               type="questionInCircle"
               className="eui-alignTop"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleLabel',
+                {
+                  defaultMessage: 'Start time of the last run.',
+                }
+              )}
             />
           </span>
         ),
