@@ -110,7 +110,7 @@ export const RuleGapsCallout = () => {
                     target="_blank"
                   >
                     {i18n.translate('xpack.securitySolution.ruleGaps.callout.messageLink', {
-                      defaultMessage: 'Learn more.',
+                      defaultMessage: 'Learn more',
                     })}
                   </EuiLink>
                 ),
