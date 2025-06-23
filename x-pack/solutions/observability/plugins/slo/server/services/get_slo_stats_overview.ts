@@ -6,7 +6,7 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
@@ -20,7 +20,7 @@ import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_ge
 export class GetSLOStatsOverview {
   constructor(
     private soClient: SavedObjectsClientContract,
-    private esClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private spaceId: string,
     private logger: Logger,
     private rulesClient: RulesClientApi,
@@ -29,13 +29,13 @@ export class GetSLOStatsOverview {
 
   public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.scopedClusterClient.asInternalUser, settings);
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
     const parsedFilters = parseStringFilters(filters, this.logger);
 
-    const response = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.scopedClusterClient.asCurrentUser, {
       index: indices,
       size: 0,
       query: {
