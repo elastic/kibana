@@ -3881,6 +3881,22 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -4391,22 +4407,6 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_inference_endpoints.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_join_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_timeseries_indices.ts"
-              },
-              {
-                "plugin": "esql",
-                "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -6655,6 +6655,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/aad/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -11948,6 +11956,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
               },
               {
@@ -12049,6 +12065,14 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/plugin_api_integration/plugins/event_log/server/init_routes.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -14697,11 +14721,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/get.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/list.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/users/list.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileged_access_detection/pad_get_installation_status.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14766,6 +14790,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/policy/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16335,6 +16363,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/privileged_access_detection/pad_install.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/migrations/routes/run_migrations.ts"
               },
               {
@@ -16368,6 +16400,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/install_data_view.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16645,6 +16681,10 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/update.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/update.ts"
+              },
+              {
                 "plugin": "metricsDataAccess",
                 "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -16858,6 +16898,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/delete.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/user_conversations/delete_all_route.ts"
               },
               {
                 "plugin": "securitySolution",
