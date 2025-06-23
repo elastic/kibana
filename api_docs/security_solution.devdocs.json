@@ -2985,6 +2985,23 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getPadPackageInstallationClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getPadPackageInstallationClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PadPackageInstallationClient"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getSiemRuleMigrationsClient",
             "type": "Function",
             "tags": [],
