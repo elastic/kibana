@@ -24,6 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import { i18n } from '@kbn/i18n';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { useInfluencersListStyles } from './influencers_list_styles';
@@ -104,7 +105,6 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {/* TODO: Find out if we still want the tooltip */}
           <EuiToolTip
             position="right"
             title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
@@ -113,6 +113,11 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
             <EuiBadge
               color={styles.influencerBadgeBackgroundColor(severity)}
               css={styles.influencerBadgeTextColor(severity)}
+              onClick={() => {}}
+              onClickAriaLabel={i18n.translate('xpack.ml.influencersList.badgeClickAreaLabel', {
+                defaultMessage: 'Anomaly score details for {influencerFieldName}',
+                values: { influencerFieldName },
+              })}
             >
               {maxScoreLabel}
             </EuiBadge>
