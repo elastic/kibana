@@ -190,7 +190,7 @@ export const fetchActionRequests = async ({
   };
 };
 
-/** @private */
+/** @internal */
 const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
   return actionType === 'manual'
     ? {
@@ -214,7 +214,7 @@ const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
 /**
  * Retrieves a list of all integration policy IDs in the active space for integrations that
  * support responses actions.
- * @private
+ * @internal
  * @param fleetServices
  */
 const fetchIntegrationPolicyIds = async (
