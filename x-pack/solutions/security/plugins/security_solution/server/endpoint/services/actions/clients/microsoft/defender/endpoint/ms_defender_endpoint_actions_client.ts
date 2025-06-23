@@ -126,7 +126,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
   /**
    * Sends actions to Ms Defender for Endpoint directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,

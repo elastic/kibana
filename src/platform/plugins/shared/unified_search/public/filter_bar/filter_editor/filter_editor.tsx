@@ -197,7 +197,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * Than the currently selected data view need to load the data view from the id to display the filter
    * correctly
    * @param dataViewId
-   * @private
+   * @internal
    */
   private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     try {
