@@ -262,7 +262,12 @@ export class State {
       const rollbackTargets = this.changedStreams().map((stream) => {
         // Bring streams back to their starting state or delete newly added streams
         if (startingState.has(stream.definition.name)) {
+          // We take the definition from the starting state
           const changedStreamToRevert = startingState.get(stream.definition.name)!.clone();
+          // Then we copy over the same changes from the desired state
+          // Since the changes only track that something changed (rather than upsert/delete)
+          // It should be enough to carry them over and let the determineElasticsearchActions step
+          // Figure out the details (routing changed, before it was added, now it was removed)
           changedStreamToRevert.setChanges(stream.getChanges());
           changedStreamToRevert.markAsUpserted();
           return changedStreamToRevert;

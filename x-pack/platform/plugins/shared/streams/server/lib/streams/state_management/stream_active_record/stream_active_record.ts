@@ -169,7 +169,9 @@ export abstract class StreamActiveRecord<
   }
 
   clone(): StreamActiveRecord<TDefinition> {
+    // Get a copy of the current definition
     const clonedStream = this.doClone();
+    // Carry over any changes not included in the definition
     clonedStream.setChanges(this.getChanges());
     return clonedStream;
   }
