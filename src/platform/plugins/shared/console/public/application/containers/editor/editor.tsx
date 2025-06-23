@@ -28,7 +28,7 @@ import {
   OutputPanelEmptyState,
   NetworkRequestStatusBar,
 } from '../../components';
-import { getAutocompleteInfo, StorageKeys } from '../../../services';
+import { StorageKeys } from '../../../services';
 import {
   useServicesContext,
   useRequestReadContext,
@@ -69,18 +69,18 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
   // useEffect(() => {
-    // const debouncedSetFechingAutocompleteEntities = debounce(
-      // setFetchingAutocompleteEntities,
-      // DEBOUNCE_DELAY
-    // );
-    // const subscription = getAutocompleteInfo().isLoading$.subscribe(
-      // debouncedSetFechingAutocompleteEntities
-    // );
+  // const debouncedSetFechingAutocompleteEntities = debounce(
+  // setFetchingAutocompleteEntities,
+  // DEBOUNCE_DELAY
+  // );
+  // const subscription = getAutocompleteInfo().isLoading$.subscribe(
+  // debouncedSetFechingAutocompleteEntities
+  // );
 
-    // return () => {
-      // subscription.unsubscribe();
-      // debouncedSetFechingAutocompleteEntities.cancel();
-    // };
+  // return () => {
+  // subscription.unsubscribe();
+  // debouncedSetFechingAutocompleteEntities.cancel();
+  // };
   // }, []);
 
   const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
@@ -168,7 +168,9 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                       localStorageValue={currentTextObject.text}
                       value={inputEditorValue}
                       setValue={setInputEditorValue}
-                      customParsedRequestsProvider={useEditorReadContext().customParsedRequestsProvider}
+                      customParsedRequestsProvider={
+                        useEditorReadContext().customParsedRequestsProvider
+                      }
                     />
                   )}
                 </EuiSplitPanel.Inner>

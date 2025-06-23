@@ -22,7 +22,11 @@ export interface EditorContextArgs {
   customParsedRequestsProvider?: (model: any) => any;
 }
 
-export function EditorContextProvider({ children, settings, customParsedRequestsProvider }: EditorContextArgs) {
+export function EditorContextProvider({
+  children,
+  settings,
+  customParsedRequestsProvider,
+}: EditorContextArgs) {
   const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, (value) => ({
     ...value,
     settings,

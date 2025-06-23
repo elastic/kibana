@@ -9,7 +9,10 @@ const fs = require('fs');
 const path = require('path');
 
 // Path to the source translations directory
-const SOURCE_TRANSLATIONS_DIR = path.resolve(__dirname, '../../../../../../x-pack/platform/plugins/private/translations/translations');
+const SOURCE_TRANSLATIONS_DIR = path.resolve(
+  __dirname,
+  '../../../../../../x-pack/platform/plugins/private/translations/translations'
+);
 
 // Output directory for Console-specific translations
 const OUTPUT_DIR = path.resolve(__dirname, 'translations');
@@ -55,9 +58,7 @@ function processTranslationFile(filename) {
     if (filename === 'en.json') {
       // Convert JavaScript object syntax to JSON
       // Replace unquoted property names with quoted ones
-      sourceContent = sourceContent
-        .replace(/(\w+):/g, '"$1":')
-        .replace(/'/g, '"');
+      sourceContent = sourceContent.replace(/(\w+):/g, '"$1":').replace(/'/g, '"');
     }
 
     const sourceTranslations = JSON.parse(sourceContent);
@@ -79,7 +80,6 @@ function processTranslationFile(filename) {
 
     const messageCount = Object.keys(consoleMessages).length;
     console.log(`✅ Processed ${filename}: extracted ${messageCount} console messages`);
-
   } catch (error) {
     console.error(`❌ Error processing ${filename}:`, error.message);
   }
@@ -99,8 +99,7 @@ function main() {
     }
 
     // Get all JSON files from the source directory
-    const files = fs.readdirSync(SOURCE_TRANSLATIONS_DIR)
-      .filter(file => file.endsWith('.json'));
+    const files = fs.readdirSync(SOURCE_TRANSLATIONS_DIR).filter((file) => file.endsWith('.json'));
 
     if (files.length === 0) {
       console.log('⚠️  No translation files found in source directory');
@@ -108,7 +107,7 @@ function main() {
     }
 
     console.log(`📁 Found ${files.length} translation files:`);
-    files.forEach(file => console.log(`   - ${file}`));
+    files.forEach((file) => console.log(`   - ${file}`));
     console.log('');
 
     // Process each translation file
@@ -119,13 +118,12 @@ function main() {
 
     // List created files
     const outputFiles = fs.readdirSync(OUTPUT_DIR);
-    outputFiles.forEach(file => {
+    outputFiles.forEach((file) => {
       const filePath = path.join(OUTPUT_DIR, file);
       const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const messageCount = Object.keys(content).length;
       console.log(`   - ${file} (${messageCount} messages)`);
     });
-
   } catch (error) {
     console.error('❌ Error during extraction:', error.message);
     process.exit(1);

@@ -25,7 +25,7 @@ export const useResizeCheckerUtils = () => {
     if (resizeObserver.current) {
       resizeObserver.current.disconnect();
     }
-    
+
     // Debounce the resize handler to prevent infinite loops
     const debouncedLayout = debounce(() => {
       try {
@@ -35,7 +35,7 @@ export const useResizeCheckerUtils = () => {
         console.warn('Monaco editor layout error:', error);
       }
     }, 100);
-    
+
     resizeObserver.current = new ResizeObserver(debouncedLayout);
     resizeObserver.current.observe(divElement);
   };

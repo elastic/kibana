@@ -41,7 +41,12 @@ export interface EditorProps {
   customParsedRequestsProvider?: (model: any) => any;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue, customParsedRequestsProvider }: EditorProps) => {
+export const MonacoEditor = ({
+  localStorageValue,
+  value,
+  setValue,
+  customParsedRequestsProvider,
+}: EditorProps) => {
   const context = useServicesContext();
   const {
     services: { notifications, settings: settingsService, autocompleteInfo },
@@ -93,14 +98,14 @@ export const MonacoEditor = ({ localStorageValue, value, setValue, customParsedR
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       // Create custom provider if factory function is provided
-      const customProvider = customParsedRequestsProvider ? 
-                            customParsedRequestsProvider(editor.getModel()) : 
-                            undefined;
-      
+      const customProvider = customParsedRequestsProvider
+        ? customParsedRequestsProvider(editor.getModel())
+        : undefined;
+
       const provider = new MonacoEditorActionsProvider(
-        editor, 
-        setEditorActionsCss, 
-        isDevMode, 
+        editor,
+        setEditorActionsCss,
+        isDevMode,
         customProvider
       );
       setInputEditor(provider);

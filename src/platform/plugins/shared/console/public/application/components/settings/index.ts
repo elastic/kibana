@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { SettingsEditor as SettingsEditorComponent } from './settings_editor';
 
 export { type Props } from './settings_editor';

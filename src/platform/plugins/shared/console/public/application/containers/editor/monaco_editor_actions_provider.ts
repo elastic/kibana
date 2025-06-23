@@ -67,8 +67,8 @@ export class MonacoEditorActionsProvider {
     customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
     // Use custom provider if provided, otherwise fallback to default
-    this.parsedRequestsProvider = customParsedRequestsProvider ||
-                                  getParsedRequestsProvider(this.editor.getModel());
+    this.parsedRequestsProvider =
+      customParsedRequestsProvider || getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
 
     const debouncedHighlightRequests = debounce(

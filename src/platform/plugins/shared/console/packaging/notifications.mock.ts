@@ -73,7 +73,6 @@ const createMock = (): NotificationsServiceContract => {
   return mocked;
 };
 
-
 export const notificationServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,

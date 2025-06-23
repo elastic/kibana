@@ -8,7 +8,7 @@
  */
 
 // Import the original Console parser from our local copy
-import { createParser } from './console_parser.js';
+import { createParser } from './console_parser';
 
 interface ParsedRequest {
   method?: string;
@@ -43,16 +43,18 @@ export const createStandaloneConsoleParser = () => {
       const result = originalParser(text);
       return {
         requests: result.requests || [],
-        errors: result.errors || []
+        errors: result.errors || [],
       };
     } catch (error) {
       console.error('Original parser error:', error);
       return {
         requests: [],
-        errors: [{
-          text: `Parse error: ${error}`,
-          offset: 0
-        }]
+        errors: [
+          {
+            text: `Parse error: ${error}`,
+            offset: 0,
+          },
+        ],
       };
     }
   };
@@ -109,6 +111,8 @@ export const getStandaloneParsedRequestsProvider = (model: any) => {
 };
 
 // Factory function that creates the adapter for use in MonacoEditorActionsProvider
-export const createStandaloneParsedRequestsProvider = (model: any): ConsoleParsedRequestsProvider => {
+export const createStandaloneParsedRequestsProvider = (
+  model: any
+): ConsoleParsedRequestsProvider => {
   return new StandaloneConsoleParsedRequestsProvider(model);
 };

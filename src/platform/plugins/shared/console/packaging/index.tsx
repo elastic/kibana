@@ -10,8 +10,6 @@
 import React from 'react';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 
-import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
-
 // Configure Monaco Environment for packaged use
 (window as any).MonacoEnvironment = {
   getWorkerUrl: () => '',
@@ -44,18 +42,11 @@ setTimeout(() => {
   }
 }, 100);
 
-import {
-  createStorage,
-  createHistory,
-  createSettings,
-  setStorage,
-} from '../public/services';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider } from '@kbn/i18n-react';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 // import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
-import { notificationServiceMock } from './notifications.mock';
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
@@ -64,16 +55,21 @@ import { ThemeService } from '@kbn/core-theme-browser-internal';
 import { I18nService } from '@kbn/core-i18n-browser-internal';
 import { i18n } from '@kbn/i18n';
 import { type HttpSetup } from '@kbn/core/public';
+import { notificationServiceMock } from './notifications.mock';
+import { createStorage, createHistory, createSettings, setStorage } from '../public/services';
+import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
 
-import { loadActiveApi } from '../public/lib/kb';
 import * as localStorageObjectClient from '../public/lib/local_storage_object_client';
 import { Main } from '../public/application/containers';
 
-import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from '../public/application/contexts';
+import {
+  ServicesContextProvider,
+  EditorContextProvider,
+  RequestContextProvider,
+} from '../public/application/contexts';
 import { createApi, createEsHostService } from '../public/application/lib';
 import { ConsoleStartServices } from '../public/types';
 import { AutocompleteInfo } from '../public/services';
-
 
 export interface BootDependencies extends ConsoleStartServices {
   lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
@@ -95,29 +91,31 @@ const injectedMetadata = {
     cluster_version: '8.0.0',
     cluster_build_flavor: 'development',
   }),
-  getCspConfig: () => ({
-    warnLegacyBrowsers: true,
-  }) as unknown,
-  getTheme: () => ({
-    darkMode: 'light',
-    name: 'default',
-    version: '1.0.0',
-    stylesheetPaths: {
-      default: [],
-      dark: [],
-    },
-  }) as unknown,
+  getCspConfig: () =>
+    ({
+      warnLegacyBrowsers: true,
+    } as unknown),
+  getTheme: () =>
+    ({
+      darkMode: 'light',
+      name: 'default',
+      version: '1.0.0',
+      stylesheetPaths: {
+        default: [],
+        dark: [],
+      },
+    } as unknown),
   getExternalUrlConfig: () => ({
     policy: [
       {
         allow: true,
         host: undefined,
         protocol: undefined,
-      }
-    ]
+      },
+    ],
   }),
   getAnonymousStatusPage: () => false,
-  getLegacyMetadata: () => ({}) as unknown,
+  getLegacyMetadata: () => ({} as unknown),
   getPlugins: () => [],
   getAssetsHrefBase: () => '/ui/',
 } as unknown as InternalInjectedMetadataSetup;
@@ -135,31 +133,35 @@ const createLogger = (name?: string) => ({
 const coreContext = {
   coreId: Symbol('core'),
   logger: {
-    get: createLogger
+    get: createLogger,
   },
   env: {
     packageInfo: { buildFlavor: 'development' },
     mode: {
       name: 'development',
       dev: true,
-    }
-  }
+    },
+  },
 };
 
 // Import all translation files statically so webpack includes them in the bundle
 const translations = {
-  'en': {
+  en: {
     formats: {},
-    messages: {}
+    messages: {},
   },
   'fr-FR': require('./translations/fr-FR.json'),
   'ja-JP': require('./translations/ja-JP.json'),
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({ lang = 'en', getEsConfig, getAutocompleteEntities }: BootDependencies) => {
+export const OneConsole = ({
+  lang = 'en',
+  getEsConfig,
+  getAutocompleteEntities,
+}: BootDependencies) => {
   // Get the translations for the selected language, fallback to English
-  const selectedTranslations = translations[lang] || translations['en'];
+  const selectedTranslations = translations[lang] || translations.en;
 
   // Configure the global @kbn/i18n system with the same translations
   i18n.init({
@@ -168,17 +170,17 @@ export const OneConsole = ({ lang = 'en', getEsConfig, getAutocompleteEntities }
     messages: selectedTranslations.messages,
   });
 
-  let docLinksService = new DocLinksService(coreContext as CoreContext);
+  const docLinksService = new DocLinksService(coreContext as CoreContext);
   docLinksService.setup();
   const docLinks = docLinksService.start({ injectedMetadata });
 
   // const notificationService = new NotificationsService();
   // notificationsService.setup({ uiSettings, analytics });
   // const notifications = notificationService.start({
-    // analytics,
-    // overlays,
-    // targetDomElement: notificationsTargetDomElement,
-    // rendering,
+  // analytics,
+  // overlays,
+  // targetDomElement: notificationsTargetDomElement,
+  // rendering,
   // });
 
   const i18nService = new I18nService();
@@ -284,4 +286,4 @@ export const OneConsole = ({ lang = 'en', getEsConfig, getAutocompleteEntities }
       </ServicesContextProvider>
     </IntlProvider>
   );
-}
+};

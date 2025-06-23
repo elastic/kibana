@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import { VariablesEditor as VariablesEditorComponent } from './variables_editor';
 
 export { type Props } from './variables_editor';
