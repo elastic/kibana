@@ -16,6 +16,7 @@
       "dataViews",
       "discover",
       "discoverShared",
+      "fieldFormats",
       "fieldsMetadata",
       "licensing",
       "indexManagement",
@@ -27,6 +28,6 @@
       "streams",
       "unifiedSearch"
     ],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }

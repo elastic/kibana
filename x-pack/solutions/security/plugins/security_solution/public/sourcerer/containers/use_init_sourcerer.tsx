@@ -22,10 +22,22 @@ import type { State } from '../../common/store/types';
 import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
 import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+
+const defaultInitResult = { browserFields: {} };
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  /* eslint-disable react-hooks/rules-of-hooks */
+  // NOTE: skipping the entire hook on purpose when the new picker is enabled
+  // will be removed as part of the cleanup in https://github.com/elastic/security-team/issues/11959
+  if (newDataViewPickerEnabled) {
+    return defaultInitResult;
+  }
+
   const dispatch = useDispatch();
   const {
     data: { dataViews },
