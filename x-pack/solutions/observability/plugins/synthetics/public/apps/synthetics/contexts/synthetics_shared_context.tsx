@@ -12,6 +12,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Subject } from 'rxjs';
 import { Store } from 'redux';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
 import { SyntheticsAppProps } from './synthetics_settings_context';
@@ -20,6 +21,8 @@ import { storage, store } from '../state';
 export const SyntheticsSharedContext: React.FC<
   React.PropsWithChildren<SyntheticsAppProps & { reload$?: Subject<boolean>; reduxStore?: Store }>
 > = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, darkMode, reload$ }) => {
+  const queryClient = new QueryClient();
+
   return (
     <KibanaContextProvider
       services={{
@@ -46,20 +49,22 @@ export const SyntheticsSharedContext: React.FC<
     >
       <EuiThemeProvider darkMode={darkMode}>
         <ReduxProvider store={reduxStore ?? store}>
-          <SyntheticsRefreshContextProvider reload$={reload$}>
-            <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-              <RedirectAppLinks
-                coreStart={{
-                  application: coreStart.application,
-                }}
-                style={{
-                  height: '100%',
-                }}
-              >
-                {children}
-              </RedirectAppLinks>
-            </SyntheticsDataViewContextProvider>
-          </SyntheticsRefreshContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <SyntheticsRefreshContextProvider reload$={reload$}>
+              <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
+                <RedirectAppLinks
+                  coreStart={{
+                    application: coreStart.application,
+                  }}
+                  style={{
+                    height: '100%',
+                  }}
+                >
+                  {children}
+                </RedirectAppLinks>
+              </SyntheticsDataViewContextProvider>
+            </SyntheticsRefreshContextProvider>
+          </QueryClientProvider>
         </ReduxProvider>
       </EuiThemeProvider>
     </KibanaContextProvider>
