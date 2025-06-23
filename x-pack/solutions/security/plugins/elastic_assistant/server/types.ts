@@ -40,18 +40,18 @@ import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatOpenAI,
+import type {
   ActionsClientChatVertexAI,
+  ActionsClientChatOpenAI,
   ActionsClientGeminiChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
@@ -255,7 +255,8 @@ export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI;
+  | ActionsClientChatVertexAI
+  | InferenceChatModel;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
@@ -282,8 +283,5 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
-  createLlmInstance?: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance?: () => Promise<AssistantToolLlm>;
 }
