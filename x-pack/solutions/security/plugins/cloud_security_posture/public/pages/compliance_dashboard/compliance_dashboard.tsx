@@ -45,6 +45,7 @@ import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { NamespaceSelector } from '../../components/namespace_selector';
 import { useActiveNamespace } from '../../common/hooks/use_active_namespace';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
@@ -326,6 +327,9 @@ const TabContent = ({
 };
 
 export const ComplianceDashboard = () => {
+  const cloudSecurityNamespaceSupportEnabled = useMemo(() => {
+    return ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled;
+  }, []);
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
 
@@ -453,7 +457,7 @@ export const ComplianceDashboard = () => {
   // if there is more than one namespace, show the namespace selector in the header
   const rightSideItems = useMemo(
     () =>
-      namespaces.length > 0
+      namespaces.length > 0 && cloudSecurityNamespaceSupportEnabled
         ? [
             <NamespaceSelector
               data-test-subj="namespace-selector"
@@ -464,7 +468,13 @@ export const ComplianceDashboard = () => {
             />,
           ]
         : [],
-    [namespaces, currentTabUrlState, activeNamespace, onActiveNamespaceChange]
+    [
+      namespaces,
+      cloudSecurityNamespaceSupportEnabled,
+      currentTabUrlState,
+      activeNamespace,
+      onActiveNamespaceChange,
+    ]
   );
 
   return (

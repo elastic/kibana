@@ -55,6 +55,7 @@ export const NamespaceSelector = ({
         <EuiContextMenuItem
           {...isSelectedProps(namespace)}
           key={namespace}
+          data-test-subj={`namespace-selector-menu-item-${namespace}`}
           onClick={() => {
             onSelectedNamespaceChange(namespace);
           }}
