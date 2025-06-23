@@ -94,7 +94,6 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        timeout: { idleSocket: 2 * 60 * 1000 }, // install can take time.
       },
     },
     async (ctx, req, res) => {
