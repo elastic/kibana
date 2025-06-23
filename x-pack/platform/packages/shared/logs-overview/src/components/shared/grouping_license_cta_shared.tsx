@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButton, EuiButtonEmpty, EuiButtonEmptyProps, EuiButtonProps } from '@elastic/eui';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import { i18n } from '@kbn/i18n';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import React from 'react';
+
+export type GroupingLicenseCtaMessageDetailsButtonProps = Pick<EuiButtonEmptyProps, 'size'>;
+
+export const GroupingLicenseCtaMessageDetailsButton: React.FC<
+  GroupingLicenseCtaMessageDetailsButtonProps
+> = (buttonProps) => (
+  <EuiButtonEmpty {...buttonProps} color="primary">
+    {groupingLicenseCtaMessageDetailsButtonTitle}
+  </EuiButtonEmpty>
+);
+
+export type GroupingLicenseCtaMessageTrialButtonProps = Pick<EuiButtonProps, 'size'> & {
+  dependencies: GroupingLicenseCtaMessageTrialButtonDependencies;
+};
+
+export interface GroupingLicenseCtaMessageTrialButtonDependencies {
+  share: SharePluginStart;
+}
+
+export const GroupingLicenseCtaMessageTrialButton: React.FC<
+  GroupingLicenseCtaMessageTrialButtonProps
+> = ({ dependencies, ...buttonProps }) => {
+  const licenseManagementUrl = dependencies.share.url.locators
+    .get(MANAGEMENT_APP_LOCATOR)
+    ?.useUrl({ sectionId: 'stack', appId: 'license_management' });
+
+  return (
+    <EuiButton
+      {...buttonProps}
+      href={licenseManagementUrl}
+      isDisabled={licenseManagementUrl == null}
+    >
+      {groupingLicenseCtaMessageTrialButtonTitle}
+    </EuiButton>
+  );
+};
+
+export const groupingLicenseCtaMessageTitle = i18n.translate(
+  'xpack.logsOverview.groupingLicenseCtaMessageTitle',
+  {
+    defaultMessage: 'Unlock advanced insights',
+  }
+);
+
+export const groupingLicenseCtaMessageDescription = i18n.translate(
+  'xpack.logsOverview.groupingLicenseCtaMessageDescription',
+  {
+    defaultMessage:
+      'Get instant access to relevant, grouped patterns that highlight the most interesting logs.',
+  }
+);
+
+export const groupingLicenseCtaMessageDetailsButtonTitle = i18n.translate(
+  'xpack.logsOverview.groupingLicenseCtaMessageDetailsButtonTitle',
+  {
+    defaultMessage: 'See how it works',
+  }
+);
+
+export const groupingLicenseCtaMessageTrialButtonTitle = i18n.translate(
+  'xpack.logsOverview.groupingLicenseCtaMessageTrialButtonTitle',
+  {
+    defaultMessage: 'Start trial',
+  }
+);

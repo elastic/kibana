@@ -13,7 +13,15 @@ export type LogCategoriesControlBarProps = ControlBarProps;
 export type LogCategoriesControlBarDependencies = ControlBarDependencies;
 
 export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = React.memo(
-  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
+  ({
+    dependencies,
+    documentFilters,
+    logsSource,
+    timeRange,
+    grouping,
+    groupingCapabilities,
+    onChangeGrouping,
+  }) => {
     return (
       <ControlBar
         dependencies={dependencies}
@@ -21,6 +29,7 @@ export const LogCategoriesControlBar: React.FC<LogCategoriesControlBarProps> = R
         logsSource={logsSource}
         timeRange={timeRange}
         grouping={grouping}
+        groupingCapabilities={groupingCapabilities}
         onChangeGrouping={onChangeGrouping}
       />
     );

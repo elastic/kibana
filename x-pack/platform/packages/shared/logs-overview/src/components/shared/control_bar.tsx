@@ -10,17 +10,40 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { DiscoverLink, DiscoverLinkDependencies, DiscoverLinkProps } from '../discover_link';
 import { GroupingSelector, GroupingSelectorProps } from './grouping_selector';
+import {
+  GroupingLicenseCtaPopover,
+  GroupingLicenseCtaPopoverDependencies,
+} from './grouping_license_cta_popover';
 
 export type ControlBarProps = Pick<DiscoverLinkProps, 'logsSource' | 'timeRange'> &
   Pick<GroupingSelectorProps, 'grouping' | 'onChangeGrouping'> & {
-    documentFilters?: QueryDslQueryContainer[];
     dependencies: ControlBarDependencies;
+    documentFilters?: QueryDslQueryContainer[];
+    groupingCapabilities: GroupingCapabilities;
   };
 
-export type ControlBarDependencies = DiscoverLinkDependencies;
+export type ControlBarDependencies = DiscoverLinkDependencies &
+  GroupingLicenseCtaPopoverDependencies;
+
+export type GroupingCapabilities =
+  | {
+      status: 'available';
+    }
+  | {
+      status: 'unavailable';
+      reason: 'disabled' | 'insufficientLicense' | 'unknown';
+    };
 
 export const ControlBar: React.FC<ControlBarProps> = React.memo(
-  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
+  ({
+    dependencies,
+    documentFilters,
+    logsSource,
+    timeRange,
+    grouping,
+    groupingCapabilities,
+    onChangeGrouping,
+  }) => {
     const linkFilters = useMemo(
       () => documentFilters?.map((filter) => ({ filter })),
       [documentFilters]
@@ -37,7 +60,13 @@ export const ControlBar: React.FC<ControlBarProps> = React.memo(
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
+          {groupingCapabilities.status === 'unavailable' ? (
+            groupingCapabilities.reason === 'insufficientLicense' ? (
+              <GroupingLicenseCtaPopover dependencies={dependencies} />
+            ) : null
+          ) : (
+            <GroupingSelector grouping={grouping} onChangeGrouping={onChangeGrouping} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );

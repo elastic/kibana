@@ -52,7 +52,15 @@ export type LogCategoriesDependencies = LogCategoriesContentDependencies & {
 };
 
 export const LogCategories = React.memo<LogCategoriesProps>(
-  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
+  ({
+    dependencies,
+    documentFilters,
+    logsSource,
+    timeRange,
+    grouping,
+    groupingCapabilities,
+    onChangeGrouping,
+  }) => {
     return (
       <CategorizeLogsServiceContext.Provider
         logic={categorizeLogsService.provide(
@@ -93,6 +101,7 @@ export const LogCategories = React.memo<LogCategoriesProps>(
             logsSource={logsSource}
             timeRange={timeRange}
             grouping={grouping}
+            groupingCapabilities={groupingCapabilities}
             onChangeGrouping={onChangeGrouping}
           />
         </CategoryDetailsServiceContext.Provider>
@@ -113,7 +122,15 @@ export type LogCategoriesContentDependencies = LogCategoriesControlBarDependenci
   LogCategoriesResultContentDependencies;
 
 export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
-  ({ dependencies, documentFilters, logsSource, timeRange, grouping, onChangeGrouping }) => {
+  ({
+    dependencies,
+    documentFilters,
+    logsSource,
+    timeRange,
+    grouping,
+    groupingCapabilities,
+    onChangeGrouping,
+  }) => {
     const categorizeLogsServiceActorRef = CategorizeLogsServiceContext.useActorRef();
     const categorizeLogsServiceState = CategorizeLogsServiceContext.useSelector(identity);
 
@@ -154,6 +171,7 @@ export const LogCategoriesContent = React.memo<LogCategoriesContentProps>(
             logsSource={logsSource}
             timeRange={timeRange}
             grouping={grouping}
+            groupingCapabilities={groupingCapabilities}
             onChangeGrouping={onChangeGrouping}
           />
         </EuiFlexItem>

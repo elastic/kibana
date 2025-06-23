@@ -19,6 +19,7 @@ import { LogsOverviewLoadingContent } from './logs_overview_loading_content';
 import { LogsOverviewStateContext, logsOverviewStateMachine } from './logs_overview_state_provider';
 import { LogEvents, LogEventsDependencies } from '../log_events';
 import { Grouping } from '../shared/grouping_selector';
+import { GroupingCapabilities } from '../shared/control_bar';
 
 export type LogsOverviewProps = LogsOverviewContentProps & {
   dependencies: LogsOverviewDependencies;
@@ -88,6 +89,20 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
     const grouping = LogsOverviewStateContext.useSelector<Grouping>((currentState) =>
       currentState.matches('showingLogCategories') ? 'categories' : 'none'
     );
+    const groupingCapabilities = LogsOverviewStateContext.useSelector<GroupingCapabilities>(
+      (currentState) => {
+        if (currentState.context.mlCapabilities.status === 'unresolved') {
+          return { status: 'unavailable', reason: 'unknown' };
+        } else if (currentState.context.mlCapabilities.status === 'unavailable') {
+          return {
+            status: 'unavailable',
+            reason: currentState.context.mlCapabilities.reason,
+          };
+        }
+
+        return { status: 'available' };
+      }
+    );
 
     const changeGrouping = useCallback(
       (newGrouping: Grouping) => {
@@ -117,6 +132,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
             logsSource={logsOverviewState.context.logsSource.value}
             timeRange={timeRange}
             grouping={grouping}
+            groupingCapabilities={groupingCapabilities}
             onChangeGrouping={changeGrouping}
           />
         );
@@ -128,6 +144,7 @@ export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
             logsSource={logsOverviewState.context.logsSource.value}
             timeRange={timeRange}
             grouping={grouping}
+            groupingCapabilities={groupingCapabilities}
             onChangeGrouping={changeGrouping}
           />
         );

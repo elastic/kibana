@@ -43,6 +43,7 @@ export const GroupingSelector: React.FC<GroupingSelectorProps> = ({
         key="none"
         onClick={() => onChangeGrouping('none')}
         data-test-subj="logsOverviewGroupingSelectorNone"
+        icon={grouping === 'none' ? 'check' : 'list'}
       >
         {groupingItemEventsTitle}
       </EuiContextMenuItem>,
@@ -50,11 +51,12 @@ export const GroupingSelector: React.FC<GroupingSelectorProps> = ({
         key="categories"
         onClick={() => onChangeGrouping('categories')}
         data-test-subj="logsOverviewGroupingSelectorCategories"
+        icon={grouping === 'categories' ? 'check' : 'sparkles'}
       >
         {groupingItemCategoriesTitle}
       </EuiContextMenuItem>,
     ],
-    [onChangeGrouping]
+    [onChangeGrouping, grouping]
   );
 
   return (
