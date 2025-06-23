@@ -326,10 +326,6 @@ export const useAnnotationStyles = () => {
             fill: euiTheme.colors.textInverse,
             transition: `fill ${euiTheme.animation.fast}`,
             userSelect: 'none',
-
-            '&--blur': {
-              fill: euiTheme.colors.mediumShade,
-            },
           },
 
           '&__text-rect': {
@@ -337,7 +333,7 @@ export const useAnnotationStyles = () => {
             transition: `fill ${euiTheme.animation.fast}`,
 
             '&--blur': {
-              fill: euiTheme.colors.lightestShade,
+              fill: euiTheme.colors.backgroundBaseAccent,
             },
           },
 
