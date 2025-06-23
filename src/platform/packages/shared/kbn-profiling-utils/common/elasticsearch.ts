@@ -16,6 +16,7 @@ export enum ProfilingESField {
   Timestamp = '@timestamp',
   ContainerName = 'container.name',
   ProcessThreadName = 'process.thread.name',
+  ProcessExecutableName = 'process.executable.name',
   StacktraceCount = 'Stacktrace.count',
   HostID = 'host.id',
   HostName = 'host.name',
@@ -70,6 +71,7 @@ export type ProfilingESEvent = DedotObject<{
   [ProfilingESField.Timestamp]: string;
   [ProfilingESField.ContainerName]: string;
   [ProfilingESField.ProcessThreadName]: string;
+  [ProfilingESField.ProcessExecutableName]: string;
   [ProfilingESField.StacktraceCount]: number;
   [ProfilingESField.HostID]: string;
   [ProfilingESField.OrchestratorResourceName]: string;
