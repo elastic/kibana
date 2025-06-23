@@ -34,18 +34,6 @@ const infraSideNavRoute = createServerRoute({
     const [fleetStart, core] = await Promise.all([plugins.fleet?.start(), context.core]);
     const packageClient = fleetStart?.packageService.asScoped(request);
 
-    const [installedPackage, ...navigationOverrides] = await Promise.all([
-      packageClient?.getInstallation(KUBERNETES),
-      core.savedObjects.client.get<NavigationOverridesSavedObject>(
-        OBSERVABILITY_NAVIGATION_OVERRIDES,
-        KUBERNETES
-      ),
-      core.savedObjects.client.get<NavigationOverridesSavedObject>(
-        OBSERVABILITY_NAVIGATION_OVERRIDES,
-        DOCKER
-      ),
-    ]);
-
     const metricbeatData = await core.elasticsearch.client.asCurrentUser.search({
       index: 'metrics-kubernetes*',
       ignore_unavailable: true,
@@ -85,102 +73,130 @@ const infraSideNavRoute = createServerRoute({
     const hasEcsData = metricbeatData?.hits?.total?.value !== 0;
     const hasOtelData = otelData?.hits?.total?.value !== 0;
 
-    // Maybe separate the ecs / otel cases in the future
-    // if ((hasEcsData || hasOtelData) && !installedPackage ) {
-    //   return [
-    //     {
-    //       id: KUBERNETES,
-    //       title: KUBERNETES,
-    //       subItems: [
-    //         {
-    //           id: 'kubernetes',
-    //           sideNavTitle: 'Add Kubernetes data',
-    //           sideNavOrder: 100,
-    //           type: 'dashboard',
-    //         },
-    //       ],
-    //     },
-    //   ];
-    // }
+    const [installedPackage, ...navigationOverrides] = await Promise.all([
+      packageClient?.getInstallation(KUBERNETES),
+      core.savedObjects.client.get<NavigationOverridesSavedObject>(
+        OBSERVABILITY_NAVIGATION_OVERRIDES,
+        KUBERNETES
+      ),
+      core.savedObjects.client.get<NavigationOverridesSavedObject>(
+        OBSERVABILITY_NAVIGATION_OVERRIDES,
+        DOCKER
+      ),
+    ]);
 
-    if (!installedPackage && !navigationOverrides) {
+    const packageInstalled = installedPackage ? [installedPackage] : [];
+    console.log('packageInstalled:', packageInstalled);
+
+    // Maybe separate the ecs / otel cases in the future
+    if ((hasEcsData || hasOtelData) && !installedPackage) {
+      // System package is always required
+      await packageClient?.ensureInstalledPackage({ pkgName: 'system' });
+      // Kubernetes package is required for both classic kubernetes and otel
+      await packageClient?.ensureInstalledPackage({ pkgName: 'kubernetes' });
+      const installedKubernetes = await packageClient?.getInstallation(KUBERNETES);
+      if (installedKubernetes) packageInstalled.push(installedKubernetes);
+      // Kubernetes otel package is required only for otel
+      if (hasOtelData) {
+        await packageClient?.ensureInstalledPackage({ pkgName: 'kubernetes_otel' });
+        const installedOtelKubernetes = await packageClient?.getInstallation('kubernetes_otel');
+        if (installedOtelKubernetes) packageInstalled.push(installedOtelKubernetes);
+      }
+    }
+
+    if ((!installedPackage || packageInstalled.length === 0) && !navigationOverrides) {
       return [];
     }
 
+    const otelInstalledPackage =
+      packageInstalled.find((pkg) => pkg.name === 'kubernetes_otel') || installedPackage;
+
     // Mock data simulating the installed package's items returned by installedPackage.installed_kibana
-    const mockInstalledPackage = installedPackage
-      ? [
-          {
-            id: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.cronjob',
-            sideNavTitle: 'Cron jobs',
-            sideNavOrder: 900,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.statefulset',
-            sideNavTitle: 'Stateful sets',
-            sideNavOrder: 600,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.volume',
-            sideNavTitle: 'Volumes',
-            sideNavOrder: 500,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.pod',
-            sideNavTitle: 'Pods',
-            sideNavOrder: 300,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.deployment',
-            sideNavTitle: 'Deployments',
-            sideNavOrder: 400,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.daemonset',
-            sideNavTitle: 'Daemon sets',
-            sideNavOrder: 700,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.job',
-            sideNavTitle: 'Jobs',
-            sideNavOrder: 800,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.node',
-            sideNavTitle: 'Nodes',
-            sideNavOrder: 200,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
-            sideNavTitle: 'Overview',
-            sideNavOrder: 100,
-            type: 'dashboard',
-          },
-          {
-            id: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
-            entityType: 'k8s.service',
-            sideNavTitle: 'Services',
-            sideNavOrder: 800,
-            type: 'dashboard',
-          },
-        ]
-      : [];
+    const mockInstalledPackage =
+      installedPackage && packageInstalled.length > 0
+        ? [
+            {
+              id: 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.cronjob',
+              sideNavTitle: 'Cron jobs',
+              sideNavOrder: 900,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.statefulset',
+              sideNavTitle: 'Stateful sets',
+              sideNavOrder: 600,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-3912d9a0-bcb2-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.volume',
+              sideNavTitle: 'Volumes',
+              sideNavOrder: 500,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.pod',
+              sideNavTitle: 'Pods',
+              sideNavOrder: 300,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.deployment',
+              sideNavTitle: 'Deployments',
+              sideNavOrder: 400,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.daemonset',
+              sideNavTitle: 'Daemon sets',
+              sideNavOrder: 700,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.job',
+              sideNavTitle: 'Jobs',
+              sideNavOrder: 800,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.node',
+              sideNavTitle: 'Nodes',
+              sideNavOrder: 200,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+              sideNavTitle: 'Overview',
+              sideNavOrder: 100,
+              type: 'dashboard',
+            },
+            {
+              id: 'kubernetes-ff1b3850-bcb1-11ec-b64f-7dd6e8e82013',
+              entityType: 'k8s.service',
+              sideNavTitle: 'Services',
+              sideNavOrder: 800,
+              type: 'dashboard',
+            },
+            ...(otelInstalledPackage
+              ? [
+                  {
+                    id: 'kubernetes_otel-cluster-overview',
+                    entityType: 'k8s.overview',
+                    sideNavTitle: 'Overview (Otel)',
+                    sideNavOrder: 1000,
+                    type: 'dashboard',
+                  },
+                ]
+              : []),
+          ]
+        : [];
 
     const integrationSubItems =
       mockInstalledPackage
