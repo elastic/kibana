@@ -14,7 +14,7 @@ import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 function isDuplicateStop(targetStop, iconStops) {
   const stops = iconStops.filter(({ stop }) => {
@@ -53,7 +53,7 @@ export function IconStops({
   onCustomIconsChange,
   customIcons,
 }) {
-  const styles = useMemoizedStyles(mapColorStopsStyles);
+  const styles = useMemoCss(mapColorStopsStyles);
   return iconStops
     .map(({ stop, icon, iconSource }, index) => {
       const iconInfo =

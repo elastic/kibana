@@ -38,6 +38,7 @@ interface CreateTestConfigOptions {
   experimentalFeatures?: ExperimentalConfigKeys;
   disabledRuleTypes?: string[];
   enabledRuleTypes?: string[];
+  maxAlerts?: number;
 }
 
 // test.not-enabled is specifically not enabled
@@ -67,6 +68,7 @@ const enabledActionTypes = [
   '.tines',
   '.webhook',
   '.xmatters',
+  '.xsoar',
   '.torq',
   'test.sub-action-connector',
   'test.sub-action-connector-without-sub-actions',
@@ -221,6 +223,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     enableFooterInEmail = true,
     maxScheduledPerMinute,
     experimentalFeatures = [],
+    maxAlerts = 20,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -340,7 +343,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
-          '--xpack.alerting.rules.run.alerts.max=110',
+          `--xpack.alerting.rules.run.alerts.max=${maxAlerts}`,
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,

@@ -29,16 +29,5 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
         expect(config).to.not.be.empty();
       });
     });
-
-    // expecting websiteSearch to be disabled for now, but adding this test to ensure
-    // it's added back to the above list when support for web crawlers is added back.
-    ['websiteSearch'].map((guideId) => {
-      it(`does not returns config for ${guideId}`, async () => {
-        await supertest
-          .get(`${getConfigsPath}/${guideId}`)
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .expect(404);
-      });
-    });
   });
 }

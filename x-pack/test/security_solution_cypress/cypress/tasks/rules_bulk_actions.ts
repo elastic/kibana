@@ -58,6 +58,10 @@ import {
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
   UPDATE_SCHEDULE_MENU_ITEM,
   UPDATE_SCHEDULE_TIME_UNIT_SELECT,
+  ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
+  SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
+  DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM,
+  SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM,
 } from '../screens/rules_bulk_actions';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
@@ -281,6 +285,32 @@ export const checkOverwriteInvestigationFieldsCheckbox = () => {
     .should('be.checked');
 };
 
+// edit alert suppression
+
+export const clickBulkActionsButton = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+};
+
+const clickAlertSuppressionMenuItem = () => {
+  clickBulkActionsButton();
+  cy.get(ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickSetAlertSuppressionMenuItem = () => {
+  clickAlertSuppressionMenuItem();
+  cy.get(SET_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickSetAlertSuppressionForThresholdMenuItem = () => {
+  clickAlertSuppressionMenuItem();
+  cy.get(SET_ALERT_SUPPRESSION_FOR_THRESHOLD_BULK_MENU_ITEM).click();
+};
+
+export const clickDeleteAlertSuppressionMenuItem = () => {
+  clickAlertSuppressionMenuItem();
+  cy.get(DELETE_ALERT_SUPPRESSION_RULE_BULK_MENU_ITEM).click();
+};
+
 // EDIT-SCHEDULE
 export const clickUpdateScheduleMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
@@ -443,5 +473,11 @@ export const scheduleManualRuleRunForSelectedRules = (
     );
     cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
   }
+  cy.get(MODAL_CONFIRMATION_BTN).click();
+};
+
+// Confirmation modal
+
+export const confirmBulkEditAction = () => {
   cy.get(MODAL_CONFIRMATION_BTN).click();
 };
