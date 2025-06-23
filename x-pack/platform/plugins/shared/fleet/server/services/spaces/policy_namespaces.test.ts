@@ -147,28 +147,7 @@ const packagePolicy1 = {
   version: '1.0.0',
   spaceIds: ['space1'],
 };
-const packagePolicyDefault = {
-  agents: 10,
-  created_at: '2022-12-20T20:43:45.879Z',
-  created_by: 'elastic',
-  description: '',
-  enabled: true,
-  id: '2',
-  inputs: [],
-  name: 'Package Policy 2',
-  namespace: 'default',
-  package: {
-    name: 'test-package',
-    title: 'Test Package',
-    version: '1.0.0',
-  },
-  policy_ids: ['agent-policy-id-a'],
-  revision: 1,
-  updated_at: '2022-12-19T20:43:45.879Z',
-  updated_by: 'elastic',
-  version: '1.0.0',
-  spaceIds: ['default'],
-};
+
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 
 jest.mock(
