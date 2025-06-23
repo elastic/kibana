@@ -36,8 +36,8 @@ import type {
   EsAssetReference,
   KibanaAssetReference,
   Installation,
-  ArchivePackage,
-  RegistryPackage,
+  InstallSource,
+  PackageInfo,
 } from '../../../types';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
@@ -52,9 +52,8 @@ import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
-import * as Registry from '../registry';
 
-import { getInstallation, kibanaSavedObjectTypes } from '.';
+import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 
 const MAX_ASSETS_TO_DELETE = 1000;
@@ -65,6 +64,7 @@ export async function removeInstallation(options: {
   pkgVersion?: string;
   esClient: ElasticsearchClient;
   force?: boolean;
+  installSource?: InstallSource;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
@@ -103,7 +103,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, esClient);
+  await deleteAssets(savedObjectsClient, installation, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -149,7 +149,7 @@ export async function deleteKibanaAssets({
 }: {
   installedObjects: KibanaAssetReference[];
   spaceId?: string;
-  packageInfo: RegistryPackage | ArchivePackage;
+  packageInfo: PackageInfo;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
     appContextService.getSavedObjects().createInternalRepository()
@@ -333,6 +333,7 @@ export async function deletePrerequisiteAssets(
 }
 
 async function deleteAssets(
+  savedObjectsClient: SavedObjectsClientContract,
   {
     installed_es: installedEs,
     installed_kibana: installedKibana,
@@ -340,6 +341,7 @@ async function deleteAssets(
     additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
     name,
     version,
+    install_source: installSource,
   }: Installation,
   esClient: ElasticsearchClient
 ) {
@@ -357,9 +359,15 @@ async function deleteAssets(
     esClient
   );
 
-  // delete the other asset types
   try {
-    const packageInfo = await Registry.fetchInfo(name, version);
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient,
+      pkgName: name,
+      pkgVersion: version,
+      skipArchive: installSource !== 'registry',
+    });
+
+    // delete the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets({ installedObjects: installedKibana, spaceId, packageInfo }),
@@ -402,9 +410,11 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 }
 
 export async function deleteKibanaSavedObjectsAssets({
+  savedObjectsClient,
   installedPkg,
   spaceId,
 }: {
+  savedObjectsClient: SavedObjectsClientContract;
   installedPkg: SavedObject<Installation>;
   spaceId?: string;
 }) {
@@ -427,10 +437,12 @@ export async function deleteKibanaSavedObjectsAssets({
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    const packageInfo = await Registry.fetchInfo(
-      installedPkg.attributes.name,
-      installedPkg.attributes.version
-    );
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient,
+      pkgName: installedPkg.attributes.name,
+      pkgVersion: installedPkg.attributes.version,
+      skipArchive: installedPkg.attributes.install_source !== 'registry',
+    });
 
     await deleteKibanaAssets({
       installedObjects: assetsToDelete,
@@ -502,7 +514,7 @@ export async function cleanupAssets(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ) {
-  await deleteAssets(installationToDelete, esClient);
+  await deleteAssets(soClient, installationToDelete, esClient);
 
   const {
     installed_es: installedEs,
