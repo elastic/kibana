@@ -110,7 +110,7 @@ export function AlertDetails() {
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const passedTab = useGetTabId();
+  const urlTabId = useGetTabId();
   const {
     isLoadingRelatedDashboards,
     suggestedDashboards,
@@ -138,11 +138,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
-    return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
-  });
+  const [activeTabId, setActiveTabId] = useState<TabId>();
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
@@ -179,9 +175,9 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
-      if (passedTab === 'overview' || passedTab === null) setActiveTabId('overview');
+      setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [passedTab, alertDetail, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry, search]);
 
   useBreadcrumbs(
     [
