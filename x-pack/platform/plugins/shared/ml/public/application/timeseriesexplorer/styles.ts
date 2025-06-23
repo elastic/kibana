@@ -294,7 +294,7 @@ export const useAnnotationStyles = () => {
             stroke-width: ${mlAnnotationBorderWidth};
             stroke-dasharray: 2 2;
             fill: ${euiTheme.colors.accent};
-            fill-opacity: 0.2;
+            fill-opacity: 0.1;
             shape-rendering: geometricPrecision;
           }
         }
