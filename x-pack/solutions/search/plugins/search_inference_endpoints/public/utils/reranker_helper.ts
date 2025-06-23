@@ -6,9 +6,11 @@
  */
 
 import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
   const {
     inference_id: inferenceId,
+    service,
     service_settings: serviceSettings,
     task_type: taskType,
   } = provider;
@@ -26,7 +28,9 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
   if (
     (taskType === 'rerank' && modelId.startsWith('.')) ||
     modelId === 'rainbow-sprinkles' ||
-    (modelId === 'elser-v2' && inferenceId.startsWith('.'))
+    (modelId === 'elser-v2' &&
+      inferenceId.startsWith('.') &&
+      service === ServiceProviderKeys.elastic)
   ) {
     return true;
   }
