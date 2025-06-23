@@ -29,7 +29,7 @@ export function useAIFeatures() {
   );
   const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors?.connectors);
 
-  if (genAiConnectors?.loading) {
+  if (!genAiConnectors || genAiConnectors.loading) {
     return undefined;
   }
 
