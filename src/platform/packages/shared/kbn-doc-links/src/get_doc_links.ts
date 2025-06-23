@@ -1115,7 +1115,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryRulesAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/group/endpoint-query_rules`,
     },
     datasetQuality: {
-      failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
+      failureStore: `${OBSERVABILITY_DOCS}monitor-datasets.html`,
     },
   });
 };
