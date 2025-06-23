@@ -2149,7 +2149,7 @@ describe('IndexPattern Data Source', () => {
           isStaticValue: false,
           hasTimeShift: false,
           hasReducedTimeRange: false,
-          scale: undefined,
+          scale: 'ordinal',
           sortingHint: undefined,
           interval: undefined,
           hasArraySupport: false,
