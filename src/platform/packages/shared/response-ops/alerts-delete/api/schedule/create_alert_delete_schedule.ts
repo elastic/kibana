@@ -18,7 +18,7 @@ export interface CreateAlertDeleteScheduleParams {
 export const createAlertDeleteSchedule = async ({
   services: { http },
   requestBody: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
-}: CreateAlertDeleteScheduleParams) => {
+}: CreateAlertDeleteScheduleParams): Promise<string | undefined> => {
   return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_delete_schedule`, {
     body: JSON.stringify({
       active_alert_delete_threshold: activeAlertDeleteThreshold,

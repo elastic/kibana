@@ -185,7 +185,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']);
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
     for (const agentInfo of agentPolicyInfo) {
       agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
@@ -439,7 +439,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      RunScriptActionRequestBody['parameters']
+    > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'runscript',
