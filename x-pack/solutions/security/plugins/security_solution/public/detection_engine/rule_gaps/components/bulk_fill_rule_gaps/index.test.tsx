@@ -80,7 +80,7 @@ describe('BulkFillRuleGapsModal', () => {
 
     expect(confirmModalConfirmButton).toBeDisabled();
     expect(timeRangeForm).toHaveTextContent(
-      'Rule gaps fill cannot be scheduled earlier than 90 days ago'
+      'Rule gap fills cannot be scheduled earlier than 90 days ago'
     );
   });
 
@@ -95,6 +95,8 @@ describe('BulkFillRuleGapsModal', () => {
     });
 
     expect(confirmModalConfirmButton).toBeDisabled();
-    expect(timeRangeForm).toHaveTextContent('Rule gaps fill cannot be scheduled for the future');
+    expect(timeRangeForm).toHaveTextContent(
+      'Select a different time range. Future gap fills are not supported.'
+    );
   });
 });

@@ -276,7 +276,7 @@ export const BULK_EDIT_WARNING_TOAST_NOTIFY = i18n.translate(
 export const BULK_FILL_RULE_GAPS_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastTitle',
   {
-    defaultMessage: 'Scheduling gaps fill',
+    defaultMessage: 'Scheduling gap fills',
   }
 );
 
@@ -285,7 +285,7 @@ export const BULK_FILL_RULE_GAPS_WARNING_TOAST_DESCRIPTION = (rulesCount: number
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsWarningToastDescription',
     {
       values: { rulesCount },
-      defaultMessage: 'Scheduling gaps fill for {rulesCount, plural, =1 {# rule} other {# rules}}.',
+      defaultMessage: 'Scheduling gap fills for {rulesCount, plural, =1 {# rule} other {# rules}}.',
     }
   );
 
@@ -384,15 +384,12 @@ export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (rulesCount: number) =>
     }
   );
 
-export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = (rulesCount: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkFillRuleGapsConfirmation.confirmButtonLabel',
-    {
-      values: { rulesCount },
-      defaultMessage:
-        'Schedule the gaps fill for {rulesCount, plural, =1 {# rule} other {# rules}}',
-    }
-  );
+export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkFillRuleGapsConfirmation.confirmButtonLabel',
+  {
+    defaultMessage: 'Schedule gap fills',
+  }
+);
 
 export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
@@ -1416,14 +1413,14 @@ export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount:
 export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle',
   {
-    defaultMessage: 'Gaps fill scheduling successful',
+    defaultMessage: 'Gap fills successfully scheduled',
   }
 );
 
 export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
   {
-    defaultMessage: 'Error scheduling the gaps fill',
+    defaultMessage: 'Error scheduling gap fills',
   }
 );
 
@@ -1432,8 +1429,8 @@ export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (succeeded: number, skip
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription',
     {
       values: { succeededRulesCount: succeeded, skippedRulesCount: skipped },
-      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully scheduled the gaps fill for # rule. } other {You've successfully scheduled the gaps fill for # rules. }}
-        {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}`,
+      defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully scheduled gap fills for # rule. } other {You've successfully scheduled gap fills for # rules. }}
+        {skippedRulesCount, plural, =0 {} =1 { # rule was} other { # rules were}} excluded from the bulk schedule gap fill action.`,
     }
   );
 
@@ -1443,7 +1440,7 @@ export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: numbe
     {
       values: { failedRulesCount },
       defaultMessage:
-        'Failed to schedule the gaps fill for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
+        'Unable to schedule gap fills for {failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}}.',
     }
   );
 

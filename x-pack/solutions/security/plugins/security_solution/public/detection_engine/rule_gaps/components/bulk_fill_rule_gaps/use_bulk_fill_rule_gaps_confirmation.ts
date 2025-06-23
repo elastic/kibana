@@ -7,7 +7,7 @@
 import { useScheduleBulkActionConfirmation } from '../../../common/components/schedule_bulk_action_modal/use_schedule_bulk_action_confirmation';
 
 /**
- * Hook that controls rule gaps filling confirmation modal window and its content
+ * Hook that controls the schedule rule gap fills confirmation modal window and its content
 ``
  */
 export const useBulkFillRuleGapsConfirmation = () => {

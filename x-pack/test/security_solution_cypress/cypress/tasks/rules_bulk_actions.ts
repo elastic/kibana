@@ -495,7 +495,7 @@ export const scheduleBulkFillGapsForSelectedRules = (
   if (disabledCount > 0) {
     cy.get(BULK_FILL_RULE_GAPS_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule the gaps fill for ${enabledCount} rules`
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot fill gaps for disabled rules)CancelSchedule gap fills`
     );
     cy.get(CONFIRM_FILL_RULE_GAPS_WARNING_BTN).click();
   }

@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 export const BULK_FILL_RULE_GAPS_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.modalTitle',
   {
-    defaultMessage: 'Schedule gaps fill',
+    defaultMessage: 'Schedule gap fills',
   }
 );
 
 export const BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.timeRangeTitle',
   {
-    defaultMessage: 'Select timerange for gaps fill',
+    defaultMessage: 'Select a time range for gap fills',
   }
 );
 
@@ -58,7 +58,7 @@ export const BULK_FILL_RULE_GAPS_INVALID_TIME_RANGE_ERROR = i18n.translate(
 export const BULK_FILL_RULE_GAPS_FUTURE_TIME_RANGE_ERROR = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.futureTimeRangeError',
   {
-    defaultMessage: 'Rule gaps fill cannot be scheduled for the future',
+    defaultMessage: 'Select a different time range. Future gap fills are not supported.',
   }
 );
 
@@ -66,14 +66,14 @@ export const BULK_FILL_RULE_GAPS_START_DATE_OUT_OF_RANGE_ERROR = (maxDaysLookbac
   i18n.translate('xpack.securitySolution.bulkFillRuleGapsModal.startDateIsOutOfRangeError', {
     values: { maxDaysLookback },
     defaultMessage:
-      'Rule gaps fill cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
+      'Rule gap fills cannot be scheduled earlier than {maxDaysLookback, plural, =1 {# day} other {# days}} ago',
   });
 
 export const BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.notificationsLimitations',
   {
     defaultMessage:
-      'Alert summary rule actions that run at a custom frequency are not performed during manual rule runs triggered by the gaps fill process.',
+      'Alert summary rule actions that run at a custom frequency are not performed during manual rule runs triggered by the gap fills process.',
   }
 );
 

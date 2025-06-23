@@ -45,7 +45,7 @@ const getActionConfirmLabel = (
     case BulkActionTypeEnum.run:
       return i18n.BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM(succeededRulesCount);
     case BulkActionTypeEnum.fill_gaps:
-      return i18n.BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM(succeededRulesCount);
+      return i18n.BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM;
     default:
       assertUnreachable(bulkAction);
   }

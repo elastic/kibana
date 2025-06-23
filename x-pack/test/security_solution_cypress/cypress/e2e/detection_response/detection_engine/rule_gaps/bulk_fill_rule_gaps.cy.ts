@@ -53,7 +53,7 @@ describe(
       visitRulesManagementTable();
     });
 
-    it('schedule gaps fill for enabled rules', () => {
+    it('schedule gap fills for enabled rules', () => {
       const enabledRules = ['Rule 1', 'Rule 2', 'Rule 4'] as const;
       interceptBulkFillRulesGaps({ succeeded: 3, failed: 0, skipped: 0 });
       selectRulesByName(enabledRules);
@@ -65,11 +65,11 @@ describe(
 
       cy.contains(
         TOASTER_BODY,
-        `You've successfully scheduled the gaps fill for ${enabledCount} rules`
+        `You've successfully scheduled gap fills for ${enabledCount} rules`
       );
     });
 
-    it('schedule gaps fill for enabled rules and show warning about disabled rules', () => {
+    it('schedule gap fills for enabled rules and show warning about disabled rules', () => {
       const enabledRules = ['Rule 1', 'Rule 2', 'Rule 4'] as const;
       const disabledRules = ['Rule 3', 'Rule 5'] as const;
 
@@ -87,11 +87,11 @@ describe(
 
       cy.contains(
         TOASTER_BODY,
-        `You've successfully scheduled the gaps fill for ${enabledCount} rules`
+        `You've successfully scheduled gap fills for ${enabledCount} rules`
       );
     });
 
-    it('handle gaps fill result with skipped rules', () => {
+    it('handle gap fills result with skipped rules', () => {
       const enabledRules = ['Rule 1', 'Rule 2', 'Rule 4'] as const;
       interceptBulkFillRulesGaps({ succeeded: 2, failed: 0, skipped: 1 });
       selectRulesByName(enabledRules);
@@ -101,11 +101,11 @@ describe(
 
       cy.contains(
         TOASTER_BODY,
-        `You've successfully scheduled the gaps fill for 2 rules. 1 rule was skipped`
+        `You've successfully scheduled gap fills for 2 rules. 1 rule was excluded from the bulk schedule gap fill action.`
       );
     });
 
-    it('handle gaps fill result when all rules are skipped', () => {
+    it('handle gap fills result when all rules are skipped', () => {
       const enabledRules = ['Rule 1', 'Rule 2', 'Rule 4'] as const;
       interceptBulkFillRulesGaps({ succeeded: 0, failed: 0, skipped: 3 });
       selectRulesByName(enabledRules);
@@ -114,7 +114,10 @@ describe(
       scheduleBulkFillGapsForSelectedRules(enabledCount, 0);
       cy.wait('@bulkFillRulesGaps');
 
-      cy.contains(TOASTER_BODY, `${enabledCount} rules were skipped`);
+      cy.contains(
+        TOASTER_BODY,
+        `${enabledCount} rules were excluded from the bulk schedule gap fill action.`
+      );
     });
 
     it('handle the case when the request is slow', () => {
@@ -124,16 +127,16 @@ describe(
 
       const enabledCount = enabledRules.length;
       scheduleBulkFillGapsForSelectedRules(enabledCount, 0);
-      cy.contains(TOASTER_BODY, `Scheduling gaps fill for ${enabledCount} rules`);
+      cy.contains(TOASTER_BODY, `Scheduling gap fills for ${enabledCount} rules`);
       cy.wait('@bulkFillRulesGaps');
 
       cy.contains(
         TOASTER_BODY,
-        `You've successfully scheduled the gaps fill for ${enabledCount} rules`
+        `You've successfully scheduled gap fills for ${enabledCount} rules`
       );
     });
 
-    it('schedule gaps fill for enabled rules and show partial error for errored rules when all rules are selected', () => {
+    it('schedule gap fills for enabled rules and show partial error for errored rules when all rules are selected', () => {
       const enabledRules = ['Rule 1', 'Rule 2', 'Rule 4'] as const;
       const errors = [
         {
@@ -164,7 +167,7 @@ describe(
       scheduleBulkFillGapsForSelectedRules(enabledCount, 0);
       cy.wait('@bulkFillRulesGaps');
 
-      cy.contains(TOASTER_BODY, `Failed to schedule the gaps fill for 2 rules`);
+      cy.contains(TOASTER_BODY, `Unable to schedule gap fills for 2 rules`);
 
       clickErrorToastBtn();
 

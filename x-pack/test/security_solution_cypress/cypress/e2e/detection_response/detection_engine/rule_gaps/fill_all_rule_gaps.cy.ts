@@ -48,7 +48,7 @@ describe(
       });
     });
 
-    it('schedule gaps fill for the rule when it is enabled', function () {
+    it('schedule gap fills for the rule when it is enabled', function () {
       interceptBulkFillRulesGaps({ succeeded: 1, failed: 0, skipped: 0 });
       interceptGetRuleGaps();
       interceptGetManualRuns(this.ruleId);
@@ -73,7 +73,7 @@ describe(
       cy.wait('@getRuleGaps');
       cy.wait('@getRuleManualRuns');
 
-      cy.contains(TOASTER_BODY, `You've successfully scheduled the gaps fill for 1 rule.`);
+      cy.contains(TOASTER_BODY, `You've successfully scheduled gap fills for 1 rule.`);
     });
 
     it('handle the case when the rule is disabled', function () {
@@ -104,13 +104,13 @@ describe(
       // Verify that an error modal is displayed
       cy.get('[data-test-subj="bulkActionRejectModal"]').should(
         'have.text',
-        `The rule gaps cannot be filledCannot schedule a gaps fill for a disabled ruleClose`
+        `The rule gaps cannot be filledCannot schedule gap fills for a disabled ruleClose`
       );
 
       cy.get(MODAL_CONFIRMATION_BTN).click();
     });
 
-    it('handle gaps fill result when the rule is skipped', function () {
+    it('handle gap fills result when the rule is skipped', function () {
       interceptBulkFillRulesGaps({ succeeded: 0, failed: 0, skipped: 1 });
       interceptGetRuleGaps();
       interceptGetManualRuns(this.ruleId);
@@ -135,11 +135,11 @@ describe(
       cy.wait('@getRuleGaps');
       cy.wait('@getRuleManualRuns');
 
-      cy.contains(TOASTER_BODY, `1 rule was skipped.`);
+      cy.contains(TOASTER_BODY, `1 rule was excluded from the bulk schedule gap fill action.`);
     });
 
     it('handle the case when the request is slow', function () {
-      interceptBulkFillRulesGaps({ succeeded: 0, failed: 0, skipped: 1, delay: 6000 });
+      interceptBulkFillRulesGaps({ succeeded: 1, failed: 0, skipped: 0, delay: 6000 });
       interceptGetRuleGaps();
       interceptGetManualRuns(this.ruleId);
 
@@ -157,14 +157,14 @@ describe(
       // Schedule the backfill
       cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();
       cy.get(MODAL_CONFIRMATION_BTN).click();
-      cy.contains(TOASTER_BODY, `Scheduling the gaps fill for 1 rule`);
+      cy.contains(TOASTER_BODY, `Scheduling gap fills for 1 rule`);
       cy.wait('@bulkFillRulesGaps');
 
       // After scheduling the backfill, the gaps and manual runs are refreshed
       cy.wait('@getRuleGaps');
       cy.wait('@getRuleManualRuns');
 
-      cy.contains(TOASTER_BODY, `1 rule was skipped.`);
+      cy.contains(TOASTER_BODY, `You've successfully scheduled gap fills for 1 rule.`);
     });
 
     it('handle the case when the request to fill gaps errors', function () {
@@ -197,7 +197,7 @@ describe(
       cy.get(MODAL_CONFIRMATION_BTN).click();
       cy.wait('@bulkFillRulesGaps');
 
-      cy.contains(TOASTER_BODY, `Failed to schedule the gaps fill for 1 rule`);
+      cy.contains(TOASTER_BODY, `Unable to schedule gap fills for 1 rule`);
 
       clickErrorToastBtn();
 

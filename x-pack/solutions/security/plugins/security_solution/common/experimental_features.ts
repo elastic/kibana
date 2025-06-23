@@ -194,7 +194,7 @@ export const allowedExperimentalValues = Object.freeze({
   storeGapsInEventLogEnabled: true,
 
   /**
-   * Enables scheduing gaps fill for rules
+   * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: false,
 
