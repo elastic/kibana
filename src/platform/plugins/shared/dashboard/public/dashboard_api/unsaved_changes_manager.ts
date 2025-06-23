@@ -27,7 +27,7 @@ import {
 } from 'rxjs';
 import type { DashboardPanel } from '../../server';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializeLayoutManager } from './layout_manager/layout_manager';
+import { initializeLayoutManager, findPanel } from './layout_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
@@ -159,10 +159,7 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    const targetPanel = lastSavedDashboardState.panels.find((panel) => {
-      return (panel as DashboardPanel).panelIndex === childId;
-    });
-
+    const targetPanel = findPanel(lastSavedDashboardState.panels, childId);
     return targetPanel
       ? {
           rawState: (targetPanel as DashboardPanel).panelConfig ?? {},
