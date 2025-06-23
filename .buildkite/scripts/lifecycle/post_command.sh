@@ -57,6 +57,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
+  if [[ -d 'target/agent_diagnostics' ]]; then
+    buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
+  fi
+
 fi
 
 if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
