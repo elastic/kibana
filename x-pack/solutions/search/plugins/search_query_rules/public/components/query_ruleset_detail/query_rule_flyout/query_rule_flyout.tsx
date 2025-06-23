@@ -26,7 +26,8 @@ import {
 import { css } from '@emotion/react';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Controller, FieldError } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import { isQueryRuleFieldError } from '../../../utils/field_error_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SearchQueryRulesQueryRule } from '../../../types';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
@@ -324,15 +325,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                             onRemove={() => {
                               remove(index);
                             }}
-                            error={
-                              error
-                                ? (error as {
-                                    values: FieldError | undefined;
-                                    metadata: FieldError | undefined;
-                                    type: FieldError | undefined;
-                                  })
-                                : undefined
-                            }
+                            error={isQueryRuleFieldError(error) ? error : undefined}
                           />
                           <EuiSpacer size="m" />
                         </React.Fragment>

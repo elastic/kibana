@@ -28,7 +28,6 @@ interface QueryRuleMetadataEditorProps {
   error?: {
     values?: FieldError;
     metadata?: FieldError;
-    type?: FieldError;
   };
 }
 
