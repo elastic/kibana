@@ -6191,6 +6191,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_SPAN_KIND",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_KIND",
+        "description": [],
+        "signature": [
+          "\"kind\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.PARENT_ID_FIELD",
         "type": "string",
         "tags": [],
