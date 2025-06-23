@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -50,26 +50,29 @@ export const CustomPanel = () => {
   if (!discoverLink) return null;
 
   return (
-    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
-      <EuiFlexItem grow={false}>
-        <FilePicker />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          fill
-          size={'s'}
-          color={'text'}
-          href={discoverLink}
-          target="_blank"
-          iconType={'discoverApp'}
-        >
-          <EuiText size="xs">
-            {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
-              defaultMessage: 'Query this index',
-            })}
-          </EuiText>
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+        <EuiFlexItem grow={false}>
+          <FilePicker />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            size={'s'}
+            color={'text'}
+            href={discoverLink}
+            target="_blank"
+            iconType={'discoverApp'}
+          >
+            <EuiText size="xs">
+              {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
+                defaultMessage: 'Query this index',
+              })}
+            </EuiText>
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
+    </>
   );
 };

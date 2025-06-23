@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
@@ -18,6 +18,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { noop } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
@@ -29,7 +30,7 @@ interface FilePreviewItem {
 }
 
 export const FilesPreview: FC = () => {
-  const { filesStatus, uploadStatus, fileClashes } = useFileUploadContext();
+  const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
 
   const {
     services: { data },
@@ -131,15 +132,39 @@ export const FilesPreview: FC = () => {
     <div>
       {filePreviewItems.map((filePreviewItem, i) => {
         return (
-          <div key={filePreviewItem.fileName}>
-            <h4>{filePreviewItem.fileName}</h4>
+          <EuiAccordion
+            id={filePreviewItem.fileName}
+            key={filePreviewItem.fileName}
+            buttonContent={
+              <EuiTitle size={'s'}>
+                <h4>{filePreviewItem.fileName}</h4>
+              </EuiTitle>
+            }
+            initialIsOpen={i === 0}
+            extraAction={
+              <EuiButton
+                size="s"
+                iconType={'trash'}
+                color={'danger'}
+                onClick={async () => {
+                  await deleteFile(i);
+                }}
+              >
+                <FormattedMessage
+                  id="indexEditor.fileUploader.removeFileButton"
+                  defaultMessage="Remove file"
+                />
+              </EuiButton>
+            }
+            paddingSize="l"
+          >
             <ResultsPreview
               sampleDocs={filePreviewItem.sampleDocs}
               dataView={filePreviewItem.dataView}
               mappings={filePreviewItem.mappings}
               columnNames={filePreviewItem.columnNames}
             />
-          </div>
+          </EuiAccordion>
         );
       })}
 

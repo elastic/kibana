@@ -98,13 +98,7 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     filesStatus.length > 0 &&
     uploadStatus.overallImportStatus !== STATUS.COMPLETED;
 
-  const content = showFilePreview ? (
-    <div css={overlayBase}>
-      <FilesPreview />
-    </div>
-  ) : (
-    children
-  );
+  const content = showFilePreview ? <FilesPreview /> : children;
 
   return (
     <div {...getRootProps()}>
