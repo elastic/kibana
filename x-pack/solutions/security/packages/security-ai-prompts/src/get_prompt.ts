@@ -145,7 +145,10 @@ export const resolveProviderAndModel = async ({
   let model = providedModel;
   let provider = providedProvider;
   if (!provider || !model || provider === 'inference') {
-    const connector = providedConnector ?? (await actionsClient?.get({ id: connectorId ?? '' }));
+    let connector = providedConnector;
+    if (!connector && connectorId != null && actionsClient) {
+      connector = await actionsClient.get({ id: connectorId });
+    }
     if (!connector) {
       return {};
     }

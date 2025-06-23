@@ -20,13 +20,10 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
 
-export const findSecurityAIPromptsRoute = (
-  router: ElasticAssistantPluginRouter,
-  logger: Logger
-) => {
+export const findSecurityAIPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) =>
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
       security: {
         authz: {
@@ -36,7 +33,7 @@ export const findSecurityAIPromptsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindSecurityAIPromptsRequestQuery),
@@ -93,4 +90,3 @@ export const findSecurityAIPromptsRoute = (
         }
       }
     );
-};

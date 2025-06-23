@@ -49,7 +49,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
     QUERY.connector_id,
     QUERY.prompt_ids,
     QUERY.prompt_group_id,
-    API_VERSIONS.internal.v1,
+    API_VERSIONS.public.v1,
   ];
 
   return useQuery<FindSecurityAIPromptsResponse, unknown, FindSecurityAIPromptsResponse>(
@@ -90,7 +90,7 @@ const getPrompts = async ({
       ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
       {
         method: 'GET',
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         signal,
         query,
       }

@@ -67,9 +67,9 @@ export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
 export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
 
-// Security AI Prompts (prompt integraiton
+// Security AI Prompts (prompt integration)
 export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
-  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/security_ai_prompts` as const;
+  `${ELASTIC_AI_ASSISTANT_URL}/security_ai_prompts` as const;
 export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
 

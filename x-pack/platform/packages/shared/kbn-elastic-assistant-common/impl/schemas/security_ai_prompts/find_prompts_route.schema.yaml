@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Get Security AI Prompt endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/security_ai_prompts/_find:
+  /api/security_ai_assistant/security_ai_prompts/_find:
     get:
       x-codegen-enabled: true
       x-internal: true
