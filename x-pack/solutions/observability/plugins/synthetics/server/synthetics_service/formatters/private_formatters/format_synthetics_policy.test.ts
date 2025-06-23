@@ -7,15 +7,38 @@
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
+const testMW = [
+  {
+    id: '190bd51b-985a-4553-9fba-57222ddde6b7',
+    title: 'test',
+    enabled: true,
+    duration: 1800000,
+    expirationDate: '2026-06-10T11:43:25.175Z',
+    events: [{ gte: '2025-06-10T11:40:29.124Z', lte: '2025-06-10T12:10:29.124Z' }],
+    rRule: { dtstart: '2025-06-10T11:40:29.124Z', tzid: 'Europe/Berlin', freq: 0, count: 1 },
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: '2025-06-10T11:43:25.176Z',
+    updatedAt: '2025-06-10T11:43:25.176Z',
+    eventStartTime: '2025-06-10T11:40:29.124Z',
+    eventEndTime: '2025-06-10T12:10:29.124Z',
+    status: 'running',
+    categoryIds: null,
+    scopedQuery: null,
+  },
+] as MaintenanceWindow[];
+
 describe('formatSyntheticsPolicy', () => {
   it('formats browser policy', () => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
       MonitorTypeEnum.BROWSER,
       browserConfig,
-      gParams
+      gParams,
+      testMW
     );
 
     expect(formattedPolicy).toEqual({
@@ -142,6 +165,9 @@ describe('formatSyntheticsPolicy', () => {
                 username: {
                   type: 'text',
                 },
+                maintenance_windows: {
+                  type: 'yaml',
+                },
               },
             },
           ],
@@ -242,6 +268,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: 'tcp',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
@@ -315,6 +342,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: '1s',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
@@ -432,6 +460,11 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: 'browser',
                 },
+                maintenance_windows: {
+                  type: 'yaml',
+                  value:
+                    '[{"dtstart":"2025-06-10T11:40:29.124Z","tzid":"Europe/Berlin","freq":"yearly","count":1,"duration":"1800000ms"}]',
+                },
               },
             },
             {
@@ -473,7 +506,8 @@ describe('formatSyntheticsPolicy', () => {
         ...httpPolicy,
         [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
       },
-      gParams
+      gParams,
+      []
     );
 
     expect(formattedPolicy).toEqual({
@@ -628,6 +662,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: '"admin"',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
@@ -728,6 +763,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: 'tcp',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
@@ -801,6 +837,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: '1s',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
@@ -897,6 +934,7 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: 'browser',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
             {
@@ -987,6 +1025,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1026,6 +1065,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1056,6 +1096,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1094,6 +1135,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
         { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
@@ -1157,6 +1199,7 @@ const browserConfig: any = {
   fields: { config_id: '00bb3ceb-a242-4c7a-8405-8da963661374' },
   fields_under_root: true,
   location_name: 'Test private location 0',
+  maintenance_windows: ['190bd51b-985a-4553-9fba-57222ddde6b7'],
 };
 
 const httpPolicy: any = {

@@ -70,7 +70,7 @@ export const renderApp = ({
           defaultMessage: 'Getting started',
         }),
         prompt: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.prompt', {
-          defaultMessage: 'What are SLOs?',
+          defaultMessage: 'What are Service Level Objectives (SLOs)?',
         }),
         icon: 'bullseye',
       },

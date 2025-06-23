@@ -4141,6 +4141,51 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DeleteAllConversationsRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAllConversationsRequestBody",
+        "description": [],
+        "signature": [
+          "{ excludedIds?: string[] | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DeleteAllConversationsRequestBodyInput",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAllConversationsRequestBodyInput",
+        "description": [],
+        "signature": [
+          "{ excludedIds?: string[] | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DeleteAllConversationsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAllConversationsResponse",
+        "description": [],
+        "signature": [
+          "{ success?: boolean | undefined; failures?: string[] | undefined; totalDeleted?: number | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.DeleteAttackDiscoverySchedulesRequestParams",
         "type": "Type",
         "tags": [],
@@ -9283,6 +9328,36 @@
           "Zod.ZodObject<{ id: Zod.ZodEffects<Zod.ZodString, string, string>; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\", \"Other\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }, { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }>>; eventsContextCount: Zod.ZodOptional<Zod.ZodNumber>; insights: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ group: Zod.ZodString; events: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; endpointId: Zod.ZodString; value: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; value: string; endpointId: string; }, { id: string; value: string; endpointId: string; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { group: string; events?: { id: string; value: string; endpointId: string; }[] | undefined; }, { group: string; events?: { id: string; value: string; endpointId: string; }[] | undefined; }>, \"many\">>; status: Zod.ZodOptional<Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; generationIntervals: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">>; backingIndex: Zod.ZodString; failureReason: Zod.ZodOptional<Zod.ZodString>; lastViewedAt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; backingIndex: string; status?: \"running\" | \"succeeded\" | \"failed\" | \"canceled\" | undefined; failureReason?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; lastViewedAt?: string | undefined; generationIntervals?: { date: string; durationMs: number; }[] | undefined; eventsContextCount?: number | undefined; insights?: { group: string; events?: { id: string; value: string; endpointId: string; }[] | undefined; }[] | undefined; }, { id: string; backingIndex: string; status?: \"running\" | \"succeeded\" | \"failed\" | \"canceled\" | undefined; failureReason?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; apiConfig?: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined; lastViewedAt?: string | undefined; generationIntervals?: { date: string; durationMs: number; }[] | undefined; eventsContextCount?: number | undefined; insights?: { group: string; events?: { id: string; value: string; endpointId: string; }[] | undefined; }[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/defend_insights/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DeleteAllConversationsRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "DeleteAllConversationsRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ excludedIds: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { excludedIds?: string[] | undefined; }, { excludedIds?: string[] | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DeleteAllConversationsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "DeleteAllConversationsResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ success: Zod.ZodOptional<Zod.ZodBoolean>; totalDeleted: Zod.ZodOptional<Zod.ZodNumber>; failures: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { success?: boolean | undefined; failures?: string[] | undefined; totalDeleted?: number | undefined; }, { success?: boolean | undefined; failures?: string[] | undefined; totalDeleted?: number | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
