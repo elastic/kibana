@@ -21,6 +21,7 @@ interface Props {
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   allSystemPrompts: PromptResponse[];
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const starterPromptWrapperClassName = css`
   max-width: 95%;
@@ -32,6 +33,7 @@ export const EmptyConvo: React.FC<Props> = ({
   isSettingsModalVisible,
   setCurrentSystemPromptId,
   setIsSettingsModalVisible,
+  setUserPrompt,
 }) => {
   return (
     <EuiFlexGroup
@@ -74,11 +76,7 @@ export const EmptyConvo: React.FC<Props> = ({
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-        <StarterPrompts
-          onSelectPrompt={(p) => {
-            console.log('prompt', p);
-          }}
-        />
+        <StarterPrompts setUserPrompt={setUserPrompt} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

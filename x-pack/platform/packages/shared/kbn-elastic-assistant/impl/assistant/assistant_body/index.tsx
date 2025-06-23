@@ -43,6 +43,7 @@ interface Props {
   http: HttpSetup;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const AssistantBody: FunctionComponent<Props> = ({
@@ -58,6 +59,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
   isSettingsModalVisible,
   isWelcomeSetup,
   setIsSettingsModalVisible,
+  setUserPrompt,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -127,6 +129,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
             isSettingsModalVisible={isSettingsModalVisible}
             setCurrentSystemPromptId={setCurrentSystemPromptId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            setUserPrompt={setUserPrompt}
           />
         ) : (
           <EuiPanel

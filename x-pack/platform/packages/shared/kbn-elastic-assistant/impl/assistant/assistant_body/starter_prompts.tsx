@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/css';
 
 interface Props {
-  onSelectPrompt: (prompt: string) => void;
+  setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const starterPromptClassName = css`
   max-width: 50%;
@@ -29,33 +29,44 @@ const starterPromptInnerClassName = css`
   text-align: center !important;
 `;
 
-export const StarterPrompts: React.FC<Props> = ({ onSelectPrompt }) => {
+export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
   const starterPrompts = [
     {
-      prompt: 'Show me the important alerts from the last 24 hours',
+      description: 'Show me the important alerts from the last 24 hours',
       title: 'User Activity',
       icon: 'bell',
+      prompt: 'big long prompt 1',
     },
     {
-      prompt: 'What is the status of my last deployment?',
+      description: 'What is the status of my last deployment?',
       title: 'Deployment Status',
       icon: 'sparkles',
+      prompt: 'big long prompt 2',
     },
     {
-      prompt: 'What are the top errors in the logs?',
+      description: 'What are the top errors in the logs?',
       title: 'Log Analysis',
       icon: 'bullseye',
+      prompt: 'big long prompt 3',
     },
     {
-      prompt: 'Can you summarize the latest sales report?',
+      description: 'Can you summarize the latest sales report?',
       title: 'Sales Summary',
       icon: 'questionInCircle',
+      prompt: 'big long prompt 4',
     },
   ];
+
+  const onSelectPrompt = useCallback(
+    (prompt: string) => {
+      setUserPrompt(prompt);
+    },
+    [setUserPrompt]
+  );
   return (
     <EuiFlexGroup direction="row" gutterSize="m" wrap>
-      {starterPrompts.map(({ prompt, title, icon }) => (
-        <EuiFlexItem key={prompt} className={starterPromptClassName}>
+      {starterPrompts.map(({ description, title, icon, prompt }) => (
+        <EuiFlexItem key={description} className={starterPromptClassName}>
           <EuiPanel
             paddingSize="m"
             hasShadow={false}
@@ -69,7 +80,7 @@ export const StarterPrompts: React.FC<Props> = ({ onSelectPrompt }) => {
             <EuiTitle size="xs">
               <h2>{title}</h2>
             </EuiTitle>
-            <EuiText size="s">{prompt}</EuiText>
+            <EuiText size="s">{description}</EuiText>
           </EuiPanel>
         </EuiFlexItem>
       ))}
