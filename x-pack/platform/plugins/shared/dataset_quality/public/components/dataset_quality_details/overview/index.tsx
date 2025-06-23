@@ -9,10 +9,10 @@ import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer, OnRefreshProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 
 const OverviewHeader = dynamic(() => import('./header'));
@@ -56,7 +56,6 @@ export function Overview() {
         <div style={{ marginBottom: 16 }}>
           <EuiCallOut
             color="warning"
-            iconType="warning"
             title={
               <>
                 {i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
@@ -66,7 +65,6 @@ export function Overview() {
                   href={locator?.getRedirectUrl(locatorParams)}
                   target="_blank"
                   external={false}
-                  color="warning"
                   css={{ textDecoration: 'underline' }}
                 >
                   {i18n.translate('xpack.datasetQuality.enableFailureStore', {
@@ -78,13 +76,10 @@ export function Overview() {
           />
         </div>
       )}
+
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
-          <EuiCallOut
-            title={noAccessToFailureStoreWarningDescription}
-            color="warning"
-            iconType="warning"
-          />
+          <FailureStoreWarning />
           <EuiSpacer size="m" />
         </EuiFlexItem>
       )}

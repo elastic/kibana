@@ -385,7 +385,9 @@ export const getDatasetQualityTableColumns = ({
                           ? i18n.translate('xpack.datasetQuality.failureStore.enable', {
                               defaultMessage: 'Set failure store',
                             })
-                          : 'N/A'}
+                          : i18n.translate('xpack.datasetQuality.failureStore.notAvailable', {
+                              defaultMessage: 'N/A',
+                            })}
                       </EuiLink>
                     </EuiToolTip>
                   );
