@@ -42,7 +42,6 @@
     "@kbn/utility-types",
     "@kbn/search-navigation",
     "@kbn/search-queries",
-    "@kbn/monaco"
   ],
   "exclude": [
     "target/**/*",
