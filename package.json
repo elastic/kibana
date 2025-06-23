@@ -1126,6 +1126,7 @@
     "@opentelemetry/semantic-conventions": "^1.32.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "@reduxjs/toolkit": "1.9.7",
+    "@slack/web-api": "^7.9.3",
     "@slack/webhook": "^7.0.1",
     "@smithy/eventstream-codec": "^4.0.1",
     "@smithy/eventstream-serde-node": "^4.0.1",
