@@ -91,7 +91,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     augmentMessageCodeBlocks,
     assistantAvailability,
     assistantTelemetry,
-    docLinks: docLinks,
+    docLinks,
     basePath,
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
