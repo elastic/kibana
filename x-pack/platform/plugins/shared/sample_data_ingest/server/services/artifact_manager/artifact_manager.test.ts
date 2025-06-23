@@ -258,7 +258,7 @@ describe('ArtifactManager', () => {
   });
 
   it('should initialize with correct properties', () => {
-    const manager = new ArtifactManager({
+    new ArtifactManager({
       artifactsFolder: '/custom/path',
       artifactRepositoryUrl: 'https://custom.repo.com',
       kibanaVersion: '9.0.0',
