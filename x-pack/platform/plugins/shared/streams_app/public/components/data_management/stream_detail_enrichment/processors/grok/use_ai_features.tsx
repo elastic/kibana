@@ -21,24 +21,25 @@ export function useAIFeatures() {
     },
     core,
   } = useKibana();
-  const genAiConnectors = observabilityAIAssistant.useGenAIConnectors();
+
+  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
   const license = useObservable(licensing.license$);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
     ElasticLlmCalloutKey.TOUR_CALLOUT
   );
-  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors.connectors);
+  const elasticManagedLlmConnector = getElasticManagedLlmConnector(genAiConnectors?.connectors);
 
-  if (genAiConnectors.loading) {
+  if (genAiConnectors?.loading) {
     return undefined;
   }
 
   const enabled =
-    observabilityAIAssistant.service.isEnabled() && !isEmpty(genAiConnectors.connectors);
+    observabilityAIAssistant?.service.isEnabled() && !isEmpty(genAiConnectors?.connectors);
   const couldBeEnabled = Boolean(
     license?.hasAtLeast('enterprise') && core.application.capabilities.actions?.save
   );
   const isManagedAIConnector = elasticManagedLlmConnector
-    ? elasticManagedLlmConnector.id === genAiConnectors.selectedConnector
+    ? elasticManagedLlmConnector.id === genAiConnectors?.selectedConnector
     : false;
 
   return {
