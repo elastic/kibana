@@ -50,7 +50,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
 
-      const surveyUrl = new URL('https://elastic.eu.qualtrics.com/jfe/form/SV_4OfUp18saHW14Mu');
+      const surveyUrl = new URL('https://ela.st/kibana-product-survey');
 
       surveyUrl.searchParams.set('uid', String(currentUser.profile_uid || null));
       surveyUrl.searchParams.set('pid', String(cloud.serverless.projectId || null));
