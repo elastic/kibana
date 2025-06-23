@@ -84,6 +84,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;
+  enforceAdaptiveAllocations?: boolean;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;

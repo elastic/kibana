@@ -32,7 +32,7 @@ interface InferenceFlyoutWrapperProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
-  isServerless?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
 }
@@ -42,7 +42,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   http,
   toasts,
   isEdit,
-  isServerless = false,
+  enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
 }) => {
@@ -77,8 +77,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       return;
     }
 
-    mutate(getInferenceApiParams(data, isServerless) ?? data, !!isEdit);
-  }, [form, isEdit, isServerless, mutate]);
+    mutate(getInferenceApiParams(data, enforceAdaptiveAllocations) ?? data, !!isEdit);
+  }, [form, isEdit, enforceAdaptiveAllocations, mutate]);
 
   const isPreconfigured = inferenceEndpoint?.config.inferenceId.startsWith('.');
 
@@ -100,7 +100,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
             http={http}
             toasts={toasts}
             isEdit={isEdit}
-            isServerless={isServerless}
+            enforceAdaptiveAllocations={enforceAdaptiveAllocations}
             isPreconfigured={isPreconfigured}
           />
           <EuiSpacer size="m" />

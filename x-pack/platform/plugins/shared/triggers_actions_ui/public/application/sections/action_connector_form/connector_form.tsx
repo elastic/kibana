@@ -41,7 +41,7 @@ interface Props {
   actionTypeModel: ActionTypeModel | null;
   connector: ConnectorFormSchema & { isMissingSecrets: boolean };
   isEdit: boolean;
-  isServerless?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   /** Handler to receive state changes updates */
   onChange?: (state: ConnectorFormState) => void;
   /** Handler to receive update on the form "isModified" state */
@@ -123,7 +123,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
   actionTypeModel,
   connector,
   isEdit,
-  isServerless,
+  enforceAdaptiveAllocations,
   onChange,
   onFormModifiedChange,
   setResetForm,
@@ -171,7 +171,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
       <ConnectorFormFields
         actionTypeModel={actionTypeModel}
         isEdit={isEdit}
-        isServerless={isServerless}
+        enforceAdaptiveAllocations={enforceAdaptiveAllocations}
         registerPreSubmitValidator={registerPreSubmitValidator}
       />
       <EuiSpacer size="m" />

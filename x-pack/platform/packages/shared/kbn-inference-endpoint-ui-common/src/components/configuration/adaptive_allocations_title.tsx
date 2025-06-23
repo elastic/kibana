@@ -17,6 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 export const AdaptiveAllocationsTitle: FC = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -25,7 +26,7 @@ export const AdaptiveAllocationsTitle: FC = () => {
     <>
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs" data-test-subj="max_number_of_allocations-details-label">
+          <EuiTitle size="xxs" data-test-subj="maxNumberOfAllocationsDetailsLabel">
             <h5>
               <FormattedMessage
                 id="xpack.inferenceEndpointUICommon.components.adaptiveResourcesTitle"
@@ -43,7 +44,12 @@ export const AdaptiveAllocationsTitle: FC = () => {
                 size="xs"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                 iconType="iInCircle"
-                aria-label="Open documentation"
+                aria-label={i18n.translate(
+                  'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
+                  {
+                    defaultMessage: 'Open adaptive resources information popover',
+                  }
+                )}
               />
             }
             isOpen={isPopoverOpen}
@@ -60,10 +66,8 @@ export const AdaptiveAllocationsTitle: FC = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.inferenceEndpointUICommon.components.sectionPopoverFirstParagraph"
-                    defaultMessage="The number of allocations scales automatically, based on load. Resources scale up when the load increases and scale down when the load decreases. We scale down to 0 <bold>{scaleDown}</bold> to the endpoint to <bold>{optimize}</bold>."
+                    defaultMessage="The number of allocations scales automatically, based on load. Resources scale up when the load increases and scale down when the load decreases. We scale down to 0 <bold>after 24 hours of no inference calls</bold> to the endpoint to <bold>optimize cost and performance</bold>."
                     values={{
-                      scaleDown: 'after 24 hours of no inference calls',
-                      optimize: 'optimize cost and performance',
                       bold: (str) => <strong>{str}</strong>,
                     }}
                   />

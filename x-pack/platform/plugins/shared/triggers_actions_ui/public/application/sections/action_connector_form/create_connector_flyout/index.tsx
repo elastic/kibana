@@ -45,23 +45,24 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
-  isServerless?: boolean;
+  enforceAdaptiveAllocations?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
   featureId,
-  isServerless: isServerlessProp,
+  enforceAdaptiveAllocations: enforceAdaptiveAllocationsProp,
   onClose,
   onConnectorCreated,
   onTestConnector,
 }) => {
   const {
     application: { capabilities },
-    isServerless: isServerlessContext,
+    enforceAdaptiveAllocations: enforceAdaptiveAllocationsContext,
   } = useKibana().services;
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
-  const isServerless = isServerlessProp ?? isServerlessContext;
+  const enforceAdaptiveAllocations =
+    enforceAdaptiveAllocationsProp ?? enforceAdaptiveAllocationsContext;
 
   const isMounted = useRef(false);
   const [allActionTypes, setAllActionTypes] = useState<ActionTypeIndex | undefined>(undefined);
@@ -161,7 +162,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const connectorData = getInferenceApiParams(data, !!isServerless);
+      const connectorData = getInferenceApiParams(data, !!enforceAdaptiveAllocations);
       const { actionTypeId, name, config, secrets } = connectorData;
       const validConnector = {
         actionTypeId,
@@ -175,7 +176,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     } else {
       setShowFormErrors(true);
     }
-  }, [submit, preSubmitValidator, createConnector, isServerless]);
+  }, [submit, preSubmitValidator, createConnector, enforceAdaptiveAllocations]);
 
   const resetActionType = useCallback(() => setActionType(null), []);
 
@@ -284,7 +285,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               actionTypeModel={actionTypeModel}
               connector={initialConnector}
               isEdit={false}
-              isServerless={isServerless}
+              enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               onChange={setFormState}
               setResetForm={setResetForm}
             />

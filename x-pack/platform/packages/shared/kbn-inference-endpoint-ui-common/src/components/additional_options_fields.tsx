@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
-import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
+import { DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
 import { Config, ConfigEntryView } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
 
@@ -183,7 +183,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       <EuiPanel hasBorder={true}>
         {optionalProviderFormFields.length > 0 ? (
           <>
-            {config.provider === ServiceProviderKeys.elasticsearch ? null : (
+            {internalProviderKeys.includes(config.provider) ? null : (
               <>
                 <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
                   <h4>
@@ -194,10 +194,10 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   </h4>
                 </EuiTitle>
                 <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    color: ${euiTheme.colors.textSubdued};
-                  `}
+                  css={{
+                    fontSize: xsFontSize,
+                    color: euiTheme.colors.textSubdued,
+                  }}
                 >
                   <FormattedMessage
                     id="xpack.inferenceEndpointUICommon.components.additionalInfo.providerOptionalSettingsHelpLabel"

@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
-  isServerless,
+  enforceAdaptiveAllocations,
 }) => {
   const {
     http,
@@ -23,7 +23,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
     <InferenceServiceFormFields
       http={http}
       isEdit={isEdit}
-      isServerless={isServerless}
+      enforceAdaptiveAllocations={enforceAdaptiveAllocations}
       toasts={toasts}
     />
   );

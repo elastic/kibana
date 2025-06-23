@@ -50,7 +50,7 @@ export const EditInferenceFlyout: React.FC<EditInterfaceFlyoutProps> = ({
       http={http}
       toasts={toasts}
       isEdit={true}
-      isServerless={!!serverless}
+      enforceAdaptiveAllocations={!!serverless}
       onSubmitSuccess={onEditSuccess}
       inferenceEndpoint={inferenceEndpoint}
     />

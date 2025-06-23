@@ -119,9 +119,9 @@ export const mapProviderFields = (
     );
 };
 
-export const getInferenceApiParams = (data: any, isServerless: boolean) => {
+export const getInferenceApiParams = (data: any, enforceAdaptiveAllocations: boolean) => {
   if (
-    isServerless &&
+    enforceAdaptiveAllocations &&
     data?.config?.provider === ServiceProviderKeys.elasticsearch &&
     data?.config?.providerConfig
   ) {

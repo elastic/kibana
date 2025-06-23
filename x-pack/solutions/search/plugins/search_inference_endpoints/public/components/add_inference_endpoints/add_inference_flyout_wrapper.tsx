@@ -35,7 +35,7 @@ export const AddInferenceFlyoutWrapper: React.FC<AddInferenceFlyoutWrapperProps>
     <InferenceFlyoutWrapper
       onFlyoutClose={onFlyoutClose}
       http={http}
-      isServerless={!!serverless}
+      enforceAdaptiveAllocations={!!serverless}
       toasts={toasts}
       onSubmitSuccess={onSubmitSuccess}
     />

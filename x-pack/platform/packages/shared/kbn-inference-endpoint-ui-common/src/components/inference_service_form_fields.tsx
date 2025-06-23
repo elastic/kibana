@@ -48,7 +48,7 @@ interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
-  isServerless?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   isPreconfigured?: boolean;
 }
 
@@ -56,7 +56,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
   isEdit,
-  isServerless,
+  enforceAdaptiveAllocations,
   isPreconfigured,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
@@ -123,7 +123,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         const newProviderSchema: ConfigEntryView[] = mapProviderFields(
           taskType,
           newProvider,
-          isServerless ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+          enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
         );
         setProviderSchema(newProviderSchema);
       }
@@ -161,7 +161,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, isServerless, secrets, updateFieldValues, updatedProviders]
+    [config, enforceAdaptiveAllocations, secrets, updateFieldValues, updatedProviders]
   );
 
   const onProviderChange = useCallback(
@@ -180,7 +180,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         ? mapProviderFields(
             newProvider.task_types[0],
             newProvider,
-            isServerless ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
           )
         : [];
       if (newProvider) {
@@ -215,7 +215,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, isServerless, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders]
+    [
+      config,
+      enforceAdaptiveAllocations,
+      onTaskTypeOptionsSelect,
+      updateFieldValues,
+      updatedProviders,
+    ]
   );
 
   const onSetProviderConfigEntry = useCallback(
@@ -316,7 +322,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         ? mapProviderFields(
             config.taskType,
             newProvider,
-            isServerless ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
+            enforceAdaptiveAllocations ? INTERNAL_OVERRIDE_FIELDS[newProvider.service] : undefined
           )
         : [];
       if (newProvider) {
@@ -329,7 +335,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     config?.provider,
     config?.taskType,
     isEdit,
-    isServerless,
+    enforceAdaptiveAllocations,
     selectedTaskType,
     updatedProviders,
   ]);

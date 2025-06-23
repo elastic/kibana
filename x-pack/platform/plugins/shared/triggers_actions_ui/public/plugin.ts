@@ -366,7 +366,7 @@ export class Plugin
           actionTypeRegistry,
           ruleTypeRegistry,
           share: pluginsStart.share,
-          isServerless: !!pluginsStart.serverless,
+          enforceAdaptiveAllocations: !!pluginsStart.serverless,
           kibanaFeatures,
         });
       },
@@ -483,7 +483,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
-          isServerless: !!plugins.serverless,
+          enforceAdaptiveAllocations: !!plugins.serverless,
         });
       },
       getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
@@ -491,7 +491,7 @@ export class Plugin
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           connectorServices: this.connectorServices!,
-          isServerless: !!plugins.serverless,
+          enforceAdaptiveAllocations: !!plugins.serverless,
         });
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {

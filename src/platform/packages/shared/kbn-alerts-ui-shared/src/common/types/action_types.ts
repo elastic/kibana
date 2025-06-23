@@ -28,7 +28,7 @@ export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | v
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
-  isServerless?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 
