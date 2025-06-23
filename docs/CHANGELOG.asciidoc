@@ -112,7 +112,7 @@ Elastic Observability solution::
 * Allows grouping for IP type fields in custom threshold rules ({kibana-pull}216062[#216062]).
 
 Kibana security::
-* Fixes an issue where the Saved Objects Rotate Encryption Key API would not affect sharable encrypted object types that exist in all spaces. ({kibana-pull}217625[#217625]).
+* Fixes an issue where the Saved Objects Rotate Encryption Key API would not affect sharable encrypted object types that exist in all spaces ({kibana-pull}217625[#217625]).
 
 [[release-notes-7.17.28]]
 == {kib} 7.17.28
