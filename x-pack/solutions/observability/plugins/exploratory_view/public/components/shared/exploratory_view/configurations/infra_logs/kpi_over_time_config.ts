@@ -24,7 +24,6 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
       operationType: 'date_histogram',
       sourceField: '@timestamp',
       isBucketed: true,
-      scale: 'interval',
     },
     yAxisColumns: [
       {
@@ -34,7 +33,6 @@ export function getLogsKPIConfig(configProps: ConfigProps): SeriesConfig {
         dataType: 'number',
         operationType: 'count',
         isBucketed: false,
-        scale: 'ratio',
         sourceField: RECORDS_FIELD,
         timeScale: 'm',
       },

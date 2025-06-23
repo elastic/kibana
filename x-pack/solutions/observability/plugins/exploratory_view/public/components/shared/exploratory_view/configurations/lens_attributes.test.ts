@@ -129,7 +129,6 @@ describe('Lens Attribute', () => {
           interval: 'auto',
           includeEmptyRows: true,
         },
-        scale: 'interval',
         sourceField: '@timestamp',
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
@@ -146,7 +145,6 @@ describe('Lens Attribute', () => {
           params: {
             percentile: Number(rank.slice(0, 2)),
           },
-          scale: 'ratio',
           sourceField: 'transaction.duration.us',
         };
         return acc;
@@ -266,7 +264,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -288,7 +285,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -303,7 +299,6 @@ describe('Lens Attribute', () => {
         interval: 'auto',
         includeEmptyRows: true,
       },
-      scale: 'interval',
       sourceField: '@timestamp',
     });
   });
@@ -325,7 +320,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -513,7 +507,6 @@ describe('Lens Attribute', () => {
                 isBucketed: false,
                 label: 'Count of records',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               orderBy: {
@@ -523,7 +516,6 @@ describe('Lens Attribute', () => {
               otherBucket: true,
               size: 10,
             },
-            scale: 'ordinal',
             sourceField: 'user_agent.name',
           },
           'x-axis-column-layer0': {
@@ -542,7 +534,6 @@ describe('Lens Attribute', () => {
               ],
               type: 'histogram',
             },
-            scale: 'interval',
             sourceField: LCP_FIELD,
           },
           'y-axis-column-layer0-0': {
@@ -583,7 +574,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
@@ -600,7 +590,6 @@ describe('Lens Attribute', () => {
             params: {
               emptyAsNull: false,
             },
-            scale: 'ratio',
             sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
@@ -610,7 +599,6 @@ describe('Lens Attribute', () => {
             label: 'Part of Pages loaded',
             operationType: 'overall_sum',
             references: ['y-axis-column-layer0X1'],
-            scale: 'ratio',
           },
           'y-axis-column-layer0X3': {
             customLabel: true,
@@ -631,7 +619,6 @@ describe('Lens Attribute', () => {
               },
             },
             references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-            scale: 'ratio',
           },
         },
         incompleteColumns: {},
