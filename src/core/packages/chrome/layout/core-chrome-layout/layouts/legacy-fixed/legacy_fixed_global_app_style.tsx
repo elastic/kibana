@@ -10,8 +10,20 @@
 import React from 'react';
 import { css, Global } from '@emotion/react';
 import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { CommonGlobalAppStyles } from '../common/global_app_styles';
 
-export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
+const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  :root {
+    // height of the header banner
+    --kbnHeaderBannerHeight: ${euiTheme.size.xl};
+    // total height of all fixed headers (when the banner is *not* present) inherited from EUI
+    --kbnHeaderOffset: var(--euiFixedHeadersOffset, 0px);
+    // total height of everything when the banner is present
+    --kbnHeaderOffsetWithBanner: calc(var(--kbnHeaderBannerHeight) + var(--kbnHeaderOffset));
+    // height of the action menu in the header in serverless projects
+    --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3}px;
+  }
+
   #kibana-body {
     // DO NOT ADD ANY OVERFLOW BEHAVIORS HERE
     // It will break the sticky navigation
@@ -43,6 +55,11 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
   .kbnBody {
     padding-top: var(--euiFixedHeadersOffset, 0);
+
+    // forward compatibility with new grid layout variables,
+    --kbn-layout--application-height: calc(
+      100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
+    );
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
@@ -89,41 +106,6 @@ export const renderingOverrides = (euiTheme: UseEuiTheme['euiTheme']) => css`
     }
   }
 
-  // Due to pure HTML and the scope being large, we decided to temporarily apply following 3 style blocks globally.
-  // TODO: refactor within github issue #223571
-
-  // Styles applied to the span.ffArray__highlight from FieldFormat class that is used to visually distinguish array delimiters when rendering array values as HTML in Kibana field formatters
-  .ffArray__highlight {
-    color: ${euiTheme.colors.mediumShade};
-  }
-
-  // Styles applied to the span.ffString__emptyValue from FieldFormat class that is used to visually distinguish empty string values when rendering string values as HTML in Kibana field formatters
-  .ffString__emptyValue {
-    color: ${euiTheme.colors.darkShade};
-  }
-
-  .lnsTableCell--colored .ffString__emptyValue {
-    color: unset;
-  }
-`;
-
-export const bannerStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  .header__topBanner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: var(--kbnHeaderBannerHeight);
-    width: 100%;
-    z-index: ${euiTheme.levels.header};
-  }
-
-  .header__topBannerContainer {
-    height: 100%;
-    width: 100%;
-  }
-`;
-
-export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   .euiDataGrid__restrictBody {
     .headerGlobalNav,
     .kbnQueryBar {
@@ -137,48 +119,14 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       height: 100%;
     }
   }
-
-  .chrHeaderHelpMenu__version {
-    text-transform: none;
-  }
-
-  .chrHeaderBadge__wrapper {
-    align-self: center;
-    margin-right: ${euiTheme.size.base};
-  }
-
-  .header__toggleNavButtonSection {
-    .euiBody--collapsibleNavIsDocked & {
-      display: none;
-    }
-  }
-
-  .header__breadcrumbsWithExtensionContainer {
-    overflow: hidden; // enables text-ellipsis in the last breadcrumb
-    .euiHeaderBreadcrumbs,
-    .euiBreadcrumbs {
-      // stop breadcrumbs from growing.
-      // this makes the extension appear right next to the last breadcrumb
-      flex-grow: 0;
-      margin-right: 0;
-
-      overflow: hidden; // enables text-ellipsis in the last breadcrumb
-    }
-  }
-  .header__breadcrumbsAppendExtension--last {
-    flex-grow: 1;
-  }
 `;
 
-export const GlobalAppStyle = () => {
+export const LegacyFixedLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
   return (
-    <Global
-      styles={css`
-        ${bannerStyles(euiTheme)}
-        ${chromeStyles(euiTheme)} 
-        ${renderingOverrides(euiTheme)}
-      `}
-    />
+    <>
+      <Global styles={globalLayoutStyles(euiTheme)} />
+      <CommonGlobalAppStyles />
+    </>
   );
 };
