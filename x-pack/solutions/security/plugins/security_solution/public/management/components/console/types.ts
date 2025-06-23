@@ -314,7 +314,7 @@ export interface ConsoleProps extends CommonProps {
   /**
    * For internal use only!
    * Provided by the ConsoleManager to indicate that the console is being managed by it
-   * @private
+   * @internal
    */
   managedKey?: symbol;
 }

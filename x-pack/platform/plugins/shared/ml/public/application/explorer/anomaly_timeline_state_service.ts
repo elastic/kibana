@@ -138,7 +138,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   /**
    * Initializes required subscriptions for fetching swim lanes data.
-   * @private
+   * @internal
    */
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();
@@ -476,7 +476,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   /**
    * Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
-   * @private
+   * @internal
    *
    * TODO check for possible enhancements/refactoring. Has been moved from explorer_utils as-is.
    */
