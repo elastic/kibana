@@ -190,6 +190,7 @@ function ManagedFlyout({
                       <EuiCodeBlock
                         data-test-subj="exportAssetValue"
                         css={{ overflowWrap: 'break-word' }}
+                        overflowHeight={360}
                         language={exportIntegration.config.copyAssetURIConfig.contentType}
                         isCopyable
                         copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
@@ -286,34 +287,65 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     setIsFlyoutVisible(true);
   }, []);
 
-  useEffect(() => {
-    // when there is only one share menu item, and no export derivatives registered,
-    // we want to open the flyout and not the popover
-    if (
-      exportIntegrations.length === 1 &&
-      exportDerivatives.length === 0 &&
-      !selectedMenuItemMeta
-    ) {
-      openFlyout(exportIntegrations[0]);
-    }
-  }, [exportIntegrations, exportDerivatives, openFlyout, selectedMenuItemMeta]);
-
-  const flyoutOnCloseHandler = useCallback(() => {
-    return exportIntegrations.length === 1 && exportDerivatives.length === 0
-      ? onClose()
-      : setIsFlyoutVisible(false);
-  }, [exportDerivatives.length, exportIntegrations.length, onClose]);
+  const exportIntegrationInteractionHandler = useCallback(
+    async (menuItem: ExportShareConfig) => {
+      if (
+        !menuItem.config.copyAssetURIConfig &&
+        !menuItem.config.generateAssetComponent &&
+        menuItem.config.generateAssetExport
+      ) {
+        await menuItem.config
+          .generateAssetExport({
+            intl,
+            optimizedForPrinting: false,
+          })
+          .finally(() => {
+            onClose();
+          });
+      } else {
+        openFlyout(menuItem);
+      }
+    },
+    [intl, onClose, openFlyout]
+  );
 
   const flyoutRef = useRef<HTMLDivElement | null>(null);
+
+  const canSkipDisplayingPopover = useMemo<boolean>(() => {
+    // when there is only one export share menu item, and no export derivatives registered,
+    // we'd like to skip displaying the popover
+    return exportIntegrations.length === 1 && !exportDerivatives.length;
+  }, [exportIntegrations, exportDerivatives]);
+
+  const flyoutOnCloseHandler = useCallback(() => {
+    setIsFlyoutVisible(false);
+    if (canSkipDisplayingPopover) {
+      onClose();
+    }
+  }, [onClose, canSkipDisplayingPopover]);
+
+  useEffect(() => {
+    if (canSkipDisplayingPopover && !selectedMenuItemMeta) {
+      exportIntegrationInteractionHandler(exportIntegrations[0]);
+    }
+  }, [
+    exportIntegrationInteractionHandler,
+    exportIntegrations,
+    onClose,
+    selectedMenuItemMeta,
+    canSkipDisplayingPopover,
+  ]);
 
   return (
     <Fragment>
       <EuiWrappingPopover
-        isOpen={!isFlyoutVisible}
-        data-test-subj="exportPopover"
+        isOpen={!isFlyoutVisible && !canSkipDisplayingPopover}
         button={anchorElement!}
         closePopover={onClose}
         panelPaddingSize="s"
+        panelProps={{
+          'data-test-subj': 'exportPopoverPanel',
+        }}
       >
         <EuiListGroup flush>
           {exportIntegrations.map((menuItem) => (
@@ -328,7 +360,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 label={menuItem.config.label}
                 data-test-subj={`exportMenuItem-${menuItem.config.label}`}
                 isDisabled={menuItem.config.disabled}
-                onClick={() => openFlyout(menuItem)}
+                onClick={exportIntegrationInteractionHandler.bind(null, menuItem)}
               />
             </EuiToolTip>
           ))}
@@ -368,6 +400,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
         >
+          {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global
             // @ts-expect-error -- we pass a z-index specifying important so we override the default z-index, so solve a known bug,
             // where when `headerZindexLocation` is set to `above`, the popover panel z-index is not high enough
