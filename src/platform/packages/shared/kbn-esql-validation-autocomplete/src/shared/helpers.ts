@@ -580,11 +580,38 @@ export function getColumnExists(
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
+// Function to clean a single index string from failure stores
+const cleanIndex = (inputIndex: string): string => {
+  let cleaned = inputIndex.trim();
+
+  // Remove '::data' suffix
+  if (cleaned.endsWith('::data')) {
+    cleaned = cleaned.slice(0, -6);
+  }
+  // Remove '::failures' suffix
+  if (cleaned.endsWith('::failures')) {
+    cleaned = cleaned.slice(0, -10);
+  }
+  return cleaned;
+};
+
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
+  if (index.startsWith('-')) {
     return true;
   }
-  return Boolean(fuzzySearch(index, sources.keys()));
+  // Split the index by comma to handle multiple values and clean each part
+  const individualIndices = index.split(',').map((item) => cleanIndex(item));
+  // Check if all individual indices exist in sources
+  const allExist = individualIndices.every((singleIndex) => {
+    // First, check for exact match after removing source name quotes
+    if (sources.has(removeSourceNameQuotes(singleIndex))) {
+      return true;
+    }
+    // If not an exact match, perform a fuzzy search
+    return Boolean(fuzzySearch(singleIndex, sources.keys()));
+  });
+
+  return allExist;
 }
 
 /**
