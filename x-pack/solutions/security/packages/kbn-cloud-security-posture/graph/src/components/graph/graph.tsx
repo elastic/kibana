@@ -28,10 +28,10 @@ import {
   LabelNode,
   EdgeGroupNode,
 } from '../node';
-import { layoutGraph, GRID_SIZE } from './layout_graph';
+import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
+import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from './constants';
 
 import '@xyflow/react/dist/style.css';
 import { Controls } from '../controls/controls';
@@ -145,7 +145,6 @@ export const Graph = memo<GraphProps>(
         <SvgDefsMarker />
         <ReactFlow
           fitView={true}
-          fitViewOptions={fitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}

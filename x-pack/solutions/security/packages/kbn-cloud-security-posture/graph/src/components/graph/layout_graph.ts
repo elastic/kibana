@@ -11,8 +11,6 @@ import type { EdgeViewModel, NodeViewModel, Size } from '../types';
 import { calcLabelSize } from './utils';
 import { GroupStyleOverride, NODE_HEIGHT, NODE_WIDTH } from '../node/styles';
 
-export const GRID_SIZE = 10; // in px
-
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
   edges: Array<Edge<EdgeViewModel>>
