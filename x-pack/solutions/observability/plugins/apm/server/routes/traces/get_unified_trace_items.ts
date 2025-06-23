@@ -150,12 +150,7 @@ export async function getUnifiedTraceItems({
         timestamp: event[AT_TIMESTAMP],
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
-        duration:
-          apmDuration !== undefined
-            ? apmDuration
-            : Array.isArray(event.duration)
-            ? (event.duration as number[])[0]
-            : event.duration ?? 0,
+        duration: resolveDuration(apmDuration, event.duration),
         hasError:
           docErrorCount > 0 ||
           (event.status?.code && Array.isArray(event.status.code)
@@ -166,4 +161,21 @@ export async function getUnifiedTraceItems({
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];
+}
+
+/**
+ * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
+ */
+function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
+  if (apmDuration) {
+    return apmDuration;
+  }
+
+  const duration = Array.isArray(otelDuration)
+    ? otelDuration[0]
+    : otelDuration
+    ? parseFloat(otelDuration)
+    : 0;
+
+  return duration * 0.001;
 }

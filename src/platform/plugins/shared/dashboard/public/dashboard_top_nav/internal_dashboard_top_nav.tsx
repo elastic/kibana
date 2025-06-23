@@ -21,7 +21,8 @@ import {
   UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { MountPoint, useMemoizedStyles } from '@kbn/core/public';
+import { MountPoint } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -114,7 +115,7 @@ export function InternalDashboardTopNav({
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
-  const styles = useMemoizedStyles(topNavStyles);
+  const styles = useMemoCss(topNavStyles);
 
   /**
    * focus on the top header when title or view mode is changed

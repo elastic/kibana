@@ -36,6 +36,7 @@ import { ExperimentalFeaturesService } from '../common/experimental_features_ser
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
+import { getXSOARConnectorType } from './xsoar';
 import { getKeepConnectorTypes } from './keep';
 
 export interface RegistrationServices {
@@ -76,6 +77,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
+  connectorTypeRegistry.register(getXSOARConnectorType());
   getKeepConnectorTypes().forEach((connector) => {
     connectorTypeRegistry.register(connector);
   });
