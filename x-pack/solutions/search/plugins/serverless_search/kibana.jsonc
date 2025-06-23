@@ -31,9 +31,9 @@
       "searchHomepage",
       "share",
       "visualizations",
-      "onechat",
     ],
     "optionalPlugins": [
+      "onechat",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
