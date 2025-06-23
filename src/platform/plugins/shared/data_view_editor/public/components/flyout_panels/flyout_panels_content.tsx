@@ -8,15 +8,28 @@
  */
 
 import React, { useEffect, FC, PropsWithChildren } from 'react';
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelContent: FC<PropsWithChildren<unknown>> = (props) => {
+  const styles = useMemoCss(componentStyles);
   const { registerContent } = useFlyoutPanelContext();
 
   useEffect(() => {
     registerContent();
   }, [registerContent]);
 
-  return <div className="fieldEditor__flyoutPanel__content" {...props} />;
+  return <div css={styles.content} {...props} />;
+};
+
+const componentStyles = {
+  content: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      overflowY: 'auto',
+      padding: euiTheme.size.l,
+    }),
 };
