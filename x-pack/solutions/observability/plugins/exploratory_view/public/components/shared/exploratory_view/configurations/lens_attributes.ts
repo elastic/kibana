@@ -22,7 +22,6 @@ import {
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  OperationMetadata,
   OperationType,
   PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
