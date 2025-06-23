@@ -54,29 +54,19 @@ function ObservabilityCompleteLandingPage() {
 }
 
 function ObservabilityLogsEssentialsLandingPage() {
-  const { hasDataMap, isAllRequestsComplete } = useHasData();
-  const {
-    application: { navigateToUrl, navigateToApp },
-    http: { basePath },
-    share: { url },
-  } = useKibana().services;
+  const { share, logsShared } = useKibana().services;
 
   useEffect(() => {
-    if (isAllRequestsComplete) {
-      const { infra_logs: logs } = hasDataMap;
-      console.log(hasDataMap);
-
-      const hasLogsData = logs?.hasData;
-
+    logsShared.logViews.client.hasData().then((hasLogsData) => {
       if (hasLogsData) {
-        const logsLocator = url.locators.get(LOGS_LOCATOR_ID);
+        const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
         logsLocator?.navigate({});
       } else {
-        const onboardingLocator = url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+        const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
         onboardingLocator?.navigate({});
       }
-    }
-  }, [basePath, hasDataMap, isAllRequestsComplete, navigateToApp, navigateToUrl, url.locators]);
+    });
+  }, [logsShared.logViews.client, share.url.locators]);
 
   return <></>;
 }
