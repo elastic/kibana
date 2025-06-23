@@ -90,7 +90,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
             content={
               <FormattedMessage
                 id="xpack.fleet.epmInstalledIntegrations.uninstallDisabledTooltip"
-                defaultMessage="Cannot uninstall integrations that are attached to agent policies"
+                defaultMessage="Can't uninstall integrations that are attached to agent policies"
               />
             }
           >

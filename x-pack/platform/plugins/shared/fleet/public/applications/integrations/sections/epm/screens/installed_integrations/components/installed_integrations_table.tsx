@@ -294,7 +294,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                       'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
                       {
                         defaultMessage: usedByAgentPolicy(item)
-                          ? 'You cannot uninstall this integration because it is used by one or more agent policies'
+                          ? "You can't uninstall this integration because it is used by one or more agent policies"
                           : 'Uninstall integration',
                       }
                     ),
