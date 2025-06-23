@@ -29,6 +29,10 @@ export class InterceptPrompter {
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
   // observer for page visibility changes, shared across all intercepts
   private pageHidden$?: Rx.Observable<boolean>;
+  // Defines safe timer bound at 24 days, javascript browser timers are not reliable for longer intervals
+  // see https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value,
+  // rxjs can do longer intervals, but we want to avoid the risk of running into issues with browser timers.
+  private readonly MAX_TIMER_INTERVAL = 0x7b98a000; // 24 days in milliseconds
 
   setup({ analytics, notifications }: ProductInterceptPrompterSetupDeps) {
     this.interceptDialogService.setup({ analytics, notifications });
@@ -83,11 +87,6 @@ export class InterceptPrompter {
       .pipe(Rx.filter((response) => !!response))
       .pipe(
         Rx.mergeMap((response) => {
-          // Define safe timer bound at 24 days, javascript browser timers are not reliable for longer intervals
-          // see https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout#maximum_delay_value, rxjs can do longer intervals, but we want to avoid
-          // the risk of running into issues with browser timers.
-          const safeTimerInterval = 24 * 24 * 60 * 60 * 1000; // 24 days in milliseconds
-
           // anchor for all calculations, this is the time when the trigger was registered
           const timePoint = Date.now();
 
@@ -104,22 +103,21 @@ export class InterceptPrompter {
             Rx.switchMap((isHidden) => {
               if (isHidden) return Rx.EMPTY;
 
-              // setup a timer that will recursively count down to the next run, considering safe bounds
               return Rx.timer(
-                Math.min(nextRunId * response.triggerIntervalInMs - diff, safeTimerInterval),
-                Math.min(response.triggerIntervalInMs, safeTimerInterval)
+                Math.min(nextRunId * response.triggerIntervalInMs - diff, this.MAX_TIMER_INTERVAL),
+                Math.min(response.triggerIntervalInMs, this.MAX_TIMER_INTERVAL)
               ).pipe(
                 Rx.switchMap((timerIterationCount) => {
-                  if (response.triggerIntervalInMs < safeTimerInterval) {
+                  if (response.triggerIntervalInMs < this.MAX_TIMER_INTERVAL) {
                     return getUserTriggerData$(intercept.id);
                   } else {
                     const timeElapsedSinceRegistration =
-                      diff + safeTimerInterval * timerIterationCount;
+                      diff + this.MAX_TIMER_INTERVAL * timerIterationCount;
 
                     const timeTillTriggerEvent =
                       nextRunId * response.triggerIntervalInMs - timeElapsedSinceRegistration;
 
-                    if (timeTillTriggerEvent <= safeTimerInterval) {
+                    if (timeTillTriggerEvent <= this.MAX_TIMER_INTERVAL) {
                       // trigger event would happen sometime within this current slice
                       // set up a single use timer that will emit the trigger event
                       return Rx.timer(timeTillTriggerEvent).pipe(
