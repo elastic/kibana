@@ -60,7 +60,7 @@ export function registerGetConnectorInfoFunction({
       name: GET_CONNECTOR_INFO_FUNCTION_NAME,
       description:
         'Retrieves information about available connectors, including the parameter schema for each.',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
     },
     async () => {
       const actionsClient = await (
@@ -132,7 +132,7 @@ export function registerValidateConnectorParamsFunction({
       name: VALIDATE_CONNECTOR_PARAMS_FUNCTION_NAME,
       description:
         'Validates the parameters for a specific connector. it must include the connector ID and parameters to validate.',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
       parameters: {
         type: 'object',
         properties: {

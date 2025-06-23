@@ -47,7 +47,7 @@ export function registerExecuteConnectorAgent({
       name: EXECUTE_CONNECTOR_AGENT_NAME,
       description:
         'Use this LLM agent when the user explicitly asks to call a Kibana connector. It allows executing connectors (e.g. Slack, Jira, Email) using a natural language prompt.',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.All,
       parameters: {
         type: 'object',
         properties: {

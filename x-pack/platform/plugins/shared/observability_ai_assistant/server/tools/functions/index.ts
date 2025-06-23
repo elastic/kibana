@@ -13,7 +13,6 @@ import type { RegistrationCallback } from '../../service/types';
 import { registerElasticsearchFunction } from './elasticsearch';
 import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
-import { registerGetConnectorInfoFunction } from './execute_connector';
 import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from './get_data_on_screen';
 import { registerExecuteConnectorAgent } from '../agents/execute_connector';
 
@@ -152,8 +151,6 @@ ${
     });
   }
   registerGetDatasetInfoFunction(registrationParameters);
-
-  registerGetConnectorInfoFunction(registrationParameters);
 
   registerExecuteConnectorAgent(registrationParameters);
 };
