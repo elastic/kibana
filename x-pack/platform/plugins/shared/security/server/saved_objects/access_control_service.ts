@@ -44,12 +44,12 @@ export class AccessControlService {
     if (!this.cachedTypeRegistry) {
       this.cachedTypeRegistry = await this.getTypeRegistryFunc();
     }
-    const typeSupportsAccessControl = this.cachedTypeRegistry?.supportsAccessControl(type);
+    const typeSupportsAccessControl = this.cachedTypeRegistry.supportsAccessControl(type);
 
     const accessControl = object.accessControl;
     const currentUser = this.userForOperation;
 
-    if (!currentUser) {
+    if (typeSupportsAccessControl && !currentUser) {
       return false;
     }
 
@@ -61,7 +61,7 @@ export class AccessControlService {
       return true;
     }
 
-    if (accessControl.owner === currentUser.profile_uid) {
+    if (accessControl.owner === currentUser?.profile_uid) {
       return true;
     }
 
