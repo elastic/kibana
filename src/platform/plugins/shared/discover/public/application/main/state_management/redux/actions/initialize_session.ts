@@ -120,7 +120,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       const tabInitialAppState = tabState.initialAppState;
 
       if (tabInitialAppState) {
-        urlState = cleanupUrlState(cloneDeep(tabInitialAppState), services.uiSettings, true);
+        urlState = cloneDeep(tabInitialAppState);
       }
     }
 

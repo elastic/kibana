@@ -18,12 +18,10 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
  * Takes care of the given url state, migrates legacy props and cleans up empty props
  * @param appStateFromUrl
  * @param uiSettings
- * @param allowEmptyDefaults
  */
 export function cleanupUrlState(
   appStateFromUrl: AppStateUrl | null | undefined,
-  uiSettings: IUiSettingsClient,
-  allowEmptyDefaults: boolean = false
+  uiSettings: IUiSettingsClient
 ): DiscoverAppState | undefined {
   if (!appStateFromUrl) {
     return;
@@ -45,7 +43,7 @@ export function cleanupUrlState(
     }
   }
 
-  if (!allowEmptyDefaults && appStateFromUrl.sort && !appStateFromUrl.sort.length) {
+  if (appStateFromUrl.sort && !appStateFromUrl.sort.length) {
     // If there's an empty array given in the URL, the sort prop should be removed
     // This allows the sort prop to be overwritten with the default sorting
     delete appStateFromUrl.sort;
