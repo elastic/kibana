@@ -14,15 +14,13 @@ import { VisualizationEmbeddable } from '../../../../../../common/components/vis
 import { getAnomaliesDetectedEsqlQuery } from './esql_query';
 import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
-export const AnomaliesDetectedTile = () => {
+export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
-  const spaceId = useSpaceId();
 
   const esqlQuery = getAnomaliesDetectedEsqlQuery(spaceId || 'default');
   const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({

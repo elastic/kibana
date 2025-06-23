@@ -23,7 +23,7 @@ const tileStyles = css`
   height: 100%;
 `;
 
-export const KeyInsightsPanel = () => {
+export const KeyInsightsPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   return (
     <EuiFlexGroup
       wrap
@@ -38,32 +38,32 @@ export const KeyInsightsPanel = () => {
     >
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <ActivePrivilegedUsersTile />
+          <ActivePrivilegedUsersTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AlertsTriggeredTile />
+          <AlertsTriggeredTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AnomaliesDetectedTile />
+          <AnomaliesDetectedTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <GrantedRightsTile />
+          <GrantedRightsTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AccountSwitchesTile />
+          <AccountSwitchesTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AuthenticationsTile />
+          <AuthenticationsTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>

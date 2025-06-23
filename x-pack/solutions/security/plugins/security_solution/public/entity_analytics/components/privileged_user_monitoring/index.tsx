@@ -78,9 +78,7 @@ export const PrivilegedUserMonitoring = ({
           <EuiFlexItem>
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
-          <EuiFlexItem>
-            <KeyInsightsPanel />
-          </EuiFlexItem>
+          <EuiFlexItem>{spaceId && <KeyInsightsPanel spaceId={spaceId} />}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}

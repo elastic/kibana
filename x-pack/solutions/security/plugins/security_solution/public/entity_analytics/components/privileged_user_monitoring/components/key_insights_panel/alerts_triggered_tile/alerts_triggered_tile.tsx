@@ -15,12 +15,10 @@ import { VisualizationEmbeddable } from '../../../../../../common/components/vis
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
-export const AlertsTriggeredTile = () => {
+export const AlertsTriggeredTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
-  const spaceId = useSpaceId();
 
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Alerts Triggered',
