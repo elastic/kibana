@@ -31,7 +31,7 @@ export interface Pkcs12ReadResult {
  *
  * Any other PKCS12 bags are ignored.
  *
- * @internalRemarks
+ * @privateRemarks
  * This intentionally does not allow for a separate key store password and
  * private key password. In conventional implementations, these two values
  * are expected to be identical, so we do not support other configurations.
