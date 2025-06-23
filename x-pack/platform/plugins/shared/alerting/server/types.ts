@@ -350,6 +350,11 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Indicates that the rule type is managed internally by a Kibana plugin.
+   * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

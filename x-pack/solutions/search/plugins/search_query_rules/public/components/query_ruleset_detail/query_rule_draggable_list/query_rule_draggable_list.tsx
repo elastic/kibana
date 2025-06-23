@@ -74,10 +74,8 @@ export const QueryRuleDraggableListItem: React.FC<QueryRuleDraggableListItemProp
     <>
       {ruleToDelete && (
         <DeleteRulesetRuleModal
-          rulesetId={rulesetId}
-          ruleId={ruleToDelete}
           closeDeleteModal={() => setRuleToDelete(null)}
-          onSuccessAction={() => {
+          onConfirm={() => {
             if (deleteRule) {
               deleteRule(ruleToDelete);
             }
