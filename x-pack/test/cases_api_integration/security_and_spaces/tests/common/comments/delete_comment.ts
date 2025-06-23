@@ -37,7 +37,6 @@ import {
   superUserSpace1Auth,
   getCaseSavedObjectsFromES,
   bulkCreateAttachments,
-  resolveCase,
   getCase,
 } from '../../../../common/lib/api';
 import {
