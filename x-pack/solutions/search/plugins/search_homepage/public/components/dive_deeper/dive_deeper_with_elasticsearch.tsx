@@ -41,7 +41,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             })}
             buttonHref={docLinks.visitSearchLabs}
             buttonLabel={i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
-              defaultMessage: 'Visit Search Labs',
+              defaultMessage: 'Visit Elasticsearch Labs',
             })}
             dataTestSubj="searchLabsButton"
           />
