@@ -329,8 +329,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    $ref: '#/components/schemas/EngineStatus'
+                required:
+                  - status
           description: Successful response
       summary: Health check on Privilege Monitoring
       tags:
