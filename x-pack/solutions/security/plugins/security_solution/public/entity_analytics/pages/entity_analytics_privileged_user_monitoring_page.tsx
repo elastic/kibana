@@ -175,7 +175,6 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
         {state.type === 'onboarding' && (
           <>
-            <EuiButtonEmpty onClick={() => dispatch({ type: 'SHOW_DASHBOARD' })} />
             <PrivilegedUserMonitoringOnboardingPanel onComplete={initEngineCallBack} />
             <EuiSpacer size="l" />
             <PrivilegedUserMonitoringSampleDashboardsPanel />
