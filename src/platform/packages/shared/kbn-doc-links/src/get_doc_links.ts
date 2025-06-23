@@ -494,6 +494,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+      gapsTable: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#gaps-table`,
       ruleApiOverview: isServerless
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_APIS}group/endpoint-security-detections-api`,

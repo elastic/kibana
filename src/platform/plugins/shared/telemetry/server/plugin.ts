@@ -121,12 +121,12 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   private readonly fetcherTask: FetcherTask;
   private readonly shouldStartSnapshotTelemetryFetcher: boolean;
   /**
-   * @private Used to mark the completion of the old UI Settings migration
+   * @internal Used to mark the completion of the old UI Settings migration
    */
   private savedObjectsInternalRepository?: ISavedObjectsRepository;
 
   /**
-   * @private
+   * @internal
    * Used to interact with the Telemetry Saved Object.
    * Some users may not have access to the document but some queries
    * are still relevant to them like fetching when was the last time it was reported.

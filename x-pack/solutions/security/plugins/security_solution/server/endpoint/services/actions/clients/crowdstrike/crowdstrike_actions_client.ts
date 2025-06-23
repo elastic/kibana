@@ -96,7 +96,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to Crowdstrike directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction(
     actionType: SUB_ACTION,

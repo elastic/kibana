@@ -24,6 +24,7 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -719,6 +720,21 @@ export default ({ getService }: FtrProviderContext): void => {
             400
           );
         });
+      });
+    });
+
+    describe('attachment stats', () => {
+      it('should set the attachment stats to zero', async () => {
+        await createCase(supertest, getPostCaseRequest());
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+
+        const theCase = res.body.hits.hits[0]._source?.cases!;
+
+        expect(theCase.total_alerts).to.eql(0);
+        expect(theCase.total_comments).to.eql(0);
       });
     });
 
