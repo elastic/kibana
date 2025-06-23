@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export const CANVAS_APP_LOCATOR = 'CANVAS_APP_LOCATOR';
+
 export const DISCOVER_APP_ID = 'discover';
 
 export const DASHBOARD_APP_ID = 'dashboards';

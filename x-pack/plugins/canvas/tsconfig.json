@@ -90,6 +90,7 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
+    "@kbn/deeplinks-analytics",
   ],
   "exclude": [
     "target/**/*",
