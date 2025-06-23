@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
-import { EuiForm, EuiAccordion, EuiSpacer, UseEuiTheme } from '@elastic/eui';
+import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
+
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
 import {
@@ -191,7 +191,6 @@ function DefaultEditorAggParams({
       isInvalid={!!error}
       error={error}
       data-test-subj="visAggEditorParams"
-      css={styles}
     >
       <DefaultEditorAggSelect
         aggError={aggError}
@@ -261,10 +260,3 @@ function DefaultEditorAggParams({
 }
 
 export { DefaultEditorAggParams };
-
-const styles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    '.visEditorAgg__subAgg + .visEditorAggParam__string': {
-      marginTop: euiTheme.size.base,
-    },
-  });
