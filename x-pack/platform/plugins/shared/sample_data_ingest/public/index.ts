@@ -7,20 +7,10 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { SampleDataIngestPlugin } from './plugin';
-import type {
-  SampleDataIngestPluginSetup,
-  SampleDataIngestPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-  PublicPluginConfig,
-} from './types';
+import type { SampleDataIngestPluginSetup, SampleDataIngestPluginStart } from './types';
 
 export type { SampleDataIngestPluginSetup, SampleDataIngestPluginStart };
 
-export const plugin: PluginInitializer<
-  SampleDataIngestPluginSetup,
-  SampleDataIngestPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies
-> = (pluginInitializerContext: PluginInitializerContext<PublicPluginConfig>) =>
-  new SampleDataIngestPlugin(pluginInitializerContext);
+export const plugin: PluginInitializer<SampleDataIngestPluginSetup, SampleDataIngestPluginStart> = (
+  pluginInitializerContext: PluginInitializerContext
+) => new SampleDataIngestPlugin(pluginInitializerContext);

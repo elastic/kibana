@@ -52,7 +52,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
-  sampleDataIngest: SampleDataIngestPluginStart;
+  sampleDataIngest?: SampleDataIngestPluginStart;
   indexManagement: IndexManagementPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
 }
