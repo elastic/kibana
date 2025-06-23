@@ -15,10 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  const {
-    createDataStream,
-    deleteDataStream,
-  } = datastreamsHelpers(getService);
+  const { createDataStream, deleteDataStream } = datastreamsHelpers(getService);
 
   describe('Data streams index mode', function () {
     // This mutes the forward-compatibility test with Elasticsearch, 8.19 kibana and 9.0 ES.
@@ -57,13 +54,13 @@ export default function ({ getService }: FtrProviderContext) {
         prior_logs_usage: boolean;
         indexMode: string;
       }> = [
-          { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
-          { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
-          // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
-          { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
-          // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
-          { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
-        ];
+        { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+        { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+        // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+        // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+        { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
+      ];
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
