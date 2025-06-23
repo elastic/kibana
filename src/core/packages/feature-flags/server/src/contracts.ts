@@ -84,7 +84,7 @@ export type SingleContextEvaluationContext = OpenFeatureEvaluationContext & {
 
 /**
  * Getter function type to retrieve the initial feature flags.
- * @private
+ * @internal
  */
 export type InitialFeatureFlagsGetter = () => Promise<Record<string, unknown>>;
 
@@ -113,7 +113,7 @@ export interface FeatureFlagsSetup {
    * browser for faster bootstrapping.
    * @param getter A function that returns all the feature flags and their values for this context.
    * Ideally, using the underlying API shouldn't track them as actual evaluations.
-   * @private
+   * @internal
    */
   setInitialFeatureFlagsGetter(getter: InitialFeatureFlagsGetter): void;
 }

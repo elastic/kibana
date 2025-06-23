@@ -33,7 +33,7 @@ import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_con
 
 /**
  * Core-internal contract for the setup lifecycle step.
- * @private
+ * @internal
  */
 export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
   /**
@@ -49,7 +49,7 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
 
 /**
  * The server-side Feature Flags Service
- * @private
+ * @internal
  */
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -186,7 +186,7 @@ export class FeatureFlagsService {
    * @param evaluationFn The actual evaluation API
    * @param flagName The name of the flag to evaluate
    * @param fallbackValue The fallback value
-   * @private
+   * @internal
    */
   private async evaluateFlag<T extends string | boolean | number>(
     evaluationFn: (flagName: string, fallbackValue: T) => Promise<T>,
@@ -207,7 +207,7 @@ export class FeatureFlagsService {
   /**
    * Formats the provided context to fulfill the expected multi-context structure.
    * @param contextToAppend The {@link EvaluationContext} to append.
-   * @private
+   * @internal
    */
   private appendContext(contextToAppend: EvaluationContext): void {
     // If no kind provided, default to the project|deployment level.
