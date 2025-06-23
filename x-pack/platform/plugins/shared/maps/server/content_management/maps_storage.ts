@@ -36,6 +36,16 @@ const searchArgsToSOFindOptions = (
   query: SearchQuery,
   options: MapsSearchOptions
 ): SavedObjectsFindOptions => {
+  const hasReference = query.tags?.included?.map((tagId) => ({
+    type: 'tag',
+    id: tagId,
+  }));
+
+  const hasNoReference = query.tags?.excluded?.map((tagId) => ({
+    type: 'tag',
+    id: tagId,
+  }));
+
   return {
     type: MAP_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
@@ -43,6 +53,8 @@ const searchArgsToSOFindOptions = (
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
+    hasReference,
+    hasNoReference,
   };
 };
 
