@@ -10,7 +10,6 @@ import { visit } from '../../../tasks/navigation';
 import {
   ASSETS_URL,
   ALERTS_URL,
-  ASSET_INVENTORY_URL,
   BLOCKLIST_URL,
   CREATE_RULE_URL,
   CSP_DASHBOARD_URL,
@@ -60,7 +59,6 @@ const notVisibleLinks = [
 const redirectedLinks = [
   ALERTS_URL,
   ASSETS_URL,
-  ASSET_INVENTORY_URL,
   CREATE_RULE_URL,
   CSP_DASHBOARD_URL,
   CSP_FINDINGS_URL,
