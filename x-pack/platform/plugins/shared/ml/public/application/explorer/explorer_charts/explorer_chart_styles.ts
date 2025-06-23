@@ -9,7 +9,11 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme, mathWithUnits, transparentize } from '@elastic/eui';
 
-import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import {
+  getThemeResolvedSeverityColor,
+  getThemeResolvedSeverityStrokeColor,
+  ML_ANOMALY_THRESHOLD,
+} from '@kbn/ml-anomaly-utils';
 
 export const useCssMlExplorerChartContainer = () => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -88,7 +92,6 @@ export const useCssMlExplorerChartContainer = () => {
 
     '.anomaly-marker': {
       strokeWidth: '1px',
-      stroke: euiTheme.colors.mediumShade,
     },
 
     '.anomaly-marker:hover': {
@@ -98,22 +101,27 @@ export const useCssMlExplorerChartContainer = () => {
 
     '.anomaly-marker.critical': {
       fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
+      stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.CRITICAL, euiTheme),
     },
 
     '.anomaly-marker.major': {
       fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
+      stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MAJOR, euiTheme),
     },
 
     '.anomaly-marker.minor': {
       fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
+      stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.MINOR, euiTheme),
     },
 
     '.anomaly-marker.warning': {
       fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
+      stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
     },
 
     '.anomaly-marker.low': {
       fill: getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
+      stroke: getThemeResolvedSeverityStrokeColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
     },
 
     '.metric-value:hover, .anomaly-marker:hover': {
