@@ -32,14 +32,14 @@ const starterPromptInnerClassName = css`
 export const StarterPrompts: React.FC<Props> = ({ onSelectPrompt }) => {
   const starterPrompts = [
     {
+      prompt: 'Show me the important alerts from the last 24 hours',
+      title: 'User Activity',
+      icon: 'bell',
+    },
+    {
       prompt: 'What is the status of my last deployment?',
       title: 'Deployment Status',
       icon: 'sparkles',
-    },
-    {
-      prompt: 'How many users logged in last week?',
-      title: 'User Activity',
-      icon: 'bell',
     },
     {
       prompt: 'What are the top errors in the logs?',
