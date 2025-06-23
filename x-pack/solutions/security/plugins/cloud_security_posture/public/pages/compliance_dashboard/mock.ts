@@ -94,7 +94,7 @@ export const getBenchmarkMockData = (): BenchmarkData => ({
 });
 
 export const mockDashboardData: ComplianceDashboardDataV2 = {
-  namespaces: ['default', 'kube-system', 'kube-public'],
+  namespaces: ['default', 'namespace1', 'namespace2'],
   stats: {
     totalFailed: 17,
     totalPassed: 155,
