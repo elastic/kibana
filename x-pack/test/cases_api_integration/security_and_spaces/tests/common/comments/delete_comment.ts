@@ -38,6 +38,7 @@ import {
   getCaseSavedObjectsFromES,
   bulkCreateAttachments,
   resolveCase,
+  getCase,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -297,12 +298,13 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 200,
         });
 
-        const resolvedCase = await resolveCase({
+        const resolvedCase = await getCase({
           supertest,
           caseId: postedCase.id,
+          includeComments: true,
         });
 
-        const caseComments = resolvedCase.case.comments!;
+        const caseComments = resolvedCase.comments!;
 
         const userComment = caseComments?.find((comment) => comment.type === 'user');
         const alertComment = caseComments?.find((comment) => comment.type === 'alert');
