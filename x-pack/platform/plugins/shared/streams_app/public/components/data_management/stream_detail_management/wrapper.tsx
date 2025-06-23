@@ -20,7 +20,7 @@ import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
 
 export type ManagementTabs = Record<
   string,
@@ -79,15 +79,16 @@ export function Wrapper({
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
             })}
-            <EuiBadgeGroup gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <DiscoverBadgeButton definition={definition} />
               {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
               <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+            </EuiFlexGroup>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({

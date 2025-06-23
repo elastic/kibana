@@ -68,8 +68,8 @@ export function WiredStreamDetailManagement({
       content: (
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     },
     schemaEditor: {
