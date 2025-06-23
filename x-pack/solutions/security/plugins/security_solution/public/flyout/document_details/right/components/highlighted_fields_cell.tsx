@@ -62,7 +62,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
+    <React.Fragment
       css={css`
         div {
           margin-bottom: ${euiTheme.size.xs};
@@ -99,6 +99,6 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
             </div>
           );
         })}
-    </div>
+    </React.Fragment>
   );
 };
