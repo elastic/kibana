@@ -9,11 +9,11 @@
 
 import { EuiLoadingChart, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { presentationUtilService } from '../../services/kibana_services';
@@ -105,7 +105,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-    const styles = useMemoizedStyles(dashboardGridItemStyles);
+    const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
