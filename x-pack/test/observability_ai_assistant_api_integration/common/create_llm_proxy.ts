@@ -14,7 +14,7 @@ import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistan
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { SCORE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/score_suggestions';
+import { SCORE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
 import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { createOpenAiChunk } from './create_openai_chunk';
 
