@@ -29,7 +29,7 @@ import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -331,5 +331,5 @@ const styles = {
     flexDirection: 'column',
     height: '100%',
   }),
-  docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
+  docsPage: kbnFullBodyHeightCss('54px'), // 54px is the action bar height
 };

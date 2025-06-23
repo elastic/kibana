@@ -5207,6 +5207,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/css-utils@link:src/platform/packages/shared/kbn-css-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-branding-plugin@link:x-pack/platform/plugins/private/custom_branding":
   version "0.0.0"
   uid ""
@@ -6584,6 +6588,10 @@
   uid ""
 
 "@kbn/onechat-common@link:x-pack/platform/packages/shared/onechat/onechat-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/onechat-genai-utils@link:x-pack/platform/packages/shared/onechat/onechat-genai-utils":
   version "0.0.0"
   uid ""
 
@@ -19386,14 +19394,15 @@ form-data@^3.0.0:
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
 
-form-data@^4.0.0, form-data@^4.0.2, form-data@~4.0.0:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.2.tgz#35cabbdd30c3ce73deb2c42d3c8d3ed9ca51794c"
-  integrity sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==
+form-data@^4.0.0, form-data@^4.0.3, form-data@~4.0.0:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.3.tgz#608b1b3f3e28be0fccf5901fc85fb3641e5cf0ae"
+  integrity sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     es-set-tostringtag "^2.1.0"
+    hasown "^2.0.2"
     mime-types "^2.1.12"
 
 formdata-node@^4.3.2:
