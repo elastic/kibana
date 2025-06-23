@@ -575,7 +575,7 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.sample', {
+      label: i18n.translate('languageDocumentation.documentationESQL.sampleCommand', {
         defaultMessage: 'SAMPLE',
       }),
       preview: true,
@@ -583,7 +583,7 @@ FROM employees
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.sample.markdown',
+            'languageDocumentation.documentationESQL.sampleCommand.markdown',
             {
               defaultMessage: `### SAMPLE
 The \`SAMPLE\` command samples a fraction of the table rows. 
