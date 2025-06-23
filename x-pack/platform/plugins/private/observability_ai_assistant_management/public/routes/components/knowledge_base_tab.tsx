@@ -39,6 +39,7 @@ import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from '@kbn/ai-assistant/src/knowledge_base/inspect_knowlegde_base_popover';
+import { KnowledgeBaseReindexingCallout } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_reindexing_callout';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
@@ -256,6 +257,8 @@ export function KnowledgeBaseTab() {
     return (
       <>
         <EuiFlexGroup direction="column">
+          {knowledgeBase.status.value?.isReIndexing && <KnowledgeBaseReindexingCallout />}
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow>
