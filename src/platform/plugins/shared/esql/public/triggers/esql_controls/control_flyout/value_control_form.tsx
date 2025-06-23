@@ -10,6 +10,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
+import { esqlQueryToOptions } from '@kbn/presentation-controls';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,
@@ -28,11 +29,7 @@ import {
   type ESQLControlState,
   type ControlWidthOptions,
 } from '@kbn/esql-types';
-import {
-  getIndexPatternFromESQLQuery,
-  getESQLResults,
-  appendStatsByToQuery,
-} from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, appendStatsByToQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import { ControlWidth, ControlLabel } from './shared_form_components';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -150,39 +147,27 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
-      try {
-        getESQLResults({
-          esqlQuery: query,
-          search,
-          signal: undefined,
-          filter: undefined,
-          dropNullColumns: true,
-        }).then((results) => {
-          if (!isMounted()) {
-            return;
-          }
-          const columns = results.response.columns.map((col) => col.name);
-          setQueryColumns(columns);
+      setValuesQuery(query);
 
-          if (columns.length === 1) {
-            const valuesArray = results.response.values.map((value) => value[0]);
-            const options = valuesArray
-              .filter((v) => v)
-              .map((option) => {
-                return {
-                  label: String(option),
-                  key: String(option),
-                  'data-test-subj': String(option),
-                };
-              });
-            setSelectedValues(options);
-            setAvailableValuesOptions(options);
-            setEsqlQueryErrors([]);
-          }
-        });
-        setValuesQuery(query);
-      } catch (e) {
-        setEsqlQueryErrors([e]);
+      const { options, columns, errors } = await esqlQueryToOptions(query, search);
+      if (!isMounted()) {
+        return;
+      }
+      if (errors.length) {
+        setEsqlQueryErrors(errors);
+        return;
+      }
+      setQueryColumns(columns);
+      setEsqlQueryErrors([]);
+
+      if (columns.length === 1) {
+        const selectOptions = options.map((option) => ({
+          label: String(option),
+          key: String(option),
+          'data-test-subj': String(option),
+        }));
+        setSelectedValues(selectOptions);
+        setAvailableValuesOptions(selectOptions);
       }
     },
     [isMounted, search]

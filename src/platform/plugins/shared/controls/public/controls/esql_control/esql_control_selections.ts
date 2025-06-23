@@ -8,9 +8,15 @@
  */
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
-import type { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import {
+  ESQLControlVariable,
+  ESQLControlState,
+  EsqlControlType,
+  ESQLVariableType,
+} from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { esqlQueryToOptions } from '@kbn/presentation-controls';
+import { dataService } from '../../services/kibana_services';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -55,6 +61,18 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     }
   }
 
+  async function updateAvailableOptions() {
+    const controlType = controlType$.getValue();
+    if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
+    const { options, errors } = await esqlQueryToOptions(
+      esqlQuery$.getValue(),
+      dataService.search.search
+    );
+    if (!errors.length) {
+      availableOptions$.next(options);
+    }
+  }
+
   // derive ESQL control variable from state.
   const getEsqlVariable = () => ({
     key: variableName$.value,
@@ -67,6 +85,8 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
   const subscriptions = combineLatest([variableName$, variableType$, selectedOptions$]).subscribe(
     () => esqlVariable$.next(getEsqlVariable())
   );
+
+  updateAvailableOptions();
 
   return {
     cleanup: () => subscriptions.unsubscribe(),

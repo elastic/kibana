@@ -1458,6 +1458,8 @@
       "@kbn/preboot-example-plugin/*": ["examples/preboot_example/*"],
       "@kbn/presentation-containers": ["src/platform/packages/shared/presentation/presentation_containers"],
       "@kbn/presentation-containers/*": ["src/platform/packages/shared/presentation/presentation_containers/*"],
+      "@kbn/presentation-controls": ["src/platform/packages/shared/presentation/presentation_controls"],
+      "@kbn/presentation-controls/*": ["src/platform/packages/shared/presentation/presentation_controls/*"],
       "@kbn/presentation-panel-plugin": ["src/platform/plugins/private/presentation_panel"],
       "@kbn/presentation-panel-plugin/*": ["src/platform/plugins/private/presentation_panel/*"],
       "@kbn/presentation-publishing": ["src/platform/packages/shared/presentation/presentation_publishing"],
