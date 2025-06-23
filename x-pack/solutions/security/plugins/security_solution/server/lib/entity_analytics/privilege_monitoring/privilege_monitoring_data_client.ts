@@ -319,74 +319,6 @@ export class PrivilegeMonitoringDataClient {
     return this.opts.auditLogger?.log(event);
   }
 
-  // TODO: remove this method
-  public async syncAllIndexUsers() {
-    // get all monitoring index source saved objects of type 'index'
-    const indexSources: MonitoringEntitySourceDescriptor[] =
-      await this.monitoringIndexSourceClient.findByIndex();
-    this.log(
-      'debug',
-      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
-    );
-    // get usernames from each index source
-    const allUserNames = new Set<string>();
-
-    for (const source of indexSources) {
-      const index = source.indexPattern ?? '';
-      const kuery =
-        typeof source.filter?.kuery === 'string' ? (source.filter.kuery as string) : undefined;
-      try {
-        // store / sync usernames in internal privileged users index
-        const usernames = await this.createUsersFromIndexSource(index, kuery);
-        usernames.forEach((username) => allUserNames.add(username));
-      } catch (error) {
-        this.log('error', `Failed to sync users from index ${index}: ${error}`);
-      }
-    }
-    await this.removeStaleIndexUsers(allUserNames);
-  }
-
-  // TODO: remove this method
-  public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
-    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
-
-    const response = await this.esClient.search<{ user?: { name?: string } }>({
-      index: indexName,
-      _source: ['user.name'],
-      query,
-    });
-
-    const usernames = new Set<string>();
-
-    for (const hit of response.hits.hits) {
-      const username = hit._source?.user?.name;
-      if (username && !usernames.has(username)) {
-        usernames.add(username);
-        this.createUser({ user: { name: username } }, 'index_sync');
-      }
-    }
-    return usernames;
-  }
-
-  // TODO: remove this method
-  public async removeStaleIndexUsers(currentUsernames: Set<string>) {
-    const existingDocs: MonitoredUserDoc[] = await this.listUsers('labels.sources: "index_sync"');
-    const staleUserIds: string[] = [];
-
-    for (const doc of existingDocs) {
-      if (doc.user?.name && !currentUsernames.has(doc.user.name) && doc.id) {
-        this.log(
-          'debug',
-          `User ${doc.user.name} (ID: ${doc.id}) is stale and will be removed from index_sync`
-        );
-        staleUserIds.push(doc.id);
-      }
-    }
-
-    await Promise.all(staleUserIds.map((id) => this.deleteUser(id)));
-    this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
-  }
-
   /** Privileged User Sync Orchestration
    *  These methods coordinate syncing users from monitoring sources.
    */
@@ -404,35 +336,45 @@ export class PrivilegeMonitoringDataClient {
     const seenUserNames: string[] = [];
     const allStaleUsers: PrivMonBulkUser[] = [];
 
-    for (const source of indexSources) {
-      const index = source.indexPattern ?? ''; // if no index pattern -- TODO: handle this case, (Mark Feedback)
-      // log and move on. Don't allow empty index patterns
-      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
-      const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
-      seenUserNames.push(...batchUserNames);
-      // collect stale users
-      const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
-      allStaleUsers.push(...staleUsers);
-      // add create logic here?
+    try {
+      for (const source of indexSources) {
+        // eslint-disable-next-line no-continue
+        if (!source.indexPattern) continue; // if no index pattern, skip this source
+        const index: string = source.indexPattern;
+        // log and move on. Don't allow empty index patterns
+        const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
+        const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
+        seenUserNames.push(...batchUserNames);
+        // collect stale users
+        const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
+        allStaleUsers.push(...staleUsers);
+        this.log(
+          'info',
+          `Found ${staleUsers.length} stale users for index source "${
+            source.name
+          }" (${index}): ${JSON.stringify(staleUsers.map((user) => user.username))}`
+        );
+      }
+    } catch (error) {
+      this.log('info', `error.message: ${error.message}`);
     }
+    // Soft delete stale users
     this.log(
       'info',
-      `Usernames collected from all index sources: ${JSON.stringify(seenUserNames)}`
+      `Found ${allStaleUsers.length} stale users across all index sources: ${JSON.stringify(
+        allStaleUsers.map((user) => user.username)
+      )}`
     );
-    this.log('info', `Total usernames collected: ${seenUserNames.length}`);
-    this.log('info', `Total stale users: ${allStaleUsers.length}`);
-
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
       await this.esClient.bulk({ body: ops });
-      this.log('info', `Soft deleted ${allStaleUsers.length} users`);
     }
   }
 
   public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
     const batchUsernames: string[] = [];
     let searchAfter: SortResults | undefined;
-    const batchSize = 100; // Make a const
+    const batchSize = 100;
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     while (true) {
@@ -459,7 +401,7 @@ export class PrivilegeMonitoringDataClient {
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
         const username = hit._source?.user?.name;
-        this.log('info', `Found existing user: ${username} with ID: ${hit._id}`);
+        this.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
         if (username) existingUserMap.set(username, hit._id);
       }
 
@@ -470,9 +412,9 @@ export class PrivilegeMonitoringDataClient {
       }));
 
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
-      this.log('info', `Executing bulk operations for ${usersToWrite.length} users`);
+      this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
-        this.log('info', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
+        this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
         await this.esClient.bulk({ body: ops }); // TODO: change to helper method instead of direct call
       } catch (error) {
         this.log('error', `Error executing bulk operations: ${error}`);
@@ -606,4 +548,5 @@ export class PrivilegeMonitoringDataClient {
 
     return ops;
   }
+
 }

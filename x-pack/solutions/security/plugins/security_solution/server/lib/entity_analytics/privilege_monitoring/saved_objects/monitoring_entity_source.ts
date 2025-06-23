@@ -112,7 +112,7 @@ export class MonitoringEntitySourceDescriptorClient {
     await this.dependencies.soClient.delete(monitoringEntitySourceTypeName, 'temp-id'); // TODO: https://github.com/elastic/security-team/issues/12851
   }
 
-  public async findByIndex() {
+  public async findByIndex(): Promise<MonitoringEntitySourceDescriptor[]> {
     const result = await this.find();
     return result.saved_objects
       .filter((so) => so.attributes.type === 'index')
