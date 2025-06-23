@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createRestorableStateProvider } from './src/restorable_state_provider';
+export {
+  type RestorableStateProviderProps,
+  type RestorableStateProviderApi,
+  createRestorableStateProvider,
+} from './src/restorable_state_provider';
