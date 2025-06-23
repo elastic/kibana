@@ -751,6 +751,7 @@
     "@kbn/ml-kibana-context": "link:x-pack/platform/packages/shared/ml/kibana_context",
     "@kbn/ml-license": "link:x-pack/platform/packages/shared/ml/license",
     "@kbn/ml-local-storage": "link:x-pack/platform/packages/private/ml/local_storage",
+    "@kbn/ml-locator": "link:x-pack/platform/packages/shared/ml/locator",
     "@kbn/ml-nested-property": "link:x-pack/platform/packages/private/ml/nested_property",
     "@kbn/ml-number-utils": "link:x-pack/platform/packages/private/ml/number_utils",
     "@kbn/ml-parse-interval": "link:x-pack/platform/packages/private/ml/parse_interval",

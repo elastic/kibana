@@ -7399,6 +7399,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-locator@link:x-pack/platform/packages/shared/ml/locator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-nested-property@link:x-pack/platform/packages/private/ml/nested_property":
   version "0.0.0"
   uid ""

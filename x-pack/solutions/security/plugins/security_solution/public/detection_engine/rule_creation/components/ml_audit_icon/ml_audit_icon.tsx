@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiIconTip } from '@elastic/eui';
 
-import type { MlSummaryJob } from '@kbn/ml-plugin/public';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 enum MessageLevels {
   info = 'info',

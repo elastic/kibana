@@ -21,9 +21,9 @@ import type {
 } from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { AppPageState } from '@kbn/ml-common-types/common';
-import { formatGenericMlUrl } from './common';
-import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
+import { getGroupQueryText, getJobQueryText } from '@kbn/ml-common-utils/string_utils';
 
+import { formatGenericMlUrl } from './common';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */

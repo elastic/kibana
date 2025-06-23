@@ -1450,6 +1450,8 @@
       "@kbn/ml-license/*": ["x-pack/platform/packages/shared/ml/license/*"],
       "@kbn/ml-local-storage": ["x-pack/platform/packages/private/ml/local_storage"],
       "@kbn/ml-local-storage/*": ["x-pack/platform/packages/private/ml/local_storage/*"],
+      "@kbn/ml-locator": ["x-pack/platform/packages/shared/ml/locator"],
+      "@kbn/ml-locator/*": ["x-pack/platform/packages/shared/ml/locator/*"],
       "@kbn/ml-nested-property": ["x-pack/platform/packages/private/ml/nested_property"],
       "@kbn/ml-nested-property/*": ["x-pack/platform/packages/private/ml/nested_property/*"],
       "@kbn/ml-number-utils": ["x-pack/platform/packages/private/ml/number_utils"],

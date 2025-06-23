@@ -337,3 +337,15 @@ export type ChangePointDetectionUrlState = MLPageState<
   typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
   ChangePointDetectionQueryState
 >;
+
+// interface that MlManagementLocatorInternal will implement
+export interface MlManagementLocator {
+  getUrl: (
+    params: MlLocatorParams | undefined,
+    appId?: string
+  ) => Promise<{ path: string; url?: string }>;
+  getRedirectUrl: (params: MlLocatorParams, appId?: string) => { path: string; url?: string };
+  navigate: (path: string, appId?: string) => Promise<void>;
+  sectionId?: string;
+  locator?: LocatorPublic<SerializableRecord>;
+}

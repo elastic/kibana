@@ -9,7 +9,8 @@ import type {
   ModelDefinitionResponse,
   GetModelDownloadConfigOptions,
 } from '@kbn/ml-trained-models-utils';
-import { type TrainedModelsApiService } from '@kbn/ml-services/ml_api_service/trained_models';
+
+import { type TrainedModelsApiService } from './ml_api_service/trained_models';
 
 export class ElasticModels {
   constructor(private readonly trainedModels: TrainedModelsApiService) {}
