@@ -915,6 +915,9 @@
     "installCount",
     "unInstallCount"
   ],
+  "scheduled_report": [
+    "createdBy"
+  ],
   "search": [
     "description",
     "title"
@@ -1106,6 +1109,7 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",

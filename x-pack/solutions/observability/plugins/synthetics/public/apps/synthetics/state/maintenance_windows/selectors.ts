@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { handleUnavailable, RequestHandler } from './request_handler';
+import { AppState } from '..';
+
+export const selectMaintenanceWindowsState = (state: AppState) => state.maintenanceWindows;

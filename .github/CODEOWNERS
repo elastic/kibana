@@ -75,7 +75,7 @@ x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
-src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/plugins/shared/charts @elastic/kibana-visualizations
@@ -415,8 +415,8 @@ src/platform/packages/shared/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
-x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-explore
-x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
@@ -852,22 +852,22 @@ x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-sec
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
-x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
-x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/features @elastic/security-threat-hunting-investigations
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
-x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
-x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
-src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
@@ -2232,7 +2232,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
-/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-investigations
 
 
 # AI4DSOC in Security Solution
@@ -2253,9 +2253,9 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detections-response @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response
-/x-pack/solutions/security/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_date/index.tsx  @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_number/index.tsx  @elastic/security-threat-hunting-explore @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/hover_actions @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_date/index.tsx @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/formatted_number/index.tsx @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/components @elastic/security-threat-hunting-investigations @elastic/security-generative-ai
 
@@ -2264,7 +2264,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/telemetry @elastic/security-detections-response
 x-pack/test/security_solution_api_integration/test_suites/detections_response/user_roles @elastic/security-detections-response
-x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-explore
+x-pack/test/security_solution_api_integration/test_suites/explore @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
@@ -2345,63 +2345,63 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting-investigations
 
 ## Security Solution Threat Hunting areas - Threat Hunting Explore
-/x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/hosts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/matrix_histogram @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-threat-hunting-investigations
 
-/x-pack/test/security_solution_cypress/cypress/e2e/explore @elastic/security-threat-hunting-explore
-/x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-threat-hunting-explore
-/x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-threat-hunting-explore
-/x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-explore
-/x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-explore
+/x-pack/test/security_solution_cypress/cypress/e2e/explore @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-threat-hunting-investigations
+/x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-threat-hunting-investigations
 
-/x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/assets @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/links @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/lib/clipboard @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/first_last_seen/first_last_seen.tsx @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/matrix_histogram @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/assets @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/links @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/lib/clipboard @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/accessibility @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/first_last_seen/first_last_seen.tsx @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/last_event_time @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/links @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/matrix_histogram @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/news_feed @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/overview_description_list @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/page @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/sidebar_header @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/tables @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/top_n @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/with_hover_actions @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/containers/matrix_histogram @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/lib/cell_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_form_with_warn @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/cases @elastic/security-threat-hunting-explore @elastic/kibana-cases
-/x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/dashboards @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/empty_page @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/common/components/empty_prompt @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution/public/cases @elastic/security-threat-hunting-investigations @elastic/kibana-cases
+/x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/overview @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/dashboards @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/onboarding @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/empty_page @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/empty_prompt @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution_serverless/public/components/dashboards_landing_callout @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/matrix_histogram @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-investigations
 
-/x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-explore
-/x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-explore
+/x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
+/x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-investigations
 
-/x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-explore
+/x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-investigations
 
 ## The Hive Connector
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
@@ -2627,7 +2627,7 @@ x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnera
 x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
-/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
+/x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-investigations
 
 # Security Service Integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations

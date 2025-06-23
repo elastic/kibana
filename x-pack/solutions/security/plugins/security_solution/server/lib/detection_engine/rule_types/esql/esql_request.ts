@@ -29,6 +29,8 @@ export interface EsqlResultColumn {
   type: 'date' | 'keyword';
 }
 
+export type EsqlEsqlShardFailure = Record<string, unknown>;
+
 type AsyncEsqlResponse = {
   id: string;
   is_running: boolean;
@@ -39,6 +41,13 @@ export type EsqlResultRow = Array<string | null>;
 export interface EsqlTable {
   columns: EsqlResultColumn[];
   values: EsqlResultRow[];
+  _clusters?: {
+    details?: {
+      [key: string]: {
+        failures?: EsqlEsqlShardFailure[];
+      };
+    };
+  };
 }
 
 export const performEsqlRequest = async ({
