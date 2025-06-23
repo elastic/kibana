@@ -62,15 +62,28 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User should be able to filter by customized rules in the rule updates table**](#scenario-user-should-be-able-to-filter-by-customized-rules-in-the-rule-updates-table)
     - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
     - [**Scenario: Customized fields should be marked with a per-field modified badge**](#scenario-customized-fields-should-be-marked-with-a-per-field-modified-badge)
-    - [**Scenario: Clicking on the modified badge should open a rule diff flyout**](#scenario-clicking-on-the-modified-badge-should-open-a-rule-diff-flyout)
+    - [**Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**](#scenario-clicking-on-the-rules-modified-badge-should-open-a-rule-diff-flyout)
     - [**Scenario: Clicking on a per-field modified badge should open a rule diff flyout**](#scenario-clicking-on-a-per-field-modified-badge-should-open-a-rule-diff-flyout)
-    - [**Scenario: Modified badge should not be clickable if rule base version is missing**](#scenario-modified-badge-should-not-be-clickable-if-rule-base-version-is-missing)
+    - [**Scenario: Modified badge should show a tooltip on hover if rule base version is missing**](#scenario-modified-badge-should-show-a-tooltip-on-hover-if-rule-base-version-is-missing)
     - [**Scenario: Per-field modified badges should not be displayed if rule base version is missing**](#scenario-per-field-modified-badges-should-not-be-displayed-if-rule-base-version-is-missing)
+  - [Reverting a rule to stock version](#reverting-a-rule-to-stock-version)
+    - [**Scenario: User can revert customized prebuilt rule to current Elastic version**](#scenario-user-can-revert-customized-prebuilt-rule-to-current-elastic-version)
+    - [**Scenario: User can view diff between current and original Elastic rule versions in flyout**](#scenario-user-can-view-diff-between-current-and-original-elastic-rule-versions-in-flyout)
+    - [**Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**](#scenario-revert-prebuilt-rule-button-should-be-disabled-when-rules-base-version-is-missing)
+    - [**Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**](#scenario-revert-prebuilt-rule-button-shouldnt-appear-if-rule-is-non-customzied)
+    - [**Scenario: Revert prebuilt rule API endpoint returns error if rule's base version is missing**](#scenario-revert-prebuilt-rule-api-endpoint-returns-error-if-rules-base-version-is-missing)
+    - [**Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**](#scenario-revert-prebuilt-rule-endpoint-does-not-modify-non-customized-rule)
+    - [**Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rule-isnt-prebuilt)
+    - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
+  - [Reverting a rule to stock version: Concurrency control](#reverting-a-rule-to-stock-version-concurrency-control)
+    - [**Scenario: Revert prebuilt rule API endpoint returns error if request `revision` field doesn't match the rule associated with `rule_id`**](#scenario-revert-prebuilt-rule-api-endpoint-returns-error-if-request-revision-field-doesnt-match-the-rule-associated-with-rule_id)
+    - [**Scenario: Revert prebuilt rule API endpoint returns error if request `version` field doesn't match the rule associated with `rule_id`**](#scenario-revert-prebuilt-rule-api-endpoint-returns-error-if-request-version-field-doesnt-match-the-rule-associated-with-rule_id)
   - [Licensing](#licensing)
     - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
     - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
     - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
     - [**Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**](#scenario-user-cant-edit-prebuilt-rules-via-bulk-edit-api-under-an-insufficient-license)
+<<<<<<< HEAD
   - [Reverting a rule to Elastic version](#reverting-a-rule-to-elastic-version)
     - [**Scenario: User can revert customized prebuilt rule to current Elastic version**](#scenario-user-can-revert-customized-prebuilt-rule-to-current-elastic-version)
     - [**Scenario: User can view diff between current and original Elastic rule versions in flyout**](#scenario-user-can-view-diff-between-current-and-original-elastic-rule-versions-in-flyout)
@@ -86,6 +99,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**](#scenario-revert-prebuilt-rule-endpoint-does-not-modify-non-customized-rule)
     - [**Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**](#scenario-revert-prebuilt-rule-endpoint-returns-error-if-rule-isnt-prebuilt)
     - [**Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**](#scenario-reverting-a-prebuilt-rule-doesnt-modify-customization-adjacent-fields)
+=======
+>>>>>>> 31d8674c1a2 (addresses comments)
 
 ## Useful information
 
@@ -123,6 +138,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 | Delete custom highlighted fields |
 | Update rule schedules |
 | Apply timeline template |
+<<<<<<< HEAD
 | Update rule schedules |
 | Apply timeline template |
 
@@ -130,12 +146,24 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **customization adjacent fields**: fields on a rule object that can be changed but aren't taken into account when calculating `is_customized` field. See list below.
 ```Gherkin
 Examples:
+=======
+
+- **customization adjacent field**: field on a rule object that can be changed but is not taken into account when calculating `is_customized` field. See list below.
+
+**Examples:**
+| `<customization_adjacent_field>` |
+>>>>>>> 31d8674c1a2 (addresses comments)
 | actions         |
 | exceptions_list |
 | enabled         |
 | revision        |
 | meta            |
+<<<<<<< HEAD
 ````
+=======
+
+- **per field JSON diff view**: a tab on the rule details flyout that contains field-separated JSON diffs between two rule versions. Only fields that are different are displayed in this view, fields with identical values are hidden.
+>>>>>>> 31d8674c1a2 (addresses comments)
 
 ## Requirements
 
@@ -513,12 +541,13 @@ And that rule is customized
 And that rule has an existing base version
 When a user navigates to that rule's details page
 Then the <field_name> field should be marked with a modified rule badge
-
-Examples:
-<field_name> = all customizable rule fields
 ```
 
-#### **Scenario: Clicking on the modified badge should open a rule diff flyout**
+**Examples:**
+
+`<field_name>` = all customizable rule fields
+
+#### **Scenario: Clicking on the rule's "Modified" badge should open a rule diff flyout**
 
 **Automation**: 1 cypress test.
 
@@ -526,10 +555,9 @@ Examples:
 Given a space with at least one prebuilt rule
 And that rule is customized
 And that rule has an existing base version
-When a user navigates to that rule's details page
-And the modified badge is clicked
+When user clicks the field's modified badge on rule's details page
 Then a rule diff flyout should open
-And this flyout should be read-only
+And this flyout should display a per field JSON diff view
 And should list all fields that are different between the current and base version
 And should not contain a button to revert the rule 
 ```
@@ -545,12 +573,12 @@ And that rule has an existing base version
 When a user navigates to that rule's details page
 And a per-field modified badge is clicked
 Then a rule diff flyout should open
-And this flyout should be read-only
+And this flyout should display a per field JSON diff view
 And should list all fields that are different between the current and base version
 And should not contain a button to revert the rule 
 ```
 
-#### **Scenario: Modified badge should not be clickable if rule base version is missing**
+#### **Scenario: Modified badge should show a tooltip on hover if rule base version is missing**
 
 **Automation**: 1 cypress test.
 
@@ -560,6 +588,7 @@ And that rule is customized
 And that rule does not have an existing base version
 When a user navigates to that rule's details page
 Then the modified badge should be displayed
+And should have an informational tooltip on hover
 But should not be clickable
 And does not open a rule flyout
 ```
@@ -574,6 +603,145 @@ And that rule is customized
 And that rule does not have an existing base version
 When a user navigates to that rule's details page
 Then no per-field modified badges should be displayed
+```
+
+### Reverting a rule to stock version
+
+#### **Scenario: User can revert customized prebuilt rule to current Elastic version**
+
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user calls the revert rule API endpoint
+Then the rule should be modified to match the original Elastic rule object corresponding to its version number
+And the rule's `is_customized` value should be false
+```
+
+#### **Scenario: User can view diff between current and original Elastic rule versions in flyout**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user clicks the "Revert" rule's action button on the rule's details page
+Then a rule diff flyout should open
+And this flyout should display a per field JSON diff view
+And should list all fields that are different between the current and base version
+And should contain a button to revert the rule
+```
+
+#### **Scenario: Revert prebuilt rule button should be disabled when rule's base version is missing**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user navigates to that rule's details page
+And clicks the overflow actions button
+Then the revert rule button should be disabled
+And have an informational tooltip on hover
+```
+
+#### **Scenario: Revert prebuilt rule button shouldn't appear if rule is non-customzied**
+
+**Automation**: 1 cypress test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is non-customized
+When a user navigates to that rule's details page
+And clicks the overflow actions button
+Then the revert rule button should not be displayed as an option
+```
+
+#### **Scenario: Revert prebuilt rule API endpoint returns error if rule's base version is missing**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule does not have an existing base version
+When a user calls the revert rule API endpoint
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint does not modify non-customized rule**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is non-customized
+And that rule has an existing base version
+When a user calls the revert rule API endpoint
+Then the API should return successfully
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule endpoint returns error if rule isn't prebuilt**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least custom rule
+When a user calls the revert endpoint on this rule
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Reverting a prebuilt rule doesn't modify customization adjacent fields**
+
+**Automation**: one integration test per field.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+And that rule has a custom <customization_adjacent_field_name> field different from the base version 
+When a user calls the revert rule API endpoint
+Then the rule's `is_customized` value should be false
+And the <customization_adjacent_field_name> field is not modified
+```
+
+**Examples:**
+
+`<customization_adjacent_field_name>` = all customization adjacent fields
+
+### Reverting a rule to stock version: Concurrency control
+
+#### **Scenario: Revert prebuilt rule API endpoint returns error if request `revision` field doesn't match the rule associated with `rule_id`**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user calls the revert rule API endpoint with an outdated revision field
+Then the API should return a 500 error
+And the rule should remain the same
+```
+
+#### **Scenario: Revert prebuilt rule API endpoint returns error if request `version` field doesn't match the rule associated with `rule_id`**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given a space with at least one prebuilt rule
+And that rule is customized
+And that rule has an existing base version
+When a user calls the revert rule API endpoint with an outdated version field
+Then the API should return a 500 error
+And the rule should remain the same
 ```
 
 ### Licensing
@@ -637,6 +805,7 @@ Then the response should only list the custom rules as updated
 And all prebuilt rules should be listed as not updated
 And for each prebuilt rule the response should contain a message that the action is not allowed under current license
 ```
+<<<<<<< HEAD
 
 ### Reverting a rule to Elastic version
 
@@ -780,3 +949,5 @@ And the rule's `is_customized` value should be false
 Examples:
 <field_name> = all customization adjacent fields
 ```
+=======
+>>>>>>> 31d8674c1a2 (addresses comments)
