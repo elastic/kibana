@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
-import { isStreamEvent } from '@kbn/onechat-genai-utils/langchain';
+import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { AgentHandlerContext } from '@kbn/onechat-server';
 import { addRoundCompleteEvent, extractRound } from '../utils';
 import {
@@ -36,9 +36,13 @@ export const runChatAgent: RunChatAgentFn = async (
   { logger, request, modelProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
-  const langchainTools = Array.isArray(tools)
-    ? tools.map((tool) => toLangchainTool({ tool, logger }))
-    : await providerToLangchainTools({ request, toolProvider: tools, logger });
+
+  const { tools: langchainTools, idMappings: toolIdMapping } = await toolsToLangchain({
+    tools,
+    logger,
+    request,
+  });
+
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
@@ -66,7 +70,11 @@ export const runChatAgent: RunChatAgentFn = async (
 
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
-    convertGraphEvents({ graphName: chatAgentGraphName, runName: chatAgentGraphName }),
+    convertGraphEvents({
+      graphName: chatAgentGraphName,
+      runName: chatAgentGraphName,
+      toolIdMapping,
+    }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

@@ -22,6 +22,9 @@ import {
   matchName,
   createTextChunkEvent,
   extractTextContent,
+  extractToolCalls,
+  toolIdentifierFromToolCall,
+  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
 import { getToolCalls } from './utils/from_langchain_messages';
 
@@ -33,10 +36,12 @@ export type ConvertedEvents =
 
 export const convertGraphEvents = ({
   graphName,
+  toolIdMapping,
   runName,
 }: {
   graphName: string;
   runName: string;
+  toolIdMapping: ToolIdMapping;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, StructuredToolIdentifier>();
@@ -58,16 +63,17 @@ export const convertGraphEvents = ({
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
-          const toolCalls = getToolCalls(lastMessage);
+          const toolCalls = extractToolCalls(lastMessage);
           if (toolCalls.length > 0) {
             const toolCallEvents: ToolCallEvent[] = [];
 
             for (const toolCall of toolCalls) {
-              toolCallIdToIdMap.set(toolCall.toolCallId, toolCall.toolId);
+              const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
+              toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
               toolCallEvents.push({
                 type: ChatAgentEventType.toolCall,
                 data: {
-                  toolId: toolCall.toolId,
+                  toolId,
                   toolCallId: toolCall.toolCallId,
                   args: toolCall.args,
                 },
