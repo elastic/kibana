@@ -575,6 +575,56 @@ FROM employees
       ),
     },
     {
+      label: i18n.translate('languageDocumentation.documentationESQL.sample', {
+        defaultMessage: 'SAMPLE',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.sample.markdown',
+            {
+              defaultMessage: `### SAMPLE
+The \`SAMPLE\` command samples a fraction of the table rows. 
+
+**Syntax**
+
+\`\`\` esql
+SAMPLE probability
+\`\`\` 
+
+**Parameters**
+
+* \`probability\`: The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+FROM employees
+| KEEP emp_no
+| SAMPLE 0.05
+\`\`\` 
+
+| emp_no:integer |
+|----------------|
+| 10018          |
+| 10024          |
+| 10062          |
+| 10081          |
+
+`,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
       label: i18n.translate('languageDocumentation.documentationESQL.sort', {
         defaultMessage: 'SORT',
       }),
