@@ -16,7 +16,6 @@ import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../comm
 
 const RULE_INTERVAL_SECONDS = 3;
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');

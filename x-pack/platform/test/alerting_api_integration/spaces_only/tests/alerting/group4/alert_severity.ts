@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getEventLog, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertSeverityTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');

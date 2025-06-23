@@ -10,7 +10,6 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { getEventLog, ObjectRemover } from '../../../common/lib';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

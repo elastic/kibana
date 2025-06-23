@@ -7,7 +7,6 @@
 
 import { createTestConfig } from '../../common/config';
 
-// eslint-disable-next-line import/no-default-export
 export default createTestConfig('security_and_spaces', {
   disabledPlugins: [],
   license: 'trial',

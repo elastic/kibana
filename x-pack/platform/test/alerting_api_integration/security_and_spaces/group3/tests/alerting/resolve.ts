@@ -10,7 +10,6 @@ import { SuperuserAtSpace1 } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

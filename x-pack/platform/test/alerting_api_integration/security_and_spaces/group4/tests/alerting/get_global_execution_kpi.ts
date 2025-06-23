@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function getGlobalExecutionKpiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

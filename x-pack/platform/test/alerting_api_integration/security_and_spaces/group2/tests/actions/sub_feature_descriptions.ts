@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 
 const SUB_FEATURE_DESC_PREFIX = 'Includes: ';
 
-// eslint-disable-next-line import/no-default-export
 export default function subFeatureDescriptionsTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 

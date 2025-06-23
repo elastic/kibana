@@ -16,7 +16,6 @@ import type { TaskManagerDoc } from '../../../../../common/lib';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function deleteRuleForBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

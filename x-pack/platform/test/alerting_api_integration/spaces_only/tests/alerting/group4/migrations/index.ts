@@ -7,7 +7,6 @@
 
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function migrationTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Migrations', () => {
     loadTestFile(require.resolve('./8_2_0'));

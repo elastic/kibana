@@ -13,7 +13,6 @@ import { getEventLog } from '../../../../../common/lib';
 
 const ES_TEST_INDEX_NAME = 'functional-test-actions-index';
 
-// eslint-disable-next-line import/no-default-export
 export default function indexTest({ getService }: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');

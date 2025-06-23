@@ -31,7 +31,6 @@ import {
 
 const TEST_HOSTNAME = 'test.alerting.example.com';
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const {
