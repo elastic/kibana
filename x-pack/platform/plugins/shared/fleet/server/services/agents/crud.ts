@@ -30,7 +30,7 @@ import {
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
-import { isAgentInNamespace } from '../spaces/agent_namespaces';
+import { DEFAULT_NAMESPACES_FILTER, isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 
@@ -826,7 +826,7 @@ async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
     return [];
   }
   if (spaceId === DEFAULT_SPACE_ID) {
-    return [`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`];
+    return [DEFAULT_NAMESPACES_FILTER];
   } else {
     return [`namespaces:"${spaceId}"`];
   }
