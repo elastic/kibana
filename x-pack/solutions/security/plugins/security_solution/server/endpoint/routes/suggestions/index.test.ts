@@ -404,8 +404,8 @@ describe('when calling the Suggestions route handler', () => {
 
       beforeEach(() => {
         mockFleetServices = {
-          agentPolicy: {
-            fetchAllAgentPolicyIds: jest.fn(),
+          packagePolicy: {
+            fetchAllItems: jest.fn(),
           },
         };
 
@@ -430,6 +430,14 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should use metadata united index and call termsAggSuggestions without agent policy filters', async () => {
+          const mockPackagePolicies = [{ policy_ids: ['policy-1', 'policy-2'] }];
+          const mockAsyncIterable = {
+            async *[Symbol.asyncIterator]() {
+              yield mockPackagePolicies;
+            },
+          };
+          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
+
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
           );
@@ -453,16 +461,42 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          // Should not call fleet services when space awareness is disabled
-          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).not.toHaveBeenCalled();
+          // Should call fleet services when space awareness is disabled but with different parameters
+          expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
+            mockSavedObjectClient,
+            {
+              kuery: 'ingest-package-policies.package.name:endpoint',
+              spaceIds: ['*'],
+            }
+          );
 
           const expectedFilters = [
             { term: { 'some.field': 'some-value' } },
             {
               bool: {
+                must_not: {
+                  terms: {
+                    'agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
+                },
                 filter: [
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
+                  {
+                    term: {
+                      'united.agent.active': {
+                        value: true,
+                      },
+                    },
+                  },
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-1', 'policy-2'],
+                    },
+                  },
                 ],
               },
             },
@@ -484,6 +518,14 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle requests without additional filters when space awareness is disabled', async () => {
+          const mockPackagePolicies = [{ policy_ids: ['policy-3'] }];
+          const mockAsyncIterable = {
+            async *[Symbol.asyncIterator]() {
+              yield mockPackagePolicies;
+            },
+          };
+          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
+
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
           );
@@ -510,9 +552,29 @@ describe('when calling the Suggestions route handler', () => {
           const expectedFilters = [
             {
               bool: {
+                must_not: {
+                  terms: {
+                    'agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
+                },
                 filter: [
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
+                  {
+                    term: {
+                      'united.agent.active': {
+                        value: true,
+                      },
+                    },
+                  },
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['policy-3'],
+                    },
+                  },
                 ],
               },
             },
@@ -547,13 +609,13 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should use metadata united index and call termsAggSuggestions with agent policy filters', async () => {
-          const mockAgentPolicies = ['policy-1', 'policy-2'];
+          const mockPackagePolicies = [{ policy_ids: ['policy-1', 'policy-2'] }];
           const mockAsyncIterable = {
             async *[Symbol.asyncIterator]() {
-              yield mockAgentPolicies;
+              yield mockPackagePolicies;
             },
           };
-          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
+          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -578,10 +640,11 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+          expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              spaceId: 'default',
+              kuery: 'ingest-package-policies.package.name:endpoint',
+              spaceIds: ['default'],
             }
           );
 
@@ -589,9 +652,24 @@ describe('when calling the Suggestions route handler', () => {
             { term: { 'some.field': 'some-value' } },
             {
               bool: {
+                must_not: {
+                  terms: {
+                    'agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
+                },
                 filter: [
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
+                  {
+                    term: {
+                      'united.agent.active': {
+                        value: true,
+                      },
+                    },
+                  },
                   {
                     terms: {
                       'united.agent.policy_id': ['policy-1', 'policy-2'],
@@ -618,13 +696,13 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle empty agent policies list when space awareness is enabled', async () => {
-          const mockAgentPolicies: string[] = [];
+          const mockPackagePolicies: any[] = [];
           const mockAsyncIterable = {
             async *[Symbol.asyncIterator]() {
-              yield mockAgentPolicies;
+              yield mockPackagePolicies;
             },
           };
-          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
+          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -649,19 +727,35 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+          expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              spaceId: 'default',
+              kuery: 'ingest-package-policies.package.name:endpoint',
+              spaceIds: ['default'],
             }
           );
 
           const expectedFilters = [
             {
               bool: {
+                must_not: {
+                  terms: {
+                    'agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
+                },
                 filter: [
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
+                  {
+                    term: {
+                      'united.agent.active': {
+                        value: true,
+                      },
+                    },
+                  },
                   {
                     terms: {
                       'united.agent.policy_id': [],
@@ -688,7 +782,7 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle fleet service errors gracefully when space awareness is enabled', async () => {
-          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockRejectedValue(
+          mockFleetServices.packagePolicy.fetchAllItems.mockRejectedValue(
             new Error('Fleet service error')
           );
 
@@ -726,13 +820,13 @@ describe('when calling the Suggestions route handler', () => {
           const customSpaceId = 'custom-space-123';
           mockSecuritySolutionContext.getSpaceId.mockReturnValue(customSpaceId);
 
-          const mockAgentPolicies = ['space-policy-1'];
+          const mockPackagePolicies = [{ policy_ids: ['space-policy-1'] }];
           const mockAsyncIterable = {
             async *[Symbol.asyncIterator]() {
-              yield mockAgentPolicies;
+              yield mockPackagePolicies;
             },
           };
-          mockFleetServices.agentPolicy.fetchAllAgentPolicyIds.mockResolvedValue(mockAsyncIterable);
+          mockFleetServices.packagePolicy.fetchAllItems.mockResolvedValue(mockAsyncIterable);
 
           const mockContext = requestContextMock.convertContext(
             createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
@@ -757,10 +851,11 @@ describe('when calling the Suggestions route handler', () => {
 
           await suggestionsRouteHandler(mockContext, mockRequest, mockResponse);
 
-          expect(mockFleetServices.agentPolicy.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+          expect(mockFleetServices.packagePolicy.fetchAllItems).toHaveBeenCalledWith(
             mockSavedObjectClient,
             {
-              spaceId: customSpaceId,
+              kuery: 'ingest-package-policies.package.name:endpoint',
+              spaceIds: [customSpaceId],
             }
           );
 
@@ -768,9 +863,24 @@ describe('when calling the Suggestions route handler', () => {
             { range: { '@timestamp': { gte: 'now-1d' } } },
             {
               bool: {
+                must_not: {
+                  terms: {
+                    'agent.id': [
+                      '00000000-0000-0000-0000-000000000000',
+                      '11111111-1111-1111-1111-111111111111',
+                    ],
+                  },
+                },
                 filter: [
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
+                  {
+                    term: {
+                      'united.agent.active': {
+                        value: true,
+                      },
+                    },
+                  },
                   {
                     terms: {
                       'united.agent.policy_id': ['space-policy-1'],
