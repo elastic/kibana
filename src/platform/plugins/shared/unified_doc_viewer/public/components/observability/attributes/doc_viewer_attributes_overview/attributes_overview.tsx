@@ -32,6 +32,7 @@ import {
 import { AttributesAccordion } from './attributes_accordion';
 import { getAttributesTitle } from './get_attributes_title';
 import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
+import { AttributesEmptyPrompt } from './attributes_empty_prompt';
 
 export function AttributesOverview({
   columns,
@@ -161,6 +162,11 @@ export function AttributesOverview({
     [setAreNullValuesHidden]
   );
 
+  const noFields =
+    groupedFields.attributesFields.length === 0 &&
+    groupedFields.resourceAttributesFields.length === 0 &&
+    groupedFields.scopeAttributesFields.length === 0;
+
   return (
     <EuiFlexGroup
       ref={setContainerRef}
@@ -229,33 +235,37 @@ export function AttributesOverview({
           overflow: auto;
         `}
       >
-        <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-          {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
-            <React.Fragment key={id}>
-              <EuiFlexItem grow={false}>
-                <AttributesAccordion
-                  id={id}
-                  title={title}
-                  ariaLabel={ariaLabel}
-                  tooltipMessage={tooltipMessage}
-                  fields={fields}
-                  hit={hit}
-                  dataView={dataView}
-                  columns={columns}
-                  columnsMeta={columnsMeta}
-                  searchTerm={searchTerm}
-                  onAddColumn={onAddColumn}
-                  onRemoveColumn={onRemoveColumn}
-                  filter={filter}
-                  isEsqlMode={isEsqlMode}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSpacer size="s" />
-              </EuiFlexItem>
-            </React.Fragment>
-          ))}
-        </EuiFlexGroup>
+        {noFields ? (
+          <AttributesEmptyPrompt />
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+            {accordionConfigs.map(({ id, title, ariaLabel, fields, tooltipMessage }) => (
+              <React.Fragment key={id}>
+                <EuiFlexItem grow={false}>
+                  <AttributesAccordion
+                    id={id}
+                    title={title}
+                    ariaLabel={ariaLabel}
+                    tooltipMessage={tooltipMessage}
+                    fields={fields}
+                    hit={hit}
+                    dataView={dataView}
+                    columns={columns}
+                    columnsMeta={columnsMeta}
+                    searchTerm={searchTerm}
+                    onAddColumn={onAddColumn}
+                    onRemoveColumn={onRemoveColumn}
+                    filter={filter}
+                    isEsqlMode={isEsqlMode}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="s" />
+                </EuiFlexItem>
+              </React.Fragment>
+            ))}
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

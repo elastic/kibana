@@ -7,19 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import {
-  EuiAccordion,
-  EuiText,
-  EuiNotificationBadge,
-  EuiEmptyPrompt,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAccordion, EuiText, EuiNotificationBadge, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { i18n } from '@kbn/i18n';
 import { AttributesTable } from './attributes_table';
+import { AttributesEmptyPrompt } from './attributes_empty_prompt';
 
 interface AttributesAccordionProps {
   id: string;
@@ -82,52 +75,7 @@ export const AttributesAccordion = ({
       paddingSize="m"
     >
       {fields.length === 0 ? (
-        <EuiEmptyPrompt
-          layout="horizontal"
-          body={
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate(
-                  'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.noFieldsLabel',
-                  {
-                    defaultMessage: 'No attributes fields found.',
-                  }
-                )}
-              </p>
-
-              <>
-                <strong>
-                  {i18n.translate(
-                    'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.tryText',
-                    {
-                      defaultMessage: 'Try:',
-                    }
-                  )}
-                </strong>
-                <ul>
-                  <li>
-                    {i18n.translate(
-                      'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.extendTimeBullet',
-                      {
-                        defaultMessage: 'Extending the time range',
-                      }
-                    )}
-                  </li>
-
-                  <li>
-                    {i18n.translate(
-                      'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.fieldTypeFilterBullet',
-                      {
-                        defaultMessage: 'Using different field filters',
-                      }
-                    )}
-                  </li>
-                </ul>
-              </>
-            </EuiText>
-          }
-          data-test-subj="attributesAccordionEmptyPrompt"
-        />
+        <AttributesEmptyPrompt />
       ) : (
         <AttributesTable
           hit={hit}
