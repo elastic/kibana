@@ -51,8 +51,8 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
-        if (docs.length === 0) {
-          // TODO add KB install check here
+        if (docs.length === 0 && !params.isEnabledKnowledgeBase) {
+          // prompt to help user install knowledge base
           return 'No relevant Elastic Security Labs content found for the provided query. Ensure knowledge base is installed.';
         }
 
