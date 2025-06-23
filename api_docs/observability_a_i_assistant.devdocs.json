@@ -6876,6 +6876,23 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ObservabilityAIAssistantAPIClientRequestParamsOf",
         "type": "Type",
         "tags": [],
@@ -10226,6 +10243,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.ObservabilityAIAssistantClient.getAnonymizationService",
+            "type": "Function",
+            "tags": [],
+            "label": "getAnonymizationService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnonymizationService"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -13157,6 +13191,23 @@
           ".MessageAdd; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

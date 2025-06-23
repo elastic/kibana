@@ -2272,6 +2272,10 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
           },
           {
+            "plugin": "taskManager",
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task_store.test.ts"
+          },
+          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/solutions/search/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
