@@ -262,7 +262,7 @@ import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/mi
 import type {
   CreatePrivilegesImportIndexRequestBodyInput,
   CreatePrivilegesImportIndexResponse,
-} from './entity_analytics/monitoring/create_indidex.gen';
+} from './entity_analytics/monitoring/create_index.gen';
 import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,

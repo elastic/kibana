@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/entity_analytics/monitoring/create_indidex.gen';
+import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/entity_analytics/monitoring/create_index.gen';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
