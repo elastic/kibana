@@ -30,6 +30,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors';
+import type { SearchHomepagePluginStart } from '@kbn/search-homepage/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -68,6 +69,7 @@ export interface KibanaLogicProps {
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage?: SearchHomepagePluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -104,6 +106,7 @@ export interface KibanaValues {
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage: SearchHomepagePluginStart | null;
   security: SecurityPluginStart | null;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -150,6 +153,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchHomepage: [props.searchHomepage || null, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],

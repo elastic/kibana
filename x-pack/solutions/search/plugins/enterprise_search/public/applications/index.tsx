@@ -112,6 +112,7 @@ export const renderApp = (
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
     security,
+    searchHomepage: plugins.searchHomepage,
     setBreadcrumbs: chrome.setBreadcrumbs,
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,

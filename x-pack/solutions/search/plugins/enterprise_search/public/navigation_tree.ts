@@ -89,7 +89,7 @@ export const getNavigationTreeDefinition = ({
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                     );
                   },
-                  link: 'enterpriseSearch',
+                  link: 'searchHomepage',
                 },
 
                 {

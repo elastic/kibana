@@ -34,6 +34,10 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
+import type {
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginStart,
+} from '@kbn/search-homepage/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -72,6 +76,7 @@ export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['sta
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  searchHomepage?: SearchHomepagePluginSetup;
   licensing: LicensingPluginStart;
   security?: SecurityPluginSetup;
   share?: SharePluginSetup;
@@ -92,6 +97,7 @@ export interface PluginsStart {
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
+  searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
@@ -210,6 +216,27 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud, share } = plugins;
+
+    const { app } = plugins.searchHomepage!;
+    core.application.register({
+      ...app,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
+      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(app.title);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { SearchHomepage } = await import('./applications/search_homepage');
+
+        return renderApp(SearchHomepage, kibanaDeps, pluginData);
+      },
+    });
 
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,

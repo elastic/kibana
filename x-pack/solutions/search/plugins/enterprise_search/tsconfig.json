@@ -75,6 +75,7 @@
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
+    "@kbn/search-homepage",
     "@kbn/security-plugin-types-common",
     "@kbn/core-security-server",
     "@kbn/core-security-server-mocks",
@@ -87,6 +88,6 @@
     "@kbn/search-shared-ui",
     "@kbn/file-upload-common",
     "@kbn/search-indices",
-    "@kbn/charts-theme",
+    "@kbn/charts-theme"
   ]
 }

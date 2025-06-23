@@ -36,6 +36,7 @@
       "console",
       "contentConnectors",
       "searchNavigation",
+      "searchHomepage",
       "searchPlayground",
       "embeddable",
       "discover",
