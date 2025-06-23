@@ -42,10 +42,10 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
         {userNames.map((userName) => (
           <EuiFlexItem
             key={userName}
-            css={css`
-              justify-content: center;
-              height: ${padChartStyling.heightOfEachCell}px;
-            `}
+            css={{
+              justifyContent: 'center',
+              height: `${padChartStyling.heightOfEachCell}px`,
+            }}
             grow={false}
           >
             <EuiText textAlign={'right'}>
