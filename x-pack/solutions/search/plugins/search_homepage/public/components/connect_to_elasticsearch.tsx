@@ -5,7 +5,7 @@
  * 2.0.
  */
 import {
-  EuiBadge,
+  // EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useKibana } from '../hooks/use_kibana';
-import { useGetApiKeys } from '../hooks/api/use_api_key';
+// import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 
 const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
@@ -31,7 +31,7 @@ const CREATE_API_KEY = '/app/management/security/api_keys/create';
 
 export const ConnectToElasticsearch = () => {
   const { http } = useKibana().services;
-  const { data } = useGetApiKeys();
+  // const { data } = useGetApiKeys();
   const elasticsearchUrl = useElasticsearchUrl();
 
   return (
@@ -145,14 +145,14 @@ export const ConnectToElasticsearch = () => {
                           Manage API keys
                         </EuiButtonEmpty>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      {/* <EuiFlexItem grow={false}>
                         <EuiBadge
                           data-test-subj="activeApiKeysBadge"
                           color={(data?.apiKeys?.length ?? 0) > 0 ? 'success' : 'warning'}
                         >
                           {data?.apiKeys?.length ?? 0} active
                         </EuiBadge>
-                      </EuiFlexItem>
+                      </EuiFlexItem> */}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
