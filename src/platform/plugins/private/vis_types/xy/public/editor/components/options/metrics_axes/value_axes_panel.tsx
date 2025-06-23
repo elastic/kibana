@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
@@ -38,7 +38,7 @@ export interface ValueAxesPanelProps {
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
-  const styles = useMemoizedStyles(visEditorSidebarStyles);
+  const styles = useMemoCss(visEditorSidebarStyles);
   const { addValueAxis, removeValueAxis, seriesParams, valueAxes } = props;
 
   const getSeries = useCallback(

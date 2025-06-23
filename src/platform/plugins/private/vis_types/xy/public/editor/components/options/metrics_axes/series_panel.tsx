@@ -15,7 +15,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { ValueAxis, SeriesParam } from '../../../../types';
 import { ChartOptions } from './chart_options';
@@ -30,7 +30,7 @@ export interface SeriesPanelProps {
 }
 
 function SeriesPanel({ seriesParams, ...chartProps }: SeriesPanelProps) {
-  const styles = useMemoizedStyles(visEditorSidebarStyles);
+  const styles = useMemoCss(visEditorSidebarStyles);
 
   return (
     <EuiPanel paddingSize="s">

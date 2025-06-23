@@ -10,7 +10,7 @@
 import React, { ComponentType } from 'react';
 import { css } from '@emotion/react';
 import { UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { AggParamEditorProps } from '../../agg_param_props';
 
 const containerStyles = {
@@ -29,7 +29,7 @@ const containerStyles = {
 export const wrapWithInlineComp =
   <T extends unknown>(WrapComponent: ComponentType<AggParamEditorProps<T>>) =>
   (props: AggParamEditorProps<T>) => {
-    const styles = useMemoizedStyles(containerStyles);
+    const styles = useMemoCss(containerStyles);
     const hasSize = props.aggParam.name === 'size';
     return (
       <div css={[styles.base, hasSize && styles.size]}>

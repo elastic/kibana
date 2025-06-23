@@ -37,7 +37,7 @@ import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -115,7 +115,7 @@ function DefaultEditorSideBarComponent({
   savedSearch,
   timeRange,
 }: DefaultEditorSideBarProps) {
-  const styles = useMemoizedStyles(defaultEditorSideBarStyles);
+  const styles = useMemoCss(defaultEditorSideBarStyles);
   const [isDirty, setDirty] = useState(false);
   const [state, dispatch] = useEditorReducer(vis, eventEmitter);
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();

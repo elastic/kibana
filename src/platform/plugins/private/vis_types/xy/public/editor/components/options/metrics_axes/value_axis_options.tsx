@@ -13,7 +13,7 @@ import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { SelectOption, SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
 import { ValueAxis } from '../../../../types';
 import { LabelOptions, SetAxisLabel } from './label_options';
@@ -45,7 +45,7 @@ export function ValueAxisOptions({
   setParamByIndex,
   setMultipleValidity,
 }: ValueAxisOptionsParams) {
-  const styles = useMemoizedStyles(visEditorSidebarStyles);
+  const styles = useMemoCss(visEditorSidebarStyles);
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
       setParamByIndex('valueAxes', index, paramName, value),

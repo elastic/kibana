@@ -21,7 +21,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorSideBar } from './components/sidebar';
 import { getInitialWidth } from './editor_size';
 
@@ -160,7 +160,7 @@ function DefaultEditor({
 
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
-  const styles = useMemoizedStyles(defaultEditorStyles);
+  const styles = useMemoCss(defaultEditorStyles);
 
   return (
     <KibanaRenderContextProvider {...core}>

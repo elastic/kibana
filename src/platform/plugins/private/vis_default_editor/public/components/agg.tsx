@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';
 import { IAggConfig } from '@kbn/data-plugin/public';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DefaultEditorAggParams } from './agg_params';
 import { DefaultEditorAggCommonProps } from './agg_common_props';
 import { AGGS_ACTION_KEYS, AggsAction } from './agg_group_state';
@@ -65,7 +65,7 @@ function DefaultEditorAgg({
   schemas,
   timeRange,
 }: DefaultEditorAggProps) {
-  const styles = useMemoizedStyles(visEditorSidebarStyles);
+  const styles = useMemoCss(visEditorSidebarStyles);
   const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;

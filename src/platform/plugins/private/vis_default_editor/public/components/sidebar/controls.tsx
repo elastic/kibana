@@ -23,7 +23,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { discardChanges, EditorAction } from './state';
 
 const defaultEditorControlsStyles = {
@@ -57,7 +57,7 @@ function DefaultEditorControls({
   dispatch,
   vis,
 }: DefaultEditorControlsProps) {
-  const styles = useMemoizedStyles(defaultEditorControlsStyles);
+  const styles = useMemoCss(defaultEditorControlsStyles);
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
   const toggleAutoApply = useCallback(
