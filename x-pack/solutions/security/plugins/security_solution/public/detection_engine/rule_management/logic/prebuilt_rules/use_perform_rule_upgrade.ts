@@ -52,7 +52,7 @@ const getSuccessToastMessage = (result: {
 }) => {
   const toastMessage: string[] = [];
   const {
-    summary: { succeeded, skipped, failed },
+    summary: { succeeded, skipped },
   } = result;
   if (succeeded > 0) {
     toastMessage.push(i18n.UPGRADE_RULE_SUCCESS(succeeded));
