@@ -65,7 +65,7 @@ export async function executeEditEmbeddableAction({
     isReadOnly: () => false,
     canEdit: () => true,
   });
-  const openInlineEditor = prepareInlineEditPanel(
+  const getInlineEditor = prepareInlineEditPanel(
     { attributes },
     () => ({ attributes }),
     (newState: LensRuntimeState) =>
@@ -88,7 +88,7 @@ export async function executeEditEmbeddableAction({
     { coreStart: core, ...deps }
   );
 
-  const ConfigPanel = await openInlineEditor({
+  const ConfigPanel = await getInlineEditor({
     onApply,
     onCancel,
   });

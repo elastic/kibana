@@ -12,11 +12,12 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, tracksOverlays } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import useAsync from 'react-use/lib/useAsync';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import type { LensApi } from '../../react_embeddable/types';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, EuiTitle } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -43,65 +44,70 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async execute({ embeddable: api }: EmbeddableApiContext) {
+    const ConfigPanelWrapper = ({ onClose }: { onClose: () => void }) => {
+      const [ConfigPanelRef, setConfigPanelRef] = React.useState<React.JSX.Element | undefined>(
+        undefined
+      );
+      useAsync(async () => {
+        // all this in React.lazy???
+        const t0 = performance.now();
+        if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
+        const embeddable = await api.addNewPanel<object, LensApi>({
+          panelType: 'lens',
+          serializedState: {
+            rawState: {
+              id: generateId(),
+              isNewPanel: true,
+              attributes: { references: [] },
+            },
+          },
+        });
 
-  const flyoutRef = this.core.overlays.openFlyout(
-    toMountPoint(
-      FallbackComponent,
-      this.core
-    ),
-    {
-      className: 'lnsConfigPanel__overlay',
-      size: 's',
-      type: 'push',
-      paddingSize: 'm',
-      maxWidth: 800,
-      hideCloseButton: true,
-      isResizable: true,
-      onClose: (overlayRef) => {
-        overlayTracker?.clearOverlays();
-        overlayRef.close();
-      },
-      outsideClickCloses: true,
-    });
+        // open the flyout if embeddable has been created successfully
+        setConfigPanelRef(await embeddable?.onEdit?.({ onClose }));
 
-  var t0 = performance.now();  
-    if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
-    const embeddable = await api.addNewPanel<object, LensApi>({
-      panelType: 'lens',
-      serializedState: {
-        rawState: {
-          id: generateId(),
-          isNewPanel: true,
-          attributes: { references: [] },
+        const t1 = performance.now();
+        console.log('execute', t1 - t0);
+      }, []);
+
+      return ConfigPanelRef ?? FallbackComponent;
+    };
+
+    const overlayTracker = tracksOverlays(api) ? api : undefined;
+    const onClose = () => {
+      overlayTracker?.clearOverlays();
+      flyoutRef?.close();
+    };
+
+    const flyoutRef = this.core.overlays.openFlyout(
+      toMountPoint(<ConfigPanelWrapper onClose={onClose} />, this.core),
+      {
+        className: 'lnsConfigPanel__overlay',
+        size: 's',
+        type: 'push',
+        paddingSize: 'm',
+        maxWidth: 800,
+        hideCloseButton: true,
+        isResizable: true,
+        onClose: (overlayRef) => {
+          console.log('ITs closing!!!', overlayRef);
+          overlayTracker?.clearOverlays();
+          overlayRef?.close();
         },
-      },
-    });
-    console.log(embeddable, api);
-    var t1 = performance.now();
-    console.log('execute',t1 - t0);
-    const rootEmbeddable = api;
-    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-    if (overlayTracker) {
-      overlayTracker.openOverlay(flyoutRef);
-    }
-    // open the flyout if embeddable has been created successfully
-    embeddable?.onEdit?.();
-
-    var t1 = performance.now();
-    console.log('execute',t1 - t0);
+        outsideClickCloses: true,
+      }
+    );
+    overlayTracker?.openOverlay(flyoutRef);
   }
 }
 
-
-const title = 'Configuration';
-
-const FallbackComponent = <>
-<EuiFlyoutHeader hasBorder>
-  <EuiTitle size="xs">
-      <h2>{title}</h2>
-  </EuiTitle>
-</EuiFlyoutHeader>
-<EuiFlyoutBody>
-  <EuiSkeletonText/>
-</EuiFlyoutBody>
-</>
+const FallbackComponent = (
+  <>
+    <EuiFlyoutHeader hasBorder>
+      <EuiSkeletonTitle size="xs" />
+    </EuiFlyoutHeader>
+    <EuiFlyoutBody>
+      <EuiSkeletonText />
+    </EuiFlyoutBody>
+  </>
+);

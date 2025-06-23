@@ -38,6 +38,7 @@ import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
+import React from 'react';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -180,7 +181,7 @@ export function initializeEditApi(
   };
 
   // This will handle both edit and read only mode based on the view mode
-  const openInlineEditor = prepareInlineEditPanel(
+  const getInlineEditor = prepareInlineEditPanel(
     initialState,
     getModifiedState,
     updateState,
@@ -228,32 +229,27 @@ export function initializeEditApi(
     : true;
 
   const openConfigurationPanel = async (
-    { showOnly }: { showOnly: boolean } = { showOnly: false }
+    { showOnly, onClose }: { showOnly: boolean, onClose?: () => void } = { showOnly: false }
   ) => {
 
     var t0 = performance.now();
     // save the initial state in case it needs to revert later on
     const firstState = getState();
-
-    const rootEmbeddable = parentApi;
-    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-    const ConfigPanel = await openInlineEditor({
+    const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
       onCancel: () => updateState({ ...firstState }),
       // the getState() here contains the wrong filters references but the input attributes
-      // are correct as openInlineEditor() handler is using the getModifiedState() function
+      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
+      closeFlyout: onClose,
     });
 
     var t1 = performance.now();
     console.log('openConfigurationPanel1', t1-t0  );
-    if (ConfigPanel) {
-      mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
-    }
-    console.log('openConfigurationPanel2', t1-t0  );
+    return ConfigPanel 
   };
 
   return {
@@ -272,8 +268,7 @@ export function initializeEditApi(
        * This is the key method to enable the new Editing capabilities API
        * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
-      onEdit: async () => {
-        console.log('onEdit called???');
+      onEdit: async ({onClose}:{onClose: () => void }) => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
@@ -289,7 +284,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        openConfigurationPanel({ showOnly: false });
+        return openConfigurationPanel({ showOnly: false, onClose });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
@@ -312,7 +307,7 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        openConfigurationPanel({ showOnly: true });
+        return openConfigurationPanel({ showOnly: true });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
