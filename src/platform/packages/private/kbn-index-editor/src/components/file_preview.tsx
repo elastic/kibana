@@ -60,6 +60,7 @@ export const FilesPreview: FC = () => {
   const previewDocsMemo = useMemo(
     // memoize the previewDocs to avoid re-fetching the same preview
     // TODO file manager needs to be optimized to preserve data and inject pipeline ref
+    // FIXME messageImporter preserves data from previous callsd
     () => memoize(messageImporter.previewDocs.bind(messageImporter)),
     [messageImporter]
   );
