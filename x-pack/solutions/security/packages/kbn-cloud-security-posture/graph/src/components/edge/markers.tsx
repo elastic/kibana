@@ -50,6 +50,8 @@ const ArrowMarker = ({
 
 const MarkerEndType = {
   primary: 'url(#arrowPrimary)',
+  subdued: 'url(#arrowSubdued)',
+  warning: 'url(#arrowWarning)',
   danger: 'url(#arrowDanger)',
 };
 
@@ -63,6 +65,8 @@ export const SvgDefsMarker = () => {
     <svg css={{ position: 'absolute', width: 0, height: 0 }}>
       <defs>
         <ArrowMarker id="arrowPrimary" color={useEdgeColor('primary')} width={6} height={4.8} />
+        <ArrowMarker id="arrowSubdued" color={useEdgeColor('subdued')} width={6} height={4.8} />
+        <ArrowMarker id="arrowWarning" color={useEdgeColor('warning')} width={6} height={4.8} />
         <ArrowMarker id="arrowDanger" color={useEdgeColor('danger')} width={6} height={4.8} />
       </defs>
     </svg>

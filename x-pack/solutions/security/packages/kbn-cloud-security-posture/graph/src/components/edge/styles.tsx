@@ -94,6 +94,11 @@ export const useEdgeColor = (edgeColor: EdgeViewModel['color']) => {
   switch (edgeColor) {
     case 'danger':
       return euiTheme.colors.danger;
+    case 'warning':
+      return euiTheme.colors.warning;
+    case 'primary':
+      return euiTheme.colors.primary;
+    case 'subdued':
     default:
       return euiTheme.colors.borderBaseFormsControl;
   }
