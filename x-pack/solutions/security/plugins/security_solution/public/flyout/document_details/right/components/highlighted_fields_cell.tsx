@@ -94,7 +94,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
                   data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
                 />
               ) : (
-                <div data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</div>
+                <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
               )}
             </div>
           );
