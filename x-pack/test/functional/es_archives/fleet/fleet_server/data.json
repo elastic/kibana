@@ -267,6 +267,7 @@
         },
         "policy_id": "fleet-server-policy",
         "revision": 1,
+        "latest_revision": true,
         "updated_at": "2024-04-22T22:04:47.788Z",
         "updated_by": "elastic"
       },
@@ -325,6 +326,7 @@
         },
         "policy_ids": ["fleet-server-policy"],
         "revision": 1,
+        "latest_revision": true,
         "updated_at": "2024-04-22T22:04:47.788Z",
         "updated_by": "elastic"
       },
@@ -384,6 +386,7 @@
         },
         "policy_id": "fleet-server-policy-2",
         "revision": 1,
+        "latest_revision": true,
         "updated_at": "2024-04-22T22:04:47.788Z",
         "updated_by": "elastic"
       },
@@ -442,6 +445,7 @@
         },
         "policy_ids": ["fleet-server-policy-2"],
         "revision": 1,
+        "latest_revision": true,
         "updated_at": "2024-04-22T22:04:47.788Z",
         "updated_by": "elastic"
       },
