@@ -6,8 +6,14 @@
  */
 
 import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
-  const { service_settings: serviceSettings, task_type: taskType } = provider;
+  const {
+    inference_id: inferenceId,
+    service,
+    service_settings: serviceSettings,
+    task_type: taskType,
+  } = provider;
   const modelId = serviceSettings?.model_id;
 
   // If there's no model ID in service settings, it's not a tech preview
@@ -19,7 +25,13 @@ export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) 
     For rerank task type, model ID starting with '.' indicates tech preview
     Special case for 'rainbow-sprinkles' model
   */
-  if ((taskType === 'rerank' && modelId.startsWith('.')) || modelId === 'rainbow-sprinkles') {
+  if (
+    (taskType === 'rerank' && modelId.startsWith('.')) ||
+    modelId === 'rainbow-sprinkles' ||
+    (modelId === 'elser-v2' &&
+      inferenceId.startsWith('.') &&
+      service === ServiceProviderKeys.elastic)
+  ) {
     return true;
   }
 
