@@ -7,12 +7,12 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/search_solution/search_navigation'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/search/plugins/search_navigation'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_solution/search_navigation',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_navigation',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/search/plugins/search_solution/search_navigation/{public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/search/plugins/search_navigation/{public,server}/**/*.{ts,tsx}',
   ],
 };
