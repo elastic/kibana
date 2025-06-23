@@ -183,8 +183,8 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
       });
     });
 
-    describe('...(AS <targetField>)', () => {
-      describe('if no provided, the default targetField is `completion`', () => {
+    describe('COMPLETION <targetField> = <prompt>...', () => {
+      describe('if no targetField provided, the default targetField is `completion`', () => {
         test('completion field is not available before COMPLETION command', async () => {
           const { expectErrors } = await setup();
 
@@ -209,7 +209,7 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors(
-            `FROM index | KEEP customField | COMPLETION "prompt" WITH inferenceId AS customField`,
+            `FROM index | KEEP customField | COMPLETION customField = "prompt" WITH inferenceId`,
             ['Unknown column [customField]']
           );
         });
@@ -218,7 +218,7 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors(
-            `FROM index | COMPLETION "prompt" WITH inferenceId AS customField | KEEP customField`,
+            `FROM index | COMPLETION customField = "prompt" WITH inferenceId | KEEP customField`,
             []
           );
         });
@@ -227,7 +227,7 @@ export const validationCompletionCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors(
-            `FROM index | COMPLETION "prompt" WITH inferenceId AS customField | KEEP completion`,
+            `FROM index | COMPLETION customField = "prompt" WITH inferenceId | KEEP completion`,
             ['Unknown column [completion]']
           );
         });
