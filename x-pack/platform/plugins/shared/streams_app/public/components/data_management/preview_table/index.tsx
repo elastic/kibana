@@ -122,6 +122,8 @@ export function PreviewTable({
         Boolean(setVisibleColumns) || Boolean(setSorting)
           ? {
               showHide: Boolean(setVisibleColumns),
+              showMoveLeft: Boolean(setVisibleColumns),
+              showMoveRight: Boolean(setVisibleColumns),
               showSortAsc: Boolean(setSorting),
               showSortDesc: Boolean(setSorting),
             }
