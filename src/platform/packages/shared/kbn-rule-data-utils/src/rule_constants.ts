@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ExportMenu } from './export_popover';
+export const ALERT_KEY_JOINER = ',';
