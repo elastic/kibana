@@ -1970,6 +1970,8 @@
       "@kbn/storage-adapter/*": ["src/platform/packages/shared/kbn-storage-adapter/*"],
       "@kbn/storybook": ["src/platform/packages/shared/kbn-storybook"],
       "@kbn/storybook/*": ["src/platform/packages/shared/kbn-storybook/*"],
+      "@kbn/streamlang": ["x-pack/platform/packages/shared/kbn-streamlang"],
+      "@kbn/streamlang/*": ["x-pack/platform/packages/shared/kbn-streamlang/*"],
       "@kbn/streams-app-plugin": ["x-pack/platform/plugins/shared/streams_app"],
       "@kbn/streams-app-plugin/*": ["x-pack/platform/plugins/shared/streams_app/*"],
       "@kbn/streams-app-wrapper-plugin": ["x-pack/solutions/observability/plugins/observability_streams_wrapper"],
