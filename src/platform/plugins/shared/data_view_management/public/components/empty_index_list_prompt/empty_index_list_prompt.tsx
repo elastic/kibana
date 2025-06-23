@@ -26,7 +26,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,
@@ -41,7 +41,7 @@ export const EmptyIndexListPrompt = ({
   addDataUrl: string;
   navigateToApp: ApplicationStart['navigateToApp'];
 }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">

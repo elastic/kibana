@@ -20,7 +20,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
@@ -49,7 +49,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const pinButtonId = `fieldPreview.pinFieldButtonLabel.${key}`;
 

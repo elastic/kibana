@@ -10,7 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, EuiModalBody, type UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 /**
  * By default the image formatter sets the max-width to "none" on the <img /> tag
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   return (
     <EuiModal onClose={closeModal}>

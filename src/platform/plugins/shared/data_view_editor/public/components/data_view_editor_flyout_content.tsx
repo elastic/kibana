@@ -23,7 +23,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import {
   DataView,
@@ -96,7 +96,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
   dataViewEditorService,
 }: Props) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },

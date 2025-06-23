@@ -19,7 +19,7 @@ import {
   EuiButton,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -70,7 +70,7 @@ export const Footer = ({
   isPersisted,
   canSave,
 }: FooterProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const isEditingAdHoc = isEdit && !isPersisted;
   const submitPersisted = () => {
     onSubmit(false);

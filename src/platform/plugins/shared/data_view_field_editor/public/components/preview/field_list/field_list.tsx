@@ -20,7 +20,7 @@ import {
   EuiTextColor,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import { useFieldPreviewContext } from '../field_preview_context';
@@ -78,7 +78,7 @@ const Row = React.memo<RowProps>(({ data, index, style }) => {
 }, areEqual);
 
 export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const { dataView } = useFieldEditorContext();
   const { controller } = useFieldPreviewContext();
   const virtualListRef = useRef<VirtualList>(null);

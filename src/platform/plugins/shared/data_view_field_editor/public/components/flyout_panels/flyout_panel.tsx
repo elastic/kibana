@@ -18,7 +18,7 @@ import React, {
 } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexItem, type UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelsContext } from './flyout_panels';
 
@@ -51,7 +51,7 @@ export const Panel: React.FC<Props & React.HTMLProps<HTMLDivElement>> = ({
   'data-test-subj': dataTestSubj,
   ...rest
 }) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const [dynamicStyles, setDynamicStyles] = useState<CSSProperties>({});
 
   const [config, setConfig] = useState<{ hasFooter: boolean; hasContent: boolean }>({

@@ -10,12 +10,12 @@
 import React, { useEffect, FC, PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { useFlyoutPanelContext } from './flyout_panel';
 
 export const PanelContent: FC<PropsWithChildren<unknown>> = (props) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const { registerContent } = useFlyoutPanelContext();
 
   useEffect(() => {
