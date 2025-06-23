@@ -37,11 +37,11 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
             })}
             description={i18n.translate('xpack.searchHomepage.searchLabs.description', {
               defaultMessage:
-                'Explore the latest articles and tutorials on using Elasticsearch for AI/ML-powered search experiences.',
+                'Explore the latest innovations for advanced search experiences.',
             })}
             buttonHref={docLinks.visitSearchLabs}
             buttonLabel={i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
-              defaultMessage: 'Visit Search Labs',
+              defaultMessage: 'Visit Elasticsearch Labs',
             })}
             dataTestSubj="searchLabsButton"
           />
@@ -63,7 +63,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="elasticsearchDocumentationSection">
           <DocCallouts
-            title={i18n.translate('xpack.searchHomepage.searchLabs.title', {
+            title={i18n.translate('xpack.searchHomepage.elasticsearchDocs.title', {
               defaultMessage: 'Elasticsearch documentation',
             })}
             description={i18n.translate(

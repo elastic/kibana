@@ -26,7 +26,7 @@ export const SemanticSearch: React.FC = () => {
       'xpack.searchHomepage.aiSearchCapabilities.semanticSearch.description',
       {
         defaultMessage:
-          "Leverage the semantic_text field along with Elastic's advanced ELSER machine learning model for enhanced data analysis.",
+          "Leverage the semantic_text field and ELSER machine learning model for enhanced data analysis.",
       }
     ),
     featureBullets: [
