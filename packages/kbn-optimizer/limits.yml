@@ -125,6 +125,7 @@ pageLoadAssetSize:
   reporting: 58600
   rollup: 97204
   runtimeFields: 41752
+  sampleDataIngest: 17496
   savedObjects: 108518
   savedObjectsFinder: 21691
   savedObjectsManagement: 101836
