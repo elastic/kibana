@@ -6,13 +6,9 @@
  */
 
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
-import { createTimeFilter, type TimeRange } from '../common/time_filter';
 
-export const getGrantedRightsEsqlCount = (namespace: string, timeRange?: TimeRange) => {
-  const timeFilter = createTimeFilter(timeRange);
-
+export const getGrantedRightsEsqlCount = (namespace: string) => {
   return `FROM logs-* METADATA _id, _index
-    ${timeFilter}
     ${getPrivilegedMonitorUsersJoin(namespace)}
     | WHERE (host.os.type == "linux"
       AND event.type == "start"
@@ -29,7 +25,7 @@ export const getGrantedRightsEsqlCount = (namespace: string, timeRange?: TimeRan
     | EVAL okta_privilege = MV_FIRST(okta.target.display_name)
     | EVAL group_name = COALESCE(group.name, user.target.group.name, okta_privilege)
     | EVAL host_ip = COALESCE(host.ip, source.ip)
-    | EVAL target_user = COALESCE(user.target.name, user.target.full_name, winlog.event_data.TargetUserName)  
-    | EVAL privileged_user = COALESCE(source.user.name, user.name)  
+    | EVAL target_user = COALESCE(user.target.name, user.target.full_name, winlog.event_data.TargetUserName)
+    | EVAL privileged_user = COALESCE(source.user.name, user.name)
     | STATS COUNT(*)`;
 };

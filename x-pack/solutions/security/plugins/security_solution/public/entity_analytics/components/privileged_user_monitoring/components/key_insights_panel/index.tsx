@@ -23,16 +23,7 @@ const tileStyles = css`
   height: 100%;
 `;
 
-interface TimeRange {
-  from: string;
-  to: string;
-}
-
-interface KeyInsightsPanelProps {
-  timerange: TimeRange;
-}
-
-export const KeyInsightsPanel: React.FC<KeyInsightsPanelProps> = ({ timerange }) => {
+export const KeyInsightsPanel = () => {
   return (
     <EuiFlexGroup
       wrap
@@ -47,32 +38,32 @@ export const KeyInsightsPanel: React.FC<KeyInsightsPanelProps> = ({ timerange })
     >
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <ActivePrivilegedUsersTile timerange={timerange} />
+          <ActivePrivilegedUsersTile />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AlertsTriggeredTile timerange={timerange} />
+          <AlertsTriggeredTile />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AnomaliesDetectedTile timerange={timerange} />
+          <AnomaliesDetectedTile />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <GrantedRightsTile timerange={timerange} />
+          <GrantedRightsTile />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AccountSwitchesTile timerange={timerange} />
+          <AccountSwitchesTile />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AuthenticationsTile timerange={timerange} />
+          <AuthenticationsTile />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>

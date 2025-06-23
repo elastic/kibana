@@ -13,19 +13,18 @@ import { getAlertsTriggeredEsqlCount } from './esql_query';
 
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
+import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
+import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 
-interface Props {
-  timerange: {
-    from: string;
-    to: string;
-  };
-}
+export const AlertsTriggeredTile = () => {
+  const filterQuery = useEsqlGlobalFilterQuery();
+  const timerange = useGlobalTime();
 
-export const AlertsTriggeredTile: React.FC<Props> = ({ timerange }) => {
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Alerts Triggered',
     label: 'Alerts Triggered',
-    esqlQuery: getAlertsTriggeredEsqlCount('default', timerange),
+    esqlQuery: getAlertsTriggeredEsqlCount('default'),
+    filterQuery,
   });
 
   return (

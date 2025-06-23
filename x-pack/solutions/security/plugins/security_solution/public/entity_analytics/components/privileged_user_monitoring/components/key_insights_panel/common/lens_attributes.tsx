@@ -6,6 +6,7 @@
  */
 
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { ESBoolQuery } from '../../../../../../../common/typed_json';
 
 interface KeyInsightsPanelParams {
   title: string;
@@ -13,6 +14,7 @@ interface KeyInsightsPanelParams {
   esqlQuery: string;
   dataViewId?: string;
   dataViewTitle?: string;
+  filterQuery: ESBoolQuery | undefined;
 }
 
 export const createKeyInsightsPanelLensAttributes = ({
@@ -21,6 +23,7 @@ export const createKeyInsightsPanelLensAttributes = ({
   esqlQuery,
   dataViewId = 'default-dataview',
   dataViewTitle = 'logs-*',
+  filterQuery,
 }: KeyInsightsPanelParams): LensAttributes => {
   // Determine appropriate data view based on the query
   const isMLQuery = esqlQuery.includes('.ml-anomalies');
@@ -69,7 +72,7 @@ export const createKeyInsightsPanelLensAttributes = ({
         query: esqlQuery,
         language: 'esql',
       },
-      filters: [],
+      filters: [{ query: filterQuery, meta: {} }],
       datasourceStates: {
         textBased: {
           layers: {

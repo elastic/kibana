@@ -12,23 +12,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { getAnomaliesDetectedEsqlQuery } from './esql_query';
-
-interface Props {
-  timerange: {
-    from: string;
-    to: string;
-  };
-}
+import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
+import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
 
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
 
-export const AnomaliesDetectedTile: React.FC<Props> = ({ timerange }) => {
-  const esqlQuery = getAnomaliesDetectedEsqlQuery('default', timerange);
+export const AnomaliesDetectedTile = () => {
+  const filterQuery = useEsqlGlobalFilterQuery();
+  const timerange = useGlobalTime();
+
+  const esqlQuery = getAnomaliesDetectedEsqlQuery('default');
   const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Anomalies Detected',
     label: 'Anomalies Detected',
     esqlQuery,
+    filterQuery,
   });
   return (
     <EuiFlexItem grow={false}>

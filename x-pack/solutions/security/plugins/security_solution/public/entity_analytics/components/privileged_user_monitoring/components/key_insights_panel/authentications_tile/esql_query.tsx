@@ -6,13 +6,9 @@
  */
 
 import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
-import { createTimeFilter, type TimeRange } from '../common/time_filter';
 
-export const getAuthenticationsEsqlCount = (namespace: string, timeRange?: TimeRange) => {
-  const timeFilter = createTimeFilter(timeRange);
-
+export const getAuthenticationsEsqlCount = (namespace: string) => {
   return `FROM logs-okta.system-* METADATA _id, _index
-      ${timeFilter}
       ${getPrivilegedMonitorUsersJoin(namespace)}
       | RENAME source.ip AS host_ip, okta.target.display_name as destination, client.user.name as privileged_user, event.module as source, okta.debug_context.debug_data.url as url, okta.outcome.result as result
       | WHERE privileged_user IS NOT NULL
