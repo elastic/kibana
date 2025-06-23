@@ -4269,6 +4269,22 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleType.internallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "internallyManaged",
+            "description": [
+              "\nIndicates that the rule type is managed internally by a Kibana plugin.\nAlerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
