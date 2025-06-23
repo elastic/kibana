@@ -603,12 +603,13 @@ const cleanIndex = (inputIndex: string): string => {
  * @param sources - A Set of source names to check against.
  * @returns true if the source exists, false otherwise.
  */
+
+// The comma-separated index and the ::data or ::failures suffixes solution is temporary
+// till we fix the AST for the quoted index names https://github.com/elastic/kibana/issues/222505.
 export function sourceExists(index: string, sources: Set<string>) {
   if (index.startsWith('-')) {
     return true;
   }
-  // The comma-separated index and the ::data or ::failures suffixes solution is temporary 
-  // till we fix the AST for the quoted index names https://github.com/elastic/kibana/issues/222505.
   // Split the index by comma to handle multiple values and clean each part
   const individualIndices = index.split(',').map((item) => cleanIndex(item));
   // Check if all individual indices exist in sources
