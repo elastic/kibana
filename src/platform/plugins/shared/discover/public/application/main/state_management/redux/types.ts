@@ -67,8 +67,8 @@ export interface TabState extends TabItem {
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
   uiState: {
-    dataGrid?: UnifiedDataTableRestorableState;
-    fieldList?: UnifiedFieldListRestorableState;
+    dataGrid?: Partial<UnifiedDataTableRestorableState>;
+    fieldList?: Partial<UnifiedFieldListRestorableState>;
   };
 }
 

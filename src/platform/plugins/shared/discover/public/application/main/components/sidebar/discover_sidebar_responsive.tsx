@@ -393,7 +393,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const fieldListUiState = useCurrentTabSelector((state) => state.uiState.fieldList);
   const setFieldListUiState = useCurrentTabAction(internalStateActions.setFieldListUiState);
   const onInitialStateChange = useCallback(
-    (newFieldListUiState: UnifiedFieldListRestorableState) => {
+    (newFieldListUiState: Partial<UnifiedFieldListRestorableState>) => {
       dispatch(
         setFieldListUiState({
           fieldListUiState: newFieldListUiState,

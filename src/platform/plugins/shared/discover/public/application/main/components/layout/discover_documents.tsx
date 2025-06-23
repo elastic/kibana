@@ -403,7 +403,7 @@ function DiscoverDocumentsComponent({
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
   const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
   const onInitialStateChange = useCallback(
-    (newDataGridUiState: UnifiedDataTableRestorableState) =>
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
       dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
     [dispatch, setDataGridUiState]
   );

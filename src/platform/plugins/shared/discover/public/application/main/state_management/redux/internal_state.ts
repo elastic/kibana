@@ -223,7 +223,7 @@ export const internalStateSlice = createSlice({
 
     setDataGridUiState: (
       state,
-      action: TabAction<{ dataGridUiState: TabState['uiState']['dataGrid'] }>
+      action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>
     ) =>
       withTab(state, action, (tab) => {
         tab.uiState.dataGrid = action.payload.dataGridUiState;
@@ -231,7 +231,7 @@ export const internalStateSlice = createSlice({
 
     setFieldListUiState: (
       state,
-      action: TabAction<{ fieldListUiState: TabState['uiState']['fieldList'] }>
+      action: TabAction<{ fieldListUiState: Partial<TabState['uiState']['fieldList']> }>
     ) =>
       withTab(state, action, (tab) => {
         tab.uiState.fieldList = action.payload.fieldListUiState;
