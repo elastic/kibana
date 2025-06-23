@@ -264,7 +264,7 @@ describe('SynchronizationTaskRunner', () => {
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
       task: {} as TasksTaskInfo,
-      response: { error: 'error' },
+      error: { type: 'reindex_error', reason: 'Reindex failed' },
     });
 
     const getESClient = async () => esClient;

@@ -216,7 +216,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
       return ReindexStatus.RUNNING;
     }
 
-    if (taskResponse.response?.failures?.length || taskResponse.response?.error) {
+    if (taskResponse.response?.failures?.length || taskResponse?.error) {
       return ReindexStatus.FAILED;
     }
 
