@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('../../apis'));
+  describe('Intercepts API', function () {
+    loadTestFile(require.resolve('./interaction_apis'));
+    loadTestFile(require.resolve('./trigger_apis'));
   });
 }
