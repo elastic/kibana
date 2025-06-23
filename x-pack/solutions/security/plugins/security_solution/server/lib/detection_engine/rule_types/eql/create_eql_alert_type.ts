@@ -20,7 +20,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 export const createEqlAlertType = (): SecurityAlertType<EqlRuleParams, {}> => {
   return {
     id: EQL_RULE_TYPE_ID,
-    name: 'Event Correlation Rule',
+    name: 'Event Correlation (EQL)',
     validate: {
       params: {
         validate: (object: unknown) => {

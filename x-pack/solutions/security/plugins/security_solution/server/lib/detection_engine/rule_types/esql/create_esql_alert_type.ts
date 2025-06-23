@@ -17,7 +17,7 @@ import type { EsqlState } from './types';
 export const createEsqlAlertType = (): SecurityAlertType<EsqlRuleParams, EsqlState> => {
   return {
     id: ESQL_RULE_TYPE_ID,
-    name: 'ES|QL Rule',
+    name: 'ES|QL',
     validate: {
       params: {
         validate: (object: unknown) => {

@@ -396,7 +396,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(
         createQueryAlertType({
           id: SAVED_QUERY_RULE_TYPE_ID,
-          name: 'Saved Query Rule',
+          name: 'Saved Query',
         })
       )
     );
@@ -406,7 +406,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeWrapper(
         createQueryAlertType({
           id: QUERY_RULE_TYPE_ID,
-          name: 'Custom Query Rule',
+          name: 'Custom Query',
         })
       )
     );

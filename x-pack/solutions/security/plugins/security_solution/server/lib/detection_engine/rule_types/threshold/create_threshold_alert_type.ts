@@ -22,7 +22,7 @@ export const createThresholdAlertType = (): SecurityAlertType<
 > => {
   return {
     id: THRESHOLD_RULE_TYPE_ID,
-    name: 'Threshold Rule',
+    name: 'Threshold',
     validate: {
       params: {
         validate: (object: unknown): ThresholdRuleParams => {
