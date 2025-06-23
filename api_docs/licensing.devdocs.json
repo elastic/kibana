@@ -811,10 +811,6 @@
               "path": "x-pack/platform/plugins/shared/license_management/public/plugin.ts"
             },
             {
-              "plugin": "aiops",
-              "path": "x-pack/platform/plugins/shared/aiops/public/plugin.tsx"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts"
             },
