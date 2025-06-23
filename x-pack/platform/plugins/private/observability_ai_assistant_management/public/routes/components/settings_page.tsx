@@ -169,7 +169,7 @@ export function SettingsPage() {
           <EuiButtonEmpty
             size="s"
             iconType="gear"
-            onClick={() => navigateToApp('management', { path: 'kibana/genAiSettings' })}
+            onClick={() => navigateToApp('management', { path: 'kibana/genAiSettings' })} // TODO: update path when available
             data-test-subj="genAiSettingsLink"
           >
             {i18n.translate(
