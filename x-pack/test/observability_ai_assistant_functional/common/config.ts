@@ -13,7 +13,7 @@ import {
   KibanaEBTUIProvider,
 } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import path from 'path';
-import { secondaryEditor, editor, viewer, unauthorizedUser } from './users/users';
+import { secondaryEditor, editor, viewer } from './users/users';
 import { getScopedApiClient } from '../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/observability_ai_assistant_api_client';
 import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';
@@ -85,15 +85,6 @@ export function createObservabilityAIAssistantAPIConfig({
       getScopedApiClientForUsername: () => getScopedApiClientForUsername,
       apmSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
-      observabilityAIAssistantAPIClient: async () => {
-        return {
-          admin: getScopedApiClientForUsername('elastic'),
-          viewer: getScopedApiClientForUsername(viewer.username),
-          editor: getScopedApiClientForUsername(editor.username),
-          secondaryEditor: getScopedApiClientForUsername(secondaryEditor.username),
-          unauthorizedUser: getScopedApiClientForUsername(unauthorizedUser.username),
-        };
-      },
     },
     junit: {
       reportName: `Observability AI Assistant API Integration tests (${name})`,
