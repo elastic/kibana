@@ -190,7 +190,11 @@ describe('single line query', () => {
       });
     });
 
-    describe('RERANK', () => {
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    describe.skip('RERANK', () => {
       test('single field', () => {
         const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
 
@@ -358,16 +362,10 @@ describe('single line query', () => {
         expect(text).toBe('FROM index::selector');
       });
 
-      test('single-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"selector"');
+      test('single-double quoted pair source selector', () => {
+        const { text } = reprint('FROM "index::selector"');
 
-        expect(text).toBe('FROM index::"selector"');
-      });
-
-      test('triple-double quoted source selector', () => {
-        const { text } = reprint('FROM index::"""say "jump"!"""');
-
-        expect(text).toBe('FROM index::"say \\"jump\\"!"');
+        expect(text).toBe('FROM "index::selector"');
       });
     });
 

@@ -2143,28 +2143,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'completion', 'dissect', 'eval', 'grok', 'limit', 'sample', 'sort', 'stats', 'where', 'fork', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2444,7 +2444,8 @@
     {
       "query": "from a_index | rename textField as",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2452,7 +2453,7 @@
       "query": "from a_index | rename missingField as",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [missingField]"
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
@@ -2491,15 +2492,14 @@
       "error": [
         "Unknown column [a]"
       ],
-      "warning": []
+      "warning": [
+        "Column [textField] of type text has been overwritten as new type: unknown"
+      ]
     },
     {
       "query": "from a_index | rename fn() as a",
       "error": [
-        "SyntaxError: token recognition error at: '('",
-        "SyntaxError: token recognition error at: ')'",
-        "Unknown column [fn]",
-        "Unknown column [a]"
+        "Invalid query [from a_index | rename fn() as a]"
       ],
       "warning": []
     },
@@ -2516,7 +2516,8 @@
     {
       "query": "from a_index |eval doubleField + 1 | rename `doubleField + 1` as ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}"
+        "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        "Error: [as] function expects exactly 2 arguments, got 1."
       ],
       "warning": []
     },
