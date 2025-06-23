@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { useGetScheduledList } from './use_get_scheduled_list';
+import { testQueryClient } from '../test_utils/test_query_client';
 
 jest.mock('../apis/get_scheduled_reports_list', () => ({
   getScheduledReportsList: jest.fn(),
@@ -18,10 +19,9 @@ jest.mock('../apis/get_scheduled_reports_list', () => ({
 
 describe('useGetScheduledList', () => {
   const http = httpServiceMock.createStartContract();
-  const queryClient = new QueryClient();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
   );
 
   beforeEach(() => {
