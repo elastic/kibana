@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { StarterPrompts } from './starter_prompts';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
 import * as i18n from '../translations';
@@ -21,6 +22,9 @@ interface Props {
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   allSystemPrompts: PromptResponse[];
 }
+const starterPromptWrapperClassName = css`
+  max-width: 95%;
+`;
 
 export const EmptyConvo: React.FC<Props> = ({
   allSystemPrompts,
@@ -30,7 +34,12 @@ export const EmptyConvo: React.FC<Props> = ({
   setIsSettingsModalVisible,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptyConvo">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      data-test-subj="emptyConvo"
+      direction="column"
+    >
       <EuiFlexItem grow={false}>
         <EuiPanel
           hasShadow={false}
@@ -63,6 +72,13 @@ export const EmptyConvo: React.FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
+        <StarterPrompts
+          onSelectPrompt={(p) => {
+            console.log('prompt', p);
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

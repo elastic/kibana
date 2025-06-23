@@ -109,7 +109,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         {isLoading ? (
           <EuiEmptyPrompt
             data-test-subj="animatedLogo"
