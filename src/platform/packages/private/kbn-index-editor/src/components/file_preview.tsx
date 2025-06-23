@@ -19,7 +19,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { noop } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
   fileName: string;
@@ -33,16 +33,12 @@ export const FilesPreview: FC = () => {
   const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
 
   const {
-    services: { data },
+    services: { data, messageImporter },
   } = useKibana<KibanaContextExtra>();
 
   const isMounted = useMountedState();
 
   const [filePreviewItems, setFilePreviewItems] = useState<FilePreviewItem[]>([]);
-
-  const {
-    services: { messageImporter },
-  } = useKibana<KibanaContextExtra>();
 
   const fetchFilePreview = useCallback(async () => {
     try {
