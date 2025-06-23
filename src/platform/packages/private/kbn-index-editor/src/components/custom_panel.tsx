@@ -10,7 +10,6 @@
 import React, { useMemo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { FilePicker } from './file_picker';
@@ -33,8 +32,8 @@ export const CustomPanel = () => {
     return dataViewColumns?.map((c) => c.name);
   }, [dataViewColumns]);
 
-  const discoverLocator = useMemo<DiscoverAppLocator | undefined>(() => {
-    return share?.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR');
+  const discoverLocator = useMemo(() => {
+    return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
   const discoverLink = dataView
