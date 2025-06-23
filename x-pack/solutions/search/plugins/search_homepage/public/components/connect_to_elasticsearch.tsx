@@ -131,7 +131,7 @@ export const ConnectToElasticsearch = () => {
                           {i18n.translate(
                             'xpack.searchHomepage.connectToElasticsearch.createApiKey',
                             {
-                              defaultMessage: 'Create API Key',
+                              defaultMessage: 'Create API key',
                             }
                           )}
                         </EuiButton>
