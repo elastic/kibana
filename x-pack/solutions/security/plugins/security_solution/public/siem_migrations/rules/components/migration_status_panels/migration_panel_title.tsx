@@ -48,12 +48,12 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
   }, [migrationStats.name]);
 
-  const { mutate: updateMigration, isLoading: isUpdatingMigration } = useUpdateMigration(
-    migrationStats.id,
-    { onError: onRenameError }
-  );
   const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
     migrationStats.id
+  );
+  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
+    migrationStats.id,
+    { onError: onRenameError }
   );
 
   const cancelEdit = useCallback(() => {
@@ -121,7 +121,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                   onClick={togglePopover}
                   aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
                   data-test-subj="openMigrationOptionsButton"
-                  isLoading={isUpdatingMigration || isDeletingMigration}
+                  isLoading={isUpdatingMigrationName || isDeletingMigration}
                 />
               }
               isOpen={isPopoverOpen}
@@ -145,7 +145,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                   data-test-subj="deleteMigrationItem"
                 >
                   <EuiToolTip content={isDeletable ? undefined : i18n.NOT_DELETABLE_MIGRATION_TEXT}>
-                    <span>{i18n.DELETE_MIGRATION_TEXT}</span>
+                    <span>{i18n.DELETE_BUTTON_TEXT}</span>
                   </EuiToolTip>
                 </EuiContextMenuItem>
               </EuiContextMenuPanel>

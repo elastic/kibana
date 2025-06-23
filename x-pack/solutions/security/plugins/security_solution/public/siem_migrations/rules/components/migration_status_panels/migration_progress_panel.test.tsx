@@ -23,7 +23,6 @@ const inProgressMigrationStats: RuleMigrationStats = {
   name: 'test-migration',
   status: SiemMigrationTaskStatus.RUNNING,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
-  name: 'test migration',
   rules: { total: 26, pending: 6, processing: 10, completed: 9, failed: 1 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
