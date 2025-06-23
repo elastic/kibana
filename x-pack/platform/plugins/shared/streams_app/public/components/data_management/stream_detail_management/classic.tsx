@@ -80,21 +80,20 @@ export function ClassicStreamDetailManagement({
   const tabs: ManagementTabs = {};
 
   if (definition.data_stream_exists) {
-    tabs.enrich = {
-      content: (
-        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
-      }),
-    };
-
     tabs.lifecycle = {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
         defaultMessage: 'Data retention',
+      }),
+    };
+    tabs.enrich = {
+      content: (
+        <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
+        defaultMessage: 'Processing',
       }),
     };
   }

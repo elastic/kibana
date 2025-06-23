@@ -187,6 +187,34 @@ export const BULK_ACTION_DELETE_INVESTIGATION_FIELDS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.alertSuppressionTitle',
+  {
+    defaultMessage: 'Alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppression',
+  {
+    defaultMessage: 'Apply alert suppression',
+  }
+);
+
+export const BULK_ACTION_SET_ALERT_SUPPRESSION_FOR_THRESHOLD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setAlertSuppressionForThreshold',
+  {
+    defaultMessage: 'Apply alert suppression to threshold rules',
+  }
+);
+
+export const BULK_ACTION_DELETE_ALERT_SUPPRESSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.deleteAlertSuppression',
+  {
+    defaultMessage: 'Remove alert suppression',
+  }
+);
+
 export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
   {
