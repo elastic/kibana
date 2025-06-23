@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 interface FeatureUpdateGroupProps {
   updates: string[];
@@ -22,9 +21,7 @@ export const FeatureUpdateGroup: React.FC<FeatureUpdateGroupProps> = ({ updates 
             <EuiFlexItem grow={false}>
               <EuiIcon type="checkInCircleFilled" color="primary" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {update}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{update}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}

@@ -9,11 +9,12 @@ import { useQuery } from '@tanstack/react-query';
 import type { ApiKeysResponse } from '../../../common/types';
 import { useKibana } from '../use_kibana';
 import { GET_API_KEYS_ROUTE } from '../../../common/routes';
+import { QueryKeys } from '../../constants';
 
 export const useGetApiKeys = () => {
   const { http } = useKibana().services;
   return useQuery({
-    queryKey: ['apiKey'],
+    queryKey: [QueryKeys.ApiKey],
     queryFn: () => http.fetch<ApiKeysResponse>(GET_API_KEYS_ROUTE),
   });
 };
