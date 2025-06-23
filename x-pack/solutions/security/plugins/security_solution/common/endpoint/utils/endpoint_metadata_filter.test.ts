@@ -38,6 +38,7 @@ describe('buildBaseEndpointMetadataFilter', () => {
     });
 
     it('should return base filters without policy filter when policyIds is null', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = buildBaseEndpointMetadataFilter(null as any);
 
       expect(result).toEqual({
