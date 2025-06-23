@@ -26,13 +26,13 @@ import { useKibana } from '../hooks/use_kibana';
 import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 
-const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
-const CREATE_API_KEY = '/app/management/security/api_keys/create';
-
 export const ConnectToElasticsearch = () => {
-  const { http } = useKibana().services;
+  const { http, share } = useKibana().services;
   const { data } = useGetApiKeys();
   const elasticsearchUrl = useElasticsearchUrl();
+  const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
+  const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
+  const createApiKeyLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys/create' });
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -124,7 +124,7 @@ export const ConnectToElasticsearch = () => {
                     <EuiFlexGroup gutterSize="s" alignItems="baseline">
                       <EuiFlexItem grow={false}>
                         <EuiButton
-                          href={http.basePath.prepend(CREATE_API_KEY)}
+                          href={createApiKeyLink}
                           iconType="key"
                           data-test-subj="createApiKeyButton"
                         >
@@ -139,7 +139,7 @@ export const ConnectToElasticsearch = () => {
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           iconType="gear"
-                          href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                          href={manageKeysLink}
                           data-test-subj="manageApiKeysButton"
                         >
                           Manage API keys
