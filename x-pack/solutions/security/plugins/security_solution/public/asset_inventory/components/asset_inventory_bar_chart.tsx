@@ -15,7 +15,7 @@ import {
   type EuiThemeFontSize,
 } from '@elastic/eui';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
-import type { GeometryValue, SeriesIdentifier, ElementClickListener } from '@elastic/charts';
+import type { GeometryValue, SeriesIdentifier } from '@elastic/charts';
 import { Axis, BarSeries, Chart, Position, Settings, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
@@ -87,6 +87,26 @@ const createAssetFilter = (key: string, value: string) => {
   };
 };
 
+export const handleElementClick = (
+  elements: Array<[GeometryValue, SeriesIdentifier]>,
+  setQuery: (v: Partial<AssetsURLQuery>) => void
+): void => {
+  if (!elements.length) return;
+
+  const [[geometryValue]] = elements;
+  const datum = geometryValue.datum as AssetInventoryChartData;
+
+  const subtype = datum[ASSET_FIELDS.ENTITY_SUB_TYPE];
+  const type = datum[ASSET_FIELDS.ENTITY_TYPE];
+
+  const filters = [
+    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type),
+    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype),
+  ];
+
+  setQuery({ filters });
+};
+
 export const AssetInventoryBarChart = ({
   isLoading,
   isFetching,
@@ -97,20 +117,6 @@ export const AssetInventoryBarChart = ({
   const xsFontSize = useEuiFontSize('xs');
   const baseTheme = useElasticChartsTheme();
 
-  const handleElementClick: ElementClickListener = (elements) => {
-    const [[geometryValue]] = elements as Array<[GeometryValue, SeriesIdentifier]>;
-    const datum = geometryValue.datum;
-
-    const subtype = (datum as AssetInventoryChartData)?.[ASSET_FIELDS.ENTITY_SUB_TYPE];
-    const type = (datum as AssetInventoryChartData)?.[ASSET_FIELDS.ENTITY_TYPE];
-
-    const filters = [
-      createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type),
-      createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype),
-    ];
-
-    setQuery?.({ filters });
-  };
   return (
     <div css={getChartStyles(euiTheme, xsFontSize)}>
       <EuiProgress size="xs" color="accent" css={getProgressStyle(isFetching)} />
@@ -156,7 +162,9 @@ export const AssetInventoryBarChart = ({
               const count = !seriesData ? 0 : getAbbreviatedNumber(seriesData.count);
               return <span>{count}</span>;
             }}
-            onElementClick={handleElementClick}
+            onElementClick={(elements) =>
+              handleElementClick(elements as Array<[GeometryValue, SeriesIdentifier]>, setQuery)
+            }
           />
           <Axis
             id="X-axis"
