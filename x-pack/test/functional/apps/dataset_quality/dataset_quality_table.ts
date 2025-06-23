@@ -39,7 +39,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const failedDatasetName = datasetNames[1];
 
-  describe('Dataset quality table', () => {
+  describe('Dataset quality table', function () {
+    // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+    // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+    // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+    this.onlyEsVersion('8.19 || >=9.1');
+
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
