@@ -124,9 +124,13 @@ components:
         - type: object
           required:
             - id
+            - name
           properties:
             id:
               description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            name:
+              description: The rule migration name
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/RuleMigrationData'
 
@@ -207,6 +211,7 @@ components:
       description: The rule migration task stats object.
       required:
         - id
+        - name
         - status
         - rules
         - created_at
@@ -214,6 +219,9 @@ components:
       properties:
         id:
           description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The migration name
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
@@ -261,7 +269,7 @@ components:
         - running
         - stopped
         - finished
-        - aborted
+        - interrupted
 
     RuleMigrationTranslationStats:
       type: object
@@ -478,10 +486,10 @@ components:
         started_at:
           type: string
           description: The moment the last execution started.
-        ended_at:
+        finished_at:
           type: string
           nullable: true
-          description: The moment the last execution ended.
+          description: The moment the last execution finished.
         connector_id:
           type: string
           description: The connector ID used for the last execution.
@@ -489,9 +497,9 @@ components:
           type: string
           nullable: true
           description: The error message if the last execution failed.
-        is_aborted:
+        is_stopped:
           type: boolean
-          description: Indicates if the last execution was aborted by the user.
+          description: Indicates if the last execution was stopped by the user.
         skip_prebuilt_rules_matching:
           type: boolean
           description: Indicates if the last execution skipped pre-built rule matching.

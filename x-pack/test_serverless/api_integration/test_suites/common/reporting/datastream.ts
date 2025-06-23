@@ -126,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             description: 'default kibana reporting template installed by elasticsearch',
             managed: true,
           },
+          failureStoreEnabled: false,
           name: '.kibana-reporting',
           indexTemplateName: '.kibana-reporting',
           generation: 1,
@@ -141,7 +142,11 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           lifecycle: expect.objectContaining({ enabled: true }),
           nextGenerationManagedBy: 'Data stream lifecycle',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
           timeStampField: { name: '@timestamp' },
         })
       );

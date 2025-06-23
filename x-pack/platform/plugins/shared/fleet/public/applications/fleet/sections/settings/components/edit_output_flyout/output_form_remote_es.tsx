@@ -415,7 +415,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                   placeholder={i18n.translate(
                     'xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyPlaceholder',
                     {
-                      defaultMessage: 'Specify Kibana API Key',
+                      defaultMessage: 'Specify encoded Kibana API Key',
                     }
                   )}
                 />
