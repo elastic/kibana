@@ -19,25 +19,7 @@ import {
 const MANAGEMENT_PAGE_DESCRIPTION =
   'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.';
 
-describe(
-  'Capabilities',
-  {
-    tags: ['@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          '--serverless=security',
-          '--xpack.encryptedSavedObjects.encryptionKey="abcdefghijklmnopqrstuvwxyz123456"',
-          `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-            { product_line: 'ai_soc', product_tier: 'search_ai_lake' },
-          ])}`,
-          '--csp.strict=false',
-          '--csp.warnLegacyBrowsers=false',
-        ],
-      },
-    },
-  },
-  () => {
+describe('Capabilities', { tags: ['@serverless'], () => {
   const userRoles = [
     {
       name: 'Admin user',

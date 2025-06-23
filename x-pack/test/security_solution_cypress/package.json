@@ -45,6 +45,7 @@
     "cypress:cloud_security_posture:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts'",
     "cypress:burn:serverless": "yarn cypress:serverless --env burn=2",
     "cypress:qa:serverless": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts",
+    "cypress:ai4dsoc:qa:serverless": "TZ=UTC node ../../solutions/security/plugins/security_solution/scripts/start_cypress_parallel_serverless --config-file ../../test/security_solution_cypress/cypress/cypress_ci_serverless_qa.config.ts --ftr-config-file ../../test/security_solution_cypress/ai4dsoc_serverless_config",
     "cypress:open:qa:serverless": "yarn cypress:qa:serverless open",
     "cypress:run:qa:serverless:entity_analytics": "yarn cypress:qa:serverless --spec './cypress/e2e/entity_analytics/**/*.cy.ts'",
     "cypress:run:qa:serverless:investigations": "yarn cypress:qa:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
@@ -55,6 +56,6 @@
     "cypress:run:qa:serverless:detection_engine:exceptions": "yarn cypress:qa:serverless --spec './cypress/e2e/detection_response/detection_engine/exceptions/**/*.cy.ts'",
     "cypress:run:qa:serverless:ai_assistant": "yarn cypress:qa:serverless --spec './cypress/e2e/ai_assistant/**/*.cy.ts'",
     "cypress:run:qa:serverless:cloud_security_posture": "yarn cypress:qa:serverless --spec './cypress/e2e/cloud_security_posture/**/*.cy.ts",
-    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:qa:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'"
+    "cypress:run:qa:serverless:ai4dsoc": "yarn cypress:ai4dsoc:qa:serverless --spec './cypress/e2e/ai4dsoc/**/*.cy.ts'"
   }
 }
