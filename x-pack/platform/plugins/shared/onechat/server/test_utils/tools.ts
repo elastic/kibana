@@ -33,6 +33,7 @@ export type InternalToolRegistryMock = jest.Mocked<InternalToolRegistry>;
 
 export type ToolsServiceStartMock = ToolsServiceStart & {
   registry: InternalToolRegistryMock;
+  esql: EsqlToolProviderMock;
 };
 
 export const createToolProviderMock = (): ToolProviderMock => {
@@ -49,7 +50,6 @@ export const esqlToolProviderMock = (): EsqlToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
-    register: jest.fn(),
     getScopedClient: jest.fn(),
   };
 };

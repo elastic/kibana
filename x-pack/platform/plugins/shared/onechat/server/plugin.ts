@@ -71,7 +71,7 @@ export class OnechatPlugin
     coreSetup.uiSettings.register({
       [ESQL_TOOL_API_UI_SETTING_ID]: {
         description: i18n.translate('onechat.uiSettings.esqlToolApi.description', {
-          defaultMessage: 'Enables ESQL Tool API to craete your own ESQL-based tools.',
+          defaultMessage: 'Enables ESQL Tool API to create your own ESQL-based tools.',
         }),
         name: i18n.translate('onechat.uiSettings.esqlToolApi.name', {
           defaultMessage: 'ESQL Tool API',
