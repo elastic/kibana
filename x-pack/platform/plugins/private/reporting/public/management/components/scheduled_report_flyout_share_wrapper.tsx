@@ -13,13 +13,13 @@ import type { ReportingSharingData } from '@kbn/reporting-public/share/share_con
 import { QueryClientProvider } from '@tanstack/react-query';
 import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
-import type { ReportingPublicPluginSetupDependencies } from '../../plugin';
+import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 import { ReportTypeId } from '../../types';
 
 export interface ScheduledReportMenuItem {
   apiClient: ReportingAPIClient;
-  services: ReportingPublicPluginSetupDependencies;
+  services: ReportingPublicPluginStartDependencies;
   sharingData: ReportingSharingData;
   onClose: () => void;
 }

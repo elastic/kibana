@@ -168,6 +168,14 @@ export const SCHEDULED_REPORT_FORM_SEND_BY_EMAIL_LABEL = i18n.translate(
   }
 );
 
+export const SCHEDULED_REPORT_FORM_NO_USER_EMAIL_HINT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.noUserEmailHint',
+  {
+    defaultMessage:
+      'To receive reports by email, you must have an email address set in your user profile.',
+  }
+);
+
 export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_LABEL = i18n.translate(
   'xpack.reporting.scheduledReportingForm.emailRecipientsLabel',
   {
@@ -187,6 +195,13 @@ export const SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT = i18n.translate(
   {
     defaultMessage:
       "On the scheduled date, we'll also email the report to the addresses you specify here.",
+  }
+);
+
+export const SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT = i18n.translate(
+  'xpack.reporting.scheduledReportingForm.emailSelfHint',
+  {
+    defaultMessage: "On the scheduled date, we'll also email the report to your address.",
   }
 );
 

@@ -17,12 +17,12 @@ import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting
 import { queryClient } from '../../query_client';
 import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
 import { SCHEDULE_EXPORT_BUTTON_LABEL } from '../translations';
-import type { ReportingPublicPluginSetupDependencies } from '../../plugin';
+import type { ReportingPublicPluginStartDependencies } from '../../plugin';
 import { getReportingHealth } from '../apis/get_reporting_health';
 
 export interface CreateScheduledReportProviderOptions {
   apiClient: ReportingAPIClient;
-  services: ReportingPublicPluginSetupDependencies;
+  services: ReportingPublicPluginStartDependencies;
 }
 
 export const shouldRegisterScheduledReportShareIntegration = async (http: HttpSetup) => {

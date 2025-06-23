@@ -115,22 +115,35 @@ const TestProviders = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
 );
 
+const TEST_EMAIL = 'test@email.com';
+
 const coreServices = coreMock.createStart();
 const mockSuccessToast = jest.fn();
 const mockErrorToast = jest.fn();
 coreServices.notifications.toasts.addSuccess = mockSuccessToast;
 coreServices.notifications.toasts.addError = mockErrorToast;
-const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
+const mockValidateEmailAddresses = jest.fn().mockReturnValue([]);
+const mockKibanaServices = {
+  ...coreServices,
+  application: {
+    ...coreServices.application,
+    capabilities: {
+      ...coreServices.application.capabilities,
+      manageReporting: { show: true },
+    },
+  },
+  actions: {
+    validateEmailAddresses: mockValidateEmailAddresses,
+  },
+  userProfile: {
+    getCurrent: jest.fn().mockResolvedValue({ user: { email: TEST_EMAIL } }),
+  },
+};
 
 describe('ScheduledReportFlyoutContent', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        ...coreServices,
-        actions: {
-          validateEmailAddresses: mockValidateEmailAddresses,
-        },
-      },
+      services: mockKibanaServices,
     });
     jest.clearAllMocks();
     testQueryClient.clear();
@@ -215,7 +228,20 @@ describe('ScheduledReportFlyoutContent', () => {
     expect(await screen.findByText('Send by email')).toBeInTheDocument();
   });
 
-  it('should render the To field and sensitive info callout when Send by email is toggled on', async () => {
+  it('should disable the To field when user is not reporting manager', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...mockKibanaServices,
+        application: {
+          ...mockKibanaServices.application,
+          capabilities: {
+            ...mockKibanaServices.application.capabilities,
+            manageReporting: { show: false },
+          },
+        },
+      },
+    });
+
     render(
       <TestProviders>
         <ScheduledReportFlyoutContent
@@ -232,8 +258,10 @@ describe('ScheduledReportFlyoutContent', () => {
     const toggle = await screen.findByText('Send by email');
     await userEvent.click(toggle);
 
-    expect(await screen.findByText('To')).toBeInTheDocument();
-    expect(await screen.findByText('Sensitive information')).toBeInTheDocument();
+    const emailField = await screen.findByTestId('emailRecipientsCombobox');
+    const emailInput = within(emailField).getByTestId('comboBoxSearchInput');
+    expect(emailInput).toBeDisabled();
+    expect(screen.getByText('Sensitive information')).toBeInTheDocument();
   });
 
   it('should show a warning callout when the notification email connector is missing', async () => {
@@ -324,7 +352,7 @@ describe('ScheduledReportFlyoutContent', () => {
   });
 
   it('should show validation error on invalid email', async () => {
-    mockValidateEmailAddresses.mockReturnValue([{ valid: false, reason: 'notAllowed' }]);
+    mockValidateEmailAddresses.mockReturnValueOnce([{ valid: false, reason: 'notAllowed' }]);
 
     render(
       <TestProviders>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -38,6 +38,7 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import { RecurringScheduleFormFields } from '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { Frequency } from '@kbn/rrule';
+import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { ResponsiveFormGroup } from './responsive_form_group';
 import { getReportParams } from '../report_params';
 import { getScheduledReportFormSchema } from '../schemas/scheduled_report_form_schema';
@@ -85,15 +86,26 @@ export const ScheduledReportFlyoutContent = ({
     throw new Error('Cannot schedule an export without an objectType or sharingData');
   }
   const {
+    application: { capabilities },
     http,
     actions: { validateEmailAddresses },
     notifications: { toasts },
+    userProfile: userProfileService,
   } = useKibana().services;
+  const { data: userProfile, isLoading: isUserProfileLoading } = useGetUserProfileQuery({
+    userProfileService,
+  });
   const {
     data: reportingHealth,
     isLoading: isReportingHealthLoading,
     isError: isReportingHealthError,
   } = useGetReportingHealthQuery({ http });
+  const hasManageReportingPrivilege = useMemo(() => {
+    if (!capabilities) {
+      return false;
+    }
+    return capabilities.manageReporting.show === true;
+  }, [capabilities]);
   const reportingPageLink = useMemo(
     () => (
       <EuiLink href={http.basePath.prepend(REPORTING_MANAGEMENT_SCHEDULES)}>
@@ -179,6 +191,12 @@ export const ScheduledReportFlyoutContent = ({
     watch: ['reportTypeId', 'sendByEmail'],
   });
 
+  useEffect(() => {
+    if (!hasManageReportingPrivilege && userProfile?.user.email) {
+      form.setFieldValue('emailRecipients', [userProfile.user.email]);
+    }
+  }, [form, hasManageReportingPrivilege, userProfile?.user.email]);
+
   const isRecurring = recurring || false;
   const isEmailActive = sendByEmail || false;
 
@@ -204,7 +222,7 @@ export const ScheduledReportFlyoutContent = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isReportingHealthLoading ? (
+        {isReportingHealthLoading || isUserProfileLoading ? (
           <EuiLoadingSpinner size="l" />
         ) : isReportingHealthError ? (
           <EuiCallOut
@@ -299,9 +317,16 @@ export const ScheduledReportFlyoutContent = ({
               <FormField
                 path="sendByEmail"
                 componentProps={{
+                  helpText:
+                    !hasManageReportingPrivilege && !userProfile?.user.email
+                      ? i18n.SCHEDULED_REPORT_FORM_NO_USER_EMAIL_HINT
+                      : undefined,
                   euiFieldProps: {
                     compressed: true,
-                    disabled: readOnly || !reportingHealth.areNotificationsEnabled,
+                    disabled:
+                      readOnly ||
+                      !reportingHealth.areNotificationsEnabled ||
+                      (!hasManageReportingPrivilege && !userProfile?.user.email),
                   },
                 }}
               />
@@ -315,11 +340,14 @@ export const ScheduledReportFlyoutContent = ({
                         componentProps={{
                           compressed: true,
                           fullWidth: true,
-                          helpText: i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT,
+                          helpText: hasManageReportingPrivilege
+                            ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
+                            : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT,
                           euiFieldProps: {
                             compressed: true,
                             fullWidth: true,
                             readOnly,
+                            isDisabled: !hasManageReportingPrivilege,
                             'data-test-subj': 'emailRecipientsCombobox',
                           },
                         }}
@@ -363,7 +391,7 @@ export const ScheduledReportFlyoutContent = ({
               <EuiButton
                 type="submit"
                 form={SCHEDULED_REPORT_FORM_ID}
-                isDisabled={false}
+                isDisabled={isReportingHealthLoading || isUserProfileLoading}
                 onClick={onSubmit}
                 isLoading={isScheduleExportLoading}
                 fill

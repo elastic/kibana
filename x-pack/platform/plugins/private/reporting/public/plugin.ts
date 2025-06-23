@@ -59,6 +59,7 @@ export interface ReportingPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  actions: ActionsPublicPluginSetup;
 }
 
 type StartServices$ = Observable<StartServices>;
@@ -248,11 +249,12 @@ export class ReportingPublicPlugin
         shouldRegisterScheduledReportShareIntegration,
         createScheduledReportShareIntegration,
       }) => {
+        const [coreStart, startDeps] = await getStartServices();
         if (await shouldRegisterScheduledReportShareIntegration(core.http)) {
           shareSetup.registerShareIntegration<ExportShareDerivatives>(
             createScheduledReportShareIntegration({
               apiClient,
-              services: { ...core, ...setupDeps },
+              services: { ...coreStart, ...startDeps, actions: actionsSetup },
             })
           );
         }
