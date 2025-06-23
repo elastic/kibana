@@ -1029,7 +1029,6 @@ x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-inf
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/slo @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
 x-pack/solutions/observability/test
