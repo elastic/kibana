@@ -20,6 +20,7 @@ import { installPrepackagedTimelines } from '../../../../timeline/routes/prepack
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
+// eslint-disable-next-line no-restricted-imports
 import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
 
 jest.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {

@@ -48,6 +48,7 @@ import {
   getSignalsMigrationStatusSchemaMock,
 } from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';

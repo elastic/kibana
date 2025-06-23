@@ -11,10 +11,10 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
-
+// eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationRuleType } from './legacy_rules_notification_rule_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyNotificationExecutorOptions } from './legacy_types';
 import {
   sampleDocSearchResultsNoSortIdNoVersion,

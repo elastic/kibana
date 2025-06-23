@@ -25,6 +25,7 @@ import { getSpacesUsage } from './transform_utils/get_spaces_usage';
 import { getRuleObjectCorrelations } from './transform_utils/get_rule_object_correlations';
 import { getEventLogByTypeAndStatus } from '../../queries/get_event_log_by_type_and_status';
 
+// eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleActions } from '../../queries/legacy_get_rule_actions';
 
 export interface GetRuleMetricsOptions {

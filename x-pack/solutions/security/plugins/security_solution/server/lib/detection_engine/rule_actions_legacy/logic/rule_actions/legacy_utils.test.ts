@@ -10,13 +10,16 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 
+// eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 
+// eslint-disable-next-line no-restricted-imports
 import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';
 
+// eslint-disable-next-line no-restricted-imports
 import {
   legacyGetActionReference,
   legacyGetRuleActionsFromSavedObject,

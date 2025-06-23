@@ -6,7 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
-
+// eslint-disable-next-line no-restricted-imports
 import { legacyCreateNotifications } from './legacy_create_notifications';
 
 /**

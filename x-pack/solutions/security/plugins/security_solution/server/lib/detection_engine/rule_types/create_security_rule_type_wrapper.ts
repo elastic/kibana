@@ -33,9 +33,9 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-
+// eslint-disable-next-line no-restricted-imports
 import { getNotificationResultsLink } from '../rule_actions_legacy';
-
+// eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';

@@ -6,7 +6,7 @@
  */
 
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
-
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesNotificationParams } from '../legacy_types';
 
 /**

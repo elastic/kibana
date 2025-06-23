@@ -8,11 +8,11 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
-
+// eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
-
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from './legacy_get_rule_actions_saved_object';
-
+// eslint-disable-next-line no-restricted-imports
 import {
   legacyGetActionReference,
   legacyGetRuleReference,
@@ -20,7 +20,7 @@ import {
   legacyTransformActionToReference,
   legacyTransformLegacyRuleAlertActionToReference,
 } from './legacy_utils';
-
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyIRuleActionsAttributesSavedObjectAttributes } from './legacy_types';
 
 /**

@@ -8,8 +8,9 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
 
+// eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesNotificationParams } from '../legacy_types';
-
+// eslint-disable-next-line no-restricted-imports
 import { legacyInjectReferences } from './legacy_inject_references';
 
 describe('legacy_inject_references', () => {
