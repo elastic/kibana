@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import { useEuiFontSize, useEuiTheme, transparentize, useEuiButtonColorCSS } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, transparentize } from '@elastic/eui';
 import {
   ML_ANOMALY_THRESHOLD,
   getThemeResolvedSeverityColor,
