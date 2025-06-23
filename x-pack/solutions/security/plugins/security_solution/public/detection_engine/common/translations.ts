@@ -1417,6 +1417,13 @@ export const RULES_BULK_FILL_GAPS_SUCCESS = i18n.translate(
   }
 );
 
+export const RULES_BULK_FILL_GAPS_SUCCESS_ALL_SKIPPED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastTitle.allSkipped',
+  {
+    defaultMessage: 'No gap fills were scheduled',
+  }
+);
+
 export const RULES_BULK_FILL_GAPS_FAILURE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.errorToastTitle',
   {
@@ -1430,9 +1437,16 @@ export const RULES_BULK_FILL_GAPS_SUCCESS_DESCRIPTION = (succeeded: number, skip
     {
       values: { succeededRulesCount: succeeded, skippedRulesCount: skipped },
       defaultMessage: `{succeededRulesCount, plural, =0 {} =1 {You've successfully scheduled gap fills for # rule. } other {You've successfully scheduled gap fills for # rules. }}
-        {skippedRulesCount, plural, =0 {} =1 { # rule was} other { # rules were}} excluded from the bulk schedule gap fill action.`,
+        {skippedRulesCount, plural, =0 {} =1 { # rule was excluded from the bulk schedule gap fill action.} other { # rules were excluded from the bulk schedule gap fill action.}}`,
     }
   );
+
+export const RULES_BULK_FILL_GAPS_SUCCESS_ALL_RULES_SKIPPED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.fillRuleGaps.successToastDescription.allSkipped',
+  {
+    defaultMessage: 'No gaps were detected for the selected time range.',
+  }
+);
 
 export const RULES_BULK_FILL_GAPS_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
   i18n.translate(

@@ -183,7 +183,7 @@ export const GAPS_TABLE_TOTAL_GAPS_LABEL = (totalItems: number, maxItems: number
 export const GAPS_FILL_ALL_GAPS_ERROR_DISABLED_RULE_MESSAGE = i18n.translate(
   'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalDisabledRuleErrorLabel',
   {
-    defaultMessage: 'Cannot schedule gap fills for a disabled rule',
+    defaultMessage: 'Enable the rule to schedule gap fills.',
   }
 );
 
@@ -213,14 +213,14 @@ export const GAPS_FILL_ALL_GAPS_DRY_RUN_FAILED_MODAL_CLOSE_BUTTON_LABEL = i18n.t
 export const GAPS_FILL_ALL_GAPS_DRY_RUN_MODAL_HEADING = i18n.translate(
   'xpack.securitySolution.gaps.dryRunBulkFillRuleGaps.failedModalHeading',
   {
-    defaultMessage: 'The rule gaps cannot be filled',
+    defaultMessage: 'Unable to schedule gap fills for disabled rule',
   }
 );
 
 export const GAPS_FILL_ALL_GAPS_WARNING_TOAST_TITLE = i18n.translate(
   'xpack.securitySolution.gaps.fillRuleGapsLongRunWarningToastTitle',
   {
-    defaultMessage: 'Rule update is in progress',
+    defaultMessage: 'Scheduling gap fills',
   }
 );
 

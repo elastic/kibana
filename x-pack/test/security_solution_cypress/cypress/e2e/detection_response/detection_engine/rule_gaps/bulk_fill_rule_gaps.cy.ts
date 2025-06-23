@@ -114,10 +114,7 @@ describe(
       scheduleBulkFillGapsForSelectedRules(enabledCount, 0);
       cy.wait('@bulkFillRulesGaps');
 
-      cy.contains(
-        TOASTER_BODY,
-        `${enabledCount} rules were excluded from the bulk schedule gap fill action.`
-      );
+      cy.contains(TOASTER_BODY, 'No gaps were detected for the selected time range.');
     });
 
     it('handle the case when the request is slow', () => {

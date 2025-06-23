@@ -73,7 +73,7 @@ export const BULK_FILL_RULE_GAPS_NOTIFIACTIONS_LIMITATIONS = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.notificationsLimitations',
   {
     defaultMessage:
-      'Alert summary rule actions that run at a custom frequency are not performed during manual rule runs triggered by the gap fills process.',
+      'Alert summary rule actions that run at a custom frequency are not performed during manual runs started by gap fills..',
   }
 );
 

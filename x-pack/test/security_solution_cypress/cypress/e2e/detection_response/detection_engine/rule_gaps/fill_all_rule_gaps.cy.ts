@@ -104,7 +104,7 @@ describe(
       // Verify that an error modal is displayed
       cy.get('[data-test-subj="bulkActionRejectModal"]').should(
         'have.text',
-        `The rule gaps cannot be filledCannot schedule gap fills for a disabled ruleClose`
+        `Unable to schedule gap fills for disabled ruleEnable the rule to schedule gap fills.Close`
       );
 
       cy.get(MODAL_CONFIRMATION_BTN).click();
@@ -135,7 +135,7 @@ describe(
       cy.wait('@getRuleGaps');
       cy.wait('@getRuleManualRuns');
 
-      cy.contains(TOASTER_BODY, `1 rule was excluded from the bulk schedule gap fill action.`);
+      cy.contains(TOASTER_BODY, 'No gaps were detected for the selected time range.');
     });
 
     it('handle the case when the request is slow', function () {
