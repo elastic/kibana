@@ -190,7 +190,11 @@ describe('single line query', () => {
       });
     });
 
-    describe('RERANK', () => {
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    describe.skip('RERANK', () => {
       test('single field', () => {
         const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
 
