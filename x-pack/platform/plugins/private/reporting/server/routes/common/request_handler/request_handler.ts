@@ -57,6 +57,7 @@ export interface RequestParams {
   jobParams: BaseParams;
   id?: string;
   schedule?: RruleSchedule;
+  startedAt?: string;
   notification?: RawNotification;
 }
 

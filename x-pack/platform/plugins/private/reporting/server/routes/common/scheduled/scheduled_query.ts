@@ -97,6 +97,7 @@ export function transformSingleResponse(
     payload,
     schedule: so.attributes.schedule,
     space_id: so.namespaces?.[0] ?? DEFAULT_SPACE_ID,
+    started_at: so.attributes.startedAt,
     title: so.attributes.title,
   };
 }

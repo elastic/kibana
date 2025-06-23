@@ -21,6 +21,7 @@ export function transformRawScheduledReportToReport(
     meta: rawScheduledReport.attributes.meta,
     migration_version: rawScheduledReport.attributes.migrationVersion,
     schedule: rawScheduledReport.attributes.schedule,
+    started_at: rawScheduledReport.attributes.startedAt,
     notification: rawScheduledReport.attributes.notification,
   };
 }

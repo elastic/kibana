@@ -12,7 +12,10 @@ import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { IKibanaResponse } from '@kbn/core/server';
-import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
+import {
+  RawNotification,
+  RawScheduledReport,
+} from '../../../saved_objects/scheduled_report/schemas/latest';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
 import {
   ScheduledReportApiJSON,
@@ -35,6 +38,7 @@ const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
     schedule: scheduleRruleSchema,
+    startedAt: schema.maybe(schema.string()),
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
@@ -69,12 +73,12 @@ export class ScheduleRequestHandler extends RequestHandler<
     return validation;
   }
 
-  public getSchedule(): RruleSchedule {
+  public getScheduleAndStartedAt(): Pick<RawScheduledReport, 'schedule' | 'startedAt'> {
     let rruleDef: null | RruleSchedule['rrule'] = null;
     const req = this.opts.req;
     const res = this.opts.res;
 
-    const { schedule } = req.body;
+    const { schedule, startedAt } = req.body;
     const { rrule } = schedule ?? {};
     rruleDef = rrule;
 
@@ -85,7 +89,14 @@ export class ScheduleRequestHandler extends RequestHandler<
       });
     }
 
-    return schedule;
+    if (startedAt && !moment(startedAt).isValid()) {
+      throw res.customError({
+        statusCode: 400,
+        body: `Invalid startedAt date: ${startedAt}`,
+      });
+    }
+
+    return { schedule, startedAt };
   }
 
   public getNotification(): RawNotification | undefined {
@@ -125,7 +136,7 @@ export class ScheduleRequestHandler extends RequestHandler<
   }
 
   public async enqueueJob(params: RequestParams) {
-    const { id, exportTypeId, jobParams, schedule, notification } = params;
+    const { id, exportTypeId, jobParams, schedule, startedAt, notification } = params;
     const { reporting, logger, req, user } = this.opts;
 
     const soClient = await reporting.getScopedSoClient(req);
@@ -170,6 +181,7 @@ export class ScheduleRequestHandler extends RequestHandler<
       title: job.title,
       payload: JSON.stringify(omit(payload, 'forceNow')),
       schedule: schedule!,
+      startedAt,
     };
 
     // Create a scheduled_report saved object

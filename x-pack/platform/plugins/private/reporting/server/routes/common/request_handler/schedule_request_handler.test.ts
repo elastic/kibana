@@ -178,6 +178,7 @@ describe('Handle request to schedule', () => {
               "tzid": "UTC",
             },
           },
+          "started_at": undefined,
         }
       `);
       expect(payload).toMatchInlineSnapshot(`
@@ -273,6 +274,7 @@ describe('Handle request to schedule', () => {
               "tzid": "UTC",
             },
           },
+          "started_at": undefined,
         }
       `);
       expect(payload).toMatchInlineSnapshot(`
@@ -328,6 +330,97 @@ describe('Handle request to schedule', () => {
         },
         { id: 'mock-report-id' }
       );
+    });
+
+    test('creates a scheduled_report saved object and startedAt', async () => {
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        startedAt: '2025-06-23T14:17:19.765Z',
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+
+      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      expect(snapObj).toMatchInlineSnapshot(`
+        Object {
+          "created_by": "testymcgee",
+          "jobtype": "printable_pdf_v2",
+          "meta": Object {
+            "isDeprecated": false,
+            "layout": "preserve_layout",
+            "objectType": "cool_object_type",
+          },
+          "migration_version": "unknown",
+          "notification": undefined,
+          "schedule": Object {
+            "rrule": Object {
+              "freq": 1,
+              "interval": 2,
+              "tzid": "UTC",
+            },
+          },
+          "started_at": "2025-06-23T14:17:19.765Z",
+        }
+      `);
+      expect(payload).toMatchInlineSnapshot(`
+        Object {
+          "browserTimezone": "UTC",
+          "isDeprecated": false,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "locatorParams": Array [],
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "unknown",
+        }
+      `);
+
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
+        },
+        kibana: {
+          saved_object: { id: 'mock-report-id', name: 'cool_title', type: 'scheduled_report' },
+        },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=cool_title]',
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        {
+          jobType: 'printable_pdf_v2',
+          createdAt: expect.any(String),
+          createdBy: 'testymcgee',
+          title: 'cool_title',
+          enabled: true,
+          payload: JSON.stringify(payload),
+          schedule: {
+            rrule: {
+              freq: 1,
+              interval: 2,
+              tzid: 'UTC',
+            },
+          },
+          migrationVersion: 'unknown',
+          meta: {
+            objectType: 'cool_object_type',
+            layout: 'preserve_layout',
+            isDeprecated: false,
+          },
+          startedAt: '2025-06-23T14:17:19.765Z',
+        },
+        { id: 'mock-report-id' }
+      );
+
+      expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
+        id: 'foo',
+        jobtype: 'printable_pdf_v2',
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
     });
 
     test('throws errors from so client create', async () => {
@@ -390,14 +483,47 @@ describe('Handle request to schedule', () => {
     });
   });
 
-  describe('getSchedule', () => {
+  describe('getScheduleAndStartedAt', () => {
     test('parse schedule from body', () => {
       // @ts-ignore body is a read-only property
       mockRequest.body = {
         jobParams: rison.encode(mockJobParams),
         schedule: { rrule: { freq: 1, interval: 2 } },
       };
-      expect(requestHandler.getSchedule()).toEqual({ rrule: { freq: 1, interval: 2 } });
+      expect(requestHandler.getScheduleAndStartedAt()).toEqual({
+        schedule: { rrule: { freq: 1, interval: 2 } },
+      });
+    });
+
+    test('parse schedule and startedAt from body', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        startedAt: '2025-06-23T14:17:19.765Z',
+      };
+      expect(requestHandler.getScheduleAndStartedAt()).toEqual({
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        startedAt: '2025-06-23T14:17:19.765Z',
+      });
+    });
+
+    test('handles invalid startedAt string', () => {
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { freq: 1, interval: 2 } },
+          startedAt: 'i am not a date',
+        };
+        requestHandler.getScheduleAndStartedAt();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe('Invalid startedAt date: i am not a date');
     });
 
     test('handles missing schedule', () => {
@@ -407,7 +533,7 @@ describe('Handle request to schedule', () => {
         mockRequest.body = {
           jobParams: rison.encode(mockJobParams),
         };
-        requestHandler.getSchedule();
+        requestHandler.getScheduleAndStartedAt();
       } catch (err) {
         error = err;
       }
@@ -424,7 +550,7 @@ describe('Handle request to schedule', () => {
           jobParams: rison.encode(mockJobParams),
           schedule: null,
         };
-        requestHandler.getSchedule();
+        requestHandler.getScheduleAndStartedAt();
       } catch (err) {
         error = err;
       }
@@ -441,7 +567,7 @@ describe('Handle request to schedule', () => {
           jobParams: rison.encode(mockJobParams),
           schedule: {},
         };
-        requestHandler.getSchedule();
+        requestHandler.getScheduleAndStartedAt();
       } catch (err) {
         error = err;
       }
@@ -458,7 +584,7 @@ describe('Handle request to schedule', () => {
           jobParams: rison.encode(mockJobParams),
           schedule: { rrule: null },
         };
-        requestHandler.getSchedule();
+        requestHandler.getScheduleAndStartedAt();
       } catch (err) {
         error = err;
       }
@@ -475,7 +601,7 @@ describe('Handle request to schedule', () => {
           jobParams: rison.encode(mockJobParams),
           schedule: { rrule: {} },
         };
-        requestHandler.getSchedule();
+        requestHandler.getScheduleAndStartedAt();
       } catch (err) {
         error = err;
       }

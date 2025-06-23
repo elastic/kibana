@@ -204,6 +204,26 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       );
   });
 
+  it('returns 400 on invalid startedAt date', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        startedAt: '2025-06-23T14:1719.765Z',
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          `"Invalid startedAt date: 2025-06-23T14:1719.765Z"`
+        )
+      );
+  });
+
   it('returns 400 on invalid notification list', async () => {
     registerScheduleRoutesInternal(reportingCore, mockLogger);
 
@@ -334,6 +354,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             bcc: ['single@email.com'],
           },
         },
+        startedAt: '2025-06-23T14:17:19.765Z',
         schedule: { rrule: { freq: 1, interval: 2 } },
       })
       .expect(200)
@@ -352,6 +373,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
               title: 'abc',
               version: '7.14.0',
             },
+            started_at: '2025-06-23T14:17:19.765Z',
             schedule: { rrule: { freq: 1, interval: 2 } },
           },
         });

@@ -109,6 +109,7 @@ export type ScheduledReportApiJSON = Omit<
   notification?: RawNotification;
   payload: Omit<ReportSource['payload'], 'headers'>;
   schedule: RruleSchedule;
+  started_at?: string;
 };
 
 export interface ScheduledReportingJobResponse {

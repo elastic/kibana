@@ -48,13 +48,14 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
             logger,
           });
           const jobParams = requestHandler.getJobParams();
-          const schedule = requestHandler.getSchedule();
+          const { schedule, startedAt } = requestHandler.getScheduleAndStartedAt();
           const notification = requestHandler.getNotification();
 
           return await requestHandler.handleRequest({
             exportTypeId: req.params.exportType,
             jobParams,
             schedule,
+            startedAt,
             notification,
           });
         } catch (err) {
