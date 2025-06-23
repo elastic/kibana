@@ -8,15 +8,11 @@
  */
 
 import { encode } from '@kbn/rison';
-import { EcsFlat } from '@elastic/ecs';
-import * as i18n from '../translations';
 
 export interface CustomQuery {
   kind: 'kuery' | 'lucene';
   expression: string;
 }
-
-export type EcsAllowedValue = (typeof EcsFlat)['event.category']['allowed_values'][0];
 
 export interface TimelineRedirectArgs {
   from?: string;
@@ -80,17 +76,4 @@ export const getSecurityTimelineRedirectUrl = ({
   });
 
   return `${baseURL}?${urlParams.toString()}`;
-};
-
-/**
- * Helper function to return the description of an allowed value of the specified field
- * @param fieldName
- * @param value
- * @returns ecs description of the value
- */
-export const getEcsAllowedValueDescription = (value: string): string => {
-  const allowedValues: EcsAllowedValue[] = EcsFlat['event.category']?.allowed_values ?? [];
-  const result =
-    allowedValues?.find((item) => item.name === value)?.description ?? i18n.noEcsDescriptionReason;
-  return result;
 };

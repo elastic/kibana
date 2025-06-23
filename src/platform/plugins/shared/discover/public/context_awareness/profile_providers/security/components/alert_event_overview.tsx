@@ -21,7 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import * as i18n from '../translations';
-import { getEcsAllowedValueDescription, getSecurityTimelineRedirectUrl } from '../utils';
+import { getSecurityTimelineRedirectUrl } from '../utils';
+import { getEcsAllowedValueDescription } from '../utils/ecs_description';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({

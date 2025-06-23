@@ -18,7 +18,7 @@ export const exploreRowActionLabel = (isAlert: boolean) =>
 export const overviewTabTitle = (isAlert: boolean) =>
   i18n.translate('discover.profile.security.flyout.overviewTabTitle', {
     values: { isAlert },
-    defaultMessage: '{isAlert, select, true {Alerts Overview} other {Event Overview}}',
+    defaultMessage: '{isAlert, select, true {Alert Overview} other {Event Overview}}',
   });
 
 export const overviewExploreButtonLabel = (isAlert: boolean) =>

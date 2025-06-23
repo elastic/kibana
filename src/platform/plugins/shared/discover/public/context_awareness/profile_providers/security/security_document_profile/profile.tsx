@@ -14,7 +14,7 @@ import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SECURITY_PROFILE_ID } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
-import { AlertEventOverview } from '../components/alert_event_overview';
+import { AlertEventOverviewLazy } from '../components';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
@@ -34,7 +34,7 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
               id: 'doc_view_alerts_overview',
               title: i18n.overviewTabTitle(isAlert),
               order: 0,
-              component: AlertEventOverview,
+              component: AlertEventOverviewLazy,
             });
 
             return prevDocViewer.docViewsRegistry(registry);
