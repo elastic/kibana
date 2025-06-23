@@ -8,10 +8,8 @@
 import { renderHook } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useManagedDataViews } from './use_managed_data_views';
-import {
-  DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID,
-  DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-} from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
 // Mock dependencies
 jest.mock('react-redux', () => ({
@@ -54,14 +52,14 @@ describe('useManagedDataViews', () => {
       { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Security Solution Data View' },
       { id: 'some-other-id', title: 'Other Data View' },
       { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Another Security Solution Data View' },
-      { id: DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID, title: 'Security Alert Data View' },
+      { id: DEFAULT_ALERT_DATA_VIEW_ID, title: 'Security Alert Data View' },
     ];
 
     // Mock the Redux selector
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      alertDataViewId: DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook
@@ -75,7 +73,7 @@ describe('useManagedDataViews', () => {
       if (i <= 1) {
         expect(dataView.id).toBe(DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID);
       } else {
-        expect(dataView.id).toBe(DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID);
+        expect(dataView.id).toBe(DEFAULT_ALERT_DATA_VIEW_ID);
       }
     });
 

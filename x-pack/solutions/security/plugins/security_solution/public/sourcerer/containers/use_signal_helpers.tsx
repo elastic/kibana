@@ -85,7 +85,6 @@ export const useSignalHelpers = (): {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
           indexFieldsSearch({ dataViewId: sourcererDataView.defaultDataView.id });
-          // indexFieldsSearch({ dataViewId: sourcererDataView.alertDataView.id });
           dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
         }
       } catch (err) {

@@ -8,10 +8,8 @@
 import { renderHook } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import { useSavedDataViews } from './use_saved_data_views';
-import {
-  DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-  DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID,
-} from '../constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
+import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -31,7 +29,7 @@ describe('useSavedDataViews', () => {
         name: 'default_view',
       },
       {
-        id: DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID, // This should be filtered out
+        id: DEFAULT_ALERT_DATA_VIEW_ID, // This should be filtered out
         title: 'Default Alert View',
         name: 'default_alert_view',
       },
@@ -51,7 +49,7 @@ describe('useSavedDataViews', () => {
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      alertDataViewId: DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook
@@ -62,9 +60,7 @@ describe('useSavedDataViews', () => {
     expect(
       result.current.find((item) => item.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
     ).toBeUndefined();
-    expect(
-      result.current.find((item) => item.id === DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID)
-    ).toBeUndefined();
+    expect(result.current.find((item) => item.id === DEFAULT_ALERT_DATA_VIEW_ID)).toBeUndefined();
 
     // Expect the custom views to be correctly transformed
     expect(result.current).toEqual([
@@ -114,7 +110,7 @@ describe('useSavedDataViews', () => {
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
       defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      alertDataViewId: DEFAULT_SECURITY_SOLUTION_ALERT_DATA_VIEW_ID,
+      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook
