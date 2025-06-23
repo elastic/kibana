@@ -75,6 +75,7 @@ export const EmptyConvo: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
+      {/* TODO feature flag */}
       <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
         <StarterPrompts setUserPrompt={setUserPrompt} />
       </EuiFlexItem>

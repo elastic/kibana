@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +16,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { PromptItemArray } from '@kbn/elastic-assistant-common/impl/schemas/security_ai_prompts/common_attributes.gen';
+import { useAssistantContext, useFindPrompts } from '../../..';
 
 interface Props {
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
@@ -28,34 +30,66 @@ const starterPromptClassName = css`
 const starterPromptInnerClassName = css`
   text-align: center !important;
 `;
+interface PromptGroup {
+  description: string;
+  title: string;
+  icon: string;
+  prompt: string;
+}
+// these are the promptIds (Security AI Prompts integration) for each of the starter prompts fields
+export const promptGroups = [
+  {
+    title: 'starterPromptTitle1',
+    description: 'starterPromptDescription1',
+    icon: 'starterPromptIcon1',
+    prompt: 'starterPromptPrompt1',
+  },
+  {
+    description: 'starterPromptDescription2',
+    title: 'starterPromptTitle2',
+    icon: 'starterPromptIcon2',
+    prompt: 'starterPromptPrompt2',
+  },
+  {
+    description: 'starterPromptDescription3',
+    title: 'starterPromptTitle3',
+    icon: 'starterPromptIcon3',
+    prompt: 'starterPromptPrompt3',
+  },
+  {
+    description: 'starterPromptDescription4',
+    title: 'starterPromptTitle4',
+    icon: 'starterPromptIcon4',
+    prompt: 'starterPromptPrompt4',
+  },
+];
 
 export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
-  const starterPrompts = [
-    {
-      description: 'Show me the important alerts from the last 24 hours',
-      title: 'User Activity',
-      icon: 'bell',
-      prompt: 'big long prompt 1',
+  const {
+    assistantAvailability: { isAssistantEnabled },
+    http,
+    toasts,
+  } = useAssistantContext();
+  const {
+    data: { prompts: actualPrompts },
+  } = useFindPrompts({
+    context: {
+      isAssistantEnabled,
+      httpFetch: http.fetch,
+      toasts,
     },
-    {
-      description: 'What is the status of my last deployment?',
-      title: 'Deployment Status',
-      icon: 'sparkles',
-      prompt: 'big long prompt 2',
+    params: {
+      prompt_group_id: 'aiAssistant',
+      prompt_ids: getAllPromptIds(promptGroups),
     },
-    {
-      description: 'What are the top errors in the logs?',
-      title: 'Log Analysis',
-      icon: 'bullseye',
-      prompt: 'big long prompt 3',
-    },
-    {
-      description: 'Can you summarize the latest sales report?',
-      title: 'Sales Summary',
-      icon: 'questionInCircle',
-      prompt: 'big long prompt 4',
-    },
-  ];
+  });
+
+  const fetchedPromptGroups = useMemo(() => {
+    if (!actualPrompts.length) {
+      return [];
+    }
+    return formatPromptGroups(actualPrompts);
+  }, [actualPrompts]);
 
   const onSelectPrompt = useCallback(
     (prompt: string) => {
@@ -63,14 +97,16 @@ export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
     },
     [setUserPrompt]
   );
+
   return (
     <EuiFlexGroup direction="row" gutterSize="m" wrap>
-      {starterPrompts.map(({ description, title, icon, prompt }) => (
-        <EuiFlexItem key={description} className={starterPromptClassName}>
+      {fetchedPromptGroups.map(({ description, title, icon, prompt }) => (
+        <EuiFlexItem key={prompt} className={starterPromptClassName}>
           <EuiPanel
             paddingSize="m"
             hasShadow={false}
             hasBorder
+            data-test-subj={prompt}
             onClick={() => onSelectPrompt(prompt)}
             className={starterPromptInnerClassName}
           >
@@ -87,3 +123,23 @@ export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
     </EuiFlexGroup>
   );
 };
+
+export const getAllPromptIds = (pGroups: PromptGroup[]) => {
+  return pGroups.map((promptGroup: PromptGroup) => [...Object.values(promptGroup)]).flat();
+};
+
+export const formatPromptGroups = (actualPrompts: PromptItemArray): PromptGroup[] =>
+  promptGroups.reduce<PromptGroup[]>((acc, promptGroup) => {
+    const foundPrompt = (field: keyof PromptGroup) =>
+      actualPrompts.find((p) => p.promptId === promptGroup[field])?.prompt;
+    const toBePrompt = {
+      prompt: foundPrompt('prompt'),
+      icon: foundPrompt('icon'),
+      title: foundPrompt('title'),
+      description: foundPrompt('description'),
+    };
+    if (toBePrompt.prompt && toBePrompt.icon && toBePrompt.title && toBePrompt.description) {
+      acc.push(toBePrompt as PromptGroup);
+    }
+    return acc;
+  }, []);

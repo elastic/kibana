@@ -51,6 +51,10 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
+        if (docs.length === 0) {
+          // TODO add KB install check here
+          return 'No relevant Elastic Security Labs content found for the provided query. Ensure knowledge base is installed.';
+        }
 
         const citedDocs = docs.map((doc) => {
           let reference: ContentReference | undefined;

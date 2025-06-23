@@ -11,14 +11,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { useFetchPrompts } from './use_fetch_prompts';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
-import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
-const http = {
-  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
-} as unknown as HttpSetup;
-
+(useAssistantContext as jest.Mock).mockReturnValue({
+  http,
+  assistantAvailability: {
+    isAssistantEnabled: true,
+  },
+});
 jest.mock('../../../assistant_context');
 
 const createWrapper = () => {
