@@ -21,15 +21,12 @@ import {
   normalizeErrorResponse,
   type BulkActionError,
 } from '../../../rule_management/api/rules/bulk_actions/bulk_actions_response';
-import { fetchRulesByQueryOrIds } from '../../../rule_management/api/rules/bulk_actions/fetch_rules_by_query_or_ids';
-import { convertAlertingRuleToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_alerting_rule_to_rule_response';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
-import { mergeAndUpdatePrebuiltRules } from '../../logic/rule_objects/merge_and_update_prebuilt_rules';
+import { revertPrebuiltRules } from '../../logic/rule_objects/merge_and_update_prebuilt_rules';
 import { getConcurrencyErrors } from './get_concurrrency_errors';
 import { filterRulesToRevert } from './filter_rules_to_revert';
-
-const MAX_RULES_TO_REVERT = 1;
+import { getRuleById } from '../../../rule_management/logic/detection_rules_client/methods/get_rule_by_id';
 
 export const revertPrebuiltRuleHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -51,18 +48,23 @@ export const revertPrebuiltRuleHandler = async (
     const updated: RuleResponse[] = [];
     const errors: BulkActionError[] = [];
 
-    const fetchRulesOutcome = await fetchRulesByQueryOrIds({
-      rulesClient,
-      query: undefined,
-      ids: [id],
-      maxRules: MAX_RULES_TO_REVERT,
-    });
+    const ruleResponse = await getRuleById({ rulesClient, id });
 
-    const formattedRules = fetchRulesOutcome.results.map(({ result }) =>
-      convertAlertingRuleToRuleResponse(result)
-    );
-    const { rulesToRevert, skipped } = filterRulesToRevert(formattedRules);
-    errors.push(...fetchRulesOutcome.errors);
+    if (!ruleResponse) {
+      errors.push({
+        item: id,
+        error: new Error(`Cannot find rule with id: ${id}`),
+      });
+
+      // Return early as there's no reason to continue if we can't find the rule
+      return buildRuleReversionResponse(response, {
+        updated,
+        skipped: [],
+        errors,
+      });
+    }
+
+    const { rulesToRevert, skipped } = filterRulesToRevert([ruleResponse]);
 
     const baseRules = await ruleAssetsClient.fetchAssetsByVersion(rulesToRevert);
     const ruleVersionsMap = zipRuleVersions(rulesToRevert, [], baseRules); // We use base versions as target param as we are reverting rules
@@ -91,13 +93,13 @@ export const revertPrebuiltRuleHandler = async (
         return;
       }
 
-      const concurrencyErrors = getConcurrencyErrors(
+      const concurrencyError = getConcurrencyErrors(
         concurrencySet[rule.id].revision,
         concurrencySet[rule.id].version,
         rule
       );
-      if (concurrencyErrors.length) {
-        errors.push(...concurrencyErrors);
+      if (concurrencyError) {
+        errors.push(concurrencyError);
         return;
       }
 
@@ -107,10 +109,12 @@ export const revertPrebuiltRuleHandler = async (
       });
     });
 
-    const { results: upgradeResults, errors: installationErrors } =
-      await mergeAndUpdatePrebuiltRules(detectionRulesClient, revertableRules);
+    const { results: upgradeResults, errors: updateErrors } = await revertPrebuiltRules(
+      detectionRulesClient,
+      revertableRules
+    );
 
-    const formattedInstallationErrors = installationErrors.map(({ error, item }) => {
+    const formattedUpdateErrors = updateErrors.map(({ error, item }) => {
       return {
         message: getErrorMessage(error),
         status: getErrorStatusCode(error),
@@ -118,7 +122,7 @@ export const revertPrebuiltRuleHandler = async (
       };
     });
 
-    errors.push(...formattedInstallationErrors);
+    errors.push(...formattedUpdateErrors);
     updated.push(...upgradeResults.map(({ result }) => result));
 
     return buildRuleReversionResponse(response, {

@@ -29,7 +29,6 @@ import {
 interface AssertRuleUpgradeAfterReviewParams {
   ruleType: string;
   fieldName: string;
-  targetRuleFields?: { [key: string]: unknown };
   fieldVersions: {
     initial: unknown;
     customized: unknown;
@@ -41,7 +40,6 @@ interface AssertRuleUpgradeAfterReviewParams {
 export function assertRuleUpgradeAfterReview({
   ruleType,
   fieldName: rawFieldName,
-  targetRuleFields,
   fieldVersions: { initial, customized, upgrade, resolvedValue: rawResolvedValue },
 }: AssertRuleUpgradeAfterReviewParams) {
   // TS isn't able to infer the type of the field name for inputFieldValue()
@@ -55,7 +53,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: initial,
@@ -77,7 +74,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: initial,
@@ -108,7 +104,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -130,7 +125,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -164,7 +158,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: upgrade,
@@ -186,7 +179,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: upgrade,
@@ -217,7 +209,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -242,7 +233,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -273,7 +263,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -298,7 +287,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           base: initial,
           current: customized,
@@ -327,7 +315,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           current: customized,
           target: upgrade,
@@ -351,7 +338,6 @@ export function assertRuleUpgradeAfterReview({
       mockRuleUpgradeReviewData({
         ruleType,
         fieldName,
-        targetRuleFields,
         fieldVersions: {
           current: customized,
           target: upgrade,

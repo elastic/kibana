@@ -10,12 +10,8 @@ import {
   REVERT_PREBUILT_RULES_URL,
   RevertPrebuiltRulesRequest,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import {
-  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
-  PREBUILT_RULES_OPERATION_CONCURRENCY,
-} from '../../constants';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 import { revertPrebuiltRuleHandler } from './revert_prebuilt_rule_handler';
 
 export const revertPrebuiltRule = (router: SecuritySolutionPluginRouter) => {
@@ -29,7 +25,6 @@ export const revertPrebuiltRule = (router: SecuritySolutionPluginRouter) => {
         },
       },
       options: {
-        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

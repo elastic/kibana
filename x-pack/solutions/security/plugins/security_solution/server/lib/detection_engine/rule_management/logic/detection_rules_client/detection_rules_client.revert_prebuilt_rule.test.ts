@@ -27,7 +27,7 @@ import { createProductFeaturesServiceMock } from '../../../../product_features_s
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
-describe('DetectionRulesClient.mergeAndUpdatePrebuiltRule', () => {
+describe('DetectionRulesClient.revertPrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
 
@@ -90,7 +90,7 @@ describe('DetectionRulesClient.mergeAndUpdatePrebuiltRule', () => {
     const mlExistingRule = getRulesEqlSchemaMock();
 
     await expect(
-      detectionRulesClient.mergeAndUpdatePrebuiltRule({
+      detectionRulesClient.revertPrebuiltRule({
         ruleAsset: mlRuleAsset,
         existingRule: mlExistingRule,
       })
@@ -102,7 +102,7 @@ describe('DetectionRulesClient.mergeAndUpdatePrebuiltRule', () => {
   it('patches the existing rule with the new params from the rule asset', async () => {
     rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
 
-    await detectionRulesClient.mergeAndUpdatePrebuiltRule({ ruleAsset, existingRule });
+    await detectionRulesClient.revertPrebuiltRule({ ruleAsset, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -152,7 +152,7 @@ describe('DetectionRulesClient.mergeAndUpdatePrebuiltRule', () => {
       },
     ];
 
-    await detectionRulesClient.mergeAndUpdatePrebuiltRule({ ruleAsset, existingRule });
+    await detectionRulesClient.revertPrebuiltRule({ ruleAsset, existingRule });
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

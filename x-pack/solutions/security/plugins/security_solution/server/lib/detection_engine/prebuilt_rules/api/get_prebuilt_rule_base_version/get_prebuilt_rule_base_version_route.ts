@@ -10,12 +10,7 @@ import {
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GetPrebuiltRuleBaseVersionRequest,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import {
-  PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
-  PREBUILT_RULES_OPERATION_CONCURRENCY,
-} from '../../constants';
 import { getPrebuiltRuleBaseVersionHandler } from './get_prebuilt_rule_base_version_handler';
 
 export const getPrebuiltRuleBaseVersion = (router: SecuritySolutionPluginRouter) => {
@@ -26,12 +21,6 @@ export const getPrebuiltRuleBaseVersion = (router: SecuritySolutionPluginRouter)
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
-        },
-      },
-      options: {
-        tags: [routeLimitedConcurrencyTag(PREBUILT_RULES_OPERATION_CONCURRENCY)],
-        timeout: {
-          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },
       },
     })

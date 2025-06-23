@@ -18,16 +18,16 @@ import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
  * @param detectionRulesClient IDetectionRulesClient
  * @param ruleVersions The rules versions to update
  */
-export const mergeAndUpdatePrebuiltRules = async (
+export const revertPrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
   ruleVersions: RuleTriad[]
 ) =>
-  withSecuritySpan('mergeAndUpdatePrebuiltRule', async () => {
+  withSecuritySpan('revertPrebuiltRule', async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ruleVersions,
       executor: async ({ current, target }) => {
-        return detectionRulesClient.mergeAndUpdatePrebuiltRule({
+        return detectionRulesClient.revertPrebuiltRule({
           ruleAsset: target,
           existingRule: current,
         });

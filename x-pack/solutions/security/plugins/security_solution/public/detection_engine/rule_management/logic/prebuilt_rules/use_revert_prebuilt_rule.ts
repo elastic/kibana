@@ -11,13 +11,16 @@ import { useRevertPrebuiltRuleMutation } from '../../api/hooks/prebuilt_rules/us
 import * as i18n from './translations';
 
 export const useRevertPrebuiltRule = () => {
-  const { addError, addSuccess } = useAppToasts();
+  const { addError, addSuccess, addWarning } = useAppToasts();
 
   return useRevertPrebuiltRuleMutation({
     onError: (error) => {
       addError(populateErrorStack(error), { title: i18n.RULE_REVERT_FAILED });
     },
     onSuccess: (result) => {
+      if (result.attributes.summary.total === result.attributes.summary.skipped) {
+        addWarning(i18n.ALL_REVERT_RULES_SKIPPED(result.attributes.summary.skipped));
+      }
       addSuccess(getSuccessToastMessage(result.attributes));
     },
   });

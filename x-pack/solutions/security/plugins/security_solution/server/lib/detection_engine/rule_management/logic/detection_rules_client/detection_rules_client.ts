@@ -25,7 +25,7 @@ import type {
   ImportRuleArgs,
   ImportRulesArgs,
   PatchRuleArgs,
-  MergeAndUpdatePrebuiltRuleArgs,
+  RevertPrebuiltRuleArgs,
   UpdateRuleArgs,
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
@@ -36,7 +36,7 @@ import { importRules } from './methods/import_rules';
 import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
-import { mergeAndUpdatePrebuiltRule } from './methods/merge_and_update_prebuilt_rule';
+import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
@@ -151,12 +151,12 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async mergeAndUpdatePrebuiltRule({
+    async revertPrebuiltRule({
       ruleAsset,
       existingRule,
-    }: MergeAndUpdatePrebuiltRuleArgs): Promise<RuleResponse> {
-      return withSecuritySpan('DetectionRulesClient.mergeAndUpdatePrebuiltRule', async () => {
-        return mergeAndUpdatePrebuiltRule({
+    }: RevertPrebuiltRuleArgs): Promise<RuleResponse> {
+      return withSecuritySpan('DetectionRulesClient.revertPrebuiltRule', async () => {
+        return revertPrebuiltRule({
           actionsClient,
           rulesClient,
           ruleAsset,

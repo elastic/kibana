@@ -8,7 +8,6 @@
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
-import { invariant } from '../../../../../../common/utils/invariant';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   ThreeWayDiffOutcome,
@@ -24,6 +23,7 @@ import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import { getRuleById } from '../../../rule_management/logic/detection_rules_client/methods/get_rule_by_id';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 export const getPrebuiltRuleBaseVersionHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -56,11 +56,15 @@ export const getPrebuiltRuleBaseVersionHandler = async (
 
     const ruleDiff = calculateRuleDiff({
       current: currentRule,
-      base: undefined, // Base version is undefined, we're using the actual base version as the target version as we want to revert the rule
-      target: baseRule,
+      base: baseRule,
+      target: baseRule, // We're using the base version as the target version as we want to revert the rule
     });
 
-    const { diff, baseVersion, currentVersion } = formatDiffResponse(ruleDiff);
+    const { diff, baseVersion, currentVersion } = formatDiffResponse({
+      ruleDiff,
+      baseRule,
+      currentRule,
+    });
 
     const body: GetPrebuiltRuleBaseVersionResponseBody = {
       diff,
@@ -78,35 +82,33 @@ export const getPrebuiltRuleBaseVersionHandler = async (
   }
 };
 
-const formatDiffResponse = (
-  diffResult: CalculateRuleDiffResult
-): { diff: PartialRuleDiff; baseVersion: RuleResponse; currentVersion: RuleResponse } => {
-  const { ruleDiff, ruleVersions } = diffResult;
-  const installedCurrentVersion = ruleVersions.input.current;
-  const baseVersion = ruleVersions.input.target;
-  invariant(installedCurrentVersion != null, 'installedCurrentVersion not found');
-  invariant(baseVersion != null, 'baseVersion not found');
-
-  const baseRule: RuleResponse = {
-    ...convertPrebuiltRuleAssetToRuleResponse(baseVersion),
-    id: installedCurrentVersion.id,
+const formatDiffResponse = ({
+  ruleDiff: { ruleDiff },
+  baseRule,
+  currentRule,
+}: {
+  ruleDiff: CalculateRuleDiffResult;
+  baseRule: PrebuiltRuleAsset;
+  currentRule: RuleResponse;
+}): { diff: PartialRuleDiff; baseVersion: RuleResponse; currentVersion: RuleResponse } => {
+  const baseVersion: RuleResponse = {
+    ...convertPrebuiltRuleAssetToRuleResponse(baseRule),
+    id: currentRule.id,
     // Set all fields to the original Elastic version values
-    created_at: installedCurrentVersion.created_at,
-    created_by: installedCurrentVersion.created_by,
-    updated_at: installedCurrentVersion.created_at,
-    updated_by: installedCurrentVersion.created_by,
+    created_at: currentRule.created_at,
+    created_by: currentRule.created_by,
+    updated_at: currentRule.created_at,
+    updated_by: currentRule.created_by,
     revision: 0,
   };
 
   return {
-    baseVersion: baseRule,
-    currentVersion: installedCurrentVersion,
+    baseVersion,
+    currentVersion: currentRule,
     diff: {
       fields: pickBy<ThreeWayDiff<unknown>>(
         ruleDiff.fields,
-        (fieldDiff) =>
-          fieldDiff.diff_outcome !== ThreeWayDiffOutcome.StockValueNoUpdate &&
-          fieldDiff.diff_outcome !== ThreeWayDiffOutcome.MissingBaseNoUpdate
+        (fieldDiff) => fieldDiff.diff_outcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate
       ),
       num_fields_with_updates: ruleDiff.num_fields_with_updates,
       num_fields_with_conflicts: ruleDiff.num_fields_with_conflicts,

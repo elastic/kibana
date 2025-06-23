@@ -15,7 +15,6 @@ import { REVERT_PREBUILT_RULES_URL } from '../../../../../../common/api/detectio
 import { revertPrebuiltRule } from '../../api';
 import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
@@ -33,7 +32,6 @@ export const useRevertPrebuiltRuleMutation = (
   >
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
-  const invalidateFetchRulesSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const invalidatePrePackagedRulesStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchPrebuiltRulesUpgradeReview =
@@ -52,7 +50,6 @@ export const useRevertPrebuiltRuleMutation = (
       onSettled: (...args) => {
         invalidatePrePackagedRulesStatus();
         invalidateFindRulesQuery();
-        invalidateFetchRulesSnoozeSettings();
         invalidateFetchRuleManagementFilters();
 
         invalidateFetchPrebuiltRulesUpgradeReview();

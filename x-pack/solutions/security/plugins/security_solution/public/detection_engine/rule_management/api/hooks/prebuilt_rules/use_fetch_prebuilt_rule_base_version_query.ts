@@ -8,35 +8,33 @@ import { useCallback } from 'react';
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { get } from 'lodash';
+import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  GetPrebuiltRuleBaseVersionResponseBody,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine';
 import { getPrebuiltRuleBaseVersion } from '../../api';
 import { GET_PREBUILT_RULES_BASE_VERSION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
-import type { PrebuiltRuleBaseVersionDiff } from '../../../model/rule_details/prebuilt_rule_base_version_diff';
 import * as i18n from '../translations';
 
 export const GET_RULE_BASE_VERSION_QUERY_KEY = ['POST', GET_PREBUILT_RULES_BASE_VERSION_URL];
 
 export const useFetchPrebuiltRuleBaseVersionQuery = (
   request: RuleResponse | null,
-  options?: UseQueryOptions<PrebuiltRuleBaseVersionDiff>
+  options?: UseQueryOptions<GetPrebuiltRuleBaseVersionResponseBody | null>
 ) => {
   const { addError } = useAppToasts();
-  return useQuery<PrebuiltRuleBaseVersionDiff>(
+  return useQuery<GetPrebuiltRuleBaseVersionResponseBody | null>(
     [...GET_RULE_BASE_VERSION_QUERY_KEY, request],
     async ({ signal }) => {
-      if (
-        request != null &&
-        request.rule_source.type === 'external' &&
-        request.rule_source.is_customized === true
-      ) {
-        const response = await getPrebuiltRuleBaseVersion({ signal, request: { id: request.id } });
-        return { ...response, hasBaseVersion: true };
+      if (request != null && isCustomizedPrebuiltRule(request)) {
+        return getPrebuiltRuleBaseVersion({ signal, request: { id: request.id } });
       }
-      return { hasBaseVersion: false };
+      return null;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

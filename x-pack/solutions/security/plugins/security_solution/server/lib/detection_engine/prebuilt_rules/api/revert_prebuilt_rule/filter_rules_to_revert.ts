@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isNonCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import {
   BulkRevertSkipReasonEnum,
   type BulkActionReversionSkipResult,
@@ -20,7 +21,7 @@ export const filterRulesToRevert = (rules: RuleResponse[]) => {
         skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_PREBUILT,
       });
       return false;
-    } else if (rule.rule_source.type === 'external' && rule.rule_source.is_customized === false) {
+    } else if (isNonCustomizedPrebuiltRule(rule)) {
       skipped.push({
         id: rule.id,
         skip_reason: BulkRevertSkipReasonEnum.RULE_NOT_CUSTOMIZED,

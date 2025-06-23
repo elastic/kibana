@@ -28,13 +28,11 @@ describe('Upgrade diffable rule "threshold" (threshold rule type) after preview 
   const customized = { value: 20, field: ['fieldB'] };
   const upgrade = { value: 30, field: ['fieldC'] };
   const resolvedValue = { value: 50, field: ['resolved'] };
-  const targetRuleFields = { threshold: upgrade };
 
   assertRuleUpgradePreview({
     ruleType,
     fieldName,
     humanizedFieldName,
-    targetRuleFields,
     fieldVersions: {
       initial,
       customized,
@@ -46,7 +44,6 @@ describe('Upgrade diffable rule "threshold" (threshold rule type) after preview 
   assertRuleUpgradeAfterReview({
     ruleType,
     fieldName,
-    targetRuleFields,
     fieldVersions: {
       initial,
       customized,

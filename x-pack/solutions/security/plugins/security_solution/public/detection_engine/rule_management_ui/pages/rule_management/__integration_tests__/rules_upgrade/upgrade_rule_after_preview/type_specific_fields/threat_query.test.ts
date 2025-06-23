@@ -37,13 +37,11 @@ describe('Upgrade diffable rule "threat_query" (threat_match rule type) after pr
     language: 'kuery',
     filters: [],
   };
-  const targetRuleFields = { threat_query: upgrade.query };
 
   assertRuleUpgradePreview({
     ruleType,
     fieldName,
     humanizedFieldName,
-    targetRuleFields,
     fieldVersions: {
       initial,
       customized,
@@ -55,7 +53,6 @@ describe('Upgrade diffable rule "threat_query" (threat_match rule type) after pr
   assertRuleUpgradeAfterReview({
     ruleType,
     fieldName,
-    targetRuleFields,
     fieldVersions: {
       initial,
       customized,

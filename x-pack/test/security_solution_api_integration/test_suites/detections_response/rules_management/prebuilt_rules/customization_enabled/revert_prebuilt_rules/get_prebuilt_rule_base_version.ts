@@ -32,20 +32,17 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 
   describe('@ess @serverless @skipInServerlessMKI Get prebuilt rule base version', () => {
-    before(async () => {
+    after(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     describe('fetching prebuilt rule base versions', () => {
       beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
-        await installPrebuiltRules(es, supertest);
-      });
-
-      afterEach(async () => {
         await deleteAllRules(supertest, log);
         await deleteAllPrebuiltRuleAssets(es, log);
+        await createPrebuiltRuleAssetSavedObjects(es, [ruleAsset]);
+        await installPrebuiltRules(es, supertest);
       });
 
       it('returns rule versions and diff field if rule is customized', async () => {

@@ -18,10 +18,10 @@ import { css } from '@emotion/css';
 import * as i18n from '../json_diff/translations';
 
 interface RuleDiffHeaderBarProps {
-  newRuleLabel?: string;
+  diffRightSideTitle?: string;
 }
 
-export const RuleDiffHeaderBar = ({ newRuleLabel }: RuleDiffHeaderBarProps) => {
+export const RuleDiffHeaderBar = ({ diffRightSideTitle }: RuleDiffHeaderBarProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -54,7 +54,7 @@ export const RuleDiffHeaderBar = ({ newRuleLabel }: RuleDiffHeaderBarProps) => {
             size="m"
           />
           <EuiTitle size="xxs">
-            <h6>{newRuleLabel ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
+            <h6>{diffRightSideTitle ?? i18n.ELASTIC_UPDATE_VERSION}</h6>
           </EuiTitle>
         </EuiFlexGroup>
       </EuiFlexGroup>

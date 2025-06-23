@@ -59,7 +59,6 @@ export const filterUnsupportedDiffOutcomes = (
     Object.entries(fields).filter(([key, value]) => {
       const diff = value as ThreeWayDiff<unknown>;
       return (
-        diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueNoUpdate &&
         diff.diff_outcome !== ThreeWayDiffOutcome.CustomizedValueSameUpdate &&
         diff.diff_outcome !== ThreeWayDiffOutcome.MissingBaseNoUpdate
       );

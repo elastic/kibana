@@ -78,3 +78,13 @@ export const REVERT_RULE_SKIPPED = (skipped: number) =>
       '{skipped, plural, one {# rule was} other {# rules were}} skipped during reversion.',
     values: { skipped },
   });
+
+export const ALL_REVERT_RULES_SKIPPED = (skipped: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.prebuiltRules.toast.allRevertRuleSkipped',
+    {
+      defaultMessage:
+        '{skipped, plural, one {# rule was} other {All # rules were}} skipped during reversion.',
+      values: { skipped },
+    }
+  );

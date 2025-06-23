@@ -12,10 +12,12 @@ import type { RuleResponse } from '../../../../../../../common/api/detection_eng
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import { ClientError, validateMlAuth } from '../utils';
+import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
+import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
+import { applyRuleUpdate } from '../mergers/apply_rule_update';
+import { ClientError, validateMlAuth, mergeExceptionLists } from '../utils';
 import { createRule } from './create_rule';
 import { getRuleByRuleId } from './get_rule_by_rule_id';
-import { mergeAndUpdatePrebuiltRule } from './merge_and_update_prebuilt_rule';
 
 export const upgradePrebuiltRule = async ({
   actionsClient,
@@ -31,6 +33,7 @@ export const upgradePrebuiltRule = async ({
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
+
   const existingRule = await getRuleByRuleId({
     rulesClient,
     ruleId: ruleAsset.rule_id,
@@ -65,12 +68,24 @@ export const upgradePrebuiltRule = async ({
     return createdRule;
   }
 
-  return mergeAndUpdatePrebuiltRule({
-    actionsClient,
-    rulesClient,
-    existingRule,
-    ruleAsset,
-    mlAuthz,
+  // Else, recreate the rule from scratch with the passed payload.
+  const updatedRule = await applyRuleUpdate({
     prebuiltRuleAssetClient,
+    existingRule,
+    ruleUpdate: ruleAsset,
   });
+
+  // We want to preserve existing actions from existing rule on upgrade
+  if (existingRule.actions.length) {
+    updatedRule.actions = existingRule.actions;
+  }
+
+  const updatedRuleWithMergedExceptions = mergeExceptionLists(updatedRule, existingRule);
+
+  const updatedInternalRule = await rulesClient.update({
+    id: existingRule.id,
+    data: convertRuleResponseToAlertingRule(updatedRuleWithMergedExceptions, actionsClient),
+  });
+
+  return convertAlertingRuleToRuleResponse(updatedInternalRule);
 };

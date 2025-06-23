@@ -27,14 +27,14 @@ interface PrebuiltRulesBaseVersionFlyoutComponentProps {
   onRevert?: () => void;
 }
 
-const PrebuiltRulesBaseVersionFlyoutComponent = ({
+export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVersionFlyout({
   currentRule,
   baseRule,
   diff,
   closeFlyout,
   isReverting,
   onRevert,
-}: PrebuiltRulesBaseVersionFlyoutComponentProps) => {
+}: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
   const { mutateAsync: revertPrebuiltRule, isLoading } = useRevertPrebuiltRule();
   const subHeader = useMemo(
     () => <BaseVersionDiffFlyoutSubheader currentRule={currentRule} diff={diff} />,
@@ -95,7 +95,7 @@ const PrebuiltRulesBaseVersionFlyoutComponent = ({
           <PerFieldRuleDiffTab
             header={headerCallout}
             ruleDiff={diff}
-            newRuleLabel={i18n.BASE_VERSION_LABEL}
+            diffRightSideTitle={i18n.BASE_VERSION_LABEL}
           />
         </TabContentPadding>
       ),
@@ -135,6 +135,4 @@ const PrebuiltRulesBaseVersionFlyoutComponent = ({
       subHeader={subHeader}
     />
   );
-};
-
-export const PrebuiltRulesBaseVersionFlyout = memo(PrebuiltRulesBaseVersionFlyoutComponent);
+});

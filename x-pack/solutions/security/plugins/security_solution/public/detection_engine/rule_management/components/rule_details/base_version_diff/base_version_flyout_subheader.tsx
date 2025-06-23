@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { startCase, camelCase } from 'lodash';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -36,20 +36,16 @@ export const BaseVersionDiffFlyoutSubheader = ({
   );
 
   const fieldsDiff = Object.keys(diff.fields);
-  const fieldUpdates = useMemo(
-    () =>
-      fieldsDiff.length > 0 && (
-        <EuiText size="s">
-          <strong>
-            {i18n.FIELD_UPDATES}
-            {':'}
-          </strong>{' '}
-          {fieldsDiff
-            .map((fieldName) => fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName)))
-            .join(', ')}
-        </EuiText>
-      ),
-    [fieldsDiff]
+  const fieldUpdates = fieldsDiff.length > 0 && (
+    <EuiText size="s">
+      <strong>
+        {i18n.FIELD_UPDATES}
+        {':'}
+      </strong>{' '}
+      {fieldsDiff
+        .map((fieldName) => fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName)))
+        .join(', ')}
+    </EuiText>
   );
 
   return (

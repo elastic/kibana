@@ -12,22 +12,20 @@ export const getConcurrencyErrors = (
   revision: number,
   version: number,
   rule: RuleResponse
-): BulkActionError[] => {
-  const errors: BulkActionError[] = [];
+): BulkActionError | undefined => {
   if (rule.version !== version) {
-    errors.push({
+    return {
       message: `Version mismatch for id ${rule.id}: expected ${version}, got ${rule.version}`,
       status: 409,
       rule,
-    });
+    };
   }
 
   if (rule.revision !== revision) {
-    errors.push({
+    return {
       message: `Revision mismatch for id ${rule.id}: expected ${revision}, got ${rule.revision}`,
       status: 409,
       rule,
-    });
+    };
   }
-  return errors;
 };

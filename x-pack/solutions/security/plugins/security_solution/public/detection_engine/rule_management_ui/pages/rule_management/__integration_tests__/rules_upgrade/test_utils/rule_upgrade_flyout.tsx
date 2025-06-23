@@ -77,7 +77,6 @@ interface MockRuleUpgradeReviewDataParams {
   };
   diffOutcome: ThreeWayDiffOutcome;
   conflict: ThreeWayDiffConflict;
-  targetRuleFields?: { [key: string]: unknown };
 }
 
 export function mockRuleUpgradeReviewData({
@@ -86,7 +85,6 @@ export function mockRuleUpgradeReviewData({
   fieldVersions,
   diffOutcome,
   conflict,
-  targetRuleFields,
 }: MockRuleUpgradeReviewDataParams): void {
   mockKibanaFetchResponse(REVIEW_RULE_UPGRADE_URL, {
     stats: {
@@ -113,7 +111,7 @@ export function mockRuleUpgradeReviewData({
         target_rule: {
           rule_id: 'test-rule',
           type: ruleType,
-          ...targetRuleFields, // We use the `convertRuleToDiffable` util in the FieldUpgradeContext which needs relevant fields to convert
+          threshold: { value: 30, field: ['fieldC'] }, // We use the `convertRuleToDiffable` util in the FieldUpgradeContext which needs relevant fields to convert
         },
         diff: {
           num_fields_with_updates: 2, // tested field + version field

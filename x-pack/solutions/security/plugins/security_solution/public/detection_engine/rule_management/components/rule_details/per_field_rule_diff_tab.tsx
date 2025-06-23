@@ -17,13 +17,13 @@ import * as i18n from './translations';
 interface PerFieldRuleDiffTabProps {
   ruleDiff: PartialRuleDiff;
   header?: React.ReactNode;
-  newRuleLabel?: string;
+  diffRightSideTitle?: string;
 }
 
 export const PerFieldRuleDiffTab = ({
   ruleDiff,
   header,
-  newRuleLabel,
+  diffRightSideTitle,
 }: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
     const fields: FieldsGroupDiff[] = [];
@@ -49,7 +49,7 @@ export const PerFieldRuleDiffTab = ({
 
   return (
     <>
-      <RuleDiffHeaderBar newRuleLabel={newRuleLabel} />
+      <RuleDiffHeaderBar diffRightSideTitle={diffRightSideTitle} />
       {header}
       {aboutFields.length !== 0 && (
         <RuleDiffSection
