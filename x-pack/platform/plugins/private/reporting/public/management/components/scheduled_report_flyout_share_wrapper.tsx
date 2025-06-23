@@ -15,6 +15,7 @@ import { supportedReportTypes } from '../report_params';
 import { queryClient } from '../../query_client';
 import type { ReportingPublicPluginSetupDependencies } from '../../plugin';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
+import { ReportTypeId } from '../../types';
 
 export interface ScheduledReportMenuItem {
   apiClient: ReportingAPIClient;
@@ -41,7 +42,7 @@ export const ScheduledReportFlyoutShareWrapper = ({
 
   const availableReportTypes = useMemo(() => {
     return shareMenuItems
-      .filter((item) => supportedReportTypes.includes(item.config.exportType))
+      .filter((item) => supportedReportTypes.includes(item.config.exportType as ReportTypeId))
       .map((item) => ({
         id: item.config.exportType,
         label: item.config.label,
