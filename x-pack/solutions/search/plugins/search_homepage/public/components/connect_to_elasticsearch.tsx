@@ -27,7 +27,7 @@ import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 
 export const ConnectToElasticsearch = () => {
-  const { http, share } = useKibana().services;
+  const { share } = useKibana().services;
   const { data } = useGetApiKeys();
   const elasticsearchUrl = useElasticsearchUrl();
   const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
