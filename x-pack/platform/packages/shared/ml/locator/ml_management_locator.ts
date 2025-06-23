@@ -9,8 +9,13 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AnomalyDetectionQueryState, MlLocatorParams } from '@kbn/ml-common-types/locator';
+import type {
+  AnomalyDetectionQueryState,
+  MlLocatorParams,
+  MlManagementLocator,
+} from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
@@ -28,7 +33,7 @@ import { formatTrainedModelsManagementUrl } from './formatters/trained_models';
  * This class is meant as a wrapper for the Management Locator.
  * This will ensure url formatting is consistent with what it was prior to being moved to the Management section.
  */
-export class MlManagementLocatorInternal {
+export class MlManagementLocatorInternal implements MlManagementLocator {
   private _locator: LocatorPublic<SerializableRecord> | undefined;
   private _sectionId: string = 'ml';
   private validPaths = new Set(Object.values(ML_PAGES));
@@ -36,6 +41,9 @@ export class MlManagementLocatorInternal {
   constructor(share: SharePublicStart | SharePublicSetup) {
     this._locator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
   }
+  sectionId?: string | undefined;
+  locator?: LocatorPublic<SerializableRecord> | undefined;
+  _validPaths?: Set<string> | undefined;
 
   private getPath = (params: MlLocatorParams, appId: string) => {
     let path: string = '';

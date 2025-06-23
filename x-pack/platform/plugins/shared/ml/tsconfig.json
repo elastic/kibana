@@ -155,5 +155,6 @@
     "@kbn/ml-common-utils",
     "@kbn/ml-server-api-schemas",
     "@kbn/ml-saved-objects",
+    "@kbn/ml-locator",
   ]
 }
