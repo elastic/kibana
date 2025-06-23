@@ -37,6 +37,5 @@
     "@kbn/file-upload",
     "@kbn/file-upload-plugin",
     "@kbn/react-kibana-context-common",
-    "@kbn/unified-search-plugin",
   ]
 }

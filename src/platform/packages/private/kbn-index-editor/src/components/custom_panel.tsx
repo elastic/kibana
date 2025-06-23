@@ -17,12 +17,7 @@ import { KibanaContextExtra } from '../types';
 
 export const CustomPanel = () => {
   const {
-    services: {
-      share,
-      data,
-      indexUpdateService,
-      // unifiedSearch: { ui: QueryStringInput },
-    },
+    services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
