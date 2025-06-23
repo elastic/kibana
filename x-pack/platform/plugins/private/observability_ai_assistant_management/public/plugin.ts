@@ -17,6 +17,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
@@ -36,6 +37,7 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ConfigSchema {

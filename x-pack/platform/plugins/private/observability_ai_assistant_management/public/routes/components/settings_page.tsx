@@ -34,12 +34,14 @@ export function SettingsPage() {
     services: {
       application: { navigateToApp, isAppRegistered },
       serverless,
+      cloud,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
   const { euiTheme } = useEuiTheme();
+  const serverlessProjectType = cloud?.serverless?.projectType;
 
   const {
     query: { tab },
@@ -48,14 +50,23 @@ export function SettingsPage() {
   useEffect(() => {
     if (serverless) {
       serverless.setBreadcrumbs([
-        {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-            {
-              defaultMessage: 'Observability and Search',
+        serverlessProjectType === 'observability'
+          ? {
+              text: i18n.translate(
+                'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
+                {
+                  defaultMessage: 'Observability',
+                }
+              ),
             }
-          ),
-        },
+          : {
+              text: i18n.translate(
+                'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.search',
+                {
+                  defaultMessage: 'Search',
+                }
+              ),
+            },
       ]);
     } else {
       setBreadcrumbs([
@@ -78,7 +89,7 @@ export function SettingsPage() {
         },
       ]);
     }
-  }, [navigateToApp, serverless, setBreadcrumbs]);
+  }, [navigateToApp, serverless, serverlessProjectType, setBreadcrumbs]);
 
   const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
@@ -111,6 +122,23 @@ export function SettingsPage() {
       disabled: !isAppRegistered('enterpriseSearch'),
     },
   ];
+
+  let title;
+  if (cloud?.isServerlessEnabled) {
+    if (serverlessProjectType === 'observability') {
+      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
+        defaultMessage: 'AI Assistant for Observability',
+      });
+    } else {
+      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
+        defaultMessage: 'AI Assistant for Search',
+      });
+    }
+  } else {
+    title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
+      defaultMessage: 'AI Assistant for Observability and Search',
+    });
+  }
 
   const selectedTabId = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
@@ -154,14 +182,7 @@ export function SettingsPage() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h2>
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-                  {
-                    defaultMessage: 'AI Assistant for Observability and Search',
-                  }
-                )}
-              </h2>
+              <h2>{title}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
