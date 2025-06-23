@@ -32,7 +32,7 @@ import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -378,7 +378,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         background-color: ${pageBackgroundColor};
 
         ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-          ${kibanaFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
+          ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
         }
       `}
     >
