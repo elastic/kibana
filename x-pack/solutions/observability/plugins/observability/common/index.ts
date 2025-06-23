@@ -86,3 +86,8 @@ export const observabilityPaths = paths.observability;
 export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';
+
+export {
+  OBSERVABILITY_TIERED_FEATURES,
+  OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
+} from './product_features';

@@ -122,7 +122,8 @@
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/esql"
+    "@kbn/esql",
+    "@kbn/core-pricing-common"
   ],
   "exclude": ["target/**/*"]
 }
