@@ -88,7 +88,6 @@ export class SavedObjectTaggingPlugin
       cache: this.tagCache,
       ui: getUiApi({
         ...startServices,
-        analytics,
         cache: this.tagCache,
         client: this.tagClient,
         capabilities: getTagsCapabilities(application.capabilities),
