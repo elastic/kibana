@@ -172,8 +172,8 @@ export function registerESQLToolsRoutes({
                     schema.literal('boolean'),
                     schema.literal('date'),
                     schema.literal('object'),
-                    schema.literal('nested')
-                   ]),
+                    schema.literal('nested'),
+                  ]),
                   description: schema.string(),
                 })
               ),
@@ -269,8 +269,8 @@ export function registerESQLToolsRoutes({
                       schema.literal('boolean'),
                       schema.literal('date'),
                       schema.literal('object'),
-                      schema.literal('nested')
-                     ]),
+                      schema.literal('nested'),
+                    ]),
                     description: schema.string(),
                   })
                 )

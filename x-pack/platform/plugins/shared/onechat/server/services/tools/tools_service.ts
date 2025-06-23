@@ -39,7 +39,6 @@ export class ToolsService {
   }
 
   start({ getRunner, esql }: ToolsServiceStartDeps): ToolsServiceStart {
-
     this.providers.set(esqlToolProviderId, esql);
 
     const registry = createInternalRegistry({
@@ -48,7 +47,7 @@ export class ToolsService {
     });
 
     return {
-      registry
+      registry,
     };
   }
   private register(toolRegistration: RegisteredTool<any, any>) {

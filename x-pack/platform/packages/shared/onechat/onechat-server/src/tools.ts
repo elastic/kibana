@@ -70,7 +70,17 @@ export interface EsqlToolDefinition extends ToolDescriptor {
       /**
        * The data types of the parameter. Must be one of these
        */
-      type: "text" | "keyword" | "long" | "integer" | "double" | "float" | "boolean" | "date" | "object" | "nested";
+      type:
+        | 'text'
+        | 'keyword'
+        | 'long'
+        | 'integer'
+        | 'double'
+        | 'float'
+        | 'boolean'
+        | 'date'
+        | 'object'
+        | 'nested';
 
       /**
        * Description of the parameter's purpose or expected values.
