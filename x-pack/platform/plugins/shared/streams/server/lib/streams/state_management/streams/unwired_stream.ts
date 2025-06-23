@@ -25,7 +25,7 @@ import type {
   StreamChanges,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
-import { StreamActiveRecord, PrintableStream } from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 
 interface UnwiredStreamChanges extends StreamChanges {
   processing: boolean;
@@ -42,17 +42,8 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
-    const clone = new UnwiredStream(cloneDeep(this._definition), this.dependencies);
-    clone.setChanges(this.getChanges());
-    return clone;
-  }
-
-  toPrintable(): PrintableStream {
-    return {
-      ...super.toPrintable(),
-      changes: this.getChanges(),
-    };
+  protected doClone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
+    return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(

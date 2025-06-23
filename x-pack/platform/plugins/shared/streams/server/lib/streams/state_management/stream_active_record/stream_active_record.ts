@@ -163,18 +163,26 @@ export abstract class StreamActiveRecord<
   toPrintable(): PrintableStream {
     return {
       changeStatus: this.changeStatus,
+      changes: this.getChanges(),
       definition: this.definition,
     };
   }
 
-  abstract clone(): StreamActiveRecord;
+  clone(): StreamActiveRecord<TDefinition> {
+    const clonedStream = this.doClone();
+    clonedStream.setChanges(this.getChanges());
+    return clonedStream;
+  }
 
   getChanges(): StreamChanges {
     return this._changes;
   }
+
   setChanges(changes: StreamChanges) {
     this._changes = { ...changes };
   }
+
+  protected abstract doClone(): StreamActiveRecord<TDefinition>;
 
   protected abstract doHandleUpsertChange(
     definition: Streams.all.Definition,

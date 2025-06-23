@@ -37,7 +37,6 @@ import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type {
-  PrintableStream,
   StreamChangeStatus,
   StreamChanges,
   ValidationResult,
@@ -64,17 +63,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<Streams.WiredStream.Definition> {
-    const clone = new WiredStream(cloneDeep(this._definition), this.dependencies);
-    clone.setChanges(this.getChanges());
-    return clone;
-  }
-
-  toPrintable(): PrintableStream {
-    return {
-      ...super.toPrintable(),
-      changes: this.getChanges(),
-    };
+  protected doClone(): StreamActiveRecord<Streams.WiredStream.Definition> {
+    return new WiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(
