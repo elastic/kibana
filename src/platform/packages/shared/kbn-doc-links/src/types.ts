@@ -397,6 +397,7 @@ export interface DocLinks {
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
     monitorLogs: string;
+    logsStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -650,9 +651,11 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
-
   readonly queryRules: {
     readonly queryRulesAPIDocumentation: string;
+  };
+  readonly datasetQuality: {
+    readonly failureStore: string;
   };
 }
 
