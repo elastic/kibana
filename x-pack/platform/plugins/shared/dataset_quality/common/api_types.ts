@@ -275,3 +275,20 @@ export const getNonAggregatableDatasetsRt = rt.exact(
 );
 
 export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;
+
+export const getPreviewChartResponseRt = rt.type({
+  series: rt.array(
+    rt.type({
+      name: rt.string,
+      data: rt.array(
+        rt.type({
+          x: rt.number,
+          y: rt.union([rt.number, rt.null]),
+        })
+      ),
+    })
+  ),
+  totalGroups: rt.number,
+});
+
+export type PreviewChartResponse = rt.TypeOf<typeof getPreviewChartResponseRt>;
