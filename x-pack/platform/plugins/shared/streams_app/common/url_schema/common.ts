@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export * from './simulation_documents_search';
-export * from './simulation_state_machine';
-export * from './types';
-export * from './utils';
+export const ENRICHMENT_URL_STATE_KEY = 'pageState';
