@@ -11,7 +11,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { InterceptDialogService } from './service';
-import { InterceptPrompter } from './prompter';
+import { InterceptPrompter, Intercept } from './prompter';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 import type { TriggerInfo } from '../../common/types';
 
@@ -64,9 +64,7 @@ describe('ProductInterceptPrompter', () => {
 
       const mockQueueInterceptFn = jest.fn();
 
-      const interceptSteps: Parameters<
-        ReturnType<InterceptPrompter['start']>['registerIntercept']
-      >[0]['steps'] = [
+      const interceptSteps: Intercept['steps'] = [
         {
           id: 'start' as const,
           title: 'Hello',
@@ -84,14 +82,13 @@ describe('ProductInterceptPrompter', () => {
         },
       ];
 
-      const intercept: Parameters<ReturnType<InterceptPrompter['start']>['registerIntercept']>[0] =
-        {
-          id: 'test-intercept',
-          steps: interceptSteps,
-          onFinish: jest.fn(),
-          onDismiss: jest.fn(),
-          onProgress: jest.fn(),
-        };
+      const intercept: Intercept = {
+        id: 'test-intercept',
+        steps: interceptSteps,
+        onFinish: jest.fn(),
+        onDismiss: jest.fn(),
+        onProgress: jest.fn(),
+      };
 
       beforeEach(() => {
         jest.useFakeTimers();
@@ -121,7 +118,10 @@ describe('ProductInterceptPrompter', () => {
           triggerIntervalInMs: 1000,
         });
 
-        const intercept$ = registerIntercept(intercept);
+        const intercept$ = registerIntercept({
+          id: intercept.id,
+          config: () => Promise.resolve(intercept),
+        });
 
         expect(intercept$).toBeInstanceOf(Rx.Observable);
       });
@@ -132,7 +132,10 @@ describe('ProductInterceptPrompter', () => {
           triggerIntervalInMs: 1000,
         });
 
-        const intercept$ = registerIntercept(intercept);
+        const intercept$ = registerIntercept({
+          id: intercept.id,
+          config: () => Promise.resolve(intercept),
+        });
 
         expect(intercept$).toBeInstanceOf(Rx.Observable);
 
@@ -184,7 +187,10 @@ describe('ProductInterceptPrompter', () => {
 
           const subscriptionHandler = jest.fn();
 
-          const intercept$ = registerIntercept(intercept);
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
 
           const subscription = intercept$.subscribe(subscriptionHandler);
 
@@ -233,7 +239,10 @@ describe('ProductInterceptPrompter', () => {
 
           const subscriptionHandler = jest.fn();
 
-          const intercept$ = registerIntercept(intercept);
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
 
           const subscription = intercept$.subscribe(subscriptionHandler);
 
@@ -280,7 +289,10 @@ describe('ProductInterceptPrompter', () => {
 
           const subscriptionHandler = jest.fn();
 
-          const intercept$ = registerIntercept(intercept);
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
 
           const subscription = intercept$.subscribe(subscriptionHandler);
 
@@ -338,7 +350,10 @@ describe('ProductInterceptPrompter', () => {
               .mockResolvedValue({ lastInteractedInterceptId: lastInteractedInterceptId + 1 });
           });
 
-          const intercept$ = registerIntercept(_intercept);
+          const intercept$ = registerIntercept({
+            id: _intercept.id,
+            config: () => Promise.resolve(_intercept),
+          });
 
           const subscription = intercept$.subscribe(subscriptionHandler);
 
@@ -415,7 +430,10 @@ describe('ProductInterceptPrompter', () => {
 
           const subscriptionHandler = jest.fn();
 
-          const intercept$ = registerIntercept(intercept);
+          const intercept$ = registerIntercept({
+            id: intercept.id,
+            config: () => Promise.resolve(intercept),
+          });
           const subscription = intercept$.subscribe(subscriptionHandler);
 
           // cause call to trigger info api route to happen

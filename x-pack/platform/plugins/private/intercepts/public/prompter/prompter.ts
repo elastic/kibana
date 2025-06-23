@@ -7,11 +7,14 @@
 
 import * as Rx from 'rxjs';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
+import { apm } from '@elastic/apm-rum';
 import { InterceptDialogService, InterceptServiceStartDeps } from './service';
 import { UserInterceptRunPersistenceService } from './service/user_intercept_run_persistence_service';
 import { Intercept } from './service';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 import { TriggerInfo } from '../../common/types';
+
+export type { Intercept } from './service';
 
 type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics' | 'notifications'>;
 type ProductInterceptPrompterStartDeps = Omit<
@@ -63,7 +66,10 @@ export class InterceptPrompter {
     getUserTriggerData$: ReturnType<
       UserInterceptRunPersistenceService['start']
     >['getUserTriggerData$'],
-    intercept: Intercept
+    intercept: {
+      id: Intercept['id'];
+      config: () => Promise<Omit<Intercept, 'id'>>;
+    }
   ) {
     let nextRunId: number;
 
@@ -140,10 +146,19 @@ export class InterceptPrompter {
         })
       )
       .pipe(
-        Rx.tap((triggerData) => {
+        Rx.tap(async (triggerData) => {
           if (nextRunId !== triggerData.lastInteractedInterceptId) {
-            this.queueIntercept?.({ ...intercept, runId: nextRunId });
-            nextRunId++;
+            try {
+              const interceptConfig = await intercept.config();
+              this.queueIntercept?.({ id: intercept.id, runId: nextRunId, ...interceptConfig });
+              nextRunId++;
+            } catch (err) {
+              apm.captureError(err, {
+                labels: {
+                  interceptId: intercept.id,
+                },
+              });
+            }
           }
         })
       );
