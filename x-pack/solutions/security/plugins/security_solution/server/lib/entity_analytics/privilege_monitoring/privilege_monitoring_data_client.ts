@@ -336,13 +336,13 @@ export class PrivilegeMonitoringDataClient {
     const seenUserNames: string[] = [];
     const allStaleUsers: PrivMonBulkUser[] = [];
 
-    try {
-      for (const source of indexSources) {
-        // eslint-disable-next-line no-continue
-        if (!source.indexPattern) continue; // if no index pattern, skip this source
-        const index: string = source.indexPattern;
-        // log and move on. Don't allow empty index patterns
-        const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
+    for (const source of indexSources) {
+      // eslint-disable-next-line no-continue
+      if (!source.indexPattern) continue; // if no index pattern, skip this source
+      const index: string = source.indexPattern;
+      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
+
+      try {
         const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
         seenUserNames.push(...batchUserNames);
         // collect stale users
@@ -354,9 +354,14 @@ export class PrivilegeMonitoringDataClient {
             source.name
           }" (${index}): ${JSON.stringify(staleUsers.map((user) => user.username))}`
         );
+      } catch (error) {
+        if (this.isIndexNotFoundError(error)) {
+          this.log('warn', `Index "${index}" not found — skipping.`);
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+        this.log('error', `Unexpected error during sync for index "${index}": ${error.message}`);
       }
-    } catch (error) {
-      this.log('info', `error.message: ${error.message}`);
     }
     // Soft delete stale users
     this.log(
@@ -549,4 +554,10 @@ export class PrivilegeMonitoringDataClient {
     return ops;
   }
 
+  private isIndexNotFoundError(error): boolean {
+    return (
+      error?.meta?.body?.error?.type === 'index_not_found_exception' ||
+      error?.message?.includes('index_not_found_exception')
+    );
+  }
 }
