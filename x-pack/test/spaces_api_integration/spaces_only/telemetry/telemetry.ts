@@ -84,7 +84,6 @@ export default function ({ getService }: FtrProviderContext) {
         uptime: 0,
         slo: 0,
         infrastructure: 0,
-        inventory: 0,
         logs: 0,
         monitoring: 0,
         apm: 0,
@@ -119,7 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
         dataQuality: 0,
-        entityManager: 0,
       });
     });
 
