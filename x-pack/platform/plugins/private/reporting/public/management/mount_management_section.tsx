@@ -23,10 +23,10 @@ import {
 } from '@kbn/reporting-public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../query_client';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
+import { queryClient } from '../query_client';
 import { Section } from '../constants';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
 

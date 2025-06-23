@@ -12,7 +12,7 @@ import {
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { Observable } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
@@ -26,6 +26,18 @@ import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { mockScheduledReports } from '../../../common/test/fixtures';
 import { userEvent } from '@testing-library/user-event';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
+
+jest.mock('@kbn/reporting-public', () => ({
+  useKibana: jest.fn(),
+  ReportingAPIClient: jest.fn().mockImplementation(() => ({
+    getScheduledList: jest.fn(),
+    disableScheduledReports: jest.fn(),
+  })),
+}));
+
+jest.mock('./scheduled_report_flyout', () => ({
+  ScheduledReportFlyout: () => <div data-test-subj="scheduledReportFlyout" />,
+}));
 
 jest.mock('../hooks/use_get_scheduled_list', () => ({
   useGetScheduledList: jest.fn(),
@@ -77,6 +89,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+const mockValidateEmailAddresses = jest.fn().mockResolvedValue([]);
 
 describe('ReportSchedulesTable', () => {
   const bulkDisableScheduledReportsMock = jest.fn();
@@ -95,6 +108,16 @@ describe('ReportSchedulesTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.open = jest.fn();
+    window.focus = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...coreStart,
+        actions: {
+          validateEmailAddresses: mockValidateEmailAddresses,
+        },
+      },
+    });
   });
 
   it('renders table correctly', async () => {
@@ -239,6 +262,105 @@ describe('ReportSchedulesTable', () => {
       expect(bulkDisableScheduledReportsMock).toHaveBeenCalledWith({
         ids: [mockScheduledReports[0].id],
       });
+    });
+  });
+
+  it('should show config flyout from table action', async () => {
+    (useGetScheduledList as jest.Mock).mockReturnValue({
+      data: {
+        page: 3,
+        size: 10,
+        total: 3,
+        data: mockScheduledReports,
+      },
+      isLoading: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    userEvent.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    const firstReportViewConfig = await screen.findByTestId(
+      `reportViewConfig-${mockScheduledReports[0].id}`
+    );
+
+    expect(firstReportViewConfig).toBeInTheDocument();
+
+    userEvent.click(firstReportViewConfig, { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('scheduledReportFlyout')).toBeInTheDocument();
+  });
+
+  it('should show config flyout from title click', async () => {
+    (useGetScheduledList as jest.Mock).mockReturnValue({
+      data: {
+        page: 3,
+        size: 10,
+        total: 3,
+        data: mockScheduledReports,
+      },
+      isLoading: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    userEvent.click((await screen.findAllByTestId('reportTitle'))[0]);
+
+    expect(await screen.findByTestId('scheduledReportFlyout')).toBeInTheDocument();
+  });
+
+  it('should open dashboard', async () => {
+    (useGetScheduledList as jest.Mock).mockReturnValue({
+      data: {
+        page: 3,
+        size: 10,
+        total: 3,
+        data: mockScheduledReports,
+      },
+      isLoading: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    userEvent.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    const firstOpenDashboard = await screen.findByTestId(
+      `reportOpenDashboard-${mockScheduledReports[0].id}`
+    );
+
+    expect(firstOpenDashboard).toBeInTheDocument();
+
+    userEvent.click(firstOpenDashboard, { pointerEventsCheck: 0 });
+
+    await waitFor(() => {
+      expect(window.open).toHaveBeenCalledWith(
+        '/app/reportingRedirect?scheduledReportId=scheduled-report-1',
+        '_blank'
+      );
     });
   });
 });

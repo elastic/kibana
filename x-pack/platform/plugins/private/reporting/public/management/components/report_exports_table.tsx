@@ -218,12 +218,12 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
    */
   private readonly tableColumnWidths = {
     type: '5%',
-    title: '30%',
+    title: '25%',
     status: '20%',
     createdAt: '21%',
     content: '7%',
     exportType: '12%',
-    actions: '5%',
+    actions: '10%',
   };
 
   public render() {
