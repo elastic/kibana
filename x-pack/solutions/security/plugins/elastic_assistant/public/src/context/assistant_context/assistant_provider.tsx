@@ -33,10 +33,10 @@ const ASSISTANT_TITLE = i18n.translate('xpack.elasticAssistantPlugin.assistant.t
  */
 export function AssistantProvider({ children }: { children: React.ReactElement }) {
   const {
-    application: { navigateToApp, currentAppId$ },
+    application: { navigateToApp, currentAppId$, getUrlForApp },
     http,
     triggersActionsUi: { actionTypeRegistry },
-    docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    docLinks,
     userProfile,
     chrome,
     productDocBase,
@@ -91,7 +91,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     augmentMessageCodeBlocks,
     assistantAvailability,
     assistantTelemetry,
-    docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+    docLinks: docLinks,
     basePath,
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
@@ -104,6 +104,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     currentAppId: currentAppId ?? 'securitySolutionUI',
     userProfileService: userProfile,
     chrome,
+    getUrlForApp,
   });
 
   useEffect(() => {
