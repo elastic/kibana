@@ -25,7 +25,11 @@ interface QueryRuleMetadataEditorProps {
   onRemove: () => void;
   criteria: QueryRulesQueryRuleCriteria;
   onChange: (criteria: QueryRulesQueryRuleCriteria) => void;
-  error?: { values?: FieldError; metadata?: FieldError; type?: FieldError };
+  error?: {
+    values?: FieldError;
+    metadata?: FieldError;
+    type?: FieldError;
+  };
 }
 
 export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = ({

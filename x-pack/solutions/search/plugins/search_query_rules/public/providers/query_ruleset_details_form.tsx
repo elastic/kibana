@@ -20,6 +20,7 @@ export const QueryRulesetDetailsForm: React.FC<
 > = ({ children }) => {
   const form = useForm<QueryRuleEditorForm>({
     defaultValues: {
+      isAlways: false,
       mode: 'create',
       rulesetId: '',
       ruleId: '',
