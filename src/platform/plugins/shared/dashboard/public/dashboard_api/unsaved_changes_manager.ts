@@ -95,8 +95,8 @@ export function initializeUnsavedChangesManager({
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
     layoutManager.internalApi.startComparing$(lastSavedState$),
   ]).pipe(
-    map(([settings, unifiedSearch, panels]) => {
-      return { ...settings, ...unifiedSearch, ...panels };
+    map(([settings, unifiedSearch, layout]) => {
+      return { ...settings, ...unifiedSearch, ...layout };
     })
   );
 
