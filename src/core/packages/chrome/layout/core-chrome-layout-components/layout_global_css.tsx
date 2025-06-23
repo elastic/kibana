@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { useLayoutState } from './layout_state_context';
 import { useEuiTheme } from '@elastic/eui';
+import { useLayoutState } from './layout_state_context';
 
 /**
  * Sets up global CSS for the layout using the CSS variables (custom properties) approach.

@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { LegacyFixedLayoutGlobalStyles } from './legacy_fixed_global_app_style';
 import { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
-import useObservable from 'react-use/lib/useObservable';
 
 /**
  * Service for providing layout component wired to other core services.
