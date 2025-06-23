@@ -180,3 +180,7 @@ export const DELETE_MIGRATION_DESCRIPTION = i18n.translate(
       'This action cannot be undone. All translations related to this migration will be removed permanently.',
   }
 );
+export const RENAME_MIGRATION_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.renameMigrationButton',
+  { defaultMessage: 'Rename' }
+);

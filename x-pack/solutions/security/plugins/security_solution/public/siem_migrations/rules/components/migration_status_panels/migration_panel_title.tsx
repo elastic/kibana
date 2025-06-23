@@ -48,12 +48,12 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
     setName(migrationStats.name); // revert to original name on error. Error toast will be shown by the useUpdateMigration hook
   }, [migrationStats.name]);
 
-  const { mutate: updateMigration, isLoading: isUpdatingMigration } = useUpdateMigration(
-    migrationStats.id,
-    { onError: onRenameError }
-  );
   const { mutate: deleteMigration, isLoading: isDeletingMigration } = useDeleteMigration(
     migrationStats.id
+  );
+  const { mutate: updateMigration, isLoading: isUpdatingMigrationName } = useUpdateMigration(
+    migrationStats.id,
+    { onError: onRenameError }
   );
 
   const cancelEdit = useCallback(() => {
@@ -121,7 +121,7 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
                   onClick={togglePopover}
                   aria-label={i18n.OPEN_MIGRATION_OPTIONS_BUTTON}
                   data-test-subj="openMigrationOptionsButton"
-                  isLoading={isUpdatingMigration || isDeletingMigration}
+                  isLoading={isUpdatingMigrationName || isDeletingMigration}
                 />
               }
               isOpen={isPopoverOpen}

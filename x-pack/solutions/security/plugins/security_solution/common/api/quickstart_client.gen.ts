@@ -265,6 +265,8 @@ import type {
 } from './entity_analytics/monitoring/search_indices.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
@@ -273,10 +275,6 @@ import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
 } from './entity_analytics/privilege_monitoring/users/delete.gen';
-import type {
-  GetPrivMonUserRequestParamsInput,
-  GetPrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/get.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
@@ -1433,11 +1431,13 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getPrivMonUser(props: GetPrivMonUserProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrivMonUser`);
+  async getPrivilegedAccessDetectionPackageStatus() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetPrivilegedAccessDetectionPackageStatus`
+    );
     return this.kbnClient
-      .request<GetPrivMonUserResponse>({
-        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+      .request<GetPrivilegedAccessDetectionPackageStatusResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/status',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1880,6 +1880,20 @@ providing you with the most current and effective threat detection capabilities.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async installPrivilegedAccessDetectionPackage() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API InstallPrivilegedAccessDetectionPackage`
+    );
+    return this.kbnClient
+      .request<InstallPrivilegedAccessDetectionPackageResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/install',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2729,9 +2743,6 @@ export interface GetNotesProps {
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
-}
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
