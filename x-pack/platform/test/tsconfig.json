@@ -87,7 +87,6 @@
     "@kbn/repo-info",
     "@kbn/es",
     "@kbn/mock-idp-utils",
-    "@kbn/test-suites-xpack",
     "@kbn/actions-simulators-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/alerting-api-integration-helpers",
@@ -100,5 +99,6 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/test-suites-xpack-platform",
   ]
 }
