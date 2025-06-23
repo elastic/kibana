@@ -2762,6 +2762,8 @@
             "text": "ToolResultEvent"
           },
           " | ",
+          "ReasoningEvent",
+          " | ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -3455,6 +3457,150 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.BuiltinTags",
+        "type": "Object",
+        "tags": [],
+        "label": "BuiltinTags",
+        "description": [
+          "\nCommon set of tags used for platform tools."
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinTags.retrieval",
+            "type": "string",
+            "tags": [],
+            "label": "retrieval",
+            "description": [
+              "/**\n   * Tag associated to tools related to data retrieval\n   */"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.BuiltinToolIds",
+        "type": "Object",
+        "tags": [],
+        "label": "BuiltinToolIds",
+        "description": [
+          "\nIds of built-in onechat tools"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.indexExplorer",
+            "type": "string",
+            "tags": [],
+            "label": "indexExplorer",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.relevanceSearch",
+            "type": "string",
+            "tags": [],
+            "label": "relevanceSearch",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.naturalLanguageSearch",
+            "type": "string",
+            "tags": [],
+            "label": "naturalLanguageSearch",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.listIndices",
+            "type": "string",
+            "tags": [],
+            "label": "listIndices",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.getIndexMapping",
+            "type": "string",
+            "tags": [],
+            "label": "getIndexMapping",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.getDocumentById",
+            "type": "string",
+            "tags": [],
+            "label": "getDocumentById",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.generateEsql",
+            "type": "string",
+            "tags": [],
+            "label": "generateEsql",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.executeEsql",
+            "type": "string",
+            "tags": [],
+            "label": "executeEsql",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.BuiltinToolIds.researcherAgent",
+            "type": "string",
+            "tags": [],
+            "label": "researcherAgent",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/onechat-common",
         "id": "def-common.OnechatErrorUtils",
