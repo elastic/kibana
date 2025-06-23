@@ -98,7 +98,7 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor('sample data to be installed', async () => {
+    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
       this.log.debug(`Attempting to add sample data: ${id}`);
 
       // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
