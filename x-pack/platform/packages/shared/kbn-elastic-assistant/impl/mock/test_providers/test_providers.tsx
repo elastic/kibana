@@ -16,12 +16,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import {
   AssistantProvider,
   AssistantProviderProps,
   useAssistantContextValue,
 } from '../../assistant_context';
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
@@ -85,7 +85,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: docLinks,
+    docLinks,
     getComments: mockGetComments,
     getUrlForApp: mockGetUrlForApp,
     http: mockHttp,

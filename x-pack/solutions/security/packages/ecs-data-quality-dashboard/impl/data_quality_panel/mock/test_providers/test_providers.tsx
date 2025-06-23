@@ -85,7 +85,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: docLinks,
+    docLinks,
     getComments: mockGetComments,
     http: mockHttp,
     navigateToApp: mockNavigateToApp,

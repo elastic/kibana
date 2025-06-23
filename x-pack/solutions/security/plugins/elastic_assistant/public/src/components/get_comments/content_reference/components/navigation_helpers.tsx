@@ -12,7 +12,10 @@ import { KNOWLEDGE_BASE_TAB } from '@kbn/elastic-assistant/impl/assistant/settin
 import type { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
 import { URL_PARAM_KEY } from '../../../../hooks/navigate_to_alerts_page_with_filters/constants';
 import { getDetectionEngineUrl } from './link_to/redirect_to_detection_engine';
-import { ALERTS_PAGE_FILTER_ACKNOWLEDGED, ALERTS_PAGE_FILTER_OPEN } from '../../../../common/constants';
+import {
+  ALERTS_PAGE_FILTER_ACKNOWLEDGED,
+  ALERTS_PAGE_FILTER_OPEN,
+} from '../../../../common/constants';
 /**
  * Opens the AI4DSOC alert summary page, filtered by alertId
  */

@@ -19,12 +19,17 @@ import { URL_PARAM_KEY } from '../../../../hooks/navigate_to_alerts_page_with_fi
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
 import { encode } from '@kbn/rison';
 import { getDetectionEngineUrl } from './link_to/redirect_to_detection_engine';
-import { ALERTS_PAGE_FILTER_ACKNOWLEDGED, ALERTS_PAGE_FILTER_OPEN } from '../../../../common/constants';
+import {
+  ALERTS_PAGE_FILTER_ACKNOWLEDGED,
+  ALERTS_PAGE_FILTER_OPEN,
+} from '../../../../common/constants';
 
 // Mocks
 jest.mock('@kbn/elastic-assistant');
 jest.mock('../../../../context/typed_kibana_context/typed_kibana_context');
-jest.mock('../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters');
+jest.mock(
+  '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters'
+);
 
 const mockNavigateToApp = jest.fn();
 const mockOpenAlertsPageWithFilters = jest.fn();

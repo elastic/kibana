@@ -56,7 +56,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: docLinks,
+    docLinks,
     getComments: jest.fn(() => []),
     http: mockHttp,
     navigateToApp: mockNavigateToApp,
@@ -67,7 +67,6 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     userProfileService: mockUserProfileService,
     chrome,
     getUrlForApp: jest.fn(),
-
   });
 
   return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
