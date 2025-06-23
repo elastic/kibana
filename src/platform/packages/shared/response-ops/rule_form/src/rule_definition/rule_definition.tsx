@@ -348,6 +348,7 @@ export const RuleDefinition = () => {
                         position="right"
                         type="questionInCircle"
                         content={ALERT_DELAY_HELP_TEXT}
+                        aria-label={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>
                   </EuiText>

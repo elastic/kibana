@@ -87,7 +87,7 @@ export const RuleSettingsFlappingTitleTooltip = (props: RuleSettingsFlappingTitl
             display="empty"
             color="primary"
             iconType="questionInCircle"
-            aria-label="Flapping title info"
+            aria-label="Alert flapping title info"
             onClick={() => setIsPopoverOpen(!isOpen)}
           />
         }
