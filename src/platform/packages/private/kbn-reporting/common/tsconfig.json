@@ -22,6 +22,5 @@
     "@kbn/task-manager-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/licensing-plugin",
-    "@kbn/reporting-server",
   ]
 }
