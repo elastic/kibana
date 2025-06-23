@@ -102,7 +102,7 @@ describe('Export Integrations', () => {
           config: {
             icon: 'empty',
             label: 'CSV',
-            generateAssetExport: jest.fn(),
+            generateAssetExport: jest.fn(() => Promise.resolve()),
           },
         } as unknown as ExportShareConfig,
       ],
@@ -115,5 +115,6 @@ describe('Export Integrations', () => {
     expect(
       (singleExportShareContext.shareMenuItems[0] as ExportShareConfig).config.generateAssetExport
     ).toHaveBeenCalled();
+    expect(singleExportShareContext.onClose).toHaveBeenCalled();
   });
 });

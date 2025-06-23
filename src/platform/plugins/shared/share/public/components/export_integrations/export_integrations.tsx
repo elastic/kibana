@@ -294,15 +294,19 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         !menuItem.config.generateAssetComponent &&
         menuItem.config.generateAssetExport
       ) {
-        await menuItem.config.generateAssetExport({
-          intl,
-          optimizedForPrinting: false,
-        });
+        await menuItem.config
+          .generateAssetExport({
+            intl,
+            optimizedForPrinting: false,
+          })
+          .finally(() => {
+            onClose();
+          });
       } else {
         openFlyout(menuItem);
       }
     },
-    [intl, openFlyout]
+    [intl, onClose, openFlyout]
   );
 
   const flyoutRef = useRef<HTMLDivElement | null>(null);
