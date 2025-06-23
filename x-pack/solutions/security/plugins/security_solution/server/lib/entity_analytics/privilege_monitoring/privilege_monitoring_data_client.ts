@@ -40,7 +40,10 @@ import {
 import type { ApiKeyManager } from './auth/api_key';
 import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { generateUserIndexMappings } from './indices';
+import {
+  PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
+  generateUserIndexMappings,
+} from './indices';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
 import {
   POST_EXCLUDE_INDICES,
@@ -155,6 +158,15 @@ export class PrivilegeMonitoringDataClient {
     return descriptor;
   }
 
+  async getEngineStatus() {
+    const engineDescriptor = await this.engineClient.get();
+
+    return {
+      status: engineDescriptor.status,
+      error: engineDescriptor.error,
+    };
+  }
+
   public async createOrUpdateIndex() {
     await createOrUpdateIndex({
       esClient: this.internalUserClient,
@@ -180,17 +192,44 @@ export class PrivilegeMonitoringDataClient {
     }
   }
 
+  /**
+   * This create a index for user to populate privileged users.
+   * It already defines the mappings and settings for the index.
+   */
+  public createPrivilegesImportIndex(indexName: string, mode: 'lookup' | 'standard') {
+    this.log('info', `Creating privileges import index: ${indexName} with mode: ${mode}`);
+    // Use the current user client to create the index, the internal user does not have permissions to any index
+    return this.esClient.indices.create({
+      index: indexName,
+      mappings: { properties: PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING },
+      settings: {
+        mode,
+      },
+    });
+  }
+
   public async searchPrivilegesIndices(query: string | undefined) {
     const { indices } = await this.esClient.fieldCaps({
       index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
       types: ['keyword'],
-      fields: ['user.name'], // search for indices with field 'user.name' of type 'keyword'
+      fields: ['user.name.keyword'], // search for indices with field 'user.name.keyword' of type 'keyword'
       include_unmapped: false,
       ignore_unavailable: true,
       allow_no_indices: true,
       expand_wildcards: 'open',
       include_empty_fields: false,
       filters: '-parent',
+      index_filter: {
+        bool: {
+          must: [
+            {
+              exists: {
+                field: 'user.name.keyword',
+              },
+            },
+          ],
+        },
+      },
     });
 
     if (!Array.isArray(indices) || indices.length === 0) {

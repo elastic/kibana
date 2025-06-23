@@ -19,9 +19,11 @@ export interface OnboardingCallout {
 
 export const PrivilegedUserMonitoring = ({
   callout,
+  error,
   onManageUserClicked,
 }: {
   callout?: OnboardingCallout;
+  error?: string;
   onManageUserClicked: () => void;
 }) => {
   const spaceId = useSpaceId();
@@ -33,6 +35,20 @@ export const PrivilegedUserMonitoring = ({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
+        {error && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.errorTitle"
+                defaultMessage="Error loading privileged user monitoring data"
+              />
+            }
+            color="danger"
+            iconType="cross"
+          >
+            <p>{error}</p>
+          </EuiCallOut>
+        )}
         {callout && !dismissCallout && (
           <EuiCallOut
             title={

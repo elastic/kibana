@@ -19,5 +19,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  status:
+                    $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                  error:
+                    type: object
+                    required:
+                      - status
+                      - message
+                    properties:
+                      message:
+                        type: string
+
+                required:
+                  - status

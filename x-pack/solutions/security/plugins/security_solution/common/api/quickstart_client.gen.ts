@@ -260,6 +260,10 @@ import type {
 } from './entity_analytics/entity_store/status.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
+  CreatePrivilegesImportIndexRequestBodyInput,
+  CreatePrivilegesImportIndexResponse,
+} from './entity_analytics/monitoring/create_indidex.gen';
+import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
 } from './entity_analytics/monitoring/search_indices.gen';
@@ -619,6 +623,19 @@ If a record already exists for the specified entity, that record is overwritten 
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
+    return this.kbnClient
+      .request<CreatePrivilegesImportIndexResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
         body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
@@ -2614,6 +2631,9 @@ export interface CreateAlertsMigrationProps {
 }
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
+}
+export interface CreatePrivilegesImportIndexProps {
+  body: CreatePrivilegesImportIndexRequestBodyInput;
 }
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;

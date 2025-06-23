@@ -18,7 +18,9 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
 
 interface PrivilegedMonitoringEngineDescriptor {
   status: MonitoringEngineDescriptor['status'];
-  error?: Record<string, unknown>;
+  error?: Record<string, unknown> & {
+    message?: string;
+  };
 }
 
 export class PrivilegeMonitoringEngineDescriptorClient {

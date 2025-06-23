@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+/*
+ * Copyright Elasticcreate B.V. and/or licensed to Elasticcreate B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { take } from 'lodash/fp';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { CreatePrivilegesImportIndexRequestBody } from '../../../../../common/api/entity_analytics/monitoring/create_indidex.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
 
-// Return a subset of all indices that contain the user.name field
-const LIMIT = 20;
-
-export const searchPrivilegeMonitoringIndicesRoute = (
+export const createPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger
 ) => {
   router.versioned
-    .get({
+    .put({
       access: 'public',
       path: '/api/entity_analytics/monitoring/privileges/indices',
       security: {
@@ -36,7 +39,7 @@ export const searchPrivilegeMonitoringIndicesRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(SearchPrivilegesIndicesRequestQuery),
+            body: buildRouteValidationWithZod(CreatePrivilegesImportIndexRequestBody),
           },
         },
       },
@@ -44,19 +47,18 @@ export const searchPrivilegeMonitoringIndicesRoute = (
       async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const secSol = await context.securitySolution;
         const siemResponse = buildSiemResponse(response);
-        const query = request.query.searchQuery;
+        const indexName = request.body.name;
+        const indexMode = request.body.mode;
 
         try {
-          const indices = await secSol
+          await secSol
             .getPrivilegeMonitoringDataClient()
-            .searchPrivilegesIndices(query);
+            .createPrivilegesImportIndex(indexName, indexMode);
 
-          return response.ok({
-            body: take(LIMIT, indices),
-          });
+          return response.ok();
         } catch (e) {
           const error = transformError(e);
-          logger.error(`Error searching privilege monitoring indices: ${error.message}`);
+          logger.error(`Error creating privilege monitoring indices: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

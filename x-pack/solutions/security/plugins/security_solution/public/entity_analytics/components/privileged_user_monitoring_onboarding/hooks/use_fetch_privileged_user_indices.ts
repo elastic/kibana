@@ -16,7 +16,6 @@ export const useFetchPrivilegedUserIndices = (query: string | undefined) => {
     {
       keepPreviousData: true,
       cacheTime: 0, // Do not cache the data because it is used by an autocomplete query
-      refetchOnWindowFocus: false,
     }
   );
 };
