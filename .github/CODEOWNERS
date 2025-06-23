@@ -2849,6 +2849,7 @@ packages/react @elastic/appex-sharedux
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
+/x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/core-docs @elastic/experience-docs

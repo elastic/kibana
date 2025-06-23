@@ -304,6 +304,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.editableIndexSettings (all?|limited?|never)',
         'xpack.index_management.enableMappingsSourceFieldSection (boolean?|never)',
         'xpack.index_management.dev.enableSemanticText (boolean?)',
+        'xpack.intercepts.enabled (boolean?)',
         'xpack.license_management.ui.enabled (boolean?)',
         'xpack.maps.preserveDrawingBuffer (boolean?)',
         'xpack.maps.showMapsInspectorAdapter (boolean?)',
