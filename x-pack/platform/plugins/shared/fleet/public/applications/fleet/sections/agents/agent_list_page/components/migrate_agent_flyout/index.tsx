@@ -154,7 +154,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.agentList.migrateAgentFlyout.title"
-              defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet server by specifying a new cluster URL and enrollment token."
+              defaultMessage="Move {agentCount, plural, one {this agent} other {these agents}} to a different Fleet Server by specifying a new cluster URL and enrollment token."
               values={{
                 agentCount: agents.length,
               }}
@@ -168,7 +168,7 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.migrateAgentFlyout.warning"
-                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet-Server agents."
+                    defaultMessage="{icon} {x} of {y} selected agents cannot be migrated as they are tamper protected or Fleet Server agents."
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: protectedAndFleetAgents.length,
