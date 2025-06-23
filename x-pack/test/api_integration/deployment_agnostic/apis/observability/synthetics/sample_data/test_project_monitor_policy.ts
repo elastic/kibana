@@ -16,6 +16,7 @@ export const commonVars = {
   },
   maintenance_windows: {
     type: 'yaml',
+    value: [],
   },
 };
 
@@ -295,6 +296,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
                 },
               },
             ],
+            maintenance_windows: null,
           },
           id: `synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },
@@ -601,6 +603,9 @@ export const getTestProjectSyntheticsPolicy = (
             ipv4: { type: 'bool', value: true },
             ipv6: { type: 'bool', value: true },
             mode: { type: 'text' },
+            maintenance_windows: {
+              type: 'yaml',
+            },
           },
           id: `synthetics/http-http-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
         },

@@ -6167,7 +6167,8 @@
             "text": "TablesAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
@@ -26481,7 +26482,8 @@
             "text": "ExpressionsInspectorAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/expressions_inspector_adapter.ts",
         "deprecated": false,
@@ -28467,7 +28469,8 @@
             "text": "TablesAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
