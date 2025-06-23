@@ -77,11 +77,15 @@ export const FilesPreview: FC = () => {
       // Create an ad-hoc data view for each file
       const adHocDataViews = await Promise.all(
         filesStatus.map((fileStatus) => {
-          return data.dataViews.create({
-            id: fileStatus.fileName,
-            title: `temp_${fileStatus.fileName}`,
-            allowNoIndex: true,
-          });
+          return data.dataViews.create(
+            {
+              id: fileStatus.fileName,
+              title: `temp_${fileStatus.fileName}`,
+              allowNoIndex: true,
+            },
+            true,
+            false
+          );
         })
       );
 
