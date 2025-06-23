@@ -11,6 +11,7 @@ import type { ZodType } from '@kbn/zod';
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import type { RouterRoute, VersionedRouterRoute } from '@kbn/core-http-server';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
@@ -84,7 +85,7 @@ export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema): Versione
           deprecated: {
             documentationUrl: 'https://fake-url',
             reason: { type: 'remove' },
-            severity: 'critical',
+            severity: DeprecationSeverity.CRITICAL,
           },
         },
         validate: {

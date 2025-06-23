@@ -20,5 +20,6 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/utility-types",
+    "@kbn/core-deprecations-common",
   ]
 }

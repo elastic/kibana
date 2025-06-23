@@ -6,7 +6,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-
+import { DeprecationSeverityOrError } from '@kbn/core-deprecations-common';
 import { DeprecationBadge } from './deprecation_badge';
 
 const meta: Meta<typeof DeprecationBadge> = {
@@ -19,7 +19,7 @@ const meta: Meta<typeof DeprecationBadge> = {
     },
     isResolved: {
       name: 'Deprecation is resolved?',
-      control: { type: 'select', options: ['none', 'info', 'warning', 'critical', 'fetch_error'] },
+      control: { type: 'select', options: Object.values(DeprecationSeverityOrError) },
     },
   },
 };
@@ -29,7 +29,7 @@ type Story = StoryObj<typeof DeprecationBadge>;
 
 export const Primary: Story = {
   args: {
-    level: 'info',
+    level: DeprecationSeverityOrError.WARNING,
     isResolved: false,
   },
 };

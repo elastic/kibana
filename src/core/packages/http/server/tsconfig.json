@@ -16,6 +16,7 @@
     "@kbn/core-base-common",
     "@kbn/core-http-common",
     "@kbn/zod",
+    "@kbn/core-deprecations-common",
   ],
   "exclude": [
     "target/**/*",

@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ApiDeprecationDetails,
-  DomainDeprecationDetails,
+import {
+  type ApiDeprecationDetails,
+  type DomainDeprecationDetails,
+  DeprecationSeverity,
 } from '@kbn/core-deprecations-common';
 
 import type { PostValidationMetadata } from '@kbn/core-http-server';
@@ -38,7 +39,7 @@ export const buildApiAccessDeprecationDetails = ({
   const { apiId, apiTotalCalls, totalMarkedAsResolved } = apiUsageStats;
   const { routeVersion, routePath, routeDeprecationOptions, routeMethod } = deprecatedApiDetails;
 
-  const deprecationLevel = routeDeprecationOptions?.severity || 'warning';
+  const deprecationLevel = routeDeprecationOptions?.severity || DeprecationSeverity.WARNING;
 
   return {
     apiId,

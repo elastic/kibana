@@ -16,6 +16,7 @@ import { RouteValidator } from './validator';
 import { schema } from '@kbn/config-schema';
 import { Router } from './router';
 import { RouteAccess } from '@kbn/core-http-server';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import { createRequest } from './versioned_router/core_versioned_route.test.util';
 import { kibanaResponseFactory } from './response';
 
@@ -50,7 +51,7 @@ describe('handle', () => {
           validate,
           options: {
             deprecated: {
-              severity: 'warning',
+              severity: DeprecationSeverity.WARNING,
               reason: { type: 'bump', newApiVersion: '123' },
               documentationUrl: 'http://test.foo',
             },
@@ -89,7 +90,7 @@ describe('handle', () => {
           validate: false,
           options: {
             deprecated: {
-              severity: 'warning',
+              severity: DeprecationSeverity.WARNING,
               reason: { type: 'bump', newApiVersion: '123' },
               documentationUrl: 'http://test.foo',
             },

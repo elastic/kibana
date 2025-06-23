@@ -15,6 +15,7 @@ import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/serv
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
@@ -302,12 +303,12 @@ export const config: ServiceConfigDescriptor<HttpConfigType> = {
   path: 'server' as const,
   schema: configSchema,
   deprecations: ({ rename }) => [
-    rename('maxPayloadBytes', 'maxPayload', { level: 'warning' }),
+    rename('maxPayloadBytes', 'maxPayload', { level: DeprecationSeverity.WARNING }),
     (settings, fromPath, addDeprecation, { docLinks }) => {
       const cfg = get(settings, fromPath);
       if (!cfg?.ssl?.enabled || cfg?.protocol === 'http1') {
         addDeprecation({
-          level: 'warning',
+          level: DeprecationSeverity.WARNING,
           title: `Consider enabling TLS and using HTTP/2 to improve security and performance.`,
           configPath: `${fromPath}.protocol,${fromPath}.ssl.enabled`,
           message: `TLS is not enabled, or the HTTP protocol is set to HTTP/1. Enabling TLS and using HTTP/2 improves security and performance.`,

@@ -8,7 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import {
+  type DeprecationsDetails,
+  DeprecationSeverityOrError,
+} from '@kbn/core-deprecations-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getIndexForType } from '@kbn/core-saved-objects-base-server-internal';
@@ -92,7 +95,7 @@ export const getUnknownTypesDeprecations = async (
           objectCount: unknownDocs.length,
         },
       }),
-      level: 'critical',
+      level: DeprecationSeverityOrError.CRITICAL,
       requireRestart: false,
       deprecationType: undefined, // not config nor feature...
       correctiveActions: {

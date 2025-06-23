@@ -8,6 +8,7 @@
  */
 
 import type { RouteDeprecationInfo } from '@kbn/core-http-server';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import { getWarningHeaderMessageFromRouteDeprecation } from './get_warning_header_message';
 
 describe('getWarningHeaderMessageFromRouteDeprecation', () => {
@@ -16,7 +17,7 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
     const expectedMessage = `299 Kibana-${kibanaVersion} "This endpoint deprecated"`;
     const deprecationObject: RouteDeprecationInfo = {
       reason: { type: 'deprecate' },
-      severity: 'warning',
+      severity: DeprecationSeverity.WARNING,
       documentationUrl: 'fakeurl.com',
     };
     expect(getWarningHeaderMessageFromRouteDeprecation(deprecationObject, expectedMessage)).toMatch(
@@ -30,7 +31,7 @@ describe('getWarningHeaderMessageFromRouteDeprecation', () => {
     const expectedMessage = `299 Kibana-${kibanaVersion} "${msg}"`;
     const deprecationObject: RouteDeprecationInfo = {
       reason: { type: 'deprecate' },
-      severity: 'warning',
+      severity: DeprecationSeverity.WARNING,
       documentationUrl: 'fakeurl.com',
       message: msg,
     };

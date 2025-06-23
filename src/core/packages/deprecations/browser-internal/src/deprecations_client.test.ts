@@ -9,7 +9,10 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { DeprecationsClient } from './deprecations_client';
-import type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+import {
+  type DomainDeprecationDetails,
+  DeprecationSeverityOrError,
+} from '@kbn/core-deprecations-common';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();
@@ -86,7 +89,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           api: {
             path: 'some-path',
@@ -107,7 +110,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           manualSteps: ['manual-step'],
         },
@@ -126,7 +129,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           manualSteps: ['manual-step'],
         },
@@ -147,7 +150,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           api: {
             path: 'some-path',
@@ -181,7 +184,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           api: {
             path: 'some-path',
@@ -205,7 +208,7 @@ describe('DeprecationsClient', () => {
         title: 'some-title',
         domainId: 'testPluginId-1',
         message: 'some-message',
-        level: 'warning',
+        level: DeprecationSeverityOrError.WARNING,
         correctiveActions: {
           api: {
             path: 'some-path',

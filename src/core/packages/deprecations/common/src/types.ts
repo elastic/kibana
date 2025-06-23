@@ -12,6 +12,24 @@ export interface DeprecationDetailsMessage {
   content: string;
 }
 
+export enum DeprecationSeverity {
+  NONE = 'none',
+  INFO = 'info',
+  WARNING = 'warning',
+  CRITICAL = 'critical',
+}
+
+enum DeprecationFetchError {
+  FETCH_ERROR = 'fetch_error',
+}
+
+export type DeprecationSeverityOrError = DeprecationSeverity | DeprecationFetchError;
+
+export const DeprecationSeverityOrError = {
+  ...DeprecationSeverity,
+  ...DeprecationFetchError,
+} as const;
+
 /**
  * Base properties shared by all types of deprecations
  *
@@ -34,7 +52,7 @@ export interface BaseDeprecationDetails {
    * - critical: needs to be addressed before upgrade.
    * - fetch_error: Deprecations service failed to grab the deprecation details for the domain.
    */
-  level: 'warning' | 'critical' | 'fetch_error';
+  level: DeprecationSeverityOrError;
   /**
    * (optional) Used to identify between different deprecation types.
    * Example use case: in Upgrade Assistant, we may want to allow the user to sort by

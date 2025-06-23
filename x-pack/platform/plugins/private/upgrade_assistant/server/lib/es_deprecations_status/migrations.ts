@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
@@ -30,7 +31,12 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   templates: Record<string, MigrationDeprecationsDeprecation[]>;
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
-type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
+
+// todo this is accurate to the ES side of things.
+// do these stay on on the server or do they get transfered to the client?
+// perhaps none and info are filtered out
+// only used by BaseDeprecation
+// type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
 
 export interface BaseDeprecation {
   index?: string;
@@ -38,7 +44,7 @@ export interface BaseDeprecation {
   details?: string;
   message: string;
   url: string;
-  level: DeprecationLevel;
+  level: DeprecationSeverity;
   metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
   // these properties apply to index_settings deprecations only
@@ -65,7 +71,7 @@ const createBaseDeprecation = (
     details,
     message,
     url,
-    level,
+    level: level as DeprecationSeverity,
     metadata: metadata as EsMetadata,
     resolveDuringUpgrade,
   };
@@ -252,8 +258,9 @@ export const getEnrichedDeprecations = async (
     }
 
     return {
-      ...omit(deprecation, 'metadata', 'isFrozenIndex', 'isClosedIndex', 'isInDataStream'),
+      ...omit(deprecation, 'level', 'metadata', 'isFrozenIndex', 'isClosedIndex', 'isInDataStream'),
       correctiveAction,
+      level: deprecation.level as DeprecationSeverity,
     };
   });
 };

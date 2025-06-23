@@ -8,6 +8,7 @@
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';
@@ -182,9 +183,8 @@ export interface UpgradeAssistantTelemetry {
   };
 }
 
-export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 export interface DeprecationInfo {
-  level: MIGRATION_DEPRECATION_LEVEL;
+  level: DeprecationSeverity;
   message: string;
   url: string;
   details?: string;
@@ -276,7 +276,7 @@ export interface EnrichedDeprecationInfo
     | 'health_indicator'
     | 'ilm_policies'
     | 'templates';
-  level: MIGRATION_DEPRECATION_LEVEL;
+  level: DeprecationSeverity;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?: CorrectiveAction;

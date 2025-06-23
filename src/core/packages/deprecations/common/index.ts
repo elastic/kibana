@@ -17,3 +17,5 @@ export type {
   DomainDeprecationDetails,
   DeprecationsGetResponse,
 } from './src/types';
+
+export { DeprecationSeverity, DeprecationSeverityOrError } from './src/types';

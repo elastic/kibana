@@ -8,6 +8,7 @@
  */
 
 import type { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {
@@ -19,7 +20,7 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDe
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
         'current behavior and silence this warning.',
-      level: 'warning',
+      level: DeprecationSeverity.WARNING,
       correctiveActions: {
         manualSteps: [
           `Set 'server.rewriteBasePath' in the config file, CLI flag, or environment variable (in Docker only).`,
@@ -37,7 +38,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecati
       configPath: 'server.cors',
       title: 'Setting "server.cors" is deprecated',
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
-      level: 'warning',
+      level: DeprecationSeverity.WARNING,
       correctiveActions: {
         manualSteps: [
           `Replace "server.cors: ${corsSettings}" with "server.cors.enabled: ${corsSettings}"`,
