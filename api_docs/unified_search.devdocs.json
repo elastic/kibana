@@ -1436,6 +1436,20 @@
           },
           {
             "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.chrome",
+            "type": "Object",
+            "tags": [],
+            "label": "chrome",
+            "description": [],
+            "signature": [
+              "ChromeStart"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
             "id": "def-public.IUnifiedSearchPluginServices.uiSettings",
             "type": "Object",
             "tags": [],

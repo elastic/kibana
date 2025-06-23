@@ -73,4 +73,25 @@ describe('ConnectorSelectorPanel', () => {
     await userEvent.click(screen.getByText('Connector 2'));
     expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[1]);
   });
+
+  it('renders beta badge props when selected connector is a pre-configured connector', () => {
+    const props = {
+      connectors: [
+        {
+          id: '.inference',
+          actionTypeId: '.inference',
+          isPreconfigured: true,
+          name: 'Elastic Managed LLM',
+          config: {},
+          isDeprecated: false,
+          isSystemAction: false,
+          secrets: {},
+        },
+      ] as AIConnector[],
+      onConnectorSelected: jest.fn(),
+      selectedConnectorId: '.inference',
+    };
+    const { getByTestId } = render(<ConnectorSelectorPanel {...props} />);
+    expect(getByTestId('connectorSelectorPanelBetaBadge')).toBeInTheDocument();
+  });
 });

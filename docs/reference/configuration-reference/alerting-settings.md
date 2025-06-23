@@ -150,6 +150,12 @@ $$$action-config-email-domain-allowlist$$$
     Data type: `int`
     Default: `465`
 
+`xpack.actions.email.services.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+
+    Data type: `string`
+    Default: `["*"]`
+
 `xpack.actions.enableFooterInEmail` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions.
 
@@ -840,6 +846,12 @@ For more examples, go to [Preconfigured connectors](/reference/connectors-kibana
 :   For a [{{sn-itsm}}](/reference/connectors-kibana/servicenow-action-type.md), [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md), or [{{sn-itom}} connector](/reference/connectors-kibana/servicenow-itom-action-type.md), specifies a user name that is required when `xpack.actions.preconfigured.<connector-id>.config.isOAuth` is `false`.
 
     Data type: `string`
+
+`xpack.actions.webhook.ssl.pfx.enabled`
+:   Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
+
+    Data type: `bool`
+    Default: `true`
 
 ## Alerting settings [alert-settings]
 

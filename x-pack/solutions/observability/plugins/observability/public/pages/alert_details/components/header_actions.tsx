@@ -39,6 +39,7 @@ export interface HeaderActionsProps {
   alertIndex?: string;
   alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
+  onUpdate?: () => void;
 }
 
 export function HeaderActions({
@@ -46,6 +47,7 @@ export function HeaderActions({
   alertIndex,
   alertStatus,
   onUntrackAlert,
+  onUpdate,
 }: HeaderActionsProps) {
   const { services } = useKibana();
   const {
@@ -232,6 +234,7 @@ export function HeaderActions({
           }}
           onSubmit={() => {
             setRuleConditionsFlyoutOpen(false);
+            onUpdate?.();
             refetch();
           }}
         />

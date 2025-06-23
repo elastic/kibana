@@ -26,7 +26,7 @@ import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 import queryRulesBackground from '../../assets/query-rule-background.svg';
 import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
-import { CreateRulesetModal } from '../query_rules_sets/create_ruleset_modal';
+import { CreateRulesetModal } from './create_ruleset_modal';
 
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 
