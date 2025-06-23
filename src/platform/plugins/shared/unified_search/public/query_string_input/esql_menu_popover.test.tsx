@@ -96,7 +96,7 @@ describe('ESQLMenuPopover', () => {
     await waitFor(() => {
       expect(screen.getByText('Count of logs')).toBeInTheDocument();
       expect(screen.getByText('Average bytes')).toBeInTheDocument();
-      expect(screen.queryByText('Identify patterns in my logs')).not.toBeInTheDocument();
+      expect(screen.getByText('Identify patterns in my logs')).toBeInTheDocument();
     });
   });
 
