@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { NewLocation } from '../../components/settings/private_locations/add_location_flyout';
+import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
+import { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { PrivateLocation, SyntheticsPrivateLocations } from '../../../../../common/runtime_types';
@@ -21,6 +22,23 @@ export const createSyntheticsPrivateLocation = async (
   return await apiService.post(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, newLocation, undefined, {
     version: INITIAL_REST_VERSION,
   });
+};
+
+export const editSyntheticsPrivateLocation = async ({
+  locationId,
+  newAttributes,
+}: {
+  locationId: string;
+  newAttributes: EditPrivateLocationAttributes;
+}): Promise<PrivateLocation> => {
+  return apiService.put(
+    `${SYNTHETICS_API_URLS.PRIVATE_LOCATIONS}/${locationId}`,
+    newAttributes,
+    undefined,
+    {
+      version: INITIAL_REST_VERSION,
+    }
+  );
 };
 
 export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivateLocations> => {
