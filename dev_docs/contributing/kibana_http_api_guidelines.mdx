@@ -262,42 +262,6 @@ GET /api/resource/my-resource
 
 Terraform import brings existing resources under management by reading their current state. If your API returns different data than what users originally configured, it can cause [import state loss bugs](https://github.com/elastic/terraform-provider-elasticstack/issues/53).
 
-**Handling defaults strategically**
-
-Consider these approaches:
-
-1. **Return computed defaults explicitly**
-   ```json
-   {
-     "name": "my-resource",
-     "timeout": "30s",      // Default applied
-     "retries": 3,          // Default applied
-     "user_specified": {    // Optional: track what user set
-       "timeout": false,
-       "retries": false
-     }
-   }
-   ```
-
-2. **Offer response control with query parameters**
-   ```bash
-   GET /api/resource/123?include_defaults=true
-   GET /api/resource/123?minimal=true
-   ```
-
-3. **Separate user config from computed values**
-   ```json
-   {
-     "config": {
-       "name": "my-resource"  // User-specified only
-     },
-     "computed": {
-       "timeout": "30s",      // Applied defaults
-       "retries": 3
-     }
-   }
-   ```
-
 ### Be predictable
 
 Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.  
