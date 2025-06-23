@@ -11,7 +11,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
-// eslint-disable-next-line no-restricted-imports
 import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
 
 export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {

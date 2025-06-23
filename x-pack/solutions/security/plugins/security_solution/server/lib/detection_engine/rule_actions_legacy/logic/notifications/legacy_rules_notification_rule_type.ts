@@ -16,18 +16,17 @@ import {
   SERVER_APP_ID,
 } from '../../../../../../common/constants';
 
-// eslint-disable-next-line no-restricted-imports
 import type { LegacyNotificationRuleTypeDefinition } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyRulesNotificationParams } from './legacy_types';
 import type { AlertAttributes } from '../../../rule_types/types';
 import { siemRuleActionGroups } from '../../../rule_types/utils/siem_rule_action_groups';
 import { formatAlertsForNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyExtractReferences } from './legacy_saved_object_references/legacy_extract_references';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyInjectReferences } from './legacy_saved_object_references/legacy_inject_references';
 
 /**

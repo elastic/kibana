@@ -13,7 +13,7 @@ import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
 import { registerPrebuiltRulesRoutes } from '../lib/detection_engine/prebuilt_rules';
-// eslint-disable-next-line no-restricted-imports
+
 import { registerLegacyRuleActionsRoutes } from '../lib/detection_engine/rule_actions_legacy';
 import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_exceptions';
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';

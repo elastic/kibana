@@ -8,14 +8,13 @@
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 
-// eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
-// eslint-disable-next-line no-restricted-imports
+
 import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
 } from './legacy_types';
-// eslint-disable-next-line no-restricted-imports
+
 import { legacyGetRuleActionsFromSavedObject } from './legacy_utils';
 
 /**

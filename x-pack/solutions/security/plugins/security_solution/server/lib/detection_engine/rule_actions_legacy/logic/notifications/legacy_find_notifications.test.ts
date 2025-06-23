@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line no-restricted-imports
 import { legacyGetFilter } from './legacy_find_notifications';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../../../common/constants';
 

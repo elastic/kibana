@@ -13,7 +13,7 @@ import {
   getInitialRulesUsage,
   getInitialSpacesUsage,
 } from './rules/get_initial_usage';
-// eslint-disable-next-line no-restricted-imports
+
 import { getInitialLegacySiemSignalsUsage } from './legacy_siem_signals/get_initial_usage';
 
 /**

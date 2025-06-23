@@ -85,7 +85,7 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-// eslint-disable-next-line no-restricted-imports
+
 import {
   isLegacyNotificationRuleExecutor,
   legacyRulesNotificationRuleType,
