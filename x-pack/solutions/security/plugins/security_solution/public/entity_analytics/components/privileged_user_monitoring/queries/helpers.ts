@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLAstRenameExpression, ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLAstQueryExpression, ESQLCommand } from '@kbn/esql-ast';
 import { Walker, BasicPrettyPrinter, isFunctionExpression, isColumn, mutate } from '@kbn/esql-ast';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import { isArray, partition } from 'lodash/fp';
-import type { ESQLAstItem, ESQLProperNode } from '@kbn/esql-ast/src/types';
+import { partition } from 'lodash/fp';
+import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import { Parser } from '@kbn/esql-ast/src/parser/parser';
+import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/helpers';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 
 export const getPrivilegedMonitorUsersJoin = (
@@ -127,13 +128,18 @@ function getAllCreatedColumns(root: ESQLAstQueryExpression) {
   const renamedColumns = renameCommands
     .map((command) => {
       return command.args.map((arg) => {
-        if (isColumn(arg)) {
-          return arg.name;
+        if (isAsExpression(arg)) {
+          if (isColumn(arg.args[1])) {
+            return arg.args[1].name;
+          }
         }
 
-        if (isRenameOptionExpression(command, arg) && isColumn(arg.args[1])) {
-          return arg.args[1].name;
+        if (isFieldExpression(arg)) {
+          if (isColumn(arg.args[0])) {
+            return arg.args[0].name;
+          }
         }
+
         return null;
       });
     })
@@ -147,16 +153,3 @@ function getAllCreatedColumns(root: ESQLAstQueryExpression) {
   );
   return createdColumns;
 }
-
-const isRenameOptionExpression = (
-  parent: ESQLProperNode,
-  node: ESQLAstItem
-): node is ESQLAstRenameExpression => {
-  return (
-    !isArray(node) &&
-    parent.type === 'command' &&
-    parent.name === 'rename' &&
-    node.type === 'option' &&
-    node.name === 'as'
-  );
-};
