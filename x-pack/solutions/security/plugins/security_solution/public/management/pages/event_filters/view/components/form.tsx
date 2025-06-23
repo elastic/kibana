@@ -92,7 +92,8 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   inputDisplay: OS_TITLES[os],
 }));
 
-const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
+// TODO: move this somewhere common
+export const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
   formFields.reduce<{ [k: string]: number }>((allFields, field) => {
     if (field in allFields) {
       allFields[field]++;
@@ -102,7 +103,7 @@ const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
     return allFields;
   }, {});
 
-const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
+export const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
   Object.values(formFieldsList).some((e) => e > 1);
 
 const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
