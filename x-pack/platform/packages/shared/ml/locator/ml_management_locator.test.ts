@@ -7,6 +7,7 @@
 
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { MlManagementLocatorInternal } from './ml_management_locator';
 
 const mockShareService = {
