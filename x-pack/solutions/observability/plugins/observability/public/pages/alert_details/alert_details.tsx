@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -60,7 +60,7 @@ import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
 import { ProximalAlertsCallout } from './proximal_alerts_callout';
-import { useGetTabId } from './hooks/use_get_tab_id';
+import { useTabId } from './hooks/use_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
@@ -75,7 +75,6 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 
 const TAB_IDS = [
   'overview',
@@ -103,14 +102,11 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-    application: { navigateToUrl },
   } = services;
-  const { basePath } = http;
-  const { search } = useLocation();
-  const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const urlTabId = useGetTabId();
+  const { getUrlTabId, setUrlTabId } = useTabId();
+  const urlTabId = getUrlTabId();
   const {
     isLoadingRelatedDashboards,
     suggestedDashboards,
@@ -139,17 +135,17 @@ export function AlertDetails() {
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [activeTabId, setActiveTabId] = useState<TabId>();
+
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
-    let searchParams = new URLSearchParams(search);
     if (tabId === 'related_alerts') {
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+      setUrlTabId(tabId, true, {
+        filterProximal: 'true',
+      });
     } else {
-      searchParams = new URLSearchParams();
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+      setUrlTabId(tabId, true);
     }
-    history.replace({ search: searchParams.toString() });
   };
 
   useEffect(() => {
@@ -177,7 +173,7 @@ export function AlertDetails() {
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
       setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [alertDetail, ruleTypeRegistry, search]);
+  }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
   useBreadcrumbs(
     [
@@ -203,11 +199,6 @@ export function AlertDetails() {
 
   const showRelatedAlertsFromCallout = () => {
     handleSetTabId('related_alerts');
-    navigateToUrl(
-      `${basePath.prepend(
-        paths.observability.alerts
-      )}/${alertId}?tabId=related_alerts&filterProximal=true`
-    );
   };
 
   usePageReady({
