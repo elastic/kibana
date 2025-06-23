@@ -31,8 +31,6 @@ const selector = (s: ReactFlowState) => ({
   maxZoomReached: s.transform[2] >= s.maxZoom,
 });
 
-const ZOOM_DURATION = 200; // milliseconds
-
 export interface ControlsProps extends CommonProps {
   showZoom?: boolean;
   showFitView?: boolean;
@@ -79,20 +77,17 @@ export const Controls = ({
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
   const onZoomInHandler = () => {
-    zoomIn({ duration: ZOOM_DURATION });
+    zoomIn({ duration: fitViewOptions?.duration });
     onZoomIn?.();
   };
 
   const onZoomOutHandler = () => {
-    zoomOut({ duration: ZOOM_DURATION });
+    zoomOut({ duration: fitViewOptions?.duration });
     onZoomOut?.();
   };
 
   const onFitViewHandler = () => {
-    const options = fitViewOptions
-      ? { ...fitViewOptions, duration: fitViewOptions.duration ?? ZOOM_DURATION }
-      : { duration: ZOOM_DURATION };
-    fitView(options);
+    fitView(fitViewOptions);
     onFitView?.();
   };
 

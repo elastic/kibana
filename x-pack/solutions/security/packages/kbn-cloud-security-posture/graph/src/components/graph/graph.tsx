@@ -74,6 +74,10 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
+const fitViewOptions: FitViewOptions<Node> = {
+  duration: 200,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -114,7 +118,7 @@ export const Graph = memo<GraphProps>(
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
         setTimeout(() => {
-          fitViewRef.current?.();
+          fitViewRef.current?.(fitViewOptions);
         }, 30);
       }
     }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
@@ -141,6 +145,7 @@ export const Graph = memo<GraphProps>(
         <SvgDefsMarker />
         <ReactFlow
           fitView={true}
+          fitViewOptions={fitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -165,7 +170,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls showCenter={false} />
+              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
             </Panel>
           )}
           {children}
