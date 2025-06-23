@@ -16,6 +16,7 @@ import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
 import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -279,6 +280,20 @@ export class LlmProxy {
       // @ts-expect-error
       when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
     });
+  }
+
+  interceptQueryRewrite(rewrittenQuery: string) {
+    return this.intercept(
+      `interceptQueryRewrite: "${rewrittenQuery}"`,
+      (body) => {
+        const systemMessage = body.messages.find((msg) => msg.role === MessageRole.System)!;
+        return systemMessage.content!.includes(
+          // @ts-expect-error
+          'You are a retrieval query-rewriting assistant'
+        );
+      },
+      rewrittenQuery
+    ).completeAfterIntercept();
   }
 
   intercept(

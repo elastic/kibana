@@ -13,7 +13,7 @@ import type { ObservabilityAIAssistantClient } from '../../../service/client';
 import type { FunctionCallChatFunction } from '../../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../../analytics/recall_ranking';
 import { RecalledEntry } from '../../../service/knowledge_base_service';
-import { getRewrittenUserPrompt } from './get_rewritten_prompt';
+import { queryRewrite } from './query_rewrite';
 
 export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'esScore'>;
 
@@ -38,7 +38,7 @@ export async function recallAndScore({
   llmScores?: Array<{ id: string; llmScore: number }>;
   suggestions: RecalledSuggestion[];
 }> {
-  const rewrittenUserPrompt = await getRewrittenUserPrompt({
+  const rewrittenUserPrompt = await queryRewrite({
     screenDescription,
     chat,
     messages,

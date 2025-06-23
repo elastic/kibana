@@ -10,9 +10,9 @@ import { lastValueFrom } from 'rxjs';
 import dedent from 'dedent';
 import { Message, MessageRole } from '../../../../common';
 import { FunctionCallChatFunction } from '../../../service/types';
-import { getUserPromptFromMessages } from './get_user_prompt_from_messages';
+import { getLastUserMessage } from './get_last_user_message';
 
-export async function getRewrittenUserPrompt({
+export async function queryRewrite({
   screenDescription,
   chat,
   messages,
@@ -25,7 +25,7 @@ export async function getRewrittenUserPrompt({
   logger: Logger;
   signal: AbortSignal;
 }): Promise<string> {
-  const userPrompt = getUserPromptFromMessages(messages);
+  const userPrompt = getLastUserMessage(messages);
 
   try {
     const systemMessage = dedent(`

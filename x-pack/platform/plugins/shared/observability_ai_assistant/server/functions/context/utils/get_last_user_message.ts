@@ -8,7 +8,7 @@
 import { last } from 'lodash';
 import { Message, MessageRole } from '../../../../common';
 
-export function getUserPromptFromMessages(messages: Message[]): string | undefined {
+export function getLastUserMessage(messages: Message[]): string | undefined {
   const lastUserMessage = last(
     messages.filter((message) => message.message.role === MessageRole.User)
   );

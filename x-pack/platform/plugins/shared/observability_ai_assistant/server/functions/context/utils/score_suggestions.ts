@@ -15,7 +15,7 @@ import type { FunctionCallChatFunction } from '../../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../../common/utils/short_id_table';
-import { getUserPromptFromMessages } from './get_user_prompt_from_messages';
+import { getLastUserMessage } from './get_last_user_message';
 
 export const SCORE_SUGGESTIONS_FUNCTION_NAME = 'score_suggestions';
 
@@ -51,7 +51,7 @@ export async function scoreSuggestions({
   llmScores: Array<{ id: string; llmScore: number }>;
 }> {
   const shortIdTable = new ShortIdTable();
-  const userPrompt = getUserPromptFromMessages(messages);
+  const userPrompt = getLastUserMessage(messages);
 
   const scoreFunction = {
     name: SCORE_SUGGESTIONS_FUNCTION_NAME,
