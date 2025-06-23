@@ -7,7 +7,17 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
@@ -29,6 +39,7 @@ export function SettingsPage() {
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+  const { euiTheme } = useEuiTheme();
 
   const {
     query: { tab },
@@ -41,7 +52,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
             {
-              defaultMessage: 'AI Assistant for Observability and Search Settings',
+              defaultMessage: 'Observability and Search',
             }
           ),
         },
@@ -61,7 +72,7 @@ export function SettingsPage() {
           text: i18n.translate(
             'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
             {
-              defaultMessage: 'Observability',
+              defaultMessage: 'Observability and Search',
             }
           ),
         },
@@ -82,7 +93,7 @@ export function SettingsPage() {
       name: i18n.translate(
         'xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBaseLabel',
         {
-          defaultMessage: 'Knowledge base',
+          defaultMessage: 'Knowledge Base',
         }
       ),
       content: <KnowledgeBaseTab />,
@@ -110,18 +121,68 @@ export function SettingsPage() {
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
-      <EuiTitle size="l">
-        <h2>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
-            {
-              defaultMessage: 'Settings',
-            }
-          )}
-        </h2>
-      </EuiTitle>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              size="xl"
+              type="logoObservability"
+              style={{
+                backgroundColor: euiTheme.colors.backgroundBasePlain,
+                borderRadius: '50%',
+                padding: 6,
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              size="xl"
+              type="logoEnterpriseSearch"
+              style={{
+                backgroundColor: euiTheme.colors.backgroundBasePlain,
+                borderRadius: '50%',
+                padding: 6,
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h2>
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.h2.settingsLabel',
+                  {
+                    defaultMessage: 'AI Assistant for Observability and Search',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            onClick={() => navigateToApp('management', { path: 'kibana/genAiSettings' })}
+            data-test-subj="genAiSettingsLink"
+          >
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsLinkLabel',
+              {
+                defaultMessage: 'GenAI Settings',
+              }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
       <EuiTabs data-test-subj="settingsPageTabs">
         {tabs
