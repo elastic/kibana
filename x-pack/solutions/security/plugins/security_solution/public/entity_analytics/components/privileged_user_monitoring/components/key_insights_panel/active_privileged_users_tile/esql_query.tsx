@@ -10,5 +10,5 @@ import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
 export const getActivePrivilegedUsersEsqlCount = (namespace: string) => {
   return `FROM logs-* METADATA _id, _index
       ${getPrivilegedMonitorUsersJoin(namespace)}
-      | STATS COUNT_DISTINCT(user.name)`;
+      | STATS \`COUNT(*)\` = COUNT_DISTINCT(user.name)`;
 };
