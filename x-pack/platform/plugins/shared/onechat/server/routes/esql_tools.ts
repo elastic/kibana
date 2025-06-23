@@ -367,8 +367,6 @@ export function registerESQLToolsRoutes({
           const client = await esqlToolService.getScopedClient({ request });
           const result = await client.delete(request.params.id);
 
-          logger.info('RESULT: ' + result);
-
           if (result === null || result === undefined) {
             return response.notFound({
               body: {
