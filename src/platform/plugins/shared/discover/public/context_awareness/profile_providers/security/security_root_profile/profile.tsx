@@ -16,6 +16,7 @@ import type { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
 import { getDefaultSecuritySolutionAppState } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
+import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
@@ -32,12 +33,15 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
   const cellRendererFeature = discoverFeaturesRegistry.getById('security-solution-cell-renderer');
 
   return {
-    profileId: 'security-root-profile',
+    profileId: SECURITY_PROFILE_ID.root,
     profile: {
       getCellRenderers:
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
+          if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
+            return entries;
+          }
           ['kibana.alert.workflow_status'].forEach((fieldName) => {
             entries[fieldName] =
               context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
@@ -45,7 +49,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
           return entries;
         },
       getRowIndicatorProvider: () => () => getAlertEventRowIndicator,
-      getDefaultAppState: () => () => getDefaultSecuritySolutionAppState(),
+      getDefaultAppState: getDefaultSecuritySolutionAppState(),
     },
     resolve: async (params) => {
       if (params.solutionNavId !== SolutionType.Security) {
