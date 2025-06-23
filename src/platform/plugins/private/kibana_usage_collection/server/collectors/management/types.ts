@@ -50,6 +50,7 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'onechat:mcpServer:enabled': boolean;
+  'onechat:esqlToolApi:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
