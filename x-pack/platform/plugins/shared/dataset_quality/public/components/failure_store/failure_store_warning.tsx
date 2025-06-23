@@ -22,7 +22,7 @@ export const FailureStoreWarning = () => {
         description: (
           <FormattedMessage
             id="xpack.datasetQuality.noAccessToFailureStore.warning"
-            defaultMessage="Documents that fail at ingestion are sent to the failure store. You don't have the required privileges to access failure store. Contact your administrator. {learnMoreLink}"
+            defaultMessage="Documents that fail to be ingested are sent to the failure store. You don't have the required privileges to access failure stores. Contact your administrator. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink
