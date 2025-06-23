@@ -4,24 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+
+import { useToasts } from '../../../../common/lib/kibana';
+import { showErrorToast } from '../../../rule_management_ui/components/rule_import_modal/utils';
 import { usePerformRulesUpgradeMutation } from '../../api/hooks/prebuilt_rules/use_perform_rules_upgrade_mutation';
 
 import * as i18n from './translations';
 
 export const usePerformUpgradeRules = () => {
-  const { addError, addSuccess } = useAppToasts();
+  // const { addError, addSuccess } = useAppToasts();
+  const toasts = useToasts();
 
   return usePerformRulesUpgradeMutation({
     onError: (err) => {
-      addError(err, { title: i18n.RULE_UPGRADE_FAILED });
+      showErrorToast({
+        title: i18n.RULE_UPGRADE_FAILED,
+        fullMessage: JSON.stringify(err, null, 2),
+        toasts,
+      });
+      // addError(err, { title: i18n.RULE_UPGRADE_FAILED });
     },
     onSuccess: (result, vars) => {
       if (vars.dry_run) {
         // This is a preflight check, no need to show toast
         return;
       }
-      addSuccess(getSuccessToastMessage(result));
+      toasts.addSuccess(getSuccessToastMessage(result));
+
+      if (result.summary.failed > 0) {
+        showErrorToast({
+          title: i18n.UPGRADE_RULE_FAILED(result.summary.failed),
+          fullMessage: JSON.stringify(result.errors, null, 2),
+          toasts,
+        });
+      }
     },
   });
 };
@@ -43,9 +59,6 @@ const getSuccessToastMessage = (result: {
   }
   if (skipped > 0) {
     toastMessage.push(i18n.UPGRADE_RULE_SKIPPED(skipped));
-  }
-  if (failed > 0) {
-    toastMessage.push(i18n.UPGRADE_RULE_FAILED(failed));
   }
   return toastMessage.join(' ');
 };

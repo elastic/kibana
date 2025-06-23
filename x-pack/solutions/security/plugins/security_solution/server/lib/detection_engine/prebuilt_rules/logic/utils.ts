@@ -45,11 +45,7 @@ function getRulesWithTargetVersion(
   return currentRules.reduce<BasicRuleInfo[]>((allUpgradableRules, currentRule) => {
     const targetRule = targetRulesMap.get(currentRule.rule_id);
     if (targetRule && currentRule.version < targetRule.version) {
-      allUpgradableRules.push({
-        rule_id: currentRule.rule_id,
-        version: currentRule.version,
-        type: targetRule.type,
-      });
+      allUpgradableRules.push(targetRule);
     }
     return allUpgradableRules;
   }, []);

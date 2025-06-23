@@ -46,14 +46,14 @@ function getUserFriendlyConnectorMessages(actionConnectorsErrors: ErrorSchema[])
   return mappedErrors;
 }
 
-function showErrorToast({
+export function showErrorToast({
   title,
-  shortMessage,
+  shortMessage = 'Click "See the full error" to learn more',
   fullMessage,
   toasts,
 }: {
   title: string;
-  shortMessage: string;
+  shortMessage?: string;
   fullMessage: string;
   toasts: IToasts;
 }) {
