@@ -93,6 +93,7 @@ export async function executeEditEmbeddableAction({
     onCancel,
   });
   if (ConfigPanel) {
+    console.log('container', container);
     // no need to pass the uuid in this use case
     mountInlinePanel(ConfigPanel, core, undefined, { container });
   }

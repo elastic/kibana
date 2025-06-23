@@ -49,8 +49,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
         undefined
       );
       useAsync(async () => {
-        // all this in React.lazy???
-        const t0 = performance.now();
         if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
         const embeddable = await api.addNewPanel<object, LensApi>({
           panelType: 'lens',
@@ -65,9 +63,6 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
         // open the flyout if embeddable has been created successfully
         setConfigPanelRef(await embeddable?.onEdit?.({ onClose }));
-
-        const t1 = performance.now();
-        console.log('execute', t1 - t0);
       }, []);
 
       return ConfigPanelRef ?? FallbackComponent;

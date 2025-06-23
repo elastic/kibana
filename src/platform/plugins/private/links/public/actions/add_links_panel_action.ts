@@ -37,15 +37,10 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
     return isParentApiCompatible(embeddable);
   },
   execute: async ({ embeddable }) => {
-
-    var t0 = performance.now();
-
     if (!isParentApiCompatible(embeddable)) throw new IncompatibleActionError();
     const runtimeState = await openEditorFlyout({
       parentDashboard: embeddable,
     });  
-    var t1 = performance.now();
-    console.log('onEdit links',t1 - t0);
     if (!runtimeState) return;
 
   
@@ -73,8 +68,6 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
       panelType: CONTENT_ID,
       serializedState: serializeState(),
     });
-    var t1 = performance.now();
-    console.log('onEdit links',t1 - t0);
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],
   getDisplayName: () => APP_NAME,

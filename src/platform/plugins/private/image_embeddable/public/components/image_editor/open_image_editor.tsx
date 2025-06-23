@@ -42,14 +42,7 @@ export const openImageEditor = async ({
   initialImageConfig?: ImageConfig;
 }): Promise<ImageConfig> => {
 
-  var t0 = performance.now();
-
-
   const { overlays, http, security, rendering } = coreServices;
-
-
-  var t1 = performance.now();
-  console.log('what is this crap', t1-t0  );
   const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
 
   /**
@@ -105,10 +98,6 @@ export const openImageEditor = async ({
         'aria-labelledby': 'image-editor-flyout-title',
       }
     );
-
-
-    var t1 = performance.now();
-    console.log('what is this crap', t1-t0  );
 
     overlayTracker?.openOverlay(flyoutSession);
   });

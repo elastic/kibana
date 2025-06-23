@@ -19,7 +19,6 @@ import {
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -34,11 +33,9 @@ import {
 import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
-import { mountInlinePanel } from '../mount';
 import { StateManagementConfig } from './initialize_state_management';
 import { apiPublishesInlineEditingCapabilities } from '../type_guards';
 import { SearchContextConfig } from './initialize_search_context';
-import React from 'react';
 
 function getSupportedTriggers(
   getState: GetStateType,
@@ -228,11 +225,10 @@ export function initializeEditApi(
     ? parentApi.canEditInline
     : true;
 
-  const openConfigurationPanel = async (
+  const getConfigurationPanel = async (
     { showOnly, onClose }: { showOnly: boolean, onClose?: () => void } = { showOnly: false }
   ) => {
 
-    var t0 = performance.now();
     // save the initial state in case it needs to revert later on
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
@@ -246,9 +242,6 @@ export function initializeEditApi(
             updateState({ ...getState(), attributes }),
       closeFlyout: onClose,
     });
-
-    var t1 = performance.now();
-    console.log('openConfigurationPanel1', t1-t0  );
     return ConfigPanel 
   };
 
@@ -284,7 +277,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        return openConfigurationPanel({ showOnly: false, onClose });
+        return getConfigurationPanel({ showOnly: false, onClose });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
@@ -307,7 +300,7 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        return openConfigurationPanel({ showOnly: true });
+        return getConfigurationPanel({ showOnly: true });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {

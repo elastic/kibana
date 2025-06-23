@@ -63,10 +63,6 @@ export async function openEditorFlyout({
   initialState?: LinksRuntimeState;
   parentDashboard?: unknown;
 }): Promise<LinksRuntimeState | undefined> {
-
-  var t0 = performance.now();
-
-
   const overlayTracker =
     parentDashboard && tracksOverlays(parentDashboard) ? parentDashboard : undefined;
 
@@ -162,8 +158,6 @@ export async function openEditorFlyout({
         'data-test-subj': 'links--panelEditor--flyout',
       }
     );
-    var t1 = performance.now();
-    console.log('THI5',t1 - t0);
 
     if (overlayTracker) {
       overlayTracker.openOverlay(editorFlyout);
