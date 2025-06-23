@@ -79,7 +79,7 @@ describe('recallAndScore', () => {
         recall: mockRecall,
         chat: mockChat,
         analytics: mockAnalytics,
-        screenDescription: 'Some context',
+        screenDescription: 'The user is looking at Discover',
         messages: normalConversationMessages,
         logger: mockLogger,
         signal,
@@ -90,12 +90,9 @@ describe('recallAndScore', () => {
       expect(result).toEqual({ relevantDocuments: [], llmScores: [], suggestions: [] });
     });
 
-    it('invokes recall with user prompt and screen context', async () => {
+    it('invokes recall with user prompt', async () => {
       expect(mockRecall).toHaveBeenCalledWith({
-        queries: [
-          { text: 'What is my favorite color?', boost: 3 },
-          { text: 'Some context', boost: 1 },
-        ],
+        queries: [{ text: 'What is my favourite color?', boost: 1 }],
       });
     });
 
@@ -112,7 +109,7 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      screenDescription: 'context',
+      screenDescription: 'The user is looking at Discover',
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
@@ -138,7 +135,7 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      screenDescription: 'context',
+      screenDescription: 'The user is looking at Discover',
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,
@@ -149,7 +146,7 @@ describe('recallAndScore', () => {
       logger: mockLogger,
       messages: normalConversationMessages,
       userMessageFunctionName: undefined,
-      context: 'context',
+      screenDescription: 'The user is looking at Discover',
       signal,
       chat: mockChat,
     });
@@ -221,7 +218,7 @@ describe('recallAndScore', () => {
       recall: mockRecall,
       chat: mockChat,
       analytics: mockAnalytics,
-      screenDescription: 'context',
+      screenDescription: 'The user is looking at Discover',
       messages: normalConversationMessages,
       logger: mockLogger,
       signal,

@@ -16,6 +16,7 @@ import {
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/recall_and_score';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
 import {
   KnowledgeBaseDocument,
   LlmProxy,
@@ -151,9 +152,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('instructs the LLM with the correct tool_choice and tools for scoring', () => {
           // @ts-expect-error
-          expect(firstRequestBody.tool_choice?.function?.name).to.be('score');
+          expect(firstRequestBody.tool_choice?.function?.name).to.be(
+            SCORE_SUGGESTIONS_FUNCTION_NAME
+          );
           expect(firstRequestBody.tools?.length).to.be(1);
-          expect(first(firstRequestBody.tools)?.function.name).to.be('score');
+          expect(first(firstRequestBody.tools)?.function.name).to.be(
+            SCORE_SUGGESTIONS_FUNCTION_NAME
+          );
         });
 
         it('sends the correct documents to the LLM', async () => {

@@ -17,12 +17,12 @@ import { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../../common/utils/short_id_table';
 import { getUserPromptFromMessages } from './get_user_prompt_from_messages';
 
-export const SCORE_FUNCTION_NAME = 'score_suggestions';
+export const SCORE_SUGGESTIONS_FUNCTION_NAME = 'score_suggestions';
 
 const scoreFunctionRequestRt = t.type({
   message: t.type({
     function_call: t.type({
-      name: t.literal(SCORE_FUNCTION_NAME),
+      name: t.literal(SCORE_SUGGESTIONS_FUNCTION_NAME),
       arguments: t.string,
     }),
   }),
@@ -54,7 +54,7 @@ export async function scoreSuggestions({
   const userPrompt = getUserPromptFromMessages(messages);
 
   const scoreFunction = {
-    name: SCORE_FUNCTION_NAME,
+    name: SCORE_SUGGESTIONS_FUNCTION_NAME,
     description: `Scores documents for relevance based on the user's prompt, conversation history, and screen context.`,
     parameters: {
       type: 'object',
@@ -95,7 +95,7 @@ export async function scoreSuggestions({
         ### Mandatory rules
         1.  **Base every score only on the text provided**. Do not rely on outside knowledge.
         2.  **Never alter, summarise, copy, or quote the documents**. Your output is *only* the scores.
-        3.  **Return the result exclusively by calling the provided function** \`${SCORE_FUNCTION_NAME}\`.
+        3.  **Return the result exclusively by calling the provided function** \`${SCORE_SUGGESTIONS_FUNCTION_NAME}\`.
             * Populate the single argument 'scores' with a CSV string.
             * Format: '<documentId>,<score>' - one line per document, no header, no extra whitespace.
         4.  **Do not output anything else** (no explanations, no JSON wrappers, no markdown). The function call itself is the entire response.
@@ -138,7 +138,7 @@ export async function scoreSuggestions({
         },
       ],
       functions: [scoreFunction],
-      functionCall: SCORE_FUNCTION_NAME,
+      functionCall: SCORE_SUGGESTIONS_FUNCTION_NAME,
       signal,
       stream: true,
     }).pipe(concatenateChatCompletionChunks())

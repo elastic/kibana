@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scoreSuggestions } from './score_suggestions';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME, scoreSuggestions } from './score_suggestions';
 import { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
 import { StreamingChatResponseEventType } from '../../../../common';
@@ -32,7 +32,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,7\ndoc2,5\ndoc3,3' }),
           },
         },
@@ -57,8 +57,8 @@ describe('scoreSuggestions', () => {
     ]);
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
-      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9, llmScore: 7 },
+      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8, llmScore: 5 },
     ]);
   });
 
@@ -69,7 +69,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,2\ndoc2,3\ndoc3,1' }),
           },
         },
@@ -95,7 +95,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,6\nfake_doc,5' }),
           },
         },
@@ -112,7 +112,7 @@ describe('scoreSuggestions', () => {
     });
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9, llmScore: 6 },
     ]);
   });
 
@@ -121,7 +121,9 @@ describe('scoreSuggestions', () => {
       of({
         id: 'mock-id',
         type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: { function_call: { name: 'score', arguments: 'invalid_json' } },
+        message: {
+          function_call: { name: SCORE_SUGGESTIONS_FUNCTION_NAME, arguments: 'invalid_json' },
+        },
       })
     );
 

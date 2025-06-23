@@ -14,7 +14,7 @@ import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistan
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { SCORE_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/utils/score_suggestions';
 import { SELECT_RELEVANT_FIELDS_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { createOpenAiChunk } from './create_openai_chunk';
 
@@ -238,9 +238,10 @@ export class LlmProxy {
     let documents: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
-      name: SCORE_FUNCTION_NAME,
+      name: SCORE_SUGGESTIONS_FUNCTION_NAME,
       // @ts-expect-error
-      when: (requestBody) => requestBody.tool_choice?.function?.name === SCORE_FUNCTION_NAME,
+      when: (requestBody) =>
+        requestBody.tool_choice?.function?.name === SCORE_SUGGESTIONS_FUNCTION_NAME,
       arguments: (requestBody) => {
         const lastMessage = last(requestBody.messages)?.content as string;
         log.debug(`interceptScoreToolChoice: ${lastMessage}`);
