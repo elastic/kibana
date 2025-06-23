@@ -283,88 +283,84 @@ export const useAnnotationStyles = () => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs', { unit: 'px' }).fontSize as string;
 
-  const buttonStyles = useEuiButtonColorCSS({ display: 'fill' });
-
   return useMemo(
-    () => css`
-      .ml-annotation {
-        &__brush {
-          .extent {
-            stroke: ${euiTheme.colors.accent};
-            stroke-width: ${mlAnnotationBorderWidth};
-            stroke-dasharray: 2 2;
-            fill: ${euiTheme.colors.accent};
-            fill-opacity: 0.1;
-            shape-rendering: geometricPrecision;
-          }
-        }
+    () =>
+      css({
+        '.ml-annotation': {
+          '&__brush': {
+            '.extent': {
+              stroke: euiTheme.colors.accent,
+              strokeWidth: mlAnnotationBorderWidth,
+              strokeDasharray: '2 2',
+              fill: euiTheme.colors.accent,
+              fillOpacity: 0.1,
+              shapeRendering: 'geometricPrecision',
+            },
+          },
 
-        &__rect {
-          stroke: ${euiTheme.colors.accent};
-          stroke-width: ${mlAnnotationBorderWidth};
-          stroke-opacity: ${mlAnnotationRectDefaultStrokeOpacity};
-          fill: ${euiTheme.colors.accent};
-          fill-opacity: ${mlAnnotationRectDefaultFillOpacity};
-          shape-rendering: geometricPrecision;
-          transition: stroke-opacity ${euiTheme.animation.fast},
-            fill-opacity ${euiTheme.animation.fast};
+          '&__rect': {
+            stroke: euiTheme.colors.accent,
+            strokeWidth: mlAnnotationBorderWidth,
+            strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+            fill: euiTheme.colors.accent,
+            fillOpacity: mlAnnotationRectDefaultFillOpacity,
+            shapeRendering: 'geometricPrecision',
+            transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
 
-          &--highlight {
-            stroke-opacity: ${mlAnnotationRectDefaultStrokeOpacity * 2};
-            fill-opacity: ${mlAnnotationRectDefaultFillOpacity * 2};
-          }
+            '&--highlight': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity * 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity * 2,
+            },
 
-          &--blur {
-            stroke-opacity: ${mlAnnotationRectDefaultStrokeOpacity / 2};
-            fill-opacity: ${mlAnnotationRectDefaultFillOpacity / 2};
-          }
-        }
+            '&--blur': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+            },
+          },
 
-        &__text {
-          text-anchor: middle;
-          font-size: ${euiFontSizeXS};
-          font-family: ${euiTheme.font.family};
-          font-weight: ${euiTheme.font.weight.medium};
-          transition: fill ${euiTheme.animation.fast};
-          user-select: none;
+          '&__text': {
+            textAnchor: 'middle',
+            fontSize: euiFontSizeXS,
+            fontFamily: euiTheme.font.family,
+            fontWeight: euiTheme.font.weight.medium,
+            fill: euiTheme.colors.textInverse,
+            transition: `fill ${euiTheme.animation.fast}`,
+            userSelect: 'none',
 
-          &--blur {
-            fill: ${euiTheme.colors.mediumShade};
-          }
+            '&--blur': {
+              fill: euiTheme.colors.mediumShade,
+            },
+          },
 
-          ${buttonStyles.accent}
-        }
+          '&__text-rect': {
+            fill: euiTheme.colors.accent,
+            transition: `fill ${euiTheme.animation.fast}`,
 
-        &__text-rect {
-          fill: ${euiTheme.colors.accent};
-          transition: fill ${euiTheme.animation.fast};
+            '&--blur': {
+              fill: euiTheme.colors.accent,
+            },
+          },
 
-          &--blur {
-            fill: ${euiTheme.colors.lightestShade};
-          }
-        }
+          '&--hidden': {
+            display: 'none',
+          },
 
-        &--hidden {
-          display: none;
-        }
+          '&__context-rect': {
+            stroke: euiTheme.colors.accent,
+            strokeWidth: mlAnnotationBorderWidth,
+            strokeOpacity: mlAnnotationRectDefaultStrokeOpacity,
+            fill: euiTheme.colors.accent,
+            fillOpacity: mlAnnotationRectDefaultFillOpacity,
+            transition: `stroke-opacity ${euiTheme.animation.fast}, fill-opacity ${euiTheme.animation.fast}`,
+            shapeRendering: 'geometricPrecision',
 
-        &__context-rect {
-          stroke: ${euiTheme.colors.fullShade};
-          stroke-width: ${mlAnnotationBorderWidth};
-          stroke-opacity: ${mlAnnotationRectDefaultStrokeOpacity};
-          fill: ${euiTheme.colors.fullShade};
-          fill-opacity: ${mlAnnotationRectDefaultFillOpacity};
-          transition: stroke-opacity ${euiTheme.animation.fast},
-            fill-opacity ${euiTheme.animation.fast};
-          shape-rendering: geometricPrecision;
-
-          &--blur {
-            stroke-opacity: ${mlAnnotationRectDefaultStrokeOpacity / 2};
-            fill-opacity: ${mlAnnotationRectDefaultFillOpacity / 2};
-          }
-        }
-      }
-    `,
-    [euiTheme, euiFontSizeXS, buttonStyles.accent]
+            '&--blur': {
+              strokeOpacity: mlAnnotationRectDefaultStrokeOpacity / 2,
+              fillOpacity: mlAnnotationRectDefaultFillOpacity / 2,
+            },
+          },
+        },
+      }),
+    [euiTheme, euiFontSizeXS]
   );
 };
