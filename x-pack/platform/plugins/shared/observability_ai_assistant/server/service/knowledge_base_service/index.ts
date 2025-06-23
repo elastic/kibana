@@ -475,6 +475,11 @@ export class KnowledgeBaseService {
             },
           ];
         },
+        onDrop: (doc) => {
+          this.dependencies.logger.error(
+            `Failed ingesting document: ${doc.error?.reason || 'unknown reason'}`
+          );
+        },
         datasource: entries,
         refresh: 'wait_for',
         concurrency: 5,
