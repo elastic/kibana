@@ -55,7 +55,7 @@ export const DiscoverLink = React.memo(
             filter.filter,
             false,
             false,
-            filter.meta?.name ?? categorizedLogsFilterLabel,
+            filter.meta?.name ?? contextualLogsFilterLabel,
             FilterStateStore.APP_STATE
           )
         ),
@@ -108,9 +108,9 @@ export const discoverLinkTitle = i18n.translate(
   }
 );
 
-export const categorizedLogsFilterLabel = i18n.translate(
-  'xpack.observabilityLogsOverview.categorizedLogsFilterLabel',
+export const contextualLogsFilterLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.contextualLogsFilterLabel',
   {
-    defaultMessage: 'Categorized log entries',
+    defaultMessage: 'Contextual log entries',
   }
 );
