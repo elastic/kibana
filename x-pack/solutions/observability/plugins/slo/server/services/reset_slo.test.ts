@@ -7,14 +7,20 @@
 
 import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
   ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { SLO_MODEL_VERSION } from '../../common/constants';
+import {
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  getWildcardPipelineId,
+  SLI_DESTINATION_INDEX_PATTERN,
+  SLO_MODEL_VERSION,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
 import { createSLO } from './fixtures/slo';
 import {
   createSLORepositoryMock,
@@ -24,6 +30,7 @@ import {
 import { ResetSLO } from './reset_slo';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+import { SLODefinition } from '../domain/models';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
@@ -31,7 +38,6 @@ describe('ResetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
@@ -40,11 +46,9 @@ describe('ResetSLO', () => {
     loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     resetSLO = new ResetSLO(
-      mockEsClient,
       mockScopedClusterClient,
       mockRepository,
       mockTransformManager,
@@ -62,7 +66,7 @@ describe('ResetSLO', () => {
 
   describe('happy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
@@ -75,27 +79,15 @@ describe('ResetSLO', () => {
       await resetSLO.execute(slo.id);
 
       // delete existing resources and data
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
-      expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-
-      expect(mockTransformManager.stop).toMatchSnapshot();
-      expect(mockTransformManager.uninstall).toMatchSnapshot();
-
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+      expectDeletionOfOriginalSLOResources(slo);
 
       // install resources
-      expect(mockSummaryTransformManager.install).toMatchSnapshot();
-      expect(mockSummaryTransformManager.start).toMatchSnapshot();
+      expectInstallationOfResetedSLOResources();
 
-      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toMatchSnapshot();
-
-      expect(mockTransformManager.install).toMatchSnapshot();
-      expect(mockTransformManager.start).toMatchSnapshot();
-
-      expect(mockEsClient.index).toMatchSnapshot();
-
+      // save reseted SLO
       expect(mockRepository.update).toHaveBeenCalledWith({
         ...slo,
+        revision: slo.revision + 1,
         version: SLO_MODEL_VERSION,
         updatedAt: expect.anything(),
       });
@@ -104,7 +96,7 @@ describe('ResetSLO', () => {
 
   describe('unhappy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
       } as SecurityHasPrivilegesResponse);
     });
@@ -118,4 +110,64 @@ describe('ResetSLO', () => {
       );
     });
   });
+
+  function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
+    const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
+    const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
+
+    expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
+    expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
+
+    // rollup and summary pipelines using wildcard pipeline
+    expect(
+      mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+    ).toHaveBeenNthCalledWith(
+      1,
+      { id: getWildcardPipelineId(originalSlo.id, originalSlo.revision) },
+      { ignore: [404] }
+    );
+
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledTimes(2);
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'slo.id': originalSlo.id } },
+              { term: { 'slo.revision': originalSlo.revision } },
+            ],
+          },
+        },
+      })
+    );
+    expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'slo.id': originalSlo.id } },
+              { term: { 'slo.revision': originalSlo.revision } },
+            ],
+          },
+        },
+      })
+    );
+  }
+
+  function expectInstallationOfResetedSLOResources() {
+    expect(mockTransformManager.install).toHaveBeenCalled();
+    expect(mockTransformManager.start).toHaveBeenCalled();
+
+    // rollup and summary pipelines
+    expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalledTimes(2);
+
+    expect(mockSummaryTransformManager.install).toHaveBeenCalled();
+    expect(mockSummaryTransformManager.start).toHaveBeenCalled();
+
+    expect(mockScopedClusterClient.asCurrentUser.index).toHaveBeenCalled();
+  }
 });

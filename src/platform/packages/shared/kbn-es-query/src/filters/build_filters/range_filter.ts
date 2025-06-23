@@ -189,12 +189,13 @@ export const buildRangeFilter = (
 
 export const buildSimpleNumberRangeFilter = (
   fieldName: string,
+  fieldType: 'number' | 'date',
   params: RangeFilterParams,
   value: string,
   dataViewId: string
 ) => {
   return buildRangeFilter(
-    { name: fieldName, type: 'number' },
+    { name: fieldName, type: fieldType },
     params,
     { id: dataViewId, title: dataViewId },
     value

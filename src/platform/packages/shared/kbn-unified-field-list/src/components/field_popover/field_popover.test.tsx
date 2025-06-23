@@ -8,7 +8,13 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiText, EuiPopoverTitle, EuiPopoverFooter } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiText,
+  EuiPopoverTitle,
+  EuiPopoverFooter,
+  EuiThemeProvider,
+} from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { FieldPopover } from './field_popover';
@@ -38,7 +44,8 @@ describe('UnifiedFieldList <FieldPopover />', () => {
         button={<EuiButton title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
-      />
+      />,
+      { wrappingComponent: EuiThemeProvider }
     );
 
     expect(wrapper.find(EuiText).first().text()).toBe('header');
@@ -78,7 +85,8 @@ describe('UnifiedFieldList <FieldPopover />', () => {
           />
         )}
         renderContent={() => <EuiText>{'content'}</EuiText>}
-      />
+      />,
+      { wrappingComponent: EuiThemeProvider }
     );
 
     expect(wrapper.find(EuiPopoverTitle).text()).toBe(fieldName);

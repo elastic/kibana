@@ -13,3 +13,10 @@ export const ATTACK_DISCOVERY_SETTINGS = i18n.translate(
     defaultMessage: 'Attack discovery settings',
   }
 );
+
+export const ATTACK_DISCOVERY_SETTINGS_AND_SCHEDULE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.attackDiscoverySettingsAndScheduleTitle',
+  {
+    defaultMessage: 'Attack discovery settings & schedule',
+  }
+);

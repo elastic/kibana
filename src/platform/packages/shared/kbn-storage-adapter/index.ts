@@ -128,6 +128,9 @@ type Exact<T, U> = T extends U
     : false
   : false;
 
+type MissingKeysError<T extends string> = Error &
+  `The following keys are missing from the schema: ${T}`;
+
 // The storage settings need to support the application payload type, but it's OK if the
 // storage document can hold more fields than the application document.
 // To keep the type safety of the application type in the consuming code, both the storage
@@ -135,24 +138,24 @@ type Exact<T, U> = T extends U
 // The IStorageClient type then checks if the application type is a subset of the storage
 // document type. If this is not the case, the IStorageClient type is set to never, which
 // will cause a type error in the consuming code.
-export type IStorageClient<TSchema extends IndexStorageSettings, TApplicationType> = Exact<
-  ApplicationDocument<TApplicationType>,
-  Partial<StorageDocumentOf<TSchema>>
-> extends true
-  ? InternalIStorageClient<ApplicationDocument<TApplicationType>>
-  : never;
+export type IStorageClient<
+  TSchema extends IndexStorageSettings,
+  TApplicationType extends StorageDocumentOf<TSchema>
+> = Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
+  ? InternalIStorageClient<TApplicationType>
+  : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
 
 export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
   TStorageSettings,
-  Omit<StorageDocumentOf<TStorageSettings>, '_id'>
+  StorageDocumentOf<TStorageSettings>
 >;
 
-export type ApplicationDocument<TApplicationType> = TApplicationType & { _id: string };
-
-export type StorageDocumentOf<TStorageSettings extends StorageSettings> = StorageFieldTypeOf<{
-  type: 'object';
-  properties: TStorageSettings['schema']['properties'];
-}> & { _id: string };
+export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partial<
+  StorageFieldTypeOf<{
+    type: 'object';
+    properties: TStorageSettings['schema']['properties'];
+  }>
+>;
 
 export { StorageIndexAdapter } from './src/index_adapter';
 

@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { getAvailableShapes, Shape } from '@kbn/expression-shape-plugin/common';
+import { getAvailableShapes, Shape } from '../../../../canvas_plugin_src/renderers/shape';
 import { ShapePickerPopover } from '../shape_picker_popover';
 
 class Interactive extends React.Component<{}, { value: string }> {

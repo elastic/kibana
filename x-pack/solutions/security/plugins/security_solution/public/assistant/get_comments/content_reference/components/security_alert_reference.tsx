@@ -8,10 +8,12 @@
 import type { SecurityAlertContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { SECURITY_ALERT_REFERENCE_LABEL } from './translations';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { useKibana } from '../../../../common/lib/kibana';
+import { openAlertsPageByAlertId } from './navigation_helpers';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertContentReference>;
@@ -20,23 +22,30 @@ interface Props {
 export const SecurityAlertReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const { navigateToApp } = useKibana().services.application;
 
+  const { assistantAvailability } = useAssistantContext();
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateToApp('security', {
-        path: `alerts/redirect/${contentReferenceNode.contentReference.alertId}`,
-        openInNewTab: true,
-      });
+      return openAlertsPageByAlertId(
+        navigateToApp,
+        contentReferenceNode.contentReference.alertId,
+        assistantAvailability.hasSearchAILakeConfigurations
+      );
     },
-    [navigateToApp, contentReferenceNode]
+    [
+      assistantAvailability.hasSearchAILakeConfigurations,
+      contentReferenceNode.contentReference.alertId,
+      navigateToApp,
+    ]
   );
-
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertReference"
     >
-      <EuiLink onClick={onClick}>{SECURITY_ALERT_REFERENCE_LABEL}</EuiLink>
+      <EuiLink onClick={onClick} data-test-subj="alertReferenceLink">
+        {SECURITY_ALERT_REFERENCE_LABEL}
+      </EuiLink>
     </PopoverReference>
   );
 };

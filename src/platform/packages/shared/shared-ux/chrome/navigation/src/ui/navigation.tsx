@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type {
   ChromeProjectNavigationNode,
-  RootNavigationItemDefinition,
-  RecentlyAccessedDefinition,
   NavigationTreeDefinitionUI,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
+import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import {
-  RecentlyAccessed,
-  NavigationPanel,
-  PanelProvider,
-  type PanelContentProvider,
-  FeedbackBtn,
-} from './components';
 import { useNavigation as useNavigationService } from '../services';
-import { NavigationSectionUI } from './components/navigation_section_ui';
+import {
+  FeedbackBtn,
+  NavigationPanel,
+  NavigationSectionUI,
+  PanelProvider,
+  RecentlyAccessed,
+} from './components';
 
 const isRecentlyAccessedDefinition = (
   item: ChromeProjectNavigationNode | RecentlyAccessedDefinition
@@ -44,10 +43,9 @@ const NavigationContext = createContext<Context>({
 export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   dataTestSubj?: string;
-  panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
   const { activeNodes$, selectedPanelNode, setSelectedPanelNode, isFeedbackBtnVisible$ } =
     useNavigationService();
 
@@ -83,12 +81,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
   );
 
   return (
-    <PanelProvider
-      activeNodes={activeNodes}
-      contentProvider={panelContentProvider}
-      selectedNode={selectedPanelNode}
-      setSelectedNode={setSelectedPanelNode}
-    >
+    <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
@@ -102,6 +95,11 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
               <EuiSpacer size="s" />
               <FeedbackBtn solutionId={solutionId} />
             </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {navigationTree.callout && (
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>{renderNodes(navigationTree.callout)}</EuiFlexItem>
           </EuiFlexGroup>
         )}
         {/* Footer */}

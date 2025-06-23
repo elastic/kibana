@@ -8,7 +8,7 @@
  */
 
 import { Datum, PartitionLayer } from '@elastic/charts';
-import { PaletteRegistry, getColorFactory } from '@kbn/coloring';
+import { ColorHandlingFn, PaletteRegistry, getColorFactory } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -135,7 +135,7 @@ function getColorFromMappingFactory(
   palettes: KbnPalettes,
   visParams: PartitionVisParams,
   isDarkMode: boolean
-): undefined | ((category: string | string[]) => string) {
+): undefined | ColorHandlingFn {
   const { colorMapping, dimensions } = visParams;
 
   if (!colorMapping) {

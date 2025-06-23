@@ -111,6 +111,9 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
       <EuiTableRow>
         <EuiTableRowCell isExpander textOnly={false}>
           <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.infra.processRow.button.ariaLabel', {
+              defaultMessage: 'Expand process details',
+            })}
             data-test-subj="infraProcessRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-expanded={isExpanded}

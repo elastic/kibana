@@ -21,9 +21,7 @@ With an application as varied and complex as Kibana has become, it’s not pract
 
 For example, say you implement a brand new feature, plugin or service but don’t quite know how it will impact Kibana’s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
 
-:::{image} images/apm_example_trace.png
-:alt: apm example trace
-:::
+![apm example trace](images/apm_example_trace.png)
 
 The net of metrics captured by APM are both a wide and deep because the entire application is instrumented at runtime and we simply take a sample of these metrics. This means that we don’t have to know what we need to measure ahead of time, we’ll instead just get (most) of the data we’re likely going to need by default.
 
@@ -103,9 +101,7 @@ The easiest and recommended way of running Kibana with the APM agent locally is 
 
 9. After Kibana starts up, navigate to the APM app, where you should see some transactions.
 
-:::{image} images/apm_ui_transactions.png
-:alt: apm ui transactions
-:::
+![apm ui transactions](images/apm_ui_transactions.png)
 
 You can now continue doing what you want to in Kibana (e.g. install sample data sets, issue queries in dashboards, build new visualizations etc). Once you’re finished, you can stop Kibana normally, then stop the {{es}} and APM servers in the apm-integration-testing clone with the following script:
 

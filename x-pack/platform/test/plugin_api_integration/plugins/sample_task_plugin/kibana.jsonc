@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sample-task-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "sampleTaskPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

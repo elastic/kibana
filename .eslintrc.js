@@ -257,6 +257,10 @@ const RESTRICTED_IMPORTS = [
     message: 'Please use react-use/lib/{method} instead.',
   },
   {
+    name: 'react-use/lib',
+    message: 'Please use react-use/lib/{method} instead.',
+  },
+  {
     name: 'react-router-dom',
     importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
@@ -275,12 +279,135 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  ...[
+    'Alt',
+    'Alternative',
+    'Applicative',
+    'Apply',
+    'Array',
+    'Bifunctor',
+    'boolean',
+    'BooleanAlgebra',
+    'Bounded',
+    'BoundedDistributiveLattice',
+    'BoundedJoinSemilattice',
+    'BoundedLattice',
+    'BoundedMeetSemilattice',
+    'Category',
+    'Chain',
+    'ChainRec',
+    'Choice',
+    'Comonad',
+    'Compactable',
+    'Console',
+    'Const',
+    'Contravariant',
+    'Date',
+    'DistributiveLattice',
+    'Either',
+    'EitherT',
+    'Eq',
+    'Extend',
+    'Field',
+    'Filterable',
+    'FilterableWithIndex',
+    'Foldable',
+    'FoldableWithIndex',
+    'function',
+    'Functor',
+    'FunctorWithIndex',
+    'Group',
+    'HeytingAlgebra',
+    'Identity',
+    'Invariant',
+    'IO',
+    'IOEither',
+    'IORef',
+    'JoinSemilattice',
+    'Lattice',
+    'Magma',
+    'Map',
+    'MeetSemilattice',
+    'Monad',
+    'MonadIO',
+    'MonadTask',
+    'MonadThrow',
+    'Monoid',
+    'NonEmptyArray',
+    'Option',
+    'OptionT',
+    'Ord',
+    'Ordering',
+    'pipeable',
+    'Profunctor',
+    'Random',
+    'Reader',
+    'ReaderEither',
+    'ReaderT',
+    'ReaderTask',
+    'ReaderTaskEither',
+    'ReadonlyArray',
+    'ReadonlyMap',
+    'ReadonlyNonEmptyArray',
+    'ReadonlyRecord',
+    'ReadonlySet',
+    'ReadonlyTuple',
+    'Record',
+    'Ring',
+    'Semigroup',
+    'Semigroupoid',
+    'Semiring',
+    'Set',
+    'Show',
+    'State',
+    'StateReaderTaskEither',
+    'StateT',
+    'Store',
+    'Strong',
+    'Task',
+    'TaskEither',
+    'TaskThese',
+    'These',
+    'TheseT',
+    'Traced',
+    'Traversable',
+    'TraversableWithIndex',
+    'Tree',
+    'Tuple',
+    'Unfoldable',
+    'ValidationT',
+    'Witherable',
+    'Writer',
+    'WriterT',
+  ].map((subset) => {
+    return {
+      name: `fp-ts/lib/${subset}`,
+      message: `Please, use fp-ts/${subset} to avoid duplicating the package import`,
+    };
+  }),
+  {
+    name: `fp-ts/lib`,
+    message: `Please, use fp-ts to avoid duplicating the package import`,
+  },
+];
+
+/**
+ * Imports that are deprecated and should be phased out
+ * They are not restricted until fully removed,
+ * but will log a warning
+ **/
+const DEPRECATED_IMPORTS = [
+  {
+    name: 'enzyme',
+    message:
+      'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
 ];
 
 module.exports = {
   root: true,
 
-  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
+  extends: ['@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -649,9 +776,13 @@ module.exports = {
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
+        'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
+        'x-pack/platform/test/*/*config.*ts',
+        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
+        'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
-        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
@@ -800,6 +931,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -967,7 +1099,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/{streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -1647,11 +1779,9 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-
     /**
      * ResponseOps overrides
      */
-
     {
       files: [
         'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
@@ -1660,8 +1790,22 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
-        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
@@ -1959,7 +2103,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
@@ -2128,9 +2272,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
-        // FIXME @dmlemeshko
-        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
-        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times

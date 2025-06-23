@@ -103,7 +103,7 @@ export class DataViewLazy extends AbstractDataView {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
 
-    const fieldMap = { ...mappedResult, ...scriptedResult, ...runtimeResult };
+    const fieldMap: DataViewFieldMap = { ...mappedResult, ...scriptedResult, ...runtimeResult };
     let fieldMapSorted = {};
     let hasBeenSorted = false;
 

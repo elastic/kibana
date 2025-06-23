@@ -23,6 +23,9 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
       });
     },
+    async expectToBeOnDiscoverPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/discover');
+    },
     async expectToBeOnIndexListPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain(
@@ -94,7 +97,7 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async expectAnalyzeLogsLink() {
       await testSubjects.existOrFail('analyzeLogsBtn');
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
-        'https://www.elastic.co/guide/en/serverless/current/elasticsearch-ingest-your-data.html'
+        'https://www.elastic.co/docs/manage-data/ingest'
       );
       expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
     },

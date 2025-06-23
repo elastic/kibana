@@ -34,7 +34,7 @@ export async function getHealthIndicators(
           details: symptom,
           message: cause,
           url: help_url,
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           resolveDuringUpgrade: false,
           correctiveAction: { type: 'healthIndicator', cause, action, impacts },
         }));
@@ -44,7 +44,7 @@ export async function getHealthIndicators(
       .flatMap(({ status, symptom, details }) => {
         return {
           type: 'health_indicator',
-          isCritical: status === 'red',
+          level: status === 'red' ? 'critical' : 'warning',
           ...getShardCapacityDeprecationInfo({ symptom, details }),
         };
       }),

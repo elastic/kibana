@@ -19,7 +19,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
@@ -31,6 +32,7 @@ import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metri
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
+import { formattedTime } from '../../../agent_list_page/components/agent_activity_flyout/helpers';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -141,11 +143,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
                 defaultMessage: 'Last activity',
               }),
-              description: agent.last_checkin ? (
-                <FormattedRelative value={new Date(agent.last_checkin)} />
-              ) : (
-                '-'
-              ),
+              description: agent.last_checkin ? formattedTime(agent.last_checkin) : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
@@ -175,7 +173,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description:
                 typeof agent.local_metadata?.elastic?.agent?.version === 'string' ? (
-                  <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    css={css`
+                      min-width: 0;
+                    `}
+                  >
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>

@@ -12,11 +12,11 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type { FilterCompareOptions } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, updateFilterReferences } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
-import { canImportVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import { canImportVisContext } from '@kbn/unified-histogram';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -58,6 +58,10 @@ export interface UpdateParams {
  * - useSavedSearchInitial for the persisted or initial state, just updated when the saved search is peristed or loaded
  */
 export interface DiscoverSavedSearchContainer {
+  /**
+   * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+   */
+  initUrlTracking: () => () => void;
   /**
    * Get an BehaviorSubject which contains the current state of the current saved search
    * All modifications are applied to this state
@@ -147,6 +151,32 @@ export function getSavedSearchContainer({
   const getHasChanged$ = () => hasChanged$;
   const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
+
+  const initUrlTracking = () => {
+    const subscription = savedSearchCurrent$.subscribe((savedSearch) => {
+      const dataView = savedSearch.searchSource.getField('index');
+
+      if (!dataView?.id) {
+        return;
+      }
+
+      const dataViewSupportsTracking =
+        // Disable for ad hoc data views, since they can't be restored after a page refresh
+        dataView.isPersisted() ||
+        // Unless it's a default profile data view, which can be restored on refresh
+        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        // Or we're in ES|QL mode, in which case we don't care about the data view
+        isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
+
+      const trackingEnabled = dataViewSupportsTracking || Boolean(savedSearch.id);
+
+      services.urlTracker.setTrackingEnabled(trackingEnabled);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
@@ -264,6 +294,7 @@ export function getSavedSearchContainer({
   };
 
   return {
+    initUrlTracking,
     getCurrent$,
     getHasChanged$,
     getId,

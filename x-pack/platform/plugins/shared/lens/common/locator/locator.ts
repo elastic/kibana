@@ -8,13 +8,13 @@
 import rison from '@kbn/rison';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
 import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 
-export const LENS_APP_LOCATOR = 'LENS_APP_LOCATOR';
 export const LENS_SHARE_STATE_ACTION = 'LENS_SHARE_STATE_ACTION';
 
 interface LensShareableState {
@@ -162,12 +162,12 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
     return {};
   }
   const outputState: LensShareableState = {
-    activeDatasourceId: params.activeDatasourceId!,
-    visualization: params.visualization!,
+    activeDatasourceId: params.activeDatasourceId,
+    visualization: params.visualization,
     datasourceStates: Object.fromEntries(
-      Object.entries(params.datasourceStates!).map(([id, { state }]) => [id, state])
+      Object.entries(params.datasourceStates).map(([id, { state }]) => [id, state])
     ) as Record<string, { state: unknown }> & SerializableRecord,
-    references: params.references!,
+    references: params.references,
   };
   if (params.dataViewSpecs) {
     outputState.dataViewSpecs = params.dataViewSpecs;

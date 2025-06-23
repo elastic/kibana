@@ -11,7 +11,8 @@
     "optionalPlugins": [
       "indexManagement",
       "fieldsMetadata",
-      "usageCollection"
+      "usageCollection",
+      "licensing"
     ],
     "requiredPlugins": [
       "data",

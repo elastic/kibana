@@ -8,7 +8,7 @@
  */
 
 export { prepareLogTable } from './prepare_log_table';
-export type { Dimension } from './prepare_log_table';
+export type { Dimension, LayerDimension } from './prepare_log_table';
 export {
   findAccessor,
   findAccessorOrFail,

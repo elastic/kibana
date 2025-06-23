@@ -282,9 +282,10 @@ describe('to_esql', () => {
     expect(esql).toEqual(undefined);
   });
 
-  it('should work with iana timezones that fall udner utc+0', () => {
+  it('should work with iana timezones that fall under UTC+0', () => {
     uiSettings.get.mockImplementation((key: string) => {
-      if (key === 'dateFormat:tz') return 'Europe/London';
+      // There are only few countries that falls under UTC all year round, others just fall into that configuration half hear when not in DST
+      if (key === 'dateFormat:tz') return 'Atlantic/Reykjavik';
       return defaultUiSettingsGet(key);
     });
 
@@ -324,6 +325,50 @@ describe('to_esql', () => {
 
     expect(esql?.esql).toEqual(
       `FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) BY order_date = BUCKET(\`order_date\`, 30 minutes) | SORT order_date ASC`
+    );
+  });
+
+  it('should work with custom filters on the layer', () => {
+    const esql = getESQLForLayer(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            interval: 'auto',
+          },
+        ],
+        [
+          '2',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+            filter: {
+              query: 'geo.src:"US"',
+              language: 'kuery',
+            },
+          },
+        ],
+      ],
+      layer,
+      indexPattern,
+      uiSettings,
+      {
+        fromDate: '2021-01-01T00:00:00.000Z',
+        toDate: '2021-01-01T23:59:59.999Z',
+      },
+      new Date()
+    );
+
+    expect(esql?.esql).toEqual(
+      `FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS bucket_0_0 = COUNT(*) WHERE KQL("""geo.src:"US"""") BY order_date = BUCKET(\`order_date\`, 30 minutes) | SORT order_date ASC`
     );
   });
 });

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { type FileUploadResults, OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import { useKibana } from '../hooks/use_kibana';
 import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
@@ -35,18 +35,32 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
 
   return (
     <>
-      <EuiButton
-        size={isSetup ? 'm' : 's'}
-        fill={isSetup}
-        iconType="plusInCircle"
-        onClick={() => showFileUploadFlyout()}
-        data-test-subj="uploadFileButton"
-      >
-        <FormattedMessage
-          id="xpack.searchPlayground.setupPage.uploadFileLabel"
-          defaultMessage="Upload file"
-        />
-      </EuiButton>
+      {isSetup ? (
+        <EuiButtonEmpty
+          flush="right"
+          iconType="importAction"
+          onClick={() => showFileUploadFlyout()}
+          data-test-subj="uploadFileButtonEmpty"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.setupPage.uploadFileButtonEmptyLabel"
+            defaultMessage="Upload a file"
+          />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButton
+          size="s"
+          fill={false}
+          iconType="plusInCircle"
+          onClick={() => showFileUploadFlyout()}
+          data-test-subj="uploadFileButton"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.setupPage.uploadFileLabel"
+            defaultMessage="Upload file"
+          />
+        </EuiButton>
+      )}
     </>
   );
 };

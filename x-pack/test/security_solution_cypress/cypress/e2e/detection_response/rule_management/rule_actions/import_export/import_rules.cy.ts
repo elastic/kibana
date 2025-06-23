@@ -43,7 +43,7 @@ describe('Import rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception'
       );
 
       expectManagementTableRules(['Test Custom Rule']);
@@ -80,7 +80,7 @@ describe('Import rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception'
       );
     });
   });

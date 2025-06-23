@@ -15,13 +15,17 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 
-import * as i18n from './translations';
-
+import { useKibana } from '../../../../../common/lib/kibana';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
-import { useEditForm } from '../hooks/use_edit_form';
-import type { AttackDiscoveryScheduleSchema } from '../hooks/types';
+import { useEditForm } from '../edit_form';
+import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
+import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import * as i18n from './translations';
+import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
@@ -32,15 +36,53 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     prefix: 'attackDiscoveryScheduleCreateFlyoutTitle',
   });
 
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const { alertsIndexPattern, http } = useAssistantContext();
+  const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
+    http,
+  });
+
+  const { sourcererDataView } = useSourcererDataView();
+
+  const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
+    useCreateAttackDiscoverySchedule();
+
   const onCreateSchedule = useCallback(
-    (scheduleData: AttackDiscoveryScheduleSchema) => {
-      // TODO: handle create schedule
-      onClose();
+    async (scheduleData: AttackDiscoveryScheduleSchema) => {
+      const connector = aiConnectors?.find((item) => item.id === scheduleData.connectorId);
+      if (!connector) {
+        return;
+      }
+
+      try {
+        const scheduleToCreate = convertFormDataInBaseSchedule(
+          scheduleData,
+          alertsIndexPattern ?? '',
+          connector,
+          sourcererDataView,
+          uiSettings
+        );
+        await createAttackDiscoverySchedule({ scheduleToCreate });
+        onClose();
+      } catch (err) {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
+      }
     },
-    [onClose]
+    [
+      aiConnectors,
+      alertsIndexPattern,
+      createAttackDiscoverySchedule,
+      onClose,
+      sourcererDataView,
+      uiSettings,
+    ]
   );
 
   const { editForm, actionButtons } = useEditForm({
+    isLoading: isLoadingConnectors || isLoadingQuery,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
   });
@@ -53,7 +95,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       onClose={onClose}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>

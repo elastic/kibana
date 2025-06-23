@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
 const breadcrumbText = i18n.translate('xpack.searchIndices.breadcrumb', {
-  defaultMessage: 'Content',
+  defaultMessage: 'Data',
 });
 
 const breadcrumb = {

@@ -20,6 +20,15 @@ export interface MonitorOverviewPageState extends MonitorFilterState {
 
 export type MonitorOverviewFlyoutConfig = FlyoutParamProps | null;
 
+// The first view in the list is the default view
+export const overviewViews = ['cardView', 'compactView'] as const;
+
+export type OverviewView = (typeof overviewViews)[number];
+
+export const isOverviewView = (view: string): view is OverviewView => {
+  return Object.values<string>(overviewViews).includes(view);
+};
+
 export interface MonitorOverviewState {
   flyoutConfig: MonitorOverviewFlyoutConfig;
   pageState: MonitorOverviewPageState;
@@ -27,6 +36,7 @@ export interface MonitorOverviewState {
   groupBy: GroupByState;
   trendStats: TrendTable;
   rollupLocations: boolean | null;
+  view: OverviewView;
 }
 
 export interface GroupByState {

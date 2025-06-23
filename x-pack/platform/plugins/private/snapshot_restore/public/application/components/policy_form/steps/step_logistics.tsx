@@ -529,6 +529,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Repository not found"
               />
             }
+            role="alert"
             color="danger"
             iconType="warning"
           >

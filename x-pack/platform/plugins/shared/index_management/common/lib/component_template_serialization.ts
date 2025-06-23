@@ -12,6 +12,7 @@ import {
   ComponentTemplateListItem,
   ComponentTemplateSerialized,
 } from '../types';
+import { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
@@ -93,13 +94,21 @@ export function deserializeComponentTemplateList(
 }
 
 export function serializeComponentTemplate(
-  componentTemplateDeserialized: ComponentTemplateDeserialized
+  componentTemplateDeserialized: ComponentTemplateDeserialized,
+  dataStreamOptions?: DataStreamOptions
 ): ComponentTemplateSerialized {
   const { version, template, _meta, deprecated } = componentTemplateDeserialized;
 
+  // If the existing component template contains data stream options, we need to persist them.
+  // Otherwise, they will be lost when the component template is updated.
+  const updatedTemplate = {
+    ...template,
+    ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
+  };
+
   return {
     version,
-    template,
+    template: updatedTemplate,
     _meta,
     deprecated,
   };

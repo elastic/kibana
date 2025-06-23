@@ -82,7 +82,7 @@ describe('Spaces plugin', () => {
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
     });
 
-    it('can setup space with default solution', async () => {
+    it('can setup space with default solution for cloud', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
@@ -98,6 +98,23 @@ describe('Spaces plugin', () => {
 
       expect(createDefaultSpace).toHaveBeenCalledWith(
         expect.objectContaining({ solution: 'security' })
+      );
+    });
+
+    it('can setup space with default solution for onprem', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext({
+        maxSpaces: 1000,
+        defaultSolution: 'oblt',
+      });
+      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+
+      const plugin = new SpacesPlugin(initializerContext);
+      plugin.setup(core, { features, licensing });
+
+      expect(createDefaultSpace).toHaveBeenCalledWith(
+        expect.objectContaining({ solution: 'oblt' })
       );
     });
   });

@@ -27,6 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('Building a new dashboard', function () {
+    // see details: https://github.com/elastic/kibana/issues/207097
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await kibanaServer.savedObjects.cleanStandardList();

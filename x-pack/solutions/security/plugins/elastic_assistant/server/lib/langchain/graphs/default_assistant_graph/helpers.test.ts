@@ -15,6 +15,7 @@ import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { waitFor } from '@testing-library/react';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { DefaultAssistantGraph } from './graph';
+import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 jest.mock('elastic-apm-node');
 
@@ -58,10 +59,15 @@ describe('streamGraph', () => {
       llmType: 'openai',
       provider: 'openai',
       connectorId: '123',
+      isOssModel: false,
     },
     logger: mockLogger,
     onLlmResponse: mockOnLlmResponse,
     request: mockRequest,
+    isEnabledKnowledgeBase: false,
+    telemetry: {
+      reportEvent: jest.fn(),
+    } as unknown as AnalyticsServiceSetup,
   };
 
   beforeEach(() => {
@@ -226,7 +232,7 @@ describe('streamGraph', () => {
     });
   });
 
-  describe('Tool Calling Agent and Structured Chat Agent streaming', () => {
+  describe('Tool Calling Agent streaming', () => {
     const mockAsyncIterator = {
       async *[Symbol.asyncIterator]() {
         yield {
@@ -268,13 +274,16 @@ describe('streamGraph', () => {
       },
     };
 
-    const expectConditions = async (response: unknown) => {
+    const expectConditions = async (response: unknown, isOssModel: boolean = false) => {
       expect(response).toBe(mockResponseWithHeaders);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
-        expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
+        if (!isOssModel) {
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: 'Look at these' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' rare IP' });
+          expect(mockPush).toHaveBeenCalledWith({ type: 'content', payload: ' addresses.' });
+        }
+
         expect(mockOnLlmResponse).toHaveBeenCalledWith(
           'Look at these rare IP addresses.',
           { transactionId: 'transactionId', traceId: 'traceId' },
@@ -326,7 +335,7 @@ describe('streamGraph', () => {
           isOssModel: true,
         },
       });
-      await expectConditions(response);
+      await expectConditions(response, true);
     });
   });
 });

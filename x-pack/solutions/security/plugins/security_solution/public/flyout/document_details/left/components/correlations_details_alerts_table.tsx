@@ -10,7 +10,7 @@ import React, { type FC, useMemo, useCallback } from 'react';
 import { type Criteria, EuiBasicTable, formatDate } from '@elastic/eui';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -81,7 +81,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const { isPreview } = useDocumentDetailsContext();
+  const { isRulePreview } = useDocumentDetailsContext();
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -174,7 +174,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
                 value={ruleName}
                 scopeId={scopeId}
                 ruleId={ruleId}
-                isPreview={isPreview}
+                isRulePreview={isRulePreview}
                 data-test-subj={`${dataTestSubj}RulePreview`}
               >
                 <span>{ruleName}</span>
@@ -218,7 +218,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [scopeId, dataTestSubj, isPreview]
+    [scopeId, dataTestSubj, isRulePreview]
   );
 
   return (

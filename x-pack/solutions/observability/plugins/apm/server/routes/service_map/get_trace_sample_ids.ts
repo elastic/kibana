@@ -12,7 +12,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
-  LINKS_SPAN_ID,
+  OTEL_SPAN_LINKS_SPAN_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -244,7 +244,7 @@ function getSampleTraceIdsForSpanLinksParams({
           ...query.bool.filter,
           {
             bool: {
-              should: [...existsQuery(SPAN_LINKS), ...existsQuery(LINKS_SPAN_ID)],
+              should: [...existsQuery(SPAN_LINKS), ...existsQuery(OTEL_SPAN_LINKS_SPAN_ID)],
               minimum_should_match: 1,
             },
           },

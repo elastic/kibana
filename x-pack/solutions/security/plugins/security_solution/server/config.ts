@@ -17,7 +17,7 @@ import { parseConfigSettings, type ConfigSettings } from '../common/config_setti
  * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
  */
 const isValidTaskManagerDuration = (value: string): string | undefined => {
-  if (/^\d+[s,m]{1}$/.test(value)) {
+  if (!/^\d+[s,m]{1}$/.test(value)) {
     return `Invalid duration [${value}]. Value must be a number followed by either 's' for seconds or 'm' for minutes `;
   }
 };
@@ -182,7 +182,22 @@ export const configSchema = schema.object({
         pipelineDebugMode: schema.boolean({ defaultValue: false }),
       }),
     }),
+    monitoring: schema.object({
+      privileges: schema.object({
+        users: schema.object({
+          csvUpload: schema.object({
+            errorRetries: schema.number({ defaultValue: 1 }),
+            maxBulkRequestBodySizeBytes: schema.number({ defaultValue: 100_000 }), // 100KB
+          }),
+        }),
+      }),
+    }),
   }),
+  siemRuleMigrations: schema.maybe(
+    schema.object({
+      elserInferenceId: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

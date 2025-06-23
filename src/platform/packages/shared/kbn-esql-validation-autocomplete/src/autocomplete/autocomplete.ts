@@ -9,14 +9,16 @@
 
 import { uniq } from 'lodash';
 import {
-  type AstProviderFn,
+  parse,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -30,17 +32,21 @@ import {
   getAllFunctions,
   isSingleItem,
   getColumnExists,
-  correctQuerySyntax,
   getColumnByName,
   getAllCommands,
   getExpressionType,
 } from '../shared/helpers';
-import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
-import type { ESQLRealField, ESQLVariable } from '../validation/types';
+import { ESQL_VARIABLES_PREFIX } from '../shared/constants';
+import {
+  collectUserDefinedColumns,
+  excludeUserDefinedColumnsFromCurrentCommand,
+} from '../shared/user_defined_columns';
+import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../validation/types';
 import {
   allStarConstant,
   commaCompleteItem,
   getCommandAutocompleteDefinitions,
+  listCompleteItem,
 } from './complete_items';
 import {
   buildPoliciesDefinitions,
@@ -49,11 +55,11 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  getControlSuggestionIfSupported,
 } from './factories';
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
 import {
-  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -69,30 +75,35 @@ import {
   pushItUpInTheList,
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
+  correctQuerySyntax,
 } from './helper';
 import {
   FunctionParameter,
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
   getLocationFromCommandOrOptionName,
+  FunctionParameterType,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
-import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import {
+  getRecommendedQueriesSuggestionsFromStaticTemplates,
+  mapRecommendedQueriesFromExtensions,
+  getRecommendedQueriesTemplatesFromExtensions,
+} from './recommended_queries/suggestions';
 
-type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
+type GetFieldsMapFn = () => Promise<Map<string, ESQLFieldWithMetadata>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 
 export async function suggest(
   fullText: string,
   offset: number,
   context: EditorContext,
-  astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
@@ -100,14 +111,12 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(ast, correctedQuery),
-    ast
-  );
+  const queryForFields = getQueryForFields(correctedQuery, root);
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
@@ -116,8 +125,9 @@ export async function suggest(
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
+    // resolve particular commands suggestions after
     // filter source commands if already defined
-    const suggestions = getCommandAutocompleteDefinitions(getAllCommands());
+    let suggestions = getCommandAutocompleteDefinitions(getAllCommands());
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
@@ -127,25 +137,61 @@ export async function suggest(
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
-        } else fromCommand = `FROM ${visibleSources[0].name}`;
+        } else if (visibleSources.length) {
+          fromCommand = `FROM ${visibleSources[0].name}`;
+        }
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
-          resourceRetriever
+          resourceRetriever,
+          innerText
         );
+        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
+          recommendedQueries: [],
+        };
+        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+          editorExtensions.recommendedQueries
+        );
+
+        const recommendedQueriesSuggestionsFromStaticTemplates =
+          await getRecommendedQueriesSuggestionsFromStaticTemplates(
+            getFieldsByTypeEmptyState,
+            fromCommand
+          );
         recommendedQueriesSuggestions.push(
-          ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
+          ...recommendedQueriesSuggestionsFromExtensions,
+          ...recommendedQueriesSuggestionsFromStaticTemplates
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
       return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
     }
 
+    // If the last command is not a FORK, RRF should not be suggested.
+    const lastCommand = root.commands[root.commands.length - 1];
+    if (lastCommand.name !== 'fork') {
+      suggestions = suggestions.filter((def) => def.label !== 'RRF');
+    }
+
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
+  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.VALUES,
+      getVariables,
+      false
+    );
+
+    return controlSuggestions;
+  }
+
   if (astContext.type === 'expression') {
-    return getSuggestionsWithinCommandExpression(
+    const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -159,12 +205,41 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
+    return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    const getCommandAndOptionWithinFORK = (
+      command: ESQLCommand<'fork'>
+    ): {
+      command: ESQLCommand;
+      option: ESQLCommandOption | undefined;
+    } => {
+      let option;
+      let subCommand;
+      Walker.walk(command, {
+        visitCommandOption: (_node) => {
+          option = _node;
+        },
+        visitCommand: (_node) => {
+          subCommand = _node;
+        },
+      });
+
+      return {
+        option,
+        command: subCommand ?? command,
+      };
+    };
+
+    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
-      astContext,
+      {
+        ...astContext,
+        ...(astContext.command.name === 'fork'
+          ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+          : {}),
+      },
       getFieldsByType,
       getFieldsMap,
       fullText,
@@ -172,6 +247,7 @@ export async function suggest(
       getVariables,
       supportsControls
     );
+    return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
@@ -187,12 +263,17 @@ export async function suggest(
 }
 
 export function getFieldsByTypeRetriever(
-  queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  queryForFields: string,
+  resourceRetriever?: ESQLCallbacks,
+  fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
-  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
-  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+
+  const queryString = fullQuery ?? queryForFields;
+  const lastCharacterTyped = queryString[queryString.length - 1];
+  const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -201,10 +282,20 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsControls,
+        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryForFields)) ?? {
+        recommendedQueries: [],
+        recommendedFields: [],
+      };
+      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
+      return buildFieldsDefinitionsWithMetadata(
+        fields,
+        recommendedFieldsFromExtensions,
+        updatedOptions,
+        getVariables
+      );
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -221,11 +312,11 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
-function findNewVariable(variables: Map<string, ESQLVariable[]>) {
-  let autoGeneratedVariableCounter = 0;
-  let name = `var${autoGeneratedVariableCounter++}`;
-  while (variables.has(name)) {
-    name = `var${autoGeneratedVariableCounter++}`;
+function findNewUserDefinedColumn(userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>) {
+  let autoGeneratedColumnCounter = 0;
+  let name = `col${autoGeneratedColumnCounter++}`;
+  while (userDefinedColumns.has(name)) {
+    name = `col${autoGeneratedColumnCounter++}`;
   }
   return name;
 }
@@ -251,11 +342,11 @@ async function getSuggestionsWithinCommandExpression(
 ) {
   const commandDef = getCommandDefinition(astContext.command.name);
 
-  // collect all fields + variables to suggest
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+  // collect all fields + userDefinedColumns to suggest
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
+  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
-  const references = { fields: fieldsMap, variables: anyVariables };
+  const references = { fields: fieldsMap, userDefinedColumns: anyUserDefinedColumns };
 
   // For now, we don't suggest for expressions within any function besides CASE
   // e.g. CASE(field != /)
@@ -272,10 +363,25 @@ async function getSuggestionsWithinCommandExpression(
       location: getLocationFromCommandOrOptionName(astContext.command.name),
       rootOperator: astContext.node,
       getExpressionType: (expression) =>
-        getExpressionType(expression, references.fields, references.variables),
+        getExpressionType(expression, references.fields, references.userDefinedColumns),
       getColumnsByType,
     });
   }
+
+  // Function returning suggestions from static templates and editor extensions
+  const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+      recommendedQueries: [],
+    };
+    const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
+      editorExtensions.recommendedQueries
+    );
+
+    const recommendedQueriesFromTemplates =
+      await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
+
+    return [...recommendedQueriesFromExtensions, ...recommendedQueriesFromTemplates];
+  };
 
   return commandDef.suggest({
     innerText,
@@ -283,24 +389,26 @@ async function getSuggestionsWithinCommandExpression(
     getColumnsByType,
     getAllColumnNames: () => Array.from(fieldsMap.keys()),
     columnExists: (col: string) => Boolean(getColumnByName(col, references)),
-    getSuggestedVariableName: (extraFieldNames?: string[]) => {
+    getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => {
       if (!extraFieldNames?.length) {
-        return findNewVariable(anyVariables);
+        return findNewUserDefinedColumn(anyUserDefinedColumns);
       }
 
       const augmentedFieldsMap = new Map(fieldsMap);
       extraFieldNames.forEach((name) => {
         augmentedFieldsMap.set(name, { name, type: 'double' });
       });
-      return findNewVariable(collectVariables(commands, augmentedFieldsMap, innerText));
+      return findNewUserDefinedColumn(
+        collectUserDefinedColumns(commands, augmentedFieldsMap, innerText)
+      );
     },
     getExpressionType: (expression: ESQLAstItem | undefined) =>
-      getExpressionType(expression, references.fields, references.variables),
+      getExpressionType(expression, references.fields, references.userDefinedColumns),
     getPreferences,
     definition: commandDef,
     getSources,
-    getRecommendedQueriesSuggestions: (prefix) =>
-      getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+    getRecommendedQueriesSuggestions: (queryString, prefix) =>
+      getRecommendedQueries(queryString, prefix),
     getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
     previousCommands: commands,
     callbacks,
@@ -308,6 +416,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
@@ -337,14 +446,14 @@ async function getFunctionArgsSuggestions(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectVariables(commands, fieldsMap, innerText);
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
+  const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
 
   const references = {
     fields: fieldsMap,
-    variables: anyVariables,
+    userDefinedColumns: anyUserDefinedColumns,
   };
-  const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
+  const userDefinedColumnsExcludingCurrentCommandOnes = excludeUserDefinedColumnsFromCurrentCommand(
     commands,
     command,
     fieldsMap,
@@ -397,7 +506,7 @@ async function getFunctionArgsSuggestions(
     isColumnItem(arg) &&
     !getColumnExists(arg, {
       fields: fieldsMap,
-      variables: variablesExcludingCurrentCommandOnes,
+      userDefinedColumns: userDefinedColumnsExcludingCurrentCommandOnes,
     });
   if (noArgDefined || isUnknownColumn) {
     // ... | EVAL fn( <suggest>)
@@ -416,17 +525,25 @@ async function getFunctionArgsSuggestions(
     const finalCommandArg = command.args[finalCommandArgIndex];
 
     const fnToIgnore = [];
-    // just ignore the current function
+
+    if (node.subtype === 'variadic-call') {
+      // for now, this getFunctionArgsSuggestions is being used in STATS to suggest for
+      // operators. When that is fixed, we can remove this "is variadic-call" check
+      // and always exclude the grouping functions
+      fnToIgnore.push(
+        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name)
+      );
+    }
+
     if (
       command.name !== 'stats' ||
       (isOptionItem(finalCommandArg) && finalCommandArg.name === 'by')
     ) {
+      // ignore the current function
       fnToIgnore.push(node.name);
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-        // ignore grouping functions, they are only used for grouping
-        ...getAllFunctions({ type: FunctionDefinitionTypes.GROUPING }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
           : [])
@@ -443,7 +560,7 @@ async function getFunctionArgsSuggestions(
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
     const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || /_literal/.test(p.type as string)
+      (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -463,6 +580,16 @@ async function getFunctionArgsSuggestions(
       )
     );
 
+    const ensureKeywordAndText = (types: FunctionParameterType[]) => {
+      if (types.includes('keyword') && !types.includes('text')) {
+        types.push('text');
+      }
+      if (types.includes('text') && !types.includes('keyword')) {
+        types.push('keyword');
+      }
+      return types;
+    };
+
     // Fields
 
     suggestions.push(
@@ -473,9 +600,11 @@ async function getFunctionArgsSuggestions(
           canBeBooleanCondition
             ? ['any']
             : // @TODO: have a way to better suggest constant only params
-              (getTypesFromParamDefs(
-                typesToSuggestNext.filter((d) => !d.constantOnly)
-              ) as string[]),
+              ensureKeywordAndText(
+                getTypesFromParamDefs(
+                  typesToSuggestNext.filter((d) => !d.constantOnly)
+                ) as FunctionParameterType[]
+              ),
           [],
           {
             addComma: shouldAddComma,
@@ -494,7 +623,9 @@ async function getFunctionArgsSuggestions(
           location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
-            : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
+            : (ensureKeywordAndText(
+                getTypesFromParamDefs(typesToSuggestNext)
+              ) as FunctionParameterType[]),
           ignored: fnToIgnore,
         }).map((suggestion) => ({
           ...suggestion,
@@ -572,26 +703,41 @@ async function getListArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const suggestions = [];
+
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
-    const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
-    const anyVariables = collectVariables(commands, fieldsMap, innerText);
-    // extract the current node from the variables inferred
-    anyVariables.forEach((values, key) => {
+    const list = node?.args[1];
+
+    if (isList(list)) {
+      const noParens = list.location.min === 0 && list.location.max === 0;
+
+      if (noParens) {
+        suggestions.push(listCompleteItem);
+
+        return suggestions;
+      }
+    }
+
+    const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMaps();
+    const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
+    // extract the current node from the userDefinedColumns inferred
+    anyUserDefinedColumns.forEach((values, key) => {
       if (values.some((v) => v.location === node.location)) {
-        anyVariables.delete(key);
+        anyUserDefinedColumns.delete(key);
       }
     });
     const [firstArg] = node.args;
     if (isColumnItem(firstArg)) {
       const argType = extractTypeFromASTArg(firstArg, {
         fields: fieldsMap,
-        variables: anyVariables,
+        userDefinedColumns: anyUserDefinedColumns,
       });
       if (argType) {
         // do not propose existing columns again
-        const otherArgs = node.args.filter(Array.isArray).flat().filter(isColumnItem);
+        const otherArgs = isList(list)
+          ? list.values
+          : node.args.filter(Array.isArray).flat().filter(isColumnItem);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
@@ -600,7 +746,7 @@ async function getListArgsSuggestions(
             {
               functions: true,
               fields: true,
-              variables: anyVariables,
+              userDefinedColumns: anyUserDefinedColumns,
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] }
           ))

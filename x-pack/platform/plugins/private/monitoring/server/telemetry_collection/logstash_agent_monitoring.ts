@@ -120,7 +120,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
           }
         }
 
-        const thisCollectionType = hit._source?.agent?.type || 'agent';
+        const thisCollectionType = 'agent';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

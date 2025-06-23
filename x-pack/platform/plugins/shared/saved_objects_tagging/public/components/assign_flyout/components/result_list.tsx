@@ -7,6 +7,8 @@
 
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { UseEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AssignableObject } from '../../../../common/assignments';
 import { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
@@ -62,6 +64,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
 
   return (
     <EuiSelectable<ResultInternals>
+      css={styles}
       height="full"
       data-test-subj="assignFlyoutResultList"
       aria-label="Saved objects which can be assigned to this tag"
@@ -107,3 +110,10 @@ const ResultActionLabel: FC<{ action: AssignmentAction }> = ({ action }) => {
     </EuiText>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '.tagAssignFlyout__selectionIcon': {
+      margin: ` 0 ${euiTheme.size.m}`,
+    },
+  });

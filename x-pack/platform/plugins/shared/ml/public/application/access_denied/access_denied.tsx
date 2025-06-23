@@ -30,6 +30,7 @@ export const AccessDeniedCallout: FC<AccessDeniedCalloutProps> = ({ missingCapab
   return (
     <>
       <EuiPageTemplate.EmptyPrompt
+        data-test-subj="mlAccessDenied"
         color={'danger'}
         alignment={'horizontalCenter'}
         iconType="warning"

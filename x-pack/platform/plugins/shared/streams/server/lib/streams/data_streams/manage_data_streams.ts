@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -22,10 +22,9 @@ interface DeleteDataStreamOptions {
   logger: Logger;
 }
 
-interface RolloverDataStreamOptions {
+interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
-  mappings: MappingTypeMapping['properties'] | undefined;
   logger: Logger;
 }
 
@@ -55,21 +54,43 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
   }
 }
 
-export async function rolloverDataStreamIfNecessary({
+export async function updateOrRolloverDataStream({
   esClient,
   name,
   logger,
-  mappings,
-}: RolloverDataStreamOptions) {
-  const dataStreams = await esClient.indices.getDataStream({ name: `${name},${name}.*` });
+}: UpdateOrRolloverDataStreamOptions) {
+  const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
+    // simulate index and try to patch the write index
+    // if that doesn't work, roll it over
+    const simulatedIndex = await esClient.indices.simulateIndexTemplate({
+      name,
+    });
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
       continue;
     }
     try {
+      // Apply blocklist to avoid changing settings we don't want to
+      const simulatedIndexSettings = omit(simulatedIndex.template.settings, [
+        'index.codec',
+        'index.mapping.ignore_malformed',
+        'index.mode',
+        'index.logsdb.sort_on_host_name',
+      ]);
+
       await retryTransientEsErrors(
-        () => esClient.indices.putMapping({ index: writeIndex.index_name, properties: mappings }),
+        () =>
+          Promise.all([
+            esClient.indices.putMapping({
+              index: writeIndex.index_name,
+              properties: simulatedIndex.template.mappings.properties,
+            }),
+            esClient.indices.putSettings({
+              index: writeIndex.index_name,
+              settings: simulatedIndexSettings,
+            }),
+          ]),
         {
           logger,
         }
@@ -112,39 +133,33 @@ export async function updateDataStreamsLifecycle({
       () =>
         esClient.indices.putDataLifecycle({
           name: names,
-          lifecycle: {
-            data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-          },
+          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
         }),
       { logger }
     );
 
-    // if we transition from ilm to dlm or vice versa, the rolled over backing
+    // if we transition from ilm to dsl or vice versa, the rolled over backing
     // indices need to be updated or they'll retain the lifecycle configuration
     // set at the time of creation.
-    // this is not needed for serverless since only dlm is allowed but in stateful
-    // we update every indices while not always necessary. this should be optimized
+    // this is not needed for serverless since only dsl is allowed.
     if (isServerless) {
       return;
     }
 
-    const dataStreams = await esClient.indices.getDataStream({ name: names });
     const isIlm = isIlmLifecycle(lifecycle);
-
-    for (const dataStream of dataStreams.data_streams) {
-      logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putSettings({
-            index: dataStream.indices.map((index) => index.index_name),
-            settings: {
-              'lifecycle.prefer_ilm': isIlm,
-              'lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-            },
-          }),
-        { logger }
-      );
-    }
+    await retryTransientEsErrors(
+      () =>
+        // TODO: use client method once available
+        esClient.transport.request({
+          method: 'PUT',
+          path: `/_data_stream/${names.join(',')}/_settings`,
+          body: {
+            'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
+            'index.lifecycle.prefer_ilm': isIlm,
+          },
+        }),
+      { logger }
+    );
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;

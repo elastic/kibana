@@ -36,7 +36,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '@kbn/react-field';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../../../../common/constants';
 import { SchemaField } from '../../../../../common/types/search_applications';
 
 import { SEARCH_INDEX_TAB_PATH } from '../../../enterprise_search_content/routes';
@@ -62,7 +62,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       ),
       render: (name: string) => (
         <EuiLinkTo
-          to={`${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          to={`${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
             indexName: name,
             tabId: 'index_mappings',
           })}`}

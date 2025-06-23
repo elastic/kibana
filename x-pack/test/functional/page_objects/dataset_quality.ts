@@ -10,6 +10,7 @@ import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityDetailsUrlSchemaV1,
   datasetQualityUrlSchemaV1,
+  datasetQualityDetailsUrlSchemaV2,
 } from '@kbn/data-quality-plugin/common';
 import {
   DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
@@ -44,6 +45,21 @@ const defaultDetailsPageState: datasetQualityDetailsUrlSchemaV1.UrlSchema = {
   },
 };
 
+const defaultDetailsPageStateV2: datasetQualityDetailsUrlSchemaV2.UrlSchema = {
+  v: 2,
+  dataStream: 'logs-synth.1-default',
+  qualityIssues: {
+    table: {
+      page: 0,
+      rowsPerPage: 10,
+      sort: {
+        field: DEFAULT_QUALITY_ISSUE_SORT_FIELD,
+        direction: DEFAULT_QUALITY_ISSUE_SORT_DIRECTION,
+      },
+    },
+  },
+};
+
 type SummaryPanelKpi = Record<
   | 'datasetHealthPoor'
   | 'datasetHealthDegraded'
@@ -54,7 +70,7 @@ type SummaryPanelKpi = Record<
 >;
 
 type SummaryPanelKPI = Record<
-  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs',
+  'docsCountTotal' | 'size' | 'services' | 'hosts' | 'degradedDocs' | 'failedDocs',
   string
 >;
 
@@ -70,6 +86,7 @@ const texts = {
   services: 'Services',
   hosts: 'Hosts',
   degradedDocs: 'Degraded docs',
+  failedDocs: 'Failed docs',
   datasetNameColumn: 'Data set name',
   datasetNamespaceColumn: 'Namespace',
   datasetTypeColumn: 'Type',
@@ -100,6 +117,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     showFullDatasetNamesSwitch: 'button[aria-label="Show full data set names"]',
     showInactiveDatasetsNamesSwitch: 'button[aria-label="Show inactive data sets"]',
     superDatePickerApplyButton: '[data-test-subj="superDatePickerQuickSelectApplyButton"]',
+    qualityIssueDegradedChart: '.euiButtonGroupButton[data-test-subj="degraded"]',
+    qualityIssueFailedChart: '.euiButtonGroupButton[data-test-subj="failed"]',
   };
 
   const testSubjectSelectors = {
@@ -124,6 +143,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityTypesSelectable: 'datasetQualityFilterType',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
@@ -136,7 +156,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
-
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -150,6 +169,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
+    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -188,6 +209,28 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
           datasetQualityDetailsUrlSchemaV1.urlSchemaRT.encode({
             ...defaultDetailsPageState,
+            ...pageState,
+          })
+        ),
+      });
+
+      return PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        '/data/data_quality/details',
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
+      );
+    },
+
+    async navigateToDetailsV2(pageState: datasetQualityDetailsUrlSchemaV2.UrlSchema) {
+      const queryStringParams = querystring.stringify({
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
+          datasetQualityDetailsUrlSchemaV2.urlSchemaRT.encode({
+            ...defaultDetailsPageStateV2,
             ...pageState,
           })
         ),
@@ -395,6 +438,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
     },
 
+    openDatasetQualityDetailsActionsButton() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
+    },
+
+    getOpenInDiscoverButton() {
+      return testSubjects.find(testSubjectSelectors.openInDiscover);
+    },
+
     openIntegrationActionsMenu() {
       return testSubjects.click(testSubjectSelectors.datasetQualityDetailsIntegrationActionsButton);
     },
@@ -418,6 +469,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         { title: texts.services, key: 'services' },
         { title: texts.hosts, key: 'hosts' },
         { title: texts.degradedDocs, key: 'degradedDocs' },
+        { title: texts.failedDocs, key: 'failedDocs' },
       ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
@@ -452,6 +504,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
+    async selectQualityIssueChart(type: 'degraded' | 'failed') {
+      const chartSelector =
+        type === 'degraded'
+          ? selectors.qualityIssueDegradedChart
+          : selectors.qualityIssueFailedChart;
+      return find.clickByCssSelector(chartSelector);
+    },
+
     async openDegradedFieldFlyout(fieldName: string) {
       await this.waitUntilTableLoaded();
       const cols = await this.parseDegradedFieldTable();
@@ -459,6 +519,37 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
       const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
         (dName) => dName === `${fieldName} field ignored`
+      );
+
+      expect(testDatasetRowIndex).to.be.greaterThan(-1);
+
+      const expandColumn = cols['0'];
+      const expandButtons = await expandColumn.getCellChildren(
+        `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
+      );
+
+      expect(expandButtons.length).to.be.greaterThan(0);
+
+      const fieldExpandButton = expandButtons[testDatasetRowIndex];
+
+      // Check if 'title' attribute is "Expand" or "Collapse"
+      const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
+
+      // Open if collapsed
+      if (isCollapsed) {
+        await fieldExpandButton.click();
+      }
+
+      await this.waitUntilDegradedFieldFlyoutLoaded();
+    },
+
+    async openFailedDocsFlyout() {
+      await this.waitUntilTableLoaded();
+      const cols = await this.parseDegradedFieldTable();
+      const fieldNameCol = cols.Issue;
+      const fieldNameColCellTexts = await fieldNameCol.getCellTexts();
+      const testDatasetRowIndex = fieldNameColCellTexts.findIndex(
+        (dName) => dName === `Documents indexing failed`
       );
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);

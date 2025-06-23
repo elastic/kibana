@@ -31,21 +31,21 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
         return;
       }
       const coreStart = (await getStartServices())[0];
-      const { overlays, ...startServices } = coreStart;
+      const { overlays, rendering } = coreStart;
       const openFlyout = overlays.openFlyout;
       openFlyout(
         toMountPoint(
           <React.Fragment>
             <EuiFlyoutHeader>
               <EuiTitle size="m" data-test-subj="samplePanelActionTitle">
-                <h1>{embeddable.title$?.value}</h1>
+                <h1>{embeddable.title$?.value ?? embeddable.defaultTitle$?.value}</h1>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
             </EuiFlyoutBody>
           </React.Fragment>,
-          startServices
+          rendering
         ),
         {
           'data-test-subj': 'samplePanelActionFlyout',

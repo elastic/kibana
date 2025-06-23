@@ -15,7 +15,7 @@ interface AlertStatusIndicatorProps {
   alertStatus: AlertStatus;
   textSize?: 'xs' | 's' | 'm' | 'inherit';
 }
-
+// TODO update these colors to a more appropriate EUI color token
 export function AlertStatusIndicator({ alertStatus, textSize = 'xs' }: AlertStatusIndicatorProps) {
   if (alertStatus === ALERT_STATUS_ACTIVE) {
     return (

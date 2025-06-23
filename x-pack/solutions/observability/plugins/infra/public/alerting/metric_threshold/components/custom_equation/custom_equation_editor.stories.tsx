@@ -107,7 +107,3 @@ export const CustomEquationEditorWithEquationErrors = {
     },
   },
 };
-
-export const CustomEquationEditorWithFieldError = {
-  render: CustomEquationEditorTemplate,
-};

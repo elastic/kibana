@@ -13,8 +13,9 @@ export interface ScoutTestConfig {
   serverless: boolean;
   projectType?: ServerlessProjectType;
   isCloud: boolean;
-  license: string;
+  cloudHostName?: string;
   cloudUsersFilePath: string;
+  license: string;
   hosts: {
     kibana: string;
     elasticsearch: string;

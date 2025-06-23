@@ -64,9 +64,8 @@ import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { applyTypeDefaults } from './apply_type_defaults';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
 
 /**
  * @internal
@@ -124,7 +123,7 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry();
+  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -219,7 +218,7 @@ export class SavedObjectsService
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(applyTypeDefaults(type));
+        this.typeRegistry.registerType(type);
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -425,6 +424,7 @@ export class SavedObjectsService
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
       esCapabilities,
+      kibanaVersionCheck: '8.18.0', // enforce upgrades from a compatible Kibana version
     });
   }
 }

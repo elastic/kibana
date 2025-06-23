@@ -8,6 +8,7 @@
 import { UnparsedEsqlResponse, createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isNumber } from 'lodash';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { excludeFrozenQuery, kqlQuery, rangeQuery } from './query_helpers';
 
@@ -18,9 +19,7 @@ export const executeEsqlRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({

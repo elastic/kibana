@@ -12,9 +12,9 @@ import Url from 'url';
 import { Readable } from 'node:stream';
 import type {
   ApmFields,
+  ApmOtelFields,
   Fields,
   InfraDocument,
-  OtelDocument,
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
@@ -30,15 +30,13 @@ import { ScoutTestOptions } from '../types';
 import {
   getApmSynthtraceEsClient,
   getInfraSynthtraceEsClient,
-  getOtelSynthtraceEsClient,
 } from '../../common/services/synthtrace';
 
 export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
 interface SynthtraceIngestionData {
-  apm: Array<SynthtraceEvents<ApmFields>>;
+  apm: Array<SynthtraceEvents<ApmFields | ApmOtelFields>>;
   infra: Array<SynthtraceEvents<InfraDocument>>;
-  otel: Array<SynthtraceEvents<OtelDocument>>;
 }
 
 const getSynthtraceClient = (
@@ -60,8 +58,6 @@ const getSynthtraceClient = (
       return getApmSynthtraceEsClient(esClient, kibanaUrlWithAuth, log);
     case 'infra':
       return getInfraSynthtraceEsClient(esClient, kbnUrl, auth, log);
-    case 'otel':
-      return getOtelSynthtraceEsClient(esClient, log);
   }
 };
 
@@ -71,11 +67,10 @@ const getSynthtraceClient = (
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
   const log = getLogger();
 
-  const { apm, infra, otel } = data;
+  const { apm, infra } = data;
   const hasApmData = apm.length > 0;
   const hasInfraData = infra.length > 0;
-  const hasOtelData = otel.length > 0;
-  const hasAnyData = hasApmData || hasInfraData || hasOtelData;
+  const hasAnyData = hasApmData || hasInfraData;
 
   if (!hasAnyData) {
     log.debug('[setup] no synthtrace data to ingest');

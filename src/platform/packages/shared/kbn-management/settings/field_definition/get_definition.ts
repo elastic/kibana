@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import words from 'lodash/words';
+import { words } from 'lodash';
 
 import { Query } from '@elastic/eui';
 import { FieldDefinition, SettingType } from '@kbn/management-settings-types';

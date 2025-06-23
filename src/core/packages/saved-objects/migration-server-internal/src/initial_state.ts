@@ -23,7 +23,7 @@ import {
   type OutdatedDocumentsQueryParams,
 } from './get_outdated_documents_query';
 import type { InitState } from './state';
-import { excludeUnusedTypesQuery } from './core';
+import { buildExcludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
 
 export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
@@ -127,6 +127,7 @@ export const createInitialState = ({
     tempIndexMappings: TEMP_INDEX_MAPPINGS,
     outdatedDocumentsQuery,
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
@@ -136,7 +137,7 @@ export const createInitialState = ({
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
-    excludeOnUpgradeQuery: excludeUnusedTypesQuery,
+    excludeOnUpgradeQuery: buildExcludeUnusedTypesQuery(typeRegistry.getLegacyTypes()),
     knownTypes,
     latestMappingsVersions: getLatestMappingsVirtualVersionMap(typeRegistry.getAllTypes()),
     excludeFromUpgradeFilterHooks: excludeFilterHooks,

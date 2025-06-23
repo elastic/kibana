@@ -69,21 +69,29 @@ export function useGetRuleTagsQuery({
     };
   };
 
-  const { refetch, data, fetchNextPage, isLoading, isFetching, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: getKey({
-        ruleTypeIds,
-        search,
-        perPage,
-        page,
-        refresh,
-      }),
-      queryFn,
-      onError: onErrorFn,
-      enabled,
-      getNextPageParam,
-      refetchOnWindowFocus: false,
-    });
+  const {
+    refetch,
+    data,
+    fetchNextPage,
+    isLoading,
+    isFetching,
+    hasNextPage,
+    isFetchingNextPage,
+    isError,
+  } = useInfiniteQuery({
+    queryKey: getKey({
+      ruleTypeIds,
+      search,
+      perPage,
+      page,
+      refresh,
+    }),
+    queryFn,
+    onError: onErrorFn,
+    enabled,
+    getNextPageParam,
+    refetchOnWindowFocus: false,
+  });
 
   const tags = useMemo(() => {
     return (
@@ -99,5 +107,6 @@ export function useGetRuleTagsQuery({
     refetch,
     isLoading: isLoading || isFetching || isFetchingNextPage,
     fetchNextPage,
+    isError,
   };
 }

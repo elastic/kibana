@@ -108,6 +108,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
       config: entityStoreConfig,
       security,
       request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
     });
 
     const { errors } = await entityStoreClient.applyDataViewIndices();

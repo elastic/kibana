@@ -45,6 +45,11 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
       });
+
+      it('should have installed the expected generic resources', async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['generic']);
+        await utils.expectEngineAssetsExist('generic');
+      });
     });
 
     describe('init error handling', () => {

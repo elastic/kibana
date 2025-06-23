@@ -13,11 +13,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   type EuiIconProps,
-  useEuiTheme,
   EuiSkeletonText,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { IOCPanelKey } from '../../ai_for_soc/constants/panel_keys';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
@@ -29,13 +30,17 @@ import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
+  HISTORY_ROW_LOADING_TEST_ID,
   HOST_HISTORY_ROW_TEST_ID,
+  MISCONFIGURATION_HISTORY_ROW_TEST_ID,
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
-  HISTORY_ROW_LOADING_TEST_ID,
+  VULNERABILITY_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
+import { VulnerabilityFindingsPanelKey } from '../../csp_details/vulnerabilities_flyout/constants';
+import { MisconfigurationFindingsPanelKey } from '../../csp_details/findings_flyout/constants';
 
 const MAX_WIDTH = 300; // px
 
@@ -56,6 +61,7 @@ export interface FlyoutHistoryRowProps {
 export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }) => {
   switch (item.panel.id) {
     case DocumentDetailsRightPanelKey:
+    case IOCPanelKey:
       return <DocumentDetailsHistoryRow item={item} index={index} />;
     case RulePanelKey:
       return <RuleHistoryRow item={item} index={index} />;
@@ -90,6 +96,23 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           icon={'globe'}
           name={'Network'}
           dataTestSubj={NETWORK_HISTORY_ROW_TEST_ID}
+        />
+      );
+    case MisconfigurationFindingsPanelKey:
+    case VulnerabilityFindingsPanelKey:
+      const TEST_ID =
+        item.panel.id === MisconfigurationFindingsPanelKey
+          ? MISCONFIGURATION_HISTORY_ROW_TEST_ID
+          : VULNERABILITY_HISTORY_ROW_TEST_ID;
+
+      return (
+        <GenericHistoryRow
+          item={item}
+          index={index}
+          title={String(item?.panel?.params?.resourceId)}
+          icon={'document'}
+          name={'Resource Id'}
+          dataTestSubj={TEST_ID}
         />
       );
     default:

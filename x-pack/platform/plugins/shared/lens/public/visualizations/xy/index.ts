@@ -9,7 +9,6 @@ import type { CoreSetup } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { EditorFrameSetup } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { FormatFactory } from '../../../common/types';
@@ -27,7 +26,6 @@ export class XyVisualization {
     { editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getXyVisualization } = await import('../../async_services');
       const [
         coreStart,
         {
@@ -40,19 +38,18 @@ export class XyVisualization {
           dataViews,
         },
       ] = await core.getStartServices();
-      const [palettes, eventAnnotationService] = await Promise.all([
+      const [{ getXyVisualization }, paletteService, eventAnnotationService] = await Promise.all([
+        import('../../async_services'),
         charts.palettes.getPalettes(),
         eventAnnotation.getService(),
       ]);
-      const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       return getXyVisualization({
         core: coreStart,
         data,
         storage: new Storage(localStorage),
-        paletteService: palettes,
+        paletteService,
         eventAnnotationService,
         fieldFormats,
-        useLegacyTimeAxis,
         kibanaTheme: core.theme,
         unifiedSearch,
         dataViewsService: dataViews,

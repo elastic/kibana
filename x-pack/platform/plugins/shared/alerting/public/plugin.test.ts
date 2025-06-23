@@ -26,6 +26,9 @@ const mockAlertingUIConfig: AlertingUIConfig = {
       },
     },
   },
+  maintenanceWindow: {
+    enabled: true,
+  },
 };
 
 const mockInitializerContext = coreMock.createPluginInitializerContext(mockAlertingUIConfig);

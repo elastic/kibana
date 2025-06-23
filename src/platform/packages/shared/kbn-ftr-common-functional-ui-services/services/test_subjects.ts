@@ -428,4 +428,18 @@ export class TestSubjects extends FtrService {
       await this.click(selector);
     }
   }
+
+  public async getAccordionState(selector: string) {
+    const container = await this.find(selector);
+    const buttons = await container.findAllByCssSelector('button');
+
+    if (buttons.length > 0) {
+      const firstButton = buttons[0];
+      return await firstButton.getAttribute('aria-expanded');
+    } else {
+      throw new Error(
+        `Container '${selector}' has no 'button' child elements, check for EUI upgrades`
+      );
+    }
+  }
 }

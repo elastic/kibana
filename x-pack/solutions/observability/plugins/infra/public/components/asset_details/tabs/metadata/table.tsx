@@ -77,7 +77,14 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
     () => [
       {
         field: 'value',
-        name: <EuiIcon type="pin" />,
+        name: (
+          <EuiIcon
+            type="pin"
+            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinFieldsColumn.ariaLabel', {
+              defaultMessage: 'Pin fields',
+            })}
+          />
+        ),
         align: 'center' as HorizontalAlignment,
         width: '5%',
         sortable: false,
@@ -103,7 +110,9 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
         name: VALUE_LABEL,
         width: '50%',
         sortable: false,
-        render: (_name: string, item: Field) => <ExpandableContent values={item.value} />,
+        render: (_name: string, item: Field) => (
+          <ExpandableContent fieldName={item.name} values={item.value} />
+        ),
       },
     ],
     [pinnedItems, setPinnedItems]

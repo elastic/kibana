@@ -196,7 +196,13 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   });
 };
 
-export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+export const getRemoteIndicesList = async (
+  dataViews: DataViewsPublicPluginStart,
+  areRemoteIndicesAvailable: boolean
+) => {
+  if (!areRemoteIndicesAvailable) {
+    return [];
+  }
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*:*',
@@ -225,7 +231,7 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
   }
 };
 
-const getIntegrations = async (core: CoreStart) => {
+const getIntegrations = async (core: Pick<CoreStart, 'application' | 'http'>) => {
   const fleetCapabilities = core.application.capabilities.fleet;
   if (!fleetCapabilities?.read) {
     return [];
@@ -255,9 +261,13 @@ const getIntegrations = async (core: CoreStart) => {
   );
 };
 
-export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+export const getESQLSources = async (
+  dataViews: DataViewsPublicPluginStart,
+  core: Pick<CoreStart, 'application' | 'http'>,
+  areRemoteIndicesAvailable: boolean
+) => {
   const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews),
+    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),
     getIntegrations(core),
   ]);
@@ -356,5 +366,16 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
+    // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
+    .suggest-details > .monaco-scrollable-element > .body > .header > .type {
+      white-space: normal !important;
+    }
   `;
+};
+
+export const filterDataErrors = (errors: MonacoMessage[]): MonacoMessage[] => {
+  return errors.filter((error) => {
+    const code = typeof error.code === 'object' ? error.code.value : error.code;
+    return code !== 'unknownIndex' && code !== 'unknownColumn';
+  });
 };

@@ -38,3 +38,12 @@ Running a recipe:
 ```
 $ yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```
+
+## EIS
+
+You can set up a local instance of the Elastic Inference Service by running `node scripts/eis.js`.
+This starts the EIS Gateway in a Docker container, and handles certificates and configuration.
+
+### Prerequisites
+
+EIS connects to external LLM providers, so you need to supply authentication. By default, the setup script will try to get credentials from Vault. Make sure you have configured Vault to point at Elastic's Infra Vault server, and that you're logged in. If you want to, you can run Vault locally and set VAULT_ADDR and VAULT_SECRET_PATH. By default the script will try to get credentials from the [Infra Vault](https://docs.elastic.dev/vault/infra-vault/home) cluster, at `secret/kibana-issues/dev/inference/*`, which is accessible for all employees.

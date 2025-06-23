@@ -130,6 +130,7 @@ export interface InstallPackageResponse {
   items: AssetReference[];
   _meta: {
     install_source: InstallSource;
+    name: string;
   };
 }
 
@@ -145,16 +146,39 @@ export interface InstallResult {
   error?: Error;
   installType: InstallType;
   installSource?: InstallSource;
+  pkgName: string;
 }
 
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  result: InstallResult;
+  result: Omit<InstallResult, 'pkgName'>;
 }
 
 export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+}
+
+export interface BulkUpgradePackagesRequest {
+  packages: Array<{ name: string; version?: string }>;
+  upgrade_package_policies?: boolean;
+  force?: boolean;
+  prerelease?: boolean;
+}
+
+export interface BulkUninstallPackagesRequest {
+  packages: Array<{ name: string; version: string }>;
+  force?: boolean;
+}
+
+export interface BulkOperationPackagesResponse {
+  taskId: string;
+}
+
+export interface GetOneBulkOperationPackagesResponse {
+  status: string;
+  error?: { message: string };
+  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
 }
 
 export interface BulkInstallPackagesRequest {
@@ -210,3 +234,17 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageDatastreamAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageDatastreamAssetsResponse {
+  success: boolean;
+}

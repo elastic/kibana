@@ -10,7 +10,7 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
-import { readCloudUsersFromFile } from './helper';
+import { isValidHostname, readCloudUsersFromFile } from './helper';
 import {
   createCloudSAMLSession,
   createLocalSAMLSession,
@@ -31,6 +31,7 @@ export interface SamlSessionManagerOptions {
   hostOptions: HostOptions;
   isCloud: boolean;
   supportedRoles?: SupportedRoles;
+  cloudHostName?: string;
   cloudUsersFilePath: string;
   log: ToolingLog;
 }
@@ -56,6 +57,7 @@ export class SamlSessionManager {
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
   private readonly supportedRoles?: SupportedRoles;
+  private readonly cloudHostName?: string;
   private readonly cloudUsersFilePath: string;
 
   constructor(options: SamlSessionManagerOptions) {
@@ -67,6 +69,10 @@ export class SamlSessionManager {
     };
     this.kbnHost = Url.format(hostOptionsWithoutAuth);
     this.isCloud = options.isCloud;
+    this.cloudHostName = options.cloudHostName || process.env.TEST_CLOUD_HOST_NAME;
+    if (this.isCloud) {
+      this.validateCloudHostName();
+    }
     this.kbnClient = new KbnClient({
       log: this.log,
       url: Url.format({
@@ -79,6 +85,18 @@ export class SamlSessionManager {
     this.roleToUserMap = new Map<Role, User>();
     this.supportedRoles = options.supportedRoles;
     this.validateCloudSetting();
+  }
+
+  private validateCloudHostName() {
+    if (!this.cloudHostName) {
+      throw new Error(
+        `'cloudHostName' is required for Cloud authentication. Provide it in the constructor or via the TEST_CLOUD_HOST_NAME environment variable.`
+      );
+    }
+
+    if (!isValidHostname(this.cloudHostName)) {
+      throw new Error(`TEST_CLOUD_HOST_NAME is not a valid hostname: ${this.cloudHostName}`);
+    }
   }
 
   /**
@@ -151,6 +169,7 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
       const kbnVersion = await this.kbnClient.version.get();
       const { email, password } = this.getCloudUserByRole(role);
       session = await createCloudSAMLSession({
+        hostname: this.cloudHostName!,
         email,
         password,
         kbnHost: this.kbnHost,

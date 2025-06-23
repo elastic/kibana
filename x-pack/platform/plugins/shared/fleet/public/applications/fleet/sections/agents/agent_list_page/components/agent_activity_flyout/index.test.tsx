@@ -6,17 +6,21 @@
  */
 
 import React from 'react';
-import { act, render, fireEvent } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
+
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
 import { useActionStatus } from '../../hooks';
-import { useGetAgentPolicies, useStartServices, useAuthz } from '../../../../../hooks';
+import { useGetAgentPolicies, useAuthz } from '../../../../../hooks';
 
 import { AgentActivityFlyout } from '.';
 
 jest.mock('../../hooks');
-jest.mock('../../../../../hooks');
+jest.mock('../../../../../../../hooks/use_request/agent_policy');
+jest.mock('../../../../../../../hooks/use_authz');
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
@@ -24,7 +28,7 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
 
 const mockUseActionStatus = useActionStatus as jest.Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
-const mockUseStartServices = useStartServices as jest.Mock;
+
 const mockedUseAuthz = useAuthz as jest.Mock;
 
 jest.mock('@kbn/logs-shared-plugin/common', () => {
@@ -43,6 +47,7 @@ describe('AgentActivityFlyout', () => {
   const mockAbortUpgrade = jest.fn();
   const mockSetSearch = jest.fn();
   const mockSetSelectedStatus = jest.fn();
+  const mockOpenManageAutoUpgradeModal = jest.fn();
 
   const component = (refreshAgentActivity: boolean = false) => (
     <IntlProvider timeZone="UTC" locale="en">
@@ -52,11 +57,13 @@ describe('AgentActivityFlyout', () => {
         refreshAgentActivity={refreshAgentActivity}
         setSearch={mockSetSearch}
         setSelectedStatus={mockSetSelectedStatus}
+        openManageAutoUpgradeModal={mockOpenManageAutoUpgradeModal}
       />
     </IntlProvider>
   );
-
+  let testRenderer: TestRenderer;
   beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
     mockOnClose.mockReset();
     mockOnAbortSuccess.mockReset();
     mockAbortUpgrade.mockReset();
@@ -66,30 +73,18 @@ describe('AgentActivityFlyout', () => {
     mockUseGetAgentPolicies.mockReturnValue({
       data: {
         items: [
-          { id: 'policy1', name: 'Policy 1' },
-          { id: 'policy2', name: 'Policy 2' },
+          { id: 'Policy1', name: 'Policy 1' },
+          { id: 'Policy2', name: 'Policy 2' },
         ],
       },
     });
-    mockUseStartServices.mockReturnValue({
-      docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
-      application: { navigateToUrl: jest.fn() },
-      http: { basePath: { prepend: jest.fn() } },
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              useUrl: () => 'https://locator.url',
-            }),
-          },
-        },
-      },
-    });
+
     mockedUseAuthz.mockReturnValue({
       fleet: {
         readAgents: true,
         allAgents: true,
       },
+      integrations: {},
     } as any);
   });
 
@@ -118,24 +113,22 @@ describe('AgentActivityFlyout', () => {
         hasRolloutPeriod: true,
       },
     ];
-    mockUseActionStatus
-      .mockReturnValueOnce({
-        currentActions: mockActionStatuses,
-        abortUpgrade: mockAbortUpgrade,
-        isFirstLoading: true,
-      })
-      .mockReturnValueOnce({
-        currentActions: mockActionStatuses,
-        abortUpgrade: mockAbortUpgrade,
-        isFirstLoading: false,
-      });
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
 
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.queryByTestId('loading')).toBeInTheDocument();
     expect(result.queryByTestId('upgradeInProgressTitle')).not.toBeInTheDocument();
-
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
     result.rerender(component());
     expect(result.queryByTestId('loading')).not.toBeInTheDocument();
     expect(result.queryByTestId('upgradeInProgressTitle')).toBeInTheDocument();
@@ -147,7 +140,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.queryByText('No activity to display')).toBeInTheDocument();
   });
@@ -174,7 +167,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -186,7 +179,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Started on Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     act(() => {
       fireEvent.click(result.getByText('Cancel'));
@@ -217,7 +210,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -229,7 +222,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Started on Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     expect(result.queryByText('Cancel')).not.toBeInTheDocument();
   });
@@ -255,7 +248,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -266,7 +259,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Scheduled for Sep 16, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Scheduled for Sep 16, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     act(() => {
       fireEvent.click(result.getByText('Cancel'));
@@ -295,7 +288,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '2 agents upgraded'
@@ -326,7 +319,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -357,7 +350,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -393,7 +386,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent unenrollment expired'
@@ -426,7 +419,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent upgrade cancelled'
@@ -448,7 +441,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 1,
         status: 'FAILED',
         expiration: '2099-09-16T10:00:00.000Z',
-        newPolicyId: 'policy1',
+        newPolicyId: 'Policy1',
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 1,
         completionTime: '2022-09-15T11:00:00.000Z',
@@ -459,7 +452,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 1 agent assigned to a new policy'
@@ -496,7 +489,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 3 agents actioned'
@@ -518,7 +511,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 0,
         status: 'COMPLETE',
         expiration: '2099-09-16T10:00:00.000Z',
-        policyId: 'policy1',
+        policyId: 'Policy1',
         revision: 2,
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
@@ -530,7 +523,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Policy changed'
@@ -552,7 +545,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 3,
         status: 'COMPLETE',
         expiration: '2099-09-16T10:00:00.000Z',
-        policyId: 'policy1',
+        policyId: 'Policy1',
         revision: 2,
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
@@ -564,7 +557,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '3 agents applied policy change'
@@ -574,6 +567,42 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for an automatic upgrade', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 3,
+        nbAgentsAck: 0,
+        type: 'UPGRADE',
+        nbAgentsActioned: 3,
+        is_automatic: true,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'Policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+        version: '8.17.3',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
+    const result = testRenderer.render(component());
+
+    expect(
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toContain('Upgrading 3 agents to version 8.17.3');
+    expect(
+      result.container
+        .querySelector('[data-test-subj="manageAutoUpgradesButton"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Manage auto-upgrade agents'.replace(/\s/g, ''));
   });
 
   it('should keep flyout state on new data', () => {
@@ -626,7 +655,7 @@ describe('AgentActivityFlyout', () => {
         };
       }
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')).toBe(null);

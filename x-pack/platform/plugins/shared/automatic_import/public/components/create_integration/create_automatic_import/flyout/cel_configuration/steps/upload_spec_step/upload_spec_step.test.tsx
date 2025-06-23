@@ -81,13 +81,14 @@ describe('UploadSpecStep', () => {
           fireEvent.change(result.getByTestId('dataStreamTitleInput'), {
             target: { value: 'testDataStreamTitle' },
           });
-          const filepicker = result.getByTestId('apiDefinitionFilePicker');
+        });
+        const filepicker = result.getByTestId('apiDefinitionFilePicker');
+        await act(async () => {
           fireEvent.change(filepicker, {
             target: { files: [new File(['...'], 'test.json', { type: 'application/json' })] },
           });
-          await waitFor(() => expect(filepicker).toHaveAttribute('data-loading', 'true'));
-          await waitFor(() => expect(filepicker).toHaveAttribute('data-loading', 'false'));
         });
+        await waitFor(() => expect(filepicker).toHaveAttribute('data-loading', 'false'));
       });
 
       it('analyze button re-enabled', () => {

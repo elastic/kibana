@@ -7,15 +7,32 @@
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
 import { Observable } from 'rxjs';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { StreamsRepositoryClient } from './api';
 
-export interface StreamsPluginSetup {
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+export interface StreamsStatus {
+  status: 'unknown' | 'enabled' | 'disabled';
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StreamsPluginSetup {}
 
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+  status$: Observable<StreamsStatus>;
 }
 
-export type StreamsPluginClass = PluginClass<StreamsPluginSetup, StreamsPluginStart, {}, {}>;
+export interface StreamsPluginSetupDependencies {
+  cloud?: CloudSetup;
+}
+
+export interface StreamsPluginStartDependencies {
+  cloud?: CloudStart;
+}
+
+export type StreamsPluginClass = PluginClass<
+  StreamsPluginSetup,
+  StreamsPluginStart,
+  StreamsPluginSetupDependencies,
+  StreamsPluginStartDependencies
+>;

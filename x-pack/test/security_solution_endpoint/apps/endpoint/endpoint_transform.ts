@@ -7,12 +7,12 @@
 
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const endpointTestResources = getService('endpointTestResources');
   const esClient: Client = getService('es');
 
   const transformAggregation = () => ({
@@ -25,6 +25,30 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('endpoint transforms', function () {
     targetTags(this, ['@ess', '@serverless', '@serverlessQA', 'esGate']);
+
+    const stopTransform = async (transformId: string) => {
+      const stopRequest = {
+        transform_id: `${transformId}*`,
+        force: true,
+        wait_for_completion: true,
+        allow_no_match: true,
+      };
+      return esClient.transform.stopTransform(stopRequest);
+    };
+
+    const startTransform = async (transformId: string) => {
+      const transformsResponse = await esClient.transform.getTransformStats({
+        transform_id: `${transformId}*`,
+      });
+      return Promise.all(
+        transformsResponse.transforms.map((transform) => {
+          if (STARTED_TRANSFORM_STATES.has(transform.state)) {
+            return Promise.resolve();
+          }
+          return esClient.transform.startTransform({ transform_id: transform.id });
+        })
+      );
+    };
 
     describe('united transform', () => {
       const transformName = 'test-agg-united';
@@ -89,7 +113,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
       after(async () => {
-        await endpointTestResources.stopTransform(transformName);
+        await stopTransform(transformName);
         await esClient.transform.deleteTransform({
           transform_id: transformName,
           force: true,
@@ -120,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             b_value: 'B', // key to test for
           },
         });
-        await endpointTestResources.startTransform(transformName);
+        await startTransform(transformName);
 
         await retry.waitForWithTimeout('transform to run', 10000, async () => {
           const search = await esClient.search({

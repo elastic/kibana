@@ -33,6 +33,27 @@ export interface SentinelOneActivityEsDoc<TData = unknown> {
 }
 
 /**
+ * The `agent` records that are ingested by the SentinelOne integration into Elasticsearch
+ *
+ * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
+ *        see what else is available and add it below if needed
+ */
+export interface SentinelOneAgentEsDoc {
+  agent: {
+    id: string;
+    type: string;
+    version: string;
+  };
+  sentinel_one: {
+    agent: {
+      agent: {
+        id: string;
+      };
+    };
+  };
+}
+
+/**
  * Activity data for file uploaded to S1 by an Agent:
  * ```
  * {

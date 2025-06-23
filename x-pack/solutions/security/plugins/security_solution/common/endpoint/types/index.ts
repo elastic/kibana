@@ -50,7 +50,6 @@ export interface AppLocation {
   pathname: string;
   search: string;
   hash: string;
-  key?: string;
   state?:
     | {
         isTabChange?: boolean;
@@ -1034,9 +1033,11 @@ export interface PolicyConfig {
   mac: {
     advanced?: {};
     events: {
+      dns: boolean;
       file: boolean;
       process: boolean;
       network: boolean;
+      security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;

@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -589,6 +600,9 @@
           }
         }
       },
+      "incremental_id": {
+        "type": "unsigned_long"
+      },
       "observables": {
         "properties": {
           "typeKey": {
@@ -719,6 +733,20 @@
     "properties": {
       "owner": {
         "type": "keyword"
+      }
+    }
+  },
+  "cases-incrementing-id": {
+    "dynamic": false,
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "last_id": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },
@@ -895,6 +923,7 @@
     }
   },
   "dashboard": {
+    "dynamic": false,
     "properties": {
       "controlGroupInput": {
         "properties": {
@@ -971,6 +1000,10 @@
           }
         }
       },
+      "sections": {
+        "dynamic": false,
+        "properties": {}
+      },
       "timeFrom": {
         "doc_values": false,
         "index": false,
@@ -1026,6 +1059,37 @@
   "enterprise_search_telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "entity-analytics-monitoring-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "error": {
+        "type": "keyword"
+      },
+      "filter": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "integrationName": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "matchers": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
   },
   "entity-definition": {
     "dynamic": false,
@@ -1101,6 +1165,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -1190,6 +1255,9 @@
       "package_assets": {
         "dynamic": false,
         "properties": {}
+      },
+      "previous_version": {
+        "type": "keyword"
       },
       "verification_key_id": {
         "type": "keyword"
@@ -1768,6 +1836,9 @@
         "properties": {}
       },
       "is_managed": {
+        "type": "boolean"
+      },
+      "latest_revision": {
         "type": "boolean"
       },
       "name": {
@@ -2373,6 +2444,9 @@
       "is_managed": {
         "type": "boolean"
       },
+      "latest_revision": {
+        "type": "boolean"
+      },
       "name": {
         "type": "keyword"
       },
@@ -2469,6 +2543,27 @@
       "use_space_awareness_migration_status": {
         "index": false,
         "type": "keyword"
+      }
+    }
+  },
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "intercept_trigger_record": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
+        "type": "text"
       }
     }
   },
@@ -2748,6 +2843,27 @@
       }
     }
   },
+  "onechat_workflow": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "categories": {
+        "type": "keyword"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2912,6 +3028,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
@@ -3004,6 +3128,14 @@
       }
     }
   },
+  "scheduled_report": {
+    "dynamic": false,
+    "properties": {
+      "createdBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "search": {
     "dynamic": false,
     "properties": {
@@ -3038,6 +3170,19 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
   },
   "security-ai-prompt": {
     "dynamic": false,
@@ -3088,6 +3233,20 @@
       },
       "version": {
         "type": "long"
+      }
+    }
+  },
+  "security:reference-data": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
       }
     }
   },
@@ -3607,6 +3766,9 @@
           }
         }
       },
+      "maintenance_windows": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3860,6 +4022,107 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "workchat_agent": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "agent_name": {
+        "type": "text"
+      },
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "description": {
+        "type": "text"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_conversation": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "conversation_id": {
+        "type": "keyword"
+      },
+      "events": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "title": {
+        "type": "text"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_integration": {
+    "dynamic": "strict",
+    "properties": {
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },

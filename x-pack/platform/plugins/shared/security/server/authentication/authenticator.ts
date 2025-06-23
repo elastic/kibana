@@ -330,6 +330,14 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
+        if (!ownsSession && existingSessionValue?.provider.name) {
+          // 'telemetry' to see how prevalent it is for users
+          // to be using multiple concurrent providers to authenticate
+          this.logger.warn(
+            `A previous provider owned the session, ${existingSessionValue?.provider.name}, but the authenticate request was handled by provider ${providerName}`
+          );
+        }
+
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
@@ -406,6 +414,14 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
+        if (!ownsSession && existingSession.value?.provider.name) {
+          // 'telemetry' to see how prevalent it is for users
+          // to be using multiple concurrent providers to authenticate
+          this.logger.warn(
+            `A previous provider owned the session, ${existingSession.value?.provider.name}, but the authenticate request was handled by provider ${providerName}`
+          );
+        }
+
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,

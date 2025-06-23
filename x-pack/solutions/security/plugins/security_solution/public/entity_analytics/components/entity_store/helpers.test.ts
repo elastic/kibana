@@ -13,6 +13,7 @@ import type {
   HostEntity,
   ServiceEntity,
   UserEntity,
+  GenericEntity,
 } from '../../../../common/api/entity_analytics';
 
 describe('helpers', () => {
@@ -26,6 +27,26 @@ describe('helpers', () => {
         entity: {
           name: 'test_user',
           source: 'logs-test',
+          type: 'AWS IAM User',
+          EngineMetadata: {
+            Type: 'user',
+          },
+        },
+      };
+
+      expect(getEntityType(userEntity)).toBe('user');
+    });
+
+    it('should return "user" if the record is a UserEntity (with user.entity)', () => {
+      const userEntity: UserEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        user: {
+          name: 'test_user',
+        },
+        entity: {
+          name: 'test_user',
+          source: 'logs-test',
+          type: 'user',
         },
       };
 
@@ -41,11 +62,32 @@ describe('helpers', () => {
         entity: {
           name: 'test_host',
           source: 'logs-test',
+          type: 'EC2 Instance',
+          EngineMetadata: {
+            Type: 'host',
+          },
         },
       };
 
       expect(getEntityType(hostEntity)).toBe('host');
     });
+
+    it('should return "host" if the record is a HostEntity (with entity.type)', () => {
+      const hostEntity: HostEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        host: {
+          name: 'test_host',
+        },
+        entity: {
+          name: 'test_host',
+          source: 'logs-test',
+          type: 'host',
+        },
+      };
+
+      expect(getEntityType(hostEntity)).toBe('host');
+    });
+
     it('should return "service" if the record is a ServiceEntity', () => {
       const serviceEntity: ServiceEntity = {
         '@timestamp': '2021-08-02T14:00:00.000Z',
@@ -55,10 +97,61 @@ describe('helpers', () => {
         entity: {
           name: 'test_service',
           source: 'logs-test',
+          type: 'SaaS',
+          EngineMetadata: {
+            Type: 'service',
+          },
         },
       };
 
       expect(getEntityType(serviceEntity)).toBe('service');
+    });
+
+    it('should return "service" if the record is a ServiceEntity (with entity.type)', () => {
+      const serviceEntity: ServiceEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        service: {
+          name: 'test_service',
+        },
+        entity: {
+          name: 'test_service',
+          source: 'logs-test',
+          type: 'service',
+        },
+      };
+
+      expect(getEntityType(serviceEntity)).toBe('service');
+    });
+
+    it('should return "generic" if the record is a ServiceEntity', () => {
+      const genericEntity: GenericEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        entity: {
+          id: 'arn',
+          name: 'test_generic',
+          source: 'logs-test',
+          type: 'PostgreSQL Database',
+          EngineMetadata: {
+            Type: 'generic',
+          },
+        },
+      };
+
+      expect(getEntityType(genericEntity)).toBe('generic');
+    });
+
+    it('should return "generic" if the record is a ServiceEntity (with entity.type)', () => {
+      const genericEntity: GenericEntity = {
+        '@timestamp': '2021-08-02T14:00:00.000Z',
+        entity: {
+          id: 'arn',
+          name: 'test_generic',
+          source: 'logs-test',
+          type: 'generic',
+        },
+      };
+
+      expect(getEntityType(genericEntity)).toBe('generic');
     });
 
     it('should throw an error if the record does not match any entity type', () => {

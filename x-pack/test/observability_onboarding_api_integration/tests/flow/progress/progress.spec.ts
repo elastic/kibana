@@ -34,26 +34,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when('Get progress', { config: 'basic' }, () => {
     let onboardingId: string;
-    const datasetName = 'api-tests';
-    const namespace = 'default';
 
     before(async () => {
       const req = await observabilityOnboardingApiClient.logMonitoringUser({
-        endpoint: 'POST /internal/observability_onboarding/logs/flow',
-        params: {
-          body: {
-            type: 'logFiles',
-            name: 'name',
-            state: {
-              datasetName,
-              namespace,
-              logFilePaths: ['my-service.log'],
-            },
-          },
-        },
+        endpoint: 'POST /internal/observability_onboarding/flow',
       });
 
-      onboardingId = req.body.onboardingId;
+      onboardingId = req.body.onboardingFlow.id;
     });
 
     describe('when missing required privileges', () => {

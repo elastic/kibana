@@ -8,7 +8,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
-import { FetchAlertsIndexNamesParams } from './types';
+import type { FetchAlertsIndexNamesParams } from './types';
 
 export const fetchAlertsIndexNames = async ({ http, ruleTypeIds }: FetchAlertsIndexNamesParams) => {
   const { index_name: indexNames = [] } = await http.get<{ index_name: string[] }>(

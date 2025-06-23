@@ -15,14 +15,13 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import {
   AgentRunnableSequence,
   createOpenAIToolsAgent,
-  createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 
 export const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini']);
 
-export const agentRunableFactory = async ({
+export const agentRunnableFactory = async ({
   llm,
   isOpenAI,
   llmType,
@@ -48,9 +47,5 @@ export const agentRunableFactory = async ({
     return createOpenAIToolsAgent(params);
   }
 
-  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
-    return createToolCallingAgent(params);
-  }
-
-  return createStructuredChatAgent(params);
+  return createToolCallingAgent(params);
 };

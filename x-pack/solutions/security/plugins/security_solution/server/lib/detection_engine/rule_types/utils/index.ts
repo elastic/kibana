@@ -15,7 +15,6 @@ export const createResultObject = <TState extends RuleTypeState>(state: TState) 
     createdSignalsCount: 0,
     createdSignals: [],
     errors: [],
-    lastLookbackDate: undefined,
     searchAfterTimes: [],
     state,
     success: true,

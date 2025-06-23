@@ -95,10 +95,10 @@ get:
                       type: string
                       description: Indicates whether new fields are added dynamically.
                       enum:
-                        - "false"
-                        - "runtime"
-                        - "strict"
-                        - "true"
+                        - 'false'
+                        - 'runtime'
+                        - 'strict'
+                        - 'true'
                     isSpaceAware:
                       type: boolean
                       description: >

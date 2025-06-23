@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { get } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
 import { throwErrors } from '@kbn/io-ts-utils';
 import type { InfraMetadataFeature } from '../../../common/http_api/metadata_api';
 import { InfraMetadataRequestRT, InfraMetadataRT } from '../../../common/http_api/metadata_api';

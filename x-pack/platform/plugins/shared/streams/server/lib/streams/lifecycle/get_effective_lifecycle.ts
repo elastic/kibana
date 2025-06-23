@@ -6,12 +6,7 @@
  */
 
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import {
-  IngestStreamDefinition,
-  findInheritedLifecycle,
-  isInheritLifecycle,
-  isUnwiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { Streams, findInheritedLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import { StreamsClient } from '../client';
 import { getDataStreamLifecycle } from '../stream_crud';
 
@@ -20,11 +15,11 @@ export async function getEffectiveLifecycle({
   streamsClient,
   dataStream,
 }: {
-  definition: IngestStreamDefinition;
+  definition: Streams.ingest.all.Definition;
   streamsClient: StreamsClient;
   dataStream: IndicesDataStream;
 }) {
-  if (isUnwiredStreamDefinition(definition)) {
+  if (Streams.UnwiredStream.Definition.is(definition)) {
     return getDataStreamLifecycle(dataStream);
   }
 

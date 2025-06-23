@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IToasts } from './types';
+import type { IToasts, NotificationCoordinator } from './types';
 
 /**
  * {@link IToasts}
@@ -25,6 +25,10 @@ export type ToastsStart = IToasts;
 export interface NotificationsSetup {
   /** {@link ToastsSetup} */
   toasts: ToastsSetup;
+  /**
+   * {@link NotificationCoordinator}
+   */
+  coordinator: NotificationCoordinator;
 }
 
 /** @public */

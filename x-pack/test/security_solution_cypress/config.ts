@@ -44,9 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // See https://github.com/elastic/kibana/pull/125396 for details
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForSequenceEqlRuleEnabled',
-        ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
@@ -57,6 +54,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'bulkEditAlertSuppressionEnabled',
+        ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
       ],

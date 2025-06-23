@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { mergeRt } from '.';
 import { jsonRt } from '../json_rt';
 

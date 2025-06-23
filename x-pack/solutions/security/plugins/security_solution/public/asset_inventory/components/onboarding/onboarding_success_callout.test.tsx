@@ -57,4 +57,21 @@ describe('OnboardingSuccessCallout', () => {
       expect(mockHideCallout).toHaveBeenCalled();
     });
   });
+
+  it('should have an "Add integration" button that calls onAddIntegrationClick when clicked', async () => {
+    const mockAddIntegrationClick = jest.fn();
+
+    (useOnboardingSuccessCallout as jest.Mock).mockReturnValue(
+      mockUseOnboardingSuccessCallout({
+        isOnboardingSuccessCalloutVisible: true,
+        onAddIntegrationClick: mockAddIntegrationClick,
+      })
+    );
+
+    renderWithTestProvider(<OnboardingSuccessCallout />);
+
+    await userEvent.click(screen.getByRole('button', { name: /add integration/i }));
+
+    expect(mockAddIntegrationClick).toHaveBeenCalled();
+  });
 });

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -60,6 +61,11 @@ const actionNames: {
     completedText: 'input action completed',
     cancelledText: 'input action',
   },
+  MIGRATE: {
+    inProgressText: 'Migrating',
+    completedText: 'migrated',
+    cancelledText: 'migration',
+  },
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
@@ -71,25 +77,36 @@ export const getAction = (type?: string, actionId?: string) => {
   return actionNames[type ?? 'ACTION'] ?? actionNames.ACTION;
 };
 
-export const inProgressTitle = (action: ActionStatus) => (
-  <FormattedMessage
-    id="xpack.fleet.agentActivity.inProgressTitle"
-    defaultMessage="{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}"
-    values={{
-      nbAgents:
-        action.nbAgentsAck >= action.nbAgentsActioned
-          ? action.nbAgentsAck
-          : action.nbAgentsAck === 0
-          ? action.nbAgentsActioned
-          : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
-      agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-      inProgressText: getAction(action.type, action.actionId).inProgressText,
-      reassignText:
-        action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
-      upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
-      failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
-    }}
-  />
+export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | undefined) => (
+  <EuiFlexGroup gutterSize="s" alignItems="center">
+    <FormattedMessage
+      id="xpack.fleet.agentActivity.inProgressTitle"
+      defaultMessage="{inProgressText} {nbAgents} {agents}{reassignText}{upgradeText}{failuresText}{automaticIcon}"
+      values={{
+        nbAgents:
+          action.nbAgentsAck >= action.nbAgentsActioned
+            ? action.nbAgentsAck
+            : action.nbAgentsAck === 0
+            ? action.nbAgentsActioned
+            : action.nbAgentsActioned - action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+        agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
+        inProgressText: getAction(action.type, action.actionId).inProgressText,
+        reassignText:
+          action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
+        upgradeText: action.type === 'UPGRADE' ? ` to version ${action.version}` : '',
+        failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
+        automaticIcon: isAutomatic ? (
+          <EuiIconTip
+            anchorProps={{
+              style: { display: 'flex', alignItems: 'center' },
+            }}
+            type="timeRefresh"
+            content="Triggered by an automatic upgrade"
+          />
+        ) : null,
+      }}
+    />
+  </EuiFlexGroup>
 );
 
 export const inProgressDescription = (time?: string) => (

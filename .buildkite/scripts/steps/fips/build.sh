@@ -32,9 +32,9 @@ node scripts/build \
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
-KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
 
-cat <<EOF | buildkite-agent annotate --style "info" --context kibana-fips-image
+cat <<EOF | buildkite-agent annotate --style "info" --context kibana-wolfi-fips-image
 
   Kibana FIPS image: \`$KIBANA_FIPS_IMAGE\`
 EOF

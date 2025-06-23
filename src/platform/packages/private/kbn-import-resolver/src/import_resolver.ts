@@ -118,7 +118,7 @@ export class ImportResolver {
     }
 
     // these are special webpack-aliases only used in storybooks, ignore them
-    if (req === 'core_styles' || req === 'core_app_image_assets') {
+    if (req === 'core_styles') {
       return true;
     }
 
@@ -140,6 +140,11 @@ export class ImportResolver {
     }
     if (req === 'kibana/server') {
       return this.adaptReq('src/core/server', dirname);
+    }
+
+    if (req.startsWith('@modelcontextprotocol/sdk')) {
+      const relPath = req.split('@modelcontextprotocol/sdk')[1];
+      return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
     }
 
     // turn root-relative paths into relative paths

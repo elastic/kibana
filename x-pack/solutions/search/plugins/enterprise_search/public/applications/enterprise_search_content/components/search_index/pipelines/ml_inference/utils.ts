@@ -13,7 +13,7 @@ import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from '
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
 const NORMALIZABLE_PIPELINE_CHARS_REGEX = /[^\w\-]/g;
-export const TRAINED_MODELS_PATH = '/app/ml/trained_models';
+export const TRAINED_MODELS_PATH = '/app/management/ml/trained_models';
 
 export const isValidPipelineName = (input: string): boolean => {
   return input.length > 0 && VALID_PIPELINE_NAME_REGEX.test(input);

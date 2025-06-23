@@ -8,6 +8,7 @@
  */
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { CreateESQLControlAction } from './esql_control_action';
@@ -15,10 +16,39 @@ import { CreateESQLControlAction } from './esql_control_action';
 describe('update ES|QL query action', () => {
   const dataMock = dataPluginMock.createStartContract();
   const searchMock = dataMock.search.search;
-  const coreStart = coreMock.createStart();
+  const core = coreMock.createStart();
+  const coreStart = {
+    ...core,
+    uiSettings: {
+      ...core.uiSettings,
+      get: (setting: string) => {
+        return setting === 'enableESQL';
+      },
+    },
+  } as CoreStart;
   describe('compatibility check', () => {
-    it('is incompatible if no query is applied', async () => {
+    it('is compatible if queryString is given', async () => {
       const createControlAction = new CreateESQLControlAction(coreStart, searchMock);
+      const isCompatible = await createControlAction.isCompatible({
+        queryString: 'FROM index',
+        variableType: ESQLVariableType.FIELDS,
+        esqlVariables: [],
+      });
+
+      expect(isCompatible).toBeTruthy();
+    });
+
+    it('is incompatible if the ES|QL switch is off', async () => {
+      const coreStartESQLDidabled = {
+        ...core,
+        uiSettings: {
+          ...core.uiSettings,
+          get: (setting: string) => {
+            return setting === 'enableESQL' ? false : true;
+          },
+        },
+      } as CoreStart;
+      const createControlAction = new CreateESQLControlAction(coreStartESQLDidabled, searchMock);
       const isCompatible = await createControlAction.isCompatible({
         queryString: '',
         variableType: ESQLVariableType.FIELDS,
@@ -28,15 +58,15 @@ describe('update ES|QL query action', () => {
       expect(isCompatible).toBeFalsy();
     });
 
-    it('is compatible if queryString is given', async () => {
+    it('is incompatible if variableType is invalid', async () => {
       const createControlAction = new CreateESQLControlAction(coreStart, searchMock);
       const isCompatible = await createControlAction.isCompatible({
-        queryString: 'FROM meow',
-        variableType: ESQLVariableType.FIELDS,
+        queryString: 'FROM index',
+        variableType: 'INVALID_TYPE' as ESQLVariableType,
         esqlVariables: [],
       });
 
-      expect(isCompatible).toBeTruthy();
+      expect(isCompatible).toBeFalsy();
     });
   });
 });

@@ -38,7 +38,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   const isEsqlQuery = isEsqlQueryRule(ruleParams);
-  // metadata provided only when open alert from Discover page
+  // metadata provided only when the user opens the alert from the Discover page or a dashboard
   const isManagementPage = props.metadata?.isManagementPage ?? true;
 
   const formTypeSelected = useCallback(

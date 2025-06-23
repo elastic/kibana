@@ -9,7 +9,7 @@ import path from 'path';
 import { readdirSync, statSync, readFile } from 'fs';
 import { promisify } from 'util';
 
-import partition from 'lodash/partition';
+import { partition } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 
 import { ToolingLog } from '@kbn/tooling-log';

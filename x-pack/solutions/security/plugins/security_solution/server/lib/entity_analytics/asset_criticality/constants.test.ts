@@ -9,7 +9,7 @@ import { ASSET_CRITICALITY_MAPPINGS_VERSIONS, assetCriticalityFieldMap } from '.
 
 describe('asset criticality - constants', () => {
   it("please bump 'ASSET_CRITICALITY_MAPPINGS_VERSIONS' when mappings change", () => {
-    expect(ASSET_CRITICALITY_MAPPINGS_VERSIONS).toEqual(3);
+    expect(ASSET_CRITICALITY_MAPPINGS_VERSIONS).toEqual(4);
     expect(assetCriticalityFieldMap).toMatchInlineSnapshot(`
       Object {
         "@timestamp": Object {
@@ -23,6 +23,16 @@ describe('asset criticality - constants', () => {
           "type": "keyword",
         },
         "criticality_level": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "entity.asset.criticality": Object {
+          "array": false,
+          "required": false,
+          "type": "keyword",
+        },
+        "entity.id": Object {
           "array": false,
           "required": false,
           "type": "keyword",

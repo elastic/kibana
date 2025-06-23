@@ -1,0 +1,33 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/wci-common",
+    "@kbn/wci-server",
+    "@kbn/workchat-app",
+    "@kbn/wci-browser",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/wc-integration-utils",
+    "@kbn/wc-index-schema-builder",
+    "@kbn/wc-genai-utils",
+    "@kbn/inference-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/i18n"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+} 

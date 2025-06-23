@@ -84,7 +84,7 @@ describe('maybeAddCloudLinks', () => {
       Array [
         Array [
           Object {
-            "href": "https://www.elastic.co/guide/en/index.html",
+            "href": "https://www.elastic.co/docs/get-started",
             "title": "Documentation",
           },
           Object {
@@ -158,7 +158,7 @@ describe('maybeAddCloudLinks', () => {
       Array [
         Array [
           Object {
-            "href": "https://www.elastic.co/guide/en/index.html",
+            "href": "https://www.elastic.co/docs/get-started",
             "title": "Documentation",
           },
           Object {

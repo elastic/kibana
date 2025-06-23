@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import React from 'react';
 import '../../mock/formatted_relative';
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { useTimelineLastEventTime } from '../../containers/events/last_event_time';
 import { TestProviders } from '../../mock';
 
@@ -22,13 +22,11 @@ jest.mock('../../containers/events/last_event_time', () => ({
 }));
 
 describe('Last Event Time Stat', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     (useTimelineLastEventTime as jest.Mock).mockReset();
   });
 
-  test('Loading', async () => {
+  test('Loading', () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
       true,
       {
@@ -36,14 +34,15 @@ describe('Last Event Time Stat', () => {
         errorMessage: null,
       },
     ]);
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
     // Removed strict equality as the EuiLoader has been converted to Emotion and will no longer have the euiLoadingSpinner--medium class
-    expect(wrapper.find(LastEventTime).html()).toContain('<span class="euiLoadingSpinner ');
+    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
+
   test('Last seen', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
       false,
@@ -52,15 +51,14 @@ describe('Last Event Time Stat', () => {
         errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.find(LastEventTime).html()).toBe(
-      'Last event: <span class="euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock">20 hours ago</span>'
-    );
+    expect(container.textContent).toBe('Last event: 20 hours ago');
   });
+
   test('Bad date time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
       false,
@@ -69,13 +67,13 @@ describe('Last Event Time Stat', () => {
         errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
 
-    expect(wrapper.find(LastEventTime).html()).toBe('something-invalid');
+    expect(container).toHaveTextContent('something-invalid');
   });
   test('Null time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -85,11 +83,11 @@ describe('Last Event Time Stat', () => {
         errorMessage: mockLastEventTimeQuery.errorMessage,
       },
     ]);
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.find(LastEventTime).html()).toContain(getEmptyValue());
+    expect(container.textContent).toBe(getEmptyValue());
   });
 });

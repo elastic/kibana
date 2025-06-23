@@ -8,12 +8,14 @@
 import { z } from '@kbn/zod';
 import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
+import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
+import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 
 export interface SanitizedDashboardAsset {
   id: string;
-  label: string;
+  title: string;
   tags: string[];
 }
 
@@ -41,8 +43,8 @@ export type BulkUpdateAssetsResponse =
 
 function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
   return {
-    id: asset.assetId,
-    label: asset.label,
+    id: asset[ASSET_ID],
+    title: asset.title,
     tags: asset.tags,
   };
 }
@@ -65,9 +67,7 @@ const listDashboardsRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
@@ -79,16 +79,11 @@ const listDashboardsRoute = createServerRoute({
     } = params;
 
     function isDashboard(asset: Asset): asset is DashboardAsset {
-      return asset.assetType === 'dashboard';
+      return asset[ASSET_TYPE] === 'dashboard';
     }
 
     return {
-      dashboards: (
-        await assetClient.getAssets({
-          entityId: streamName,
-          entityType: 'stream',
-        })
-      )
+      dashboards: (await assetClient.getAssets(streamName))
         .filter(isDashboard)
         .map(sanitizeDashboardAsset),
     };
@@ -108,9 +103,7 @@ const linkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -127,11 +120,9 @@ const linkDashboardRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.linkAsset({
-      entityId: streamName,
-      entityType: 'stream',
-      assetId: dashboardId,
-      assetType: 'dashboard',
+    await assetClient.linkAsset(streamName, {
+      [ASSET_TYPE]: 'dashboard',
+      [ASSET_ID]: dashboardId,
     });
 
     return {
@@ -153,9 +144,7 @@ const unlinkDashboardRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -173,11 +162,9 @@ const unlinkDashboardRoute = createServerRoute({
       path: { dashboardId, name: streamName },
     } = params;
 
-    await assetClient.unlinkAsset({
-      entityId: streamName,
-      entityType: 'stream',
-      assetId: dashboardId,
-      assetType: 'dashboard',
+    await assetClient.unlinkAsset(streamName, {
+      [ASSET_ID]: dashboardId,
+      [ASSET_TYPE]: 'dashboard',
     });
 
     return {
@@ -193,9 +180,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -252,9 +237,7 @@ const bulkDashboardsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -290,17 +273,14 @@ const bulkDashboardsRoute = createServerRoute({
     await streamsClient.ensureStream(streamName);
 
     const result = await assetClient.bulk(
-      {
-        entityId: streamName,
-        entityType: 'stream',
-      },
+      streamName,
       operations.map((operation) => {
         if ('index' in operation) {
           return {
             index: {
               asset: {
-                assetType: 'dashboard',
-                assetId: operation.index.id,
+                [ASSET_TYPE]: 'dashboard',
+                [ASSET_ID]: operation.index.id,
               },
             },
           };
@@ -308,8 +288,8 @@ const bulkDashboardsRoute = createServerRoute({
         return {
           delete: {
             asset: {
-              assetType: 'dashboard',
-              assetId: operation.delete.id,
+              [ASSET_TYPE]: 'dashboard',
+              [ASSET_ID]: operation.delete.id,
             },
           },
         };

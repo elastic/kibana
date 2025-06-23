@@ -3,6 +3,7 @@
 exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
 <div>
   <a
+    aria-label="Show all alerts"
     class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-both"
     data-test-subj="test-link"
     href="/app/observability/alerts?_a=(rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
@@ -28,6 +29,7 @@ exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
 exports[`LinkToAlertsPage component renders correctly with optional props 1`] = `
 <div>
   <a
+    aria-label="Show all alerts"
     class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-both"
     data-test-subj="test-link"
     href="/app/observability/alerts?_a=(kuery:'foo:bar',rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"

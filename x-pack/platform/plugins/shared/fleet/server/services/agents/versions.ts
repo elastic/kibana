@@ -13,7 +13,7 @@ import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
-import semverRcompare from 'semver/functions/rcompare';
+import semverCompareBuild from 'semver/functions/compare-build';
 import semverLt from 'semver/functions/lt';
 import semverParse from 'semver/functions/parse';
 
@@ -54,7 +54,7 @@ export const getLatestAvailableAgentVersion = async ({
   let latestCompatibleVersion;
 
   const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
-  versions.sort(semverRcompare);
+  versions.sort(semverCompareBuild).reverse();
 
   if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
     latestCompatibleVersion =

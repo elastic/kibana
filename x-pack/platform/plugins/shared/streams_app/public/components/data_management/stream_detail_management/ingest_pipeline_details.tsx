@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
 import { css } from '@emotion/css';
 import { ManagedBadge } from './managed_badge';
@@ -27,25 +27,34 @@ export function IngestPipelineDetails({
       hasBorder
       className={css`
         min-width: 300px;
+        max-height: 100px;
       `}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailView.ingestPipeline', {
-            defaultMessage: 'Ingest pipeline',
-          })}
-        </EuiText>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiText size="s">
-              {i18n.translate('xpack.streams.streamDetailView.ingestPipelineName', {
-                defaultMessage: 'Name',
-              })}
-            </EuiText>
-            <EuiLink onClick={() => onFlyoutOpen(ingestPipeline?.name || '')}>
-              {ingestPipeline ? ingestPipeline.name : '-'}
-              <ManagedBadge meta={ingestPipeline?._meta} />
-            </EuiLink>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xs">
+          <p>
+            {i18n.translate('xpack.streams.streamDetailView.ingestPipeline', {
+              defaultMessage: 'Ingest pipeline',
+            })}
+          </p>
+        </EuiTitle>
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiTitle size="xxxs">
+              <p>
+                {i18n.translate('xpack.streams.streamDetailView.ingestPipelineName', {
+                  defaultMessage: 'Name',
+                })}
+              </p>
+            </EuiTitle>
+            {ingestPipeline ? (
+              <EuiLink onClick={() => onFlyoutOpen(ingestPipeline.name)}>
+                {ingestPipeline.name}
+                <ManagedBadge meta={ingestPipeline?._meta} />
+              </EuiLink>
+            ) : (
+              <EuiText size="s">-</EuiText>
+            )}
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiFlexGroup>

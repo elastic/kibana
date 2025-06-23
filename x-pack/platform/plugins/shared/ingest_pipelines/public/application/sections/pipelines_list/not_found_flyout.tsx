@@ -7,7 +7,14 @@
 
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyout, EuiFlyoutBody, EuiCallOut, EuiCode, EuiButton } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiCallOut,
+  EuiCode,
+  EuiButton,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { Error, useKibana } from '../../../shared_imports';
@@ -83,13 +90,20 @@ export const PipelineNotFoundFlyout: FunctionComponent<Props> = ({
       </EuiCallOut>
     );
   };
+  const pipelineErrorTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyout onClose={onClose} size="m" maxWidth={550} data-test-subj="pipelineErrorFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      maxWidth={550}
+      data-test-subj="pipelineErrorFlyout"
+      aria-labelledby={pipelineErrorTitleId}
+    >
       <EuiFlyoutHeader>
         {pipelineName && (
           <EuiTitle id="notFoundFlyoutTitle" data-test-subj="title">
-            <h2>{pipelineName}</h2>
+            <h2 id={pipelineErrorTitleId}>{pipelineName}</h2>
           </EuiTitle>
         )}
       </EuiFlyoutHeader>

@@ -19,20 +19,16 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
-import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { BurnRateRuleParams } from '../../../typings';
 import { useSloActions } from '../../slo_details/hooks/use_slo_actions';
+import { useActionModal } from '../../../context/action_modal';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isActionsPopoverOpen: boolean;
   setIsActionsPopoverOpen: (value: boolean) => void;
-  setDeleteConfirmationModalOpen: (value: boolean) => void;
-  setResetConfirmationModalOpen: (value: boolean) => void;
-  setEnableConfirmationModalOpen: (value: boolean) => void;
-  setDisableConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady?: (value: boolean) => void;
@@ -65,10 +61,6 @@ export function SloItemActions({
   setIsActionsPopoverOpen,
   setIsAddRuleFlyoutOpen,
   setIsEditRuleFlyoutOpen,
-  setDeleteConfirmationModalOpen,
-  setResetConfirmationModalOpen,
-  setEnableConfirmationModalOpen,
-  setDisableConfirmationModalOpen,
   setDashboardAttachmentReady,
   btnProps,
 }: Props) {
@@ -79,7 +71,7 @@ export function SloItemActions({
   const executionContextName = executionContext.get().name;
   const isDashboardContext = executionContextName === 'dashboards';
   const { data: permissions } = usePermissions();
-  const navigateToClone = useCloneSlo();
+  const { triggerAction } = useActionModal();
 
   const {
     handleNavigateToRules,
@@ -105,15 +97,14 @@ export function SloItemActions({
   };
 
   const handleClone = () => {
-    navigateToClone(slo);
+    triggerAction({ type: 'clone', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
   };
 
   const handleDelete = () => {
     if (!!remoteDeleteUrl) {
       window.open(remoteDeleteUrl, '_blank');
     } else {
-      setDeleteConfirmationModalOpen(true);
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'delete', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -121,8 +112,7 @@ export function SloItemActions({
     if (!!remoteResetUrl) {
       window.open(remoteResetUrl, '_blank');
     } else {
-      setResetConfirmationModalOpen(true);
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'reset', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -130,8 +120,7 @@ export function SloItemActions({
     if (!!remoteEnableUrl) {
       window.open(remoteEnableUrl, '_blank');
     } else {
-      setEnableConfirmationModalOpen(true);
-      setIsActionsPopoverOpen(false);
+      triggerAction({ type: 'enable', item: slo, onConfirm: () => setIsActionsPopoverOpen(false) });
     }
   };
 
@@ -139,8 +128,11 @@ export function SloItemActions({
     if (!!remoteDisableUrl) {
       window.open(remoteDisableUrl, '_blank');
     } else {
-      setDisableConfirmationModalOpen(true);
-      setIsActionsPopoverOpen(false);
+      triggerAction({
+        type: 'disable',
+        item: slo,
+        onConfirm: () => setIsActionsPopoverOpen(false),
+      });
     }
   };
 
@@ -319,7 +311,7 @@ export function SloItemActions({
             {showRemoteLinkIcon}
           </EuiContextMenuItem>,
         ].concat(
-          !isDashboardContext ? (
+          !isDashboardContext && !!setDashboardAttachmentReady ? (
             <EuiContextMenuItem
               icon="dashboardApp"
               key="addToDashboard"

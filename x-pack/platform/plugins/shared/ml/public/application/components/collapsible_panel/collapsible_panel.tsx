@@ -26,6 +26,7 @@ export interface CollapsiblePanelProps {
   header: React.ReactElement;
   headerItems?: React.ReactElement[];
   ariaLabel: string;
+  dataTestSubj?: string;
 }
 
 export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
@@ -35,11 +36,13 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
   header,
   headerItems,
   ariaLabel,
+  dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
     <EuiSplitPanel.Outer
+      data-test-subj={dataTestSubj}
       grow
       hasShadow={false}
       css={{
@@ -100,7 +103,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
 
 export interface StatEntry {
   label: string;
-  value: number;
+  value: number | string;
   'data-test-subj'?: string;
 }
 

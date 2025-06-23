@@ -98,7 +98,7 @@ export async function installBuiltInEntityDefinitions({
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
 
-  logger.info(`Checking installation of ${definitions.length} built-in definitions`);
+  logger.debug(`Checking installation of ${definitions.length} built-in definitions`);
   const installPromises = definitions.map(async (builtInDefinition) => {
     const installedDefinition = await findEntityDefinitionById({
       soClient,
@@ -129,7 +129,7 @@ export async function installBuiltInEntityDefinitions({
       return installedDefinition;
     }
 
-    logger.info(
+    logger.debug(
       `Detected failed or outdated installation of definition [${installedDefinition.id}] v${installedDefinition.version}, installing v${builtInDefinition.version}`
     );
     return await reinstallEntityDefinition({
@@ -153,7 +153,7 @@ async function install({
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
-  logger.info(`Installing definition [${definition.id}] v${definition.version}`);
+  logger.debug(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,17 +17,32 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
+  useGeneratedHtmlId,
+  EuiSwitch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { MonitorFilters } from '../monitors_overview/types';
 import { MonitorFiltersForm } from './monitor_filters_form';
+import { DEFAULT_OVERVIEW_VIEW, OverviewView } from '../../synthetics/state';
+
+const MonitorConfigurationContext = React.createContext<{
+  overviewView: OverviewView;
+  onChangeCompactViewSwitch: (e: EuiSwitchEvent) => void;
+}>({ overviewView: DEFAULT_OVERVIEW_VIEW, onChangeCompactViewSwitch: () => {} });
+
+const COMPACT_VIEW_LABEL = i18n.translate(
+  'xpack.synthetics.embeddables.monitorsOverview.compactViewLabel',
+  { defaultMessage: 'Compact view' }
+);
 
 interface MonitorConfigurationProps {
   initialInput?: {
     filters: MonitorFilters;
+    view?: OverviewView;
   };
-  onCreate: (props: { filters: MonitorFilters }) => void;
+  onCreate: (props: { filters: MonitorFilters; view: OverviewView }) => void;
   onCancel: () => void;
   title: string;
 }
@@ -36,7 +52,16 @@ export function MonitorConfiguration({
   onCreate,
   onCancel,
   title,
-}: MonitorConfigurationProps) {
+  children,
+}: React.PropsWithChildren<MonitorConfigurationProps>) {
+  const [overviewView, setOverviewView] = useState<OverviewView>(
+    initialInput?.view || DEFAULT_OVERVIEW_VIEW
+  );
+
+  const onChangeCompactViewSwitch = (e: EuiSwitchEvent) => {
+    setOverviewView(e.target.checked ? 'compactView' : 'cardView');
+  };
+
   const methods = useForm<MonitorFilters>({
     defaultValues: {
       monitorIds: [],
@@ -49,30 +74,44 @@ export function MonitorConfiguration({
     mode: 'all',
   });
   const { getValues, formState } = methods;
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'monitorConfigurationFlyout',
+  });
 
   const onConfirmClick = () => {
     const newFilters = getValues();
     onCreate({
       filters: newFilters,
+      view: overviewView,
     });
   };
 
+  const hasViewChanged = initialInput?.view && overviewView !== initialInput.view;
+
   return (
-    <EuiFlyout onClose={onCancel}>
+    <EuiFlyout onClose={onCancel} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>{title}</h2>
+          <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFlexGroup>
+            <EuiFlexGroup direction="column">
               <EuiFlexItem grow>
                 <FormProvider {...methods}>
                   <MonitorFiltersForm />
                 </FormProvider>
               </EuiFlexItem>
+              <MonitorConfigurationContext.Provider
+                value={{
+                  overviewView,
+                  onChangeCompactViewSwitch,
+                }}
+              >
+                {children}
+              </MonitorConfigurationContext.Provider>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -91,7 +130,7 @@ export function MonitorConfiguration({
 
           <EuiButton
             data-test-subj="syntheticsMonitorConfigurationSaveButton"
-            isDisabled={!(formState.isDirty || !initialInput)}
+            isDisabled={!(formState.isDirty || !initialInput || hasViewChanged)}
             onClick={onConfirmClick}
             fill
           >
@@ -105,3 +144,17 @@ export function MonitorConfiguration({
     </EuiFlyout>
   );
 }
+
+function ViewSwitch() {
+  const { onChangeCompactViewSwitch, overviewView } = React.useContext(MonitorConfigurationContext);
+  return (
+    <EuiSwitch
+      compressed
+      checked={overviewView === 'compactView'}
+      label={COMPACT_VIEW_LABEL}
+      onChange={onChangeCompactViewSwitch}
+    />
+  );
+}
+
+MonitorConfiguration.ViewSwitch = ViewSwitch;

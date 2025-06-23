@@ -33,3 +33,5 @@ export const trendStatsBatch = createAsyncAction<TrendRequest[], GetTrendPayload
 );
 
 export const setRollupLocations = createAction<boolean>('setRollupLocations');
+export const setOverviewViewAction =
+  createAction<MonitorOverviewState['view']>('setOverviewViewAction');

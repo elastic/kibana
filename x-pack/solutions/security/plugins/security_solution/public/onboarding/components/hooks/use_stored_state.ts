@@ -7,34 +7,17 @@
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { OnboardingCardId } from '../../constants';
-import type { IntegrationTabId } from '../onboarding_body/cards/integrations/types';
 import type { CardSelectorListItem } from '../onboarding_body/cards/common/card_selector_list';
+import { useDefinedLocalStorage } from '../../../common/lib/integrations/hooks/use_stored_state';
 
 const LocalStorageKey = {
-  avcBannerDismissed: 'securitySolution.onboarding.avcBannerDismissed',
   videoVisited: 'securitySolution.onboarding.videoVisited',
   completeCards: 'securitySolution.onboarding.completeCards',
   expandedCard: 'securitySolution.onboarding.expandedCard',
   urlDetails: 'securitySolution.onboarding.urlDetails',
-  selectedIntegrationTabId: 'securitySolution.onboarding.selectedIntegrationTabId',
   selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
-  integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
   assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
 } as const;
-
-/**
- * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
- */
-export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
-  const [value, setValue] = useLocalStorage<T>(key, defaultValue);
-  return [value ?? defaultValue, setValue] as const;
-};
-
-/**
- * Stores the AVC banner dismissed state
- */
-export const useStoredIsAVCBannerDismissed = () =>
-  useDefinedLocalStorage<boolean>(LocalStorageKey.avcBannerDismissed, false);
 
 /**
  * Stores the completed card IDs per space
@@ -52,34 +35,13 @@ export const useStoredUrlDetails = (spaceId: string) =>
  * Stores the selected selectable card ID per space
  */
 export const useStoredSelectedCardItemId = (
-  cardType: 'alerts' | 'dashboards' | 'rules',
+  cardType: 'alerts' | 'dashboards' | 'rules' | 'knowledgeSource',
   spaceId: string,
   defaultSelectedCardItemId: CardSelectorListItem['id']
 ) =>
   useDefinedLocalStorage<CardSelectorListItem['id']>(
     `${LocalStorageKey.selectedCardItemId}.${cardType}.${spaceId}`,
     defaultSelectedCardItemId
-  );
-
-/**
- * Stores the selected integration tab ID per space
- */
-export const useStoredIntegrationTabId = (
-  spaceId: string,
-  defaultSelectedTabId: IntegrationTabId
-) =>
-  useDefinedLocalStorage<IntegrationTabId>(
-    `${LocalStorageKey.selectedIntegrationTabId}.${spaceId}`,
-    defaultSelectedTabId
-  );
-
-/**
- * Stores the integration search term per space
- */
-export const useStoredIntegrationSearchTerm = (spaceId: string) =>
-  useDefinedLocalStorage<string | null>(
-    `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
-    null
   );
 
 /**

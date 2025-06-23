@@ -82,7 +82,7 @@ describe('EntityStoreManagementPage', () => {
     render(<EntityStoreManagementPage />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('entityStoreManagementPage')).toBeInTheDocument();
-    expect(screen.getByText('Entity Store')).toBeInTheDocument();
+    expect(screen.getByText('Entity store')).toBeInTheDocument();
   });
 
   it('disables the switch when status is installing', () => {

@@ -20,38 +20,46 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowId,
+  sectionId,
 }: {
   panelId: string;
-  rowId: string;
+  sectionId?: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const startInteraction = useGridLayoutPanelEvents({
+  const startDrag = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowId,
+    sectionId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
+      /**
+       * if new `startDrag` reference (which happens when, for example, panels change sections),
+       * then clean up the old event listeners
+       */
+      removeEventListenersRef.current?.();
+
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', startInteraction, { passive: true });
-        handle.addEventListener('touchstart', startInteraction, { passive: true });
-        handle.style.touchAction = 'none';
+        handle.addEventListener('mousedown', startDrag, { passive: true });
+        handle.addEventListener('touchstart', startDrag, { passive: true });
+        handle.addEventListener('keydown', startDrag);
+        handle.classList.add('kbnGridPanel--dragHandle');
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', startInteraction);
-          handle.removeEventListener('touchstart', startInteraction);
+          handle.removeEventListener('mousedown', startDrag);
+          handle.removeEventListener('touchstart', startDrag);
+          handle.removeEventListener('keydown', startDrag);
         }
       };
     },
-    [startInteraction]
+    [startDrag]
   );
 
   useEffect(
@@ -63,7 +71,7 @@ export const useDragHandleApi = ({
   );
 
   return {
-    startDrag: startInteraction,
+    startDrag,
     setDragHandles: useCustomDragHandle ? setDragHandles : undefined,
   };
 };

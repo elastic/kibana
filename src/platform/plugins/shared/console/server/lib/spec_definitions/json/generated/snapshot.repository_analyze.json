@@ -1,12 +1,50 @@
 {
   "snapshot.repository_analyze": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "blob_count": [
+        "100"
+      ],
+      "concurrency": [
+        "10"
+      ],
+      "detailed": "__flag__",
+      "early_read_node_count": [
+        "2"
+      ],
+      "max_blob_size": [
+        "10mb"
+      ],
+      "max_total_data_size": [
+        "1gb"
+      ],
+      "rare_action_probability": [
+        "0.02"
+      ],
+      "rarely_abort_writes": "__flag__",
+      "read_node_count": [
+        "10"
+      ],
+      "register_operation_count": [
+        "10"
+      ],
+      "seed": "",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_snapshot/{repository}/_analyze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-repository-analyze",
     "availability": {
       "stack": true,
       "serverless": false

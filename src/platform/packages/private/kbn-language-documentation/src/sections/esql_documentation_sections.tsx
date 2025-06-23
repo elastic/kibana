@@ -145,10 +145,7 @@ ROW a = ROUND(1.23, 0)
         <Markdown
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
             defaultMessage: `### SHOW
-The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
-
-* Use \`SHOW INFO\` to return the deployment's version, build date and hash.
-* Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
+The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
             ignoreTag: true,
             description:
@@ -171,6 +168,70 @@ export const processingCommands = {
     }
   ),
   items: [
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.changePoint', {
+        defaultMessage: 'CHANGE_POINT',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.changePoint.markdown',
+            {
+              defaultMessage: `### CHANGE POINT
+\`CHANGE POINT\`detects spikes, dips, and change points in a metric. 
+
+The command adds columns to the table with the change point type and p-value, that indicates how extreme the change point is (lower values indicate greater changes).
+
+The possible change point types are:
+
+* \`dip\`: a significant dip occurs at this change point
+* \`distribution_change\`: the overall distribution of the values has changed significantly
+* \`spike\`: a significant spike occurs at this point
+* \`step_change\`: the change indicates a statistically significant step up or down in value distribution
+* \`trend_change\`: there is an overall trend change occurring at this point
+
+Note that there must be at least 22 values for change point detection. Fewer than 1,000 is preferred.
+
+**Syntax**
+
+\`\`\` esql
+CHANGE_POINT value [ON key] [AS type_name, pvalue_name]
+\`\`\` 
+
+**Parameters**
+
+* \`value\`: The column with the metric in which you want to detect a change point.
+* \`key\`: The column with the key to order the values by. If not specified, @timestamp is used.
+* \`type_name\`: The name of the output column with the change point type. If not specified, type is used.
+* \`pvalue_name\`: The name of the output column with the p-value that indicates how extreme the change point is. If not specified, pvalue is used.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+| MV_EXPAND key
+| EVAL value = CASE(key<13, 0, 42)
+| CHANGE_POINT value ON key
+| WHERE type IS NOT NULL
+\`\`\` 
+
+| key:integer | value:integer | type:keyword | pvalue:double |
+|-------------|---------------|--------------|---------------|
+| 13          | 42            | step_change  | 0.0           |
+
+`,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
     {
       label: i18n.translate('languageDocumentation.documentationESQL.dissect', {
         defaultMessage: 'DISSECT',
@@ -416,7 +477,7 @@ ROW language_code = 1
 | LOOKUP JOIN languages ON language_code
 \`\`\`
 
-An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a lookup index, set the index mode to lookup.
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index mode](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#_static_index_settings) needs to be set when the index is created.
 
 \`\`\` esql
 PUT languages
@@ -505,6 +566,56 @@ FROM employees
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
             `,
+              ignoreTag: true,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate('languageDocumentation.documentationESQL.sampleCommand', {
+        defaultMessage: 'SAMPLE',
+      }),
+      preview: true,
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
+            'languageDocumentation.documentationESQL.sampleCommand.markdown',
+            {
+              defaultMessage: `### SAMPLE
+The \`SAMPLE\` command samples a fraction of the table rows. 
+
+**Syntax**
+
+\`\`\` esql
+SAMPLE probability
+\`\`\` 
+
+**Parameters**
+
+* \`probability\`: The probability that a row is included in the sample. The value must be between 0 and 1, exclusive.
+
+**Example**
+
+The following example shows the detection of a step change:
+
+\`\`\` esql
+FROM employees
+| KEEP emp_no
+| SAMPLE 0.05
+\`\`\` 
+
+| emp_no:integer |
+|----------------|
+| 10018          |
+| 10024          |
+| 10062          |
+| 10081          |
+
+`,
               ignoreTag: true,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -682,194 +793,7 @@ Refer to **Operators** for an overview of the supported operators.
   ],
 };
 
-export const operators = {
-  label: i18n.translate('languageDocumentation.documentationESQL.operators', {
-    defaultMessage: 'Operators',
-  }),
-  description: i18n.translate(
-    'languageDocumentation.documentationESQL.operatorsDocumentationESQLDescription',
-    {
-      defaultMessage: `ES|QL supports the following operators:`,
-    }
-  ),
-  items: [
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.binaryOperators', {
-        defaultMessage: 'Binary operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.binaryOperators.markdown',
-            {
-              defaultMessage: `### Binary operators
-These binary comparison operators are supported:
-
-* equality: \`==\`
-* inequality: \`!=\`
-* less than: \`<\`
-* less than or equal: \`<=\`
-* greater than: \`>\`
-* greater than or equal: \`>=\`
-* add: \`+\`
-* subtract: \`-\`
-* multiply: \`*\`
-* divide: \`/\`
-* modulus: \`%\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.booleanOperators', {
-        defaultMessage: 'Boolean operators',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.booleanOperators.markdown',
-            {
-              defaultMessage: `### Boolean operators
-The following boolean operators are supported:
-
-* \`AND\`
-* \`OR\`
-* \`NOT\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.castOperator', {
-        defaultMessage: 'Cast (::)',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.castOperator.markdown',
-            {
-              defaultMessage: `### CAST (\`::\`)
-The \`::\` operator provides a convenient alternative syntax to the \`TO_<type>\` type conversion functions.
-
-Example:
-\`\`\` esql
-ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-              ignoreTag: true,
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.inOperator', {
-        defaultMessage: 'IN',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.inOperator.markdown',
-            {
-              defaultMessage: `### IN
-The \`IN\` operator allows testing whether a field or expression equals an element in a list of literals, fields or expressions:
-
-\`\`\` esql
-ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.stringOperators', {
-        defaultMessage: 'LIKE and RLIKE',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.stringOperators.markdown',
-            {
-              defaultMessage: `### LIKE and RLIKE
-For string comparison using wildcards or regular expressions, use \`LIKE\` or \`RLIKE\`:
-
-Use \`LIKE\` to match strings using wildcards. The following wildcard characters are supported:
-
-* \`*\` matches zero or more characters.
-* \`?\` matches one character.
-
-\`\`\` esql
-FROM employees
-| WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
-\`\`\`
-
-Use \`RLIKE\` to match strings using regular expressions:
-
-\`\`\` esql
-FROM employees
-| WHERE first_name RLIKE ".leja.*"
-| KEEP first_name, last_name
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate('languageDocumentation.documentationESQL.predicates', {
-        defaultMessage: 'NULL values',
-      }),
-      description: (
-        <Markdown
-          markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.predicates.markdown',
-            {
-              defaultMessage: `### NULL values
-For NULL comparison use the \`IS NULL\` and \`IS NOT NULL\` predicates:
-
-\`\`\` esql
-FROM employees
-| WHERE birth_date IS NULL
-| KEEP first_name, last_name
-| SORT first_name
-| LIMIT 3
-\`\`\`
-
-\`\`\` esql
-FROM employees
-| WHERE is_rehired IS NOT NULL
-| STATS count(emp_no)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-  ],
-};
-
 export { functions as scalarFunctions } from './generated/scalar_functions';
 export { functions as aggregationFunctions } from './generated/aggregation_functions';
 export { functions as groupingFunctions } from './generated/grouping_functions';
+export { functions as operators } from './generated/operators';

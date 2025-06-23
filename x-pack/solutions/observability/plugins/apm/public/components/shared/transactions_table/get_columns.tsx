@@ -63,7 +63,7 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   detailedStatisticsLoading: boolean;
   detailedStatistics?: TransactionGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled: boolean;
   shouldShowSparkPlots?: boolean;
   showAlertsColumn: boolean;
   offset?: string;
@@ -131,13 +131,17 @@ export function getColumns({
       render: (_, { name, transactionType: type }) => {
         return (
           <TransactionDetailLink
-            serviceName={serviceName}
             transactionName={name}
-            transactionType={type}
-            latencyAggregationType={latencyAggregationType}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-            overflowCount={transactionOverflowCount}
+            href={link('/services/{serviceName}/transactions/view', {
+              path: { serviceName },
+              query: {
+                ...query,
+                transactionName: name,
+                transactionType: type,
+                comparisonEnabled,
+                offset,
+              },
+            })}
           >
             {name}
           </TransactionDetailLink>

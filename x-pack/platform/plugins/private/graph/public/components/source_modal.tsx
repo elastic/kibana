@@ -16,7 +16,7 @@ export function SourceModal(props: SourcePickerProps) {
   return (
     <div css={sourceModalStyles}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id="source-modal-title">
           <FormattedMessage
             id="xpack.graph.sourceModal.title"
             defaultMessage="Select a data source"

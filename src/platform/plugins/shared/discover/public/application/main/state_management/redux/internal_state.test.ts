@@ -8,24 +8,46 @@
  */
 
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from '.';
+import {
+  createInternalStateStore,
+  createRuntimeStateManager,
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
+} from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createTabsStorageManager } from '../tabs_storage_manager';
 
 describe('InternalStateStore', () => {
   it('should set data view', () => {
+    const services = createDiscoverServicesMock();
+    const urlStateStorage = createKbnUrlStateStorage();
     const runtimeStateManager = createRuntimeStateManager();
+    const tabsStorageManager = createTabsStorageManager({
+      urlStateStorage,
+      storage: services.storage,
+    });
     const store = createInternalStateStore({
       services: createDiscoverServicesMock(),
       customizationContext: mockCustomizationContext,
       runtimeStateManager,
-      urlStateStorage: createKbnUrlStateStorage(),
+      urlStateStorage,
+      tabsStorageManager,
     });
-    expect(store.getState().dataViewId).toBeUndefined();
-    expect(runtimeStateManager.currentDataView$.value).toBeUndefined();
-    store.dispatch(internalStateActions.setDataView(dataViewMock));
-    expect(store.getState().dataViewId).toBe(dataViewMock.id);
-    expect(runtimeStateManager.currentDataView$.value).toBe(dataViewMock);
+    store.dispatch(
+      internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    );
+    const tabId = store.getState().tabs.unsafeCurrentId;
+    expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
+    expect(
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
+    ).toBeUndefined();
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    expect(selectTab(store.getState(), tabId).dataViewId).toBe(dataViewMock.id);
+    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
+      dataViewMock
+    );
   });
 });

@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useAddIntegrationsUrl } from '../../../../common/hooks/use_add_integrations_url';
 import { IntegrationCard } from './integration_card';
 import imageSrc from './alert_summary.png';
+import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.title', {
   defaultMessage: 'All your alerts in one place with AI',
@@ -39,10 +39,7 @@ const VIEW_ALL_INTEGRATIONS = i18n.translate(
   }
 );
 
-const PRIMARY_INTEGRATIONS = [
-  'splunk', // doesnt yet exist
-  'google_secops',
-];
+const PRIMARY_INTEGRATIONS = ['splunk', 'google_secops'];
 
 export const LANDING_PAGE_PROMPT_TEST_ID = 'alert-summary-landing-page-prompt';
 export const LANDING_PAGE_IMAGE_TEST_ID = 'alert-summary-landing-page-image';
@@ -63,7 +60,7 @@ export interface LandingPageProps {
  */
 export const LandingPage = memo(({ packages }: LandingPageProps) => {
   const { euiTheme } = useEuiTheme();
-  const { onClick: moreIntegrations } = useAddIntegrationsUrl(); // TODO this link might have to be revisited once the integration work is done
+  const navigateToIntegrationsPage = useNavigateToIntegrationsPage();
 
   // We only want to show the 2 top integrations, Splunk and GoogleSecOps, in that specific order
   const primaryPackages = useMemo(
@@ -141,7 +138,7 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
             <EuiButtonEmpty
               data-test-subj={LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID}
               iconType="plusInCircle"
-              onClick={moreIntegrations}
+              onClick={navigateToIntegrationsPage}
             >
               {VIEW_ALL_INTEGRATIONS}
             </EuiButtonEmpty>

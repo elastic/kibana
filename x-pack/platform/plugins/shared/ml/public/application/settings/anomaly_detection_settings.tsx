@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import {
   EuiBadge,
@@ -23,11 +23,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useMlApi } from '../contexts/kibana';
-import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../contexts/kibana/use_create_url';
 import { separateCalendarsByType } from './calendars/dst_utils';
+import { MANAGEMENT_SECTION_IDS } from '../management';
 
 export const AnomalyDetectionSettings: FC = () => {
   const mlApi = useMlApi();
@@ -36,17 +37,38 @@ export const AnomalyDetectionSettings: FC = () => {
   const [calendarsDstCount, setCalendarsDstCount] = useState(0);
   const [filterListsCount, setFilterListsCount] = useState(0);
 
-  const { canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar } = useContext(
-    AnomalyDetectionSettingsContext
-  );
+  const [canGetFilters, canCreateFilter, canGetCalendars, canCreateCalendar] = usePermissionCheck([
+    'canGetFilters',
+    'canCreateFilter',
+    'canGetCalendars',
+    'canCreateCalendar',
+  ]);
 
   const { displayErrorToast } = useToastNotificationService();
-  const redirectToCalendarList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
-  const redirectToCalendarDstList = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_MANAGE);
-  const redirectToNewCalendarPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_NEW);
-  const redirectToNewCalendarDstPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_DST_NEW);
-  const redirectToFilterLists = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_MANAGE);
-  const redirectToNewFilterListPage = useCreateAndNavigateToMlLink(ML_PAGES.FILTER_LISTS_NEW);
+  const redirectToCalendarList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
+  const redirectToCalendarDstList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_DST_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
+  const redirectToNewCalendarPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_NEW,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
+  const redirectToNewCalendarDstPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.CALENDARS_DST_NEW,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
+  const redirectToFilterLists = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_MANAGE,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
+  const redirectToNewFilterListPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.FILTER_LISTS_NEW,
+    MANAGEMENT_SECTION_IDS.AD_SETTINGS
+  );
 
   useEffect(() => {
     loadSummaryStats();
@@ -87,17 +109,6 @@ export const AnomalyDetectionSettings: FC = () => {
 
   return (
     <Fragment>
-      <EuiTitle>
-        <h2>
-          <FormattedMessage
-            id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
-            defaultMessage="Anomaly Detection"
-          />
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <EuiTitle size="s">

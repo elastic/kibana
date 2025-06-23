@@ -34,5 +34,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/ml-query-utils",
     "@kbn/ml-date-utils",
+    "@kbn/charts-theme",
   ]
 }

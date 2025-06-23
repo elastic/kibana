@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { SERVICE_NAME, TRANSACTION_NAME } from '../../../../../../../common/es_fields/apm';
 import { getNextEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
@@ -27,13 +28,12 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
     '/traces/explorer',
     '/dependencies/operation'
   );
+  const { link } = useApmRouter();
 
   const latencyAggregationType =
     ('latencyAggregationType' in query && query.latencyAggregationType) ||
     LatencyAggregationType.avg;
   const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
-
-  const { comparisonEnabled, offset } = query;
 
   if (!transaction) {
     return null;
@@ -76,15 +76,16 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       fieldName: TRANSACTION_NAME,
       val: (
         <TransactionDetailLink
-          serviceName={transaction.service.name}
-          transactionId={transaction.transaction.id}
-          traceId={transaction.trace.id}
           transactionName={transaction.transaction.name}
-          transactionType={transaction.transaction.type}
-          environment={nextEnvironment}
-          latencyAggregationType={latencyAggregationType}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
+          href={link('/services/{serviceName}/transactions/view', {
+            path: { serviceName: transaction.service.name },
+            query: {
+              ...query,
+              serviceGroup,
+              latencyAggregationType,
+              transactionName: transaction.transaction.name,
+            },
+          })}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>

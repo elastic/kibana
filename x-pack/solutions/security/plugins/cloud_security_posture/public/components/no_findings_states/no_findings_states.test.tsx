@@ -171,7 +171,7 @@ describe('NoFindingsStates', () => {
         screen.getByText(/required elasticsearch index privilege for the following indices:/i)
       ).toBeInTheDocument();
       expect(
-        screen.getByText('logs-cloud_security_posture.findings_latest-default')
+        screen.getByText('security_solution-cloud_security_posture.misconfiguration_latest')
       ).toBeInTheDocument();
       expect(screen.getByText('logs-cloud_security_posture.findings-default*')).toBeInTheDocument();
       expect(screen.getByText('logs-cloud_security_posture.scores-default')).toBeInTheDocument();
@@ -194,7 +194,7 @@ describe('NoFindingsStates', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column"
+          class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column-FullSizeCenteredPage"
         />
       </div>
     `);

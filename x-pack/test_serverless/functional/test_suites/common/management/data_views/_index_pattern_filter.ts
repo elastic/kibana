@@ -22,17 +22,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // TODO: Navigation to Data View Management is different in Serverless
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-dataViews');
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    beforeEach(async function () {
-      await PageObjects.settings.createIndexPattern('logstash-*');
-    });
-
-    afterEach(async function () {
       await PageObjects.settings.removeIndexPattern();
     });
 

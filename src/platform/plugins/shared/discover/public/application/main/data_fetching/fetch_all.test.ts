@@ -28,6 +28,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { selectTabRuntimeState } from '../state_management/redux';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -55,8 +56,9 @@ const waitForNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
-  let deps: Parameters<typeof fetchAll>[2];
+  let deps: Parameters<typeof fetchAll>[0];
   let searchSource: SearchSource;
+
   beforeEach(() => {
     subjects = {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
@@ -64,12 +66,21 @@ describe('test fetchAll', () => {
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
     };
     searchSource = savedSearchMock.searchSource.createChild();
-
+    const { appState, internalState, runtimeStateManager, getCurrentTab } = getDiscoverStateMock(
+      {}
+    );
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      getCurrentTab().id
+    );
     deps = {
+      dataSubjects: subjects,
+      reset: false,
       abortController: new AbortController(),
       inspectorAdapters: { requests: new RequestAdapter() },
-      getAppState: () => ({}),
-      internalState: getDiscoverStateMock({}).internalState,
+      appStateContainer: appState,
+      internalState,
+      scopedProfilesManager: scopedProfilesManager$.getValue(),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
       savedSearch: {
@@ -77,8 +88,8 @@ describe('test fetchAll', () => {
         searchSource,
       },
       services: discoverServiceMock,
+      getCurrentTab,
     };
-
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
     mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
@@ -88,7 +99,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
 
     expect(stateArr).toEqual([
@@ -106,13 +117,14 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue({ records: documents });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
+        interceptedWarnings: [],
         result: documents,
       },
     ]);
@@ -131,7 +143,7 @@ describe('test fetchAll', () => {
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -152,7 +164,7 @@ describe('test fetchAll', () => {
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -177,7 +189,7 @@ describe('test fetchAll', () => {
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.ERROR,
@@ -209,7 +221,7 @@ describe('test fetchAll', () => {
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
     });
-    fetchAll(subjects, false, deps);
+    fetchAll(deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -239,17 +251,8 @@ describe('test fetchAll', () => {
       esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
-    deps = {
-      abortController: new AbortController(),
-      inspectorAdapters: { requests: new RequestAdapter() },
-      searchSessionId: '123',
-      initialFetchStatus: FetchStatus.UNINITIALIZED,
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      getAppState: () => ({ query }),
-      internalState: getDiscoverStateMock({}).internalState,
-    };
-    fetchAll(subjects, false, deps);
+    deps.appStateContainer.update({ query });
+    fetchAll(deps);
     await waitForNextTick();
 
     expect(await collect()).toEqual([
@@ -257,6 +260,7 @@ describe('test fetchAll', () => {
       { fetchStatus: FetchStatus.LOADING, query },
       {
         fetchStatus: FetchStatus.PARTIAL,
+        interceptedWarnings: [],
         result: documents,
         esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
@@ -279,7 +283,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
       });
-      fetchMoreDocuments(subjects, deps);
+      fetchMoreDocuments(deps);
       await waitForNextTick();
 
       expect(await collectDocuments()).toEqual([
@@ -313,7 +317,7 @@ describe('test fetchAll', () => {
         fetchStatus: FetchStatus.COMPLETE,
         result: initialRecords,
       });
-      fetchMoreDocuments(subjects, deps);
+      fetchMoreDocuments(deps);
       await waitForNextTick();
 
       expect(await collectDocuments()).toEqual([
@@ -348,17 +352,8 @@ describe('test fetchAll', () => {
       const collect = subjectCollector(subjects.documents$);
       mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
-      deps = {
-        abortController: new AbortController(),
-        inspectorAdapters: { requests: new RequestAdapter() },
-        searchSessionId: '123',
-        initialFetchStatus: FetchStatus.UNINITIALIZED,
-        savedSearch: savedSearchMock,
-        services: discoverServiceMock,
-        getAppState: () => ({ query }),
-        internalState: getDiscoverStateMock({}).internalState,
-      };
-      fetchAll(subjects, false, deps);
+      deps.appStateContainer.update({ query });
+      fetchAll(deps);
       deps.abortController.abort();
       await waitForNextTick();
 

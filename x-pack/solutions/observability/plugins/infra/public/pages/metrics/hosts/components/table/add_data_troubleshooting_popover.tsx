@@ -53,7 +53,7 @@ export const AddDataTroubleshootingPopover = () => {
   } = useKibanaContextForPlugin();
   const addDataLinkHref = share.url.locators
     .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.getRedirectUrl({ category: 'logs' });
+    ?.getRedirectUrl({ category: 'host' });
 
   const onButtonClick = () => togglePopover();
 

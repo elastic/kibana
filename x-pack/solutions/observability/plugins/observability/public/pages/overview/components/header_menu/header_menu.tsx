@@ -12,10 +12,10 @@ import {
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
-// FIXME: import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public'
-import HeaderMenuPortal from './header_menu_portal';
+import { InspectorHeaderLink } from '../../../alert_details/components/inspector_header_link';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { share, theme, http } = useKibana().services;
@@ -34,21 +34,21 @@ export function HeaderMenu(): React.ReactElement | null {
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          <EuiHeaderLinks>
-            <EuiHeaderLink color="primary" href={href} iconType="indexOpen">
-              {i18n.translate('xpack.observability.home.addData', {
-                defaultMessage: 'Add data',
-              })}
-            </EuiHeaderLink>
+          <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}
-              iconType="brush"
             >
               {i18n.translate('xpack.observability.home.annotations', {
                 defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
+            <EuiHeaderLink color="primary" href={href}>
+              {i18n.translate('xpack.observability.home.addData', {
+                defaultMessage: 'Add data',
+              })}
+            </EuiHeaderLink>
+            <InspectorHeaderLink />
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>

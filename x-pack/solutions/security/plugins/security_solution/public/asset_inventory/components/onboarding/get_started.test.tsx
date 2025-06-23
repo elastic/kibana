@@ -30,11 +30,7 @@ describe('GetStarted Component', () => {
 
     expect(screen.getByText(/get started with asset inventory/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /enable asset inventory/i })).toBeInTheDocument();
-
-    expect(screen.getByText(/read documentation/i).closest('a')).toHaveAttribute(
-      'href',
-      'https://ela.st/asset-inventory'
-    );
+    expect(screen.getByText(/need help?/i)).toBeInTheDocument();
   });
 
   it('calls enableAssetInventory when enable asset inventory button is clicked', async () => {
@@ -58,7 +54,8 @@ describe('GetStarted Component', () => {
   });
 
   it('displays an error message when there is an error', () => {
-    const errorMessage = 'Task Manager is not available';
+    const errorMessage =
+      'Something went wrong while setting things up. You can try again or go back to Get Started with Inventory.';
     (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       error: errorMessage,
@@ -66,11 +63,11 @@ describe('GetStarted Component', () => {
 
     renderWithTestProvider(<GetStarted />);
 
-    expect(screen.getByText(/sorry, there was an error/i)).toBeInTheDocument();
+    expect(screen.getByText(/Unable to show your Inventory/i)).toBeInTheDocument();
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
   });
 
-  it('calls reset when error message is dismissed', async () => {
+  it('calls reset when Back to Get Started with Inventory empty button is clicked', async () => {
     (useEnableAssetInventory as jest.Mock).mockReturnValue({
       ...mockGetStarted,
       error: 'Task Manager is not available',
@@ -78,7 +75,9 @@ describe('GetStarted Component', () => {
 
     renderWithTestProvider(<GetStarted />);
 
-    await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /Back to Get Started with Inventory/i })
+    );
 
     await waitFor(() => expect(mockGetStarted.reset).toHaveBeenCalled());
   });

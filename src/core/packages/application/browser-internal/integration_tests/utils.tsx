@@ -8,26 +8,23 @@
  */
 
 import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { render, act } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters } from '@kbn/core-application-browser';
 
 import { MockedMounterTuple, Mountable } from '../src/test_helpers/test_types';
 
-type Dom = ReturnType<typeof mount> | null;
+type Dom = ReturnType<typeof render> | null;
 type Renderer = () => Dom | Promise<Dom>;
 
 export const createRenderer = (element: ReactElement | null): Renderer => {
-  const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
+  const dom: Dom = element && render(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
     new Promise(async (resolve, reject) => {
       try {
         if (dom) {
-          await act(async () => {
-            dom.update();
-          });
+          await act(async () => {}); // just acts, nothing else.
         }
 
         setImmediate(() => resolve(dom)); // flushes any pending promises

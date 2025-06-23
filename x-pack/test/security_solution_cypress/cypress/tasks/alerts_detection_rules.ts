@@ -516,13 +516,21 @@ export const disableAutoRefresh = () => {
   expectAutoRefreshIsDisabled();
 };
 
+export const enableAutoRefresh = () => {
+  openRefreshSettingsPopover();
+  cy.get(REFRESH_SETTINGS_SWITCH).click();
+  expectAutoRefreshIsEnabled();
+};
+
 export const mockGlobalClock = () => {
   /**
    * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
    * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
    * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+   *
+   * Warning: timers need to be mocked after the first page load,
+   * otherwise plugin deep links won't be registered properly since they use rxjs debounceTime.
    */
-
   cy.clock(Date.now(), ['setInterval', 'clearInterval', 'Date']);
 };
 

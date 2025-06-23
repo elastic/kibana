@@ -127,16 +127,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins/])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
-    }
-
-    if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/observability\/plugins/,
         /^package.json/,
@@ -145,6 +135,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
     if (
@@ -463,16 +457,35 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/private\/kbn-scout-info/,
         /^src\/platform\/packages\/private\/kbn-scout-reporting/,
         /^x-pack\/platform\/plugins\/shared\/maps/,
+        /^x-pack\/platform\/plugins\/shared\/streams_app/,
         /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
         /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+    }
+
+    if (GITHUB_PR_LABELS.includes('ci:security-genai-run-evals')) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml')
+      );
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

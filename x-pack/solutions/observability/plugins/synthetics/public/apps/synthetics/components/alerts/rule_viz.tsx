@@ -15,12 +15,14 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { PayloadAction } from '@reduxjs/toolkit';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { selectInspectRule } from '../../state/alert_rules/selectors';
@@ -30,12 +32,14 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
   const { data, loading } = useSelector(selectInspectRule);
   const dispatch = useDispatch();
   const {
-    services: { inspector },
+    services: { inspector, uiSettings },
   } = useKibana<ClientPluginsStart>();
 
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const { inspectorAdapters, addInspectorRequest } = useInspectorContext();
+
+  const isInspectorEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const inspect = () => {
     inspector.open(inspectorAdapters);
@@ -50,6 +54,20 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
     inspectorAdapters?.requests?.reset();
     dispatch(dispatchedAction);
   }, [dispatchedAction, dispatch, inspectorAdapters?.requests]);
+
+  const detailsButton = (
+    <EuiButtonEmpty
+      data-test-subj="syntheticsRuleVizInspectButton"
+      onClick={inspect}
+      iconType="inspect"
+      size="xs"
+      disabled={!isInspectorEnabled}
+    >
+      {i18n.translate('xpack.synthetics.rules.details', {
+        defaultMessage: 'Details',
+      })}
+    </EuiButtonEmpty>
+  );
 
   return (
     <EuiCallOut iconType="search" size="s">
@@ -99,18 +117,17 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
         {/* to push detail button to end*/}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="syntheticsRuleVizInspectButton"
-            onClick={inspect}
-            iconType="inspect"
-            size="xs"
-          >
-            {i18n.translate('xpack.synthetics.rules.details', {
-              defaultMessage: 'Details',
-            })}
-          </EuiButtonEmpty>
+          {isInspectorEnabled ? (
+            detailsButton
+          ) : (
+            <EuiToolTip content={inspectorDisabledTooltip}>{detailsButton}</EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>
   );
 };
+
+const inspectorDisabledTooltip = i18n.translate('xpack.synthetics.rules.inspectorDisabled', {
+  defaultMessage: 'Enable "Inspect ES queries" in Advanced Settings to see Details',
+});

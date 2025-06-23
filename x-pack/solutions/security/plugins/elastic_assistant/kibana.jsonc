@@ -11,10 +11,17 @@
     "id": "elasticAssistant",
     "browser": false,
     "server": true,
+    "configPath": [
+      "xpack",
+      "elasticAssistant"
+    ],
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
+      "eventLog",
       "ml",
+      "ruleRegistry",
       "taskManager",
       "licensing",
       "llmTasks",
@@ -22,6 +29,13 @@
       "productDocBase",
       "spaces",
       "security"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Only include the encoded versions in the build due to https://github.com/elastic/kibana/issues/202114
+      "**/knowledge_base/security_labs/*.md",
+      "!**/knowledge_base/security_labs/*.encoded.md"
     ]
   }
 }

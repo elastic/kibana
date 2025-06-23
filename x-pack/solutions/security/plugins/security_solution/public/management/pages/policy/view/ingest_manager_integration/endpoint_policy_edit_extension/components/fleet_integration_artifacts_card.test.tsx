@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import * as reactTestingLibrary from '@testing-library/react';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
@@ -37,24 +37,22 @@ describe('Fleet integration policy endpoint security event filters card', () => 
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
     render = async (externalPrivileges = true) => {
-      await act(async () => {
-        renderResult = mockedContext.render(
-          <FleetIntegrationArtifactsCard
-            policyId={policy.id}
-            artifactApiClientInstance={EventFiltersApiClient.getInstance(
-              mockedContext.coreStart.http
-            )}
-            searchableFields={SEARCHABLE_FIELDS}
-            getArtifactsPath={getPolicyEventFiltersPath}
-            labels={EVENT_FILTERS_LABELS}
-            privileges={externalPrivileges}
-            data-test-subj="artifacts"
-          />
-        );
-        await waitFor(() =>
-          expect(mockedApi.responseProvider.eventFiltersGetSummary).toHaveBeenCalled()
-        );
-      });
+      renderResult = mockedContext.render(
+        <FleetIntegrationArtifactsCard
+          policyId={policy.id}
+          artifactApiClientInstance={EventFiltersApiClient.getInstance(
+            mockedContext.coreStart.http
+          )}
+          searchableFields={SEARCHABLE_FIELDS}
+          getArtifactsPath={getPolicyEventFiltersPath}
+          labels={EVENT_FILTERS_LABELS}
+          privileges={externalPrivileges}
+          data-test-subj="artifacts"
+        />
+      );
+      await waitFor(() =>
+        expect(mockedApi.responseProvider.eventFiltersGetSummary).toHaveBeenCalled()
+      );
       return renderResult;
     };
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React, { FC } from 'react';
 
 export interface TooltipData {
@@ -17,12 +18,31 @@ export interface TooltipData {
 export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
   return label && value ? (
     <tr>
-      <td className="detailedTooltip__label">
-        <div className="detailedTooltip__labelContainer">{label}</div>
+      <td
+        css={({ euiTheme }) => css`
+          font-weight: ${euiTheme.font.weight.medium};
+        `}
+      >
+        <div
+          css={({ euiTheme }) =>
+            css`
+              max-width: calc(${euiTheme.size.xl} * 5);
+              overflow-wrap: break-word;
+            `
+          }
+        >
+          {label}
+        </div>
       </td>
 
-      <td className="detailedTooltip__value">
-        <div className="detailedTooltip__valueContainer">{value}</div>
+      <td>
+        <div
+          css={css`
+            overflow-wrap: break-word;
+          `}
+        >
+          {value}
+        </div>
       </td>
     </tr>
   ) : null;

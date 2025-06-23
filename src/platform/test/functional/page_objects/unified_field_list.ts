@@ -25,7 +25,7 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async clearFieldSearchInput() {
     const fieldSearch = await this.testSubjects.find('fieldListFiltersFieldSearch');
-    await fieldSearch.clearValue();
+    await fieldSearch.clearValueWithKeyboard();
   }
 
   public async getAllFieldNames() {

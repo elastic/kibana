@@ -150,7 +150,7 @@ You can specify a specific callback for each command, instead of the generic
 - `visitLimitCommand` &mdash; Called for every `LIMIT` command node.
 - `visitExplainCommand` &mdash; Called for every `EXPLAIN` command node.
 - `visitRowCommand` &mdash; Called for every `ROW` command node.
-- `visitMetricsCommand` &mdash; Called for every `METRICS` command node.
+- `visitTimeseriesCommand` &mdash; Called for every `TS` command node.
 - `visitShowCommand` &mdash; Called for every `SHOW` command node.
 - `visitMetaCommand` &mdash; Called for every `META` command node.
 - `visitEvalCommand` &mdash; Called for every `EVAL` command node.
@@ -184,8 +184,6 @@ of the generic `visitExpression`:
   literal expression node, say `1h`, `1d`, `1w`.
 - `visitInlineCastExpression` &mdash; Called for every inline cast expression
   node, say `abc::int`, `def::string`.
-- `visitRenameExpression` &mdash; Called for every rename expression node, say
-  `a AS b`.
 - `visitOrderExpression` &mdash; Called for every order expression node, say
   `@timestamp ASC`.
 

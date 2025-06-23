@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { LazyErrorComponent } from '@kbn/expression-error-plugin/public';
+import { LazyErrorComponent } from '../../../../canvas_plugin_src/renderers/error';
 import { Datatable } from '../../datatable';
 
 const Error = withSuspense(LazyErrorComponent);

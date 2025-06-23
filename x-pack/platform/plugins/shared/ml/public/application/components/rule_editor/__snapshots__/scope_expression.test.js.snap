@@ -2,10 +2,10 @@
 
 exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
 <EuiFlexGroup
+  alignItems="center"
   gutterSize="m"
 >
   <EuiFlexItem
-    className="scope-field-checkbox"
     grow={false}
   >
     <EuiCheckbox
@@ -18,7 +18,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
     grow={false}
   >
     <EuiExpression
-      className="scope-field-button"
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -35,10 +35,10 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
 
 exports[`ScopeExpression renders when enabled set to false 1`] = `
 <EuiFlexGroup
+  alignItems="center"
   gutterSize="m"
 >
   <EuiFlexItem
-    className="scope-field-checkbox"
     grow={false}
   >
     <EuiCheckbox
@@ -51,7 +51,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     grow={false}
   >
     <EuiExpression
-      className="scope-field-button"
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -176,10 +176,10 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
 
 exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
 <EuiFlexGroup
+  alignItems="center"
   gutterSize="m"
 >
   <EuiFlexItem
-    className="scope-field-checkbox"
     grow={false}
   >
     <EuiCheckbox
@@ -192,7 +192,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     grow={false}
   >
     <EuiExpression
-      className="scope-field-button"
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"
@@ -317,10 +317,10 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
 
 exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
 <EuiFlexGroup
+  alignItems="center"
   gutterSize="m"
 >
   <EuiFlexItem
-    className="scope-field-checkbox"
     grow={false}
   >
     <EuiCheckbox
@@ -333,7 +333,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     grow={false}
   >
     <EuiExpression
-      className="scope-field-button"
+      css="unknown styles"
       description={
         <Memo(MemoizedFormattedMessage)
           defaultMessage="when"

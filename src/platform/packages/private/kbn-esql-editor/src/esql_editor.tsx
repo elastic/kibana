@@ -19,20 +19,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { isEqual } from 'lodash';
+import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import useObservable from 'react-use/lib/useObservable';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { type ESQLFieldWithMetadata } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
@@ -46,6 +49,7 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
+  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -102,6 +106,8 @@ export const ESQLEditor = memo(function ESQLEditor({
   disableAutoFocus,
   controlsContext,
   esqlVariables,
+  expandToFitQueryOnMount,
+  dataErrorsControl,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -123,9 +129,16 @@ export const ESQLEditor = memo(function ESQLEditor({
     data,
   } = kibana.services;
 
+  const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
+
+  const fixedQuery = useMemo(
+    () => fixESQLQueryWithVariables(query.esql, esqlVariables),
+    [esqlVariables, query.esql]
+  );
+
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(query.esql ?? '');
+  const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -147,6 +160,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -212,11 +226,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== query.esql) {
-        setCode(query.esql);
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
       }
     }
-  }, [code, query.esql]);
+  }, [code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -285,7 +299,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
@@ -298,7 +312,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FIELDS,
       position,
       uiActions,
@@ -311,7 +325,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.VALUES,
       position,
       uiActions,
@@ -324,7 +338,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FUNCTIONS,
       position,
       uiActions,
@@ -429,7 +443,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart, boolean]) => ({
       timestamp: Date.now(),
       result: getESQLSources(...args),
     }));
@@ -440,8 +454,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, query.esql);
-        const sources = await memoizedSources(dataViews, core).result;
+        clearCacheWhenOld(dataSourcesCache, fixedQuery);
+        const ccrFeature = license?.getFeature('ccr');
+        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
+        const sources = await memoizedSources(dataViews, core, areRemoteIndicesAvailable).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -462,11 +478,12 @@ export const ESQLEditor = memo(function ESQLEditor({
               undefined,
               variablesService?.esqlVariables
             ).result;
-            const columns: ESQLRealField[] =
+            const columns: ESQLFieldWithMetadata[] =
               table?.columns.map((c) => {
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
                 };
               }) || [];
 
@@ -499,13 +516,30 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
+      getEditorExtensions: async (queryString: string) => {
+        if (activeSolutionId) {
+          return (
+            (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
+              queryString,
+              activeSolutionId
+            )) ?? { recommendedQueries: [], recommendedFields: [] }
+          );
+        }
+        return {
+          recommendedQueries: [],
+          recommendedFields: [],
+        };
+      },
+      getInferenceEndpoints: kibana.services?.esql?.getInferenceEndpointsAutocomplete,
     };
     return callbacks;
   }, [
     fieldsMetadata,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    kibana.services?.esql,
     dataSourcesCache,
-    query.esql,
+    fixedQuery,
+    license,
     memoizedSources,
     dataViews,
     core,
@@ -514,10 +548,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     memoizedFieldsFromESQL,
     expressions,
     abortController,
-    indexManagementApiService,
-    histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    indexManagementApiService,
+    histogramBarTarget,
+    activeSolutionId,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -579,6 +614,20 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
+  useEffect(() => {
+    async function fetchLicense() {
+      try {
+        const ls = await kibana.services?.esql?.getLicense();
+        if (!isEqual(license, ls)) {
+          setLicense(ls);
+        }
+      } catch (error) {
+        // failed to fetch
+      }
+    }
+    fetchLicense();
+  }, [kibana.services?.esql, license]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
@@ -587,7 +636,11 @@ export const ESQLEditor = memo(function ESQLEditor({
       const markers = [];
 
       if (parserErrors.length) {
-        markers.push(...parserErrors);
+        if (dataErrorsControl?.enabled === false) {
+          markers.push(...filterDataErrors(parserErrors));
+        } else {
+          markers.push(...parserErrors);
+        }
       }
       if (active) {
         setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
@@ -595,7 +648,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         return;
       }
     },
-    [parseMessages]
+    [parseMessages, dataErrorsControl?.enabled]
   );
 
   useDebounceWithOptions(
@@ -622,7 +675,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code]
+    [serverErrors, serverWarning, code, queryValidation]
   );
 
   const suggestionProvider = useMemo(
@@ -674,8 +727,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       hover: {
         above: false,
       },
-      accessibilitySupport: 'off',
-      autoIndent: 'none',
+      accessibilitySupport: 'auto',
+      autoIndent: 'keep',
       automaticLayout: true,
       fixedOverflowWidgets: true,
       folding: false,
@@ -707,6 +760,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         verticalScrollbarSize: 6,
       },
       scrollBeyondLastLine: false,
+      tabSize: 2,
       theme: ESQL_LANG_ID,
       wordWrap: 'on',
       wrappingIndent: 'none',
@@ -748,7 +802,15 @@ export const ESQLEditor = memo(function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
+      <EuiFlexGroup
+        gutterSize="none"
+        css={{
+          zIndex: theme.euiTheme.levels.flyout,
+          position: 'relative',
+        }}
+        responsive={false}
+        ref={containerRef}
+      >
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             setIsCodeEditorExpandedFocused(false);
@@ -814,8 +876,14 @@ export const ESQLEditor = memo(function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
-
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    if (expandToFitQueryOnMount) {
+                      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+                      const lineCount = editor.getModel()?.getLineCount() || 1;
+                      const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
+                      const height = editor.getTopForLineNumber(lineCount + 1) + padding;
+                      if (height > editorHeight) setEditorHeight(height);
+                    }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });
@@ -881,6 +949,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
+        dataErrorsControl={dataErrorsControl}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

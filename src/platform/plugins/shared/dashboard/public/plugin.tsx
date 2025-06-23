@@ -61,14 +61,14 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './plugin_constants';
+} from '../common/constants';
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,
@@ -77,7 +77,6 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-import type { ConfigSchema } from '../server/config';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -134,7 +133,7 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
@@ -230,8 +229,11 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        await untilPluginStartServicesReady();
-        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        const [{ mountApp }] = await Promise.all([
+          import('./dashboard_app/dashboard_router'),
+          import('./dashboard_renderer/dashboard_module'),
+          untilPluginStartServicesReady(),
+        ]);
         appMounted();
 
         const [coreStart] = await core.getStartServices();
@@ -309,13 +311,7 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => {
-      registerActions({
-        plugins,
-        allowByValueEmbeddables:
-          this.initializerContext.config.get<ConfigSchema>()?.allowByValueEmbeddables ?? true,
-      });
-    });
+    untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {
       registerDashboardPanelPlacementSetting,

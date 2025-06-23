@@ -178,10 +178,14 @@
             "description": [],
             "signature": [
               "{ root: ",
-              "EuiThemeShape",
-              "; model: ",
-              "EuiThemeShape",
-              "; key: string; }"
+              "EuiThemeShapeBase",
+              " & { overrides?: ",
+              "_EuiThemeOverrides",
+              " | undefined; }; model: ",
+              "EuiThemeShapeBase",
+              " & { overrides?: ",
+              "_EuiThemeOverrides",
+              " | undefined; }; key: string; }"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/common/theme.ts",
             "deprecated": false,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,12 +24,15 @@ import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 export const SetupTechnologySelector = ({
   disabled,
-  setupTechnology,
+  isAgentless,
   onSetupTechnologyChange,
+  showLimitationsMessage = true,
 }: {
   disabled: boolean;
   setupTechnology: SetupTechnology;
+  isAgentless: boolean;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
+  showLimitationsMessage?: boolean;
 }) => {
   const radioGroupItemId1 = useGeneratedHtmlId({
     prefix: 'radioGroupItem',
@@ -88,8 +91,12 @@ export const SetupTechnologySelector = ({
   ];
 
   const [radioIdSelected, setRadioIdSelected] = useState(
-    SetupTechnology.AGENTLESS === setupTechnology ? radioGroupItemId1 : radioGroupItemId2
+    isAgentless ? radioGroupItemId1 : radioGroupItemId2
   );
+
+  useEffect(() => {
+    setRadioIdSelected(isAgentless ? radioGroupItemId1 : radioGroupItemId2);
+  }, [isAgentless, radioGroupItemId1, radioGroupItemId2, setRadioIdSelected]);
 
   const onChange = (optionId: string) => {
     setRadioIdSelected(optionId);
@@ -127,7 +134,9 @@ export const SetupTechnologySelector = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      {showLimitationsMessage && (
+        <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      )}
       <EuiSpacer size="m" />
       <EuiRadioGroup
         disabled={disabled}

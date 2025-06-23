@@ -105,7 +105,7 @@ export const getDebugBody = ({
   const operationLine = `${operationName}\n`;
 
   if (requestType === 'search') {
-    return `${operationLine}GET ${params.index}/_search\n${formatObj(params.body)}`;
+    return `${operationLine}GET ${params.index}/_search\n${formatObj(params)}`;
   }
 
   return `${chalk.bold('ES operation:')} ${requestType}\n${chalk.bold(

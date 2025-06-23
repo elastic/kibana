@@ -79,6 +79,7 @@ export const getPreloadedState = ({
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
+  visualizationType,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
@@ -118,25 +119,25 @@ export const getPreloadedState = ({
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
+    query,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId() || '',
+    searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      embeddableEditorIncomingState?.originatingApp ||
-        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+      embeddableEditorIncomingState?.originatingApp ??
+        (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
       state: null,
-      activeId: Object.keys(visualizationMap)[0] || null,
+      activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
     },
   };
   return state;
@@ -896,14 +897,19 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
         }
 
+        const datasourceByLayerId = new Map<string, string>(
+          Object.entries(datasourceMap).flatMap(([datasourceId, datasource]) => {
+            if (!state.datasourceStates[datasourceId]) {
+              return [];
+            }
+            return datasource
+              .getLayers(state.datasourceStates[datasourceId].state)
+              .map((layerId) => [layerId, datasourceId]);
+          }) ?? []
+        );
+
         layerIds.forEach((layerId) => {
-          const [layerDatasourceId] =
-            Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
-              return (
-                state.datasourceStates[datasourceId] &&
-                datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-              );
-            }) ?? [];
+          const layerDatasourceId = datasourceByLayerId.get(layerId);
           if (layerDatasourceId) {
             const { newState } = datasourceMap[layerDatasourceId].removeLayer(
               current(state).datasourceStates[layerDatasourceId].state,

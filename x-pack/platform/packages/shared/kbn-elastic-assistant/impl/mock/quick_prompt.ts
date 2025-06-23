@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PromptResponse,
-  PromptTypeEnum,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 
 export const MOCK_QUICK_PROMPTS: PromptResponse[] = [
   {

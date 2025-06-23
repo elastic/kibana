@@ -4,22 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 
 export function PreviewTable({
   documents,
   displayColumns,
+  height,
+  renderCellValue,
+  rowHeightsOptions,
+  toolbarVisibility = false,
+  setVisibleColumns,
+  columnOrderHint = [],
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
+  height?: EuiDataGridProps['height'];
+  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  rowHeightsOptions?: EuiDataGridRowHeightsOptions;
+  toolbarVisibility?: boolean;
+  setVisibleColumns?: (visibleColumns: string[]) => void;
+  columnOrderHint?: string[];
 }) {
-  const columns = useMemo(() => {
-    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
-
+  // Determine canonical column order
+  const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
       if (!doc || typeof doc !== 'object') {
@@ -29,16 +39,54 @@ export function PreviewTable({
         cols.add(key);
       });
     });
-    return Array.from(cols);
-  }, [displayColumns, documents]);
+    let allColumns = Array.from(cols);
 
+    // Sort columns by displayColumns or alphabetically as baseline
+    allColumns = allColumns.sort((a, b) => {
+      const indexA = (displayColumns || []).indexOf(a);
+      const indexB = (displayColumns || []).indexOf(b);
+      if (indexA === -1 && indexB === -1) {
+        return a.localeCompare(b);
+      }
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
+    // Sort columns based on the columnOrderHint if provided
+    if (columnOrderHint.length > 0) {
+      const orderedCols = columnOrderHint.filter((col) => allColumns.includes(col));
+      const unorderedCols = allColumns.filter((col) => !orderedCols.includes(col));
+      allColumns = [...orderedCols, ...unorderedCols];
+    }
+    // Always show the displayColumns first, but preserve the order from allColumns
+    if (displayColumns) {
+      const displaySet = new Set(displayColumns);
+      allColumns = [
+        ...allColumns.filter((col) => displaySet.has(col)),
+        ...allColumns.filter((col) => !displaySet.has(col)),
+      ];
+    }
+    return allColumns;
+  }, [columnOrderHint, displayColumns, documents]);
+
+  // Derive visibleColumns from canonical order
+  const visibleColumns = useMemo(() => {
+    if (displayColumns) {
+      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
+    }
+    return canonicalColumnOrder;
+  }, [canonicalColumnOrder, displayColumns]);
+
+  // Derive gridColumns from canonical order
   const gridColumns = useMemo(() => {
-    return columns.map((column) => ({
+    return canonicalColumnOrder.map((column) => ({
       id: column,
       displayAsText: column,
-      initialWidth: columns.length > 10 ? 250 : undefined,
+      actions: false as false,
+      initialWidth: visibleColumns.length > 10 ? 250 : undefined,
     }));
-  }, [columns]);
+  }, [canonicalColumnOrder, visibleColumns.length]);
 
   return (
     <EuiDataGrid
@@ -47,17 +95,27 @@ export function PreviewTable({
       })}
       columns={gridColumns}
       columnVisibility={{
-        visibleColumns: columns,
-        setVisibleColumns: () => {},
+        visibleColumns,
+        setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
-      toolbarVisibility={false}
+      height={height}
+      toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
+      rowHeightsOptions={rowHeightsOptions}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
           return '';
         }
+
+        if (renderCellValue) {
+          const renderedValue = renderCellValue(doc, columnId);
+          if (renderedValue !== undefined) {
+            return renderedValue;
+          }
+        }
+
         const value = (doc as SampleDocument)[columnId];
         if (value === undefined || value === null) {
           return '';

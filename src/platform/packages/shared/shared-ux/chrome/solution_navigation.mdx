@@ -264,68 +264,12 @@ The `ItemDefinition` interface represents a top level item in the side navigatio
 ### Panels
 
 As seen in the API above, the `renderAs` property can be used to render a group as a panel opener. This is useful when you want to display a group of links in the side navigation and display its content in a panel on the right of the side navigation.
-The content of the panel can be auto-generaged (based on the group's children) or manually provided.
+The content of the panel is auto-generated based on the group's children.
 
-#### Auto-generated panels
+#### Secondary nav panel
 
-When the panel content is auto-generated, the group's children will be rendered in the panel. Those `children` can be items or other groups (that render as `'block' (default) or `'accordion'`). 
+A group's children can be rendered in the secondary nav panel. Those `children` can be items or other groups (that render as `'block' (default) or `'accordion'`). 
 The panel will be opened when the user clicks on the group's icon button. The panel will be closed when the user clicks on the group's icon again or when the user clicks outside of the panel.
-
-#### Manually provided panels
-
-When the panel content is manually provided, the group's `children` are used for the navigation tree definition (and the breadcrumbs) but the actual UI content rendered inside the panel is provided through JSX.
-
-```tsx
-// 1. Define the PanelContentProvider
-// -----------------------------------
-const panelContentProvider: PanelContentProvider = (id: string) => {
-  // The full ID of the node icon button that was clicked is provided (e.g. "root.group1.itemA")
-  // You can use this ID to determine which panel content to render
-
-  if (id === 'foo1') {
-    // Return the JSX to render in the panel for this node.
-    return {
-      content: ({
-        /** Handler to close the panel */
-        closePanel,
-        /** ChromeNavigationNode - The node that has been clicked in the main nav */
-        selectedNode,
-        /** ChromeProjectNavigationNode[][] - Active nodes that match the current URL location */
-        activeNodes,
-      }) => {
-        return (
-          <div>
-            <EuiText>This is a custom component to render in the panel.</EuiText>
-            <EuiButton onClick={() => closePanel()}>Close panel</EuiButton>
-          </div>
-        );
-      },
-    };
-  }
-
-  if (id === 'foo2') {
-    // If need be you can only customize the "Title" of the panel and leave the content
-    // to be auto-generated.
-    return {
-      title: <div style={{ backgroundColor: 'yellow', fontWeight: 600 }}>Custom title</div>,
-    };
-  }
-
-  // All other nodes content ids that haven't match will be auto-generated
-};
-
-// 2a. Provide it when initiating the navigation (serverless)
-// ----------------------------------------------------------
-serverless.initNavigation(navigationTree$, { panelContentProvider });
-
-// 2b. Provide it when initiating the navigation (stateful)
-// --------------------------------------------------------
-navigation.addSolutionNavigation({
-  ...
-  navigationTree$,
-  panelContentProvider
-});
-```
 
 ### Important Concepts
 

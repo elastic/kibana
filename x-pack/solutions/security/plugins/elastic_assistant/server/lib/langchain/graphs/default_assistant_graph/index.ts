@@ -26,10 +26,11 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunableFactory } from './agentRunnable';
+import { agentRunnableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
+  assistantContext,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
@@ -58,6 +59,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   telemetryParams,
   traceOptions,
   responseLanguage = 'English',
+  timeout,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
@@ -89,6 +91,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
       convertSystemMessageToHumanContent: false,
+      timeout,
       telemetryMetadata: {
         pluginId: 'security_ai_assistant',
       },
@@ -113,6 +116,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
+    assistantContext,
     anonymizationFields,
     connectorId,
     contentReferencesStore,
@@ -127,6 +131,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     request,
     size,
     telemetry,
+    createLlmInstance,
+    isOssModel,
   };
 
   const tools: StructuredTool[] = (
@@ -157,6 +163,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     )
   ).filter((e) => e != null) as StructuredTool[];
 
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          // this line MUST come before kbTools are added
+          elasticTools: tools.map(({ name }) => name),
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
+
   // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
   if (isEnabledKnowledgeBase) {
     const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
@@ -181,11 +200,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const chatPromptTemplate = formatPrompt({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
-    llmType,
-    isOpenAI,
   });
 
-  const agentRunnable = await agentRunableFactory({
+  const agentRunnable = await agentRunnableFactory({
     llm: createLlmInstance(),
     isOpenAI,
     llmType,
@@ -193,19 +210,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     isStream,
     prompt: chatPromptTemplate,
   });
-
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-  const telemetryTracer = telemetryParams
-    ? new TelemetryTracer(
-        {
-          elasticTools: tools.map(({ name }) => name),
-          totalTools: tools.length,
-          telemetry,
-          telemetryParams,
-        },
-        logger
-      )
-    : undefined;
 
   const { provider } =
     !llmType || llmType === 'inference'
@@ -236,6 +240,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         screenContextTimezone: screenContext?.timeZone,
         uiSettingsDateFormatTimezone,
       }),
+    telemetry,
+    telemetryParams,
+    contentReferencesStore,
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -253,9 +260,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       apmTracer,
       assistantGraph,
       inputs,
+      isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
       logger,
       onLlmResponse,
       request,
+      telemetry,
       telemetryTracer,
       traceOptions,
     });
@@ -270,16 +279,21 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
-  const contentReferences = pruneContentReferences(graphResponse.output, contentReferencesStore);
+  const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
+    graphResponse.output,
+    contentReferencesStore
+  );
 
   const metadata: MessageMetadata = {
-    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
+    ...(!isEmpty(prunedContentReferencesStore)
+      ? { contentReferences: prunedContentReferencesStore }
+      : {}),
   };
 
   return {
     body: {
       connector_id: connectorId,
-      data: graphResponse.output,
+      data: prunedContent,
       trace_data: graphResponse.traceData,
       replacements,
       status: 'ok',

@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 
 import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
@@ -18,7 +18,7 @@ import * as d3Transition from 'd3-transition';
 import { getSnappedWindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
-import './dual_brush.scss';
+import { css } from '@emotion/react';
 
 const { brush, brushSelection, brushX } = d3Brush;
 const { scaleLinear } = d3Scale;
@@ -113,6 +113,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
     width,
     nonInteractive,
   } = props;
+  const { euiTheme } = useEuiTheme();
   const d3BrushContainer = useRef(null);
   const brushes = useRef<DualBrush[]>([]);
 
@@ -129,6 +130,20 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
   const snapTimestampsRef = useRef(snapTimestamps);
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } = windowParameters;
+
+  const cssOverrides = useMemo(
+    () =>
+      css({
+        '.handle': {
+          fill: euiTheme.colors.vis.euiColorVisGrey2,
+        },
+        '.brush .selection': {
+          stroke: 'none',
+          fill: euiTheme.colors.vis.euiColorVisGrey2,
+        },
+      }),
+    [euiTheme.colors.vis.euiColorVisGrey2]
+  );
 
   useEffect(() => {
     if (d3BrushContainer.current && width > 0) {
@@ -380,7 +395,7 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
     <>
       {width > 0 && (
         <svg
-          className="aiops-dual-brush"
+          css={cssOverrides}
           data-test-subj="aiopsDualBrush"
           width={width}
           height={BRUSH_HEIGHT}

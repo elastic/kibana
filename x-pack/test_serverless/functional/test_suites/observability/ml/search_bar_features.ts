@@ -7,26 +7,21 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['header', 'svlCommonPage', 'svlCommonNavigation']);
-
   const allLabels = {
     viewer: [
       { label: 'Machine Learning', expected: true },
       { label: 'Machine Learning / Overview', expected: true },
-      { label: 'Machine Learning / Anomaly Detection', expected: true },
+      { label: 'Machine Learning / Anomaly Detection Jobs', expected: true },
       { label: 'Machine Learning / Anomaly Detection / Anomaly explorer', expected: true },
       { label: 'Machine Learning / Anomaly Detection / Single metric viewer', expected: true },
-      { label: 'Machine Learning / Data Frame Analytics', expected: false },
-      { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: false },
-      { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: false },
-      { label: 'Machine Learning / Model Management', expected: true },
-      { label: 'Machine Learning / Model Management / Trained Models', expected: true },
-      { label: 'Machine Learning / Model Management / Nodes', expected: false },
+      { label: 'Machine Learning / Data Frame Analytics Jobs', expected: true },
+      { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: true },
+      { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: true },
+      { label: 'Machine Learning / Trained Models', expected: true },
       { label: 'Machine Learning / Memory Usage', expected: true },
-      { label: 'Machine Learning / Settings', expected: true },
-      { label: 'Machine Learning / Settings / Calendars', expected: true },
-      { label: 'Machine Learning / Settings / Filter Lists', expected: true },
+      { label: 'Machine Learning / Anomaly Detection Settings', expected: true },
       { label: 'Machine Learning / AIOps', expected: true },
       { label: 'Machine Learning / AIOps / Log Rate Analysis', expected: true },
       { label: 'Machine Learning / AIOps / Log Pattern Analysis', expected: true },
@@ -38,7 +33,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       { label: 'Machine Learning / ES|QL Data Visualizer', expected: true },
       { label: 'Machine Learning / Data Drift', expected: true },
     ],
-    admin: [{ label: 'Alerts and Insights / Machine Learning', expected: true }],
+    admin: [{ label: 'Machine Learning / Memory Usage', expected: true }],
   };
 
   describe('Search bar features', () => {
@@ -58,12 +53,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
               for (const expectedLabel of expectedLabels) {
                 await PageObjects.svlCommonNavigation.search.searchFor(expectedLabel);
-                const [result] = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-                const label = result?.label;
-                expect(label).to.eql(
-                  expectedLabel,
-                  `First result should be ${expectedLabel} (got matching items '${label}')`
-                );
+                const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
+                expect(results.length).to.be.greaterThan(0);
+                expect(results.map((r) => r.label)).to.contain(expectedLabel);
               }
               await PageObjects.svlCommonNavigation.search.hideSearch();
             });
@@ -78,12 +70,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
               for (const notExpectedLabel of notExpectedLabels) {
                 await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel);
-                const [result] = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-                const label = result?.label;
-                expect(label).to.not.eql(
-                  notExpectedLabel,
-                  `First result should not be ${notExpectedLabel} (got matching items '${label}')`
-                );
+                const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
+                expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
               }
               await PageObjects.svlCommonNavigation.search.hideSearch();
             });

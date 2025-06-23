@@ -15,6 +15,13 @@ import { Observable, of } from 'rxjs';
 import { createServerRouteFactory } from './create_server_route_factory';
 import { decodeRequestParams } from './decode_request_params';
 
+const disabledAuthz = {
+  authz: {
+    enabled: false as const,
+    reason: 'This is a test',
+  },
+};
+
 function assertType<TShape = never>(value: TShape) {
   return value;
 }
@@ -27,6 +34,7 @@ createServerRouteFactory<{}, {}>()({
     // @ts-expect-error Argument of type '{}' is not assignable to parameter of type '{ params: any; }'.
     assertType<{ params: any }>(resources);
   },
+  security: disabledAuthz,
 });
 
 // If a params codec is set, its type _should_ be available in the
@@ -41,6 +49,7 @@ createServerRouteFactory<{}, {}>()({
   handler: async (resources) => {
     assertType<{ params: { path: { serviceName: string } } }>(resources);
   },
+  security: disabledAuthz,
 });
 
 createServerRouteFactory<{}, {}>()({
@@ -53,6 +62,7 @@ createServerRouteFactory<{}, {}>()({
   handler: async (resources) => {
     assertType<{ params: { path: { serviceName: string } } }>(resources);
   },
+  security: disabledAuthz,
 });
 
 // Resources should be passed to the request handler.
@@ -67,6 +77,7 @@ createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
     const spaceId = context.getSpaceId();
     assertType<string>(spaceId);
   },
+  security: disabledAuthz,
 });
 
 createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
@@ -80,6 +91,7 @@ createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
     const spaceId = context.getSpaceId();
     assertType<string>(spaceId);
   },
+  security: disabledAuthz,
 });
 
 // Create options are available when registering a route.
@@ -93,6 +105,7 @@ createServerRouteFactory<{}, {}>()({
   handler: async (resources) => {
     assertType<{ params: { path: { serviceName: string } } }>(resources);
   },
+  security: disabledAuthz,
 });
 
 // Public APIs should be versioned
@@ -101,6 +114,7 @@ createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params',
   tags: [],
   handler: async (resources) => {},
+  security: disabledAuthz,
 });
 
 // `access` is respected
@@ -111,6 +125,7 @@ createServerRouteFactory<{}, { tags: string[] }>()({
     access: 'internal',
   },
   handler: async (resources) => {},
+  security: disabledAuthz,
 });
 
 // specifying additional options makes them required
@@ -118,6 +133,7 @@ createServerRouteFactory<{}, { tags: string[] }>()({
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params 2023-10-31',
   handler: async (resources) => {},
+  security: disabledAuthz,
 });
 
 createServerRouteFactory<{}, { tags: string[] }>()({
@@ -126,6 +142,7 @@ createServerRouteFactory<{}, { tags: string[] }>()({
     tags: [],
   },
   handler: async (resources) => {},
+  security: disabledAuthz,
 });
 
 // cannot return observables that are not in the SSE structure
@@ -135,6 +152,7 @@ const route = createServerRouteFactory<{}, {}>()({
   handler: async () => {
     return of({ streamed_response: true });
   },
+  security: disabledAuthz,
 });
 
 const createServerRoute = createServerRouteFactory<{}, {}>();
@@ -147,6 +165,7 @@ const repository = {
         noParamsForMe: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_params',
@@ -160,6 +179,7 @@ const repository = {
         yesParamsForMe: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_optional_params',
@@ -173,6 +193,7 @@ const repository = {
         someParamsForMe: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_params_zod',
@@ -186,6 +207,7 @@ const repository = {
         yesParamsForMe: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_optional_params_zod',
@@ -203,6 +225,7 @@ const repository = {
         someParamsForMe: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_returning_result',
@@ -211,6 +234,7 @@ const repository = {
         result: true,
       };
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_returning_kibana_response',
@@ -221,12 +245,14 @@ const repository = {
         },
       });
     },
+    security: disabledAuthz,
   }),
   ...createServerRoute({
     endpoint: 'POST /internal/endpoint_returning_observable',
     handler: async () => {
       return of({ type: 'foo' as const, streamed_response: true });
     },
+    security: disabledAuthz,
   }),
 };
 

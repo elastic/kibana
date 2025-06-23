@@ -6,16 +6,19 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { MonitorOverviewState } from './models';
+import { MonitorOverviewState, overviewViews } from './models';
 
 import {
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
   setRollupLocations,
+  setOverviewViewAction,
   toggleErrorPopoverOpen,
   trendStatsBatch,
 } from './actions';
+
+export const DEFAULT_OVERVIEW_VIEW = overviewViews[0];
 
 const initialState: MonitorOverviewState = {
   pageState: {
@@ -28,6 +31,7 @@ const initialState: MonitorOverviewState = {
   flyoutConfig: null,
   isErrorPopoverOpen: null,
   rollupLocations: null,
+  view: DEFAULT_OVERVIEW_VIEW,
 };
 
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
@@ -77,6 +81,8 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setRollupLocations, (state, action) => {
       state.rollupLocations = action.payload;
+    .addCase(setOverviewViewAction, (state, action) => {
+      state.view = action.payload;
     });
 });
 

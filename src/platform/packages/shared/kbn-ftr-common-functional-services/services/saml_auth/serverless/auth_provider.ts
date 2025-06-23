@@ -23,6 +23,7 @@ const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
+  ['chat', 'developer'], // TODO: double check if it's really 'developer'
 ]);
 
 const projectTypesWithCustomRolesEnabled = ['es', 'security'];
@@ -60,6 +61,14 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
+  isServerless(): boolean {
+    return true;
+  }
+
+  getProjectType() {
+    return this.projectType;
+  }
+
   getSupportedRoleDescriptors() {
     const roleDescriptors = new Map<string, any>(
       Object.entries(
@@ -83,8 +92,9 @@ export class ServerlessAuthProvider implements AuthProvider {
     );
   }
 
+  // For compatibility with the Scout test framework we use the same name for the custom role
   getCustomRole() {
-    return 'customRole';
+    return 'custom_role_worker_1';
   }
 
   getRolesDefinitionPath(): string {

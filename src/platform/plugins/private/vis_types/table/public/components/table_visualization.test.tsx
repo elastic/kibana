@@ -22,13 +22,13 @@ jest.mock('../utils', () => ({
 }));
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FormattedColumns, TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
-import { TableVisSplit } from './table_vis_split';
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
@@ -82,7 +82,7 @@ describe('TableVisualizationComponent', () => {
   });
 
   it('should render split table and set minWidth for column split', () => {
-    const comp = mount(
+    const { container } = render(
       <TableVisualizationComponent
         core={coreStartMock}
         handlers={handlers}
@@ -127,12 +127,12 @@ describe('TableVisualizationComponent', () => {
         renderComplete={renderComplete}
       />
     );
-    const splits = comp.find(TableVisSplit).find('.tbvChart__split');
+
+    const splits = container.querySelectorAll('.tbvChart__split');
+
     expect(splits.length).toBe(2);
     splits.forEach((split) => {
-      expect((split.prop('css') as { minWidth: string }).minWidth).toEqual(
-        `calc(${77 + 22 + 25}px + 2 * 8px)`
-      );
+      expect(split).toHaveStyleRule('min-width', `calc(${77 + 22 + 25}px + 2 * 8px)`);
     });
   });
 });

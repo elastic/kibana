@@ -14,8 +14,8 @@ import type { TimelineResponse } from '../../../common/api/timeline';
 import {
   type ColumnHeaderResult,
   RowRendererIdEnum,
-  TimelineTypeEnum,
   TimelineStatusEnum,
+  TimelineTypeEnum,
 } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
@@ -1914,7 +1914,6 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
   selectedEventIds: {},
-  sessionViewConfig: null,
   show: false,
   sort: [
     {
@@ -1966,7 +1965,6 @@ export const mockDataTableModel: DataTableModel = {
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
   selectedEventIds: {},
-  sessionViewConfig: null,
   sort: [
     {
       columnId: '@timestamp',
@@ -2089,7 +2087,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedObjectId: null,
     selectAll: false,
     selectedEventIds: {},
-    sessionViewConfig: null,
     show: false,
     sort: [
       {

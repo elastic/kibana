@@ -7,9 +7,11 @@
 
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
-import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
+import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
@@ -32,6 +34,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
   const hasManageGlobalKnowledgeBase =
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
+  const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -44,6 +47,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities.actions?.save === true;
 
   return {
+    hasSearchAILakeConfigurations,
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,

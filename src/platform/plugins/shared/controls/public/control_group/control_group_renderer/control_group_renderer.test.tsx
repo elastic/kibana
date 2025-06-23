@@ -66,7 +66,7 @@ describe('control group renderer', () => {
     expect(buildControlGroupSpy).toBeCalledTimes(1);
     act(() => api.updateInput({ autoApplySelections: false }));
     await waitFor(() => {
-      expect(buildControlGroupSpy).toBeCalledTimes(2);
+      expect(buildControlGroupSpy).toBeCalledTimes(1);
     });
   });
 

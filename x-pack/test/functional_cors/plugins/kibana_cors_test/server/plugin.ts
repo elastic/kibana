@@ -50,8 +50,18 @@ export class CorsTestPlugin implements Plugin {
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    router.post({ path: '/cors-test', validate: false }, (context, req, res) =>
-      res.ok({ body: 'content from kibana' })
+    router.post(
+      {
+        path: '/cors-test',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'content from kibana' })
     );
   }
 

@@ -64,10 +64,12 @@ export function mergeServiceStats({
     function merge(a, b) {
       const aEnvs = 'environments' in a ? a.environments : [];
       const bEnvs = 'environments' in b ? b.environments : [];
-
+      const agentNameA = 'agentName' in a ? a?.agentName : undefined;
+      const agentNameB = 'agentName' in b ? b?.agentName : undefined;
       return {
         ...a,
         ...b,
+        ...{ agentName: agentNameA || agentNameB },
         environments: uniq(aEnvs.concat(bEnvs)),
       };
     }

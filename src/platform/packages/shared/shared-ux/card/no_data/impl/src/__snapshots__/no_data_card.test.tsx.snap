@@ -2,11 +2,11 @@
 
 exports[`NoDataCard props button 1`] = `
 <div
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
   >
     <div
       class="euiCard__main emotion-euiCard__main-vertical"
@@ -85,11 +85,11 @@ exports[`NoDataCard props button 1`] = `
 
 exports[`NoDataCard props extends EuiCardProps 1`] = `
 <div
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard custom_class emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
   >
     <div
       class="euiCard__main emotion-euiCard__main-vertical"
@@ -168,11 +168,11 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
 
 exports[`NoDataCard props href 1`] = `
 <div
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
   >
     <div
       class="euiCard__main emotion-euiCard__main-vertical"
@@ -251,11 +251,11 @@ exports[`NoDataCard props href 1`] = `
 
 exports[`NoDataCard props no access to Fleet 1`] = `
 <div
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-EuiCard"
+    class="euiPanel euiPanel--subdued euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-subdued-euiCard-center-disabled-NoDataCard"
   >
     <div
       class="euiCard__main emotion-euiCard__main-vertical"
@@ -317,11 +317,11 @@ exports[`NoDataCard props no access to Fleet 1`] = `
 
 exports[`NoDataCard renders 1`] = `
 <div
-  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+  class="css-qvyf25-redirectAppLinksStyles"
   data-test-subj="kbnRedirectAppLink"
 >
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard emotion-euiPanel-grow-m-l-plain-hasShadow-isClickable-euiCard-center-NoDataCard"
   >
     <div
       class="euiCard__main emotion-euiCard__main-vertical"

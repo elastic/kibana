@@ -74,6 +74,7 @@ export const checkForInstallationNamingCollision = async (
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }

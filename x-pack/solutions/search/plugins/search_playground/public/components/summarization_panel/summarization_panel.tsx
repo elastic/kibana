@@ -12,18 +12,17 @@ import { EuiPanel } from '@elastic/eui';
 import { useLLMsModels } from '../../hooks/use_llms_models';
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {
-  const { control } = useFormContext<ChatForm>();
+  const { control } = useFormContext<PlaygroundForm>();
   const models = useLLMsModels();
 
   return (
     <EuiPanel data-test-subj="summarizationPanel">
       <Controller
-        name={ChatFormFields.summarizationModel}
-        rules={{ required: true }}
+        name={PlaygroundFormFields.summarizationModel}
         control={control}
         render={({ field }) => (
           <SummarizationModel
@@ -35,15 +34,14 @@ export const SummarizationPanel: React.FC = () => {
       />
 
       <Controller
-        name={ChatFormFields.prompt}
+        name={PlaygroundFormFields.prompt}
         control={control}
-        rules={{ required: true }}
         defaultValue="You are an assistant for question-answering tasks."
         render={({ field }) => <InstructionsField value={field.value} onChange={field.onChange} />}
       />
 
       <Controller
-        name={ChatFormFields.citations}
+        name={PlaygroundFormFields.citations}
         control={control}
         defaultValue={true}
         render={({ field }) => (

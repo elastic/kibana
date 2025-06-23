@@ -42,6 +42,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -181,6 +182,7 @@ Array [
           <EuiToolTip
             content="triggered:1"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -206,6 +208,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -448,6 +451,7 @@ Array [
           <EuiToolTip
             content="triggered:1"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -473,6 +477,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -504,6 +509,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -535,6 +541,7 @@ Array [
           <EuiToolTip
             content="triggered:1"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -560,6 +567,7 @@ Array [
           <EuiToolTip
             content="triggered:0"
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >

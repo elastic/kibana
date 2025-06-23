@@ -28,7 +28,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
         previewDelay={0}
@@ -56,7 +56,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={true}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={false}
       >
@@ -83,7 +83,7 @@ describe('TabPreview', () => {
       <TabPreview
         showPreview={false}
         setShowPreview={setShowPreview}
-        getPreviewData={getPreviewDataMock}
+        previewData={getPreviewDataMock(tabItem)}
         tabItem={tabItem}
         stopPreviewOnHover={true}
       >

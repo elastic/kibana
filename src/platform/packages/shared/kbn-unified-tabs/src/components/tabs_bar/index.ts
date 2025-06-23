@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabsBar, type TabsBarProps } from './tabs_bar';
+export { TabsBar, type TabsBarProps, type TabsBarApi } from './tabs_bar';

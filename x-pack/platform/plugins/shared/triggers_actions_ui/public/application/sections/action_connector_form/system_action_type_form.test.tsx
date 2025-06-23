@@ -26,8 +26,8 @@ jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
   };
 });
 
-jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
-  useRuleTypeAadTemplateFields: () => ({
+jest.mock('../../hooks/use_rule_alert_fields', () => ({
+  useRuleTypeAlertFields: () => ({
     isLoading: false,
     fields: [],
   }),

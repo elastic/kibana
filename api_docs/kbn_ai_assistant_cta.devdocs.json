@@ -13,7 +13,7 @@
           "\nA pure component that renders a call to action to add a connector."
         ],
         "signature": [
-          "({ onAddConnector }: ",
+          "({ onAddConnector, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -32,7 +32,7 @@
             "id": "def-public.AddConnector.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onAddConnector }",
+            "label": "{ onAddConnector, ...props }",
             "description": [],
             "signature": [
               {
@@ -62,7 +62,7 @@
           "\nA \"Call to Action\" panel for use in the AI Assistant.  Comprises a title, description, and children.\n\nThis is a base component that can be used to create more specific calls to action, (e.g. install knowledge base)."
         ],
         "signature": [
-          "({ title, description, color, children, }: ",
+          "({ title, description, color, children, centered, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -81,7 +81,7 @@
             "id": "def-public.AssistantCallToAction.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title = translations.title,\n  description,\n  color = 'plain',\n  children,\n}",
+            "label": "{\n  title = translations.title,\n  description,\n  color = 'plain',\n  children,\n  centered = false,\n  ...props\n}",
             "description": [],
             "signature": [
               {
@@ -111,7 +111,7 @@
           "\nA pure component that renders a call to action to install a knowledge base."
         ],
         "signature": [
-          "({ onInstallKnowledgeBase }: ",
+          "({ onInstallKnowledgeBase, isInstalling, isInstallAvailable, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -130,7 +130,7 @@
             "id": "def-public.InstallKnowledgeBase.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onInstallKnowledgeBase }",
+            "label": "{\n  onInstallKnowledgeBase,\n  isInstalling = false,\n  isInstallAvailable = true,\n  ...props\n}",
             "description": [],
             "signature": [
               {
@@ -160,7 +160,7 @@
           "\nA pure component that renders a call to action to upgrade a license."
         ],
         "signature": [
-          "({ onManageLicense }: ",
+          "({ onManageLicense, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -179,7 +179,7 @@
             "id": "def-public.NeedLicenseUpgrade.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onManageLicense }",
+            "label": "{ onManageLicense, ...props }",
             "description": [],
             "signature": [
               {
@@ -209,7 +209,7 @@
           "\nA pure component that renders a call to action to upgrade the tier on a Serverless project."
         ],
         "signature": [
-          "({ onManageSubscription }: ",
+          "({ onManageSubscription, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -228,7 +228,7 @@
             "id": "def-public.NeedTierUpgrade.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onManageSubscription }",
+            "label": "{ onManageSubscription, ...props }",
             "description": [],
             "signature": [
               {
@@ -258,12 +258,28 @@
           "\nA call to action that is displayed if the user does not have permission or ability to add a connector."
         ],
         "signature": [
-          "() => React.JSX.Element"
+          "(props: NoConnectorAccessProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/no_connector_access/no_connector_access.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-cta",
+            "id": "def-public.NoConnectorAccess.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "NoConnectorAccessProps"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/no_connector_access/no_connector_access.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -277,7 +293,7 @@
           "\nA pure component that renders a call to action that indicates the AI Assistant is configured\nand ready to be used."
         ],
         "signature": [
-          "({ type }: ",
+          "({ type, ...props }: ",
           {
             "pluginId": "@kbn/ai-assistant-cta",
             "scope": "public",
@@ -296,7 +312,7 @@
             "id": "def-public.ReadyToHelp.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ type = 'stack' }",
+            "label": "{ type = 'stack', ...props }",
             "description": [],
             "signature": [
               {
@@ -326,6 +342,24 @@
         "label": "AddConnectorProps",
         "description": [
           "\nProps for the `AddConnector` call to action."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AddConnectorProps",
+            "text": "AddConnectorProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AssistantCallToActionProps",
+            "text": "AssistantCallToActionProps"
+          },
+          ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
         "deprecated": false,
@@ -415,6 +449,22 @@
           },
           {
             "parentPluginId": "@kbn/ai-assistant-cta",
+            "id": "def-public.AssistantCallToActionProps.centered",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "centered",
+            "description": [
+              "\nTrue if the panel is intended to be vertically centered, false otherwise.  If true, the panel will compensate for the\nbeacon height to ensure the title and description are centered."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-cta",
             "id": "def-public.AssistantCallToActionProps.children",
             "type": "CompoundType",
             "tags": [],
@@ -424,6 +474,22 @@
             ],
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-cta",
+            "id": "def-public.AssistantCallToActionProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "['data-test-subj']",
+            "description": [
+              "Optional test subject for the component."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/call_to_action.tsx",
             "deprecated": false,
@@ -439,7 +505,25 @@
         "tags": [],
         "label": "InstallKnowledgeBaseProps",
         "description": [
-          "\nProps for the `InstallKnowledgeBase`."
+          "\nProps for the `InstallKnowledgeBase` call to action."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.InstallKnowledgeBaseProps",
+            "text": "InstallKnowledgeBaseProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AssistantCallToActionProps",
+            "text": "AssistantCallToActionProps"
+          },
+          ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
         "deprecated": false,
@@ -462,6 +546,38 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-cta",
+            "id": "def-public.InstallKnowledgeBaseProps.isInstalling",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInstalling",
+            "description": [
+              "True if the Knowledge Base is currently installing, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant-cta",
+            "id": "def-public.InstallKnowledgeBaseProps.isInstallAvailable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInstallAvailable",
+            "description": [
+              "True if the Knowledge Base can be installed, false otherwise."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -474,6 +590,24 @@
         "label": "NeedLicenseUpgradeProps",
         "description": [
           "\nProps for the `NeedLicenseUpgrade` call to action."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.NeedLicenseUpgradeProps",
+            "text": "NeedLicenseUpgradeProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AssistantCallToActionProps",
+            "text": "AssistantCallToActionProps"
+          },
+          ", \"data-test-subj\" | \"centered\">"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
         "deprecated": false,
@@ -509,6 +643,24 @@
         "description": [
           "\nProps for the `NeedTierUpgrade` call to action."
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.NeedTierUpgradeProps",
+            "text": "NeedTierUpgradeProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AssistantCallToActionProps",
+            "text": "AssistantCallToActionProps"
+          },
+          ", \"data-test-subj\" | \"centered\">"
+        ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -543,6 +695,24 @@
         "description": [
           "\nProps for the `ReadyToHelp`."
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.ReadyToHelpProps",
+            "text": "ReadyToHelpProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/ai-assistant-cta",
+            "scope": "public",
+            "docId": "kibKbnAiAssistantCtaPluginApi",
+            "section": "def-public.AssistantCallToActionProps",
+            "text": "AssistantCallToActionProps"
+          },
+          ", \"data-test-subj\" | \"centered\">"
+        ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/ready_to_help/ready_to_help.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -568,7 +738,76 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-cta",
+        "id": "def-public.DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON",
+        "description": [
+          "Data test subject for the add connector button."
+        ],
+        "signature": [
+          "\"aiCTAAddConnectorButton\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/add_connector/add_connector.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-cta",
+        "id": "def-public.DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON",
+        "description": [
+          "Data test subject for the install knowledge base button."
+        ],
+        "signature": [
+          "\"aiCTAInstallKnowledgeBaseButton\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/install_knowledge_base/install_knowledge_base.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-cta",
+        "id": "def-public.DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON",
+        "description": [
+          "Data test subject for the manage license button."
+        ],
+        "signature": [
+          "\"aiCTAManageLicenseButton\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_license_upgrade/need_license_upgrade.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-cta",
+        "id": "def-public.DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON",
+        "description": [
+          "Data test subject for the manage subscription button."
+        ],
+        "signature": [
+          "\"aiCTAManageSubscriptionButton\""
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta/need_tier_upgrade/need_tier_upgrade.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

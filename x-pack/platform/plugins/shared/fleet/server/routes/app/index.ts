@@ -183,7 +183,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
       .post({
-        path: '/internal/fleet/enable_space_awareness',
+        path: APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
         access: 'internal',
         security: {
           authz: {
@@ -209,6 +209,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       summary: `Check permissions`,
       options: {
         tags: ['oas-tag:Fleet internals'],
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route performs its own authorization checks.`,
+        },
       },
     })
     .addVersion(

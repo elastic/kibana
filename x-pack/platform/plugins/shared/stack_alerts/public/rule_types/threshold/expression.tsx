@@ -15,7 +15,9 @@ import {
   EuiText,
   EuiFieldSearch,
   EuiFormRow,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -32,7 +34,6 @@ import {
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdRuleParams } from './types';
-import './expression.scss';
 import { IndexSelectPopover } from '../components/index_select_popover';
 
 export const DEFAULT_VALUES = {
@@ -97,6 +98,8 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
     filterKuery,
   } = ruleParams;
 
+  const { euiTheme } = useEuiTheme();
+
   const indexArray = indexParamToArray(index);
   const { http } = useKibana<KibanaDeps>().services;
 
@@ -121,6 +124,10 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
       defaultMessage: 'Expression contains errors.',
     }
   );
+
+  const alertVizualizationChartCss = css`
+    height: calc(${euiTheme.size.base} * 14);
+  `;
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', {
@@ -313,7 +320,7 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer />
-      <div className="actAlertVisualization__chart">
+      <div className="actAlertVisualization__chart" css={alertVizualizationChartCss}>
         {cannotShowVisualization ? (
           <Fragment>
             <EuiEmptyPrompt

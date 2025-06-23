@@ -163,12 +163,14 @@ export function parseBucket(
 > {
   return (buckets ?? []).reduce(
     (summary, bucket) => {
-      const status: string = bucket.key;
+      const status: string = `${bucket.key}`;
       const taskTypeBuckets = bucket?.by_task_type?.buckets as AggregationsStringTermsBucketKeys[];
 
       const byTaskType = (taskTypeBuckets ?? []).reduce<Record<string, number>>(
         (acc, taskTypeBucket: AggregationsStringTermsBucketKeys) => {
-          const taskType: string = replaceDotSymbols(taskTypeBucket.key.replace('alerting:', ''));
+          const taskType: string = replaceDotSymbols(
+            `${taskTypeBucket.key}`.replace('alerting:', '')
+          );
           acc[taskType] = taskTypeBucket.doc_count ?? 0;
           return acc;
         },

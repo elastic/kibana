@@ -18,7 +18,6 @@
     "@kbn/observability-utils-common",
     "@kbn/alerting-plugin",
     "@kbn/rule-registry-plugin",
-    "@kbn/inference-plugin",
     "@kbn/logging",
     "@kbn/calculate-auto",
     "@kbn/observability-ai-assistant-plugin",

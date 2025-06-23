@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import React from 'react';
 
 import type { ShareToSpaceFlyoutProps } from '../types';
@@ -13,7 +14,17 @@ export const getShareToSpaceFlyoutComponent = async (): Promise<
   React.FC<ShareToSpaceFlyoutProps>
 > => {
   const { ShareToSpaceFlyoutInternal } = await import('./share_to_space_flyout_internal');
-  return (props: ShareToSpaceFlyoutProps) => {
-    return <ShareToSpaceFlyoutInternal {...props} />;
-  };
+  return React.memo(
+    (props: ShareToSpaceFlyoutProps) => {
+      return <ShareToSpaceFlyoutInternal {...props} />;
+    },
+    (prevProps, nextProps) => {
+      return (
+        prevProps.behaviorContext === nextProps.behaviorContext &&
+        prevProps.savedObjectTarget.id === nextProps.savedObjectTarget.id &&
+        prevProps.savedObjectTarget.type === nextProps.savedObjectTarget.type &&
+        isEqual(prevProps.savedObjectTarget.namespaces, nextProps.savedObjectTarget.namespaces)
+      );
+    }
+  );
 };

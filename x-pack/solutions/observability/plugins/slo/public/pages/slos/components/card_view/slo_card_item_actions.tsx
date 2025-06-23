@@ -16,10 +16,6 @@ interface Props {
   slo: SLOWithSummaryResponse;
   isActionsPopoverOpen: boolean;
   setIsActionsPopoverOpen: (value: boolean) => void;
-  setDeleteConfirmationModalOpen: (value: boolean) => void;
-  setResetConfirmationModalOpen: (value: boolean) => void;
-  setEnableConfirmationModalOpen: (value: boolean) => void;
-  setDisableConfirmationModalOpen: (value: boolean) => void;
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
   setIsEditRuleFlyoutOpen: (value: boolean) => void;
   setDashboardAttachmentReady: (value: boolean) => void;

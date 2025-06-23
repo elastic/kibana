@@ -11,9 +11,7 @@
     "server/**/*.ts",
     "../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
@@ -24,13 +22,20 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-lifecycle-browser",
     "@kbn/response-ops-alerts-table",
+    "@kbn/response-ops-rules-apis",
     "@kbn/data-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/cases-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/rule-data-utils",
-    "@kbn/triggers-actions-ui-types",
-    "@kbn/response-ops-rules-apis",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/i18n-react",
+    "@kbn/alerting-types",
+    "@kbn/react-kibana-mount",
+    "@kbn/es-query",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/utility-types"
   ]
 }

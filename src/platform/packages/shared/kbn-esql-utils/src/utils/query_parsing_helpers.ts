@@ -6,7 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { parse, Walker, walk, BasicPrettyPrinter } from '@kbn/esql-ast';
+import {
+  parse,
+  Walker,
+  walk,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+} from '@kbn/esql-ast';
 
 import type {
   ESQLSource,
@@ -16,7 +23,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { monaco } from '@kbn/monaco';
 
@@ -25,7 +32,7 @@ const DEFAULT_ESQL_LIMIT = 1000;
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
   const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.name).join(',');
@@ -161,7 +168,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
 };
 
 /**
@@ -192,7 +199,7 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
   const lines = queryString.split('\n');
   const lineNumber = cursorPosition?.lineNumber ?? lines.length;
   const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
@@ -210,8 +217,23 @@ const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Positio
   return previousLines + '\n' + currentLine;
 };
 
+const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
+  if (typeof queryString !== 'string' || queryString.length === 0) {
+    return false;
+  }
+
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  return lastChar === '?' || secondLastChar === '?';
+};
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryInCursorPosition)) {
+    return undefined;
+  }
 
   const validQuery = `${queryInCursorPosition} ""`;
   const { root } = parse(validQuery);
@@ -224,7 +246,119 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
 
   const column = Walker.match(lastCommand, { type: 'column' });
 
-  if (column) {
+  if (column && column.name && column.name !== '*') {
     return `${column.name}`;
   }
+};
+
+// this is for backward compatibility, if the query is of fields or functions type
+// and the query is not set with ?? in the query, we should set it
+// https://github.com/elastic/elasticsearch/pull/122459
+export const fixESQLQueryWithVariables = (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => {
+  const currentVariables = getESQLQueryVariables(queryString);
+  if (!currentVariables.length) {
+    return queryString;
+  }
+
+  // filter out the variables that are not used in the query
+  // and that they are not of type FIELDS or FUNCTIONS
+  const identifierTypeVariables = esqlVariables?.filter(
+    (variable) =>
+      currentVariables.includes(variable.key) &&
+      (variable.type === ESQLVariableType.FIELDS || variable.type === ESQLVariableType.FUNCTIONS)
+  );
+
+  // check if they are set with ?? or ? in the query
+  // replace only if there is only one ? in front of the variable
+  if (identifierTypeVariables?.length) {
+    identifierTypeVariables.forEach((variable) => {
+      const regex = new RegExp(`(?<!\\?)\\?${variable.key}`);
+      queryString = queryString.replace(regex, `??${variable.key}`);
+    });
+    return queryString;
+  }
+
+  return queryString;
+};
+
+export const getCategorizeColumns = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const statsCommand = root.commands.find(({ name }) => name === 'stats');
+  if (!statsCommand) {
+    return [];
+  }
+  const options: ESQLCommandOption[] = [];
+  const columns: string[] = [];
+
+  walk(statsCommand, {
+    visitCommandOption: (node) => options.push(node),
+  });
+
+  const statsByOptions = options.find(({ name }) => name === 'by');
+
+  // categorize is part of the stats by command
+  if (!statsByOptions) {
+    return [];
+  }
+
+  const categorizeOptions = statsByOptions.args.filter((arg) => {
+    return (arg as ESQLFunction).text.toLowerCase().indexOf('categorize') !== -1;
+  }) as ESQLFunction[];
+
+  if (categorizeOptions.length) {
+    categorizeOptions.forEach((arg) => {
+      // ... STATS ... BY CATEGORIZE(field)
+      if (isFunctionExpression(arg) && arg.name === 'categorize') {
+        columns.push(arg.text);
+      } else {
+        // ... STATS ... BY pattern = CATEGORIZE(field)
+        const columnArgs = arg.args.filter((a) => isColumn(a));
+        columnArgs.forEach((c) => columns.push((c as ESQLColumn).name));
+      }
+    });
+  }
+
+  // If there is a rename command, we need to check if the column is renamed
+  const renameCommand = root.commands.find(({ name }) => name === 'rename');
+  if (!renameCommand) {
+    return columns;
+  }
+  const renameFunctions: ESQLFunction[] = [];
+  walk(renameCommand, {
+    visitFunction: (node) => renameFunctions.push(node),
+  });
+
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
+    if (columns.includes(oldColumn)) {
+      columns[columns.indexOf(oldColumn)] = newColumn;
+    }
+  });
+  return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
 };

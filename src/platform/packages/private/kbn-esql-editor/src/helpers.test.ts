@@ -8,7 +8,14 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { parseErrors, parseWarning, getIndicesList, getRemoteIndicesList } from './helpers';
+import {
+  parseErrors,
+  parseWarning,
+  getIndicesList,
+  getRemoteIndicesList,
+  filterDataErrors,
+  MonacoMessage,
+} from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -313,8 +320,57 @@ describe('helpers', function () {
           },
         ]),
       };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock);
+      const indices = await getRemoteIndicesList(updatedDataViewsMock, true);
       expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
+    });
+
+    it('should not suggest ccs indices if not allowed', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'remote: alias1',
+            item: {
+              indices: ['index1'],
+            },
+          },
+          {
+            name: 'remote:.system1',
+            item: {
+              name: 'system',
+            },
+          },
+          {
+            name: 'remote:logs',
+            item: {
+              name: 'logs',
+              timestamp_field: '@timestamp',
+            },
+          },
+        ]),
+      };
+      const indices = await getRemoteIndicesList(updatedDataViewsMock, false);
+      expect(indices).toStrictEqual([]);
+    });
+  });
+
+  describe('filterDataErrors', function () {
+    it('should return an empty array if no errors are provided', function () {
+      expect(filterDataErrors([])).toEqual([]);
+    });
+
+    it('should filter properly filter data errors', function () {
+      const errors = [
+        { code: 'unknownIndex' },
+        { code: 'unknownColumn' },
+        { code: 'other' },
+        { code: { value: 'unknownIndex' } },
+        { code: { value: 'unknownColumn' } },
+        { code: { value: 'other' } },
+      ] as MonacoMessage[];
+
+      expect(filterDataErrors(errors)).toEqual([{ code: 'other' }, { code: { value: 'other' } }]);
     });
   });
 });

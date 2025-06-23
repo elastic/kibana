@@ -6,7 +6,13 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
+import { ObjectRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import { getAlwaysFiringInternalRule } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/alert_utils';
+import { getEventLog } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import type { Client } from '@elastic/elasticsearch';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   obsOnlySpacesAll,
@@ -27,6 +33,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const secureSearch = getService('secureSearch');
   const kbnClient = getService('kibanaServer');
+  const es = getService('es');
+  const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
@@ -692,6 +701,194 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('observability', () => {
+      const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      it('should omit alerts when score is less than min score', async () => {
+        const query = {
+          bool: {
+            filter: [],
+            should: [
+              {
+                function_score: {
+                  functions: [
+                    {
+                      exp: {
+                        [ALERT_START]: {
+                          origin: '2021-10-19T14:58:08.539Z',
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ],
+                  boost_mode: 'sum',
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+          },
+        };
+        const resultWithoutMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(resultWithoutMinScore.rawResponse.hits.total).to.eql(9);
+
+        validateRuleTypeIds(resultWithoutMinScore, apmRuleTypeIds);
+
+        const resultWithMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            minScore: 11,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        const allScores = resultWithMinScore.rawResponse.hits.hits.map((hit) => {
+          return hit._score;
+        });
+        allScores.forEach((score) => {
+          if (score) {
+            expect(score >= 11).to.be(true);
+          } else {
+            throw new Error('Score is null');
+          }
+        });
+
+        expect(resultWithMinScore.rawResponse.hits.total).to.eql(8);
+
+        validateRuleTypeIds(resultWithMinScore, apmRuleTypeIds);
+      });
+
+      it('should track scores alerts when sorting when trackScores is true', async () => {
+        const query = {
+          bool: {
+            filter: [],
+            should: [
+              {
+                function_score: {
+                  functions: [
+                    {
+                      exp: {
+                        [ALERT_START]: {
+                          origin: '2021-10-19T14:58:08.539Z',
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ],
+                  boost_mode: 'sum',
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+          },
+        };
+        const resultWithoutTrackScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            sort: [
+              {
+                'kibana.alert.start': {
+                  order: 'desc',
+                },
+              },
+            ],
+            minScore: 11,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        resultWithoutTrackScore.rawResponse.hits.hits.forEach((hit) => {
+          expect(hit._score).to.be(null);
+        });
+
+        validateRuleTypeIds(resultWithoutTrackScore, apmRuleTypeIds);
+
+        const resultWithTrackScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            sort: [
+              {
+                'kibana.alert.start': {
+                  order: 'desc',
+                },
+              },
+            ],
+            minScore: 11,
+            trackScores: true,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        resultWithTrackScore.rawResponse.hits.hits.forEach((hit) => {
+          expect(hit._score).not.to.be(null);
+          expect(hit._score).to.be(11);
+        });
+
+        validateRuleTypeIds(resultWithTrackScore, apmRuleTypeIds);
+      });
+    });
+
     describe('discover', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -794,6 +991,55 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.rawResponse.hits.total).to.eql(0);
       });
     });
+
+    describe('internal rule types', () => {
+      const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+      const objectRemover = new ObjectRemover(supertest);
+      const rulePayload = getAlwaysFiringInternalRule();
+      let ruleId: string;
+
+      before(async () => {
+        await deleteAllAlertsFromIndex(alertAsDataIndex, es);
+      });
+
+      beforeEach(async () => {
+        const { body: createdRule1 } = await supertest
+          .post('/api/alerting/rule')
+          .set('kbn-xsrf', 'foo')
+          .send(rulePayload)
+          .expect(200);
+
+        ruleId = createdRule1.id;
+        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+      });
+
+      afterEach(async () => {
+        await deleteAllAlertsFromIndex(alertAsDataIndex, es);
+        await objectRemover.removeAll();
+      });
+
+      it('should not return alerts from internal rule types', async () => {
+        await waitForRuleExecution(retry, getService, ruleId);
+        await waitForActiveAlerts(es, retry, alertAsDataIndex, rulePayload.rule_type_id);
+
+        const result = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: superUser.username,
+            password: superUser.password,
+          },
+          referer: 'test',
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: [rulePayload.rule_type_id],
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+        });
+
+        expect(result.rawResponse.hits.total).to.eql(0);
+        expect(result.rawResponse.hits.hits.length).to.eql(0);
+      });
+    });
   });
 };
 
@@ -811,4 +1057,52 @@ const validateRuleTypeIds = (result: RuleRegistrySearchResponse, ruleTypeIdsToVe
       ruleTypeIdsToVerify.some((ruleTypeIdToVerify) => ruleTypeIdToVerify === ruleTypeId)
     )
   ).to.eql(true);
+};
+
+const waitForRuleExecution = async (
+  retry: RetryService,
+  getService: FtrProviderContext['getService'],
+  ruleId: string
+) => {
+  return await retry.try(async () => {
+    await getEventLog({
+      getService,
+      spaceId: 'default',
+      type: 'alert',
+      id: ruleId,
+      provider: 'alerting',
+      actions: new Map([['active-instance', { gte: 1 }]]),
+    });
+  });
+};
+
+const waitForActiveAlerts = async (
+  es: Client,
+  retry: RetryService,
+  alertAsDataIndex: string,
+  ruleTypeId: string
+) => {
+  await retry.try(async () => {
+    const {
+      hits: { hits: activeAlerts },
+    } = await es.search({
+      index: alertAsDataIndex,
+      query: { match_all: {} },
+    });
+
+    activeAlerts.forEach((activeAlert: any) => {
+      expect(activeAlert._source[ALERT_RULE_TYPE_ID]).eql(ruleTypeId);
+    });
+  });
+};
+
+const deleteAllAlertsFromIndex = async (index: string, es: Client) => {
+  await es.deleteByQuery({
+    index,
+    query: {
+      match_all: {},
+    },
+    conflicts: 'proceed',
+    ignore_unavailable: true,
+  });
 };

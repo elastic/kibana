@@ -9,7 +9,7 @@ import type {
   EqlSearchRequest,
   FieldCapsRequest,
   FieldCapsResponse,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
   TermsEnumRequest,
   TermsEnumResponse,
@@ -157,11 +157,13 @@ export class APMEventClient {
 
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
+    options?: { skipProcessorEventFilter?: boolean }
   ): Promise<TypedSearchResponse<TParams>> {
     const { index, filters } = getRequestBase({
       apm: params.apm,
       indices: this.indices,
+      skipProcessorEventFilter: options?.skipProcessorEventFilter,
     });
 
     if (this.excludedDataTiers.length > 0) {
@@ -247,7 +249,7 @@ export class APMEventClient {
           filters.push(...excludeTiersQuery(this.excludedDataTiers));
         }
 
-        const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+        const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
           {
             index,
             preference: 'any',

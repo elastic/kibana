@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiHorizontalRule, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RelatedIntegration } from '../../../../../common/api/detection_engine';
-import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { IntegrationsPopover } from '../../../../detection_engine/common/components/related_integrations/integrations_popover';
+import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 import { TableHeader } from './header';
@@ -45,7 +45,7 @@ export const createIntegrationsColumn = ({
         }
       />
     ),
-    render: (_, rule: RuleMigration) => {
+    render: (_, rule: RuleMigrationRule) => {
       const migrationRuleData = getMigrationRuleData(rule.id);
       if (migrationRuleData?.isIntegrationsLoading) {
         return <EuiLoadingSpinner />;

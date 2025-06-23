@@ -32,6 +32,7 @@ import {
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
+import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 import type { SelectionMode } from './components/types';
 
@@ -42,6 +43,7 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentMigrateFlyout,
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
@@ -62,6 +64,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
   const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+  const [isManageAutoUpgradeModalOpen, setManageAutoUpgradeModalOpen] = useState(false);
+
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
   const flyoutContext = useFlyoutContext();
 
   // Agent actions states
@@ -79,6 +84,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+
+  // migrateAgentState
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
     allTags,
@@ -170,6 +179,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
+  const openMigrateFlyout = (agent: Agent) => {
+    setAgentToMigrate(agent);
+    setMigrateFlyoutOpen(true);
+  };
+
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -192,6 +206,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
+        onMigrateAgentClick={() => openMigrateFlyout(agent)}
       />
     );
   };
@@ -285,9 +300,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentActivityFlyout
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
+            openManageAutoUpgradeModal={(policyId: string) => {
+              setSelectedPolicyId(policyId);
+
+              setManageAutoUpgradeModalOpen(true);
+            }}
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+          />
+        </EuiPortal>
+      ) : null}
+      {isManageAutoUpgradeModalOpen ? (
+        <EuiPortal>
+          <ManageAutoUpgradeAgentsModal
+            key={selectedPolicyId}
+            onClose={() => setManageAutoUpgradeModalOpen(false)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === selectedPolicyId)!}
           />
         </EuiPortal>
       ) : null}
@@ -377,6 +406,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setShowTagsAddRemove(false);
           }}
         />
+      )}
+      {migrateFlyoutOpen && (
+        <EuiPortal>
+          <AgentMigrateFlyout
+            agents={[agentToMigrate]}
+            onClose={() => {
+              setAgentToMigrate(undefined);
+              setMigrateFlyoutOpen(false);
+            }}
+            onSave={() => {
+              setAgentToMigrate(undefined);
+              setMigrateFlyoutOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
       )}
       {showUnhealthyCallout && (
         <>

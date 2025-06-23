@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonPage',
     'discover',
     'timePicker',
-    'share',
+    'exports',
     'unifiedFieldList',
     'timePicker',
   ]);
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // close any open notification toasts
     await toasts.dismissAll();
 
-    await PageObjects.reporting.openExportTab();
+    await PageObjects.reporting.openExportPopover();
     await PageObjects.reporting.clickGenerateReportButton();
 
     const url = await PageObjects.reporting.getReportURL(timeout);
@@ -56,6 +56,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', function () {
+    // see details: https://github.com/elastic/kibana/issues/219913
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       // TODO: emptyKibanaIndex fails in Serverless with
@@ -83,11 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.share.closeShareModal();
+        await PageObjects.exports.closeExportFlyout();
       });
 
       it('is available if new', async () => {
-        await PageObjects.reporting.openExportTab();
+        await PageObjects.reporting.openExportPopover();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
@@ -96,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'my search - expectEnabledGenerateReportButton',
           true
         );
-        await PageObjects.reporting.openExportTab();
+        await PageObjects.reporting.openExportPopover();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });

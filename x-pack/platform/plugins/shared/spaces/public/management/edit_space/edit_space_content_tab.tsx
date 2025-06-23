@@ -61,7 +61,24 @@ export const EditSpaceContentTab: FC<{ space: Space }> = ({ space }) => {
           space.id,
           `${ENTER_SPACE_PATH}?next=${uriComponent}`
         );
-        return <EuiLink href={href}>{value}</EuiLink>;
+        return (
+          <EuiLink
+            href={href}
+            aria-label={i18n.translate(
+              'xpack.spaces.management.editSpaceContent.countLinkAriaLabel',
+              {
+                defaultMessage:
+                  'Discover {count} {count, plural, one {item} other {items}} in {name}',
+                values: {
+                  name: item.displayName,
+                  count: item.count,
+                },
+              }
+            )}
+          >
+            {value}
+          </EuiLink>
+        );
       },
     },
   ];

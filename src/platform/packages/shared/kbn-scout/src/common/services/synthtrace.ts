@@ -13,7 +13,6 @@ import {
   InfraSynthtraceEsClient,
   InfraSynthtraceKibanaClient,
   LogLevel,
-  OtelSynthtraceEsClient,
   createLogger,
 } from '@kbn/apm-synthtrace';
 import { ScoutLogger } from './logger';
@@ -21,7 +20,6 @@ import { EsClient } from '../../types';
 
 let apmSynthtraceEsClientInstance: ApmSynthtraceEsClient | undefined;
 let infraSynthtraceEsClientInstance: InfraSynthtraceEsClient | undefined;
-let otelSynthtraceEsClientInstance: OtelSynthtraceEsClient | undefined;
 const logger = createLogger(LogLevel.info);
 
 export async function getApmSynthtraceEsClient(
@@ -42,11 +40,10 @@ export async function getApmSynthtraceEsClient(
       logger,
       refreshAfterIndex: true,
       version,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    apmSynthtraceEsClientInstance.pipeline(
-      apmSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('apmSynthtraceClient');
   }
@@ -74,32 +71,13 @@ export async function getInfraSynthtraceEsClient(
       client: esClient,
       logger,
       refreshAfterIndex: true,
+      pipeline: {
+        includeSerialization: false,
+      },
     });
-
-    infraSynthtraceEsClientInstance.pipeline(
-      infraSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
 
     log.serviceLoaded('infraSynthtraceClient');
   }
 
   return infraSynthtraceEsClientInstance;
-}
-
-export function getOtelSynthtraceEsClient(esClient: EsClient, log: ScoutLogger) {
-  if (!otelSynthtraceEsClientInstance) {
-    otelSynthtraceEsClientInstance = new OtelSynthtraceEsClient({
-      client: esClient,
-      logger,
-      refreshAfterIndex: true,
-    });
-
-    otelSynthtraceEsClientInstance.pipeline(
-      otelSynthtraceEsClientInstance.getDefaultPipeline({ includeSerialization: false })
-    );
-
-    log.serviceLoaded('otelSynthtraceClient');
-  }
-
-  return otelSynthtraceEsClientInstance;
 }

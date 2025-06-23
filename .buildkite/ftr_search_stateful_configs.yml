@@ -1,9 +1,11 @@
 disabled:
   # Base config files, only necessary to inform config finding script
-  - x-pack/test/functional_enterprise_search/base_config.ts
+  - x-pack/solutions/search/test/api_integration/config.ts
 
-  # Cypress configs, for now these are still run manually
-  - x-pack/test/functional_enterprise_search/cypress.config.ts
-  - x-pack/test/functional_enterprise_search/visual_config.ts
-  - x-pack/test/functional_enterprise_search/cli_config.ts
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test/functional_search/config.ts
   - x-pack/test/functional/apps/search_playground/config.ts
+  - x-pack/solutions/search/test/functional_search/config/config.feature_flags.ts
+  - x-pack/solutions/search/test/api_integration/apis/search_playground/config.ts
+  - x-pack/solutions/search/test/api_integration/apis/guided_onboarding/config.ts

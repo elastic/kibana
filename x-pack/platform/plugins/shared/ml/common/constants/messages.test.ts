@@ -15,6 +15,10 @@ import {
   nonBasicIssuesMessages,
 } from './messages.test.mock';
 
+const BASE_URL_DOCS = 'https://www.elastic.co/docs';
+const BASE_URL_API = `${BASE_URL_DOCS}/api/doc/elasticsearch/operation`;
+const BASE_URL_EXPLORE = `${BASE_URL_DOCS}/explore-analyze/machine-learning/anomaly-detection`;
+
 describe('Constants: Messages parseMessages()', () => {
   const docLinksService = docLinksServiceMock.createStartContract();
 
@@ -25,14 +29,14 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'job_id_valid',
         status: 'success',
         text: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
-        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
+        url: `${BASE_URL_API}/operation-ml-put-job`,
       },
       {
         heading: 'Detector functions',
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-detectors`,
       },
       {
         bucketSpan: '15m',
@@ -40,7 +44,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'success_bucket_span',
         status: 'success',
         text: 'Format of "15m" is valid and passed validation checks.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-bucket-span',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-bucket-span`,
       },
       {
         heading: 'Time range',
@@ -53,7 +57,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'success_mml',
         status: 'success',
         text: 'Valid and within the estimated model memory limit.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-model-memory-limits',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-model-memory-limits`,
       },
     ]);
   });
@@ -65,14 +69,14 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'error',
         heading: 'Job ID',
         text: 'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character.',
-        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
+        url: `${BASE_URL_API}/operation-ml-put-job`,
       },
       {
         heading: 'Detector functions',
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-detectors`,
       },
       {
         bucketSpan: '15m',
@@ -80,7 +84,7 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'bucket_span_valid',
         status: 'success',
         text: 'Format of "15m" is valid.',
-        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#put-analysisconfig',
+        url: `${BASE_URL_API}/operation-ml-put-job`,
       },
       {
         id: 'skipped_extended_tests',
@@ -97,14 +101,14 @@ describe('Constants: Messages parseMessages()', () => {
         id: 'job_id_valid',
         status: 'success',
         text: 'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
-        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
+        url: `${BASE_URL_API}/operation-ml-put-job`,
       },
       {
         heading: 'Detector functions',
         id: 'detectors_function_not_empty',
         status: 'success',
         text: 'Presence of detector functions validated in all detectors.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-detectors',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-detectors`,
       },
       {
         id: 'cardinality_model_plot_high',
@@ -117,14 +121,14 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'warning',
         heading: 'Partition field cardinality',
         text: 'Cardinality of partition_field "order_id" is above 1000 and might result in high memory usage.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-cardinality',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-cardinality`,
       },
       {
         heading: 'Bucket span',
         id: 'bucket_span_high',
         status: 'info',
         text: 'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-bucket-span',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-bucket-span`,
       },
       {
         bucketSpanCompareFactor: 25,
@@ -139,7 +143,7 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'success',
         heading: 'Influencer configuration',
         text: 'Passed the validation checks.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-influencers',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-influencers`,
       },
       {
         id: 'half_estimated_mml_greater_than_mml',
@@ -147,7 +151,7 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'warning',
         heading: 'Model memory limit',
         text: 'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
-        url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-model-memory-limits',
+        url: `${BASE_URL_EXPLORE}/ml-ad-run-jobs#ml-ad-model-memory-limits`,
       },
       {
         id: 'missing_summary_count_field_name',

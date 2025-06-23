@@ -16,7 +16,7 @@
     "patterns": [
       "_scripts/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-get-script",
     "availability": {
       "stack": true,
       "serverless": true

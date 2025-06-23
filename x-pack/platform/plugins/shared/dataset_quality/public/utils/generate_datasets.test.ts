@@ -44,6 +44,7 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
     {
@@ -54,6 +55,7 @@ describe('generateDatasets', () => {
       totalDocs: 100,
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     },
   ];
@@ -109,6 +111,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 102,
         quality: 'degraded',
@@ -134,6 +137,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 100,
         quality: 'poor',
@@ -172,6 +176,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 2,
         quality: 'poor',
@@ -197,6 +202,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         docsInTimeRange: 0,
         quality: 'good',
@@ -361,6 +367,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -386,6 +393,7 @@ describe('generateDatasets', () => {
         totalDocs: 100,
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         docsInTimeRange: 100,
@@ -411,6 +419,7 @@ describe('generateDatasets', () => {
       integration: 'system',
       userPrivileges: {
         canMonitor: true,
+        canReadFailureStore: true,
       },
     };
 
@@ -429,6 +438,7 @@ describe('generateDatasets', () => {
         integration: integrations[0],
         userPrivileges: {
           canMonitor: true,
+          canReadFailureStore: true,
         },
         quality: 'good',
         totalDocs: 100,

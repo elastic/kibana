@@ -111,4 +111,48 @@ describe('MessageConversion', () => {
       )
     ).toEqual('stackToString...\\u001b[5;7;6mThis is Fine\\u001b[27m');
   });
+
+  test('it should format an AggregateError with multiple causes', () => {
+    const firstError = new Error('first error');
+    firstError.stack = 'Error: first error\n    at foo';
+
+    const secondError = new Error('second error');
+    secondError.stack = 'Error: second error\n    at bar';
+
+    const agg = new AggregateError([firstError, secondError], 'aggregate failed');
+    agg.stack = 'AggregateError: aggregate failed\n    at baz\n    at qux';
+
+    const result = MessageConversion.convert({ ...baseRecord, error: agg }, false);
+
+    expect(result).toEqual(
+      [
+        'AggregateError: aggregate failed. Caused by:',
+        '    > Error: first error',
+        '    > at foo',
+        '    > Error: second error',
+        '    > at bar',
+        '    at baz',
+        '    at qux',
+      ].join('\n')
+    );
+  });
+
+  test('it should omit duplicate frames between cause and aggregate stack', () => {
+    const cause = new Error('cause error');
+    cause.stack = 'Error: cause error\n    at shared\n    at unique';
+
+    const agg = new AggregateError([cause], 'aggregate');
+    agg.stack = 'AggregateError: aggregate\n    at shared\n    at extended';
+
+    const result = MessageConversion.convert({ ...baseRecord, error: agg }, false);
+
+    expect(result).toEqual(
+      [
+        'AggregateError: aggregate. Caused by:',
+        '    > Error: cause error',
+        '    at shared',
+        '    at extended',
+      ].join('\n')
+    );
+  });
 });

@@ -43,10 +43,13 @@ import {
   fillThreatSubtechnique,
   fillThreatTechnique,
   importSavedQuery,
+  waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { visit } from '../../../../tasks/navigation';
+import { waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../../screens/alerts';
 
 // This test is meant to test touching all the common various components in rule creation
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
@@ -111,5 +114,13 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
 
     cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
     cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed
+
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(ALERTS_COUNT)
+      .invoke('text')
+      .should('match', /^[1-9].+$/);
+    cy.get(ALERT_GRID_CELL).contains(ruleFields.ruleName);
   });
 });

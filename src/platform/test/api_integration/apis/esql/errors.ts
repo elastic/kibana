@@ -13,8 +13,7 @@ import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { hasStartEndParams } from '@kbn/esql-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import uniqBy from 'lodash/uniqBy';
-import { groupBy, mapValues } from 'lodash';
+import { groupBy, mapValues, uniqBy } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function getConfigPath() {

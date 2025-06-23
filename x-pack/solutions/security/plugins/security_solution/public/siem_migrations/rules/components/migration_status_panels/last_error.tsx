@@ -14,7 +14,13 @@ interface RuleMigrationsLastErrorProps {
 }
 
 export const RuleMigrationsLastError = React.memo<RuleMigrationsLastErrorProps>(({ message }) => (
-  <EuiCallOut title={i18n.RULE_MIGRATION_ERROR_TITLE} color="danger" iconType="alert" size="s">
+  <EuiCallOut
+    data-test-subj="ruleMigrationLastError"
+    title={i18n.RULE_MIGRATION_ERROR_TITLE}
+    color="danger"
+    iconType="alert"
+    size="s"
+  >
     <EuiText size="s">{message}</EuiText>
   </EuiCallOut>
 ));

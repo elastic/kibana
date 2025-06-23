@@ -7,11 +7,15 @@
 
 import { EuiBreadcrumb, EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse, getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
+import { Streams, getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
-export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetResponse }) {
+export function CurrentStreamEntry({
+  definition,
+}: {
+  definition: Streams.WiredStream.GetResponse;
+}) {
   const router = useStreamsAppRouter();
   const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.stream.name).map(
     (parentId) => {
@@ -21,11 +25,10 @@ export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetR
         text: parentId,
         href: isBreadcrumbsTail
           ? undefined
-          : router.link('/{key}/{tab}/{subtab}', {
+          : router.link('/{key}/management/{tab}', {
               path: {
                 key: parentId,
-                tab: 'management',
-                subtab: 'route',
+                tab: 'route',
               },
             }),
       };

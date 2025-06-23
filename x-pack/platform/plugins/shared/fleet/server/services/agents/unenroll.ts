@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
@@ -30,13 +30,20 @@ import {
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agentId: string
+  agentId: string,
+  options?: {
+    skipAgentlessValidation?: boolean;
+  }
 ) {
   const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
+  }
+
+  if (!options?.skipAgentlessValidation && agentPolicy?.supports_agentless) {
+    throw new FleetError(`Cannot unenroll agentless agent ${agentId}`);
   }
 
   return true;
@@ -48,12 +55,15 @@ export async function unenrollAgent(
   agentId: string,
   options?: {
     force?: boolean;
+    skipAgentlessValidation?: boolean;
     revoke?: boolean;
   }
 ) {
   await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
   if (!options?.force) {
-    await unenrollAgentIsAllowed(soClient, esClient, agentId);
+    await unenrollAgentIsAllowed(soClient, esClient, agentId, {
+      skipAgentlessValidation: options?.skipAgentlessValidation,
+    });
   }
   if (options?.revoke) {
     return forceUnenrollAgent(esClient, soClient, agentId);
@@ -96,6 +106,7 @@ export async function unenrollAgents(
   const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
   const res = await getAgentsByKuery(esClient, soClient, {
     kuery,
+    showAgentless: options.showAgentless,
     showInactive: options.showInactive ?? false,
     page: 1,
     perPage: batchSize,

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  XJSON_LANG_ID,
-  PAINLESS_LANG_ID,
-  ESQL_LANG_ID,
-  CONSOLE_LANG_ID,
-  YAML_LANG_ID,
-} from './languages';
+import { XJSON_LANG_ID, PAINLESS_LANG_ID, CONSOLE_LANG_ID, YAML_LANG_ID } from './languages';
 import { monaco } from './monaco_imports';
 
 export const DEFAULT_WORKER_ID = 'default' as const;
@@ -22,7 +16,6 @@ const langSpecificWorkerIds = [
   monaco.languages.json.jsonDefaults.languageId,
   XJSON_LANG_ID,
   PAINLESS_LANG_ID,
-  ESQL_LANG_ID,
   YAML_LANG_ID,
   CONSOLE_LANG_ID,
 ] as const;

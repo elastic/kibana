@@ -64,13 +64,12 @@ export const getActionDetailsRequestHandler = (
 > => {
   return async (context, req, res) => {
     try {
+      const activeSpaceId = (await context.securitySolution).getSpaceId();
       return res.ok({
         body: {
           data: await getActionDetailsById(
-            (
-              await context.core
-            ).elasticsearch.client.asInternalUser,
-            endpointContext.service.getEndpointMetadataService(),
+            endpointContext.service,
+            activeSpaceId,
             req.params.action_id
           ),
         },

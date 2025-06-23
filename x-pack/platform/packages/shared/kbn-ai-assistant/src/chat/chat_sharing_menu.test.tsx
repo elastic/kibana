@@ -17,6 +17,7 @@ describe('ChatSharingMenu', () => {
     render(
       <ChatSharingMenu
         isPublic={false}
+        isArchived={false}
         disabled={false}
         onChangeConversationAccess={mockOnChangeConversationAccess}
         {...props}
@@ -107,5 +108,24 @@ describe('ChatSharingMenu', () => {
         screen.queryByText('This conversation is only visible to you.')
       ).not.toBeInTheDocument()
     );
+  });
+
+  it('renders archived state with correct badges', () => {
+    renderComponent({ isArchived: true });
+
+    const accessBadge = screen.getByTestId('observabilityAiAssistantChatAccessBadge');
+    const archivedBadge = screen.getByTestId('observabilityAiAssistantArchivedBadge');
+
+    expect(accessBadge).toBeInTheDocument();
+    expect(archivedBadge).toBeInTheDocument();
+    expect(archivedBadge).toHaveTextContent('Archived');
+  });
+
+  it('does not open the popover when archived', () => {
+    renderComponent({ isArchived: true });
+
+    fireEvent.click(screen.getByTestId('observabilityAiAssistantChatAccessBadge'));
+
+    expect(screen.queryByText('This conversation is only visible to you.')).not.toBeInTheDocument();
   });
 });

@@ -129,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     tags: '{{rule.tags}}',
                     alertId: '{{alert.id}}',
                     alertActionGroup: '{{alert.actionGroup}}',
+                    grouping: '{{context.grouping}}',
                     instanceContextValue: '{{context.instanceContextValue}}',
                     instanceStateValue: '{{state.instanceStateValue}}',
                   },
@@ -201,6 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '{"size":100,"thresholdComparator":">","threshold":[1],"index":["kbn-data-forge-fake_hosts.fake_hosts-*"],"timeField":"@timestamp","esQuery":"{\\n  \\"query\\":{\\n    \\"match_all\\" : {}\\n  }\\n}","timeWindowSize":1,"timeWindowUnit":"m","groupBy":"top","termField":"host.name","termSize":1,"excludeHitsFromPreviousRun":true,"aggType":"count","searchType":"esQuery"}'
         );
         expect(resp.hits.hits[0]._source?.alertActionGroup).eql('query matched');
+        expect(resp.hits.hits[0]._source?.grouping).eql('{"host":{"name":"host-0"}}');
       });
     });
   });

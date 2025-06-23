@@ -86,7 +86,7 @@ export function SecuritySolutionServerlessUtils({
         throw new Error(`Could not find a role definition for ${userRoleName}`);
       }
       await svlUserManager.setCustomRole(roleDefinition.privileges);
-      const roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('customRole');
+      const roleAuthc = await svlUserManager.createM2mApiKeyWithCustomRoleScope();
       const superTest = supertest
         .agent(kbnUrl)
         .set(svlCommonApi.getInternalRequestHeader())

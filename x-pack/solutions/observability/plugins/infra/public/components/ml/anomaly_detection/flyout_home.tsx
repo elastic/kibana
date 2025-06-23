@@ -94,8 +94,8 @@ export const FlyoutHome = (props: Props) => {
 
   const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
   const manageJobsLinkProps = useLinkProps({
-    app: 'ml',
-    pathname: '/jobs',
+    app: 'management',
+    pathname: 'ml/anomaly_detection',
   });
 
   // Used for prefilling the feedback form (if both types are enabled do not prefill)

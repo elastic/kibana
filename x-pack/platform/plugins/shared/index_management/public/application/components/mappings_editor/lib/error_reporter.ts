@@ -6,7 +6,7 @@
  */
 
 import { ValidationError } from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
+import { fold } from 'fp-ts/Either';
 import { Reporter } from 'io-ts/lib/Reporter';
 
 export type ReporterResult = Array<{ path: string[]; message: string }>;

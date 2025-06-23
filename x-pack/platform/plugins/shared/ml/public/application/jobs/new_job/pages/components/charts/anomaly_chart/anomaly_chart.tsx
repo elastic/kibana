@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { Chart, Settings, TooltipType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { Chart, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { useMlKibana } from '../../../../../../contexts/kibana';
 import type { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
 import { ModelBounds } from './model_bounds';
@@ -43,6 +44,16 @@ export const AnomalyChart: FC<Props> = ({
   width,
   loading = false,
 }) => {
+  const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
+
+  const baseTheme = useChartsBaseTheme();
+
   const data = chartType === CHART_TYPE.SCATTER ? flattenData(chartData) : chartData;
   const xDomain = getXRange(data);
   return (
@@ -50,12 +61,7 @@ export const AnomalyChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={data.length > 0} loading={loading}>
         <Chart>
           <Tooltip type={TooltipType.None} />
-          <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
-            xDomain={xDomain}
-            locale={i18n.getLocale()}
-          />
+          <Settings baseTheme={baseTheme} xDomain={xDomain} locale={i18n.getLocale()} />
           <Axes chartData={data} />
           <Anomalies anomalyData={anomalyData} />
           <ModelBounds modelData={modelData} />

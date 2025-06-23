@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import mapValues from 'lodash/mapValues';
+import { mapValues } from 'lodash';
 import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
 import { FieldMetadata } from './field_metadata';
 

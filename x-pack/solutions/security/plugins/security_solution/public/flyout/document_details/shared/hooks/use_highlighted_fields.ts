@@ -12,7 +12,7 @@ import { useAlertResponseActionsSupport } from '../../../../common/hooks/endpoin
 import { isResponseActionsAlertAgentIdField } from '../../../../common/lib/endpoint';
 import {
   getEventCategoriesFromData,
-  getEventFieldsToDisplay,
+  getHighlightedFieldsToDisplay,
 } from '../../../../common/components/event_details/get_alert_summary_rows';
 
 export interface UseHighlightedFieldsParams {
@@ -23,7 +23,14 @@ export interface UseHighlightedFieldsParams {
   /**
    * An array of fields user has selected to highlight, defined on rule
    */
-  investigationFields?: string[];
+  investigationFields: string[];
+  /**
+   * Optional prop to specify the type of highlighted fields to display
+   * Custom: fields defined on the rule
+   * Default: fields defined by elastic
+   * All: both custom and default fields
+   */
+  type?: 'default' | 'custom' | 'all';
 }
 
 export interface UseHighlightedFieldsResult {
@@ -45,6 +52,7 @@ export interface UseHighlightedFieldsResult {
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
+  type,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
   const responseActionsSupport = useAlertResponseActionsSupport(dataFormattedForFieldBrowser);
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
@@ -67,11 +75,12 @@ export const useHighlightedFields = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
-  const tableFields = getEventFieldsToDisplay({
+  const tableFields = getHighlightedFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: investigationFields ?? [],
+    ruleCustomHighlightedFields: investigationFields,
+    type,
   });
 
   return tableFields.reduce<UseHighlightedFieldsResult>((acc, field) => {

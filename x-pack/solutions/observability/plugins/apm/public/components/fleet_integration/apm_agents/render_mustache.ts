@@ -8,7 +8,7 @@
 import type { DocLinksStart } from '@kbn/core/public';
 import Mustache from 'mustache';
 
-const TEMPLATE_TAGS = ['{', '}'];
+const TEMPLATE_TAGS: [string, string] = ['{', '}'];
 
 export function renderMustache({
   text,

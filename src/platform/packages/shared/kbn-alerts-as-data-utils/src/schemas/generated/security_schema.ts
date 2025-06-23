@@ -10,7 +10,7 @@
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 import { AlertSchema } from './alert_schema';
 import { EcsSchema } from './ecs_schema';
 import { LegacyAlertSchema } from './legacy_alert_schema';
@@ -141,6 +141,9 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.new_terms': schemaStringArray,
+  'kibana.alert.original_data_stream.dataset': schemaString,
+  'kibana.alert.original_data_stream.namespace': schemaString,
+  'kibana.alert.original_data_stream.type': schemaString,
   'kibana.alert.original_event.agent_id_status': schemaString,
   'kibana.alert.original_event.code': schemaString,
   'kibana.alert.original_event.duration': schemaString,

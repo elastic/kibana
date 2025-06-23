@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -23,13 +24,15 @@ export const FieldFormType = ({
 }) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
+  const ecsFieldName = getRegularEcsField(field.name);
+
   const { fieldsMetadata, loading } = useFieldsMetadata(
-    { attributes: ['type'], fieldNames: [field.name] },
+    { attributes: ['type'], fieldNames: [ecsFieldName] },
     [field]
   );
 
   // Propagate recommendation to state if a type is not already set
-  const recommendation = fieldsMetadata?.[field.name]?.type;
+  const recommendation = fieldsMetadata?.[ecsFieldName]?.type;
 
   useEffect(() => {
     if (
@@ -67,6 +70,13 @@ interface FieldTypeSelectorProps {
   value?: FieldTypeOption;
 }
 
+const typeSelectorOptions = Object.entries(FIELD_TYPE_MAP)
+  .filter(([_, { readonly }]) => !readonly)
+  .map(([optionKey, { label }]) => ({
+    text: label,
+    value: optionKey,
+  }));
+
 const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSelectorProps) => {
   return (
     <EuiSelect
@@ -77,10 +87,7 @@ const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSele
         onChange(event.target.value as FieldTypeOption);
       }}
       value={value}
-      options={Object.entries(FIELD_TYPE_MAP).map(([optionKey, optionConfig]) => ({
-        text: optionConfig.label,
-        value: optionKey,
-      }))}
+      options={typeSelectorOptions}
     />
   );
 };

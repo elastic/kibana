@@ -12,9 +12,9 @@ import {
   ChatCompletionTokenCountEvent,
   createInferenceInternalError,
 } from '@kbn/inference-common';
-import { createTokenLimitReachedError } from '../../errors';
 import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
 import { convertStreamError, type ErrorLine } from './stream_errors';
+import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 
 export function processOpenAIStream() {
   return (source: Observable<string>) => {

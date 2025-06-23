@@ -82,17 +82,20 @@ export class MonitorConfigRepository {
 
   async bulkUpdate({
     monitors,
+    namespace,
   }: {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
     }>;
+    namespace?: string;
   }) {
-    return await this.soClient.bulkUpdate<MonitorFields>(
+    return this.soClient.bulkUpdate<MonitorFields>(
       monitors.map(({ attributes, id }) => ({
         type: syntheticsMonitorType,
         id,
         attributes,
+        namespace,
       }))
     );
   }
@@ -137,7 +140,9 @@ export class MonitorConfigRepository {
     );
   }
 
-  async getAll({
+  async getAll<
+    T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes
+  >({
     search,
     fields,
     filter,
@@ -151,7 +156,7 @@ export class MonitorConfigRepository {
     showFromAllSpaces?: boolean;
   } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) {
     return withApmSpan('get_all_monitors', async () => {
-      const finder = this.soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+      const finder = this.soClient.createPointInTimeFinder<T>({
         type: syntheticsMonitorType,
         perPage: 5000,
         search,
@@ -163,7 +168,7 @@ export class MonitorConfigRepository {
         ...(showFromAllSpaces && { namespaces: ['*'] }),
       });
 
-      const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+      const hits: Array<SavedObjectsFindResult<T>> = [];
       for await (const result of finder.find()) {
         hits.push(...result.saved_objects);
       }

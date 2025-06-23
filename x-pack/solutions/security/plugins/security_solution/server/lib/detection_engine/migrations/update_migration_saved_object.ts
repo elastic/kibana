@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { chain, tryCatch } from 'fp-ts/TaskEither';
+import { pipe } from 'fp-ts/pipeable';
 
 import type { SavedObjectsClientContract, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { validateTaskEither } from '@kbn/securitysolution-io-ts-utils';

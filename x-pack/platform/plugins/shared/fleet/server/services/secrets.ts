@@ -67,23 +67,31 @@ import { checkFleetServerVersionsForSecretsStorage } from './fleet_server';
 
 export async function createSecrets(opts: {
   esClient: ElasticsearchClient;
-  values: string[];
-}): Promise<Secret[]> {
+  values: Array<string | string[]>;
+}): Promise<Array<Secret | Secret[]>> {
   const { esClient, values } = opts;
   const logger = appContextService.getLogger();
 
-  const secretsResponse: Secret[] = await Promise.all(
+  const sendESRequest = (value: string): Promise<Secret> => {
+    return retryTransientEsErrors(
+      () =>
+        esClient.transport.request({
+          method: 'POST',
+          path: SECRETS_ENDPOINT_PATH,
+          body: { value },
+        }),
+      { logger }
+    );
+  };
+
+  const secretsResponse: Array<Secret | Secret[]> = await Promise.all(
     values.map(async (value) => {
       try {
-        return await retryTransientEsErrors(
-          () =>
-            esClient.transport.request({
-              method: 'POST',
-              path: SECRETS_ENDPOINT_PATH,
-              body: { value },
-            }),
-          { logger }
-        );
+        if (Array.isArray(value)) {
+          return await Promise.all(value.map(sendESRequest));
+        } else {
+          return await sendESRequest(value);
+        }
       } catch (err) {
         const msg = `Error creating secrets: ${err}`;
         logger.error(msg);
@@ -92,7 +100,7 @@ export async function createSecrets(opts: {
     })
   );
 
-  secretsResponse.forEach((item) => {
+  const writeLog = (item: Secret) => {
     auditLoggingService.writeCustomAuditLog({
       message: `secret created: ${item.id}`,
       event: {
@@ -102,6 +110,14 @@ export async function createSecrets(opts: {
         outcome: 'success',
       },
     });
+  };
+
+  secretsResponse.forEach((item) => {
+    if (Array.isArray(item)) {
+      item.forEach(writeLog);
+    } else {
+      writeLog(item);
+    }
   });
 
   return secretsResponse;
@@ -164,10 +180,19 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   // create a map of secret_references.id to package policy id
   const packagePoliciesBySecretId = packagePolicies.items.reduce((acc, packagePolicy) => {
     packagePolicy?.secret_references?.forEach((secretReference) => {
-      if (!acc[secretReference.id]) {
-        acc[secretReference.id] = [];
+      if (Array.isArray(secretReference)) {
+        secretReference.forEach(({ id }) => {
+          if (!acc[id]) {
+            acc[id] = [];
+          }
+          acc[id].push(packagePolicy.id);
+        });
+      } else {
+        if (!acc[secretReference.id]) {
+          acc[secretReference.id] = [];
+        }
+        acc[secretReference.id].push(packagePolicy.id);
       }
-      acc[secretReference.id].push(packagePolicy.id);
     });
     return acc;
   }, {} as Record<string, string[]>);
@@ -256,7 +281,12 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secretReferences: secrets.map(({ id }) => ({ id })),
+    secretReferences: secrets.reduce((acc: PolicySecretReference[], secret) => {
+      if (Array.isArray(secret)) {
+        return [...acc, ...secret.map(({ id }) => ({ id }))];
+      }
+      return [...acc, { id: secret.id }];
+    }, []),
   };
 }
 
@@ -294,8 +324,18 @@ export async function extractAndUpdateSecrets(opts: {
   );
 
   const secretReferences = [
-    ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
-    ...createdSecrets.map(({ id }) => ({ id })),
+    ...noChange.reduce((acc: PolicySecretReference[], secretPath) => {
+      if (secretPath.value.value.ids) {
+        return [...acc, ...secretPath.value.value.ids.map((id: string) => ({ id }))];
+      }
+      return [...acc, { id: secretPath.value.value.id }];
+    }, []),
+    ...createdSecrets.reduce((acc: PolicySecretReference[], secret) => {
+      if (Array.isArray(secret)) {
+        return [...acc, ...secret.map(({ id }) => ({ id }))];
+      }
+      return [...acc, { id: secret.id }];
+    }, []),
   ];
 
   const secretsToDelete: PolicySecretReference[] = [];
@@ -305,7 +345,13 @@ export async function extractAndUpdateSecrets(opts: {
     // it may be that secrets were not enabled at the time of creation
     // in which case they are just stored as plain text
     if (secretPath.value.value?.isSecretRef) {
-      secretsToDelete.push({ id: secretPath.value.value.id });
+      if (secretPath.value.value.ids) {
+        secretPath.value.value.ids.forEach((id: string) => {
+          secretsToDelete.push({ id });
+        });
+      } else {
+        secretsToDelete.push({ id: secretPath.value.value.id });
+      }
     }
   });
 
@@ -325,8 +371,11 @@ function containsSecretVar(vars?: RegistryVarsEntry[]) {
 }
 
 // this is how secrets are stored on the package policy
-function toVarSecretRef(id: string): VarSecretReference {
-  return { id, isSecretRef: true };
+function toVarSecretRef(secret: Secret | Secret[]): VarSecretReference {
+  if (Array.isArray(secret)) {
+    return { ids: secret.map(({ id }) => id), isSecretRef: true };
+  }
+  return { id: secret.id, isSecretRef: true };
 }
 
 // this is how IDs are inserted into compiled templates
@@ -612,7 +661,7 @@ function _getInputSecretVarDefsByPolicyTemplateAndType(packageInfo: PackageInfo)
  */
 function getPolicyWithSecretReferences(
   secretPaths: SecretPath[],
-  secrets: Secret[],
+  secrets: Array<Secret | Secret[]>,
   packagePolicy: NewPackagePolicy
 ) {
   const result = JSON.parse(JSON.stringify(packagePolicy));
@@ -626,7 +675,7 @@ function getPolicyWithSecretReferences(
       const isLast = secretPathComponentIndex === secretPath.path.length - 1;
 
       if (isLast) {
-        acc[val].value = toVarSecretRef(secrets[secretPathIndex].id);
+        acc[val].value = toVarSecretRef(secrets[secretPathIndex]);
       }
 
       return acc[val];
@@ -717,22 +766,30 @@ async function extractAndWriteSOSecrets<T>(opts: {
 
   const secrets = await createSecrets({
     esClient,
-    values: secretPaths.map(({ value }) => value as string),
+    values: secretPaths.map(({ value }) => value as string | string[]),
   });
 
   const objectWithSecretRefs = JSON.parse(JSON.stringify(soObject));
   secretPaths.forEach((secretPath, i) => {
     const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
     const maybeHash = get(secretHashes, pathWithoutPrefix);
+    const currentSecret = secrets[i];
     set(objectWithSecretRefs, secretPath.path, {
-      id: secrets[i].id,
+      ...(Array.isArray(currentSecret)
+        ? { ids: currentSecret.map(({ id }) => id) }
+        : { id: currentSecret.id }),
       ...(typeof maybeHash === 'string' && { hash: maybeHash }),
     });
   });
 
   return {
     soObjectWithSecrets: objectWithSecretRefs,
-    secretReferences: secrets.map(({ id }) => ({ id })),
+    secretReferences: secrets.reduce((acc: PolicySecretReference[], secret) => {
+      if (Array.isArray(secret)) {
+        return [...acc, ...secret.map(({ id }) => ({ id }))];
+      }
+      return [...acc, { id: secret.id }];
+    }, []),
   };
 }
 
@@ -769,16 +826,31 @@ async function extractAndUpdateSOSecrets<T>(opts: {
   toCreate.forEach((secretPath, i) => {
     const pathWithoutPrefix = secretPath.path.replace('secrets.', '');
     const maybeHash = get(secretHashes, pathWithoutPrefix);
+    const currentSecret = createdSecrets[i];
 
     set(soObjectWithSecretRefs, secretPath.path, {
-      id: createdSecrets[i].id,
+      ...(Array.isArray(currentSecret)
+        ? { ids: currentSecret.map(({ id }) => id) }
+        : { id: currentSecret.id }),
       ...(typeof maybeHash === 'string' && { hash: maybeHash }),
     });
   });
 
   const secretReferences = [
-    ...noChange.map((secretPath) => ({ id: (secretPath.value as { id: string }).id })),
-    ...createdSecrets.map(({ id }) => ({ id })),
+    ...noChange.reduce((acc: PolicySecretReference[], secretPath) => {
+      const currentValue = secretPath.value as { id: string } | { ids: string[] };
+      if ('ids' in currentValue) {
+        return [...acc, ...currentValue.ids.map((id: string) => ({ id }))];
+      } else {
+        return [...acc, { id: currentValue.id }];
+      }
+    }, []),
+    ...createdSecrets.reduce((acc: PolicySecretReference[], secret) => {
+      if (Array.isArray(secret)) {
+        return [...acc, ...secret.map(({ id }) => ({ id }))];
+      }
+      return [...acc, { id: secret.id }];
+    }, []),
   ];
 
   return {
@@ -862,12 +934,6 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.service_token,
       });
     }
-    if (remoteESOutput.secrets?.kibana_api_key) {
-      outputSecretPaths.push({
-        path: 'secrets.kibana_api_key',
-        value: remoteESOutput.secrets.kibana_api_key,
-      });
-    }
   }
 
   // common to all outputs
@@ -912,11 +978,6 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
     if (typeof output?.secrets?.service_token === 'object') {
       outputSecretPaths.push({
         id: output.secrets.service_token.id,
-      });
-    }
-    if (typeof output?.secrets?.kibana_api_key === 'object') {
-      outputSecretPaths.push({
-        id: output.secrets.kibana_api_key.id,
       });
     }
   }

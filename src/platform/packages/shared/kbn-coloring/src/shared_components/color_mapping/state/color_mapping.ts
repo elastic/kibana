@@ -59,10 +59,7 @@ export const colorMappingSlice = createSlice({
       state.assignments = [];
     },
 
-    addNewAssignment: (
-      state,
-      action: PayloadAction<ColorMapping.Config['assignments'][number]>
-    ) => {
+    addNewAssignment: (state, action: PayloadAction<ColorMapping.Assignment>) => {
       state.assignments.push({ ...action.payload });
     },
     addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
@@ -72,7 +69,7 @@ export const colorMappingSlice = createSlice({
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        assignment: ColorMapping.Config['assignments'][number];
+        assignment: ColorMapping.Assignment;
       }>
     ) => {
       state.assignments[action.payload.assignmentIndex] = {
@@ -84,19 +81,37 @@ export const colorMappingSlice = createSlice({
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        rule: ColorMapping.Config['assignments'][number]['rule'];
+        ruleIndex: number;
+        rule: ColorMapping.ColorRule;
+      }>
+    ) => {
+      const assignment = state.assignments[action.payload.assignmentIndex];
+      state.assignments[action.payload.assignmentIndex] = {
+        ...assignment,
+        rules: [
+          ...assignment.rules.slice(0, action.payload.ruleIndex),
+          action.payload.rule,
+          ...assignment.rules.slice(action.payload.ruleIndex + 1),
+        ],
+      };
+    },
+    updateAssignmentRules: (
+      state,
+      action: PayloadAction<{
+        assignmentIndex: number;
+        rules: ColorMapping.ColorRule[];
       }>
     ) => {
       state.assignments[action.payload.assignmentIndex] = {
         ...state.assignments[action.payload.assignmentIndex],
-        rule: action.payload.rule,
+        rules: action.payload.rules,
       };
     },
     updateAssignmentColor: (
       state,
       action: PayloadAction<{
         assignmentIndex: number;
-        color: ColorMapping.Config['assignments'][number]['color'];
+        color: ColorMapping.Assignment['color'];
       }>
     ) => {
       state.assignments[action.payload.assignmentIndex] = {
@@ -219,6 +234,7 @@ export const colorMappingSlice = createSlice({
     },
   },
 });
+
 // Action creators are generated for each case reducer function
 export const {
   updatePalette,
@@ -230,6 +246,7 @@ export const {
   updateAssignmentColor,
   updateSpecialAssignmentColor,
   updateAssignmentRule,
+  updateAssignmentRules,
   removeAssignment,
   removeAllAssignments,
   changeColorMode,

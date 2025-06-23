@@ -11,7 +11,6 @@ import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -35,7 +34,10 @@ import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
 import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
-import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
+import {
+  checkGetManagementMlJobsResolver,
+  usePermissionCheck,
+} from '../../../../capabilities/check_capabilities';
 
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
@@ -98,6 +100,7 @@ export const JobsListPage: FC<Props> = ({
     setInitialized(true);
   };
 
+  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
   useEffect(() => {
     check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -205,29 +208,35 @@ export const JobsListPage: FC<Props> = ({
                   >
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
-                        <>
-                          <EuiButtonEmpty
-                            onClick={() => setShowSyncFlyout(true)}
-                            data-test-subj="mlStackMgmtSyncButton"
-                          >
-                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                              defaultMessage: 'Synchronize saved objects',
-                            })}
-                          </EuiButtonEmpty>
-                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                          <EuiSpacer size="s" />
-                        </>
+                        {
+                          <>
+                            <EuiButtonEmpty
+                              disabled={!canCreateJob}
+                              onClick={() => setShowSyncFlyout(true)}
+                              data-test-subj="mlStackMgmtSyncButton"
+                            >
+                              {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                                defaultMessage: 'Synchronize saved objects',
+                              })}
+                            </EuiButtonEmpty>
+                            {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                            <EuiSpacer size="s" />
+                          </>
+                        }
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <ExportJobsFlyout
-                          isDisabled={false}
+                          isDisabled={!canCreateJob}
                           currentTab={
                             currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
                           }
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
+                        <ImportJobsFlyout
+                          isDisabled={!canCreateJob}
+                          onImportComplete={refreshJobs}
+                        />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <SpaceManagement

@@ -47,14 +47,14 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
     },
     onSuccess: () => {
       toasts.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsSuccess', {
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.updateRulesSettingsSuccess', {
           defaultMessage: 'Rules settings updated successfully.',
         })
       );
     },
     onError: () => {
       toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.updateRulesSettingsFailure', {
+        i18n.translate('xpack.triggersActionsUI.rulesSettings.updateRulesSettingsFailure', {
           defaultMessage: 'Failed to update rules settings.',
         })
       );

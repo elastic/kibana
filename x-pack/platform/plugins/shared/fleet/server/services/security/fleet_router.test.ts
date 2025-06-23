@@ -276,6 +276,7 @@ describe('FleetAuthzRouter', () => {
 
           fleetAuthzRouter.versioned[method]({
             path: '/test',
+            security: { authz: { enabled: false, reason: '' } },
           });
           // @ts-ignore
           expect(fakeRouter.versioned[method]).toBeCalledWith(
@@ -290,6 +291,7 @@ describe('FleetAuthzRouter', () => {
           fleetAuthzRouter.versioned[method]({
             path: '/test',
             access: 'internal',
+            security: { authz: { enabled: false, reason: '' } },
           });
           // @ts-ignore
           expect(fakeRouter.versioned[method]).toBeCalledWith(

@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import type { APMLinkExtendProps } from './apm_link';
-import { useAPMHref } from './apm_link';
-
-export function useServiceMapHref(serviceName?: string) {
-  const path = serviceName ? `/services/${serviceName}/service-map` : '/service-map';
-  return useAPMHref({ path });
-}
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import { EuiLink } from '@elastic/eui';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
+import type { APMLinkExtendProps } from './apm_link_hooks';
 
 interface ServiceMapLinkProps extends APMLinkExtendProps {
   serviceName?: string;
+  query:
+    | TypeOf<ApmRoutes, '/services/{serviceName}/service-map'>['query']
+    | TypeOf<ApmRoutes, '/service-map'>['query'];
 }
 
-export function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
-  const href = useServiceMapHref(serviceName);
+export function ServiceMapLink({ serviceName, query, ...rest }: ServiceMapLinkProps) {
+  const { link } = useApmRouter();
+  const href = serviceName
+    ? link('/services/{serviceName}/service-map', {
+        path: {
+          serviceName,
+        },
+        query,
+      })
+    : link('/service-map', { query });
   return <EuiLink data-test-subj="apmServiceMapLinkLink" href={href} {...rest} />;
 }

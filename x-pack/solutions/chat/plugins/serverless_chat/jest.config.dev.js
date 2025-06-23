@@ -9,8 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../',
-  projects: [
-    '<rootDir>/x-pack/solutions/chat/plugins/chat_serverless/server/*/jest.config.js',
-    '<rootDir>/x-pack/solutions/chat/plugins/chat_serverless/public/*/jest.config.js',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/chat/plugins/serverless_chat'],
 };

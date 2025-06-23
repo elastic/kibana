@@ -19,6 +19,7 @@ import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
+import { nonNullable } from '../../../utils';
 import { LensCellValueAction } from '../../../types';
 import { buildColumnsMetaLookup } from './helpers';
 import { DEFAULT_HEADER_ROW_HEIGHT } from './constants';
@@ -73,240 +74,246 @@ export const createGridColumns = (
     return { rowValue, contentsIsDefined, cellContent };
   };
 
-  return visibleColumns.map((field) => {
-    const { name, index: colIndex } = columnsReverseLookup[field];
-    const filterable = columnFilterable?.[colIndex] || false;
+  return visibleColumns
+    .map((field) => {
+      if (!columnsReverseLookup[field]) {
+        // if the column is not in the table, we can't do anything with it
+        return undefined;
+      }
+      const { name, index: colIndex } = columnsReverseLookup[field];
+      const filterable = columnFilterable?.[colIndex] || false;
 
-    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+      const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
-    const cellActions: EuiDataGridColumnCellAction[] = [];
+      const cellActions: EuiDataGridColumnCellAction[] = [];
 
-    // compatible cell actions from actions registry
-    const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
+      // compatible cell actions from actions registry
+      const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
-    if (
-      !hasFilterCellAction(compatibleCellActions) &&
-      filterable &&
-      handleFilterClick &&
-      !columnArgs?.oneClickFilter
-    ) {
-      cellActions.push(
-        ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-          const { rowValue, contentsIsDefined, cellContent } = getContentData({
-            rowIndex,
-            columnId,
-          });
+      if (
+        !hasFilterCellAction(compatibleCellActions) &&
+        filterable &&
+        handleFilterClick &&
+        !columnArgs?.oneClickFilter
+      ) {
+        cellActions.push(
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            const { rowValue, contentsIsDefined, cellContent } = getContentData({
+              rowIndex,
+              columnId,
+            });
 
-          const filterForText = i18n.translate(
-            'xpack.lens.table.tableCellFilter.filterForValueText',
-            {
-              defaultMessage: 'Filter for',
+            const filterForText = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterForValueText',
+              {
+                defaultMessage: 'Filter for',
+              }
+            );
+            const filterForAriaLabel = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
+              {
+                defaultMessage: 'Filter for: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
+
+            if (!contentsIsDefined) {
+              return null;
             }
-          );
-          const filterForAriaLabel = i18n.translate(
-            'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
-            {
-              defaultMessage: 'Filter for: {cellContent}',
-              values: {
-                cellContent,
-              },
-            }
-          );
 
-          if (!contentsIsDefined) {
-            return null;
+            return (
+              <Component
+                aria-label={filterForAriaLabel}
+                data-test-subj="lensDatatableFilterFor"
+                onClick={() => {
+                  handleFilterClick(field, rowValue, colIndex, rowIndex);
+                  closeCellPopover?.();
+                }}
+                iconType="plusInCircle"
+              >
+                {filterForText}
+              </Component>
+            );
+          },
+          ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+            const { rowValue, contentsIsDefined, cellContent } = getContentData({
+              rowIndex,
+              columnId,
+            });
+
+            const filterOutText = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterOutValueText',
+              {
+                defaultMessage: 'Filter out',
+              }
+            );
+            const filterOutAriaLabel = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
+              {
+                defaultMessage: 'Filter out: {cellContent}',
+                values: {
+                  cellContent,
+                },
+              }
+            );
+
+            if (!contentsIsDefined) {
+              return null;
+            }
+
+            return (
+              <Component
+                data-test-subj="lensDatatableFilterOut"
+                aria-label={filterOutAriaLabel}
+                onClick={() => {
+                  handleFilterClick(field, rowValue, colIndex, rowIndex, true);
+                  closeCellPopover?.();
+                }}
+                iconType="minusInCircle"
+              >
+                {filterOutText}
+              </Component>
+            );
           }
-
-          return (
-            <Component
-              aria-label={filterForAriaLabel}
-              data-test-subj="lensDatatableFilterFor"
-              onClick={() => {
-                handleFilterClick(field, rowValue, colIndex, rowIndex);
-                closeCellPopover?.();
-              }}
-              iconType="plusInCircle"
-            >
-              {filterForText}
-            </Component>
-          );
-        },
-        ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-          const { rowValue, contentsIsDefined, cellContent } = getContentData({
-            rowIndex,
-            columnId,
-          });
-
-          const filterOutText = i18n.translate(
-            'xpack.lens.table.tableCellFilter.filterOutValueText',
-            {
-              defaultMessage: 'Filter out',
-            }
-          );
-          const filterOutAriaLabel = i18n.translate(
-            'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
-            {
-              defaultMessage: 'Filter out: {cellContent}',
-              values: {
-                cellContent,
-              },
-            }
-          );
-
-          if (!contentsIsDefined) {
-            return null;
-          }
-
-          return (
-            <Component
-              data-test-subj="lensDatatableFilterOut"
-              aria-label={filterOutAriaLabel}
-              onClick={() => {
-                handleFilterClick(field, rowValue, colIndex, rowIndex, true);
-                closeCellPopover?.();
-              }}
-              iconType="minusInCircle"
-            >
-              {filterOutText}
-            </Component>
-          );
-        }
-      );
-    }
-
-    compatibleCellActions.forEach((action) => {
-      cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-        const rowValue = table.rows[rowIndex][columnId];
-        const columnMeta = columnsReverseLookup[columnId].meta;
-        const data = {
-          value: rowValue,
-          columnMeta,
-        };
-
-        if (rowValue == null) {
-          return null;
-        }
-
-        return (
-          <Component
-            aria-label={action.displayName}
-            data-test-subj={`lensDatatableCellAction-${action.id}`}
-            onClick={() => {
-              action.execute([data]);
-              closeCellPopover?.();
-            }}
-            iconType={action.iconType}
-          >
-            {action.displayName}
-          </Component>
         );
+      }
+
+      compatibleCellActions.forEach((action) => {
+        cellActions.push(({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+          const rowValue = table.rows[rowIndex][columnId];
+          const columnMeta = columnsReverseLookup[columnId].meta;
+          const data = {
+            value: rowValue,
+            columnMeta,
+          };
+
+          if (rowValue == null) {
+            return null;
+          }
+
+          return (
+            <Component
+              aria-label={action.displayName}
+              data-test-subj={`lensDatatableCellAction-${action.id}`}
+              onClick={() => {
+                action.execute([data]);
+                closeCellPopover?.();
+              }}
+              iconType={action.iconType}
+            >
+              {action.displayName}
+            </Component>
+          );
+        });
       });
-    });
 
-    const isTransposed = Boolean(columnArgs?.originalColumnId);
-    const initialWidth = columnArgs?.width;
-    const isHidden = columnArgs?.hidden;
-    const originalColumnId = columnArgs?.originalColumnId;
+      const isTransposed = Boolean(columnArgs?.originalColumnId);
+      const initialWidth = columnArgs?.width;
+      const isHidden = columnArgs?.hidden;
+      const originalColumnId = columnArgs?.originalColumnId;
 
-    const additionalActions: EuiListGroupItemProps[] = [];
+      const additionalActions: EuiListGroupItemProps[] = [];
 
-    additionalActions.push({
-      color: 'text',
-      size: 'xs',
-      onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
-      iconType: 'empty',
-      label: i18n.translate('xpack.lens.table.resize.reset', {
-        defaultMessage: 'Reset width',
-      }),
-      'data-test-subj': 'lensDatatableResetWidth',
-      isDisabled: initialWidth == null,
-    });
-    if (!isTransposed && onColumnHide) {
       additionalActions.push({
         color: 'text',
         size: 'xs',
-        onClick: () => onColumnHide({ columnId: originalColumnId || field }),
-        iconType: 'eyeClosed',
-        label: i18n.translate('xpack.lens.table.hide.hideLabel', {
-          defaultMessage: 'Hide',
+        onClick: () => onColumnResize({ columnId: originalColumnId || field, width: undefined }),
+        iconType: 'empty',
+        label: i18n.translate('xpack.lens.table.resize.reset', {
+          defaultMessage: 'Reset width',
         }),
-        'data-test-subj': 'lensDatatableHide',
-        isDisabled: !isHidden && visibleColumns.length <= 1,
+        'data-test-subj': 'lensDatatableResetWidth',
+        isDisabled: initialWidth == null,
       });
-    }
-
-    if (!isReadOnly) {
-      if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
-        const bucketValues = columnArgs?.bucketValues;
+      if (!isTransposed && onColumnHide) {
         additionalActions.push({
           color: 'text',
           size: 'xs',
-          onClick: () => handleTransposedColumnClick(bucketValues, false),
-          iconType: 'plusInCircle',
-          label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
-            defaultMessage: 'Filter for',
+          onClick: () => onColumnHide({ columnId: originalColumnId || field }),
+          iconType: 'eyeClosed',
+          label: i18n.translate('xpack.lens.table.hide.hideLabel', {
+            defaultMessage: 'Hide',
           }),
           'data-test-subj': 'lensDatatableHide',
-        });
-
-        additionalActions.push({
-          color: 'text',
-          size: 'xs',
-          onClick: () => handleTransposedColumnClick(bucketValues, true),
-          iconType: 'minusInCircle',
-          label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
-            defaultMessage: 'Filter out',
-          }),
-          'data-test-subj': 'lensDatatableHide',
+          isDisabled: !isHidden && visibleColumns.length <= 1,
         });
       }
-    }
-    const currentAlignment = alignments && alignments.get(field);
-    const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
-      headerRowHeight
-    );
 
-    const columnStyle = css({
-      ...((headerRowHeight === DEFAULT_HEADER_ROW_HEIGHT || headerRowHeight === undefined) && {
-        WebkitLineClamp: headerRowLines,
-      }),
-      ...(hasMultipleRows && {
-        whiteSpace: 'normal',
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical',
-      }),
-      textAlign: currentAlignment,
-    });
+      if (!isReadOnly) {
+        if (isTransposed && columnArgs?.bucketValues && handleTransposedColumnClick) {
+          const bucketValues = columnArgs?.bucketValues;
+          additionalActions.push({
+            color: 'text',
+            size: 'xs',
+            onClick: () => handleTransposedColumnClick(bucketValues, false),
+            iconType: 'plusInCircle',
+            label: i18n.translate('xpack.lens.table.columnFilter.filterForValueText', {
+              defaultMessage: 'Filter for',
+            }),
+            'data-test-subj': 'lensDatatableHide',
+          });
 
-    const columnDefinition: EuiDataGridColumn = {
-      id: field,
-      cellActions,
-      visibleCellActions: 5,
-      display: <div css={columnStyle}>{name}</div>,
-      displayAsText: name,
-      schema: field,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-        showSortAsc: {
-          label: i18n.translate('xpack.lens.table.sort.ascLabel', {
-            defaultMessage: 'Sort ascending',
-          }),
+          additionalActions.push({
+            color: 'text',
+            size: 'xs',
+            onClick: () => handleTransposedColumnClick(bucketValues, true),
+            iconType: 'minusInCircle',
+            label: i18n.translate('xpack.lens.table.columnFilter.filterOutValueText', {
+              defaultMessage: 'Filter out',
+            }),
+            'data-test-subj': 'lensDatatableHide',
+          });
+        }
+      }
+      const currentAlignment = alignments && alignments.get(field);
+      const hasMultipleRows = [RowHeightMode.auto, RowHeightMode.custom, undefined].includes(
+        headerRowHeight
+      );
+
+      const columnStyle = css({
+        ...((headerRowHeight === DEFAULT_HEADER_ROW_HEIGHT || headerRowHeight === undefined) && {
+          WebkitLineClamp: headerRowLines,
+        }),
+        ...(hasMultipleRows && {
+          whiteSpace: 'normal',
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+        }),
+        textAlign: currentAlignment,
+      });
+
+      const columnDefinition: EuiDataGridColumn = {
+        id: field,
+        cellActions,
+        visibleCellActions: 5,
+        display: <div css={columnStyle}>{name}</div>,
+        displayAsText: name,
+        schema: field,
+        actions: {
+          showHide: false,
+          showMoveLeft: false,
+          showMoveRight: false,
+          showSortAsc: {
+            label: i18n.translate('xpack.lens.table.sort.ascLabel', {
+              defaultMessage: 'Sort ascending',
+            }),
+          },
+          showSortDesc: {
+            label: i18n.translate('xpack.lens.table.sort.descLabel', {
+              defaultMessage: 'Sort descending',
+            }),
+          },
+          additional: additionalActions,
         },
-        showSortDesc: {
-          label: i18n.translate('xpack.lens.table.sort.descLabel', {
-            defaultMessage: 'Sort descending',
-          }),
-        },
-        additional: additionalActions,
-      },
-    };
+      };
 
-    if (initialWidth) {
-      columnDefinition.initialWidth = initialWidth;
-    }
+      if (initialWidth) {
+        columnDefinition.initialWidth = initialWidth;
+      }
 
-    return columnDefinition;
-  });
+      return columnDefinition;
+    })
+    .filter(nonNullable);
 };

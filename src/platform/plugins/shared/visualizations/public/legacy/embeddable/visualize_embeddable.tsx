@@ -25,6 +25,7 @@ import { Adapters } from '@kbn/inspector-plugin/public';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
+  ExpressionRendererEvent,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
@@ -436,11 +437,25 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     render(
       <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
+          <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,
       this.domNode
     );
+
+    const hasCompatibleActions = async (event: ExpressionRendererEvent) => {
+      const uiActions = getUiActions();
+      if (!uiActions?.getTriggerCompatibleActions) {
+        return false;
+      }
+      const eventName = get(VIS_EVENT_TO_TRIGGER, event.name, event.name);
+      const actions = await uiActions.getTriggerCompatibleActions(eventName, {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    };
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
@@ -448,6 +463,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      hasCompatibleActions,
       executionContext: this.getExecutionContext(),
     });
 

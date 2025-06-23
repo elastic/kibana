@@ -7,18 +7,20 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import { useMlManagementHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
 export function CreateCustomMlJobButton(): JSX.Element {
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    services: { ml },
+  } = useKibana();
+  const mlADLink = useMlManagementHref(ml, {
+    page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  });
 
   return (
-    <EuiButton
-      iconType="popout"
-      iconSide="right"
-      onClick={() => navigateToApp('ml', { openInNewTab: true })}
-    >
+    <EuiButton iconType="popout" iconSide="right" href={mlADLink}>
       {i18n.CREATE_CUSTOM_JOB_BUTTON_TITLE}
     </EuiButton>
   );

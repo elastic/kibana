@@ -9,7 +9,11 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexFlyoutStep } from './reindex_step';
@@ -41,6 +45,7 @@ describe('ReindexStep', () => {
     onConfirmInputChange: jest.fn(),
     startReindex: jest.fn(),
     cancelReindex: jest.fn(),
+    startReadonly: jest.fn(),
     http: {
       basePath: {
         prepend: jest.fn(),
@@ -63,8 +68,21 @@ describe('ReindexStep', () => {
         isFrozen: false,
         isInDataStream: false,
         isClosedIndex: false,
+        isFollowerIndex: false,
       },
     } as ReindexState,
+    deprecation: {
+      level: 'critical',
+      resolveDuringUpgrade: false,
+      type: 'index_settings',
+      message: 'Index created before 7.0',
+      details: 'deprecation details',
+      url: 'doc_url',
+      index: 'myIndex',
+      correctiveAction: {
+        type: 'reindex',
+      },
+    } as EnrichedDeprecationInfo,
   };
 
   it('renders', () => {
@@ -134,5 +152,59 @@ describe('ReindexStep', () => {
 
     wrapper.find('EuiButton').simulate('click');
     expect(props.startReindex).toHaveBeenCalled();
+  });
+
+  it('shows read-only button when reindexing fails', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.failed;
+    props.reindexState.errorMessage = 'Reindex failed';
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
+    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(true);
+  });
+
+  it('only shows read-only button when status is failed', () => {
+    const statuses = [
+      ReindexStatus.cancelled,
+      ReindexStatus.completed,
+      ReindexStatus.fetchFailed,
+      ReindexStatus.inProgress,
+      ReindexStatus.paused,
+    ];
+
+    statuses.forEach((status) => {
+      const props = cloneDeep(defaultProps);
+      props.reindexState.status = status;
+      const wrapper = shallow(<ReindexFlyoutStep {...props} />);
+      expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
+    });
+  });
+
+  it('does not show read-only button when the index is already read-only', () => {
+    const props = cloneDeep(defaultProps);
+    props.reindexState.status = ReindexStatus.failed;
+    props.reindexState.errorMessage = 'Reindex failed';
+    props.reindexState.meta.isReadonly = true;
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
+    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
+  });
+
+  it('does not show read-only button when read-only is excluded', () => {
+    const props = {
+      ...defaultProps,
+      reindexState: {
+        ...defaultProps.reindexState,
+        status: ReindexStatus.failed,
+        errorMessage: 'Reindex failed',
+      },
+      deprecation: {
+        ...defaultProps.deprecation,
+        correctiveAction: {
+          ...defaultProps.deprecation.correctiveAction,
+          excludedActions: ['readOnly'],
+        } as ReindexAction,
+      },
+    };
+    const wrapper = shallow(<ReindexFlyoutStep {...props} />);
+    expect(wrapper.find('[data-test-subj="startIndexReadonlyButton"]').exists()).toBe(false);
   });
 });

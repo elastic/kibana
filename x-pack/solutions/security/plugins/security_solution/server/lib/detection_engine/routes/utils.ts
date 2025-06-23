@@ -72,7 +72,6 @@ export const createBulkErrorObject = ({
     };
   } else {
     return {
-      rule_id: '(unknown id)',
       error: {
         status_code: statusCode,
         message,

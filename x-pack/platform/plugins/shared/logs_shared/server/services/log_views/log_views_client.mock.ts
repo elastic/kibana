@@ -6,14 +6,14 @@
  */
 
 import type { LogViewReference } from '../../../common/log_views';
-import { createResolvedLogViewMock } from '../../../common/log_views/resolved_log_view.mock';
+import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
 import type { ILogViewsClient } from './types';
 
 export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getLogView: jest.fn(),
   getInternalLogView: jest.fn(),
   getResolvedLogView: jest.fn((logViewReference: LogViewReference) =>
-    Promise.resolve(createResolvedLogViewMock())
+    Promise.resolve(createResolvedLogViewLazyMock())
   ),
   putLogView: jest.fn(),
   resolveLogView: jest.fn(),

@@ -14,6 +14,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiCard,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -70,14 +71,52 @@ export const ChatSetupPage: React.FC = () => {
               <EuiLoadingSpinner />
             ) : (
               <>
-                <EuiFlexItem grow={false}>
-                  <ConnectLLMButton />
+                <EuiFlexItem style={{ minWidth: 360 }}>
+                  <EuiCard
+                    textAlign="left"
+                    titleSize="xs"
+                    title={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.connectToLLM"
+                        defaultMessage="Large Language Model (LLM)"
+                      />
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.connectToLLMDescription"
+                        defaultMessage="Select a model to integrate with your chat experience. You can also set up your own connection."
+                      />
+                    }
+                    footer={<ConnectLLMButton />}
+                  />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {indices.length ? <AddDataSources /> : <CreateIndexButton />}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <UploadFileButton isSetup={true} />
+                <EuiFlexItem style={{ minWidth: 360 }}>
+                  <EuiCard
+                    textAlign="left"
+                    titleSize="xs"
+                    title={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.elasticsearchData"
+                        defaultMessage="Elasticsearch Data"
+                      />
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.elasticsearchDataDescription"
+                        defaultMessage="Select your data sources to include as context or upload files to start."
+                      />
+                    }
+                    footer={
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false}>
+                          {indices.length ? <AddDataSources /> : <CreateIndexButton />}
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <UploadFileButton isSetup={true} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                  />
                 </EuiFlexItem>
               </>
             )}

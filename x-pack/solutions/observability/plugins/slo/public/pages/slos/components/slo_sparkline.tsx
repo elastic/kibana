@@ -49,7 +49,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   if (isLoading) {
-    return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
+    return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" />;
   }
 
   const height = size === 'compact' ? 14 : 28;
@@ -85,6 +85,7 @@ export function SloSparkline({ chart, data, id, isLoading, size, state }: Props)
           point: { visible: 'never' },
         }}
         xAccessor={'key'}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yAccessors={['value']}
         yScaleType={ScaleType.Linear}

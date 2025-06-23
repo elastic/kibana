@@ -11,8 +11,9 @@ import fs from 'fs';
 import path from 'path';
 import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
-import { FieldMap } from '../..';
-import { createLineWriter, LineWriter } from './lib/line_writer';
+import type { FieldMap } from '../..';
+import type { LineWriter } from './lib/line_writer';
+import { createLineWriter } from './lib/line_writer';
 
 const PLUGIN_DIR = path.resolve(path.join(__dirname, '..'));
 
@@ -266,7 +267,7 @@ const SchemaFileTemplate = `
 // this file was generated, and should not be edited by hand
 // ---------------------------------- WARNING ----------------------------------
 import * as rt from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/Either';
 %%IMPORTS%%
 const ISO_DATE_PATTERN = /^d{4}-d{2}-d{2}Td{2}:d{2}:d{2}.d{3}Z$/;
 export const IsoDateString = new rt.Type<string, string, unknown>(

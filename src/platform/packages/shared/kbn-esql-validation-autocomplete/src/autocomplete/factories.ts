@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, type ESQLControlVariable, type RecommendedField } from '@kbn/esql-types';
 import { SuggestionRawDefinition } from './types';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
@@ -25,7 +25,7 @@ import {
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
-import { ESQLRealField } from '../validation/types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 
@@ -35,6 +35,11 @@ const techPreviewLabel = i18n.translate(
     defaultMessage: `Technical Preview`,
   }
 );
+
+const getVariablePrefix = (variableType: ESQLVariableType) =>
+  variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+    ? '??'
+    : '?';
 
 const allFunctions = memoize(
   () =>
@@ -193,8 +198,27 @@ export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
     .map(getOperatorSuggestion);
 };
 
+/**
+ * Generates a sort key for field suggestions based on their categorization.
+ * Recommended fields are prioritized, followed by ECS fields.
+ *
+ * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
+ * @param isRecommended - True if the field is a recommended field from the registry.
+ * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
+ */
+const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
+  if (isRecommended) {
+    return '1C';
+  }
+  if (isEcs) {
+    return '1D';
+  }
+  return 'D';
+};
+
 export const buildFieldsDefinitionsWithMetadata = (
-  fields: ESQLRealField[],
+  fields: ESQLFieldWithMetadata[],
+  recommendedFieldsFromExtensions: RecommendedField[] = [],
   options?: {
     advanceCursor?: boolean;
     openSuggestions?: boolean;
@@ -205,7 +229,15 @@ export const buildFieldsDefinitionsWithMetadata = (
   getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
-    const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const fieldType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const titleCaseType = `${field.name} (${fieldType})`;
+    // Check if the field is in the recommended fields from extensions list
+    // and if so, mark it as recommended. This also ensures that recommended fields
+    // that are registered wrongly, won't be shown as suggestions.
+    const fieldIsRecommended = recommendedFieldsFromExtensions.some(
+      (recommendedField) => recommendedField.name === field.name
+    );
+    const sortText = getFieldsSortText(Boolean(field.isEcs), Boolean(fieldIsRecommended));
     return {
       label: field.name,
       text:
@@ -214,8 +246,7 @@ export const buildFieldsDefinitionsWithMetadata = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      // If detected to be an ECS field, push it up to the top of the list
-      sortText: field.isEcs ? '1D' : 'D',
+      sortText,
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   }) as SuggestionRawDefinition[];
@@ -223,12 +254,13 @@ export const buildFieldsDefinitionsWithMetadata = (
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
     const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
-    const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
+    const userDefinedColumns =
+      getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
 
     const controlSuggestions = fields.length
       ? getControlSuggestion(
           variableType,
-          variables?.map((v) => `?${v.key}`)
+          userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];
     suggestions.push(...controlSuggestions);
@@ -252,15 +284,17 @@ export const buildFieldsDefinitions = (
     command: openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 };
-export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDefinition[] =>
-  variables.map((label) => ({
+export const buildUserDefinedColumnsDefinitions = (
+  userDefinedColumns: string[]
+): SuggestionRawDefinition[] =>
+  userDefinedColumns.map((label) => ({
     label,
     text: getSafeInsertText(label),
     kind: 'Variable',
     detail: i18n.translate(
       'kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition',
       {
-        defaultMessage: `Variable specified by the user within the ES|QL query`,
+        defaultMessage: `Column specified by the user within the ES|QL query`,
       }
     ),
     sortText: 'D',
@@ -329,13 +363,13 @@ export const buildValueDefinitions = (
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
-export const getNewVariableSuggestion = (label: string): SuggestionRawDefinition => {
+export const getNewUserDefinedColumnSuggestion = (label: string): SuggestionRawDefinition => {
   return {
     label,
     text: `${label} = `,
     kind: 'Variable',
     detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
-      defaultMessage: 'Define a new variable',
+      defaultMessage: 'Define a new column',
     }),
     sortText: '1',
     command: TRIGGER_SUGGESTION_COMMAND,
@@ -391,18 +425,18 @@ export function getCompatibleLiterals(
   getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('time_literal')) {
+  if (types.includes('time_duration')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {
-      const variables =
+      const userDefinedColumns =
         getVariables?.()?.filter((variable) => variable.type === ESQLVariableType.TIME_LITERAL) ??
         [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
-          variables.map((v) => `?${v.key}`)
+          userDefinedColumns.map((v) => `?${v.key}`)
         )
       );
     }
@@ -482,16 +516,17 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariables?: () => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined,
+  shouldBePrefixed = true
 ) {
   if (!supportsControls) {
     return [];
   }
-  const variableType = type;
-  const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
+  const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
+  const variables = getVariables?.()?.filter((variable) => variable.type === type) ?? [];
   const controlSuggestion = getControlSuggestion(
-    variableType,
-    variables?.map((v) => `?${v.key}`)
+    type,
+    variables?.map((v) => `${prefix}${v.key}`)
   );
   return controlSuggestion;
 }

@@ -57,6 +57,7 @@ export const sloKeys = {
     page: number;
     perPage: number;
     includeOutdatedOnly: boolean;
+    validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
@@ -87,6 +88,7 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
+  bulkDeleteStatus: (taskId: string) => [...sloKeys.all, 'bulkDeleteStatus', taskId] as const,
 };
 
 export type SloKeys = typeof sloKeys;

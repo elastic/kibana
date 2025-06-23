@@ -6,7 +6,7 @@
  */
 
 import { ContentReference } from '../../schemas';
-import { ContentReferencesStore } from '../types';
+import { ContentReferencesStore, Options } from '../types';
 
 const CONTENT_REFERENCE_ID_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -14,10 +14,15 @@ const CONTENT_REFERENCE_ID_ALPHABET =
 /**
  * Creates a new ContentReferencesStore used for storing references (also known as citations)
  */
-export const newContentReferencesStore: () => ContentReferencesStore = () => {
+export const newContentReferencesStore: (options?: Options) => ContentReferencesStore = (
+  options?: Options
+) => {
   const store = new Map<string, ContentReference>();
 
   const add: ContentReferencesStore['add'] = (creator) => {
+    if (options?.disabled) {
+      return undefined;
+    }
     const entry = creator({ id: generateUnsecureId() });
     store.set(entry.id, entry);
     return entry;
@@ -48,5 +53,6 @@ export const newContentReferencesStore: () => ContentReferencesStore = () => {
   return {
     add,
     getStore,
+    options,
   };
 };

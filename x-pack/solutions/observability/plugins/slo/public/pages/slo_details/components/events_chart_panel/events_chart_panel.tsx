@@ -64,7 +64,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
   function getChart() {
     if (isLoading) {
-      return <EuiLoadingChart size="m" mono data-test-subj="eventsLoadingChart" />;
+      return <EuiLoadingChart size="m" data-test-subj="eventsLoadingChart" />;
     }
 
     switch (slo.indicator.type) {
@@ -114,7 +114,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
                 })}
                 data-test-subj="sloDetailDiscoverLink"
               >
-                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
                 <FormattedMessage
                   id="xpack.slo.sloDetails.viewEventsLink"
                   defaultMessage="View events"

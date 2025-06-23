@@ -274,7 +274,27 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = `[${elements}]`;
+      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitMapEntryExpression', (ctx) => {
+      const key = ctx.visitKey();
+      const value = ctx.visitValue();
+      const formatted = key + ': ' + value;
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
+    .on('visitMapExpression', (ctx) => {
+      let entriesFormatted = '';
+
+      for (const entry of ctx.visitEntries()) {
+        entriesFormatted += (entriesFormatted ? ', ' : '') + entry;
+      }
+
+      const formatted = '{' + entriesFormatted + '}';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -354,12 +374,6 @@ export class BasicPrettyPrinter {
       }
     })
 
-    .on('visitRenameExpression', (ctx) => {
-      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
-
-      return this.decorateWithComments(ctx.node, formatted);
-    })
-
     .on('visitOrderExpression', (ctx) => {
       const node = ctx.node;
       let text = ctx.visitArgument(0);
@@ -400,6 +414,27 @@ export class BasicPrettyPrinter {
         ? ''
         : (opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase()) + ' ';
 
+      if (cmd === 'FORK') {
+        const branches = node.args
+          .map((branch) => {
+            if (Array.isArray(branch) || branch.type !== 'query') {
+              return undefined;
+            }
+
+            return ctx.visitSubQuery(branch);
+          })
+          .filter(Boolean) as string[];
+
+        const spaces = (n: number) => ' '.repeat(n);
+
+        const branchSeparator = opts.multiline ? `)\n${spaces(4)}(` : `) (`;
+
+        return this.decorateWithComments(
+          ctx.node,
+          `FORK${opts.multiline ? `\n${spaces(4)}` : ' '}(${branches.join(branchSeparator)})`
+        );
+      }
+
       let args = '';
       let options = '';
 
@@ -423,7 +458,16 @@ export class BasicPrettyPrinter {
 
     .on('visitQuery', (ctx) => {
       const opts = this.opts;
-      const cmdSeparator = opts.multiline ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
+
+      let parentNode;
+      if (ctx.parent?.node && !Array.isArray(ctx.parent.node)) {
+        parentNode = ctx.parent.node;
+      }
+
+      const useMultiLine =
+        opts.multiline && !Array.isArray(parentNode) && parentNode?.name !== 'fork';
+
+      const cmdSeparator = useMultiLine ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
       let text = '';
 
       for (const cmd of ctx.visitCommands()) {

@@ -26,9 +26,7 @@ export const findUserActionsRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params,
   routerOptions: {
-    access: 'public',
-    summary: 'Get user actions by case',
-    tags: ['oas-tag:cases'],
+    access: 'internal',
   },
   handler: async ({ context, request, response }) => {
     try {

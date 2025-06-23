@@ -162,7 +162,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink emotion-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -222,7 +222,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <a
           class="euiLink emotion-euiLink-primary"
-          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/managing-data-views.html#string-field-formatters"
+          href="https://www.elastic.co/docs/explore-analyze/find-and-organize/data-views#string-field-formatters"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -260,7 +260,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       class="euiFormRow__fieldWrapper"
     >
       <div
-        class="euiBasicTable kbnFieldFormatEditor__samples"
+        class="euiBasicTable kbnFieldFormatEditor__samples css-p1tgq2-samples"
         id="generated-id"
       >
         <table
