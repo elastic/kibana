@@ -50,8 +50,8 @@ export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
 export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.data.navTitle', {
-    defaultMessage: 'Data',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.build.navTitle', {
+    defaultMessage: 'Build',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
