@@ -337,7 +337,7 @@ export const useAnnotationStyles = () => {
             transition: `fill ${euiTheme.animation.fast}`,
 
             '&--blur': {
-              fill: euiTheme.colors.accent,
+              fill: euiTheme.colors.lightestShade,
             },
           },
 
