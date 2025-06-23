@@ -45,7 +45,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
   }, [showEISCallout, tourCompleted]);
 
   if (!showCallOut) {
-    return;
+    return null;
   }
 
   return (
