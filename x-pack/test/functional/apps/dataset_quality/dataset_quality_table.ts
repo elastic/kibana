@@ -209,7 +209,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       it('changes link text on hover when failure store is not enabled', async () => {
         const linkSelector = 'datasetQualitySetFailureStoreLink';
-        const link = await testSubjects.find(linkSelector);
+        const links = await testSubjects.findAll(linkSelector);
+        expect(links.length).to.be.greaterThan(0);
+        const link = links[links.length - 1];
 
         expect(await link.getVisibleText()).to.eql('N/A');
 
@@ -218,6 +220,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await retry.try(async () => {
           expect(await link.getVisibleText()).to.eql('Set failure store');
         });
+
+        const table = await PageObjects.datasetQuality.getDatasetsTable();
+        await table.moveMouseTo();
       });
     });
   });
