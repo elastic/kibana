@@ -104,8 +104,8 @@ export const BulkActionBase = z.object({
 /**
  * IDs for a specific prompt within a group of prompts.
  */
-export type PromptIdSet = z.infer<typeof PromptIdSet>;
-export const PromptIdSet = z.object({
+export type PromptIds = z.infer<typeof PromptIds>;
+export const PromptIds = z.object({
   /**
    * The unique identifier for a specific prompt.
    */
