@@ -42,7 +42,7 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logsShared",
+      "logsDataAccess",
       "licensing",
       "navigation",
       "fieldsMetadata",
@@ -63,6 +63,7 @@
     "requiredBundles": [
       "data",
       "discover",
+      "logsShared",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",
