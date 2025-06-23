@@ -81,7 +81,7 @@ export function SettingsPage() {
         },
         {
           text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
+            'xpack.observabilityAiAssistantManagement.breadcrumb.observabilityAndSearch',
             {
               defaultMessage: 'Observability and Search',
             }
@@ -126,18 +126,24 @@ export function SettingsPage() {
   let title;
   if (cloud?.isServerlessEnabled) {
     if (serverlessProjectType === 'observability') {
-      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
-        defaultMessage: 'AI Assistant for Observability',
-      });
+      title = i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.title.observability',
+        {
+          defaultMessage: 'AI Assistant for Observability',
+        }
+      );
     } else {
-      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
+      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title.search', {
         defaultMessage: 'AI Assistant for Search',
       });
     }
   } else {
-    title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title', {
-      defaultMessage: 'AI Assistant for Observability and Search',
-    });
+    title = i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.title.observabilityAndSearch',
+      {
+        defaultMessage: 'AI Assistant for Observability and Search',
+      }
+    );
   }
 
   const selectedTabId = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
