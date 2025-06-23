@@ -16,15 +16,11 @@ import {
   SEARCH_AI_SEARCH,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
-import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
-import { GETTING_STARTED_TITLE } from '../../../../common/constants';
+import type { ClassicNavItem } from './types';
 
-export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
-  const navItems: ClassicNavItem[] = [];
-
-  // Home
-  navItems.push({
+export const BaseClassicNavItems: ClassicNavItem[] = [
+  {
     'data-test-subj': 'searchSideNav-Home',
     deepLink: {
       link: ENTERPRISE_SEARCH_APP_ID,
@@ -33,15 +29,13 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
     id: 'home',
     name: (
       <EuiText size="s">
-        {i18n.translate('xpack.enterpriseSearch.nav.homeTitle', {
+        {i18n.translate('xpack.searchNavigation.classicNav.homeTitle', {
           defaultMessage: 'Home',
         })}
       </EuiText>
     ),
-  });
-
-  // Data
-  navItems.push({
+  },
+  {
     'data-test-subj': 'searchSideNav-Data',
     id: 'data',
     items: [
@@ -69,13 +63,11 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'crawlers',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.dataTitle', {
+    name: i18n.translate('xpack.searchNavigation.classicNav.dataTitle', {
       defaultMessage: 'Data',
     }),
-  });
-
-  // Build
-  navItems.push({
+  },
+  {
     'data-test-subj': 'searchSideNav-Build',
     id: 'build',
     items: [
@@ -95,12 +87,11 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'searchApplications',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
+    name: i18n.translate('xpack.searchNavigation.classicNav.applicationsTitle', {
       defaultMessage: 'Build',
     }),
-  });
-
-  navItems.push({
+  },
+  {
     'data-test-subj': 'searchSideNav-Relevance',
     id: 'relevance',
     items: [
@@ -129,13 +120,11 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'searchQueryRules',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+    name: i18n.translate('xpack.searchNavigation.classicNav.relevanceTitle', {
       defaultMessage: 'Relevance',
     }),
-  });
-
-  // Getting Started
-  navItems.push({
+  },
+  {
     'data-test-subj': 'searchSideNav-GettingStarted',
     id: 'es_getting_started',
     items: [
@@ -168,8 +157,8 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'aiSearch',
       },
     ],
-    name: GETTING_STARTED_TITLE,
-  });
-
-  return navItems;
-};
+    name: i18n.translate('xpack.searchNavigation.classicNav.gettingStartedTitle', {
+      defaultMessage: 'Getting started',
+    }),
+  },
+];
