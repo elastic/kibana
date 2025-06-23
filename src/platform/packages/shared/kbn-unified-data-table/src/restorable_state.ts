@@ -9,8 +9,10 @@
 
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 
+type SelectedDocId = string;
+
 export interface UnifiedDataTableRestorableState {
-  selectedDocsSet: Set<string>;
+  selectedDocsMap: Record<SelectedDocId, boolean>;
   isCompareActive: boolean;
 }
 

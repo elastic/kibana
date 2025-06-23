@@ -298,6 +298,9 @@ export const createInternalStateStore = (options: InternalStateDependencies) => 
         thunk: { extraArgument: options },
         serializableCheck: !IS_JEST_ENVIRONMENT,
       }).prepend(createMiddleware(options).middleware),
+    devTools: {
+      name: 'DiscoverInternalState',
+    },
   });
 };
 
