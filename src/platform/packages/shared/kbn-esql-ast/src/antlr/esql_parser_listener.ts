@@ -75,6 +75,9 @@ import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
 import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RrfCommandContext } from "./esql_parser.js";
+import { InferenceCommandOptionsContext } from "./esql_parser.js";
+import { InferenceCommandOptionContext } from "./esql_parser.js";
+import { InferenceCommandOptionValueContext } from "./esql_parser.js";
 import { RerankCommandContext } from "./esql_parser.js";
 import { CompletionCommandContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
@@ -789,6 +792,36 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inferenceCommandOptions`.
+	 * @param ctx the parse tree
+	 */
+	enterInferenceCommandOptions?: (ctx: InferenceCommandOptionsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inferenceCommandOptions`.
+	 * @param ctx the parse tree
+	 */
+	exitInferenceCommandOptions?: (ctx: InferenceCommandOptionsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inferenceCommandOption`.
+	 * @param ctx the parse tree
+	 */
+	enterInferenceCommandOption?: (ctx: InferenceCommandOptionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inferenceCommandOption`.
+	 * @param ctx the parse tree
+	 */
+	exitInferenceCommandOption?: (ctx: InferenceCommandOptionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inferenceCommandOptionValue`.
+	 * @param ctx the parse tree
+	 */
+	enterInferenceCommandOptionValue?: (ctx: InferenceCommandOptionValueContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inferenceCommandOptionValue`.
+	 * @param ctx the parse tree
+	 */
+	exitInferenceCommandOptionValue?: (ctx: InferenceCommandOptionValueContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.rerankCommand`.
 	 * @param ctx the parse tree

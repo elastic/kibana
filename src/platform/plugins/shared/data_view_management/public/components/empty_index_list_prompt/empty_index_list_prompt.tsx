@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './empty_index_list_prompt.scss';
 import React from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,8 +23,10 @@ import {
   EuiLink,
   EuiText,
   EuiFlexGroup,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const EmptyIndexListPrompt = ({
   onRefresh,
@@ -40,6 +41,8 @@ export const EmptyIndexListPrompt = ({
   addDataUrl: string;
   navigateToApp: ApplicationStart['navigateToApp'];
 }) => {
+  const styles = useMemoCss(componentStyles);
+
   const createAnywayLink = (
     <EuiText color="subdued" textAlign="center" size="xs">
       <FormattedMessage
@@ -61,14 +64,11 @@ export const EmptyIndexListPrompt = ({
 
   return (
     <EuiPanel
-      className="inpEmptyState"
       data-test-subj="indexPatternEmptyState"
       color="subdued"
       hasShadow={false}
       paddingSize="xl"
-      css={css`
-        margin: auto;
-      `}
+      css={styles.wrapper}
     >
       <EuiPageHeader>
         <EuiTitle>
@@ -82,10 +82,10 @@ export const EmptyIndexListPrompt = ({
       </EuiPageHeader>
       <EuiSpacer size="xl" />
       <div>
-        <EuiFlexGrid className="inpEmptyState__cardGrid" columns={3} responsive={true}>
+        <EuiFlexGrid css={styles.cardGrid} columns={3} responsive={true}>
           <EuiFlexItem>
             <EuiCard
-              className="inpEmptyState__card"
+              css={styles.card}
               onClick={() => {
                 navigateToApp('integrations', { path: '/browse' });
               }}
@@ -107,7 +107,7 @@ export const EmptyIndexListPrompt = ({
           <EuiFlexItem>
             <EuiCard
               onClick={() => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' })}
-              className="inpEmptyState__card"
+              css={styles.card}
               icon={<EuiIcon size="xl" type="document" color="subdued" />}
               title={
                 <FormattedMessage
@@ -125,7 +125,7 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              className="inpEmptyState__card"
+              css={styles.card}
               onClick={() => {
                 navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
               }}
@@ -146,9 +146,9 @@ export const EmptyIndexListPrompt = ({
           </EuiFlexItem>
         </EuiFlexGrid>
         <EuiSpacer size="xxl" />
-        <div className="inpEmptyState__footer">
+        <div css={styles.footer}>
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
+            <EuiFlexItem grow={false} css={styles.footerItem}>
               <EuiDescriptionList
                 listItems={[
                   {
@@ -170,7 +170,7 @@ export const EmptyIndexListPrompt = ({
                 ]}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="inpEmptyState__footerFlexItem">
+            <EuiFlexItem grow={false} css={styles.footerItem}>
               <EuiDescriptionList
                 listItems={[
                   {
@@ -200,4 +200,30 @@ export const EmptyIndexListPrompt = ({
       </div>
     </EuiPanel>
   );
+};
+
+const componentStyles = {
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      maxWidth: `calc(${euiTheme.size.xxl} * 19)`,
+      margin: 'auto',
+    }),
+  cardGrid: css({
+    justifyContent: 'center',
+  }),
+  card: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minWidth: `calc(${euiTheme.size.xl} * 6)`,
+    }),
+  footer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.lightestShade,
+      margin: `0 -${euiTheme.size.l} -${euiTheme.size.l}`,
+      padding: euiTheme.size.l,
+      borderRadius: `0 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small}`,
+    }),
+  footerItem: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minWidth: `calc(${euiTheme.size.xl} * 7)`,
+    }),
 };

@@ -419,6 +419,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-requirements`,
       networkMap: `${ELASTIC_DOCS}solutions/security/explore/configure-network-map-data`,
       troubleshootGaps: `${ELASTIC_DOCS}troubleshoot/security/detection-rules#troubleshoot-gaps`,
+      gapsTable: `${ELASTIC_DOCS}solutions/security/detect-and-alert/monitor-rule-executions#gaps-table`,
       ruleApiOverview: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
@@ -1015,6 +1016,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryRulesAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-query_rules`
         : `${ELASTICSEARCH_APIS}group/endpoint-query_rules`,
+    },
+    datasetQuality: {
+      failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
     },
   });
 };
