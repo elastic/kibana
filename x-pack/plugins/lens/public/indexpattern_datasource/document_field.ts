@@ -16,9 +16,7 @@ export const documentField: IndexPatternField = {
   displayName: i18n.translate('xpack.lens.indexPattern.records', {
     defaultMessage: 'Records',
   }),
-  name: i18n.translate('xpack.lens.indexPattern.records', {
-    defaultMessage: 'Records',
-  }),
+  name: 'Records',
   type: 'document',
   aggregatable: true,
   searchable: true,
