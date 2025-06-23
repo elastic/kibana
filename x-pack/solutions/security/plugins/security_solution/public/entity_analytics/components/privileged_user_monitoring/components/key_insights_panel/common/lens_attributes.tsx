@@ -11,8 +11,8 @@ interface KeyInsightsPanelParams {
   title: string;
   label: string;
   esqlQuery: string;
-  dataViewId?: string; // Optional data view override for ESQL queries
-  dataViewTitle?: string; // Optional data view title override
+  dataViewId?: string;
+  dataViewTitle?: string;
 }
 
 export const createKeyInsightsPanelLensAttributes = ({
