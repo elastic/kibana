@@ -26,6 +26,5 @@
     "@kbn/ml-validators",
     "@kbn/ml-parse-interval",
     "@kbn/ml-is-defined",
-    "@kbn/ml-data-grid",
   ]
 }

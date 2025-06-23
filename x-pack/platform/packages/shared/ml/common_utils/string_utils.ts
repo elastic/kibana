@@ -14,7 +14,6 @@ import he from 'he';
 import { escapeKuery } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
-import type { DataGridItem } from '@kbn/ml-data-grid';
 import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 // Replaces all instances of dollar delimited tokens in the specified String
@@ -26,7 +25,8 @@ import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 // If a corresponding key is not found in valuesByTokenName, then the String is not replaced.
 export function replaceStringTokens(
   str: string,
-  valuesByTokenName: MlCustomUrlAnomalyRecordDoc | DataGridItem,
+  /** Record<string, any> is the same as DataGridItem, not importing it though to avoid a circular dependency issue. */
+  valuesByTokenName: MlCustomUrlAnomalyRecordDoc | Record<string, any>,
   encodeForURI: boolean
 ) {
   return String(str).replace(/\$([^?&$\'"]+)\$/g, (match, name) => {
