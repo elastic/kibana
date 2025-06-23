@@ -20,7 +20,6 @@ import {
   getExecutionPrompt,
   getAnswerPrompt,
 } from './prompts';
-import { getToolCalls as getToolCallsBis } from '../utils';
 import { extractToolResults } from './utils';
 import { ActionResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
 
@@ -96,7 +95,7 @@ export const createResearcherAgentGraph = async ({
   const stringify = (obj: unknown) => JSON.stringify(obj, null, 2);
 
   /**
-   * Initialize the flow by adding a first index explorer call to the action queue.
+   * Identify the research goal from the current discussion, or ask for additional info if required.
    */
   const identifyResearchGoal = async (state: StateType) => {
     const researchGoalModel = chatModel.bindTools([setResearchGoalTool()]).withConfig({
@@ -107,7 +106,7 @@ export const createResearcherAgentGraph = async ({
       getIdentifyResearchGoalPrompt({ discussion: state.initialMessages })
     );
 
-    const toolCalls = getToolCallsBis(response);
+    const toolCalls = extractToolCalls(response);
     const textContent = extractTextContent(response);
 
     log.trace(
