@@ -8,14 +8,13 @@
 import type { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
 import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
 import { useNavigateToAlertsPageWithFilters } from '../../../../hooks/navigate_to_alerts_page_with_filters/use_navigate_to_alerts_page_with_filters';
-import {
-  ALERTS_PAGE_FILTER_ACKNOWLEDGED,
-  ALERTS_PAGE_FILTER_OPEN,
-} from '../../../../common/constants';
+import { openAlertsPageByOpenAndAck } from './navigation_helpers';
+import { useKibana } from '../../../../context/typed_kibana_context/typed_kibana_context';
 
 interface Props {
   contentReferenceNode: ResolvedContentReferenceNode<SecurityAlertsPageContentReference>;
@@ -23,21 +22,19 @@ interface Props {
 
 export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceNode }) => {
   const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
+  const { assistantAvailability } = useAssistantContext();
+  const { navigateToApp } = useKibana().services.application;
 
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
-      openAlertsPageWithFilters(
-        {
-          selectedOptions: [ALERTS_PAGE_FILTER_OPEN, ALERTS_PAGE_FILTER_ACKNOWLEDGED],
-          fieldName: 'kibana.alert.workflow_status',
-          persist: false,
-        },
-        true,
-        '(global:(timerange:(fromStr:now-24h,kind:relative,toStr:now)))'
+      return openAlertsPageByOpenAndAck(
+        navigateToApp,
+        openAlertsPageWithFilters,
+        assistantAvailability.hasSearchAILakeConfigurations
       );
     },
-    [openAlertsPageWithFilters]
+    [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, openAlertsPageWithFilters]
   );
 
   return (
@@ -45,7 +42,9 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({ contentReferenceN
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertsPageReference"
     >
-      <EuiLink onClick={onClick}>{SECURITY_ALERTS_PAGE_REFERENCE_LABEL}</EuiLink>
+      <EuiLink onClick={onClick} data-test-subj="alertsReferenceLink">
+        {SECURITY_ALERTS_PAGE_REFERENCE_LABEL}
+      </EuiLink>
     </PopoverReference>
   );
 };

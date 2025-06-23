@@ -950,6 +950,48 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.RruleSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleSchedule",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RruleSchedule.rrule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rrule",
+            "description": [],
+            "signature": [
+              "RruleMonthly | RruleWeekly | RruleDaily"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RruleSchedule.interval",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.RunContext",
         "type": "Interface",
         "tags": [],
@@ -1164,7 +1206,13 @@
                 "text": "IntervalSchedule"
               },
               " | ",
-              "RruleSchedule",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.RruleSchedule",
+                "text": "RruleSchedule"
+              },
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
@@ -1863,6 +1911,60 @@
             ]
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
+        "id": "def-server.scheduleRruleSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "scheduleRruleSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ rrule: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ byweekday?: string[] | undefined; bymonthday?: number[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".MONTHLY; }> | Readonly<{ byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".WEEKLY; bymonthday: never; }> | Readonly<{ byweekday?: string[] | undefined; byhour?: number[] | undefined; byminute?: number[] | undefined; } & { interval: number; tzid: string; freq: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          ".DAILY; bymonthday: never; }>>; }>"
+        ],
+        "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/schemas/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -225,71 +225,23 @@
         "signature": [
           "(options: InferenceGenerationOptions, cb: (span?: ",
           "Span",
-          " | undefined) => Promise<",
+          " | undefined) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteResponse",
-            "text": "ChatCompleteResponse"
+            "section": "def-common.ChatCompleteCompositeResponse",
+            "text": "ChatCompleteCompositeResponse"
           },
-          "<",
+          "<ChatCompleteCompositeResponseOptions>) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
+            "section": "def-common.ChatCompleteCompositeResponse",
+            "text": "ChatCompleteCompositeResponse"
           },
-          "<string>>> | ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteStreamResponse",
-            "text": "ChatCompleteStreamResponse"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>) => Promise<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteResponse",
-            "text": "ChatCompleteResponse"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>> | ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompleteStreamResponse",
-            "text": "ChatCompleteStreamResponse"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>"
+          "<ChatCompleteCompositeResponseOptions>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
         "deprecated": false,
@@ -320,39 +272,15 @@
             "signature": [
               "(span?: ",
               "Span",
-              " | undefined) => Promise<",
+              " | undefined) => ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
                 "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteResponse",
-                "text": "ChatCompleteResponse"
+                "section": "def-common.ChatCompleteCompositeResponse",
+                "text": "ChatCompleteCompositeResponse"
               },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>> | ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteStreamResponse",
-                "text": "ChatCompleteStreamResponse"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>"
+              "<ChatCompleteCompositeResponseOptions>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
             "deprecated": false,

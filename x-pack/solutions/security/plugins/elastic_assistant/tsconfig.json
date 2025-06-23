@@ -81,7 +81,8 @@
     "@kbn/elastic-assistant-shared-state-plugin",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/ai-assistant-management-plugin",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/rule-registry-plugin"
   ],
   "exclude": [
     "target/**/*",

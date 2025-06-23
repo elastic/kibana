@@ -7,4 +7,5 @@
 
 export const URL_PARAM_KEY = {
   pageFilter: 'pageFilters',
+  appQuery: 'query',
 } as const;

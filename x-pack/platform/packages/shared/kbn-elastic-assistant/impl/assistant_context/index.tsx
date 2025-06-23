@@ -16,8 +16,8 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import {
   ChromeStart,
-  NavigateToAppOptions,
   UnmountCallback,
+  ApplicationStart,
   UserProfileService,
 } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
@@ -64,6 +64,8 @@ type ShowAssistantOverlay = ({
   selectedConversation,
 }: ShowAssistantOverlayProps) => void;
 
+type GetUrlForApp = ApplicationStart['getUrlForApp'];
+
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
@@ -77,12 +79,13 @@ export interface AssistantProviderProps {
   };
   basePath: string;
   basePromptContexts?: PromptContextTemplate[];
-  docLinks: Omit<DocLinksStart, 'links'>;
+  docLinks: DocLinksStart;
+  getUrlForApp: GetUrlForApp;
   getComments: GetAssistantMessages;
   http: HttpSetup;
   inferenceEnabled?: boolean;
   nameSpace?: string;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   title?: string;
   toasts?: IToasts;
   currentAppId: string;
@@ -110,15 +113,16 @@ export interface UseAssistantContext {
       showAnonymizedValues: boolean;
     }) => UnmountCallback;
   };
-  docLinks: Omit<DocLinksStart, 'links'>;
+  docLinks: DocLinksStart;
   basePath: string;
   currentUserAvatar?: UserAvatar;
   getComments: GetAssistantMessages;
+  getUrlForApp: GetUrlForApp;
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
   promptContexts: Record<string, PromptContext>;
-  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
+  navigateToApp: ApplicationStart['navigateToApp'];
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: ModalSettingsTabs | null;
@@ -171,6 +175,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
     basePath,
     basePromptContexts = [],
     getComments,
+    getUrlForApp,
     http,
     inferenceEnabled = false,
     navigateToApp,
@@ -310,6 +315,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       knowledgeBase: {
@@ -359,6 +365,7 @@ export const useAssistantContextValue = (props: AssistantProviderProps): UseAssi
       currentUserAvatar,
       docLinks,
       getComments,
+      getUrlForApp,
       http,
       inferenceEnabled,
       localStorageKnowledgeBase,

@@ -14,6 +14,7 @@ import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -42,6 +43,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   };
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+  const docLinks = docLinksServiceMock.createStartContract();
 
   const mockUserProfileService = {
     getCurrent: jest.fn(() => Promise.resolve({ avatar: 'avatar' })),
@@ -54,7 +56,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current' },
+    docLinks: docLinks,
     getComments: jest.fn(() => []),
     http: mockHttp,
     navigateToApp: mockNavigateToApp,
@@ -64,6 +66,8 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
     },
     userProfileService: mockUserProfileService,
     chrome,
+    getUrlForApp: jest.fn(),
+
   });
 
   return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;

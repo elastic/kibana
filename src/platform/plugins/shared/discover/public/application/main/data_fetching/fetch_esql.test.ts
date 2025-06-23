@@ -21,13 +21,14 @@ describe('fetchEsql', () => {
     jest.clearAllMocks();
   });
 
+  const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
   const fetchEsqlMockProps = {
     query: { esql: 'from *' },
     dataView: dataViewWithTimefieldMock,
     inspectorAdapters: { requests: new RequestAdapter() },
     data: discoverServiceMock.data,
     expressions: discoverServiceMock.expressions,
-    profilesManager: discoverServiceMock.profilesManager,
+    scopedProfilesManager,
   };
 
   it('resolves with returned records', async () => {
@@ -52,10 +53,7 @@ describe('fetchEsql', () => {
         })
       ),
     } as unknown as ExecutionContract);
-    const resolveDocumentProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
-      'resolveDocumentProfile'
-    );
+    const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
       esqlQueryColumns: ['_id', 'foo'],

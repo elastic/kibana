@@ -42,7 +42,6 @@ import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selec
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
@@ -56,6 +55,7 @@ import {
   useAssistantLastConversation,
   useAssistantSpaceId,
 } from './use_space_aware_context';
+import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -519,12 +519,13 @@ const AssistantComponent: React.FC<Props> = ({
                   `}
                   banner={
                     !isDisabled &&
-                    showMissingConnectorCallout &&
                     isFetchedConnectors && (
-                      <ConnectorMissingCallout
-                        isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                      <AssistantConversationBanner
                         isSettingsModalVisible={isSettingsModalVisible}
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        shouldShowMissingConnectorCallout={showMissingConnectorCallout}
+                        currentConversation={currentConversation}
+                        connectors={connectors}
                       />
                     )
                   }

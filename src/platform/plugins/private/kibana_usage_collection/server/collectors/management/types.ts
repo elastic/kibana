@@ -49,6 +49,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
+  'onechat:mcpServer:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
@@ -170,4 +171,5 @@ export interface UsageStats {
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
+  'observability:enableStreamsUI': boolean;
 }

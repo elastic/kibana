@@ -464,12 +464,12 @@
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/platform/plugins/shared/unified_search/public/types.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/public/kibana_services.ts"
               },
               {
                 "plugin": "visualizations",

@@ -21,6 +21,7 @@ import {
   AssistantProviderProps,
   useAssistantContextValue,
 } from '../../assistant_context';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { AssistantAvailability } from '../../assistant_context/types';
 import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
@@ -59,6 +60,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
+  const mockGetUrlForApp = jest.fn();
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -74,6 +76,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
 
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+  const docLinks = docLinksServiceMock.createStartContract();
 
   const assistantProviderProps = {
     actionTypeRegistry,
@@ -82,8 +85,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
       mount: jest.fn().mockReturnValue(() => {}),
     },
     basePath: 'https://localhost:5601/kbn',
-    docLinks: { ELASTIC_WEBSITE_URL: 'https://www.elastic.co/', DOC_LINK_VERSION: 'current' },
+    docLinks: docLinks,
     getComments: mockGetComments,
+    getUrlForApp: mockGetUrlForApp,
     http: mockHttp,
     navigateToApp: mockNavigateToApp,
     ...providerContext,

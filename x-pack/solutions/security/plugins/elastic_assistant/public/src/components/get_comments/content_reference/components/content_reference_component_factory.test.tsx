@@ -15,6 +15,13 @@ import type {
   UnresolvedContentReferenceNode,
 } from '../content_reference_parser';
 
+jest.mock('@kbn/elastic-assistant', () => ({
+  useAssistantContext: () => ({
+    assistantAvailability: {
+      hasSearchAILakeConfigurations: true,
+    },
+  }),
+}));
 jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),
