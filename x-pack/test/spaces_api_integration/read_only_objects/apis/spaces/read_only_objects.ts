@@ -129,5 +129,75 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
+
+    describe('transfer ownership of read only objects', () => {
+      it('should transfer ownership of read only objects when owner is current user', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        const transferResponse = await supertestWithoutAuth
+          .post('/read_only_objects/transfer')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .expect(200);
+        expect(transferResponse.body.accessControl).to.have.property('owner', 'new_owner');
+      });
+
+      it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await login(
+          adminTestUser.username,
+          adminTestUser.password
+        );
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+
+        const { cookie: testUserCookie } = await loginAsTestUser();
+        const transferResponse = await supertestWithoutAuth
+          .post('/read_only_objects/transfer')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .expect(403);
+        expect(transferResponse.body).to.have.property('message');
+        expect(transferResponse.body.message).to.contain(
+          'Access control denied: No modifiable objects'
+        );
+      });
+
+      it('should allow admins to transfer ownership of any object', async () => {
+        const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', testUserCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+
+        const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
+        const transferResponse = await supertestWithoutAuth
+          .post('/read_only_objects/transfer')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ objectId, type: 'read_only_type', newOwner: 'new_owner' })
+          .expect(200);
+        expect(transferResponse.body.accessControl).to.have.property('owner', 'new_owner');
+      });
+    });
   });
 }

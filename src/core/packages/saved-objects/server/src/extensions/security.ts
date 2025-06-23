@@ -145,6 +145,24 @@ export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
 }
 
 /**
+ * The AuthorizeChangeOwnershipObject interface extends AuthorizeObjectWithExistingSpaces
+ * and contains a object namespace override. Used by the authorizeChangeOwnership
+ * method.
+ */
+export interface AuthorizeChangeOwnershipObject extends AuthorizeObjectWithExistingSpaces {
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
+}
+
+export interface AuthorizeBulkChangeOwnershipParams extends AuthorizeParams {
+  /** The objects to authorize */
+  objects: AuthorizeChangeOwnershipObject[];
+}
+
+/**
  * The MultiNamespaceReferencesOptions interface contains options
  * specific for authorizing CollectMultiNamespaceReferences actions.
  */
@@ -257,6 +275,14 @@ export interface AuthorizeFindParams {
  */
 export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
 
+/**
+ * The AuthorizeChangeOwnershipParams interface extends AuthorizeParams and is
+ * used for the AuthorizeChangeOwnership method of the ISavedObjectsSecurityExtension.
+ */
+export interface AuthorizeChangeOwnershipParams extends AuthorizeParams {
+  /** The object to authorize */
+  object: AuthorizeChangeOwnershipObject;
+}
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
  * AuthorizeParams and is used for the AuthorizeAndRedactMultiNamespaceReferences
@@ -436,6 +462,15 @@ export interface ISavedObjectsSecurityExtension {
    */
   authorizeOpenPointInTime: <A extends string>(
     params: AuthorizeOpenPointInTimeParams
+  ) => Promise<CheckAuthorizationResult<A>>;
+
+  /**
+   * Performs authorization for the CHANGE_OWNERSHIP security action
+   * @param params the namespace and object to authorize for changing ownership
+   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeOwnership: <A extends string>(
+    params: AuthorizeChangeOwnershipParams
   ) => Promise<CheckAuthorizationResult<A>>;
 
   /**

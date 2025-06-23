@@ -132,6 +132,15 @@ describe('getBaseMappings', () => {
         managed: {
           type: 'boolean',
         },
+        accessControl: {
+          type: 'object',
+          dynamic: false,
+          properties: {
+            owner: {
+              type: 'keyword',
+            },
+          },
+        },
       },
     });
   });

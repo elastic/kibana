@@ -22,10 +22,12 @@ import type {
   AuthorizationTypeMap,
   AuthorizeAndRedactInternalBulkResolveParams,
   AuthorizeAndRedactMultiNamespaceReferencesParams,
+  AuthorizeBulkChangeOwnershipParams,
   AuthorizeBulkCreateParams,
   AuthorizeBulkDeleteParams,
   AuthorizeBulkGetParams,
   AuthorizeBulkUpdateParams,
+  AuthorizeChangeOwnershipParams,
   AuthorizeCheckConflictsParams,
   AuthorizeCreateParams,
   AuthorizeDeleteParams,
@@ -1112,6 +1114,38 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     return preAuthorizationResult;
+  }
+
+  async authorizeChangeOwnership<A extends string>(
+    params: AuthorizeChangeOwnershipParams
+  ): Promise<CheckAuthorizationResult<A>> {
+    return await this.internalAuthorizeChangeOwnership({
+      namespace: params.namespace,
+      objects: [params.object],
+    });
+  }
+
+  async internalAuthorizeChangeOwnership<A extends string>(
+    params: AuthorizeBulkChangeOwnershipParams
+  ): Promise<CheckAuthorizationResult<A>> {
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
+    const { objects } = params;
+    const action = SecurityAction.UPDATE; // TODO: Change to a more specific action for ownership transfer
+
+    this.assertObjectsArrayNotEmpty(objects, action);
+
+    const enforceMap = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>([namespaceString]);
+
+    const authorizationResult = await this.authorize({
+      actions: new Set([action]),
+      types: new Set(enforceMap.keys()),
+      spaces: spacesToAuthorize,
+      enforceMap,
+      auditOptions: { objects },
+    });
+
+    return authorizationResult;
   }
 
   auditClosePointInTime() {
