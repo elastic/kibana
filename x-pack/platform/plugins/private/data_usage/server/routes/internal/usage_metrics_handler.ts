@@ -43,8 +43,9 @@ export const getUsageMetricsHandler = (
       const parsedTo = momentDateParser(to)?.toISOString();
 
       if (!parsedFrom || !parsedTo) {
-        const customErrorMessage = `[request body.${!parsedTo ? 'to' : 'from'
-          }] Invalid date range ${!parsedTo ? to : from} is out of range`;
+        const customErrorMessage = `[request body.${
+          !parsedTo ? 'to' : 'from'
+        }] Invalid date range ${!parsedTo ? to : from} is out of range`;
         return errorHandler(logger, response, new CustomHttpRequestError(customErrorMessage, 400));
       }
 
@@ -113,9 +114,9 @@ export function transformMetricsData(
         name: metricSeries.name,
         data: Array.isArray(metricSeries.data)
           ? (metricSeries.data as Array<[number, number]>).map(([timestamp, value]) => ({
-            x: timestamp,
-            y: value,
-          }))
+              x: timestamp,
+              y: value,
+            }))
           : [],
       })),
     ])
