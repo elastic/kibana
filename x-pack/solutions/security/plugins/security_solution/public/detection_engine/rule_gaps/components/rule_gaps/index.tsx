@@ -19,7 +19,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiBetaBadge,
   EuiProgress,
   EuiText,
   EuiHealth,
@@ -28,7 +27,6 @@ import {
 } from '@elastic/eui';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -269,7 +267,6 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <HeaderSection title={'Gaps'} subtitle={'Rule gaps'} />
-            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 
