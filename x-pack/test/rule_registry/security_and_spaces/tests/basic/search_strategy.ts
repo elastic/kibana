@@ -10,7 +10,11 @@ import { ALERT_RULE_TYPE_ID, ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import type { Client } from '@elastic/elasticsearch';
-import { ObjectRemover, getEventLog } from '../../../../alerting_api_integration/common/lib';
+import {
+  ObjectRemover,
+  getEventLog,
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import { getAlwaysFiringInternalRule } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/alert_utils';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   obsOnlySpacesAll,
@@ -19,7 +23,6 @@ import {
   stackAlertsOnlyAllSpacesAll,
   superUser,
 } from '../../../common/lib/authentication/users';
-import { getAlwaysFiringInternalRule } from '../../../../alerting_api_integration/common/lib/alert_utils';
 
 type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
   statusCode: number;
