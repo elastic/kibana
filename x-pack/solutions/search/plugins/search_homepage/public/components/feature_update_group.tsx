@@ -23,9 +23,7 @@ export const FeatureUpdateGroup: React.FC<FeatureUpdateGroupProps> = ({ updates 
               <EuiIcon type="checkInCircleFilled" color="primary" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.searchHomepage.featureUpdateLabel', {
-                defaultMessage: update,
-              })}
+              {update}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
