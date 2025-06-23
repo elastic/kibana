@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiPageHeader,
-  useEuiTheme,
-  EuiBadgeGroup,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
