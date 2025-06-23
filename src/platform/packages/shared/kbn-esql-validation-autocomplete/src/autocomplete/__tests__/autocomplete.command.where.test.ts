@@ -285,6 +285,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
 
@@ -296,6 +297,7 @@ describe('WHERE <expression>', () => {
         'IS NOT NULL',
         'IS NULL',
         'NOT',
+        'NOT IN $0',
         'OR $0',
       ]);
     });

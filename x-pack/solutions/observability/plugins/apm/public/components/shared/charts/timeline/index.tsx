@@ -48,7 +48,11 @@ export function TimelineAxisContainer({
         const plotValues = getPlotValues({ width, xMin, xMax, margins, numberOfTicks });
         const topTraceDuration = xMax - (xMin ?? 0);
         return (
-          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+          <div
+            style={{ width: '100%', height: '100%' }}
+            ref={resizeRef}
+            data-test-subj="timeline-axis-container"
+          >
             <TimelineAxis
               plotValues={plotValues}
               marks={marks}

@@ -92,6 +92,63 @@ describe('traverseAndMutateDoc', () => {
     });
   });
 
+  describe('ECS fields that have alert-specific translations', () => {
+    describe('data_stream.* fields', () => {
+      it('preserves data_stream fields', () => {
+        const { result, removed } = traverseAndMutateDoc({
+          data_stream: { foo: 'test-foo' },
+        });
+
+        expect(result).toEqual(expect.objectContaining({ data_stream: { foo: 'test-foo' } }));
+        expect(removed).toEqual([]);
+      });
+
+      it('preserves dotted data_stream fields', () => {
+        const { result, removed } = traverseAndMutateDoc({
+          'data_stream.type': 'test-type',
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            'data_stream.type': 'test-type',
+          })
+        );
+        expect(removed).toEqual([]);
+      });
+
+      it('transforms data_stream fields to an alert-specific namespace', () => {
+        const { result, removed } = traverseAndMutateDoc({
+          data_stream: { namespace: 'test-namespace', type: 'test-type', dataset: 'test-dataset' },
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            'kibana.alert.original_data_stream.dataset': 'test-dataset',
+            'kibana.alert.original_data_stream.namespace': 'test-namespace',
+            'kibana.alert.original_data_stream.type': 'test-type',
+          })
+        );
+
+        expect(removed).toEqual([]);
+      });
+    });
+
+    it('transforms unknown data_stream fields to the alert-specific namespace', () => {
+      const { result, removed } = traverseAndMutateDoc({
+        data_stream: { foo: 'test-foo', type: 'test-type' },
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          'kibana.alert.original_data_stream.foo': 'test-foo',
+          'kibana.alert.original_data_stream.type': 'test-type',
+        })
+      );
+
+      expect(removed).toEqual([]);
+    });
+  });
+
   describe('array fields', () => {
     it('should not strip arrays of objects when an object is expected', () => {
       const { result, removed } = traverseAndMutateDoc({

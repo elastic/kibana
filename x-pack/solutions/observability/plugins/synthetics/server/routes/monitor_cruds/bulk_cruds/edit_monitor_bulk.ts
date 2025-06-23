@@ -83,7 +83,10 @@ export const syncEditedMonitorBulk = async ({
       } as unknown as MonitorFields,
     }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
-      monitorConfigRepository.bulkUpdate({ monitors: data }),
+      monitorConfigRepository.bulkUpdate({
+        monitors: data,
+        namespace: spaceId !== routeContext.spaceId ? spaceId : undefined,
+      }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
@@ -119,7 +122,6 @@ export const syncEditedMonitorBulk = async ({
       editedMonitors: editedMonitorSavedObjects?.saved_objects,
     };
   } catch (e) {
-    server.logger.error(`Unable to update Synthetics monitors, ${e.message}`);
     await rollbackCompletely({ routeContext, monitorsToUpdate });
     throw e;
   }
@@ -140,8 +142,10 @@ export const rollbackCompletely = async ({
         attributes: decryptedPreviousMonitor.attributes as unknown as MonitorFields,
       })),
     });
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+  } catch (error) {
+    server.logger.error(`Unable to rollback Synthetics monitors edit, Error: ${error.message}`, {
+      error,
+    });
   }
 };
 
@@ -189,7 +193,10 @@ export const rollbackFailedUpdates = async ({
       await monitorConfigRepository.bulkUpdate({ monitors: monitorsToRevert });
     }
     return failedConfigs;
-  } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitor failed updates, ${e.message} `);
+  } catch (error) {
+    server.logger.error(
+      `Unable to rollback Synthetics monitor failed updates, Error: ${error.message}`,
+      { error }
+    );
   }
 };

@@ -63,6 +63,7 @@
     "@kbn/rule-data-utils",
     "@kbn/alerting-types",
     "@kbn/zod-helpers",
+    "@kbn/rule-registry-plugin",
     "@kbn/ai-security-labs-content"
   ],
   "exclude": [

@@ -132,6 +132,7 @@ export const reportingCsvExportProvider = ({
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
+      icon: 'tableDensityNormal',
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage

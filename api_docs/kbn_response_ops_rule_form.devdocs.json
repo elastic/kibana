@@ -2007,20 +2007,6 @@
             "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormProps.isServerless",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isServerless",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_form.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

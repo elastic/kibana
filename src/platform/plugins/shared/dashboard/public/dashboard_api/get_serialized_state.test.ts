@@ -9,11 +9,7 @@
 
 import type { DashboardPanelState } from '../../common';
 
-import {
-  dataService,
-  embeddableService,
-  savedObjectsTaggingService,
-} from '../services/kibana_services';
+import { dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getSampleDashboardState } from '../mocks';
 import { getSerializedState } from './get_serialized_state';
 
@@ -29,10 +25,6 @@ dataService.query.timefilter.timefilter.getTime = jest
 dataService.query.timefilter.timefilter.getRefreshInterval = jest
   .fn()
   .mockReturnValue({ pause: true, value: 0 });
-
-embeddableService.extract = jest
-  .fn()
-  .mockImplementation((attributes) => ({ state: attributes, references: [] }));
 
 if (savedObjectsTaggingService) {
   savedObjectsTaggingService.getTaggingApi = jest.fn().mockReturnValue({
@@ -121,7 +113,6 @@ describe('getSerializedState', () => {
           "panelConfig": Object {},
           "panelIndex": "54321",
           "type": "visualization",
-          "version": undefined,
         },
       ]
     `);
@@ -216,7 +207,6 @@ describe('getSerializedState', () => {
               "panelConfig": Object {},
               "panelIndex": "54321",
               "type": "visualization",
-              "version": undefined,
             },
           ],
           "title": "Section One",

@@ -12,7 +12,7 @@ import {
   KIBANA_PROJECTS as VALID_SOLUTION_IDS,
 } from '@kbn/projects-solutions-groups';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ResolveIndexResponse } from '@kbn/esql-types';
+import { type ResolveIndexResponse, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 /**
@@ -39,7 +39,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
+      path: `${REGISTRY_EXTENSIONS_ROUTE}{solutionId}/{query}`,
       security: {
         authz: {
           enabled: false,
@@ -79,20 +79,31 @@ export const registerESQLExtensionsRoute = (
         })) as ResolveIndexResponse;
 
         const sources = {
-          ...localSources,
-          ...ccsSources,
+          indices: [...(localSources.indices ?? []), ...(ccsSources.indices ?? [])],
+          aliases: [...(localSources.aliases ?? []), ...(ccsSources.aliases ?? [])],
+          data_streams: [...(localSources.data_streams ?? []), ...(ccsSources.data_streams ?? [])],
         };
 
         // Validate solutionId
         const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
-        // return the recommended queries for now, we will add more extensions later
+
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(
           query,
           sources,
           validSolutionId
         );
+
+        const recommendedFields = extensionsRegistry.getRecommendedFields(
+          query,
+          sources,
+          validSolutionId
+        );
+
         return response.ok({
-          body: recommendedQueries,
+          body: {
+            recommendedQueries,
+            recommendedFields,
+          },
         });
       } catch (error) {
         logger.get().debug(error);

@@ -295,7 +295,9 @@ export interface DocLinks {
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
+    readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
     readonly blocklist: string;
@@ -395,6 +397,7 @@ export interface DocLinks {
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
     monitorLogs: string;
+    logsStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -648,9 +651,11 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
-
   readonly queryRules: {
     readonly queryRulesAPIDocumentation: string;
+  };
+  readonly datasetQuality: {
+    readonly failureStore: string;
   };
 }
 
