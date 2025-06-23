@@ -207,7 +207,8 @@ export default function ({ getService }: FtrProviderContext) {
       securitySolutionSiemMigrations: ['all', 'read', 'minimal_all', 'minimal_read'],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-      dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+      dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules', 'manage_alerts'],
+      manageReporting: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
       discover: [
         'all',
