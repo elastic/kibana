@@ -672,9 +672,13 @@ export class ActionsPlugin
     });
   };
 
-  private instantiateAuthorization = (request: KibanaRequest) => {
+  private instantiateAuthorization = (
+    request: KibanaRequest,
+    authorizationMode?: AuthorizationMode
+  ) => {
     return new ActionsAuthorization({
       request,
+      authorizationMode,
       authorization: this.security?.authz,
     });
   };
