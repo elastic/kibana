@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockLayoutPanels, getMockLayoutPanelsWithSections } from '../mocks';
+import { getMockLayout, getMockLayoutWithSections } from '../mocks';
 import { placeClonePanel } from './place_clone_panel_strategy';
 
 describe('Clone panel placement strategies', () => {
@@ -35,7 +35,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('panel collision at desired clone location', () => {
-    const panels = getMockLayoutPanels();
+    const panels = getMockLayout().panels;
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,
@@ -52,7 +52,7 @@ describe('Clone panel placement strategies', () => {
   });
 
   it('ignores panels in other sections', () => {
-    const panels = getMockLayoutPanelsWithSections();
+    const panels = getMockLayoutWithSections().panels;
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: 6,
       height: 6,

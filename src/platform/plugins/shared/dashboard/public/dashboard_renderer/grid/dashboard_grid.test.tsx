@@ -20,7 +20,12 @@ import {
   useDashboardApi as mockUseDashboardApi,
 } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
-import { buildMockDashboardApi, getMockPanels, getMockPanelsWithSections } from '../../mocks';
+import {
+  buildMockDashboardApi,
+  getMockLayoutWithSections,
+  getMockPanels,
+  getMockPanelsWithSections,
+} from '../../mocks';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
@@ -280,6 +285,27 @@ describe('DashboardGrid', () => {
         expect(Object.keys(internalApi.layout$.getValue().sections)).not.toContain('section1');
         expect(Object.keys(internalApi.layout$.getValue().panels)).not.toContain('3'); // this is the panel in section1
       });
+    });
+  });
+
+  test('layout responds to dashboard state update', async () => {
+    const { internalApi } = await createAndMountDashboardGrid({
+      panels: getMockPanels(),
+    });
+
+    let sectionContainers = screen.getAllByTestId(`kbnGridSectionWrapper-`, {
+      exact: false,
+    });
+    expect(sectionContainers.length).toBe(1); // only the first top section is rendered
+
+    internalApi.layout$.next(getMockLayoutWithSections());
+
+    await waitFor(() => {
+      sectionContainers = screen.getAllByTestId(`kbnGridSectionWrapper-`, {
+        exact: false,
+      });
+      expect(sectionContainers.length).toBe(2); // section wrappers are not rendered for collapsed sections
+      expect(screen.getAllByTestId('dashboardGridItem').length).toBe(3); // one panel is in a collapsed section
     });
   });
 });

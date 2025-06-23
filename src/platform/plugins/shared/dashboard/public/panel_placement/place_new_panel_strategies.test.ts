@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockLayoutPanels, getMockLayoutPanelsWithSections } from '../mocks';
+import { getMockLayout, getMockLayoutWithSections } from '../mocks';
 import { PanelPlacementStrategy } from '../plugin_constants';
 import { runPanelPlacementStrategy } from './place_new_panel_strategies';
 
@@ -28,7 +28,7 @@ describe('new panel placement strategies', () => {
     });
 
     it('push other panels down', () => {
-      const panels = getMockLayoutPanels();
+      const panels = getMockLayout().panels;
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
         PanelPlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: panels }
@@ -57,7 +57,7 @@ describe('new panel placement strategies', () => {
     });
 
     it('ignores panels in other sections', () => {
-      const panels = getMockLayoutPanelsWithSections();
+      const panels = getMockLayoutWithSections().panels;
       const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
         PanelPlacementStrategy.placeAtTop,
         { width: 6, height: 6, currentPanels: panels, sectionId: 'section1' }
@@ -106,7 +106,7 @@ describe('new panel placement strategies', () => {
 
     it('top left most space is available', () => {
       const panels = {
-        ...getMockLayoutPanels(),
+        ...getMockLayout().panels,
         '1': {
           gridData: { x: 6, y: 0, w: 6, h: 6, i: '1' },
           type: 'lens',
@@ -128,7 +128,7 @@ describe('new panel placement strategies', () => {
 
     it('panel must be pushed down', () => {
       const panels = {
-        ...getMockLayoutPanelsWithSections(),
+        ...getMockLayoutWithSections().panels,
         '5': {
           gridData: { x: 6, y: 0, w: 42, h: 6, i: '5' },
           type: 'lens',
@@ -149,7 +149,7 @@ describe('new panel placement strategies', () => {
 
     it('ignores panels in other sections', () => {
       const panels = {
-        ...getMockLayoutPanelsWithSections(),
+        ...getMockLayoutWithSections().panels,
         '1': {
           gridData: { x: 0, y: 0, w: 6, h: 100, i: '1' },
           type: 'lens',

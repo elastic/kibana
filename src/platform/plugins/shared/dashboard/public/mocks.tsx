@@ -148,10 +148,6 @@ export function getMockPanels() {
   ];
 }
 
-export function getMockLayoutPanels() {
-  return deserializeLayout(getMockPanels(), () => []).layout.panels;
-}
-
 export function getMockPanelsWithSections() {
   return [
     ...getMockPanels(),
@@ -190,6 +186,10 @@ export function getMockPanelsWithSections() {
   ];
 }
 
-export function getMockLayoutPanelsWithSections() {
-  return deserializeLayout(getMockPanelsWithSections(), () => []).layout.panels;
+export function getMockLayout() {
+  return deserializeLayout(getMockPanels(), () => []).layout;
+}
+
+export function getMockLayoutWithSections() {
+  return deserializeLayout(getMockPanelsWithSections(), () => []).layout;
 }
