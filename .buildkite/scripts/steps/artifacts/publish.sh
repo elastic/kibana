@@ -18,12 +18,12 @@ function download {
 mkdir -p target
 cd target
 
-download "kibana-$FULL_VERSION-docker-image.tar.gz"
-download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
-download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-wolfi-$FULL_VERSION-docker-image.tar.gz"
-download "kibana-wolfi-$FULL_VERSION-docker-image-aarch64.tar.gz"
+download "kibana-$FULL_VERSION-docker-image-amd64.tar.gz"
+download "kibana-$FULL_VERSION-docker-image-arm64.tar.gz"
+download "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
+download "kibana-cloud-$FULL_VERSION-docker-image-arm64.tar.gz"
+download "kibana-wolfi-$FULL_VERSION-docker-image-amd64.tar.gz"
+download "kibana-wolfi-$FULL_VERSION-docker-image-arm64.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
