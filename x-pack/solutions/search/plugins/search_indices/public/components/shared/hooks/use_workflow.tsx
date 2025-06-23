@@ -19,7 +19,6 @@ import {
   SemanticCodeExamples,
 } from '../../../code_examples/create_index';
 import { useOnboardingTokenQuery } from '../../../hooks/api/use_onboarding_data';
-import { DEFAULT_WORKER_ID } from '@kbn/monaco/src/register_globals';
 
 const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
   switch (type) {
