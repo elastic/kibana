@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../types';
@@ -268,7 +268,31 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }),
       width: '100px',
       render: (lastCheckin: string) =>
-        lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
+        lastCheckin ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentList.lastActivityTooltip"
+                defaultMessage="Last checked in at {lastCheckin}"
+                values={{
+                  lastCheckin: (
+                    <FormattedDate
+                      value={lastCheckin}
+                      year="numeric"
+                      month="short"
+                      day="2-digit"
+                      timeZoneName="short"
+                      hour="numeric"
+                      minute="numeric"
+                    />
+                  ),
+                }}
+              />
+            }
+          >
+            <FormattedRelative value={lastCheckin} />
+          </EuiToolTip>
+        ) : undefined,
     },
     {
       field: AGENTS_TABLE_FIELDS.VERSION,
