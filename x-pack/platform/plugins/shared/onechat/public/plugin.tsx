@@ -29,6 +29,7 @@ import {
   OnechatInternalService,
 } from './services';
 import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
+import { ONECHAT_CHAT_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -56,24 +57,34 @@ export class OnechatPlugin
       return this.internalServices;
     };
 
-    coreSetup.application.register({
-      id: ONECHAT_APP_ID,
-      appRoute: ONECHAT_PATH,
-      category: DEFAULT_APP_CATEGORIES.chat,
-      title: ONECHAT_TITLE,
-      euiIconType: 'logoElasticsearch',
-      visibleIn: ['sideNav', 'globalSearch'],
-      deepLinks: [{ id: 'chat', path: '/chat', title: 'Chat' }],
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
+    const isOnechatEnabled = coreSetup.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
+    if (isOnechatEnabled) {
+      coreSetup.application.register({
+        id: ONECHAT_APP_ID,
+        appRoute: ONECHAT_PATH,
+        category: DEFAULT_APP_CATEGORIES.chat,
+        title: ONECHAT_TITLE,
+        euiIconType: 'logoElasticsearch',
+        visibleIn: ['sideNav', 'globalSearch'],
+        deepLinks: [{ id: 'chat', path: '/chat', title: 'Chat' }],
+        async mount({ element, history }: AppMountParameters) {
+          const { renderApp } = await import('./application');
+          const [coreStart, startPluginDeps] = await coreSetup.getStartServices();
 
-        coreStart.chrome.docTitle.change(ONECHAT_TITLE);
-        const services = getServices();
+          coreStart.chrome.docTitle.change(ONECHAT_TITLE);
+          const services = getServices();
 
-        return renderApp({ core: coreStart, services, element, history, plugins: startPluginDeps });
-      },
-    });
+          return renderApp({
+            core: coreStart,
+            services,
+            element,
+            history,
+            plugins: startPluginDeps,
+          });
+        },
+      });
+    }
+
     return {};
   }
 

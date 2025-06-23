@@ -20,7 +20,7 @@ import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import { registerFeatures } from './features';
 import { registerTools } from './tools';
-import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
+import { ONECHAT_CHAT_UI_SETTING_ID, ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
 
 export class OnechatPlugin
   implements
@@ -60,6 +60,18 @@ export class OnechatPlugin
         }),
         name: i18n.translate('onechat.uiSettings.mcpServer.name', {
           defaultMessage: 'MCP Server',
+        }),
+        schema: schema.boolean(),
+        value: false,
+        readonly: true,
+        readonlyMode: 'ui',
+      },
+      [ONECHAT_CHAT_UI_SETTING_ID]: {
+        description: i18n.translate('onechat.uiSettings.chatUI.description', {
+          defaultMessage: 'Enables the OneChat chat UI.',
+        }),
+        name: i18n.translate('onechat.uiSettings.chatUI.name', {
+          defaultMessage: 'OneChat Chat UI',
         }),
         schema: schema.boolean(),
         value: false,
