@@ -36,8 +36,7 @@ export const DiveDeeperWithElasticsearch: React.FC = () => {
               defaultMessage: 'Elasticsearch Labs',
             })}
             description={i18n.translate('xpack.searchHomepage.searchLabs.description', {
-              defaultMessage:
-                'Explore the latest innovations for advanced search experiences.',
+              defaultMessage: 'Explore the latest innovations for advanced search experiences.',
             })}
             buttonHref={docLinks.visitSearchLabs}
             buttonLabel={i18n.translate('xpack.searchHomepage.searchLabs.buttonText', {
