@@ -271,14 +271,22 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         lastCheckin ? (
           <EuiToolTip
             content={
-              <FormattedDate
-                value={lastCheckin}
-                year="numeric"
-                month="short"
-                day="2-digit"
-                timeZoneName="short"
-                hour="numeric"
-                minute="numeric"
+              <FormattedMessage
+                id="xpack.fleet.agentList.lastActivityTooltip"
+                defaultMessage="Last checked in at {lastCheckin}"
+                values={{
+                  lastCheckin: (
+                    <FormattedDate
+                      value={lastCheckin}
+                      year="numeric"
+                      month="short"
+                      day="2-digit"
+                      timeZoneName="short"
+                      hour="numeric"
+                      minute="numeric"
+                    />
+                  ),
+                }}
               />
             }
           >
