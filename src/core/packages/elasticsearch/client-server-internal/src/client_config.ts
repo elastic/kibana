@@ -92,6 +92,10 @@ export function parseClientOptions(
     clientOptions.caFingerprint = config.caFingerprint;
   }
 
+  if (config.serverMode) {
+    clientOptions.serverMode = config.serverMode;
+  }
+
   return clientOptions;
 }
 
