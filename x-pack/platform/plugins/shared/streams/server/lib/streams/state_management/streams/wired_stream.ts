@@ -566,7 +566,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    const definitionChanged = Object.values(this._changes).some(Boolean);
+    const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
     if (definitionChanged) {
       actions.push({
         type: 'upsert_dot_streams_document',
