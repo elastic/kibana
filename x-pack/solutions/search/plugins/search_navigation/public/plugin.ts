@@ -30,11 +30,11 @@ export class SearchNavigationPlugin
 {
   private readonly logger: Logger;
   private currentChromeStyle: ChromeStyle | undefined = undefined;
-  private baseClassicNavItemsFn: (() => ClassicNavItem[]) | undefined = undefined;
   private coreStart: CoreStart | undefined = undefined;
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
   private onAppMountHandlers: Array<() => Promise<void>> = [];
   private chromeSub: Subscription | undefined;
+  private baseClassicNavItems: ClassicNavItem[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -51,10 +51,16 @@ export class SearchNavigationPlugin
       this.currentChromeStyle = value;
     });
 
+    // Async loads classic nav items on start
+    import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
+      // caches nav items so we don't need to do an async call when needed by other plugins.
+      this.baseClassicNavItems = BaseClassicNavItems;
+    });
+
     return {
       handleOnAppMount: this.handleOnAppMount.bind(this),
       registerOnAppMountHandler: this.registerOnAppMountHandler.bind(this),
-      setGetBaseClassicNavItems: this.setGetBaseClassicNavItems.bind(this),
+      getBaseClassicNavItems: this.getBaseClassicNavItems.bind(this),
       useClassicNavigation: this.useClassicNavigation.bind(this),
       breadcrumbs: {
         setSearchBreadCrumbs: this.setBreadcrumbs.bind(this),
@@ -85,19 +91,14 @@ export class SearchNavigationPlugin
     this.onAppMountHandlers.push(handler);
   }
 
-  private setGetBaseClassicNavItems(classicNavItemsFn: () => ClassicNavItem[]) {
-    this.baseClassicNavItemsFn = classicNavItemsFn;
+  private useClassicNavigation(history: ScopedHistory<unknown>) {
+    if (this.coreStart === undefined || this.currentChromeStyle !== 'classic') return undefined;
+
+    return classicNavigationFactory(this.baseClassicNavItems, this.coreStart, history);
   }
 
-  private useClassicNavigation(history: ScopedHistory<unknown>) {
-    if (
-      this.baseClassicNavItemsFn === undefined ||
-      this.coreStart === undefined ||
-      this.currentChromeStyle !== 'classic'
-    )
-      return undefined;
-
-    return classicNavigationFactory(this.baseClassicNavItemsFn(), this.coreStart, history);
+  private getBaseClassicNavItems(): ClassicNavItem[] {
+    return this.baseClassicNavItems;
   }
 
   private setBreadcrumbs(
