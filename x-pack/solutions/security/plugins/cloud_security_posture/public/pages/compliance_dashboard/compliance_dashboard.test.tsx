@@ -111,7 +111,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed', healthyAgents: 0, installedPackagePolicies: 0 },
           isPluginInitialized: false,
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -152,7 +155,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -192,7 +198,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -232,7 +241,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'waiting_for_results', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -272,7 +284,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -312,7 +327,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -352,7 +370,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -391,7 +412,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -430,7 +454,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -469,7 +496,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'indexed', healthyAgents: 0, installedPackagePolicies: 1 },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -509,7 +539,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -549,7 +582,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -589,7 +625,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'indexed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'not-empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'not-empty' },
           ],
         },
@@ -629,7 +668,10 @@ describe('<ComplianceDashboard />', () => {
           cspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
@@ -671,7 +713,10 @@ describe('<ComplianceDashboard />', () => {
           kspm: { status: 'not-installed' },
           installedPackageVersion: '1.2.13',
           indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
+            {
+              index: 'security_solution-cloud_security_posture.misconfiguration_latest',
+              status: 'empty',
+            },
             { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
           ],
         },
