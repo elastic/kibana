@@ -13331,8 +13331,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - status
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                required:
+                  - status
           description: Successful response
       summary: Health check on Privilege Monitoring
       tags:
