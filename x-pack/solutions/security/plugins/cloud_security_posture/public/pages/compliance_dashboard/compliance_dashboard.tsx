@@ -35,7 +35,6 @@ import {
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
   CLOUD_DASHBOARD_TAB,
-  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
 } from './test_subjects';
 import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -373,9 +372,12 @@ export const ComplianceDashboard = () => {
   );
 
   const namespaces = useMemo(() => {
-    return currentTabUrlState === POSTURE_TYPE_CSPM
-      ? getCspmDashboardData.data?.namespaces || []
-      : getKspmDashboardData.data?.namespaces || [];
+    const postureNamespaces =
+      currentTabUrlState === POSTURE_TYPE_CSPM
+        ? getCspmDashboardData.data?.namespaces || []
+        : getKspmDashboardData.data?.namespaces || [];
+
+    return postureNamespaces.sort((a: string, b: string) => a.localeCompare(b));
   }, [currentTabUrlState, getCspmDashboardData.data, getKspmDashboardData.data]);
 
   // if the active namespace is not in the list of namespaces, default to the first available namespace
@@ -449,25 +451,25 @@ export const ComplianceDashboard = () => {
   ]);
 
   // if there is more than one namespace, show the namespace selector in the header
-  const rightSideItems = useMemo(() => {
-    return namespaces.length > 1
-      ? [
-          <NamespaceSelector
-            data-test-subj="namespace-selector"
-            key={`namespace-selector-${currentTabUrlState}`}
-            namespaces={namespaces}
-            activeNamespace={activeNamespace}
-            postureType={currentTabUrlState}
-            onNamespaceChange={onActiveNamespaceChange}
-          />,
-        ]
-      : [];
-  }, [namespaces, currentTabUrlState, activeNamespace, onActiveNamespaceChange]);
+  const rightSideItems = useMemo(
+    () =>
+      namespaces.length > 0
+        ? [
+            <NamespaceSelector
+              data-test-subj="namespace-selector"
+              key={`namespace-selector-${currentTabUrlState}`}
+              namespaces={namespaces}
+              activeNamespace={activeNamespace}
+              onNamespaceChange={onActiveNamespaceChange}
+            />,
+          ]
+        : [],
+    [namespaces, currentTabUrlState, activeNamespace, onActiveNamespaceChange]
+  );
 
   return (
     <CloudPosturePage>
       <EuiPageHeader
-        data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
         bottomBorder
         pageTitle={
           <CloudPosturePageTitle

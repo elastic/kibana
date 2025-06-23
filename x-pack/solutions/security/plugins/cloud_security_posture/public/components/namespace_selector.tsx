@@ -16,8 +16,6 @@ import { EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface NamespaceSelectorProps {
-  'data-test-subj'?: string;
-  postureType?: 'cspm' | 'kspm';
   activeNamespace: string;
   namespaces: string[];
   onNamespaceChange: (namespace: string) => void;
@@ -27,9 +25,6 @@ export const NamespaceSelector = ({
   activeNamespace,
   namespaces,
   onNamespaceChange,
-
-  postureType,
-  'data-test-subj': dataTestSubj,
 }: NamespaceSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -87,21 +82,22 @@ export const NamespaceSelector = ({
         onClick={onButtonClick}
         title={activeNamespace}
         size="xs"
+        disabled={namespaces.length < 2}
       >
         {`${title}: ${activeNamespace}`}
       </EuiButtonEmpty>
     );
-  }, [onButtonClick, activeNamespace]);
+  }, [onButtonClick, activeNamespace, namespaces.length]);
 
   return (
     <EuiPopover
-      data-test-subj={dataTestSubj ?? 'namespaceSelectorPopover'}
+      data-test-subj="namespace-selector"
       button={button}
       closePopover={closePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenuPanel size="s" items={menuItems} className="cspNamespaceSelectorPanel" />
+      <EuiContextMenuPanel data-test-subj="namespace-selector-menu" size="s" items={menuItems} />
     </EuiPopover>
   );
 };
