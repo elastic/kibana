@@ -319,8 +319,7 @@ export class PrivilegeMonitoringDataClient {
     return this.opts.auditLogger?.log(event);
   }
 
-  // --- Privileged User Sync Orchestration ---
-  // These methods coordinate syncing users from monitoring sources.
+  // TODO: remove this method
   public async syncAllIndexUsers() {
     // get all monitoring index source saved objects of type 'index'
     const indexSources: MonitoringEntitySourceDescriptor[] =
@@ -347,6 +346,7 @@ export class PrivilegeMonitoringDataClient {
     await this.removeStaleIndexUsers(allUserNames);
   }
 
+  // TODO: remove this method
   public async createUsersFromIndexSource(indexName: string, kuery?: string): Promise<Set<string>> {
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
 
@@ -368,6 +368,7 @@ export class PrivilegeMonitoringDataClient {
     return usernames;
   }
 
+  // TODO: remove this method
   public async removeStaleIndexUsers(currentUsernames: Set<string>) {
     const existingDocs: MonitoredUserDoc[] = await this.listUsers('labels.sources: "index_sync"');
     const staleUserIds: string[] = [];
@@ -386,6 +387,10 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Removed ${staleUserIds.length} stale users from index_sync`);
   }
 
+  /** Privileged User Sync Orchestration
+   *  These methods coordinate syncing users from monitoring sources.
+   */
+
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
     this.log('info', 'Starting plain index sync for privilege monitoring users');
@@ -397,7 +402,7 @@ export class PrivilegeMonitoringDataClient {
     );
     const seenUserNames: string[] = [];
     for (const source of indexSources) {
-      const index = source.indexPattern ?? ''; // if no index pattern cry -- TODO: handle this case,
+      const index = source.indexPattern ?? ''; // if no index pattern -- TODO: handle this case, (Mark Feedback)
       // log and move on. Don't allow empty index patterns
       const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
       const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
@@ -406,6 +411,18 @@ export class PrivilegeMonitoringDataClient {
     }
     this.log('info', `Usernames collected from all index sources: \n${seenUserNames.join('\n')}`);
     this.log('info', `Total usernames collected: ${seenUserNames.length}`);
+    // find stale users in the internal privileged users index
+    const staleUserNames: PrivMonBulkUser[] = await this.findStaleUsersForIndex(
+      this.getIndex(),
+      seenUserNames
+    );
+    this.log(
+      'info',
+      `Found ${staleUserNames.length} stale users in the internal privileged users index`
+    );
+    const softDeleteOps = this.bulkOperationsForSoftDeleteUsers(staleUserNames, this.getIndex());
+    this.log('info', `Soft deleting ${staleUserNames.length} stale users`);
+    await this.esClient.bulk({ body: softDeleteOps });
   }
 
   public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
@@ -433,15 +450,7 @@ export class PrivilegeMonitoringDataClient {
         if (username) batchUsernames.push(username);
       }
 
-      const existingUserRes = await this.esClient.search<MonitoredUserDoc>({
-        index: this.getIndex(),
-        size: batchUsernames.length,
-        query: {
-          bool: {
-            must: [{ terms: { 'user.name': batchUsernames } }],
-          },
-        },
-      });
+      const existingUserRes = await this.getMonitoredUsers(batchUsernames);
 
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
@@ -455,8 +464,7 @@ export class PrivilegeMonitoringDataClient {
         indexName,
         existingUserId: existingUserMap.get(username),
       }));
-      // Handle create and update logic here
-      // bulk operations to create or update users in the privileged monitoring index
+
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('info', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
@@ -467,11 +475,49 @@ export class PrivilegeMonitoringDataClient {
       }
       searchAfter = hits[hits.length - 1].sort;
     }
-
     return batchUsernames;
   }
 
-  // can maybe do helpers - on document to do one user and that will iterate instead of doing this yourself.
+  private async findStaleUsersForIndex(
+    indexName: string,
+    userNames: string[]
+  ): Promise<PrivMonBulkUser[]> {
+    const response = await this.esClient.search<MonitoredUserDoc>({
+      index: this.getIndex(),
+      size: 1000,
+      _source: ['user.name', 'labels.source_indices'],
+      query: {
+        bool: {
+          must: [
+            { term: { 'labels.monitoring_status': 'privileged_user_monitored' } },
+            { term: { 'labels.source_indices': indexName } },
+          ],
+          must_not: {
+            terms: { 'user.name': userNames },
+          },
+        },
+      },
+    });
+
+    return response.hits.hits.map((hit) => ({
+      username: hit._source?.user?.name ?? 'unknown',
+      existingUserId: hit._id,
+      indexName,
+    }));
+  }
+
+  private async getMonitoredUsers(batchUsernames: string[]) {
+    return this.esClient.search<MonitoredUserDoc>({
+      index: this.getIndex(),
+      size: batchUsernames.length,
+      query: {
+        bool: {
+          must: [{ terms: { 'user.name': batchUsernames } }],
+        },
+      },
+    });
+  }
+
   public buildBulkOperationsForUsers(users: PrivMonBulkUser[], userIndexName: string): object[] {
     const ops: object[] = [];
     this.log('info', `Building bulk operations for ${users.length} users`);
@@ -517,6 +563,43 @@ export class PrivilegeMonitoringDataClient {
       }
     }
     this.log('info', `Built ${ops.length} bulk operations for users`);
+    return ops;
+  }
+
+  public bulkOperationsForSoftDeleteUsers(
+    users: PrivMonBulkUser[],
+    userIndexName: string
+  ): object[] {
+    const ops: object[] = [];
+    this.log('info', `Building bulk operations for soft delete users`);
+    for (const user of users) {
+      ops.push(
+        { update: { _index: userIndexName, _id: user.existingUserId } },
+        {
+          script: {
+            source: `
+            if (ctx._source.labels?.source_indices != null) {
+              ctx._source.labels.source_indices.removeIf(idx -> idx == params.index);
+            }
+
+            if (ctx._source.labels?.source_indices == null || ctx._source.labels.source_indices.isEmpty()) {
+              if (ctx._source.labels?.sources != null) {
+                ctx._source.labels.sources.removeIf(src -> src == 'index');
+              }
+            }
+
+            if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
+              ctx._source.labels.monitoring_status = 'privileged_user_not_monitored';
+            }
+          `,
+            params: {
+              index: user.indexName,
+            },
+          },
+        }
+      );
+    }
+
     return ops;
   }
 }
