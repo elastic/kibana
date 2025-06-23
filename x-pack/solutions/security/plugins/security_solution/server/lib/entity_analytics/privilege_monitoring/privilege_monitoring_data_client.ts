@@ -400,29 +400,33 @@ export class PrivilegeMonitoringDataClient {
       'info',
       `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
     );
+
     const seenUserNames: string[] = [];
+    const allStaleUsers: PrivMonBulkUser[] = [];
+
     for (const source of indexSources) {
       const index = source.indexPattern ?? ''; // if no index pattern -- TODO: handle this case, (Mark Feedback)
       // log and move on. Don't allow empty index patterns
       const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
       const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
       seenUserNames.push(...batchUserNames);
+      // collect stale users
+      const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
+      allStaleUsers.push(...staleUsers);
       // add create logic here?
     }
-    this.log('info', `Usernames collected from all index sources: \n${seenUserNames.join('\n')}`);
-    this.log('info', `Total usernames collected: ${seenUserNames.length}`);
-    // find stale users in the internal privileged users index
-    const staleUserNames: PrivMonBulkUser[] = await this.findStaleUsersForIndex(
-      this.getIndex(),
-      seenUserNames
-    );
     this.log(
       'info',
-      `Found ${staleUserNames.length} stale users in the internal privileged users index`
+      `Usernames collected from all index sources: ${JSON.stringify(seenUserNames)}`
     );
-    const softDeleteOps = this.bulkOperationsForSoftDeleteUsers(staleUserNames, this.getIndex());
-    this.log('info', `Soft deleting ${staleUserNames.length} stale users`);
-    await this.esClient.bulk({ body: softDeleteOps });
+    this.log('info', `Total usernames collected: ${seenUserNames.length}`);
+    this.log('info', `Total stale users: ${allStaleUsers.length}`);
+
+    if (allStaleUsers.length > 0) {
+      const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
+      await this.esClient.bulk({ body: ops });
+      this.log('info', `Soft deleted ${allStaleUsers.length} users`);
+    }
   }
 
   public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
@@ -489,7 +493,7 @@ export class PrivilegeMonitoringDataClient {
       query: {
         bool: {
           must: [
-            { term: { 'labels.monitoring_status': 'privileged_user_monitored' } },
+            { term: { 'labels.monitoring.privileged_users': 'monitored' } }, // This will need updated after https://github.com/elastic/kibana/pull/224623
             { term: { 'labels.source_indices': indexName } },
           ],
           must_not: {
