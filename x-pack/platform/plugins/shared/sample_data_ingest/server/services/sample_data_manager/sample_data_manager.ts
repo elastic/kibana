@@ -15,7 +15,6 @@ import { IndexManager } from '../index_manager';
 interface SampleDataManagerOpts {
   artifactsFolder: string;
   logger: Logger;
-  esClient: ElasticsearchClient;
   artifactRepositoryUrl: string;
   kibanaVersion: string;
   elserInferenceId?: string;
@@ -27,18 +26,15 @@ export class SampleDataManager {
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
   private readonly indexPrefixName: string;
-  private esClient: ElasticsearchClient;
 
   constructor({
     artifactsFolder,
     logger,
-    esClient,
     artifactRepositoryUrl,
     elserInferenceId,
     kibanaVersion,
     indexPrefixName,
   }: SampleDataManagerOpts) {
-    this.esClient = esClient;
     this.log = logger;
     this.indexPrefixName = indexPrefixName;
 
@@ -50,17 +46,22 @@ export class SampleDataManager {
     });
 
     this.indexManager = new IndexManager({
-      esClient: this.esClient,
       elserInferenceId: elserInferenceId || defaultInferenceEndpoints.ELSER,
       logger: this.log.get('index-manager'),
     });
   }
 
-  async installSampleData(sampleType: DatasetSampleType): Promise<string> {
+  async installSampleData({
+    sampleType,
+    esClient,
+  }: {
+    sampleType: DatasetSampleType;
+    esClient: ElasticsearchClient;
+  }): Promise<string> {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
     try {
-      await this.removeSampleData({ sampleType });
+      await this.removeSampleData({ sampleType, esClient });
 
       const { archive, manifest, mappings } = await this.artifactManager.prepareArtifact(
         sampleType
@@ -72,6 +73,7 @@ export class SampleDataManager {
         mappings,
         manifest,
         archive,
+        esClient,
       });
 
       this.log.info(`Sample data installation successful for [${sampleType}]`);
@@ -82,15 +84,27 @@ export class SampleDataManager {
     }
   }
 
-  async removeSampleData({ sampleType }: { sampleType: DatasetSampleType }): Promise<void> {
+  async removeSampleData({
+    sampleType,
+    esClient,
+  }: {
+    sampleType: DatasetSampleType;
+    esClient: ElasticsearchClient;
+  }): Promise<void> {
     const indexName = this.getSampleDataIndexName(sampleType);
-    await this.indexManager.deleteIndex(indexName);
+    await this.indexManager.deleteIndex({ indexName, esClient });
   }
 
-  async getSampleDataStatus(sampleType: DatasetSampleType): Promise<StatusResponse> {
+  async getSampleDataStatus({
+    sampleType,
+    esClient,
+  }: {
+    sampleType: DatasetSampleType;
+    esClient: ElasticsearchClient;
+  }): Promise<StatusResponse> {
     const indexName = this.getSampleDataIndexName(sampleType);
     try {
-      const isIndexExists = await this.esClient.indices.exists({ index: indexName });
+      const isIndexExists = await esClient.indices.exists({ index: indexName });
       return {
         status: isIndexExists ? 'installed' : 'uninstalled',
         indexName: isIndexExists ? indexName : undefined,
@@ -99,11 +113,6 @@ export class SampleDataManager {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
       return { status: 'uninstalled' };
     }
-  }
-
-  setESClient(esClient: ElasticsearchClient): void {
-    this.esClient = esClient;
-    this.indexManager.setESClient(esClient);
   }
 
   private getSampleDataIndexName(sampleType: DatasetSampleType): string {

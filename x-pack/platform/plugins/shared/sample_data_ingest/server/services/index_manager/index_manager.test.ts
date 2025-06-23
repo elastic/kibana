@@ -67,7 +67,6 @@ describe('IndexManager', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
 
     indexManager = new IndexManager({
-      esClient,
       elserInferenceId,
       logger,
     });
@@ -91,6 +90,7 @@ describe('IndexManager', () => {
         mappings: mockMappings,
         manifest: mockManifest,
         archive: mockArchive,
+        esClient,
       });
 
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledWith({
@@ -121,7 +121,6 @@ describe('IndexManager', () => {
     it('should create and populate index with custom inference ID without ELSER deployment', async () => {
       const customInferenceId = 'custom-inference-id';
       const customIndexManager = new IndexManager({
-        esClient,
         elserInferenceId: customInferenceId,
         logger,
       });
@@ -131,6 +130,7 @@ describe('IndexManager', () => {
         mappings: mockMappings,
         manifest: mockManifest,
         archive: mockArchive,
+        esClient,
       });
 
       expect(ensureDefaultElserDeployedMock).not.toHaveBeenCalled();
@@ -162,6 +162,7 @@ describe('IndexManager', () => {
         mappings: mockMappings,
         manifest: mockManifest,
         archive: mockArchive,
+        esClient,
       });
 
       expect(createIndexMock).toHaveBeenCalledWith({
@@ -193,6 +194,7 @@ describe('IndexManager', () => {
           mappings: mockMappings,
           manifest: mockManifest,
           archive: mockArchive,
+          esClient,
         })
       ).rejects.toThrow('ELSER deployment failed');
 
@@ -210,6 +212,7 @@ describe('IndexManager', () => {
           mappings: mockMappings,
           manifest: mockManifest,
           archive: mockArchive,
+          esClient,
         })
       ).rejects.toThrow('Index creation failed');
 
@@ -226,6 +229,7 @@ describe('IndexManager', () => {
           mappings: mockMappings,
           manifest: mockManifest,
           archive: mockArchive,
+          esClient,
         })
       ).rejects.toThrow('Index population failed');
 
@@ -242,6 +246,7 @@ describe('IndexManager', () => {
         mappings: mockMappings,
         manifest: mockManifest,
         archive: mockArchive,
+        esClient,
       });
 
       expect(callOrder(ensureDefaultElserDeployedMock)).toBeLessThan(callOrder(createIndexMock));
@@ -255,7 +260,7 @@ describe('IndexManager', () => {
     it('should delete index successfully', async () => {
       esClient.indices.delete.mockResolvedValue({} as any);
 
-      await indexManager.deleteIndex(indexName);
+      await indexManager.deleteIndex({ indexName, esClient });
 
       expect(esClient.indices.delete).toHaveBeenCalledWith({ index: indexName }, { ignore: [404] });
 
@@ -267,7 +272,7 @@ describe('IndexManager', () => {
       const deletionError = new Error('Deletion failed');
       esClient.indices.delete.mockRejectedValue(deletionError);
 
-      await indexManager.deleteIndex(indexName);
+      await indexManager.deleteIndex({ indexName, esClient });
 
       expect(esClient.indices.delete).toHaveBeenCalledWith({ index: indexName }, { ignore: [404] });
 
@@ -280,64 +285,17 @@ describe('IndexManager', () => {
     it('should ignore 404 errors when index does not exist', async () => {
       esClient.indices.delete.mockResolvedValue({} as any);
 
-      await indexManager.deleteIndex(indexName);
+      await indexManager.deleteIndex({ indexName, esClient });
 
       expect(esClient.indices.delete).toHaveBeenCalledWith({ index: indexName }, { ignore: [404] });
     });
   });
 
-  describe('setESClient', () => {
-    it('should update Elasticsearch client', async () => {
-      const newEsClient = elasticsearchServiceMock.createElasticsearchClient();
-
-      indexManager.setESClient(newEsClient);
-
-      const indexName = 'test-index';
-      await indexManager.createAndPopulateIndex({
-        indexName,
-        mappings: mockMappings,
-        manifest: mockManifest,
-        archive: mockArchive,
-      });
-
-      expect(createIndexMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esClient: newEsClient,
-        })
-      );
-
-      expect(populateIndexMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          esClient: newEsClient,
-        })
-      );
-    });
-
-    it('should update client for delete operations', async () => {
-      const newEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      newEsClient.indices.delete.mockResolvedValue({} as any);
-
-      indexManager.setESClient(newEsClient);
-
-      const indexName = 'test-index';
-      await indexManager.deleteIndex(indexName);
-
-      expect(newEsClient.indices.delete).toHaveBeenCalledWith(
-        { index: indexName },
-        { ignore: [404] }
-      );
-
-      expect(esClient.indices.delete).not.toHaveBeenCalled();
-    });
-  });
-
   it('should initialize with correct properties', () => {
     const customLogger = loggerMock.create();
-    const customEsClient = elasticsearchServiceMock.createElasticsearchClient();
     const customInferenceId = 'custom-inference';
 
     const manager = new IndexManager({
-      esClient: customEsClient,
       elserInferenceId: customInferenceId,
       logger: customLogger,
     });

@@ -40,16 +40,15 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const core = await ctx.core;
-      const client = core.elasticsearch.client.asCurrentUser;
+      const esClient = core.elasticsearch.client.asCurrentUser;
 
       const { sampleDataManager } = getServices();
 
-      sampleDataManager.setESClient(client);
-
       try {
-        const indexName = await sampleDataManager.installSampleData(
-          DatasetSampleType.elasticsearch
-        );
+        const indexName = await sampleDataManager.installSampleData({
+          sampleType: DatasetSampleType.elasticsearch,
+          esClient,
+        });
 
         return res.ok<InstallResponse>({
           body: {
@@ -98,16 +97,15 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const core = await ctx.core;
-      const client = core.elasticsearch.client.asCurrentUser;
+      const esClient = core.elasticsearch.client.asCurrentUser;
 
       const { sampleDataManager } = getServices();
 
-      sampleDataManager.setESClient(client);
-
       try {
-        const statusData = await sampleDataManager.getSampleDataStatus(
-          DatasetSampleType.elasticsearch
-        );
+        const statusData = await sampleDataManager.getSampleDataStatus({
+          sampleType: DatasetSampleType.elasticsearch,
+          esClient,
+        });
 
         return res.ok<StatusResponse>({
           body: statusData,

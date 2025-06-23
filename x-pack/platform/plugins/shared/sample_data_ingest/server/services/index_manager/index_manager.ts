@@ -17,7 +17,6 @@ import {
 import type { ZipArchive } from '../types';
 
 interface IndexManagerOpts {
-  esClient: ElasticsearchClient;
   elserInferenceId: string;
   logger: Logger;
 }
@@ -27,15 +26,14 @@ interface CreateAndPopulateIndexOpts {
   mappings: any;
   manifest: any;
   archive: ZipArchive;
+  esClient: ElasticsearchClient;
 }
 
 export class IndexManager {
-  private esClient: ElasticsearchClient;
   private readonly elserInferenceId: string;
   private readonly log: Logger;
 
-  constructor({ esClient, elserInferenceId, logger }: IndexManagerOpts) {
-    this.esClient = esClient;
+  constructor({ elserInferenceId, logger }: IndexManagerOpts) {
     this.elserInferenceId = elserInferenceId;
     this.log = logger;
   }
@@ -45,17 +43,18 @@ export class IndexManager {
     mappings,
     manifest,
     archive,
+    esClient,
   }: CreateAndPopulateIndexOpts): Promise<void> {
     if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
       await ensureDefaultElserDeployed({
-        client: this.esClient,
+        client: esClient,
       });
     }
 
     const params = {
       indexName,
       legacySemanticText: isLegacySemanticTextVersion(manifest.formatVersion),
-      esClient: this.esClient,
+      esClient,
       elserInferenceId: this.elserInferenceId,
       log: this.log,
     };
@@ -71,9 +70,15 @@ export class IndexManager {
     });
   }
 
-  async deleteIndex(indexName: string): Promise<void> {
+  async deleteIndex({
+    indexName,
+    esClient,
+  }: {
+    indexName: string;
+    esClient: ElasticsearchClient;
+  }): Promise<void> {
     try {
-      await this.esClient.indices.delete(
+      await esClient.indices.delete(
         {
           index: indexName,
         },
@@ -83,9 +88,5 @@ export class IndexManager {
     } catch (error) {
       this.log.warn(`Failed to delete index [${indexName}]: ${error.message}`);
     }
-  }
-
-  setESClient(esClient: ElasticsearchClient): void {
-    this.esClient = esClient;
   }
 }

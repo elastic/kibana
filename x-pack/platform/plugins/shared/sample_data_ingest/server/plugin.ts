@@ -47,7 +47,6 @@ export class SampleDataIngestPlugin
 
   start(core: CoreStart): SampleDataStartDependencies {
     const sampleDataManager = new SampleDataManager({
-      esClient: core.elasticsearch.client.asInternalUser,
       kibanaVersion: this.context.env.packageInfo.version,
       artifactsFolder: Path.join(getDataPath(), 'sample-data-artifacts'),
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
