@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AgentConfigOptions, Labels } from 'elastic-apm-node';
+import type { AgentConfigOptions } from '@kbn/telemetry-config';
+import type { Attributes } from '@opentelemetry/api';
 import {
   packageMock,
   mockedRootDir,
@@ -46,7 +47,7 @@ describe('ApmConfiguration', () => {
   it('sets the git revision from `git rev-parse` command in non distribution mode', () => {
     gitRevExecMock.mockReturnValue('some-git-rev');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    const labels = config.getConfig('serviceName').globalLabels as Attributes;
     expect(labels.git_rev).toBe('some-git-rev');
   });
 
@@ -59,14 +60,14 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, {}, true);
-    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    const labels = config.getConfig('serviceName').globalLabels as Attributes;
     expect(labels.git_rev).toBe('distribution-sha');
   });
 
   it('reads the kibana uuid from the uuid file', () => {
     readUuidFileMock.mockReturnValue('instance-uuid');
     const config = new ApmConfiguration(mockedRootDir, {}, false);
-    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    const labels = config.getConfig('serviceName').globalLabels as Attributes;
     expect(labels.kibana_uuid).toBe('instance-uuid');
   });
 
@@ -78,7 +79,7 @@ describe('ApmConfiguration', () => {
       },
     };
     const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-    const labels = config.getConfig('serviceName').globalLabels as Labels;
+    const labels = config.getConfig('serviceName').globalLabels as Attributes;
     expect(labels.kibana_uuid).toBe('uuid-from-config');
   });
 
@@ -447,32 +448,6 @@ describe('ApmConfiguration', () => {
           serviceName: 'externalServiceName',
         })
       );
-    });
-  });
-
-  describe('isUsersRedactionEnabled', () => {
-    it('defaults to true', () => {
-      const kibanaConfig = {
-        elastic: {
-          apm: {},
-        },
-      };
-
-      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-      expect(config.isUsersRedactionEnabled()).toEqual(true);
-    });
-
-    it('uses the value defined in the config if specified', () => {
-      const kibanaConfig = {
-        elastic: {
-          apm: {
-            redactUsers: false,
-          },
-        },
-      };
-
-      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-      expect(config.isUsersRedactionEnabled()).toEqual(false);
     });
   });
 });

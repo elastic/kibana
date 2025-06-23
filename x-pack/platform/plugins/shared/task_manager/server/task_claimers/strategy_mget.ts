@@ -13,9 +13,10 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import type { Logger } from 'elastic-apm-node';
-import apm from 'elastic-apm-node';
 import type { Subject } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
+import { SpanStatusCode } from '@opentelemetry/api';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 import { sharedConcurrencyTaskTypes, type TaskTypeDictionary } from '../task_type_dictionary';
@@ -69,17 +70,19 @@ const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
-  const apmTrans = apm.startTransaction(
+  const apmTrans = tracingApi?.legacy.startTransaction(
     TASK_MANAGER_MARK_AS_CLAIMED,
     TASK_MANAGER_TRANSACTION_TYPE
   );
 
   try {
     const result = await claimAvailableTasks(opts);
-    apmTrans.end('success');
+    apmTrans?.span.setStatus({ code: SpanStatusCode.OK });
+    apmTrans?.span.end();
     return result;
   } catch (err) {
-    apmTrans.end('failure');
+    apmTrans?.span.setStatus({ code: SpanStatusCode.ERROR });
+    apmTrans?.span.end();
     throw err;
   }
 }

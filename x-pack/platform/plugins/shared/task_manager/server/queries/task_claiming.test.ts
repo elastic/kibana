@@ -9,10 +9,11 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { TaskClaiming } from './task_claiming';
 import { taskStoreMock } from '../task_store.mock';
-import apm from 'elastic-apm-node';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
+import { tracingApi } from '@kbn/tracing';
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -24,6 +25,12 @@ jest.mock('../constants', () => ({
     'limitedToFive',
   ],
 }));
+
+jest.mock('@kbn/tracing', () => {
+  return {
+    tracingApi: createMockedTracingApi(),
+  };
+});
 
 const taskManagerLogger = mockLogger();
 const taskPartitioner = new TaskPartitioner({
@@ -71,7 +78,7 @@ describe('TaskClaiming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest
-      .spyOn(apm, 'startTransaction')
+      .spyOn(tracingApi!.legacy, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);

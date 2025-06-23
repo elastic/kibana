@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
 import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
 import { takeWhile, tap, toArray } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 
@@ -57,7 +57,7 @@ export class AnalyticsPluginAPlugin implements Plugin {
     reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'setup',
-      traceId: apm.currentTraceIds?.['trace.id'],
+      traceId: tracingApi?.legacy.currentTraceIds?.['trace.id'],
     });
 
     const actions$ = new ReplaySubject<Action>();
@@ -146,7 +146,7 @@ export class AnalyticsPluginAPlugin implements Plugin {
     analytics.reportEvent('test-plugin-lifecycle', {
       plugin: 'analyticsPluginA',
       step: 'start',
-      traceId: apm.currentTraceIds?.['trace.id'],
+      traceId: tracingApi?.legacy.currentTraceIds['trace.id'],
     });
   }
 

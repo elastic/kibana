@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { logger } from 'elastic-apm-node';
-
 import type {
   SavedObjectModelTransformationContext,
   SavedObjectModelTransformationDoc,
@@ -15,6 +13,7 @@ import type {
   SavedObjectModelUnsafeTransformFn,
   SavedObjectsModelUnsafeTransformChange,
 } from '@kbn/core-saved-objects-server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import { getCreateEsoModelVersion } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
@@ -44,7 +43,7 @@ describe('create ESO model version', () => {
     attributesToEncrypt: new Set(['firstAttr', 'secondAttr']),
   };
   const context: SavedObjectModelTransformationContext = {
-    log: logger,
+    log: loggerMock.create(),
     modelVersion: 1,
     namespaceType: 'single',
   };

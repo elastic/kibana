@@ -31,6 +31,5 @@
     "@kbn/ml-string-hash",
     "@kbn/ml-response-stream",
     "@kbn/i18n",
-    "@kbn/apm-utils",
   ]
 }

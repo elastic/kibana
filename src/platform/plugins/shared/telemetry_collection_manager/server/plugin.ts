@@ -22,7 +22,8 @@ import type {
 } from '@kbn/core/server';
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
-import apm from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
+import { SpanStatusCode } from '@opentelemetry/api';
 import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
@@ -261,16 +262,16 @@ export class TelemetryCollectionManagerPlugin
     config: EncryptedStatsGetterConfig
   ): Promise<Array<{ clusterUuid: string; stats: string }>>;
   private async getStats(config: StatsGetterConfig) {
-    const retrieveSnapshotTelemetryTransaction = apm.startTransaction(
+    const retrieveSnapshotTelemetryTransaction = tracingApi?.legacy.startTransaction(
       'Retrieve Snapshot Telemetry',
       'telemetry'
     );
-    retrieveSnapshotTelemetryTransaction.addLabels({
+    retrieveSnapshotTelemetryTransaction?.addLabels({
       unencrypted: config.unencrypted,
       refresh: config.refreshCache,
     });
     if (!this.usageCollection) {
-      retrieveSnapshotTelemetryTransaction.end('skipped');
+      retrieveSnapshotTelemetryTransaction?.span.end();
       return [];
     }
     const collection = this.collectionStrategy;
@@ -279,11 +280,11 @@ export class TelemetryCollectionManagerPlugin
       const statsCollectionConfig = this.getStatsCollectionConfig(config, this.usageCollection);
       if (statsCollectionConfig) {
         try {
-          retrieveSnapshotTelemetryTransaction.startSpan('Fetch usage');
+          retrieveSnapshotTelemetryTransaction?.startSpan('Fetch usage');
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
           this.logger.debug(`Received Usage using ${collection.title} collection.`);
 
-          retrieveSnapshotTelemetryTransaction.startSpan('Prepare response');
+          retrieveSnapshotTelemetryTransaction?.startSpan('Prepare response');
           const results = await Promise.all(
             usageData.map(async (clusterStats) => {
               const { cluster_uuid: clusterUuid } = clusterStats;
@@ -298,19 +299,21 @@ export class TelemetryCollectionManagerPlugin
               };
             })
           );
-          retrieveSnapshotTelemetryTransaction.end('success');
+          retrieveSnapshotTelemetryTransaction?.span.setStatus({ code: SpanStatusCode.OK });
+          retrieveSnapshotTelemetryTransaction?.span.end();
           return results;
         } catch (err) {
           this.logger.debug(
             `Failed to collect any usage with registered collection ${collection.title}.`
           );
-          retrieveSnapshotTelemetryTransaction.end('error');
+          retrieveSnapshotTelemetryTransaction?.span.setStatus({ code: SpanStatusCode.ERROR });
+          retrieveSnapshotTelemetryTransaction?.span.end();
           return [];
         }
       }
     }
 
-    retrieveSnapshotTelemetryTransaction.end('skipped');
+    retrieveSnapshotTelemetryTransaction?.span.end();
 
     return [];
   }

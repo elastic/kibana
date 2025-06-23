@@ -48,7 +48,6 @@
     "@kbn/langchain",
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
-    "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/zod",
     "@kbn/inference-plugin",
@@ -86,7 +85,9 @@
     "@kbn/deeplinks-security",
     "@kbn/core-application-browser",
     "@kbn/ai-security-labs-content",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
+    "@kbn/tracing",
+    "@kbn/opentelemetry-attributes"
   ],
   "exclude": [
     "target/**/*",

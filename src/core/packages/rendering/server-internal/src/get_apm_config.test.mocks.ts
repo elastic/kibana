@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
 
 export const getConfigurationMock = jest.fn();
 export const shouldInstrumentClientMock = jest.fn(() => true);
@@ -14,5 +15,11 @@ jest.doMock('@kbn/apm-config-loader', () => ({
   shouldInstrumentClient: shouldInstrumentClientMock,
 }));
 
-export const agentMock = {} as Record<string, any>;
-jest.doMock('elastic-apm-node', () => agentMock);
+const tracingApiMock = createMockedTracingApi();
+export const agentMock = tracingApiMock.legacy;
+
+jest.doMock('@kbn/tracing', () => {
+  return {
+    tracingApi: agentMock,
+  };
+});

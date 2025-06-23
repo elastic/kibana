@@ -15,7 +15,6 @@ import type {
 } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
@@ -23,6 +22,10 @@ import { nodeBuilder } from '@kbn/es-query';
 
 import { buildNode as buildFunctionNode } from '@kbn/es-query/src/kuery/node_types/function';
 import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
+
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+
+import { withActiveSpan } from '@kbn/tracing';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -126,12 +129,15 @@ export async function getPackages(
         // limit to 10 for performance
         if (i < MAX_PKGS_TO_LOAD_TITLE) {
           try {
-            const packageInfo = await withSpan({ name: 'get-package-info', type: 'package' }, () =>
-              getPackageInfo({
-                savedObjectsClient,
-                pkgName: pkg.id,
-                pkgVersion: pkg.attributes.version,
-              })
+            const packageInfo = await withActiveSpan(
+              'get-package-info',
+              { attributes: { [ATTR_SPAN_TYPE]: 'package' } },
+              () =>
+                getPackageInfo({
+                  savedObjectsClient,
+                  pkgName: pkg.id,
+                  pkgVersion: pkg.attributes.version,
+                })
             );
             return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
           } catch (err) {

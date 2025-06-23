@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import type { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -62,8 +63,9 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
   let createdAlert: SavedObject<RawRule>;
   try {
-    createdAlert = await withSpan(
-      { name: 'unsecuredSavedObjectsClient.create', type: 'rules' },
+    createdAlert = await withActiveSpan(
+      'unsecuredSavedObjectsClient.create',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
       () =>
         createRuleSo({
           ruleAttributes: updateMeta(context, rawRule),
@@ -112,14 +114,17 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       throw e;
     }
 
-    await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
-      updateRuleSo({
-        savedObjectsClient: context.unsecuredSavedObjectsClient,
-        id: createdAlert.id,
-        updateRuleAttributes: {
-          scheduledTaskId,
-        },
-      })
+    await withActiveSpan(
+      'unsecuredSavedObjectsClient.update',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+      () =>
+        updateRuleSo({
+          savedObjectsClient: context.unsecuredSavedObjectsClient,
+          id: createdAlert.id,
+          updateRuleAttributes: {
+            scheduledTaskId,
+          },
+        })
     );
     createdAlert.attributes.scheduledTaskId = scheduledTaskId;
   }

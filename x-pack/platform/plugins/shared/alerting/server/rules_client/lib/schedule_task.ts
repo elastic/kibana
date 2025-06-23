@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+import { withActiveSpan } from '@kbn/tracing';
 import type { RulesClientContext } from '../types';
 import type { ScheduleTaskOptions } from '../types';
 
@@ -29,8 +30,10 @@ export async function scheduleTask(context: RulesClientContext, opts: ScheduleTa
     enabled: true,
   };
   try {
-    return await withSpan({ name: 'taskManager.schedule', type: 'rules' }, () =>
-      context.taskManager.schedule(taskInstance)
+    return await withActiveSpan(
+      'taskManager.schedule',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+      () => context.taskManager.schedule(taskInstance)
     );
   } catch (err) {
     if (err.statusCode === 409 && !throwOnConflict) {

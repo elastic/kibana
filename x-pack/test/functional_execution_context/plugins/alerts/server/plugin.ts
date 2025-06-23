@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import apmAgent from 'elastic-apm-node';
-
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { AlertingServerSetup } from '@kbn/alerting-plugin/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -13,6 +11,7 @@ import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { tracingApi } from '@kbn/tracing';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -112,7 +111,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
         return res.ok({
           body: {
-            traceId: apmAgent.currentTraceIds['trace.id'],
+            traceId: tracingApi?.legacy.currentTraceIds['trace.id'],
           },
         });
       }

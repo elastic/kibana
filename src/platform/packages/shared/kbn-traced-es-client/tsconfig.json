@@ -18,7 +18,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/es-types",
-    "@kbn/apm-utils",
     "@kbn/utility-types",
     "@kbn/task-manager-plugin",
   ]

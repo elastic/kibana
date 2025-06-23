@@ -17,6 +17,7 @@
     "@kbn/config",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",

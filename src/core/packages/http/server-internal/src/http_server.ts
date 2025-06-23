@@ -14,7 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
 import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
-import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -45,6 +44,7 @@ import { identity, isNil, isObject, omitBy } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import { tracingApi } from '@kbn/tracing';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -79,7 +79,7 @@ function startEluMeasurement<T>(
   return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
-    apm.currentTransaction?.addLabels(
+    tracingApi?.legacy.addLabels(
       {
         event_loop_utilization: utilization,
         event_loop_active: active,
@@ -553,7 +553,7 @@ export class HttpServer {
 
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
-        apm.addLabels(executionContext.getAsLabels());
+        tracingApi?.legacy.addLabels(executionContext.getAsLabels());
       }
 
       executionContext?.setRequestId(requestId);
@@ -565,7 +565,7 @@ export class HttpServer {
         measureElu: stop,
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-        traceId: apm.currentTraceIds['trace.id'],
+        traceId: tracingApi?.legacy.currentTraceIds['trace.id'],
       } as KibanaRequestState;
       return responseToolkit.continue;
     });

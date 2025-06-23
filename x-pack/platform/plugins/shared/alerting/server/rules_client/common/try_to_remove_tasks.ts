@@ -6,8 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 
 export const tryToRemoveTasks = async ({
   taskIdsToDelete,
@@ -20,39 +21,43 @@ export const tryToRemoveTasks = async ({
 }) => {
   const taskIdsFailedToBeDeleted: string[] = [];
   const taskIdsSuccessfullyDeleted: string[] = [];
-  return await withSpan({ name: 'taskManager.bulkRemove', type: 'rules' }, async () => {
-    if (taskIdsToDelete.length > 0) {
-      try {
-        const resultFromDeletingTasks = await taskManager.bulkRemove(taskIdsToDelete);
-        resultFromDeletingTasks?.statuses.forEach((status) => {
-          if (status.success || status.error?.statusCode === 404) {
-            taskIdsSuccessfullyDeleted.push(status.id);
-          } else {
-            taskIdsFailedToBeDeleted.push(status.id);
+  return await withActiveSpan(
+    'taskManager.bulkRemove',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
+    async () => {
+      if (taskIdsToDelete.length > 0) {
+        try {
+          const resultFromDeletingTasks = await taskManager.bulkRemove(taskIdsToDelete);
+          resultFromDeletingTasks?.statuses.forEach((status) => {
+            if (status.success || status.error?.statusCode === 404) {
+              taskIdsSuccessfullyDeleted.push(status.id);
+            } else {
+              taskIdsFailedToBeDeleted.push(status.id);
+            }
+          });
+          if (taskIdsSuccessfullyDeleted.length) {
+            logger.debug(
+              `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
+                ', '
+              )}`
+            );
           }
-        });
-        if (taskIdsSuccessfullyDeleted.length) {
-          logger.debug(
-            `Successfully deleted schedules for underlying tasks: ${taskIdsSuccessfullyDeleted.join(
-              ', '
-            )}`
-          );
-        }
-        if (taskIdsFailedToBeDeleted.length) {
+          if (taskIdsFailedToBeDeleted.length) {
+            logger.error(
+              `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+                ', '
+              )}`
+            );
+          }
+        } catch (error) {
           logger.error(
-            `Failure to delete schedules for underlying tasks: ${taskIdsFailedToBeDeleted.join(
+            `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
               ', '
-            )}`
+            )}. TaskManager bulkRemove failed with Error: ${error.message}`
           );
         }
-      } catch (error) {
-        logger.error(
-          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
-            ', '
-          )}. TaskManager bulkRemove failed with Error: ${error.message}`
-        );
       }
+      return taskIdsFailedToBeDeleted;
     }
-    return taskIdsFailedToBeDeleted;
-  });
+  );
 };

@@ -22,7 +22,8 @@
     "@kbn/logging-mocks",
     "@kbn/config-mocks",
     "@kbn/config",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/tracing"
   ],
   "exclude": [
     "target/**/*",

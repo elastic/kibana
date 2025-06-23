@@ -35,7 +35,6 @@
     "@kbn/logging-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/securitysolution-rules",
-    "@kbn/apm-utils",
     "@kbn/data-views-plugin",
     "@kbn/share-plugin",
     "@kbn/safer-lodash-set",
@@ -78,7 +77,8 @@
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
-    "@kbn/response-ops-recurring-schedule-form"
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/tracing"
   ],
   "exclude": [
     "target/**/*"

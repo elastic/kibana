@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type apm from 'elastic-apm-node';
+import type { Attributes } from '@opentelemetry/api';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 /**
@@ -21,7 +21,7 @@ export interface ExecutionContextSetup {
    **/
   withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
 
-  getAsLabels(): apm.Labels;
+  getAsLabels(): Attributes;
 }
 
 /**

@@ -12,7 +12,7 @@ import { merge, isEmpty } from 'lodash';
 import { execSync } from 'child_process';
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
-import type { AgentConfigOptions } from 'elastic-apm-node';
+import type { AgentConfigOptions } from '@kbn/telemetry-config';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import { getFlattenedObject } from '@kbn/std';
 import type { TelemetryConfig } from '@kbn/telemetry-config';
@@ -100,11 +100,6 @@ export class ApmConfiguration {
 
   public getTelemetryConfig(): TelemetryConfig | undefined {
     return this.rawKibanaConfig.telemetry;
-  }
-
-  public isUsersRedactionEnabled(): boolean {
-    const { redactUsers = true } = this.getConfigFromKibanaConfig();
-    return redactUsers;
   }
 
   private getBaseConfig() {

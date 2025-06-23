@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 
@@ -30,6 +29,7 @@ import {
 import { ExportType, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
+import { tracingApi } from '@kbn/tracing';
 import { getCustomLogo } from './get_custom_logo';
 import { getTracker } from './pdf_tracker';
 
@@ -82,8 +82,11 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     stream,
   }: RunTaskOpts<TaskPayloadPDFV2>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
-    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
+    const apmTrans = tracingApi?.legacy.startTransaction(
+      'execute-job-pdf-v2',
+      REPORTING_TRANSACTION_TYPE
+    );
+    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
@@ -96,7 +99,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
         apmGetAssets?.end();
 
-        apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
+        apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
 
         const tracker = getTracker();
         tracker.startScreenshots();
@@ -177,7 +180,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    apmTrans.end();
+    apmTrans?.span.end();
     return Rx.firstValueFrom(process$.pipe(takeUntil(stop$)));
   };
 }

@@ -31,7 +31,6 @@ import type { TaskDefinitionRegistry } from '../task_type_dictionary';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwRetryableError, throwUnrecoverableError } from './errors';
-import apm from 'elastic-apm-node';
 import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
@@ -44,6 +43,8 @@ import { schema } from '@kbn/config-schema';
 import { CLAIM_STRATEGY_MGET, CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
+import { tracingApi } from '@kbn/tracing';
+import { createMockedTracingApi } from '@kbn/tracing-test-utils';
 
 const baseDelay = 5 * 60 * 1000;
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -55,6 +56,10 @@ let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
+
+jest.mock('@kbn/tracing', () => {
+  return createMockedTracingApi();
+});
 
 beforeAll(() => {
   fakeTimer = sinon.useFakeTimers();
@@ -88,7 +93,7 @@ describe('TaskManagerRunner', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       jest
-        .spyOn(apm, 'startTransaction')
+        .spyOn(tracingApi!.legacy, 'startTransaction')
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockImplementation(() => mockApmTrans as any);
@@ -110,7 +115,7 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -139,7 +144,7 @@ describe('TaskManagerRunner', () => {
         `[Error: Saved object [type/id] not found]`
       );
       // await runner.markTaskAsRunning();
-      expect(apm.startTransaction).toHaveBeenCalledWith(
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
         TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
         TASK_MANAGER_TRANSACTION_TYPE
       );
@@ -810,7 +815,7 @@ describe('TaskManagerRunner', () => {
       const result = await runner.markTaskAsRunning();
 
       expect(result).toBe(true);
-      expect(apm.startTransaction).not.toHaveBeenCalled();
+      expect(tracingApi!.legacy.startTransaction).not.toHaveBeenCalled();
       expect(mockApmTrans.end).not.toHaveBeenCalled();
 
       expect(runner.id).toEqual('foo');
@@ -902,9 +907,13 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
-        childOf: 'apmTraceparent',
-      });
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
+        'bar',
+        TASK_MANAGER_RUN_TRANSACTION_TYPE,
+        {
+          childOf: 'apmTraceparent',
+        }
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
     });
     test('makes calls to APM and logs errors as expected when task fails', async () => {
@@ -925,9 +934,13 @@ describe('TaskManagerRunner', () => {
         },
       });
       await runner.run();
-      expect(apm.startTransaction).toHaveBeenCalledWith('bar', TASK_MANAGER_RUN_TRANSACTION_TYPE, {
-        childOf: 'apmTraceparent',
-      });
+      expect(tracingApi!.legacy.startTransaction).toHaveBeenCalledWith(
+        'bar',
+        TASK_MANAGER_RUN_TRANSACTION_TYPE,
+        {
+          childOf: 'apmTraceparent',
+        }
+      );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
       const loggerCall = logger.error.mock.calls[0][0];
       const loggerMeta = logger.error.mock.calls[0][1];

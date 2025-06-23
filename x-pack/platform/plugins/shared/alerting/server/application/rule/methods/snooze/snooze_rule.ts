@@ -6,7 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -54,8 +55,9 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   context: RulesClientContext,
   { id, snoozeSchedule }: SnoozeRuleOptions
 ) {
-  const { attributes, version } = await withSpan(
-    { name: 'getRuleSavedObject', type: 'rules' },
+  const { attributes, version } = await withActiveSpan(
+    'getRuleSavedObject',
+    { attributes: { [ATTR_SPAN_TYPE]: 'rules' } },
     () =>
       getRuleSavedObject(context, {
         ruleId: id,

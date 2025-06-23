@@ -8,7 +8,6 @@
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
-import type apm from 'elastic-apm-node';
 import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
 
@@ -16,6 +15,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+import type { Attributes } from '@opentelemetry/api';
 import type { ExecutionContextConfigType } from './execution_context_config';
 import { ExecutionContextContainer, getParentContextFrom } from './execution_context_container';
 
@@ -48,7 +48,7 @@ export interface IExecutionContext {
   /**
    * returns apm labels
    **/
-  getAsLabels(): apm.Labels;
+  getAsLabels(): Attributes;
 }
 
 /**

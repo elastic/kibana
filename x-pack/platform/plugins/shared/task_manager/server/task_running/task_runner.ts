@@ -11,9 +11,7 @@
  * rescheduling, middleware application, etc.
  */
 
-import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
-import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type {
   ExecutionContextStart,
@@ -27,6 +25,9 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { tracingApi, withActiveSpan } from '@kbn/tracing';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { ATTR_TRANSACTION_TYPE } from '@kbn/opentelemetry-attributes';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -352,26 +353,34 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
-    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
-      childOf: this.instance.task.traceparent,
-    });
+    const apmTrans = tracingApi?.legacy.startTransaction(
+      this.taskType,
+      TASK_MANAGER_RUN_TRANSACTION_TYPE,
+      {
+        childOf: this.instance.task.traceparent,
+      }
+    );
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
     const stateValidationResult = this.validateTaskState(this.instance.task);
 
     if (stateValidationResult.error) {
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(
-          asErr({
-            error: stateValidationResult.error,
-            state: stateValidationResult.taskInstance.state,
-            shouldValidate: false,
-          }),
-          stopTaskTimer()
-        )
+      const processedResult = await withActiveSpan(
+        'process result',
+        { attributes: { [ATTR_TRANSACTION_TYPE]: 'task-manager' } },
+        () =>
+          this.processResult(
+            asErr({
+              error: stateValidationResult.error,
+              state: stateValidationResult.taskInstance.state,
+              shouldValidate: false,
+            }),
+            stopTaskTimer()
+          )
       );
-      if (apmTrans) apmTrans.end('failure');
+      apmTrans?.span.setStatus({ code: SpanStatusCode.ERROR });
+      apmTrans?.span.end();
       return processedResult;
     }
 
@@ -402,14 +411,21 @@ export class TaskManagerRunner implements TaskRunner {
       };
 
       const result = await this.executionContext.withContext(ctx, () =>
-        withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+        withActiveSpan('run', { attributes: { [ATTR_TRANSACTION_TYPE]: 'task manager' } }, () =>
+          this.task!.run()
+        )
       );
 
       const validatedResult = this.validateResult(result);
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(validatedResult, stopTaskTimer())
+      const processedResult = await withActiveSpan(
+        'process result',
+        { attributes: { [ATTR_TRANSACTION_TYPE]: 'task manager' } },
+        () => this.processResult(validatedResult, stopTaskTimer())
       );
-      if (apmTrans) apmTrans.end('success');
+      if (apmTrans) {
+        apmTrans.span.setStatus({ code: SpanStatusCode.OK });
+        apmTrans.span.end();
+      }
       return processedResult;
     } catch (err) {
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
@@ -419,13 +435,19 @@ export class TaskManagerRunner implements TaskRunner {
       });
       // in error scenario, we can not get the RunResult
       // re-use modifiedContext's state, which is correct as of beforeRun
-      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
-        this.processResult(
-          asErr({ error: err, state: modifiedContext.taskInstance.state }),
-          stopTaskTimer()
-        )
+      const processedResult = await withActiveSpan(
+        'process result',
+        { attributes: { [ATTR_TRANSACTION_TYPE]: 'task manager' } },
+        () =>
+          this.processResult(
+            asErr({ error: err, state: modifiedContext.taskInstance.state }),
+            stopTaskTimer()
+          )
       );
-      if (apmTrans) apmTrans.end('failure');
+      if (apmTrans) {
+        apmTrans.span.setStatus({ code: SpanStatusCode.ERROR });
+        apmTrans.span.end();
+      }
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
@@ -479,11 +501,12 @@ export class TaskManagerRunner implements TaskRunner {
       return true;
     }
 
-    const apmTrans = apm.startTransaction(
+    const apmTrans = tracingApi?.legacy.startTransaction(
       TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
       TASK_MANAGER_TRANSACTION_TYPE
     );
-    apmTrans.addLabels({ entityId: this.taskType });
+
+    apmTrans?.span.setAttributes({ 'labels.entityId': this.taskType });
 
     const now = new Date();
     try {
@@ -529,11 +552,17 @@ export class TaskManagerRunner implements TaskRunner {
         );
       }
 
-      if (apmTrans) apmTrans.end('success');
+      if (apmTrans) {
+        apmTrans.span.setStatus({ code: SpanStatusCode.OK });
+        apmTrans.span.end();
+      }
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
-      if (apmTrans) apmTrans.end('failure');
+      if (apmTrans) {
+        apmTrans.span.setStatus({ code: SpanStatusCode.ERROR });
+        apmTrans.span.end();
+      }
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {

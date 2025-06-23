@@ -9,7 +9,8 @@ import type { Logger, ISavedObjectsRepository } from '@kbn/core/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { chunk } from 'lodash';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import type { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import type { Gap } from '../gap';
@@ -129,21 +130,25 @@ const updateGapBatch = async (
         }
       })
       .filter((scheduledItem): scheduledItem is ScheduledItem => scheduledItem !== undefined);
-    await withSpan({ name: 'updateGaps.prepareGapsForUpdate', type: 'rule' }, async () => {
-      for (const { gap, scheduled } of findOverlappingIntervals(gaps, scheduledItems)) {
-        // we do async request only if there errors in backfill or no backfill schedule
-        const updatedGap = await prepareGapForUpdate(gap, {
-          scheduledItems: scheduled,
-          savedObjectsRepository,
-          shouldRefetchAllBackfills,
-          logger,
-          backfillClient,
-          actionsClient,
-          ruleId,
-        });
-        updatedGaps.push(updatedGap);
+    await withActiveSpan(
+      'updateGaps.prepareGapsForUpdate',
+      { attributes: { type: 'rule' } },
+      async () => {
+        for (const { gap, scheduled } of findOverlappingIntervals(gaps, scheduledItems)) {
+          // we do async request only if there errors in backfill or no backfill schedule
+          const updatedGap = await prepareGapForUpdate(gap, {
+            scheduledItems: scheduled,
+            savedObjectsRepository,
+            shouldRefetchAllBackfills,
+            logger,
+            backfillClient,
+            actionsClient,
+            ruleId,
+          });
+          updatedGaps.push(updatedGap);
+        }
       }
-    });
+    );
 
     // Convert gaps to the format expected by updateDocuments
     const gapsToUpdate = updatedGaps
@@ -161,8 +166,9 @@ const updateGapBatch = async (
     }
 
     // Attempt bulk update
-    const bulkResponse = await withSpan(
-      { name: 'updateGaps.alertingEventLogger.updateGaps', type: 'rule' },
+    const bulkResponse = await withActiveSpan(
+      'updateGaps.alertingEventLogger.updateGaps',
+      { attributes: { [ATTR_SPAN_TYPE]: 'rule' } },
       () => alertingEventLogger.updateGaps(gapsToUpdate)
     );
 

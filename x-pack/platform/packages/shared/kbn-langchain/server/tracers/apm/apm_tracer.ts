@@ -5,17 +5,16 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
 import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
 import { BaseTracer, Run } from '@langchain/core/tracers/base';
-import agent from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
+import { Attributes, Span } from '@opentelemetry/api';
 
 export interface LangChainTracerFields extends BaseCallbackHandlerInput {
   exampleId?: string;
   projectName?: string;
 }
-
-type Span = Exclude<typeof agent.currentSpan, undefined | null>;
 
 /**
  * APMTracer is a tracer that uses the Elastic APM agent to trace langchain retrievers, llms, chains, and tools.
@@ -52,13 +51,13 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
    * @param run
    * @protected
    */
-  protected _getLabelsFromRun(run: Run): agent.Labels {
+  protected _getLabelsFromRun(run: Run): Attributes {
     try {
       return {
-        tags: JSON.stringify(run.tags),
-        outputs: JSON.stringify(run.outputs),
-        events: JSON.stringify(run.events),
-        inputs: JSON.stringify(run.inputs),
+        'labels.tags': JSON.stringify(run.tags),
+        'labels.outputs': JSON.stringify(run.outputs),
+        'labels.events': JSON.stringify(run.events),
+        'labels.inputs': JSON.stringify(run.inputs),
       };
     } catch (e) {
       this.logger.error(`Error parsing run into labels:\n${e}`);
@@ -67,10 +66,10 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   protected createAndAddSpanFromRun(run: Run, spans: Span[]) {
-    const span = agent.startSpan(run.name) ?? undefined;
+    const span = tracingApi?.legacy.startSpan(run.name) ?? undefined;
 
     if (span) {
-      span.addLabels(this._getLabelsFromRun(run));
+      span.setAttributes(this._getLabelsFromRun(run));
       spans.push(span);
     }
   }
@@ -84,7 +83,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
     this.logger.debug(() => `onRetrieverEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.retrieverSpans.pop();
     if (span != null) {
-      span.addLabels(this._getLabelsFromRun(run));
+      span.setAttributes(this._getLabelsFromRun(run));
       span.end();
     }
   }
@@ -102,7 +101,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
     this.logger.debug(() => `onLLMEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.llmSpans.pop();
     if (span != null) {
-      span.addLabels(this._getLabelsFromRun(run));
+      span.setAttributes(this._getLabelsFromRun(run));
       span.end();
     }
   }
@@ -120,7 +119,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
     this.logger.debug(() => `onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.chainSpans.pop();
     if (span != null) {
-      span.addLabels(this._getLabelsFromRun(run));
+      span.setAttributes(this._getLabelsFromRun(run));
       span.end();
     }
   }
@@ -138,7 +137,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
     this.logger.debug(() => `onToolEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.toolSpans.pop();
     if (span != null) {
-      span.addLabels(this._getLabelsFromRun(run));
+      span.setAttributes(this._getLabelsFromRun(run));
       span.end();
     }
   }

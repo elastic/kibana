@@ -12,9 +12,9 @@ import { first, publishReplay, switchMap, concatMap, tap, distinctUntilChanged }
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
-import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
 import { setDiagLogger } from '@kbn/telemetry';
+import { tracingApi } from '@kbn/tracing';
 import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
 import { MIGRATION_EXCEPTION_CODE } from '../constants';
@@ -125,7 +125,7 @@ export class Root {
         distinctUntilChanged(isEqual),
         tap((elasticConfig) => {
           const labels = elasticConfig.apm?.globalLabels || {};
-          apm.addLabels(labels);
+          tracingApi?.legacy.addLabels(labels);
         })
       )
       .subscribe();

@@ -4,47 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SpanOptions } from '@kbn/apm-utils';
-import { withSpan } from '@kbn/apm-utils';
-import agent from 'elastic-apm-node';
+import { createWithActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { APP_ID } from '../../common/constants';
 
-type Span = Exclude<typeof agent.currentSpan, undefined | null>;
-
 /**
- * This is a thin wrapper around withSpan from @kbn/apm-utils, which sets
- * span type to Security APP_ID by default. This span type is used to
+ * This is a thin wrapper around withActiveSpan from @kbn/tracing, which
+ * sets span type to Security APP_ID by default. This span type is used to
  * distinguish Security spans from everything else when inspecting traces.
  *
  * Use this method to capture information about the execution of a specific
- * code path and highlight it in APM IU.
+ * code path and highlight it in APM UI.
  *
- * @param optionsOrName Span name or span options object
- * @param cb Code block you want to measure
+ * Overloads:
+ *   1. (name, cb)
+ *   2. (name, options, cb)
+ *   3. (name, options, context, cb)
+ *
+ * @param name     Span name
+ * @param options  (optional) Span options object
+ * @param context  (optional) OTel context in which to start the span
+ * @param cb       Code block you want to measure
  *
  * @returns Whatever the measured code block returns
  */
-export const withSecuritySpan = <T>(
-  optionsOrName: SpanOptions | string,
-  cb: (span?: Span) => Promise<T>
-) =>
-  withSpan<T>(
-    {
-      type: APP_ID,
-      ...(typeof optionsOrName === 'string' ? { name: optionsOrName } : optionsOrName),
-    },
-    cb
-  );
 
-export const withSecuritySpanSync = <T>(name: string, fn: (span: Span | null) => T): T => {
-  const span = agent.startSpan(name, APP_ID);
-
-  try {
-    const result = fn(span);
-    return result;
-  } finally {
-    if (span) {
-      span.end();
-    }
-  }
-};
+export const withSecuritySpan = createWithActiveSpan({
+  attributes: {
+    [ATTR_SPAN_TYPE]: APP_ID,
+  },
+});

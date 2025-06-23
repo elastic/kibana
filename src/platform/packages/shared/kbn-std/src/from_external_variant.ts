@@ -11,15 +11,13 @@
  * Given a record type `{a: X; b: Y}`, produces a distributed union:
  * `{ type: "a"; value: X } | { type: "b"; value: Y }`.
  */
-export type FromExternalVariant<T extends Record<string, unknown>> = T extends any
+export type FromExternalVariant<T extends object> = T extends any
   ? {
       [K in keyof T]: { type: K; value: T[K] };
     }[keyof T]
   : never;
 
-export function fromExternalVariant<T extends Record<string, unknown>>(
-  obj: T
-): FromExternalVariant<T> {
+export function fromExternalVariant<T extends object>(obj: T): FromExternalVariant<T> {
   const keys = Object.keys(obj);
 
   if (keys.length !== 1) {

@@ -15,5 +15,11 @@
   ],
   "kbn_references": [
     "@kbn/telemetry-config",
+    "@kbn/opentelemetry-attributes",
+    "@kbn/opentelemetry-utils",
+    "@kbn/tracing-config",
+    "@kbn/std",
+    "@kbn/inference-tracing",
+    "@kbn/metrics",
   ]
 }

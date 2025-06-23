@@ -10,7 +10,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { Payload } from 'elastic-apm-node';
 import {
   type AuthorizationTypeEntry,
   type AuthorizeAndRedactMultiNamespaceReferencesParams,
@@ -65,7 +64,7 @@ export interface ExpectedErrorResult {
   error: Record<string, any>;
 }
 
-export type ErrorPayload = Error & Payload;
+export type ErrorPayload = Error & Record<string, any>;
 
 export const createBadRequestErrorPayload = (reason?: string) =>
   SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as unknown as ErrorPayload;

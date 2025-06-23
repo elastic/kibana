@@ -6,7 +6,7 @@
  */
 import { pickBy } from 'lodash';
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
-import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
   type PerformRuleUpgradeRequestBody,
@@ -41,7 +41,7 @@ export const createModifiedPrebuiltRuleAssets = ({
   requestBody,
   defaultPickVersion,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
-  return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
+  return withSecuritySpan(createModifiedPrebuiltRuleAssets.name, () => {
     const {
       pick_version: globalPickVersion = defaultPickVersion,
       mode,

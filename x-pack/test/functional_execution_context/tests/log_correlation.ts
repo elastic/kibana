@@ -30,7 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
         description: 'traceId included in the http logs',
         predicate: (record) => {
           // we don't check trace.id value since trace.id in the test plugin and Kibana are different on CI.
-          // because different 'elastic-apm-node' instances are imported
           if (
             record.log?.logger === 'http.server.response' &&
             record.url?.path === '/emit_log_with_trace_id'

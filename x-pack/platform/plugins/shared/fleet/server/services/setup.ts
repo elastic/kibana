@@ -7,8 +7,6 @@
 
 import fs from 'fs/promises';
 
-import apm from 'elastic-apm-node';
-
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import pRetry from 'p-retry';
@@ -16,6 +14,10 @@ import pRetry from 'p-retry';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { LockAcquisitionError } from '@kbn/lock-manager';
+
+import { tracingApi } from '@kbn/tracing';
+
+import { SpanStatusCode } from '@opentelemetry/api';
 
 import { MessageSigningError } from '../../common/errors';
 
@@ -102,7 +104,7 @@ export async function setupFleet(
     useLock: boolean;
   } = { useLock: false }
 ): Promise<SetupStatus> {
-  const t = apm.startTransaction('fleet-setup', 'fleet');
+  const t = tracingApi?.legacy.startTransaction('fleet-setup', 'fleet');
   try {
     if (options.useLock) {
       return _runSetupWithLock(() =>
@@ -112,11 +114,11 @@ export async function setupFleet(
       return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
     }
   } catch (error) {
-    apm.captureError(error);
-    t.setOutcome('failure');
+    tracingApi?.legacy.captureError(error);
+    t?.span.setStatus({ code: SpanStatusCode.ERROR });
     throw error;
   } finally {
-    t.end();
+    t?.span.end();
   }
 }
 
@@ -180,7 +182,7 @@ async function createSetupSideEffects(
   await outputService.backfillAllOutputPresets(soClient, esClient);
 
   logger.debug('Setting up Fleet Elasticsearch assets');
-  let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
+  let stepSpan = tracingApi?.legacy.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
   stepSpan?.end();
 
@@ -205,7 +207,10 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up initial Fleet packages');
 
-  stepSpan = apm.startSpan('Install preconfigured packages and policies', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan(
+    'Install preconfigured packages and policies',
+    'preconfiguration'
+  );
   const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
     await ensurePreconfiguredPackagesAndPolicies(
       soClient,
@@ -218,17 +223,20 @@ async function createSetupSideEffects(
     );
   stepSpan?.end();
 
-  stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan('Upgrade managed package policies', 'preconfiguration');
   await setupUpgradeManagedPackagePolicies(soClient, esClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
-  stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan(
+    'Upgrade package install format version',
+    'preconfiguration'
+  );
   await upgradePackageInstallVersion({ soClient, esClient, logger });
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
-  stepSpan = apm.startSpan('Configure message signing', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan('Configure message signing', 'preconfiguration');
   if (!appContextService.getMessageSigningService()?.isEncryptionAvailable) {
     logger.warn(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
@@ -246,13 +254,16 @@ async function createSetupSideEffects(
   }
   stepSpan?.end();
 
-  stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan('Upgrade agent policy schema', 'preconfiguration');
 
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
   stepSpan?.end();
 
-  stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
+  stepSpan = tracingApi?.legacy.startSpan(
+    'Set up enrollment keys for preconfigured policies',
+    'preconfiguration'
+  );
   logger.debug(
     'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
   );
@@ -295,9 +306,9 @@ async function createSetupSideEffects(
     logger.info('Encountered non fatal errors during Fleet setup');
     formatNonFatalErrors(nonFatalErrors)
       .map((e) => JSON.stringify(e))
-      .forEach((error) => {
-        logger.info(error);
-        apm.captureError(error);
+      .forEach((errorStr) => {
+        logger.info(errorStr);
+        tracingApi?.legacy.captureError(new Error(errorStr));
       });
   }
 
@@ -336,7 +347,7 @@ export async function ensureFleetGlobalEsAssets(
           esClient,
           installation,
         }).catch((err) => {
-          apm.captureError(err);
+          tracingApi?.legacy.captureError(err);
           logger.error(
             `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { ExtractedDatasetFields } from '@kbn/fields-metadata-plugin/server';
 
 import { load } from 'js-yaml';
+
+import { withActiveSpan } from '@kbn/tracing';
+
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 
 import type { RegistryDataStream } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
@@ -24,7 +27,7 @@ type InputField =
     };
 
 export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
-  withSpan({ name: stepName, type: 'package' }, func);
+  withActiveSpan(stepName, { attributes: { [ATTR_SPAN_TYPE]: 'package' } }, func);
 
 const normalizeFields = (fields: InputField[], prefix = ''): ExtractedDatasetFields => {
   return fields.reduce((normalizedFields, field) => {

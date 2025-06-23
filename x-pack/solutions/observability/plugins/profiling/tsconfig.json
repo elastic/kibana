@@ -32,7 +32,6 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core-http-server",
-    "@kbn/apm-utils",
     "@kbn/core-elasticsearch-server",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-page-no-data-types",

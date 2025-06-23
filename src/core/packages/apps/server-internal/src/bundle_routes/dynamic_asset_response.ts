@@ -10,7 +10,7 @@
 import { createReadStream } from 'fs';
 import { resolve, extname } from 'path';
 import mime from 'mime-types';
-import agent from 'elastic-apm-node';
+import { tracingApi } from '@kbn/tracing';
 
 import type { RequestHandler } from '@kbn/core-http-server';
 import { fstat, close } from './fs';
@@ -51,7 +51,7 @@ export const createDynamicAssetHandler = ({
   isDist: boolean;
 }): RequestHandler<{ path: string }, {}, {}> => {
   return async (ctx, req, res) => {
-    agent.setTransactionName('GET ?/bundles/?');
+    tracingApi?.legacy.setTransactionName('GET ?/bundles/?');
 
     let fd: number | undefined;
     let fileEncoding: 'gzip' | 'br' | undefined;

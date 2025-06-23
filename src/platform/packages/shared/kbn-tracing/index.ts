@@ -8,4 +8,9 @@
  */
 
 export { LateBindingSpanProcessor } from './src/late_binding_span_processor';
-export { initTracing } from './src/init_tracing';
+export { initTracing, tracingApi } from './src/init_tracing';
+export type { ElasticApmApi } from './src/bridge/elastic_apm_api';
+export type { ElasticTransactionApi } from './src/bridge/elastic_apm_api';
+export type { TracingApi } from './src/types';
+export { createWithActiveSpan } from './src/utils/create_with_active_span';
+export { withActiveSpan } from './src/utils/with_active_span';

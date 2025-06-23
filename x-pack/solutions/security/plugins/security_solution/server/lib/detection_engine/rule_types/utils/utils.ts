@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
 import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
@@ -41,6 +40,7 @@ import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import { tracingApi } from '@kbn/tracing';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -140,7 +140,7 @@ export const hasTimestampFields = async (args: {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
-  agent.setCustomContext({
+  tracingApi?.legacy.setCustomContext({
     [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
   });
 
@@ -325,7 +325,7 @@ export const getExceptions = async ({
           sortOrder: undefined,
           sortField: undefined,
         });
-        agent.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
+        tracingApi?.legacy.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
         return items;
       } catch (e) {
         throw new Error(
@@ -368,7 +368,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  tracingApi?.legacy.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };

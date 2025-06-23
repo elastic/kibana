@@ -11,7 +11,10 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+
+import { withActiveSpan } from '@kbn/tracing';
+
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 
 import type { FleetUsage } from '../../collectors/register';
 
@@ -49,8 +52,10 @@ export class FleetUsageSender {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return withSpan({ name: this.taskType, type: 'telemetry' }, () =>
-                this.runTask(taskInstance, core, () => fetchUsage(this.abortController))
+              return withActiveSpan(
+                this.taskType,
+                { attributes: { [ATTR_SPAN_TYPE]: 'telemetry' } },
+                () => this.runTask(taskInstance, core, () => fetchUsage(this.abortController))
               );
             },
 

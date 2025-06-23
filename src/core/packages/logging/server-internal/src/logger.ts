@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apmAgent from 'elastic-apm-node';
 import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
+import { tracingApi } from '@kbn/tracing';
 
 function isError(x: any): x is Error {
   return x instanceof Error;
@@ -48,9 +48,9 @@ export class BaseLogger extends AbstractLogger {
 
   private getTraceIds() {
     return {
-      spanId: apmAgent.currentTraceIds['span.id'],
-      traceId: apmAgent.currentTraceIds['trace.id'],
-      transactionId: apmAgent.currentTraceIds['transaction.id'],
+      spanId: tracingApi?.legacy.currentTraceIds['span.id'],
+      traceId: tracingApi?.legacy.currentTraceIds['trace.id'],
+      transactionId: tracingApi?.legacy.currentTraceIds['transaction.id'],
     };
   }
 }

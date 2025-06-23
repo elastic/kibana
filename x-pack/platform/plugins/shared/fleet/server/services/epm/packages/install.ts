@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
@@ -21,6 +20,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+
+import { tracingApi } from '@kbn/tracing';
 
 import type {
   KibanaAssetReference,
@@ -640,7 +641,7 @@ export async function installPackageWithStateMachine(options: {
 
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
-  const span = apm.startSpan(
+  const span = tracingApi?.legacy.startSpan(
     `Install package from ${installSource} ${pkgName}@${pkgVersion}`,
     'package'
   );
@@ -652,10 +653,10 @@ export async function installPackageWithStateMachine(options: {
   }
 
   try {
-    span?.addLabels({
-      packageName: pkgName,
-      packageVersion: pkgVersion,
-      installType,
+    span?.setAttributes({
+      'labels.packageName': pkgName,
+      'labels.packageVersion': pkgVersion,
+      'labels.installType': installType,
     });
 
     const filteredPackages = getFilteredInstallPackages();

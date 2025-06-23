@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import apm from 'elastic-apm-node';
 import {
   finalize,
   fromEventPattern,
@@ -42,6 +41,8 @@ import {
   REPORTING_TRANSACTION_TYPE,
   RunTaskOpts,
 } from '@kbn/reporting-server';
+import { tracingApi } from '@kbn/tracing';
+import { Span } from '@opentelemetry/api';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -93,8 +94,11 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     stream,
   }: RunTaskOpts<TaskPayloadPNGV2>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
-    const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
-    const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
+    const apmTrans = tracingApi?.legacy.startTransaction(
+      'execute-job-pdf-v2',
+      REPORTING_TRANSACTION_TYPE
+    );
+    const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
@@ -109,7 +113,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         const [locatorParams] = payload.locatorParams;
 
         apmGetAssets?.end();
-        apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
+        apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
         const layout = { ...payload.layout, id: 'preserve_layout' as const };
         if (!layout.dimensions) {
@@ -117,7 +121,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         }
 
         const apmScreenshots = apmTrans?.startSpan('screenshots-pipeline', 'setup');
-        let apmBuffer: typeof apm.currentSpan;
+        let apmBuffer: Span | undefined;
 
         return this.startDeps
           .screenshotting!.getScreenshots({
@@ -132,11 +136,11 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           .pipe(
             tap(({ metrics }) => {
               if (metrics) {
-                apmTrans.setLabel('cpu', metrics.cpu, false);
-                apmTrans.setLabel('memory', metrics.memory, false);
+                apmTrans?.setLabel('cpu', metrics.cpu, false);
+                apmTrans?.setLabel('memory', metrics.memory, false);
               }
               apmScreenshots?.end();
-              apmBuffer = apmTrans.startSpan('get-buffer', 'output') ?? null;
+              apmBuffer = apmTrans?.startSpan('get-buffer', 'output');
             }),
             map(({ metrics, results }) => ({
               metrics,
@@ -153,11 +157,11 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
             })),
             tap(({ buffer }) => {
               logger.debug(`PNG buffer byte length: ${buffer.byteLength}`);
-              apmTrans.setLabel('byte-length', buffer.byteLength, false);
+              apmTrans?.setLabel('byte-length', buffer.byteLength, false);
             }),
             finalize(() => {
               apmBuffer?.end();
-              apmTrans.end();
+              apmTrans?.span.end();
             })
           );
       }),

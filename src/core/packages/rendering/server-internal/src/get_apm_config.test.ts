@@ -27,7 +27,7 @@ describe('getApmConfig', () => {
 
   afterEach(() => {
     getConfigurationMock.mockReset();
-    agentMock.currentTransaction = null;
+    agentMock.currentTransaction = undefined;
   });
 
   it('returns null if apm is disabled', () => {

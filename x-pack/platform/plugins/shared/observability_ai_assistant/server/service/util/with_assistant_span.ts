@@ -4,22 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { withSpan, SpanOptions, parseSpanOptions } from '@kbn/apm-utils';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+import { createWithActiveSpan } from '@kbn/tracing';
 
-export function withAssistantSpan<T>(
-  optionsOrName: SpanOptions | string,
-  cb: () => Promise<T>
-): Promise<T> {
-  const options = parseSpanOptions(optionsOrName);
-
-  const optionsWithDefaults = {
-    ...(options.intercept ? {} : { type: 'plugin:observability_ai_assistant' }),
-    ...options,
-    labels: {
-      plugin: 'observability_ai_assistant',
-      ...options.labels,
-    },
-  };
-
-  return withSpan(optionsWithDefaults, cb);
-}
+export const withAssistantSpan = createWithActiveSpan({
+  attributes: {
+    'labels.plugin': 'observability_ai_assistant',
+    [ATTR_SPAN_TYPE]: 'plugin:observability_ai_assistant',
+  },
+});

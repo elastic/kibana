@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-common';
+import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize, omit, partition } from 'lodash';
+import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
 import { unflattenAttributes } from '../util/unflatten_attributes';
 
 export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
   private getProjectId: () => Promise<string | undefined>;
-  constructor(
-    private readonly logger: Logger,
-    private readonly config: InferenceTracingLangfuseExportConfig
-  ) {
+  constructor(private readonly config: InferenceTracingLangfuseExportConfig) {
     const headers = {
       Authorization: `Basic ${Buffer.from(`${config.public_key}:${config.secret_key}`).toString(
         'base64'
@@ -44,7 +41,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
 
     this.getProjectId = () => {
       return getProjectIdMemoized().catch((error) => {
-        logger.error(`Could not get project ID from Langfuse: ${error.message}`);
+        diag.error(`Could not get project ID from Langfuse: ${error.message}`);
         getProjectIdMemoized.cache.clear?.();
         return undefined;
       });
@@ -88,7 +85,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
           `/project/${projectId}/traces/${langfuseTraceId}`,
           new URL(this.config.base_url)
         );
-        this.logger.info(`View trace at ${url.toString()}`);
+        diag.info(`View trace at ${url.toString()}`);
       });
     }
 

@@ -9,7 +9,8 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import type { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import type { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
@@ -36,14 +37,21 @@ export const retryIfBulkOperationConflicts = async ({
   filter: KueryNode | null;
   retries?: number;
 }): Promise<BulkOperationResult> => {
-  return withSpan({ name: 'retryIfBulkOperationConflicts', type: 'rules' }, () =>
-    handler({
-      action,
-      logger,
-      bulkOperation,
-      filter,
-      retries,
-    })
+  return withActiveSpan(
+    'retryIfBulkOperationConflicts',
+    {
+      attributes: {
+        [ATTR_SPAN_TYPE]: 'rules',
+      },
+    },
+    () =>
+      handler({
+        action,
+        logger,
+        bulkOperation,
+        filter,
+        retries,
+      })
   );
 };
 

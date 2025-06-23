@@ -11,9 +11,11 @@ import type {
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { withSpan } from '@kbn/apm-utils';
 
 import { uniq } from 'lodash';
+
+import { ATTR_SPAN_TYPE } from '@kbn/opentelemetry-attributes';
+import { withActiveSpan } from '@kbn/tracing';
 
 import { appContextService } from '../app_context';
 
@@ -44,7 +46,7 @@ export class FleetMetricsTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              return withSpan({ name: TYPE, type: 'metrics' }, () =>
+              return withActiveSpan(TYPE, { attributes: { [ATTR_SPAN_TYPE]: 'metrics' } }, () =>
                 this.runTask(taskInstance, () => fetchAgentMetrics(this.abortController))
               );
             },

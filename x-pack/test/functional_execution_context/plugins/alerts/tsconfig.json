@@ -11,13 +11,13 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/apm-config-loader",
-    "@kbn/repo-info",
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin",
+    "@kbn/tracing",
+    "@kbn/telemetry",
   ]
 }

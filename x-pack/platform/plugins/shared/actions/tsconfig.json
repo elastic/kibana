@@ -26,7 +26,6 @@
     "@kbn/config-schema",
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
-    "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/logging",
     "@kbn/logging-mocks",
@@ -51,6 +50,8 @@
     "@kbn/core-http-server-utils",
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
+    "@kbn/tracing",
+    "@kbn/opentelemetry-attributes",
   ],
   "exclude": [
     "target/**/*",

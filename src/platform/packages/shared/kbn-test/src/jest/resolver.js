@@ -19,7 +19,6 @@ const { readPackageMap } = require('@kbn/repo-packages');
 
 const pkgMap = readPackageMap();
 
-const APM_AGENT_MOCK = Path.resolve(__dirname, 'mocks/apm_agent_mock.ts');
 const CSS_MODULE_MOCK = Path.resolve(__dirname, 'mocks/css_module_mock.js');
 const STYLE_MOCK = Path.resolve(__dirname, 'mocks/style_mock.js');
 const FILE_MOCK = Path.resolve(__dirname, 'mocks/file_mock.js');
@@ -68,10 +67,6 @@ module.exports = (request, options) => {
       basedir: options.basedir,
       extensions: options.extensions,
     });
-  }
-
-  if (request === `elastic-apm-node`) {
-    return APM_AGENT_MOCK;
   }
 
   const reqExt = Path.extname(request);

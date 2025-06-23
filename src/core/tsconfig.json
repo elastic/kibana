@@ -176,6 +176,8 @@
     "@kbn/core-pricing-browser",
     "@kbn/core-pricing-server-internal",
     "@kbn/core-pricing-common",
+    "@kbn/tracing-test-utils",
+    "@kbn/tracing",
   ],
   "exclude": [
     "target/**/*",

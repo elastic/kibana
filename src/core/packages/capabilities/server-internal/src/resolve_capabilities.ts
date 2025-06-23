@@ -8,10 +8,11 @@
  */
 
 import { cloneDeep, memoize, uniqueId } from 'lodash';
-import { withSpan } from '@kbn/apm-utils';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import { withActiveSpan } from '@kbn/tracing';
+import { ATTR_TRANSACTION_TYPE } from '@kbn/opentelemetry-attributes';
 import type { SwitcherWithOptions, SwitcherWithId } from './types';
 import { pathsIntersect, splitIntoBuckets, convertBucketToSwitcher } from './resolve_helpers';
 
@@ -65,15 +66,18 @@ export const getCapabilitiesResolver = (
       initialized = true;
     }
 
-    return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
-      resolveCapabilities({
-        capabilities,
-        request,
-        capabilityPath,
-        applications,
-        useDefaultCapabilities,
-        getAggregatedSwitchers,
-      })
+    return withActiveSpan(
+      'resolve capabilities',
+      { attributes: { [ATTR_TRANSACTION_TYPE]: 'capabilities' } },
+      () =>
+        resolveCapabilities({
+          capabilities,
+          request,
+          capabilityPath,
+          applications,
+          useDefaultCapabilities,
+          getAggregatedSwitchers,
+        })
     );
   };
 };

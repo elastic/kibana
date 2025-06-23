@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
@@ -15,6 +14,8 @@ import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
 import { AgentFinish } from 'langchain/agents';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { Span, SpanStatusCode } from '@opentelemetry/api';
+import { tracingApi } from '@kbn/tracing';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../../telemetry/event_based_telemetry';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
@@ -63,10 +64,9 @@ export const streamGraph = async ({
   telemetryTracer,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
-  let streamingSpan: Span | undefined;
-  if (agent.isStarted()) {
-    streamingSpan = agent.startSpan(`${DEFAULT_ASSISTANT_GRAPH_ID} (Streaming)`) ?? undefined;
-  }
+  const streamingSpan: Span | undefined =
+    tracingApi?.legacy.startSpan(`${DEFAULT_ASSISTANT_GRAPH_ID} (Streaming)`) ?? undefined;
+
   const {
     end: streamEnd,
     push,
@@ -92,17 +92,15 @@ export const streamGraph = async ({
       onLlmResponse(
         finalResponse,
         {
-          transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
-          traceId: streamingSpan?.ids?.['trace.id'],
+          transactionId: tracingApi?.legacy.currentTraceIds['transaction.id'],
+          traceId: tracingApi?.legacy.currentTraceIds['trace.id'],
         },
         isError
       ).catch(() => {});
     }
     streamEnd();
     didEnd = true;
-    if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = isError ? 'failure' : 'success';
-    }
+    streamingSpan?.setStatus({ code: isError ? SpanStatusCode.ERROR : SpanStatusCode.OK });
     streamingSpan?.end();
   };
 
@@ -249,15 +247,18 @@ export const invokeGraph = async ({
   telemetryTracer,
   traceOptions,
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
-  return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
+  return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async () => {
     let traceData: TraceData = {};
-    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+
+    const traceId = tracingApi?.legacy.currentTraceIds['trace.id'];
+    const transactionId = tracingApi?.legacy.currentTraceIds['transaction.id'];
+
+    if (traceId && transactionId) {
       traceData = {
-        // Transactions ID since this span is the parent
-        transactionId: span.transaction.ids['transaction.id'],
-        traceId: span.ids['trace.id'],
+        transactionId,
+        traceId,
       };
-      span.addLabels({ evaluationId: traceOptions?.evaluationId });
+      tracingApi?.legacy.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
     const result = await assistantGraph.invoke(inputs, {
       callbacks: [

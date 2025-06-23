@@ -6,7 +6,6 @@
  */
 
 import { isEmpty, partition } from 'lodash';
-import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
@@ -19,6 +18,8 @@ import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { tracingApi } from '@kbn/tracing';
+import { flattenToAttributes } from '@kbn/opentelemetry-utils';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -75,7 +76,7 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
 });
 
 const addApmLabelsFromParams = (params: RuleParams) => {
-  agent.addLabels(
+  tracingApi?.legacy.addLabels(
     {
       [SECURITY_FROM]: params.from,
       [SECURITY_IMMUTABLE]: params.immutable,
@@ -157,7 +158,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         });
       },
       async executor(options) {
-        agent.setTransactionName(`${options.rule.ruleTypeId} execution`);
+        tracingApi?.legacy.setTransactionName(`${options.rule.ruleTypeId} execution`);
         return withSecuritySpan('securityRuleTypeExecutor', async () => {
           const {
             executionId,
@@ -171,8 +172,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             rule,
           } = options;
           addApmLabelsFromParams(params);
-          agent.setCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
-          agent.setCustomContext({ [SECURITY_PARAMS]: params });
+          tracingApi?.legacy.setCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
+          tracingApi?.legacy.setCustomContext(flattenToAttributes({ [SECURITY_PARAMS]: params }));
           let runState = state;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -294,7 +295,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           // Make a copy of `inputIndex` or else the APM agent reports it as [Circular] for most rule types because it's the same object
           // as `index`
-          agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
+          tracingApi?.legacy.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
@@ -394,7 +395,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
-          agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
+          tracingApi?.legacy.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
 
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
@@ -436,7 +437,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               ignoreFieldsObject[field] = true;
             });
 
-            agent.setCustomContext({
+            tracingApi?.legacy.setCustomContext({
               [SECURITY_NUM_IGNORE_FIELDS_STANDARD]: ignoreFieldsStandard.length,
               [SECURITY_NUM_IGNORE_FIELDS_REGEX]: ignoreFieldsRegexes.length,
             });
@@ -531,7 +532,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const createdSignalsCount = result.createdSignals.length;
 
-            agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
+            tracingApi?.legacy.setCustomContext({
+              [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount,
+            });
 
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({

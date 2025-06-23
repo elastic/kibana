@@ -53,7 +53,6 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant",
-    "@kbn/apm-utils",
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/rule-registry-plugin",
