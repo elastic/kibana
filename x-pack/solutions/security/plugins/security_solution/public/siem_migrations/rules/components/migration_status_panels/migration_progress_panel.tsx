@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { PanelText } from '../../../../common/components/panel_text';
+import { useStopMigration } from '../../service/hooks/use_stop_migration';
 import type { RuleMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { RuleMigrationsReadMore } from './read_more';
-import { useStopMigration } from '../../service/hooks/use_stop_migration';
+import { MigrationPanelTitle } from './migration_panel_title';
 
 export interface MigrationProgressPanelProps {
   migrationStats: RuleMigrationStats;
@@ -49,9 +50,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <PanelText size="s" semiBold>
-                  <p>{i18n.RULE_MIGRATION_TITLE(migrationStats.number)}</p>
-                </PanelText>
+                <MigrationPanelTitle migrationStats={migrationStats} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
