@@ -715,9 +715,11 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
-
   readonly queryRules: {
     readonly queryRulesAPIDocumentation: string;
+  };
+  readonly datasetQuality: {
+    readonly failureStore: string;
   };
 }
 
