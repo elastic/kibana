@@ -415,7 +415,7 @@ src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
-src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
@@ -508,7 +508,7 @@ src/platform/packages/shared/kbn-search-errors @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-security-hardening @elastic/kibana-security
-src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
+src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-securitysolution-es-utils @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-types @elastic/security-detection-engine
 src/platform/packages/shared/kbn-securitysolution-io-ts-utils @elastic/security-detection-engine
@@ -975,13 +975,13 @@ x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/searc
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
-x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/features @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
@@ -1000,14 +1000,14 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engine @elastic/security-detection-rule-management
-x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/navigation @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-generative-ai
-x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
