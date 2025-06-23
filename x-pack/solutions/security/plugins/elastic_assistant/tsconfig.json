@@ -82,7 +82,9 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/react-kibana-context-theme",
-    "@kbn/rule-registry-plugin"
+    "@kbn/rule-registry-plugin",
+    "@kbn/deeplinks-security",
+    "@kbn/core-application-browser"
   ],
   "exclude": [
     "target/**/*",
