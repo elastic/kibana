@@ -110,12 +110,13 @@ export async function validatePackagePoliciesUniqueNameAcrossSpaces(
       });
 
       const filteredItems = items.filter((item) => item.id !== pkgPolicy.id);
-      newSpaceIds.find((spaceId) => {
-        if (filteredItems.flatMap((item) => item.spaceIds ?? []).includes(spaceId))
-          throw new PackagePolicyNameExistsError(
-            `An integration policy with the name ${pkgPolicy.name} already exists in space "${spaceId}". Please rename it or choose a different name.`
-          );
-      });
+      const matchingSpaceId = newSpaceIds.find((spaceId) =>
+        filteredItems.flatMap((item) => item.spaceIds ?? []).includes(spaceId)
+      );
+      if (matchingSpaceId)
+        throw new PackagePolicyNameExistsError(
+          `An integration policy with the name ${pkgPolicy.name} already exists in space "${matchingSpaceId}". Please rename it or choose a different name.`
+        );
     },
     {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,

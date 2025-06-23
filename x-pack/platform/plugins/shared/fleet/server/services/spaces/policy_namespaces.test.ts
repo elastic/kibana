@@ -209,22 +209,27 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
   });
 
   it('should throw if there are other policies with the same package name in different spaces', async () => {
-    const packagePolicyOnOtherSpaces = {
+    const packagePolicyOnSpace1 = {
       ...packagePolicy1,
-      spaceIds: ['default', 'test'],
+      spaceIds: ['space1'],
       id: '3',
+    };
+    const packagePolicyOnSpace2 = {
+      ...packagePolicy1,
+      spaceIds: ['space2'],
+      id: '4',
     };
     packagePolicyServiceMock.list.mockResolvedValue({
       total: 1,
       perPage: 10,
       page: 1,
-      items: [packagePolicyOnOtherSpaces],
+      items: [packagePolicyOnSpace1, packagePolicyOnSpace2],
     });
     await expect(
-      validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default'])
+      validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default', 'space1'])
     ).rejects.toThrowError(
       new PackagePolicyNameExistsError(
-        'An integration policy with the name Package Policy 1 already exists in space "default". Please rename it or choose a different name.'
+        'An integration policy with the name Package Policy 1 already exists in space "space1". Please rename it or choose a different name.'
       )
     );
   });
