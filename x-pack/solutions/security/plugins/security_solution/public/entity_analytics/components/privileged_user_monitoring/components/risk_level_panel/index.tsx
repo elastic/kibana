@@ -23,7 +23,7 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../common';
 import { useRiskScoreFillColor } from '../../../risk_score_donut_chart/use_risk_score_fill_color';
-import { DONUT_CHART_HEIGHT, RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID } from './constants';
+import { DONUT_CHART_HEIGHT, RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID } from './esql_query';
 import { useRiskLevelsPrivilegedUserQuery, useRiskLevelsTableColumns } from './hooks';
 
 const TITLE = i18n.translate(
@@ -31,13 +31,14 @@ const TITLE = i18n.translate(
   { defaultMessage: 'Risk levels of privileged users' }
 );
 
-export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
+export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => {
   const fillColor = useRiskScoreFillColor();
   const { toggleStatus, setToggleStatus } = useQueryToggle(RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID);
   const { deleteQuery, setQuery } = useGlobalTime();
   const columns = useRiskLevelsTableColumns();
   const { records, isLoading, refetch, inspect, isError } = useRiskLevelsPrivilegedUserQuery({
     skip: !toggleStatus,
+    spaceId,
   });
 
   const total = sum(records.map(({ count }) => count));
@@ -87,6 +88,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
         <HeaderSection
+          hideSubtitle
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}

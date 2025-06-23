@@ -28,7 +28,7 @@ import type {
   SortColumnTimeline,
   TimelinePersistInput,
 } from '../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -242,32 +242,6 @@ export const updateTimelineShowTimeline = ({
     [id]: {
       ...timeline,
       show,
-    },
-  };
-};
-
-export const updateTimelineGraphEventId = ({
-  id,
-  graphEventId,
-  timelineById,
-}: {
-  id: string;
-  graphEventId: string;
-  timelineById: TimelineById;
-}): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      graphEventId,
-      // if use click close analyzer button, it will go back to the previous tab
-      ...(graphEventId === '' &&
-      id === TimelineId.active &&
-      timeline.activeTab === TimelineTabs.graph
-        ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
-        : {}),
     },
   };
 };

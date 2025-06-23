@@ -309,6 +309,16 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-analytics-monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "integrationName",
+    "managed",
+    "matchers",
+    "name",
+    "type"
+  ],
   "entity-definition": [
     "description",
     "filter",
@@ -360,6 +370,7 @@
     "latest_install_failed_attempts",
     "name",
     "package_assets",
+    "previous_version",
     "verification_key_id",
     "verification_status",
     "version"
@@ -537,6 +548,7 @@
     "enabled",
     "inputs",
     "is_managed",
+    "latest_revision",
     "name",
     "namespace",
     "output_id",
@@ -722,6 +734,7 @@
     "enabled",
     "inputs",
     "is_managed",
+    "latest_revision",
     "name",
     "namespace",
     "output_id",
@@ -932,6 +945,9 @@
     "installCount",
     "unInstallCount"
   ],
+  "scheduled_report": [
+    "createdBy"
+  ],
   "search": [
     "description",
     "title"
@@ -964,6 +980,11 @@
     "sourceIndex",
     "updated",
     "version"
+  ],
+  "security:reference-data": [
+    "id",
+    "owner",
+    "type"
   ],
   "siem-detection-engine-rule-actions": [
     "actions",
@@ -1126,6 +1147,7 @@
     "locations",
     "locations.id",
     "locations.label",
+    "maintenance_windows",
     "name",
     "origin",
     "project_id",

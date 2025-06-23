@@ -34,19 +34,18 @@ export function HeaderMenu(): React.ReactElement | null {
     >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
-          <EuiHeaderLinks>
-            <EuiHeaderLink color="primary" href={href} iconType="indexOpen">
-              {i18n.translate('xpack.observability.home.addData', {
-                defaultMessage: 'Add data',
-              })}
-            </EuiHeaderLink>
+          <EuiHeaderLinks gutterSize="xs">
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}
-              iconType="brush"
             >
               {i18n.translate('xpack.observability.home.annotations', {
                 defaultMessage: 'Annotations',
+              })}
+            </EuiHeaderLink>
+            <EuiHeaderLink color="primary" href={href}>
+              {i18n.translate('xpack.observability.home.addData', {
+                defaultMessage: 'Add data',
               })}
             </EuiHeaderLink>
             <InspectorHeaderLink />

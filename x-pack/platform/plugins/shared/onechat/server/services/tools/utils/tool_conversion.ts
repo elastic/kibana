@@ -7,36 +7,20 @@
 
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { builtinSourceId, ToolSourceType, ToolDescriptor } from '@kbn/onechat-common';
-import type { Runner, RegisteredTool, ExecutableTool } from '@kbn/onechat-server';
-import { RegisteredToolWithMeta } from '../types';
-
-export const addBuiltinSystemMeta = <
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
->(
-  tool: RegisteredTool<RunInput, RunOutput>
-): RegisteredToolWithMeta<RunInput, RunOutput> => {
-  return {
-    ...tool,
-    meta: {
-      tags: tool.meta?.tags ?? [],
-      sourceType: ToolSourceType.builtIn,
-      sourceId: builtinSourceId,
-    },
-  };
-};
+import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { Runner, ExecutableTool } from '@kbn/onechat-server';
+import type { RegisteredToolWithMeta } from '../types';
 
 export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
   tool,
   runner,
   request,
 }: {
-  tool: RegisteredTool<RunInput, RunOutput>;
+  tool: RegisteredToolWithMeta<RunInput, RunOutput>;
   runner: Runner;
   request: KibanaRequest;
 }): ExecutableTool<RunInput, RunOutput> => {
-  const { handler, ...toolParts } = addBuiltinSystemMeta(tool);
+  const { handler, ...toolParts } = tool;
 
   return {
     ...toolParts,
@@ -52,6 +36,6 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
 export const toolToDescriptor = <T extends ToolDescriptor>(tool: T): ToolDescriptor => {
-  const { id, name, description, meta } = tool;
-  return { id, name, description, meta };
+  const { id, description, meta } = tool;
+  return { id, description, meta };
 };

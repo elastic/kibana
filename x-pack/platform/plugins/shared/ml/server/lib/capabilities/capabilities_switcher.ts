@@ -55,6 +55,10 @@ function getSwitcher(
       const originalCapabilities = capabilities.ml as MlCapabilities;
       const mlCaps = cloneDeep(originalCapabilities);
 
+      if (capabilities.aiops.enabled === false) {
+        mlCaps.canUseAiops = false;
+      }
+
       // full license, leave capabilities as they were
       if (mlEnabled && isFullLicense(license)) {
         return { ml: applyEnabledFeatures(mlCaps, enabledFeatures, isServerless) };

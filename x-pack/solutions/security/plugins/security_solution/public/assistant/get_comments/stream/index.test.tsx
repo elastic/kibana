@@ -18,7 +18,13 @@ const mockSetComplete = jest.fn();
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
-
+jest.mock('@kbn/elastic-assistant', () => ({
+  useAssistantContext: () => ({
+    assistantAvailability: {
+      hasSearchAILakeConfigurations: true,
+    },
+  }),
+}));
 jest.mock('../../../common/lib/kibana', () => ({
   useNavigation: jest.fn().mockReturnValue({
     navigateTo: jest.fn(),

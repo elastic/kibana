@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { EuiProgress } from '@elastic/eui';
+import type { FileAnalysis } from '@kbn/file-upload';
 import type { FC } from 'react';
 import React from 'react';
-import type { FileAnalysis } from './file_manager/file_wrapper';
 
 interface Props {
   filesStatus: FileAnalysis[];

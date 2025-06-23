@@ -77,11 +77,26 @@ export function ActionMenuContent(): React.ReactElement {
     <EuiHeaderLinks gutterSize="xs">
       <ManageMonitorsBtn />
 
+      <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
+        <EuiHeaderLink
+          aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
+            defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
+          })}
+          href={syntheticExploratoryViewLink}
+          color="primary"
+          data-test-subj={'uptimeExploreDataButton'}
+        >
+          {ANALYZE_DATA}
+        </EuiHeaderLink>
+      </EuiToolTip>
+
+      <ToggleAlertFlyoutButton />
+
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.settingsLink.label', {
           defaultMessage: 'Navigate to the Uptime settings page',
         })}
-        color="text"
+        color="primary"
         data-test-subj="settings-page-link"
         href={history.createHref({
           pathname: SETTINGS_ROUTE,
@@ -91,29 +106,12 @@ export function ActionMenuContent(): React.ReactElement {
         <FormattedMessage id="xpack.uptime.page_header.settingsLink" defaultMessage="Settings" />
       </EuiHeaderLink>
 
-      <ToggleAlertFlyoutButton />
-
-      <EuiToolTip position="top" content={<p>{ANALYZE_MESSAGE}</p>}>
-        <EuiHeaderLink
-          aria-label={i18n.translate('xpack.uptime.page_header.analyzeData.label', {
-            defaultMessage: 'Navigate to the "Explore Data" view to visualize Synthetics/User data',
-          })}
-          href={syntheticExploratoryViewLink}
-          color="text"
-          iconType="visBarVerticalStacked"
-          data-test-subj={'uptimeExploreDataButton'}
-        >
-          {ANALYZE_DATA}
-        </EuiHeaderLink>
-      </EuiToolTip>
-
       <EuiHeaderLink
         aria-label={i18n.translate('xpack.uptime.page_header.addDataLink.label', {
           defaultMessage: 'Navigate to a tutorial about adding Uptime data',
         })}
         href={kibana.services?.application?.getUrlForApp('/home#/tutorial/uptimeMonitors')}
         color="primary"
-        iconType="indexOpen"
       >
         {ADD_DATA_LABEL}
       </EuiHeaderLink>

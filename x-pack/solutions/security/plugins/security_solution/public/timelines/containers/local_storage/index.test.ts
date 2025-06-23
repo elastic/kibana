@@ -644,7 +644,6 @@ describe('SiemLocalStorage', () => {
         sort: [
           { columnId: '@timestamp', columnType: 'date', esTypes: ['date'], sortDirection: 'desc' },
         ],
-        graphEventId: undefined,
         selectedEventIds: {},
         selectAll: undefined,
         id: 'alerts-page',
@@ -885,7 +884,6 @@ describe('SiemLocalStorage', () => {
           },
         ],
         selectAll: false,
-        graphEventId: '',
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -998,7 +996,6 @@ describe('SiemLocalStorage', () => {
           },
         ],
         selectAll: false,
-        graphEventId: '',
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1119,7 +1116,6 @@ describe('SiemLocalStorage', () => {
           },
         ],
         selectAll: false,
-        graphEventId: '',
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1555,7 +1551,6 @@ describe('SiemLocalStorage', () => {
               sortDirection: 'desc',
             },
           ],
-          graphEventId: undefined,
           selectedEventIds: {},
           selectAll: false,
           id: 'alerts-page',

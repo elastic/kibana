@@ -39,7 +39,6 @@ export function AddDataContextMenu() {
   const button = (
     <EuiHeaderLink
       color="primary"
-      iconType="indexOpen"
       onClick={() => setPopoverOpen((prevState) => !prevState)}
       data-test-subj="inventoryAddDataHeaderContextMenu"
     >

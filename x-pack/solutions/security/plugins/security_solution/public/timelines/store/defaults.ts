@@ -112,5 +112,4 @@ export const getTimelineManageDefaults = (id: string) => ({
   isLoading: false,
   queryFields: [],
   title: '',
-  graphEventId: '',
 });

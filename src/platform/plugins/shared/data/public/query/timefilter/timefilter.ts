@@ -116,6 +116,10 @@ export class Timefilter {
    */
   public getAutoRefreshFetch$ = () => this.autoRefreshLoop.loop$;
 
+  public triggerFetch = () => {
+    this.fetch$.next();
+  };
+
   public getFetch$ = () => {
     return this.fetch$.asObservable();
   };

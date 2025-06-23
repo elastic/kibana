@@ -125,6 +125,7 @@ export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
 export const OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS = 'observability:searchExcludedDataTiers';
+export const OBSERVABILITY_ENABLE_STREAMS_UI = 'observability:enableStreamsUI';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -177,7 +178,6 @@ export const TIMELION_TARGET_BUCKETS_ID = 'timelion:target_buckets';
 
 // Visualization settings
 export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBuckets';
-export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =
   'visualization:visualize:legacyGaugeChartsLibrary';
 export const VISUALIZATION_LEGACY_HEATMAP_CHARTS_LIBRARY_ID =

@@ -45,6 +45,18 @@ export const getSLIPipelineTemplate = (
       },
       {
         set: {
+          field: 'slo.name',
+          value: slo.name,
+        },
+      },
+      {
+        set: {
+          field: 'slo.tags',
+          value: slo.tags,
+        },
+      },
+      {
+        set: {
           field: 'slo.revision',
           value: slo.revision,
         },

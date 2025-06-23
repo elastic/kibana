@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { LEGACY_CUSTOM_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/common/preconfigured_inference_ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getKbIndexCreatedVersion, getKnowledgeBaseEntriesFromApi } from '../utils/knowledge_base';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../utils/index_assets';
 import { restoreKbSnapshot } from '../utils/snapshots';
 import {
-  LEGACY_CUSTOM_INFERENCE_ID,
   TINY_ELSER_MODEL_ID,
   createTinyElserInferenceEndpoint,
   deleteInferenceEndpoint,

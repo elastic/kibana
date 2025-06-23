@@ -71,6 +71,7 @@ export interface RegistryRuleType
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
     | 'alerts'
+    | 'internallyManaged'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -416,6 +417,12 @@ export class RuleTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.ruleTypes.keys()];
+  }
+
+  public getAllTypesForCategories(categories: string[]): string[] {
+    return [...this.ruleTypes.values()]
+      .filter((ruleType) => categories.includes(ruleType.category))
+      .map((ruleType) => ruleType.id);
   }
 }
 

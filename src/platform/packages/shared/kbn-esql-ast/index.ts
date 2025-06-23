@@ -15,7 +15,6 @@ export type {
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
-  ESQLCommandMode,
   ESQLFunction,
   ESQLTimeInterval,
   ESQLLocation,
@@ -29,7 +28,6 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
-  ESQLAstRenameExpression,
   ESQLAstBaseItem,
   ESQLAstChangePointCommand,
 } from './src/types';

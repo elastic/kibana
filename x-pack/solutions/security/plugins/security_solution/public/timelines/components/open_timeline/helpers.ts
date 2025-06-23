@@ -11,13 +11,14 @@ import { v4 as uuidv4 } from 'uuid';
 import deepMerge from 'deepmerge';
 import { useDiscoverInTimelineContext } from '../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import type {
-  TimelineResponse,
   ColumnHeaderResult,
-  FilterTimelineResult,
   DataProviderResult,
-  PinnedEvent,
+  FilterTimelineResult,
   Note,
+  PinnedEvent,
+  TimelineResponse,
 } from '../../../../common/api/timeline';
 import {
   DataProviderTypeEnum,
@@ -26,7 +27,6 @@ import {
   type TimelineType,
   TimelineTypeEnum,
 } from '../../../../common/api/timeline';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';
 
 import type { TimelineModel } from '../../store/model';
@@ -292,7 +292,6 @@ export const formatTimelineResponseToModel = (
 export interface QueryTimelineById {
   activeTimelineTab?: TimelineTabs;
   duplicate?: boolean;
-  graphEventId?: string;
   timelineId?: string;
   timelineType?: TimelineType;
   onError?: TimelineErrorCallback;
@@ -308,7 +307,6 @@ export const useQueryTimelineById = () => {
   return ({
     activeTimelineTab = TimelineTabs.query,
     duplicate = false,
-    graphEventId = '',
     timelineId,
     timelineType,
     onError,
@@ -369,7 +367,6 @@ export const useQueryTimelineById = () => {
               timeline: {
                 ...timeline,
                 activeTab: activeTimelineTab,
-                graphEventId,
                 show: openTimeline,
                 dateRange: { start: from, end: to },
                 savedSearchId: timeline.savedSearchId,
