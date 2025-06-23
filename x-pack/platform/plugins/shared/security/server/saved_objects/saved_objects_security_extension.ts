@@ -559,14 +559,17 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * Check if user has access control permissions for objects
    * @param objects The objects to check
    * @param action The security action being performed
-   * @param spaces The spaces to check authorization for
+   * @param typeAndSpacesMap The set of spaces to check authorization for an object type
    * @returns An array of objects that can be modified
    */
   private async checkAccessControl(
     objects: AuthorizeObject[],
     action: SecurityAction,
-    spaces: Set<string>
-  ): Promise<AuthorizeObject[]> {
+    typeAndSpacesMap: Map<string, Set<string>>
+  ): Promise<{
+    authorizedObjects: AuthorizeObject[];
+    unauthorizedObjects: AuthorizeObject[];
+  }> {
     if (
       action === SecurityAction.UPDATE ||
       action === SecurityAction.BULK_UPDATE ||
@@ -580,13 +583,26 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.accessControlService.canModifyObject({
             type: obj.type,
             object: obj,
-            spacesToAuthorize: spaces,
+            spacesToAuthorize: typeAndSpacesMap.get(obj.type) ?? new Set([ALL_NAMESPACES_STRING]),
           })
         )
       );
-      return objects.filter((_, index) => results[index]);
+      return objects.reduce<{
+        authorizedObjects: AuthorizeObject[];
+        unauthorizedObjects: AuthorizeObject[];
+      }>(
+        (result, obj, index) => {
+          if (results[index]) {
+            result.authorizedObjects.push(obj);
+          } else {
+            result.unauthorizedObjects.push(obj);
+          }
+          return result;
+        },
+        { authorizedObjects: [], unauthorizedObjects: [] }
+      );
     } else {
-      return objects;
+      return { authorizedObjects: objects, unauthorizedObjects: [] };
     }
   }
 
@@ -610,16 +626,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
     if (auditObjects && auditObjects.length > 0) {
-      const allSpaces = new Set<string>();
-      for (const spaces of typesAndSpaces.values()) {
-        for (const space of spaces) {
-          allSpaces.add(space);
-        }
-      }
+      const filteredObjects = await this.checkAccessControl(auditObjects, action, typesAndSpaces);
 
-      const filteredObjects = await this.checkAccessControl(auditObjects, action, allSpaces);
-
-      if (filteredObjects.length === 0) {
+      if (filteredObjects.authorizedObjects.length === 0) {
         const msg = 'Access control denied: No modifiable objects';
         const error = this.errors.decorateForbiddenError(new Error(msg));
         if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
