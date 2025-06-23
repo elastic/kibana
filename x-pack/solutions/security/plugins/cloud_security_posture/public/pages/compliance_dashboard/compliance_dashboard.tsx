@@ -35,6 +35,7 @@ import {
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
   CLOUD_DASHBOARD_TAB,
+  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
 } from './test_subjects';
 import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -480,6 +481,7 @@ export const ComplianceDashboard = () => {
   return (
     <CloudPosturePage>
       <EuiPageHeader
+        data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
         bottomBorder
         pageTitle={
           <CloudPosturePageTitle
