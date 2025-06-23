@@ -9,7 +9,6 @@
 
 import React from 'react';
 import 'monaco-editor/min/vs/editor/editor.main.css';
-import { autocompleteEntities } from './http_mocks/autocomplete_entities';
 
 import { createStandaloneParsedRequestsProvider } from './standalone_console_parser';
 
@@ -78,6 +77,8 @@ import { AutocompleteInfo } from '../public/services';
 
 export interface BootDependencies extends ConsoleStartServices {
   lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
+  getEsConfig?: () => Promise<any>;
+  getAutocompleteEntities?: () => Promise<any>;
 }
 
 const trackUiMetricMock = { count: () => {}, load: () => {} };
@@ -156,7 +157,7 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({ lang = 'en' }: BootDependencies) => {
+export const OneConsole = ({ lang = 'en', getEsConfig, getAutocompleteEntities }: BootDependencies) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations['en'];
 
@@ -212,17 +213,13 @@ export const OneConsole = ({ lang = 'en' }: BootDependencies) => {
   // Create a mock HTTP service that intercepts specific API calls
   const http = {
     ...originalHttp,
-    get: (path: string, options?: any) => {
-      if (path === '/api/console/es_config') {
-        return Promise.resolve({
-          host: 'http://localhost:9200',
-          pathMatch: '*',
-          requestTimeout: 30000,
-        });
+    get: async (path: string, options?: any) => {
+      if (path === '/api/console/es_config' && getEsConfig) {
+        return await getEsConfig();
       }
 
-      if (path === '/api/console/autocomplete_entities') {
-        return Promise.resolve(autocompleteEntities);
+      if (path === '/api/console/autocomplete_entities' && getAutocompleteEntities) {
+        return await getAutocompleteEntities();
       }
 
       // For all other requests, use the original HTTP service
