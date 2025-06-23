@@ -14,6 +14,8 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
+### Example 1
+
 ```esql
 ROW str = ["true", "TRuE", "false", "", "yes", "1"]
 | EVAL bool = TO_BOOLEAN(str)
@@ -23,3 +25,15 @@ This example converts a multi-valued string column into boolean values. For inst
 - `"true"` and `"TRuE"` are converted to `true`.
 - `"false"`, `""` (empty string), and other non-`true` strings are converted to `false`.
 - `"1"` is converted to `true`.
+
+### Example 2
+
+```esql
+ROW num = [0, 1, 2, -1]
+| EVAL bool = TO_BOOLEAN(num)
+```
+
+## Notes
+
+- A string value of `true` is case-insensitively converted to the boolean `true`. For any other value, including an empty string, the function returns `false`.
+- A numerical value of `0` is converted to `false`, while any other numerical value is converted to `true`.

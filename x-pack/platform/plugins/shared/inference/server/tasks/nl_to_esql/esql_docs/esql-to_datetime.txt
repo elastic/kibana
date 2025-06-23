@@ -44,3 +44,7 @@ ROW int = [0, 1]
 ```
 
 In this example, the numeric values `0` and `1` are converted to datetime values representing the Unix epoch and one millisecond after the epoch, respectively.
+
+## Notes
+
+- A string will only be successfully converted if it’s respecting the format yyyy-MM-dd'T'HH:mm:ss.SSS'Z'. To convert dates in other formats, use DATE_PARSE.
