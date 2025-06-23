@@ -52,6 +52,7 @@ export async function executeEditEmbeddableAction({
   onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
 }) {
+  console.log('que hay en attributes', attributes);
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
@@ -90,7 +91,7 @@ export async function executeEditEmbeddableAction({
 
   const ConfigPanel = await getInlineEditor({
     onApply,
-    onCancel,
+    onCancel
   });
   if (ConfigPanel) {
     console.log('container', container);

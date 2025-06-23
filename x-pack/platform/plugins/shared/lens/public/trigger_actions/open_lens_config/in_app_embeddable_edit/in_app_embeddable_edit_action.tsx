@@ -48,6 +48,7 @@ export class EditLensEmbeddableAction implements Action<InlineEditLensEmbeddable
     onApply,
     onCancel,
   }: InlineEditLensEmbeddableContext) {
+    console.log('Executing EditLensEmbeddableAction with attributes:', attributes);
     const { executeEditEmbeddableAction } = await import('../../../async_services');
     if (attributes) {
       executeEditEmbeddableAction({

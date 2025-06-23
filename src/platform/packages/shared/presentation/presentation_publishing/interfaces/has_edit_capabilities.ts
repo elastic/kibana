@@ -16,7 +16,7 @@ import { HasTypeDisplayName } from './has_type';
  * edited, and an isEditingEnabled function.
  */
 export interface HasEditCapabilities extends HasTypeDisplayName {
-  onEdit: () => Promise<void>;
+  onEdit: () => Promise<void | JSX.Element | null>;
   isEditingEnabled: () => boolean;
   getEditHref?: () => Promise<string | undefined>;
 }

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, tracksOverlays } from '@kbn/presentation-containers';
@@ -44,59 +44,51 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async execute({ embeddable: api }: EmbeddableApiContext) {
-    const ConfigPanelWrapper = ({ onClose }: { onClose: () => void }) => {
-      const [ConfigPanelRef, setConfigPanelRef] = React.useState<React.JSX.Element | undefined>(
-        undefined
-      );
-      useAsync(async () => {
-        if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
-        const embeddable = await api.addNewPanel<object, LensApi>({
-          panelType: 'lens',
-          serializedState: {
-            rawState: {
-              id: generateId(),
-              isNewPanel: true,
-              attributes: { references: [] },
-            },
-          },
-        });
-
-        // open the flyout if embeddable has been created successfully
-        setConfigPanelRef(await embeddable?.onEdit?.({ onClose }));
-      }, []);
-
-      return ConfigPanelRef ?? FallbackComponent;
-    };
-
     const overlayTracker = tracksOverlays(api) ? api : undefined;
     const onClose = () => {
       overlayTracker?.clearOverlays();
       flyoutRef?.close();
     };
-
     const flyoutRef = this.core.overlays.openFlyout(
-      toMountPoint(<ConfigPanelWrapper onClose={onClose} />, this.core),
-      {
-        className: 'lnsConfigPanel__overlay',
-        size: 's',
-        type: 'push',
-        paddingSize: 'm',
-        maxWidth: 800,
-        hideCloseButton: true,
-        isResizable: true,
-        onClose: (overlayRef) => {
-          console.log('ITs closing!!!', overlayRef);
-          overlayTracker?.clearOverlays();
-          overlayRef?.close();
-        },
-        outsideClickCloses: true,
-      }
+      toMountPoint(
+        <EditPanelWrapper
+          closeFlyout={onClose}
+          getEditFlyout={async () => {
+            if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
+            const embeddable = await api.addNewPanel<object, LensApi>({
+              panelType: 'lens',
+              serializedState: {
+                rawState: {
+                  id: generateId(),
+                  isNewPanel: true,
+                  attributes: { references: [] },
+                },
+              },
+            });
+
+            return await embeddable?.onEdit?.();
+          }}
+        />,
+        this.core
+      ),
+      { ...flyoutProps, onClose }
     );
     overlayTracker?.openOverlay(flyoutRef);
   }
 }
 
-const FallbackComponent = (
+const flyoutProps: OverlayFlyoutOpenOptions = {
+  className: 'lnsConfigPanel__overlay',
+  size: 's',
+  type: 'push',
+  paddingSize: 'm',
+  maxWidth: 800,
+  hideCloseButton: true,
+  isResizable: true,
+  outsideClickCloses: true,
+};
+
+const LoadingPanel = (
   <>
     <EuiFlyoutHeader hasBorder>
       <EuiSkeletonTitle size="xs" />
@@ -106,3 +98,23 @@ const FallbackComponent = (
     </EuiFlyoutBody>
   </>
 );
+
+const EditPanelWrapper = ({
+  closeFlyout,
+  getEditFlyout,
+}: {
+  closeFlyout: () => void;
+  getEditFlyout: (() => Promise<void | JSX.Element | null>) | undefined;
+}) => {
+  const [EditFlyoutPanel, setEditFlyoutPanel] = React.useState<React.JSX.Element | null>(
+    null
+  );
+  useAsync(async () => {
+    const editFlyoutContent = await getEditFlyout?.();
+    if (editFlyoutContent) {
+      setEditFlyoutPanel(React.cloneElement(editFlyoutContent, { closeFlyout }));
+    }
+  }, []);
+
+  return EditFlyoutPanel ?? LoadingPanel;
+};

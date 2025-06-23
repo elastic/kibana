@@ -226,7 +226,7 @@ export function initializeEditApi(
     : true;
 
   const getConfigurationPanel = async (
-    { showOnly, onClose }: { showOnly: boolean, onClose?: () => void } = { showOnly: false }
+    { showOnly }: { showOnly: boolean} = { showOnly: false }
   ) => {
 
     // save the initial state in case it needs to revert later on
@@ -240,7 +240,6 @@ export function initializeEditApi(
         ? noop
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
-      closeFlyout: onClose,
     });
     return ConfigPanel 
   };
@@ -261,7 +260,7 @@ export function initializeEditApi(
        * This is the key method to enable the new Editing capabilities API
        * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
-      onEdit: async ({onClose}:{onClose: () => void }) => {
+      onEdit: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
@@ -277,7 +276,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        return getConfigurationPanel({ showOnly: false, onClose });
+        return getConfigurationPanel({ showOnly: false });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
