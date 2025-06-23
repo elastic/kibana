@@ -14,6 +14,7 @@ import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
@@ -31,6 +32,7 @@ import {
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
 import { buildIndexNameWithNamespace } from '../../../../common/endpoint/utils/index_name_utilities';
+import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
@@ -127,37 +129,23 @@ export const getEndpointSuggestionsRequestHandler = (
       } else if (request.params.suggestion_type === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
         index = METADATA_UNITED_INDEX;
-        let baseFilters: QueryDslQueryContainer[] = [
-          { exists: { field: 'united.endpoint.agent.id' } },
-          { exists: { field: 'united.agent.agent.id' } },
-        ];
 
-        if (isSpaceAwarenessEnabled) {
-          const fleetService = securitySolutionContext.getInternalFleetServices();
-          const agentPoliciesIterable = await fleetService.agentPolicy.fetchAllAgentPolicyIds(
-            savedObjects.client,
-            {
-              spaceId,
-            }
-          );
-          const agentPolicyIdsInSpace: string[] = [];
-          for await (const batch of agentPoliciesIterable) {
-            agentPolicyIdsInSpace.push(...batch);
+        let agentPolicyIds: string[] = [];
+        const fleetService = securitySolutionContext.getInternalFleetServices();
+        const endpointPackagePolicies = await fleetService.packagePolicy.fetchAllItems(
+          savedObjects.client,
+          {
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:endpoint`,
+            spaceIds: isSpaceAwarenessEnabled ? [spaceId] : ['*'],
           }
-          baseFilters = [
-            ...baseFilters,
-            { terms: { 'united.agent.policy_id': agentPolicyIdsInSpace } },
-          ];
+        );
+        for await (const batch of endpointPackagePolicies) {
+          const batchAgentPolicyIds = batch.flatMap((policy) => policy.policy_ids);
+          agentPolicyIds.push(...batchAgentPolicyIds);
         }
 
-        fullFilters = [
-          ...fullFilters,
-          {
-            bool: {
-              filter: baseFilters,
-            },
-          },
-        ];
+        const baseFilters = buildBaseEndpointMetadataFilter(agentPolicyIds);
+        fullFilters = [...fullFilters, baseFilters];
       } else {
         return response.badRequest({
           body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
