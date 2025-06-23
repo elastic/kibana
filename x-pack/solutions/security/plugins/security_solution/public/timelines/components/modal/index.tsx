@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { StatefulTimeline } from '../timeline';
 import type { TimelineId } from '../../../../common/types/timeline';
 import { defaultRowRenderers } from '../timeline/body/renderers';
@@ -48,38 +47,12 @@ export const TimelineModal = React.memo<TimelineModalProps>(
     const ref = useRef<HTMLDivElement>(null);
     const isFullScreen =
       useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
-    const { closeFlyout } = useExpandableFlyoutApi();
 
     const styles = usePaneStyles();
     const wrapperClassName = classNames('timeline-portal-overlay-mask', styles, {
       'timeline-portal-overlay-mask--full-screen': isFullScreen,
       'timeline-portal-overlay-mask--hidden': !visible,
     });
-
-    useEffect(() => {
-      if (!visible) return;
-
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key !== 'Escape') return;
-
-        const flyout = document.querySelector('.euiFlyout');
-        if (flyout) {
-          closeFlyout();
-          e.stopPropagation();
-          return; // close flyout only on ESC press
-        }
-
-        // second ESC: toggle the modal via the same button
-        if (openToggleRef.current) {
-          openToggleRef.current.click();
-        }
-      };
-
-      document.addEventListener('keydown', handleKeyDown);
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }, [visible, openToggleRef, closeFlyout]);
 
     const sibling: HTMLDivElement | null = useMemo(
       () => (!visible ? ref.current : null),

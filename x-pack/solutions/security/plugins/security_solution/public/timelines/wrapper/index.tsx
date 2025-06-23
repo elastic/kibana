@@ -9,6 +9,7 @@ import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
 import React, { useMemo, useCallback, useRef } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -42,15 +43,22 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     const handleClose = useCallback(() => {
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
     }, [dispatch, timelineId]);
+    const { closeFlyout } = useExpandableFlyoutApi();
 
     // pressing the ESC key closes the timeline portal
     const onKeyDown = useCallback(
       (ev: KeyboardEvent) => {
         if (ev.key === keys.ESCAPE) {
+          const flyout = document.querySelector('.euiFlyout');
+          if (flyout) {
+            closeFlyout();
+            ev.stopPropagation();
+            return; // close flyout only on ESC press
+          }
           handleClose();
         }
       },
-      [handleClose]
+      [closeFlyout, handleClose]
     );
 
     useTimelineSavePrompt(timelineId, onAppLeave);
