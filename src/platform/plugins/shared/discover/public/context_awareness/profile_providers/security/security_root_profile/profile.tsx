@@ -14,7 +14,7 @@ import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { SecurityProfileProviderFactory } from '../types';
 import { createCellRendererAccessor } from '../accessors/get_cell_renderer_accessor';
-import { getDefaultSecuritySolutionAppState } from '../accessors/get_default_app_state';
+import { createDefaultSecuritySolutionAppStateGetter as createDefaultSecuritySolutionAppStateGetter } from '../accessors/get_default_app_state';
 import { getAlertEventRowIndicator } from '../accessors/get_row_indicator';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 
@@ -49,7 +49,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
           return entries;
         },
       getRowIndicatorProvider: () => () => getAlertEventRowIndicator,
-      getDefaultAppState: getDefaultSecuritySolutionAppState(),
+      getDefaultAppState: createDefaultSecuritySolutionAppStateGetter(),
     },
     resolve: async (params) => {
       if (params.solutionNavId !== SolutionType.Security) {

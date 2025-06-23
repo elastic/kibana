@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDefaultSecuritySolutionAppState } from './get_default_app_state';
+import { createDefaultSecuritySolutionAppStateGetter } from './get_default_app_state';
 
-describe('getDefaultSecuritySolutionAppState', () => {
+describe('createDefaultSecuritySolutionAppStateGetter', () => {
   it('should return default app state without security solution specific columns and breakdown field if there is no index match', () => {
-    const getDefaultAppState = getDefaultSecuritySolutionAppState();
+    const getDefaultAppState = createDefaultSecuritySolutionAppStateGetter();
 
     const params = {
       dataView: {
@@ -28,7 +28,7 @@ describe('getDefaultSecuritySolutionAppState', () => {
   });
 
   it('should return default app state with security solution specific columns and breakdown field if there is index match', () => {
-    const getDefaultAppState = getDefaultSecuritySolutionAppState();
+    const getDefaultAppState = createDefaultSecuritySolutionAppStateGetter();
 
     const params = {
       dataView: {

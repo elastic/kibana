@@ -10,7 +10,7 @@
 import type { RootProfileProvider } from '../../../profiles';
 import { ALERTS_INDEX_PATTERN } from '../constants';
 
-export const getDefaultSecuritySolutionAppState: () => RootProfileProvider['profile']['getDefaultAppState'] =
+export const createDefaultSecuritySolutionAppStateGetter: () => RootProfileProvider['profile']['getDefaultAppState'] =
   () => (prev) => (params) => {
     const { dataView } = params;
     const appState = { ...prev(params) };
