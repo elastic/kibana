@@ -6,12 +6,11 @@
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES } from '../../common/constants';
-import {
+import type {
   CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
-  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
@@ -50,6 +49,7 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
