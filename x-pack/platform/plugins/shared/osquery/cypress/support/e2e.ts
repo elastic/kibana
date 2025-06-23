@@ -31,8 +31,8 @@ import registerCypressGrep from '@cypress/grep';
 
 registerCypressGrep();
 
-import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/cypress-test-helper';
-import { login } from '@kbn/cypress-test-helper';
+import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/cypress-test-helper/src/utils';
+import { login } from '@kbn/cypress-test-helper/src/auth/login';
 
 import type { LoadedRoleAndUser } from '@kbn/test-suites-serverless/shared/lib';
 import type { ServerlessRoleName } from './roles';

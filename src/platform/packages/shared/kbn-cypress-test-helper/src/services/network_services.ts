@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { networkInterfaces } from 'node:os';
-
 export const getLocalhostRealIp = (): string => {
-  // reverse to get the last interface first
-  for (const netInterfaceList of Object.values(networkInterfaces()).reverse()) {
+  // Use require dynamically so Cypress don't process it
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const os = require('os') as typeof import('os');
+  const interfaces = os.networkInterfaces();
+
+  for (const netInterfaceList of Object.values(interfaces).reverse()) {
     if (netInterfaceList) {
       const netInterface = netInterfaceList.find(
         (networkInterface) =>
           networkInterface.family === 'IPv4' &&
-          networkInterface.internal === false &&
+          !networkInterface.internal &&
           networkInterface.address
       );
       if (netInterface) {
@@ -24,5 +26,6 @@ export const getLocalhostRealIp = (): string => {
       }
     }
   }
+
   return '0.0.0.0';
 };

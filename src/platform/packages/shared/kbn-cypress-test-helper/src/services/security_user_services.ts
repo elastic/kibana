@@ -8,7 +8,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { userInfo } from 'os';
 
 export interface CreatedSecuritySuperuser {
   username: string;
@@ -18,9 +17,16 @@ export interface CreatedSecuritySuperuser {
 
 export const createSecuritySuperuser = async (
   esClient: Client,
-  username: string = userInfo().username,
+  username?: string,
   password: string = 'changeme'
 ): Promise<CreatedSecuritySuperuser> => {
+  // Dynamically load userInfo from 'os' if no username is provided
+  if (!username) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const os = require('os') as typeof import('os');
+    username = os.userInfo().username;
+  }
+
   if (!username || !password) {
     throw new Error(`username and password require values.`);
   }

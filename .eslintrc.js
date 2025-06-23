@@ -2303,6 +2303,23 @@ module.exports = {
         'no-console': 'off',
       },
     },
+    {
+      files: ['x-pack/**/*.ts'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@kbn/cypress-test-helper',
+                message:
+                  "Import from a sub-path (e.g. '@kbn/cypress-test-helper/src/utils'). Cypress uses Webpack, which requires direct file imports to avoid parse errors.",
+              },
+            ],
+          },
+        ],
+      },
+    },
   ],
 };
 
