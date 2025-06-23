@@ -60,14 +60,14 @@ export const useMonitorsTableColumns = ({
 
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
-      const { configId, locationLabel, locationId, spaceId } = monitor;
+      const { configId, locationLabel, locationId, spaces } = monitor;
       dispatch(
         setFlyoutConfigCallback({
           configId,
           id: configId,
           location: locationLabel,
           locationId,
-          spaceId,
+          spaces,
         })
       );
     },

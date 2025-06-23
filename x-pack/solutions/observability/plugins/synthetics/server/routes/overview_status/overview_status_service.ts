@@ -370,7 +370,7 @@ export class OverviewStatusService {
       projectId: monitor.attributes[ConfigKey.PROJECT_ID],
       isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
       updated_at: monitor.updated_at,
-      spaceId: monitor.namespaces?.[0],
+      spaces: monitor.namespaces,
       urls: monitor.attributes[ConfigKey.URLS],
       maintenanceWindows: monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS]?.map((mw) => mw),
     };

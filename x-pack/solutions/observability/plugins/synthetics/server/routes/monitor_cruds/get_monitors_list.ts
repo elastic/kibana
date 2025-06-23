@@ -67,8 +67,9 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
           internal: request.query?.internal,
         });
         return {
-          spaceId: monitor.namespaces?.[0],
           ...mon,
+          spaceId: monitor.namespaces?.[0],
+          spaces: monitor.namespaces ?? [],
         };
       }),
       absoluteTotal,

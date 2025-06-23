@@ -14,11 +14,11 @@ import { ClientPluginsStart } from '../../../plugin';
 export function useMonitorDetailLocator({
   configId,
   locationId,
-  spaceId,
+  spaces,
 }: {
   configId: string;
   locationId?: string;
-  spaceId?: string;
+  spaces?: string[];
 }) {
   const { space } = useKibanaSpace();
   const [monitorUrl, setMonitorUrl] = useState<string | undefined>(undefined);
@@ -31,12 +31,12 @@ export function useMonitorDetailLocator({
       const url = await locator?.getUrl({
         configId,
         locationId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       });
       setMonitorUrl(url);
     }
     generateUrl();
-  }, [locator, configId, locationId, spaceId, space?.id]);
+  }, [locator, configId, locationId, spaces, space?.id, space]);
 
   return monitorUrl;
 }

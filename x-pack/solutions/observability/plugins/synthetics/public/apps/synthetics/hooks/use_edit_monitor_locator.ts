@@ -15,10 +15,10 @@ import { ClientPluginsStart } from '../../../plugin';
 export function useEditMonitorLocator({
   configId,
   locators,
-  spaceId,
+  spaces,
 }: {
   configId: string;
-  spaceId?: string;
+  spaces?: string[];
   locators?: LocatorClient;
 }) {
   const { space } = useKibanaSpace();
@@ -31,12 +31,12 @@ export function useEditMonitorLocator({
     async function generateUrl() {
       const url = await locator?.getUrl({
         configId,
-        ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
+        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       });
       setEditUrl(url);
     }
     generateUrl();
-  }, [locator, configId, space, spaceId]);
+  }, [locator, configId, space, spaces]);
 
   return editUrl;
 }

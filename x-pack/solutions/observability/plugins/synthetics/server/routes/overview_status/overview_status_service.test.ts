@@ -37,6 +37,7 @@ jest.mock('../../saved_objects/synthetics_monitor/process_monitors', () => ({
 describe('current status route', () => {
   const testMonitors = [
     {
+      namespaces: ['default'],
       attributes: {
         config_id: 'id1',
         id: 'id1',
@@ -53,6 +54,7 @@ describe('current status route', () => {
       },
     },
     {
+      namespaces: ['default'],
       attributes: {
         id: 'id2',
         config_id: 'id2',
@@ -162,7 +164,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -194,7 +198,9 @@ describe('current status route', () => {
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -216,7 +222,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -327,7 +335,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "down",
               "tags": Array [
                 "tag-1",
@@ -359,7 +369,9 @@ describe('current status route', () => {
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -381,7 +393,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "up",
               "tags": Array [
                 "tag-1",
@@ -442,7 +456,9 @@ describe('current status route', () => {
               "name": "test monitor 1",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",
@@ -464,7 +480,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",
@@ -486,7 +504,9 @@ describe('current status route', () => {
               "name": "test monitor 2",
               "projectId": "project-id",
               "schedule": "1",
-              "spaceId": undefined,
+              "spaces": Array [
+                "default",
+              ],
               "status": "unknown",
               "tags": Array [
                 "tag-1",

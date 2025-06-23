@@ -223,10 +223,16 @@ export function useMonitorListColumns({
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
           href: (fields) => {
-            if ('spaceId' in fields && space?.id !== fields.spaceId) {
-              return http?.basePath.prepend(
-                `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
-              )!;
+            if (space) {
+              if (
+                'spaceId' in fields &&
+                space.id !== fields.spaceId &&
+                !fields.spaces?.includes(space.id)
+              ) {
+                return http?.basePath.prepend(
+                  `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
+                )!;
+              }
             }
             return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
           },

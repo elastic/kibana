@@ -171,7 +171,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}
