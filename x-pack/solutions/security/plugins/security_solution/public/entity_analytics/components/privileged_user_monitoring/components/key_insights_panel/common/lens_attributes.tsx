@@ -21,7 +21,6 @@ export const createKeyInsightsPanelLensAttributes = ({
   title,
   label,
   esqlQuery,
-  dataViewId = 'default-dataview',
   dataViewTitle = 'logs-*',
   filterQuery,
 }: KeyInsightsPanelParams): LensAttributes => {
