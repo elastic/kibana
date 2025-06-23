@@ -53,6 +53,7 @@ import {
 import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
+  getDeleteAllConversationsSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
@@ -188,6 +189,13 @@ export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
     params: { id },
+  });
+
+export const getDeleteAllConversationsRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+    body: getDeleteAllConversationsSchemaMock(),
   });
 
 export const getCreateConversationRequest = () =>
