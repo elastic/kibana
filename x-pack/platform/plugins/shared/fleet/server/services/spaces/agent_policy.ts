@@ -24,6 +24,8 @@ import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../erro
 import type { UninstallTokenSOAttributes } from '../security/uninstall_token_service';
 import { closePointInTime, getAgentsByKuery, openPointInTime } from '../agents';
 
+import { validatePackagePoliciesUniqueNameAcrossSpaces } from './policy_namespaces';
+
 import { isSpaceAwarenessEnabled } from './helpers';
 
 const UPDATE_AGENT_BATCH_SIZE = 1000;
@@ -71,6 +73,7 @@ export async function updateAgentPolicySpaces({
   if (deepEqual(existingPolicy?.space_ids?.sort() ?? [DEFAULT_SPACE_ID], newSpaceIds.sort())) {
     return;
   }
+  await validatePackagePoliciesUniqueNameAcrossSpaces(existingPackagePolicies);
 
   if (existingPackagePolicies.some((packagePolicy) => packagePolicy.policy_ids.length > 1)) {
     throw new FleetError(
