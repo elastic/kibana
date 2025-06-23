@@ -257,7 +257,8 @@ describe('autocomplete', () => {
     // source command
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
-      'dateField'
+      'dateField',
+      'textField'
     );
     testSuggestions('f/', [
       ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
@@ -483,7 +484,8 @@ describe('autocomplete', () => {
     });
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
-      'dateField'
+      'dateField',
+      'textField'
     );
     // Source command
     testSuggestions('F/', [
@@ -575,7 +577,11 @@ describe('autocomplete', () => {
       );
     });
 
-    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates('', 'dateField');
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      '',
+      'dateField',
+      'textField'
+    );
 
     // PIPE (|)
     testSuggestions('FROM a /', [
@@ -626,7 +632,8 @@ describe('autocomplete', () => {
       );
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
         'index1',
-        'dateField'
+        'dateField',
+        'textField'
       );
 
       testSuggestions(
@@ -649,7 +656,8 @@ describe('autocomplete', () => {
 
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
         'index2',
-        'dateField'
+        'dateField',
+        'textField'
       );
       testSuggestions(
         'FROM index1, index2/',
@@ -675,7 +683,8 @@ describe('autocomplete', () => {
       // we're setting it ourselves.
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
         'foo$bar',
-        'dateField'
+        'dateField',
+        'textField'
       );
       testSuggestions(
         'FROM foo$bar/',
@@ -707,7 +716,8 @@ describe('autocomplete', () => {
       // This is an identifier that matches multiple sources
       recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
         'i*',
-        'dateField'
+        'dateField',
+        'textField'
       );
       testSuggestions(
         'FROM i*/',
@@ -728,7 +738,11 @@ describe('autocomplete', () => {
       );
     });
 
-    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates('', 'dateField');
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      '',
+      'dateField',
+      'textField'
+    );
     // FROM source METADATA
     testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
