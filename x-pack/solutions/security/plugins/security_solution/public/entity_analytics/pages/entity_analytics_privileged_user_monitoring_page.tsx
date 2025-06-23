@@ -131,7 +131,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
 
       return dispatch({
         type: 'SHOW_DASHBOARD',
-        onboardingCallout: errorMessage ? undefined : { userCount: 0 },
+        onboardingCallout: undefined,
         error: errorMessage,
       });
     }
