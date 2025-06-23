@@ -402,7 +402,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
           },
           {
             name: i18n.translate('xpack.reporting.exports.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open in Kibana',
+              defaultMessage: 'Open Dashboard',
             }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(

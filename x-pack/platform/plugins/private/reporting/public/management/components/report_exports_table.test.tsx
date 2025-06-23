@@ -12,17 +12,22 @@ import {
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
 import { ReportExportsTable } from './report_exports_table';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { Job, ReportingAPIClient } from '@kbn/reporting-public';
 import { Observable } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { userEvent } from '@testing-library/user-event';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import React from 'react';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { mockJobs } from '../../../common/test';
 import { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
+
+jest.mock('./report_info_flyout', () => ({
+  ReportInfoFlyout: () => <div data-test-subj="reportInfoFlyout" />,
+}));
 
 const coreStart = coreMock.createStart();
 const http = httpServiceMock.createSetupContract();
@@ -67,6 +72,8 @@ describe('ReportExportsTable', () => {
       .spyOn(reportingAPIClient, 'list')
       .mockImplementation(() => Promise.resolve(mockJobs.map((j) => new Job(j))));
     jest.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
+    window.open = jest.fn();
+    window.focus = jest.fn();
   });
 
   it('renders table correctly', async () => {
@@ -102,5 +109,62 @@ describe('ReportExportsTable', () => {
 
     expect(await screen.findByTestId(`viewReportingLink-${mockJobs[0].id}`)).toBeInTheDocument();
     expect(await screen.findByTestId(`reportDownloadLink-${mockJobs[0].id}`)).toBeInTheDocument();
+  });
+
+  it('should show config flyout from table action', async () => {
+    render(
+      <ThemeProvider theme={mockTheme}>
+        <ReportExportsTable {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    userEvent.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    const firstReportViewConfig = await screen.findByTestId(`viewReportingLink-${mockJobs[0].id}`);
+
+    expect(firstReportViewConfig).toBeInTheDocument();
+
+    userEvent.click(firstReportViewConfig, { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('reportInfoFlyout')).toBeInTheDocument();
+  });
+
+  it('should show config flyout from title click', async () => {
+    render(
+      <ThemeProvider theme={mockTheme}>
+        <ReportExportsTable {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    const reportViewConfig = await screen.findByTestId(`viewReportingLink-${mockJobs[1].id}`);
+
+    expect(reportViewConfig).toBeInTheDocument();
+
+    userEvent.click(reportViewConfig, { pointerEventsCheck: 0 });
+
+    expect(await screen.findByTestId('reportInfoFlyout')).toBeInTheDocument();
+  });
+
+  it('should open dashboard', async () => {
+    render(
+      <ThemeProvider theme={mockTheme}>
+        <ReportExportsTable {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    userEvent.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    const firstOpenDashboard = await screen.findByTestId('reportOpenInKibanaApp');
+
+    expect(firstOpenDashboard).toBeInTheDocument();
+
+    userEvent.click(firstOpenDashboard, { pointerEventsCheck: 0 });
+
+    await waitFor(() => {
+      expect(window.open).toHaveBeenCalledWith(
+        '/s/my-space/app/reportingRedirect?jobId=k90e51pk1ieucbae0c3t8wo2',
+        '_blank'
+      );
+    });
   });
 });

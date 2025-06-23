@@ -142,8 +142,8 @@ export const ReportSchedulesTable = (props: ListingPropsInternal) => {
         defaultMessage: 'Next schedule',
       }),
       width: '20%',
-      render: (_nextRun: string) => {
-        return moment(_nextRun).format('YYYY-MM-DD @ hh:mm A');
+      render: (_nextRun: string, item) => {
+        return item.enabled ? moment(_nextRun).format('YYYY-MM-DD @ hh:mm A') : '—';
       },
     },
     {

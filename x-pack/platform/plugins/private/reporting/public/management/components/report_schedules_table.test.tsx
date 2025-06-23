@@ -16,6 +16,7 @@ import { ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { Observable } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { userEvent } from '@testing-library/user-event';
 import { mockConfig } from '../__test__/report_listing.test.helpers';
 import React from 'react';
 import { RecursivePartial, UseEuiTheme } from '@elastic/eui';
@@ -24,7 +25,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useGetScheduledList } from '../hooks/use_get_scheduled_list';
 import { mockScheduledReports } from '../../../common/test/fixtures';
-import { userEvent } from '@testing-library/user-event';
 import { useBulkDisable } from '../hooks/use_bulk_disable';
 
 jest.mock('@kbn/reporting-public', () => ({
