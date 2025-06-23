@@ -69,8 +69,6 @@ export const initializeSession: InternalStateThunkActionCreator<
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
-    const reduxState = getState();
-
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -83,7 +81,7 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     const { currentDataView$, stateContainer$, customizationService$, scopedProfilesManager$ } =
       selectTabRuntimeState(runtimeStateManager, tabId);
-    const tabState = selectTab(reduxState, tabId);
+    const tabState = selectTab(getState(), tabId);
 
     let urlState = cleanupUrlState(
       defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
@@ -136,7 +134,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
     );
-    const { initializationState, defaultProfileAdHocDataViewIds } = reduxState;
+    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
     const profileDataViews = runtimeStateManager.adHocDataViews$
       .getValue()
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
