@@ -49,10 +49,10 @@ describe('useManagedDataViews', () => {
   it('should filter data views to only include those with DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID', () => {
     // Create mock data views with a mix of IDs
     const mockDataViews = [
-      { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Security Solution Data View' },
-      { id: 'some-other-id', title: 'Other Data View' },
-      { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Another Security Solution Data View' },
-      { id: DEFAULT_ALERT_DATA_VIEW_ID, title: 'Security Alert Data View' },
+      { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Security solution data view' },
+      { id: 'some-other-id', title: 'Other data view' },
+      { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: 'Another security solution data view' },
+      { id: DEFAULT_ALERT_DATA_VIEW_ID, title: 'Security alert data view' },
     ];
 
     // Mock the Redux selector
