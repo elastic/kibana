@@ -88,14 +88,21 @@ const AllAssetsComponent = () => {
     enabled: !queryError,
   });
 
+  // Todo: Improve to a dedicated loading state that's not dependent on chart data
+  const isSearchBarLoading = isLoadingChartData || isFetchingChartData;
+
   return (
     <I18nProvider>
-      <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
+      <AssetInventorySearchBar
+        query={urlQuery}
+        setQuery={setUrlQuery}
+        isLoading={isSearchBarLoading}
+      />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
         <EuiSpacer size="l" />
         <OnboardingSuccessCallout />
-        <AssetInventoryFilters setQuery={setUrlQuery} />
+        <AssetInventoryFilters query={urlQuery} setQuery={setUrlQuery} />
         <EuiSpacer size="l" />
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
