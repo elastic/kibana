@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/server';
-import type { ExportType } from '@kbn/reporting-server';
-import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import {
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-} from '.';
+import { ILicense } from '@kbn/licensing-plugin/server';
+import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
+import type { ExportType } from '.';
+import { ExportTypesRegistry } from './export_types_registry';
 
 export interface LicenseCheckResult {
   showLinks: boolean;
@@ -24,14 +18,6 @@ export interface LicenseCheckResult {
   message?: string;
   jobTypes?: string[];
 }
-
-export const scheduledReportValidLicenses: LicenseType[] = [
-  LICENSE_TYPE_TRIAL,
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_ENTERPRISE,
-];
 
 const messages = {
   getUnavailable: () => {
@@ -95,7 +81,7 @@ const makeScheduledReportsFeature = () => {
         };
       }
 
-      if (!scheduledReportValidLicenses.includes(license.type)) {
+      if (!SCHEDULED_REPORT_VALID_LICENSES.includes(license.type)) {
         return {
           showLinks: false,
           enableLinks: false,

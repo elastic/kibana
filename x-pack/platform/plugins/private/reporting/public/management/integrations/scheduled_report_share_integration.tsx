@@ -12,7 +12,7 @@ import type { ReportingSharingData } from '@kbn/reporting-public/share/share_con
 import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { scheduledReportValidLicenses } from '@kbn/reporting-common/check_license';
+import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';
 import { queryClient } from '../../query_client';
 import { ScheduledReportFlyoutShareWrapper } from '../components/scheduled_report_flyout_share_wrapper';
@@ -66,7 +66,7 @@ export const createScheduledReportShareIntegration = ({
       if (!license || !license.type) {
         return false;
       }
-      return scheduledReportValidLicenses.includes(license.type);
+      return SCHEDULED_REPORT_VALID_LICENSES.includes(license.type);
     },
   };
 };

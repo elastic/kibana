@@ -9,7 +9,7 @@
 
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { checkLicense } from './check_license';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { ExportTypesRegistry } from './export_types_registry';
 
 describe('check_license', () => {
   let exportTypesRegistry: ExportTypesRegistry;
