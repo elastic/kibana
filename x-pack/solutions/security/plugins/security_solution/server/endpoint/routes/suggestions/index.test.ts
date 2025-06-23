@@ -696,6 +696,7 @@ describe('when calling the Suggestions route handler', () => {
         });
 
         it('should handle empty agent policies list when space awareness is enabled', async () => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mockPackagePolicies: any[] = [];
           const mockAsyncIterable = {
             async *[Symbol.asyncIterator]() {
