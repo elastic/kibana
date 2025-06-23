@@ -156,7 +156,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
-
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -170,6 +169,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
+    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -435,6 +436,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     getDatasetQualityDetailsHeaderButton() {
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
+    },
+
+    openDatasetQualityDetailsActionsButton() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
+    },
+
+    getOpenInDiscoverButton() {
+      return testSubjects.find(testSubjectSelectors.openInDiscover);
     },
 
     openIntegrationActionsMenu() {
