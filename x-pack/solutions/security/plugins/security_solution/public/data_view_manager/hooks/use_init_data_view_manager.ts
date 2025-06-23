@@ -16,10 +16,11 @@ import type { RootState } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
 
@@ -40,15 +41,51 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const {
+    loading: loadingSignalIndex,
+    signalIndexName,
+    signalIndexMappingOutdated,
+  } = useUserInfo();
+
+  const onSignalIndexUpdated = useCallback(() => {
+    if (!loadingSignalIndex && signalIndexName != null) {
+      dispatch(
+        sharedDataViewManagerSlice.actions.setSignalIndex({
+          name: signalIndexName,
+          isOutdated: !!signalIndexMappingOutdated,
+        })
+      );
+    }
+  }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
+    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
+    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
     if (!newDataViewPickerEnabled) {
       return;
     }
 
+    onSignalIndexUpdated();
+    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
+    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signalIndexName]);
+
+  useEffect(() => {
+    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
+    if (!newDataViewPickerEnabled) {
+      return;
+    }
+
+    // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
+      http: services.http,
+      uiSettings: services.uiSettings,
+      application: services.application,
+      spaces: services.spaces,
     });
 
     dispatch(addListener(dataViewsLoadingListener));
@@ -78,7 +115,15 @@ export const useInitDataViewManager = () => {
         dispatch(removeListener(dataViewSelectedListener));
       });
     };
-  }, [dispatch, newDataViewPickerEnabled, services.dataViews]);
+  }, [
+    dispatch,
+    newDataViewPickerEnabled,
+    services.application,
+    services.dataViews,
+    services.http,
+    services.spaces,
+    services.uiSettings,
+  ]);
 
   return useCallback(
     (initialSelection: SelectDataViewAsyncPayload[]) => {

@@ -21,15 +21,16 @@ describe('getTopAssetsQuery', () => {
       must_not: [],
     },
   };
+  const indexPattern = 'index-pattern-test';
 
   const sort = [['some.field', 'desc']];
 
   it('should return a valid ES query with aggregations by entityType and entitySubType using entityId count', () => {
-    const result = getTopAssetsQuery({ query, sort, enabled: true });
+    const result = getTopAssetsQuery({ query, sort, enabled: true }, indexPattern);
 
     expect(result).toMatchObject({
       size: 0,
-      index: expect.any(String),
+      index: indexPattern,
       ignore_unavailable: true,
       query: expect.objectContaining({
         bool: expect.objectContaining({
@@ -56,15 +57,24 @@ describe('getTopAssetsQuery', () => {
   });
 
   it('should handle missing query subfields safely', () => {
-    const result = getTopAssetsQuery({
-      query: { bool: { filter: [], must: [], should: [], must_not: [] } },
-      sort,
-      enabled: true,
-    });
+    const result = getTopAssetsQuery(
+      {
+        query: { bool: { filter: [], must: [], should: [], must_not: [] } },
+        sort,
+        enabled: true,
+      },
+      indexPattern
+    );
 
     expect(result.query.bool.filter).toEqual([]);
     expect(result.query.bool.must).toEqual([]);
     expect(result.query.bool.should).toEqual([]);
     expect(result.query.bool.must_not).toEqual([]);
+  });
+
+  it('should throw an error if indexPattern is not provided', () => {
+    expect(() => {
+      getTopAssetsQuery({ query, sort, enabled: true });
+    }).toThrowError('Index pattern is required');
   });
 });

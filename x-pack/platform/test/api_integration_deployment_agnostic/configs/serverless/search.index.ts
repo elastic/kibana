@@ -15,5 +15,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/management'));
     loadTestFile(require.resolve('../../apis/saved_objects_management'));
+    loadTestFile(require.resolve('../../apis/intercepts'));
   });
 }

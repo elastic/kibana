@@ -11,7 +11,7 @@ import { registerConnectorTypes } from './connector_types';
 import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import type { StackConnectorsConfigType } from '../common/types';
+import type { ConfigSchema as StackConnectorsConfigType } from './config';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }
@@ -37,7 +37,8 @@ export class StackConnectorsPlugin
     const router = core.http.createRouter();
     const { actions } = plugins;
 
-    getWellKnownEmailServiceRoute(router);
+    const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
+    getWellKnownEmailServiceRoute(router, awsSesConfig);
     validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
 
     registerConnectorTypes({

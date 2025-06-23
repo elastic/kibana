@@ -16,13 +16,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
-const mockUsePlaygroundParameters = jest.fn();
-
 jest.mock('../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({}),
-}));
-jest.mock('../hooks/use_playground_parameters', () => ({
-  usePlaygroundParameters: () => mockUsePlaygroundParameters(),
 }));
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
@@ -68,14 +63,15 @@ const MockPlaygroundForm = ({
 
 describe('Header', () => {
   it('renders correctly', () => {
-    mockUsePlaygroundParameters.mockReturnValue({
-      pageMode: PlaygroundPageMode.chat,
-      viewMode: PlaygroundViewMode.preview,
-    });
     render(
       <IntlProvider locale="en">
         <MockPlaygroundForm handleSubmit={() => {}}>
-          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
+          <Header
+            pageMode={PlaygroundPageMode.chat}
+            viewMode={PlaygroundViewMode.preview}
+            onModeChange={() => {}}
+            onSelectPageModeChange={() => {}}
+          />
         </MockPlaygroundForm>
       </IntlProvider>
     );
@@ -85,14 +81,15 @@ describe('Header', () => {
   });
 
   it('renders correctly with preview mode', () => {
-    mockUsePlaygroundParameters.mockReturnValue({
-      pageMode: PlaygroundPageMode.search,
-      viewMode: PlaygroundViewMode.preview,
-    });
     render(
       <IntlProvider locale="en">
         <MockPlaygroundForm handleSubmit={() => {}}>
-          <Header onModeChange={() => {}} onSelectPageModeChange={() => {}} />
+          <Header
+            pageMode={PlaygroundPageMode.search}
+            viewMode={PlaygroundViewMode.preview}
+            onModeChange={() => {}}
+            onSelectPageModeChange={() => {}}
+          />
         </MockPlaygroundForm>
       </IntlProvider>
     );

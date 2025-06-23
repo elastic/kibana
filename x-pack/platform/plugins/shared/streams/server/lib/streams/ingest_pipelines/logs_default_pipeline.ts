@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const logsDefaultPipelineProcessors = [
+export const getLogsDefaultPipelineProcessors = (isServerless?: boolean) => [
   {
     set: {
       description: "If '@timestamp' is missing, set it with the ingest timestamp",
@@ -26,18 +26,17 @@ export const logsDefaultPipelineProcessors = [
       ignore_failure: true,
     },
   },
-  {
-    // This is a placeholder for the ECS migration processor - once it exists on the Elasticsearch side, it can be removed here
-    // The exact behavior might slightly differ from the one in the ECS migration processor, but it is close enough for now.
-    script: {
-      lang: 'painless',
-      source: `
+  isServerless
+    ? {
+        // This is a placeholder for the ECS migration - since it's not yet exposed on serverless, we need to handle it via painless script.
+        script: {
+          lang: 'painless',
+          source: `
       if (ctx.resource?.attributes != null) return;
       
       // Initialize resource container.
       ctx.resource = [:];
       ctx.resource.attributes = [:];
-
       // Resource prefixes to look for
       def resourcePrefixes = ["host", "cloud", "agent"];
       
@@ -67,20 +66,17 @@ export const logsDefaultPipelineProcessors = [
           ctx.remove(key);
         }
       }
-
       // Process the "message" field.
       if (ctx.message != null) {
         ctx.body = [:];
         ctx.body.text = ctx.message;
         ctx.remove("message");
       }
-
       // Process "log.level" field.
       if (ctx.log?.level != null) {
         ctx.severity_text = ctx.log.level;
         ctx.log.remove("level");
       }
-
       // Collect any remaining keys into ctx.attributes (except reserved ones) and remove them.
       ctx.attributes = [:];
       def keysToRemove = [];
@@ -100,8 +96,13 @@ export const logsDefaultPipelineProcessors = [
         ctx.remove(key);
       }
       `,
-    },
-  },
+        },
+      }
+    : {
+        // On stateful, we use the normalize_for_stream processor to handle the ECS migration.
+        // Later on this will be replaced by the /logs endpoint
+        normalize_for_stream: {},
+      },
   {
     dot_expander: {
       path: 'resource.attributes',

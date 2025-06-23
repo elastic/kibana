@@ -551,6 +551,263 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStats",
+        "type": "Class",
+        "tags": [],
+        "label": "ScoutTestConfigStats",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.findConfigByPath",
+            "type": "Function",
+            "tags": [],
+            "label": "findConfigByPath",
+            "description": [],
+            "signature": [
+              "(configPath: string) => { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.findConfigByPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "configPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.largestConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "largestConfig",
+            "description": [],
+            "signature": [
+              "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.writeToFile",
+            "type": "Function",
+            "tags": [],
+            "label": "writeToFile",
+            "description": [],
+            "signature": [
+              "(outputPath: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.writeToFile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "outputPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.fromFile",
+            "type": "Function",
+            "tags": [],
+            "label": "fromFile",
+            "description": [],
+            "signature": [
+              "(statsFilePath: string) => ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfigStats",
+                "text": "ScoutTestConfigStats"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromFile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "statsFilePath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestConfigStats.fromElasticsearch",
+            "type": "Function",
+            "tags": [],
+            "label": "fromElasticsearch",
+            "description": [],
+            "signature": [
+              "(es: ",
+              "default",
+              ", options: { configPaths: string[]; lookbackDays: number; buildkite: { branch?: string | undefined; pipelineSlug?: string | undefined; }; }) => Promise<",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.ScoutTestConfigStats",
+                "text": "ScoutTestConfigStats"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "es",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.configPaths",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "configPaths",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.lookbackDays",
+                    "type": "number",
+                    "tags": [],
+                    "label": "lookbackDays",
+                    "description": [],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-reporting",
+                    "id": "def-common.ScoutTestConfigStats.fromElasticsearch.$2.buildkite",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "buildkite",
+                    "description": [],
+                    "signature": [
+                      "{ branch?: string | undefined; pipelineSlug?: string | undefined; }"
+                    ],
+                    "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -1815,7 +2072,69 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsData",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfigStatsData",
+        "description": [],
+        "signature": [
+          "{ configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfigStatsEntry",
+        "description": [],
+        "signature": [
+          "{ path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsDataSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ScoutTestConfigStatsDataSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ lastUpdated: Zod.ZodDate; lookbackDays: Zod.ZodNumber; buildkite: Zod.ZodObject<{ branch: Zod.ZodOptional<Zod.ZodString>; pipeline: Zod.ZodOptional<Zod.ZodObject<{ slug: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { slug?: string | undefined; }, { slug?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }, { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }>; configs: Zod.ZodArray<Zod.ZodObject<{ path: Zod.ZodString; runCount: Zod.ZodNumber; runtime: Zod.ZodObject<{ avg: Zod.ZodNumber; median: Zod.ZodNumber; pc95th: Zod.ZodNumber; pc99th: Zod.ZodNumber; max: Zod.ZodNumber; estimate: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", Zod.ZodTypeAny, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }, { configs: { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }[]; lastUpdated: Date; lookbackDays: number; buildkite: { pipeline?: { slug?: string | undefined; } | undefined; branch?: string | undefined; }; }>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutTestConfigStatsEntrySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ScoutTestConfigStatsEntrySchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ path: Zod.ZodString; runCount: Zod.ZodNumber; runtime: Zod.ZodObject<{ avg: Zod.ZodNumber; median: Zod.ZodNumber; pc95th: Zod.ZodNumber; pc99th: Zod.ZodNumber; max: Zod.ZodNumber; estimate: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }, { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }>; }, \"strip\", Zod.ZodTypeAny, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }, { path: string; runtime: { max: number; avg: number; median: number; pc95th: number; pc99th: number; estimate: number; }; runCount: number; }>"
+        ],
+        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/stats/test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }
