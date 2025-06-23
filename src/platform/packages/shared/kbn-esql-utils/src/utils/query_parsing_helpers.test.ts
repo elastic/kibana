@@ -800,6 +800,7 @@ describe('esql query helpers', () => {
         'FROM logs-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | STATS count = COUNT(*) BY `Over time` = BUCKET(@timestamp, 50, ?_tstart, ?_tend)',
         'FROM logs-* | STATS count = COUNT(*) BY buckets = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | CHANGE_POINT count ON buckets',
         'FROM logs-* |  ENRICH  meow ON @message WITH col0 = docks_count',
+        'FROM logs-* |  FORK (LIMIT 10 ) (STATS metric = AVG(bytes))',
       ];
       const result = getSourceFieldsFromQueries(queries);
       expect(result).toEqual(

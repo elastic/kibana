@@ -442,15 +442,6 @@ export function processSingleQuery(query: string): {
         const existingColumns = userDefinedColumns.get(indexPattern) || [];
         const updatedColumns = [...existingColumns, (newArg as ESQLColumn).text];
         userDefinedColumns.set(indexPattern, updatedColumns);
-        // if (args.length === 2) {
-        //   const [leftArg, _] = args;
-        //   const existingColumns = userDefinedColumns.get(indexPattern) || [];
-        //   const updatedColumns = [
-        //     ...existingColumns,
-        //     (leftArg as ESQLColumn).text.replace(/`/g, ''),
-        //   ];
-        //   userDefinedColumns.set(indexPattern, updatedColumns);
-        // }
       }
     })
     .on('visitCommandOption', (ctx) => {
