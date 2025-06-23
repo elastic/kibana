@@ -10243,6 +10243,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.ObservabilityAIAssistantClient.getAnonymizationService",
+            "type": "Function",
+            "tags": [],
+            "label": "getAnonymizationService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnonymizationService"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
