@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
       await lens.setCSVDownloadDebugFlag(true);
-      await lens.openCSVDownloadExport();
+      await lens.triggerCSVDownloadExport();
 
       const csv = await lens.getCSVContent();
       expect(csv).to.be.ok();
