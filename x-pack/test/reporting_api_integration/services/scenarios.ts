@@ -203,14 +203,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPDFV2,
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
   const generatePng = async (
     username: string,
@@ -230,14 +234,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPNGV2,
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
   const generateCsv = async (
     job: JobParamsCSV,
@@ -257,15 +265,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     job: JobParamsCSV,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
-
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
 
   const listScheduledReports = async (

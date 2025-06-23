@@ -24,10 +24,13 @@ export function getFirstRunAt({
 
   if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
     try {
+      const dtstart = taskInstance.schedule.rrule.dtstart
+        ? new Date(taskInstance.schedule.rrule.dtstart)
+        : now;
       const rrule = new RRule({
         ...taskInstance.schedule.rrule,
         bysecond: [0],
-        dtstart: now,
+        dtstart,
       });
       return rrule.after(now)?.toISOString() || nowString;
     } catch (e) {
