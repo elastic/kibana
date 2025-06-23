@@ -16,7 +16,7 @@ import yargs from 'yargs';
 import { CaseSeverity, type CasePostRequest } from '../common';
 
 const toolingLogger = new ToolingLog({
-  level: 'debug',
+  level: 'info',
   writeTo: process.stdout,
 });
 
@@ -61,7 +61,6 @@ const makeRequest = async ({
   let updatedUrl = updateURL({
     url,
     user: { username, password },
-    protocol: 'http:',
   });
 
   let kbnClientOptions: KbnClientOptions = {
@@ -135,7 +134,9 @@ const generateCases = async ({
   ssl: boolean;
 }) => {
   try {
-    console.log(`Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`);
+    toolingLogger.info(
+      `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`
+    );
     const path = `${space ? `/s/${space}` : ''}/api/cases`;
     await pMap(
       cases,
@@ -145,7 +146,7 @@ const generateCases = async ({
       { concurrency: 100 }
     );
   } catch (error) {
-    console.log(error);
+    toolingLogger.error(error);
   }
 };
 
@@ -203,7 +204,7 @@ const main = async () => {
     const invalidOwnerProvided = owners.some((owner) => !potentialOwners.has(owner));
 
     if (invalidOwnerProvided) {
-      console.error('Only valid owners are securitySolution, observability, and cases');
+      toolingLogger.error('Only valid owners are securitySolution, observability, and cases');
       // eslint-disable-next-line no-process-exit
       process.exit(1);
     }
