@@ -7,19 +7,14 @@
 
 import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk, BaseMessage, ToolMessage } from '@langchain/core/messages';
-import { EMPTY, map, merge, mergeMap, of, OperatorFunction, share, toArray } from 'rxjs';
+import { EMPTY, mergeMap, of, OperatorFunction } from 'rxjs';
 import {
   ChatAgentEventType,
-  isMessageCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
   MessageChunkEvent,
   MessageCompleteEvent,
-  RoundCompleteEvent,
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common/agents';
-import { RoundInput, ConversationRoundStepType } from '@kbn/onechat-common/chat';
 import { StructuredToolIdentifier, toStructuredToolIdentifier } from '@kbn/onechat-common/tools';
 import {
   matchGraphName,
@@ -35,50 +30,6 @@ export type ConvertedEvents =
   | MessageCompleteEvent
   | ToolCallEvent
   | ToolResultEvent;
-
-export const addRoundCompleteEvent = ({
-  userInput,
-}: {
-  userInput: RoundInput;
-}): OperatorFunction<ConvertedEvents, ConvertedEvents | RoundCompleteEvent> => {
-  return (events$) => {
-    const shared$ = events$.pipe(share());
-    return merge(
-      shared$,
-      shared$.pipe(
-        toArray(),
-        map<ConvertedEvents[], RoundCompleteEvent>((events) => {
-          const toolCalls = events.filter(isToolCallEvent).map((event) => event.data);
-          const toolResults = events.filter(isToolResultEvent).map((event) => event.data);
-          const messages = events.filter(isMessageCompleteEvent).map((event) => event.data);
-          const event: RoundCompleteEvent = {
-            type: ChatAgentEventType.roundComplete,
-            data: {
-              round: {
-                userInput,
-                steps: toolCalls.map((toolCall) => {
-                  const toolResult = toolResults.find(
-                    (result) => result.toolCallId === toolCall.toolCallId
-                  );
-                  return {
-                    type: ConversationRoundStepType.toolCall,
-                    toolCallId: toolCall.toolCallId,
-                    toolId: toolCall.toolId,
-                    args: toolCall.args,
-                    result: toolResult?.result ?? 'unknown',
-                  };
-                }),
-                assistantResponse: { message: messages[messages.length - 1].messageContent },
-              },
-            },
-          };
-
-          return event;
-        })
-      )
-    );
-  };
-};
 
 export const convertGraphEvents = ({
   graphName,

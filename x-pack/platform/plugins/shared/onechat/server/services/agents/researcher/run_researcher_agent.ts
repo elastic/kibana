@@ -5,73 +5,43 @@
  * 2.0.
  */
 
-import { from, filter, shareReplay, lastValueFrom } from 'rxjs';
-import type { Logger } from '@kbn/logging';
-import { StreamEvent } from '@langchain/core/tracers/log_stream';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  ChatAgentEvent,
-  BuiltinToolIds,
-  builtinToolProviderId,
-  isMessageCompleteEvent,
-} from '@kbn/onechat-common';
-import type { ModelProvider, ScopedRunner, ToolProvider } from '@kbn/onechat-server';
+import { from, filter, shareReplay } from 'rxjs';
+import { BuiltinToolIds, builtinToolProviderId } from '@kbn/onechat-common';
+import { AgentHandlerContext } from '@kbn/onechat-server';
+import { isStreamEvent } from '@kbn/onechat-genai-utils/langchain';
 import { filterProviderTools } from '@kbn/onechat-genai-utils/framework';
-import { toLangchainTool } from '../chat/utils';
+import { toLangchainTool, conversationToLangchainMessages } from '../chat/utils';
+import { addRoundCompleteEvent, extractRound } from '../utils';
 import { createResearcherAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
+import { RunAgentParams, RunAgentResponse } from '../run_agent';
 
-export interface RunResearcherAgentContext {
-  logger: Logger;
-  request: KibanaRequest;
-  modelProvider: ModelProvider;
-  runner: ScopedRunner;
-}
-
-export interface RunResearcherAgentParams {
-  /**
-   * The search instructions
-   */
-  instructions: string;
+export type RunResearcherAgentParams = Omit<RunAgentParams, 'mode'> & {
   /**
    * Budget, in search cycles, to allocate to the researcher.
    * Defaults to 5.
    */
   cycleBudget?: number;
-
-  /**
-   * Top level tool provider to use to retrieve internal tools
-   */
-  toolProvider: ToolProvider;
-  /**
-   * Handler to react to the agent's events.
-   */
-  onEvent?: (event: ChatAgentEvent) => void;
-}
-
-export interface RunResearcherAgentResponse {
-  answer: string;
-}
+};
 
 export type RunResearcherAgentFn = (
   params: RunResearcherAgentParams,
-  context: RunResearcherAgentContext
-) => Promise<RunResearcherAgentResponse>;
+  context: AgentHandlerContext
+) => Promise<RunAgentResponse>;
 
 const agentGraphName = 'researcher-agent';
 const defaultCycleBudget = 5;
-
-const noopOnEvent = () => {};
 
 /**
  * Create the handler function for the default onechat agent.
  */
 export const runResearcherAgent: RunResearcherAgentFn = async (
-  { instructions, cycleBudget = defaultCycleBudget, toolProvider, onEvent = noopOnEvent },
-  { logger, request, modelProvider }
+  { nextInput, conversation = [], cycleBudget = defaultCycleBudget, tools },
+  { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
 
+  // TODO: use tools param instead of tool provider
   const researcherTools = await filterProviderTools({
     request,
     provider: toolProvider,
@@ -89,6 +59,12 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
     ],
   });
 
+  const initialMessages = conversationToLangchainMessages({
+    nextInput,
+    previousRounds: conversation,
+    ignoreSteps: true,
+  });
+
   const langchainTools = researcherTools.map((tool) => toLangchainTool({ tool, logger }));
 
   const agentGraph = await createResearcherAgentGraph({
@@ -99,7 +75,7 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
 
   const eventStream = agentGraph.streamEvents(
     {
-      initialQuery: instructions,
+      initialMessages,
       cycleBudget,
     },
     {
@@ -116,21 +92,17 @@ export const runResearcherAgent: RunResearcherAgentFn = async (
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
     convertGraphEvents({ graphName: agentGraphName }),
+    addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );
 
-  events$.pipe().subscribe((event) => {
-    // later we should emit reasoning events from there.
+  events$.subscribe((event) => {
+    events.emit(event);
   });
 
-  const lastEvent = await lastValueFrom(events$.pipe(filter(isMessageCompleteEvent)));
-  const generatedAnswer = lastEvent.data.messageContent;
+  const round = await extractRound(events$);
 
   return {
-    answer: generatedAnswer,
+    round,
   };
-};
-
-const isStreamEvent = (input: any): input is StreamEvent => {
-  return 'event' in input;
 };

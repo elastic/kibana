@@ -11,10 +11,76 @@ import type { ResearchGoal } from './graph';
 import {
   isActionResult,
   isReflectionResult,
+  isResearchGoalResult,
   BacklogItem,
   ReflectionResult,
+  ResearchGoalResult,
   ActionResult,
 } from './backlog';
+
+export const getIdentifyResearchGoalPrompt = ({
+  discussion,
+}: {
+  discussion: BaseMessageLike[];
+}): BaseMessageLike[] => {
+  return [
+    [
+      'system',
+      `
+      You are a thoughtful and rigorous research assistant preparing to initiate a deep research process.
+
+      Your task is to extract the user's **research intent** based on the conversation so far. This intent will guide a costly and time-consuming investigation.
+      The goal must be clear and specific — but you should not worry about *how* it will be achieved, only *what* the user wants to know.
+
+      There are two possible outcomes:
+        1. **If the user's messages clearly express a research goal**, use the \`set_research_goal\` tool with two fields:
+           - \`researchGoal\`: A concise and actionable research objective.
+           - \`reasoning\`: A brief explanation of how you interpreted the user’s input to reach this goal. Include what signal in their message pointed to the goal you chose. This will be surfaced to the user.
+
+        2. **If the user's intent is vague or incomplete**, respond in plain text asking brief, high-signal questions
+           aimed only at clarifying the *intent or focus of the research*. Do not ask for details about tools,
+           data sources, indices, or execution — those will be handled later in the workflow.
+
+      Constraints:
+      - Only follow the possible outcomes: plain text response for clarification or calling \`set_research_goal\` to set the research goal.
+      - Only use the \`set_research_goal\` tool when the user's intent is explicit.
+      - Never make up a goal if the context is too vague.
+      - When asking for clarification, keep your language natural, friendly, and streamable.
+
+      ## Examples:
+
+      ### Example A:
+
+      User messages:
+
+      > "I'd like to understand more about the effects of red meat consumption."
+
+      *expected response ->* tool use:
+      \`\`\`json
+      {
+        "tool_name": "set_research_goal",
+        "parameters": {
+          "researchGoal": "Investigate the health effects of red meat consumption based on current scientific evidence.",
+          "reasoning": "The user asked to understand the effects of red meat consumption. I must investigate the health effects of red meat consumption. I should back my research on scientific evidences."
+        }
+      }
+
+      ### Example B:
+
+      User messages:
+
+      > "I'm interested in tech and society, maybe something on AI."
+
+      *expected response ->* Plain text reply:
+
+      "Can you clarify what aspect of AI interests you most? For example, are you thinking about ethics, job displacement, regulation, or something else?"
+
+      Begin by reading the conversation so far. Either use the set_research_goal tool with a precise objective, or respond in plain text asking for clarification if needed.
+      `,
+    ],
+    ...discussion,
+  ];
+};
 
 export const getExecutionPrompt = ({
   currentResearchGoal,
@@ -226,6 +292,9 @@ export const getAnswerPrompt = ({
 
 const renderBacklog = (backlog: BacklogItem[]): string => {
   const renderItem = (item: BacklogItem, i: number) => {
+    if (isResearchGoalResult(item)) {
+      return renderResearchGoalResult(item, i);
+    }
     if (isActionResult(item)) {
       return renderActionResult(item, i);
     }
@@ -236,6 +305,19 @@ const renderBacklog = (backlog: BacklogItem[]): string => {
   };
 
   return backlog.map((item, i) => renderItem(item, i)).join('\n\n');
+};
+
+const renderResearchGoalResult = (
+  { researchGoal, reasoning }: ResearchGoalResult,
+  index: number
+): string => {
+  return `### Cycle ${index + 1}
+
+  At cycle "${index + 1}", you identified the main research topic based on the current discussion:
+
+  - You defined the research goal as: "${researchGoal}"
+  - The reasoning behind this decision was: "${reasoning}"
+  `;
 };
 
 const renderReflectionResult = (

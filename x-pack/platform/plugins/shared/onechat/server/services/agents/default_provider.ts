@@ -12,15 +12,14 @@ import {
   createAgentNotFoundError,
   toSerializedAgentIdentifier,
 } from '@kbn/onechat-common';
-import type { Logger } from '@kbn/core/server';
 import type { ConversationalAgentDefinition } from '@kbn/onechat-server';
-import type { AgentProviderWithId } from '../types';
+import type { AgentProviderWithId } from './types';
 import { createHandler } from './handler';
 
 /**
  * Returns an agent provider exposing the default onechat agent.
  */
-export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): AgentProviderWithId => {
+export const createDefaultAgentProvider = (): AgentProviderWithId => {
   const provider: AgentProviderWithId = {
     id: OneChatDefaultAgentProviderId,
     has: ({ agentId }) => {
@@ -28,12 +27,12 @@ export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): Agen
     },
     get: ({ agentId }) => {
       if (agentId === OneChatDefaultAgentId) {
-        return createDefaultAgentDescriptor({ logger });
+        return createDefaultAgentDescriptor({ agentId: OneChatDefaultAgentProviderId });
       }
       throw createAgentNotFoundError({ agentId: toSerializedAgentIdentifier(agentId) });
     },
     list: () => {
-      return [createDefaultAgentDescriptor({ logger })];
+      return [createDefaultAgentDescriptor({ agentId: OneChatDefaultAgentProviderId })];
     },
   };
 
@@ -41,14 +40,14 @@ export const createDefaultAgentProvider = ({ logger }: { logger: Logger }): Agen
 };
 
 const createDefaultAgentDescriptor = ({
-  logger,
+  agentId,
 }: {
-  logger: Logger;
+  agentId: string;
 }): ConversationalAgentDefinition => {
   return {
     type: AgentType.conversational,
     id: OneChatDefaultAgentId,
     description: 'Default onechat agent',
-    handler: createHandler({ logger }),
+    handler: createHandler({ agentId }),
   };
 };

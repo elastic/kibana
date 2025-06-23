@@ -48,6 +48,7 @@ export {
   OneChatDefaultAgentId,
   OneChatDefaultAgentProviderId,
   AgentType,
+  AgentMode,
   type AgentDescriptor,
   type AgentIdentifier,
   type PlainIdAgentIdentifier,

@@ -11,6 +11,11 @@ export enum AgentType {
   conversational = 'conversational',
 }
 
+export enum AgentMode {
+  normal = 'normal',
+  researcher = 'researcher',
+}
+
 /**
  * ID of the onechat default conversational agent
  */

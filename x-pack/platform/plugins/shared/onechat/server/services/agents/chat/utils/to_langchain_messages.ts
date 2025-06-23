@@ -20,14 +20,16 @@ import { toolIdToLangchain } from './tool_provider_to_langchain_tools';
 export const conversationToLangchainMessages = ({
   previousRounds,
   nextInput,
+  ignoreSteps = false,
 }: {
   previousRounds: ConversationRound[];
   nextInput: RoundInput;
+  ignoreSteps?: boolean;
 }): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
   for (const round of previousRounds) {
-    messages.push(...roundToLangchain(round));
+    messages.push(...roundToLangchain(round, { ignoreSteps }));
   }
 
   messages.push(createUserMessage({ content: nextInput.message }));
@@ -35,16 +37,21 @@ export const conversationToLangchainMessages = ({
   return messages;
 };
 
-export const roundToLangchain = (round: ConversationRound): BaseMessage[] => {
+export const roundToLangchain = (
+  round: ConversationRound,
+  { ignoreSteps = false }: { ignoreSteps?: boolean } = {}
+): BaseMessage[] => {
   const messages: BaseMessage[] = [];
 
   // user message
   messages.push(createUserMessage({ content: round.userInput.message }));
 
-  // tool calls
-  for (const step of round.steps) {
-    if (isToolCallStep(step)) {
-      messages.push(...createToolCallMessages(step));
+  // steps
+  if (!ignoreSteps) {
+    for (const step of round.steps) {
+      if (isToolCallStep(step)) {
+        messages.push(...createToolCallMessages(step));
+      }
     }
   }
 

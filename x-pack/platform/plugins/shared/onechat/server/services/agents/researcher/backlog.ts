@@ -18,7 +18,16 @@ export interface ReflectionResult {
   reasoning: string;
 }
 
-export type BacklogItem = ActionResult | ReflectionResult;
+export interface ResearchGoalResult {
+  researchGoal: string;
+  reasoning: string;
+}
+
+export type BacklogItem = ActionResult | ReflectionResult | ResearchGoalResult;
+
+export const isResearchGoalResult = (item: BacklogItem): item is ResearchGoalResult => {
+  return 'researchGoal' in item;
+};
 
 export const isReflectionResult = (item: BacklogItem): item is ReflectionResult => {
   return 'isSufficient' in item;
@@ -36,4 +45,14 @@ export const lastReflectionResult = (backlog: BacklogItem[]): ReflectionResult =
     }
   }
   throw new Error('No reflection result found');
+};
+
+export const firstResearchGoalResult = (backlog: BacklogItem[]): ResearchGoalResult => {
+  for (let i = 0; i < backlog.length; i++) {
+    const current = backlog[i];
+    if (isResearchGoalResult(current)) {
+      return current;
+    }
+  }
+  throw new Error('No research goal result found');
 };

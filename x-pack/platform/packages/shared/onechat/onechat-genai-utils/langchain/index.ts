@@ -6,6 +6,7 @@
  */
 
 export {
+  isStreamEvent,
   matchGraphName,
   matchGraphNode,
   matchName,
