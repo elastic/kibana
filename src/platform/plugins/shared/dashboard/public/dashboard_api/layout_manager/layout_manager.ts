@@ -8,7 +8,15 @@
  */
 
 import { filter, map as lodashMap, max } from 'lodash';
-import { BehaviorSubject, Observable, combineLatestWith, debounceTime, map, merge } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatestWith,
+  debounceTime,
+  map,
+  merge,
+  tap,
+} from 'rxjs';
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -66,12 +74,9 @@ export function initializeLayoutManager(
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
-  const resetLayout = (lastSavedState: DashboardState) => {
-    const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
-      lastSavedState.panels,
-      getReferences
-    );
-
+  let lastSavedLayout = initialLayout;
+  let lastSavedChildState = initialChildState;
+  const resetLayout = () => {
     layout$.next(lastSavedLayout);
     currentChildState = lastSavedChildState;
     let childrenModified = false;
@@ -312,7 +317,8 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      getSerializedStateForPanel: (uuid: string) => currentChildState[uuid],
+      getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
+      getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
@@ -321,9 +327,16 @@ export function initializeLayoutManager(
       ): Observable<{ panels?: DashboardState['panels'] }> => {
         return layout$.pipe(
           debounceTime(100),
-          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => lastSaved.panels))),
-          map(([currentLayout, lastSavedPanels]) => {
-            const lastSavedLayout = deserializeLayout(lastSavedPanels, getReferences).layout;
+          combineLatestWith(
+            lastSavedState$.pipe(
+              map((lastSaved) => deserializeLayout(lastSaved.panels, getReferences)),
+              tap(({ layout, childState }) => {
+                lastSavedChildState = childState;
+                lastSavedLayout = layout;
+              })
+            )
+          ),
+          map(([currentLayout]) => {
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
               return { panels: serializeLayout(currentLayout, currentChildState).panels };

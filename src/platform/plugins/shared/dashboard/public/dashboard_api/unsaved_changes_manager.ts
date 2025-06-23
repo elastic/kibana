@@ -25,9 +25,8 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import type { DashboardPanel } from '../../server';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializeLayoutManager, findPanel } from './layout_manager';
+import { initializeLayoutManager } from './layout_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
@@ -159,20 +158,14 @@ export function initializeUnsavedChangesManager({
         : undefined;
     }
 
-    const targetPanel = findPanel(lastSavedDashboardState.panels, childId);
-    return targetPanel
-      ? {
-          rawState: (targetPanel as DashboardPanel).panelConfig ?? {},
-          references: getReferences(childId),
-        }
-      : undefined;
+    return layoutManager.internalApi.getLastSavedStateForPanel(childId);
   };
 
   return {
     api: {
       asyncResetToLastSavedState: async () => {
         const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset(savedState);
+        layoutManager.internalApi.reset();
         unifiedSearchManager.internalApi.reset(savedState);
         settingsManager.internalApi.reset(savedState);
 
