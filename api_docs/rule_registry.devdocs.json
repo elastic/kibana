@@ -1904,7 +1904,7 @@
           "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
-          "<TParams> | undefined; }"
+          "<TParams> | undefined; internallyManaged?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
