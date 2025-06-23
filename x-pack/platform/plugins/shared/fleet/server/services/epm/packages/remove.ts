@@ -38,6 +38,7 @@ import type {
   Installation,
   InstallSource,
   PackageInfo,
+  InstallablePackage,
 } from '../../../types';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
@@ -149,7 +150,7 @@ export async function deleteKibanaAssets({
 }: {
   installedObjects: KibanaAssetReference[];
   spaceId?: string;
-  packageInfo: PackageInfo;
+  packageInfo: PackageInfo | InstallablePackage;
 }) {
   const savedObjectsClient = new SavedObjectsClient(
     appContextService.getSavedObjects().createInternalRepository()
