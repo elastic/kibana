@@ -14,23 +14,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'home']);
   const testSubjects = getService('testSubjects');
   const kbnServer = getService('kibanaServer');
+  const log = getService('log');
 
   describe('security', () => {
     before(async () => {
+      log.debug('Starting security test suite');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kbnServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json'
       );
 
       // ensure we're logged out so we can login as the appropriate users
+      log.debug('logging out from initial session');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      log.debug('logging out from final session');
       await PageObjects.security.forceLogout();
 
+      log.debug('Cleaning up security test suite');
       await kbnServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
