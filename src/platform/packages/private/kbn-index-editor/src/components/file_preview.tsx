@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordion, EuiButton, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiTabbedContent,
+  type EuiTabbedContentTab,
+  EuiTitle,
+} from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
@@ -17,17 +26,25 @@ import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discove
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { noop } from 'lodash';
+import { memoize, noop } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
   fileName: string;
-  sampleDocs: DataTableRecord[];
+  fileContents?: string;
+  filePreview: {
+    // Sample documents created by the inference pipeline simulate
+    sampleDocs?: DataTableRecord[];
+    // Errors produced by the ingest pipeline for preview
+    errors?: string[];
+  };
   dataView: DataView;
   mappings: FindFileStructureResponse['mappings'];
   columnNames: Exclude<FindFileStructureResponse['column_names'], undefined>;
 }
+
+const FILE_PREVIEW_LIMIT = 10;
 
 export const FilesPreview: FC = () => {
   const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
@@ -40,16 +57,19 @@ export const FilesPreview: FC = () => {
 
   const [filePreviewItems, setFilePreviewItems] = useState<FilePreviewItem[]>([]);
 
+  const previewDocsMemo = useMemo(
+    // memoize the previewDocs to avoid re-fetching the same preview
+    // TODO file manager needs to be optimized to preserve data and inject pipeline ref
+    () => memoize(messageImporter.previewDocs.bind(messageImporter)),
+    [messageImporter]
+  );
+
   const fetchFilePreview = useCallback(async () => {
     try {
       const previewResults = await Promise.allSettled(
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
-            return messageImporter.previewDocs(
-              fileStatus.data,
-              fileStatus.results?.ingest_pipeline!,
-              10
-            );
+            return previewDocsMemo(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
           }
         })
       );
@@ -78,11 +98,26 @@ export const FilesPreview: FC = () => {
             properties: {},
           };
 
+          const item: FilePreviewItem = {
+            fileName: status.fileName,
+            dataView: dV,
+            columnNames,
+            mappings,
+            fileContents: status.fileContents.split('\n').slice(0, FILE_PREVIEW_LIMIT).join('\n'),
+            filePreview: {},
+          };
+
           if (promisePreviewResult.status === 'fulfilled') {
             const filePreview = promisePreviewResult.value!;
             const validESHits: EsHitRecord[] = filePreview?.docs
               ?.filter((d) => !!d.doc)
               .map<EsHitRecord>((d) => d.doc as EsHitRecord);
+
+            const previewErrors: string[] = filePreview?.docs
+              ?.filter((d) => !!d.error)
+              .map((err) => {
+                return `${err.error?.reason} [${err.error?.caused_by?.reason}]`;
+              });
 
             const dataRecords = validESHits?.map((doc, i) => {
               return buildDataTableRecord(
@@ -95,38 +130,78 @@ export const FilesPreview: FC = () => {
               );
             });
 
-            return {
-              fileName: status.fileName,
-              sampleDocs: dataRecords,
-              dataView: dV,
-              mappings,
-              columnNames,
-            };
+            item.filePreview.sampleDocs = dataRecords;
+            item.filePreview.errors = previewErrors;
           } else {
-            return {
-              fileName: status.fileName,
-              sampleDocs: [],
-              dataView: dV,
-              columnNames,
-              mappings,
-            };
+            //
           }
+
+          return item;
         })
       );
     } catch (error) {
       // Handle error appropriately, e.g., log it or show a notification
     }
-  }, [data.dataViews, filesStatus, isMounted, messageImporter]);
+  }, [data.dataViews, filesStatus, isMounted, previewDocsMemo]);
 
   useEffect(() => {
-    fetchFilePreview();
-  }, [fetchFilePreview]);
+    // wait for all files to be analyzed before fetching previews
+    if (filesStatus.length > 0 && filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)) {
+      fetchFilePreview();
+    }
+
+    return () => {
+      // clean up ad hoc data views
+    };
+  }, [fetchFilePreview, filesStatus]);
 
   if (!filePreviewItems.length) return null;
 
   return uploadStatus.overallImportStatus === STATUS.NOT_STARTED && filesStatus.length > 0 ? (
     <div>
       {filePreviewItems.map((filePreviewItem, i) => {
+        const tabs: EuiTabbedContentTab[] = [];
+
+        if (filePreviewItem.filePreview.sampleDocs || filePreviewItem.filePreview.errors) {
+          tabs.push({
+            id: 'previewDoc',
+            name: (
+              <FormattedMessage id="indexEditor.fileUploader.previewTab" defaultMessage="Preview" />
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'s'} />
+                <ResultsPreview
+                  filePreview={filePreviewItem.filePreview}
+                  dataView={filePreviewItem.dataView}
+                  mappings={filePreviewItem.mappings}
+                  columnNames={filePreviewItem.columnNames}
+                />
+              </>
+            ),
+          });
+        }
+
+        if (filePreviewItem.fileContents) {
+          tabs.push({
+            id: 'fileContent',
+            name: (
+              <FormattedMessage
+                id="indexEditor.fileUploader.fileContentTab"
+                defaultMessage="File content"
+              />
+            ),
+            content: (
+              <>
+                <EuiSpacer size={'s'} />
+                <EuiCodeBlock paddingSize="none" transparentBackground>
+                  {filePreviewItem.fileContents}
+                </EuiCodeBlock>
+              </>
+            ),
+          });
+        }
+
         return (
           <Fragment key={filePreviewItem.fileName}>
             <EuiAccordion
@@ -152,14 +227,9 @@ export const FilesPreview: FC = () => {
                   />
                 </EuiButton>
               }
-              paddingSize="l"
+              paddingSize="s"
             >
-              <ResultsPreview
-                sampleDocs={filePreviewItem.sampleDocs}
-                dataView={filePreviewItem.dataView}
-                mappings={filePreviewItem.mappings}
-                columnNames={filePreviewItem.columnNames}
-              />
+              <EuiTabbedContent tabs={tabs} autoFocus="selected" />
             </EuiAccordion>
             <EuiSpacer size={'s'} />
           </Fragment>
@@ -175,7 +245,7 @@ export const FilesPreview: FC = () => {
 export type ResultsPreviewProps = Omit<FilePreviewItem, 'fileName'>;
 
 const ResultsPreview: FC<ResultsPreviewProps> = ({
-  sampleDocs,
+  filePreview,
   dataView,
   mappings,
   columnNames,
@@ -210,31 +280,56 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({
   }, [columnNames, mappings.properties]);
 
   return (
-    <UnifiedDataTable
-      sampleSizeState={10}
-      onSetColumns={noop}
-      columns={columnNames!}
-      rows={sampleDocs}
-      columnsMeta={columnsMeta}
-      services={services}
-      enableInTableSearch={false}
-      isPlainRecord
-      isSortEnabled={false}
-      showMultiFields={false}
-      showColumnTokens
-      showTimeCol
-      enableComparisonMode={false}
-      isPaginationEnabled={false}
-      showKeyboardShortcuts={false}
-      canDragAndDropColumns={false}
-      loadingState={DataLoadingState.loaded}
-      dataView={dataView}
-      sort={[]}
-      ariaLabelledBy="lookupIndexDataGrid"
-      maxDocFieldsDisplayed={100}
-      showFullScreenButton={false}
-      disableCellActions
-      disableCellPopover
-    />
+    <>
+      {filePreview?.errors?.length ? (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id={'indexEditor.fileUploader.previewTab.inferenceFailTitle'}
+                defaultMessage={'Failed to load the preview'}
+              />
+            }
+            color="danger"
+            iconType="error"
+          >
+            <ul>
+              {filePreview.errors.map((error, i) => {
+                return <li key={i}>{error}</li>;
+              })}
+            </ul>
+          </EuiCallOut>
+          <EuiSpacer size={'s'} />
+        </>
+      ) : null}
+      {filePreview.sampleDocs?.length ? (
+        <UnifiedDataTable
+          sampleSizeState={10}
+          onSetColumns={noop}
+          columns={columnNames!}
+          rows={filePreview.sampleDocs}
+          columnsMeta={columnsMeta}
+          services={services}
+          enableInTableSearch={false}
+          isPlainRecord
+          isSortEnabled={false}
+          showMultiFields={false}
+          showColumnTokens
+          showTimeCol
+          enableComparisonMode={false}
+          isPaginationEnabled={false}
+          showKeyboardShortcuts={false}
+          canDragAndDropColumns={false}
+          loadingState={DataLoadingState.loaded}
+          dataView={dataView}
+          sort={[]}
+          ariaLabelledBy="lookupIndexDataGrid"
+          maxDocFieldsDisplayed={100}
+          showFullScreenButton={false}
+          disableCellActions
+          disableCellPopover
+        />
+      ) : null}
+    </>
   );
 };
