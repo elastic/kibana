@@ -94,7 +94,8 @@ export function RelatedAlertsTable({ alertData }: Props) {
         height="600px"
         emptyState={{
           messageTitle: 'No related alerts found',
-          messageBody: 'This alert has no related alerts.',
+          messageBody:
+            'This alert has no related alerts. Check back later when more alerts are created.',
         }}
       />
     </EuiFlexGroup>
