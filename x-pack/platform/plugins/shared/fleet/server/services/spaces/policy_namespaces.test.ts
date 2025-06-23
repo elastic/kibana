@@ -9,8 +9,16 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 import { appContextService } from '../app_context';
+import { packagePolicyService } from '../package_policy';
 
-import { validatePolicyNamespaceForSpace } from './policy_namespaces';
+import type { PackagePolicyClient } from '../package_policy_service';
+
+import { PackagePolicyNameExistsError } from '../../errors';
+
+import {
+  validatePolicyNamespaceForSpace,
+  validatePackagePoliciesUniqueNameAcrossSpaces,
+} from './policy_namespaces';
 
 jest.mock('../app_context');
 
@@ -114,5 +122,156 @@ describe('validatePolicyNamespaceForSpace', () => {
       spaceId: 'test1',
       namespace: 'notvalid',
     });
+  });
+});
+
+const packagePolicy1 = {
+  agents: 100,
+  created_at: '2022-12-19T20:43:45.879Z',
+  created_by: 'elastic',
+  description: '',
+  enabled: true,
+  id: '1',
+  inputs: [],
+  name: 'Package Policy 1',
+  namespace: 'default',
+  package: {
+    name: 'test-package',
+    title: 'Test Package',
+    version: '1.0.0',
+  },
+  policy_ids: ['agent-policy-id-a'],
+  revision: 1,
+  updated_at: '2022-12-19T20:43:45.879Z',
+  updated_by: 'elastic',
+  version: '1.0.0',
+  spaceIds: ['space1'],
+};
+const packagePolicyDefault = {
+  agents: 10,
+  created_at: '2022-12-20T20:43:45.879Z',
+  created_by: 'elastic',
+  description: '',
+  enabled: true,
+  id: '2',
+  inputs: [],
+  name: 'Package Policy 2',
+  namespace: 'default',
+  package: {
+    name: 'test-package',
+    title: 'Test Package',
+    version: '1.0.0',
+  },
+  policy_ids: ['agent-policy-id-a'],
+  revision: 1,
+  updated_at: '2022-12-19T20:43:45.879Z',
+  updated_by: 'elastic',
+  version: '1.0.0',
+  spaceIds: ['default'],
+};
+const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
+
+jest.mock(
+  '../package_policy',
+  (): {
+    packagePolicyService: jest.Mocked<PackagePolicyClient>;
+  } => {
+    return {
+      packagePolicyService: {
+        buildPackagePolicyFromPackage: jest.fn(),
+        bulkCreate: jest.fn(),
+        create: jest.fn(),
+        delete: jest.fn(),
+        get: jest.fn(),
+        getByIDs: jest.fn(),
+        list: jest.fn(),
+        listIds: jest.fn(),
+        update: jest.fn(),
+
+        runExternalCallbacks: jest.fn(),
+        upgrade: jest.fn(),
+        bulkUpgrade: jest.fn(),
+        getUpgradeDryRunDiff: jest.fn(),
+        enrichPolicyWithDefaultsFromPackage: jest.fn(),
+      } as any,
+    };
+  }
+);
+
+describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
+  const soClient = savedObjectsClientMock.create();
+  jest
+    .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
+    .mockReturnValue(soClient);
+
+  it('should not validate if package policies are empty', async () => {
+    await expect(validatePackagePoliciesUniqueNameAcrossSpaces([], ['space1']));
+  });
+
+  it('should throw if there are other policies with the same package name', async () => {
+    const packagePolicyOnOtherSpace = {
+      ...packagePolicy1,
+      spaceIds: ['default'],
+      id: '3',
+    };
+    packagePolicyServiceMock.list.mockResolvedValue({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      items: [packagePolicyOnOtherSpace],
+    });
+    await expect(
+      validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default'])
+    ).rejects.toThrowError(
+      new PackagePolicyNameExistsError(
+        'An integration policy with the name Package Policy 1 already exists in space "default". Please rename it or choose a different name.'
+      )
+    );
+  });
+
+  it('should throw if there are other policies with the same package name in different spaces', async () => {
+    const packagePolicyOnOtherSpaces = {
+      ...packagePolicy1,
+      spaceIds: ['default', 'test'],
+      id: '3',
+    };
+    packagePolicyServiceMock.list.mockResolvedValue({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      items: [packagePolicyOnOtherSpaces],
+    });
+    await expect(
+      validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default'])
+    ).rejects.toThrowError(
+      new PackagePolicyNameExistsError(
+        'An integration policy with the name Package Policy 1 already exists in space "default". Please rename it or choose a different name.'
+      )
+    );
+  });
+
+  it('should not throw if there are other policies with the same package name but in a space different than the target one', async () => {
+    const packagePolicyOnOtherSpace = {
+      ...packagePolicy1,
+      spaceIds: ['test'],
+      id: '3',
+    };
+    packagePolicyServiceMock.list.mockResolvedValue({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      items: [packagePolicyOnOtherSpace],
+    });
+    await expect(validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default']));
+  });
+
+  it('should not throw if there are no other policies with the same package name', async () => {
+    packagePolicyServiceMock.list.mockResolvedValue({
+      total: 1,
+      perPage: 10,
+      page: 1,
+      items: [],
+    });
+    await expect(validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default']));
   });
 });

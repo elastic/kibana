@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import { appContextService } from '../app_context';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 
-import type { AgentPolicy, PackagePolicy } from '../../types';
+import type { PackagePolicy } from '../../types';
 import { packagePolicyService } from '../package_policy';
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
