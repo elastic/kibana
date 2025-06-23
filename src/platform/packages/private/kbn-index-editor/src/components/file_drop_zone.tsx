@@ -10,12 +10,18 @@
 import { EuiLoadingSpinner, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import React, { PropsWithChildren, useCallback, type FC } from 'react';
+import React, { type FC, PropsWithChildren, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 
-export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
+const acceptedFiles = ['.csv'];
+
+export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
+  children,
+  noResults,
+}) => {
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
   const isAnalyzing =
@@ -33,11 +39,9 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     [fileUploadManager]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      onFilesSelected(acceptedFiles);
-    },
-    accept: ['.csv'],
+  const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
+    onDrop: onFilesSelected,
+    accept: acceptedFiles,
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
@@ -98,10 +102,16 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     filesStatus.length > 0 &&
     uploadStatus.overallImportStatus !== STATUS.COMPLETED;
 
-  const content = showFilePreview ? <FilesPreview /> : children;
+  let content: React.ReactNode = children;
+
+  if (noResults && !showFilePreview) {
+    content = <EmptyPrompt inputRef={inputRef} />;
+  } else if (showFilePreview) {
+    content = <FilesPreview />;
+  }
 
   return (
-    <div {...getRootProps()}>
+    <div {...getRootProps()} css={{ height: '100%' }}>
       {isDragActive ? <div css={overlayDraggingFile} /> : null}
       {isUploading || isAnalyzing ? loadingIndicator : null}
       <input {...getInputProps()} />

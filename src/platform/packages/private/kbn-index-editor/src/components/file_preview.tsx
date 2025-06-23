@@ -11,7 +11,7 @@ import { EuiAccordion, EuiButton, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataLoadingState, DataTableColumnsMeta, UnifiedDataTable } from '@kbn/unified-data-table';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -132,39 +132,41 @@ export const FilesPreview: FC = () => {
     <div>
       {filePreviewItems.map((filePreviewItem, i) => {
         return (
-          <EuiAccordion
-            id={filePreviewItem.fileName}
-            key={filePreviewItem.fileName}
-            buttonContent={
-              <EuiTitle size={'s'}>
-                <h4>{filePreviewItem.fileName}</h4>
-              </EuiTitle>
-            }
-            initialIsOpen={i === 0}
-            extraAction={
-              <EuiButton
-                size="s"
-                iconType={'trash'}
-                color={'danger'}
-                onClick={async () => {
-                  await deleteFile(i);
-                }}
-              >
-                <FormattedMessage
-                  id="indexEditor.fileUploader.removeFileButton"
-                  defaultMessage="Remove file"
-                />
-              </EuiButton>
-            }
-            paddingSize="l"
-          >
-            <ResultsPreview
-              sampleDocs={filePreviewItem.sampleDocs}
-              dataView={filePreviewItem.dataView}
-              mappings={filePreviewItem.mappings}
-              columnNames={filePreviewItem.columnNames}
-            />
-          </EuiAccordion>
+          <Fragment key={filePreviewItem.fileName}>
+            <EuiAccordion
+              id={filePreviewItem.fileName}
+              buttonContent={
+                <EuiTitle size={'s'}>
+                  <h4>{filePreviewItem.fileName}</h4>
+                </EuiTitle>
+              }
+              initialIsOpen={i === 0}
+              extraAction={
+                <EuiButton
+                  size="s"
+                  iconType={'trash'}
+                  color={'danger'}
+                  onClick={async () => {
+                    await deleteFile(i);
+                  }}
+                >
+                  <FormattedMessage
+                    id="indexEditor.fileUploader.removeFileButton"
+                    defaultMessage="Remove file"
+                  />
+                </EuiButton>
+              }
+              paddingSize="l"
+            >
+              <ResultsPreview
+                sampleDocs={filePreviewItem.sampleDocs}
+                dataView={filePreviewItem.dataView}
+                mappings={filePreviewItem.mappings}
+                columnNames={filePreviewItem.columnNames}
+              />
+            </EuiAccordion>
+            <EuiSpacer size={'s'} />
+          </Fragment>
         );
       })}
 

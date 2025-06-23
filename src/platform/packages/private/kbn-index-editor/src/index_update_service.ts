@@ -142,7 +142,7 @@ export class IndexUpdateService {
     this._indexCrated$,
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
-      return indexCreated === false || !indexName;
+      return !indexName;
     }),
     switchMap(([indexName]) => {
       return from(this.getDataView(indexName!));
@@ -196,7 +196,12 @@ export class IndexUpdateService {
       return dataView;
     }
 
-    return await this.data.dataViews.create({ title: indexName, name: indexName });
+    return await this.data.dataViews.create({
+      title: indexName,
+      name: indexName,
+      // The index might not exist yet
+      allowNoIndex: true,
+    });
   }
 
   private listenForUpdates() {

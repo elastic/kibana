@@ -9,9 +9,21 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 
-export const EmptyPrompt: FC = () => {
+export const EmptyPrompt: FC<{ inputRef: React.RefObject<HTMLInputElement> }> = ({ inputRef }) => {
+  const uploading = (
+    <EuiLink
+      onClick={(e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        inputRef.current?.click();
+      }}
+    >
+      <FormattedMessage id="indexEditor.emptyPrompt.uploadingLink" defaultMessage="uploading" />
+    </EuiLink>
+  );
+
   return (
     <EuiEmptyPrompt
       body={
@@ -19,7 +31,8 @@ export const EmptyPrompt: FC = () => {
           <EuiText color="subdued" textAlign="center" size="s">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description"
-              defaultMessage="Start creating your lookup index by adding cells to the table, by uploading or dragging and dropping a file."
+              defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or dragging and dropping a file."
+              values={{ uploading }}
             />
           </EuiText>
         </p>
