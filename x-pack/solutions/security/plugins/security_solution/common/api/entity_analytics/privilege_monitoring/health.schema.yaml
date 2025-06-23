@@ -25,7 +25,6 @@ paths:
                     type: object
                     required:
                       - status
-                      - message
                     properties:
                       message:
                         type: string

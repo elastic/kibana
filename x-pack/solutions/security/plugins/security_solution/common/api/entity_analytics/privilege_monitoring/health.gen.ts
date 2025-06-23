@@ -23,7 +23,7 @@ export const PrivMonHealthResponse = z.object({
   status: EngineStatus,
   error: z
     .object({
-      message: z.string(),
+      message: z.string().optional(),
     })
     .optional(),
 });
