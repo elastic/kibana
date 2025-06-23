@@ -29,6 +29,14 @@ const FORK_AVAILABLE_COMMANDS = [
   'eval',
   'completion',
   'grok',
+  'change_point',
+  'mv_expand',
+  'keep',
+  'drop',
+  'rename',
+  'sample',
+  'join',
+  // 'enrich', // not suggesting enrich for now, there are client side validation issues
 ];
 
 export async function suggest(
