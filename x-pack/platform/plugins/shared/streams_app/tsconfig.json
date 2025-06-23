@@ -74,6 +74,7 @@
     "@kbn/zod",
     "@kbn/kibana-utils-plugin",
     "@kbn/field-types",
-    "@kbn/field-formats-plugin"
+    "@kbn/field-formats-plugin",
+    "@kbn/test"
   ]
 }
