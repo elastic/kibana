@@ -10,6 +10,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   KSPM_POLICY_TEMPLATE,
   CSPM_POLICY_TEMPLATE,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
@@ -21,10 +22,7 @@ import type {
   CloudProviderKey,
   CloudSecurityAccountsStats,
 } from './types';
-import {
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  VULN_MGMT_POLICY_TEMPLATE,
-} from '../../../../common/constants';
+import { VULN_MGMT_POLICY_TEMPLATE } from '../../../../common/constants';
 import {
   getCspBenchmarkRulesStatesHandler,
   getMutedRulesFilterQuery,
@@ -412,7 +410,7 @@ export const getIndexAccountStats = async (
     ? getCloudAccountsStats(accountsStatsResponse.aggregations, logger)
     : [];
 
-  if (index === LATEST_FINDINGS_INDEX_DEFAULT_NS) {
+  if (index === CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS) {
     const cloudAccountsStatsForEnabledRules = await getAccountStatsBasedOnEnablesRule(
       esClient,
       encryptedSoClient,
@@ -442,7 +440,7 @@ export const getAllCloudAccountsStats = async (
 ): Promise<CloudSecurityAccountsStats[]> => {
   try {
     const indices = [
-      LATEST_FINDINGS_INDEX_DEFAULT_NS,
+      CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
       CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
     ];
     const [findingIndex, vulnerabilitiesIndex] = await Promise.all(

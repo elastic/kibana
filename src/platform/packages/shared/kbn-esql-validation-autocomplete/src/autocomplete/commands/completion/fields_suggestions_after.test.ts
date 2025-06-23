@@ -11,7 +11,7 @@ import type { ESQLFieldWithMetadata } from '../../../validation/types';
 import { fieldsSuggestionsAfter } from './fields_suggestions_after';
 
 describe('COMPLETION', () => {
-  it('adds "completion" field, when AS option not specified', () => {
+  it('adds "completion" field, when targetField is not specified', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'count', type: 'double' },
@@ -32,7 +32,7 @@ describe('COMPLETION', () => {
     ]);
   });
 
-  it('adds the given targetField as field, when AS option is specified', () => {
+  it('adds the given targetField as field, when targetField is specified', () => {
     const previousCommandFields = [
       { name: 'field1', type: 'keyword' },
       { name: 'count', type: 'double' },
@@ -41,7 +41,7 @@ describe('COMPLETION', () => {
     const userDefinedColumns = [] as ESQLFieldWithMetadata[];
 
     const result = fieldsSuggestionsAfter(
-      synth.cmd`COMPLETION "prompt" WITH inferenceId AS customField`,
+      synth.cmd`COMPLETION customField = "prompt" WITH inferenceId`,
       previousCommandFields,
       userDefinedColumns
     );

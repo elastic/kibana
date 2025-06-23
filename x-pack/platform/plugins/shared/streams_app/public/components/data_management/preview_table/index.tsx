@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiDataGrid, EuiDataGridRowHeightsOptions, EuiDataGridSorting } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridRowHeightsOptions,
+  EuiDataGridSorting,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SampleDocument } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
@@ -13,6 +18,7 @@ import { SimulationContext } from '../stream_detail_enrichment/state_management/
 export function PreviewTable({
   documents,
   displayColumns,
+  height,
   renderCellValue,
   rowHeightsOptions,
   sorting,
@@ -23,6 +29,7 @@ export function PreviewTable({
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
+  height?: EuiDataGridProps['height'];
   renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   toolbarVisibility?: boolean;
@@ -129,6 +136,7 @@ export function PreviewTable({
       }}
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
+      height={height}
       toolbarVisibility={toolbarVisibility}
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
