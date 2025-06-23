@@ -104,31 +104,38 @@ export const CAI_CASES_INDEX_SCRIPT: StoredScript = {
     }
 
     ctx._source.assignees = [];
-    for (item in source.cases.assignees) {
-      ctx._source.assignees.add(item.uid);
+
+    if (source.cases.assignees != null) {
+      for (item in source.cases.assignees) {
+        ctx._source.assignees.add(item.uid);
+      }
+      ctx._source.total_assignees = source.cases.assignees.size();
     }
-    ctx._source.total_assignees = source.cases.assignees.size();
 
     ctx._source.custom_fields = [];
-    for (item in source.cases.customFields) {
-        Map customField = new HashMap();
+    if (source.cases.customFields != null) {
+      for (item in source.cases.customFields) {
+          Map customField = new HashMap();
 
-        customField.type = item.type;
-        customField.value = item.value;
-        customField.key = item.key;
-        
-        ctx._source.custom_fields.add(customField);
+          customField.type = item.type;
+          customField.value = item.value;
+          customField.key = item.key;
+          
+          ctx._source.custom_fields.add(customField);
+      }
     }
 
     ctx._source.observables = [];
-    for (item in source.cases.observables) {
-        Map observable = new HashMap();
+    if (source.cases.observables != null) {
+      for (item in source.cases.observables) {
+          Map observable = new HashMap();
 
-        observable.label = item.label;
-        observable.type = item.typeKey;
-        observable.value = item.value;
+          observable.label = item.label;
+          observable.type = item.typeKey;
+          observable.value = item.value;
 
-        ctx._source.observables.add(observable);
+          ctx._source.observables.add(observable);
+      }
     }
     
     ctx._source.owner = source.cases.owner;

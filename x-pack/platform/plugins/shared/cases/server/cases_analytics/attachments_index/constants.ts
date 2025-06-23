@@ -17,20 +17,30 @@ export const CAI_ATTACHMENTS_INDEX_VERSION = 1;
 
 export const CAI_ATTACHMENTS_SOURCE_QUERY: QueryDslQueryContainer = {
   bool: {
-    must: {
-      match: {
-        type: 'cases-comments',
-      },
-    },
-    filter: {
-      bool: {
-        must_not: {
-          term: {
-            'cases-comments.type': 'user',
-          },
+    must: [
+      {
+        term: {
+          type: 'cases-comments',
         },
       },
-    },
+      {
+        bool: {
+          should: [
+            {
+              term: {
+                'cases-comments.type': 'externalReference',
+              },
+            },
+            {
+              term: {
+                'cases-comments.type': 'alert',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
   },
 };
 
@@ -52,11 +62,19 @@ export const getAttachmentsSynchronizationSourceQuery = (
       },
       {
         bool: {
-          must_not: {
-            term: {
-              'cases-comments.type': 'user',
+          should: [
+            {
+              term: {
+                'cases-comments.type': 'externalReference',
+              },
             },
-          },
+            {
+              term: {
+                'cases-comments.type': 'alert',
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       },
       {

@@ -126,10 +126,10 @@ export class AnalyticsIndex {
       const indexExists = await this.indexExists();
 
       if (!indexExists) {
-        this.logDebug(`Index does not exist. Creating.`);
+        this.logDebug('Index does not exist. Creating.');
         await this.createIndexMapping();
       } else {
-        this.logDebug(`Index exists. Updating mapping.`);
+        this.logDebug('Index exists. Checking mapping.');
         await this.updateIndexMapping();
       }
     } catch (error) {
@@ -144,7 +144,7 @@ export class AnalyticsIndex {
       if (shouldUpdateMapping) {
         await this.updateMapping();
       } else {
-        this.logDebug(`Mapping version is up to date. Skipping update.`);
+        this.logDebug('Mapping version is up to date. Skipping update.');
       }
     } catch (error) {
       this.handleError('Failed to update the index mapping.', error);

@@ -38,6 +38,25 @@ export const CAI_COMMENTS_INDEX_MAPPINGS: MappingTypeMapping = {
         },
       },
     },
+    updated_at: {
+      type: 'date',
+    },
+    updated_by: {
+      properties: {
+        username: {
+          type: 'keyword',
+        },
+        profile_uid: {
+          type: 'keyword',
+        },
+        full_name: {
+          type: 'keyword',
+        },
+        email: {
+          type: 'keyword',
+        },
+      },
+    },
     owner: {
       type: 'keyword',
     },

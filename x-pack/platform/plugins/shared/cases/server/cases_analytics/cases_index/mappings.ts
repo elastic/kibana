@@ -14,10 +14,15 @@ export const CAI_CASES_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'date',
     },
     title: {
-      type: 'keyword',
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
     },
     description: {
-      type: 'keyword',
+      type: 'text',
     },
     tags: {
       type: 'keyword',

@@ -66,11 +66,13 @@ export const CAI_ATTACHMENTS_INDEX_SCRIPT: StoredScript = {
         ctx._source.payload.file.name = source["cases-comments"].externalReferenceMetadata.files[0].name;
     }
 
-    for (item in source.references) {
-        if (item.type == "file") {
-            ctx._source.payload.file.id = item.id;
-        } else if (item.type == "cases") {
-            ctx._source.case_id = item.id;
+    if (source.references != null) {
+        for (item in source.references) {
+            if (item.type == "file") {
+                ctx._source.payload.file.id = item.id;
+            } else if (item.type == "cases") {
+                ctx._source.case_id = item.id;
+            }
         }
     }
 

@@ -26,9 +26,23 @@ export const CAI_COMMENTS_INDEX_SCRIPT: StoredScript = {
     ctx._source.owner = source["cases-comments"].owner;
     ctx._source.space_ids = source.namespaces;
 
-    for (item in source.references) {
-      if (item.type == "cases") {
-        ctx._source.case_id = item.id;
+    if ( source["cases-comments"].updated_at != null ) {
+      ctx._source.updated_at = source["cases-comments"].updated_at;
+    }
+
+    if (source["cases-comments"].updated_by != null) {
+        ctx._source.updated_by = new HashMap();
+        ctx._source.updated_by.full_name = source["cases-comments"].updated_by.full_name;
+        ctx._source.updated_by.username = source["cases-comments"].updated_by.username;
+        ctx._source.updated_by.profile_uid = source["cases-comments"].updated_by.profile_uid;
+        ctx._source.updated_by.email = source["cases-comments"].updated_by.email;
+    }
+    
+    if (source.references != null) {
+      for (item in source.references) {
+        if (item.type == "cases") {
+          ctx._source.case_id = item.id;
+        }
       }
     }
   `,

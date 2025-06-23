@@ -56,9 +56,11 @@ export const CAI_ACTIVITY_INDEX_SCRIPT: StoredScript = {
       }
     }
 
-    for (item in source.references) {
-      if (item.type == "cases") {
-        ctx._source.case_id = item.id;
+    if (source.references != null) {
+      for (item in source.references) {
+        if (item.type == "cases") {
+          ctx._source.case_id = item.id;
+        }
       }
     }
 
