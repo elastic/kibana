@@ -20,6 +20,7 @@ import { registerRoutes } from './routes';
 import { ServiceManager } from './services';
 import { registerFeatures } from './features';
 import { ESQL_TOOL_API_UI_SETTING_ID, ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
+import { registerTools } from './tools';
 
 export class OnechatPlugin
   implements
@@ -49,6 +50,8 @@ export class OnechatPlugin
     });
 
     registerFeatures({ features: pluginsSetup.features });
+
+    registerTools({ tools: serviceSetups.tools });
 
     coreSetup.uiSettings.register({
       [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {

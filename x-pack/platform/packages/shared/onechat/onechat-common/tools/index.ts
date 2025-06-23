@@ -24,3 +24,4 @@ export {
   esqlToolProviderId,
   unknownToolProviderId,
 } from './tools';
+export { BuiltinToolIds, BuiltinTags } from './constants';

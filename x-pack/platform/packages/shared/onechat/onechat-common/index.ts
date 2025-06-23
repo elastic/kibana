@@ -24,6 +24,8 @@ export {
   builtinToolProviderId,
   esqlToolProviderId,
   unknownToolProviderId,
+  BuiltinToolIds,
+  BuiltinTags,
 } from './tools';
 export {
   OnechatErrorCode,

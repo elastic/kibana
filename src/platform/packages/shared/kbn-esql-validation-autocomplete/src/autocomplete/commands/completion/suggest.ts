@@ -12,8 +12,8 @@ import { ESQLAstCompletionCommand } from '@kbn/esql-ast/src/types';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { findFinalWord, getFunctionDefinition } from '../../../shared/helpers';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
-import { EDITOR_MARKER } from '../../../shared/constants';
+import { getNewUserDefinedColumnSuggestion, TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { EDITOR_MARKER, ESQL_VARIABLES_PREFIX } from '../../../shared/constants';
 import { pipeCompleteItem } from '../../complete_items';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 
@@ -25,23 +25,17 @@ import {
 } from '../../helper';
 
 export enum CompletionPosition {
-  PROMPT = 'prompt',
+  AFTER_COMPLETION = 'after_completion',
+  AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
-  AFTER_WITH = 'with',
-  AFTER_INFERENCE_ID = 'inference_id',
-  AFTER_AS = 'as',
-  AFTER_TARGET_ID = 'target_id',
+  AFTER_WITH = 'after_with',
+  AFTER_INFERENCE_ID = 'after_inference_id',
+  AFTER_TARGET_ID = 'after_target_id',
 }
 
 function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosition | undefined {
   const { innerText, getExpressionType } = params;
   const { prompt, inferenceId, targetField } = params.command as ESQLAstCompletionCommand;
-
-  if (targetField) {
-    return targetField.incomplete
-      ? CompletionPosition.AFTER_AS
-      : CompletionPosition.AFTER_TARGET_ID;
-  }
 
   if (inferenceId.incomplete && /WITH\s*$/i.test(innerText)) {
     return CompletionPosition.AFTER_WITH;
@@ -58,8 +52,18 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
     return CompletionPosition.AFTER_PROMPT;
   }
 
-  if (!isExpressionComplete(expressionType, innerText)) {
-    return CompletionPosition.PROMPT;
+  if (targetField && !targetField.incomplete) {
+    return CompletionPosition.AFTER_TARGET_ID;
+  }
+
+  // If we are right after COMPLETION or if there is only one word with no space after it (for fragments).
+  if (!expressionRoot?.text || /COMPLETION\s*\S*$/i.test(innerText)) {
+    return CompletionPosition.AFTER_COMPLETION;
+  }
+
+  // We don't know if the expression is a prompt or a target field
+  if (prompt.type === 'unknown' && prompt.name === 'unknown') {
+    return CompletionPosition.AFTER_PROMPT_OR_TARGET;
   }
 
   return undefined;
@@ -68,12 +72,22 @@ function getPosition(params: CommandSuggestParams<'completion'>): CompletionPosi
 export async function suggest(
   params: CommandSuggestParams<'completion'>
 ): Promise<SuggestionRawDefinition[]> {
-  const { references, innerText, columnExists, getColumnsByType, callbacks } = params;
+  const {
+    references,
+    innerText,
+    columnExists,
+    getColumnsByType,
+    callbacks,
+    getSuggestedUserDefinedColumnName,
+  } = params;
+
+  const { prompt } = params.command as ESQLAstCompletionCommand;
 
   const position = getPosition(params);
 
   switch (position) {
-    case CompletionPosition.PROMPT:
+    case CompletionPosition.AFTER_COMPLETION:
+    case CompletionPosition.AFTER_TARGET_ID: {
       const fieldsAndFunctionsSuggestions = uniqBy(
         await getFieldsOrFunctionsSuggestions(
           ['text', 'keyword', 'unknown'],
@@ -104,26 +118,41 @@ export async function suggest(
         () => []
       );
 
-      if (!findFinalWord(innerText)) {
+      const lastWord = findFinalWord(innerText);
+
+      if (!lastWord) {
         suggestions.push(defaultPrompt);
       }
 
+      if (position !== CompletionPosition.AFTER_TARGET_ID) {
+        suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+      }
+
       return suggestions;
+    }
 
     case CompletionPosition.AFTER_PROMPT:
       return [withCompletionItem];
+
+    case CompletionPosition.AFTER_PROMPT_OR_TARGET: {
+      const lastWord = findFinalWord(innerText);
+
+      if (
+        !lastWord.length &&
+        !columnExists(prompt.text) &&
+        !prompt.text.startsWith(ESQL_VARIABLES_PREFIX)
+      ) {
+        return [assignCompletionItem];
+      }
+
+      return [withCompletionItem];
+    }
 
     case CompletionPosition.AFTER_WITH:
       const result = await callbacks?.getInferenceEndpoints?.('completion');
       return result?.inferenceEndpoints?.map(inferenceEndpointToCompletionItem) || [];
 
     case CompletionPosition.AFTER_INFERENCE_ID:
-      return [asCompletionItem, pipeCompleteItem];
-
-    case CompletionPosition.AFTER_AS:
-      return [targetIdCompletionItem];
-
-    case CompletionPosition.AFTER_TARGET_ID:
       return [pipeCompleteItem];
 
     default:
@@ -151,29 +180,15 @@ const withCompletionItem: SuggestionRawDefinition = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
-const asCompletionItem: SuggestionRawDefinition = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.completionAsDoc', {
-    defaultMessage: 'Name the result group, or use the default provided.',
+const assignCompletionItem: SuggestionRawDefinition = {
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.newVarDoc', {
+    defaultMessage: 'Define a new column',
   }),
-  kind: 'Reference',
-  label: 'AS',
-  sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
-  text: 'AS ',
-};
-
-const targetIdCompletionItem: SuggestionRawDefinition = {
-  detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.definitions.completionTargetIdDoc',
-    {
-      defaultMessage: 'Default target column',
-    }
-  ),
-  command: TRIGGER_SUGGESTION_COMMAND,
-  kind: 'Reference',
-  label: 'completion',
+  label: '=',
+  kind: 'Variable',
   sortText: '1',
-  text: 'completion ',
+  text: '= ',
 };
 
 function inferenceEndpointToCompletionItem(

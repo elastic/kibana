@@ -7,6 +7,7 @@
 
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
+import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
@@ -22,7 +23,7 @@ import type { ToolEventEmitter } from './events';
 /**
  * Subset of {@link ToolDescriptorMeta} that can be defined during tool registration.
  */
-export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'sourceType' | 'sourceId'>>;
+export type RegisteredToolMeta = Partial<Omit<ToolDescriptorMeta, 'providerId'>>;
 
 /**
  * Onechat tool, as registered by built-in tool providers.
@@ -212,6 +213,10 @@ export interface ToolHandlerContext {
    * Event emitter that can be used to emits custom events
    */
   events: ToolEventEmitter;
+  /**
+   * Logger scoped to this execution
+   */
+  logger: Logger;
 }
 
 /**
