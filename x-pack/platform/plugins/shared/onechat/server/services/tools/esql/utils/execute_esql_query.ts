@@ -46,7 +46,7 @@ export const esqlToolCreator = (tool: EsqlToolCreateResponse): EsqlTool => {
         query: filledQuery,
       });
 
-      return response.columns;
+      return response;
     },
     meta: tool.meta,
   };

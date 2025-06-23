@@ -162,7 +162,18 @@ export function registerESQLToolsRoutes({
               params: schema.recordOf(
                 schema.string(),
                 schema.object({
-                  type: schema.string(),
+                  type: schema.oneOf([
+                    schema.literal('text'),
+                    schema.literal('keyword'),
+                    schema.literal('long'),
+                    schema.literal('integer'),
+                    schema.literal('double'),
+                    schema.literal('float'),
+                    schema.literal('boolean'),
+                    schema.literal('date'),
+                    schema.literal('object'),
+                    schema.literal('nested')
+                   ]),
                   description: schema.string(),
                 })
               ),
@@ -248,7 +259,18 @@ export function registerESQLToolsRoutes({
                 schema.recordOf(
                   schema.string(),
                   schema.object({
-                    type: schema.string(),
+                    type: schema.oneOf([
+                      schema.literal('text'),
+                      schema.literal('keyword'),
+                      schema.literal('long'),
+                      schema.literal('integer'),
+                      schema.literal('double'),
+                      schema.literal('float'),
+                      schema.literal('boolean'),
+                      schema.literal('date'),
+                      schema.literal('object'),
+                      schema.literal('nested')
+                     ]),
                     description: schema.string(),
                   })
                 )

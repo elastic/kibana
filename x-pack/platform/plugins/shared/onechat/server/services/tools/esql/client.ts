@@ -39,7 +39,7 @@ class EsqlToolClientImpl {
 
       return tool;
     } catch (error) {
-      logger.error(`Error retrieving ESQL tool with Name ${name}: ${error}`);
+      logger.error(`Error retrieving ESQL tool with Id ${id}: ${error}`);
       throw error;
     }
   }
@@ -83,7 +83,7 @@ class EsqlToolClientImpl {
 
       return document as EsqlToolCreateResponse;
     } catch (error) {
-      logger.info(`Error creating ESQL tool with ID ${tool.id}: ${error}`);
+      logger.info(`Error creating ESQL tool with Id ${tool.id}: ${error}`);
       throw error;
     }
   }
