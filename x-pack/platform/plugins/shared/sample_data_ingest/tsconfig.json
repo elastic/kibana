@@ -11,11 +11,13 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/inference-common",
     "@kbn/logging",
-    "@kbn/product-doc-common",
-    "@kbn/core-http-browser",
     "@kbn/config-schema",
-    "@kbn/utils"
+    "@kbn/product-doc-common",
+    "@kbn/utils",
+    "@kbn/core-http-browser",
+    "@kbn/logging-mocks",
+    "@kbn/inference-common",
+    "@kbn/i18n",
   ]
 }
