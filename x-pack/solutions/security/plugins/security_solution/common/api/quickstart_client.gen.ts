@@ -265,6 +265,8 @@ import type {
 } from './entity_analytics/monitoring/search_indices.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+import type { InstallPrivilegedAccessDetectionPackageResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/install.gen';
+import type { GetPrivilegedAccessDetectionPackageStatusResponse } from './entity_analytics/privilege_monitoring/privileged_access_detection/status.gen';
 import type {
   CreatePrivMonUserRequestBodyInput,
   CreatePrivMonUserResponse,
@@ -273,10 +275,6 @@ import type {
   DeletePrivMonUserRequestParamsInput,
   DeletePrivMonUserResponse,
 } from './entity_analytics/privilege_monitoring/users/delete.gen';
-import type {
-  GetPrivMonUserRequestParamsInput,
-  GetPrivMonUserResponse,
-} from './entity_analytics/privilege_monitoring/users/get.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
@@ -372,6 +370,7 @@ import type {
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
 import type {
+  CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
@@ -405,7 +404,7 @@ import type {
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
-  UpdateRuleMigrationResponse,
+  UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -710,7 +709,7 @@ For detailed information on Kibana actions and alerting, and additional API call
   /**
    * Creates a new rule migration and returns the corresponding migration_id
    */
-  async createRuleMigration() {
+  async createRuleMigration(props: CreateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateRuleMigration`);
     return this.kbnClient
       .request<CreateRuleMigrationResponse>({
@@ -719,6 +718,7 @@ For detailed information on Kibana actions and alerting, and additional API call
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PUT',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1431,11 +1431,13 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getPrivMonUser(props: GetPrivMonUserProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPrivMonUser`);
+  async getPrivilegedAccessDetectionPackageStatus() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API GetPrivilegedAccessDetectionPackageStatus`
+    );
     return this.kbnClient
-      .request<GetPrivMonUserResponse>({
-        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+      .request<GetPrivilegedAccessDetectionPackageStatusResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/status',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -1878,6 +1880,20 @@ providing you with the most current and effective threat detection capabilities.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async installPrivilegedAccessDetectionPackage() {
+    this.log.info(
+      `${new Date().toISOString()} Calling API InstallPrivilegedAccessDetectionPackage`
+    );
+    return this.kbnClient
+      .request<InstallPrivilegedAccessDetectionPackageResponse>({
+        path: '/api/entity_analytics/privileged_user_monitoring/pad/install',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2505,12 +2521,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
-      .request<UpdateRuleMigrationResponse>({
+      .request({
         path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'PATCH',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2603,6 +2620,9 @@ export interface CreatePrivMonUserProps {
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
+}
+export interface CreateRuleMigrationProps {
+  body: CreateRuleMigrationRequestBodyInput;
 }
 export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
@@ -2723,9 +2743,6 @@ export interface GetNotesProps {
 }
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
-}
-export interface GetPrivMonUserProps {
-  params: GetPrivMonUserRequestParamsInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
@@ -2884,6 +2901,7 @@ export interface UpdateRuleProps {
 }
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
+  body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;
