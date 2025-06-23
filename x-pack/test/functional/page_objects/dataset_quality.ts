@@ -411,6 +411,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async toggleShowFullDatasetNames() {
+      await find.waitForDeletedByCssSelector('.euiToolTipPopover', 5 * 1000);
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
