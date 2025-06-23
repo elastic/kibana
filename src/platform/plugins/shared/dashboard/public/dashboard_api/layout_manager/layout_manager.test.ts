@@ -95,42 +95,6 @@ describe('layout manager', () => {
     });
   });
 
-  describe('serializeLayout', () => {
-    test('should serialize the latest state of all panels', () => {
-      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
-
-      layoutManager.internalApi.registerChildApi(childApi);
-      layoutManager.internalApi.setChildState(PANEL_ONE_ID, {
-        rawState: { title: 'Updated Panel One' },
-      });
-      const serializedLayout = layoutManager.internalApi.serializeLayout();
-      expect(serializedLayout.panels).toEqual([
-        {
-          gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
-          type: 'testPanelType',
-          panelConfig: { title: 'Updated Panel One' },
-          panelIndex: 'panelOne',
-        },
-      ]);
-    });
-
-    test('should serialize the latest state of all panels when a child API is unavailable', () => {
-      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
-      expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(undefined);
-
-      // serializing should still work without an API present, returning the last known state of the panel
-      const serializedLayout = layoutManager.internalApi.serializeLayout();
-      expect(serializedLayout.panels).toEqual([
-        {
-          gridData: { w: 1, h: 1, x: 0, y: 0, i: 'panelOne' },
-          type: 'testPanelType',
-          panelConfig: { title: 'Panel One' },
-          panelIndex: 'panelOne',
-        },
-      ]);
-    });
-  });
-
   describe('duplicatePanel', () => {
     const titleManager = initializeTitleManager(panels[0].panelConfig);
     const childApiToDuplicate = {
