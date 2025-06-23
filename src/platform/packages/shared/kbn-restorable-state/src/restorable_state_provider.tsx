@@ -25,8 +25,8 @@ import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, Subject, filter, map } from 'rxjs';
 
 export interface RestorableStateProviderProps<TState extends object> {
-  initialState?: TState;
-  onInitialStateChange?: (initialState: TState) => void;
+  initialState?: Partial<TState>;
+  onInitialStateChange?: (initialState: Partial<TState>) => void;
 }
 
 export interface RestorableStateProviderApi {
@@ -37,14 +37,14 @@ type RestorableStateContext<TState extends object> = Pick<
   RestorableStateProviderProps<TState>,
   'onInitialStateChange'
 > & {
-  initialState$: BehaviorSubject<TState | undefined>;
-  initialStateRefresh$: Subject<TState | undefined>;
+  initialState$: BehaviorSubject<Partial<TState> | undefined>;
+  initialStateRefresh$: Subject<Partial<TState> | undefined>;
 };
 
 export const createRestorableStateProvider = <TState extends object>() => {
   const context = createContext<RestorableStateContext<TState>>({
-    initialState$: new BehaviorSubject<TState | undefined>(undefined),
-    initialStateRefresh$: new Subject<TState | undefined>(),
+    initialState$: new BehaviorSubject<Partial<TState> | undefined>(undefined),
+    initialStateRefresh$: new Subject<Partial<TState> | undefined>(),
     onInitialStateChange: undefined,
   });
 
@@ -60,8 +60,8 @@ export const createRestorableStateProvider = <TState extends object>() => {
     ref
   ) {
     const [initialState$] = useState(() => new BehaviorSubject(currentInitialState));
-    const [initialStateRefresh$] = useState(() => new Subject<TState | undefined>());
-    const onInitialStateChange = useStableFunction((newInitialState: TState) => {
+    const [initialStateRefresh$] = useState(() => new Subject<Partial<TState> | undefined>());
+    const onInitialStateChange = useStableFunction((newInitialState: Partial<TState>) => {
       initialState$.next(newInitialState);
       currentOnInitialStateChange?.(newInitialState);
     });
@@ -135,8 +135,12 @@ export const createRestorableStateProvider = <TState extends object>() => {
     const [value, _setValue] = useState(() => {
       const initialState = initialState$.getValue();
 
-      if (initialState && key in initialState && !shouldIgnoredRestoredValue?.(initialState[key])) {
-        return initialState[key];
+      if (
+        initialState &&
+        key in initialState &&
+        !shouldIgnoredRestoredValue?.(initialState[key] as TState[TKey])
+      ) {
+        return initialState[key] as TState[TKey];
       }
       if (typeof initialValue === 'function') {
         return (initialValue as () => TState[TKey])();
@@ -153,8 +157,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
             : newValue;
 
         // TODO: another approach to consider is to call `onInitialStateChange` only on unmount and not on every state change
-        // TODO: Why is `as TState` necessary here? Might need to be Partial<TState>
-        onInitialStateChange?.({ ...initialState$.getValue(), [key]: nextValue } as TState);
+        onInitialStateChange?.({ ...initialState$.getValue(), [key]: nextValue });
 
         return nextValue;
       });
@@ -169,11 +172,11 @@ export const createRestorableStateProvider = <TState extends object>() => {
     const { initialState$, onInitialStateChange } = useContext(context);
     const initialState = initialState$.getValue();
     const valueRef = useRef<TState[TKey]>(
-      initialState?.[key] !== undefined ? initialState[key] : initialValue
+      initialState?.[key] !== undefined ? (initialState[key] as TState[TKey]) : initialValue
     );
 
     useUnmount(() => {
-      onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current } as TState);
+      onInitialStateChange?.({ ...initialState$.getValue(), [key]: valueRef.current });
     });
 
     useInitialStateRefresh(key, (newValue) => {
