@@ -214,6 +214,13 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
   });
 
+  // Enable the mocking of internal fleet services
+  const fleetServices = endpointService.getInternalFleetServices();
+  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+  const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
+  getInternalFleetServicesMock.mockReturnValue(fleetServices);
+
   return {
     esClient,
     casesClient,

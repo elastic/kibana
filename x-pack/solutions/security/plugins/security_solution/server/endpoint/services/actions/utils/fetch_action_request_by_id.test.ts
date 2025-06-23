@@ -22,6 +22,9 @@ describe('fetchActionRequestById() utility', () => {
   beforeEach(() => {
     endpointServiceMock = createMockEndpointAppContextService();
     applyActionsEsSearchMock(endpointServiceMock.getInternalEsClient() as ElasticsearchClientMock);
+    (
+      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
   });
 
   it('should search the actions index with expected query', async () => {
