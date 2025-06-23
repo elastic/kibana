@@ -15,6 +15,7 @@ import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes'
 import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
 import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
+import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
 const LENS_VISUALIZATION_HEIGHT = 126;
 const LENS_VISUALIZATION_MIN_WIDTH = 160;
@@ -22,11 +23,12 @@ const LENS_VISUALIZATION_MIN_WIDTH = 160;
 export const GrantedRightsTile = () => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
+  const spaceId = useSpaceId();
 
   const grantedRightsLensAttributes = createKeyInsightsPanelLensAttributes({
     title: 'Granted Rights',
     label: 'Granted Rights',
-    esqlQuery: getGrantedRightsEsqlCount('default'),
+    esqlQuery: getGrantedRightsEsqlCount(spaceId || 'default'),
     filterQuery,
   });
 
