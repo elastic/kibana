@@ -68,7 +68,9 @@ const DEFAULT_WORKFLOW_ID: WorkflowId = 'semantic';
 export const useWorkflow = () => {
   const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
   const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || DEFAULT_WORKFLOW_ID);
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
+    workflowId || DEFAULT_WORKFLOW_ID
+  );
   const { data } = useOnboardingTokenQuery();
 
   useEffect(() => {
