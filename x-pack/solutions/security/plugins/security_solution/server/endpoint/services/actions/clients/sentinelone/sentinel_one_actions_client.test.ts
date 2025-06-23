@@ -1570,7 +1570,7 @@ describe('SentinelOneActionsClient class', () => {
         response: s1DataGenerator.toEsSearchResponse([]),
       });
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'Action ID [abc] for agent ID [abc] is still pending'
+        'Action ID [abc] for agent ID [123] is still pending'
       );
     });
 

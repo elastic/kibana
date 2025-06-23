@@ -145,6 +145,8 @@ describe('SyntheticsService', () => {
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
+    service.getMaintenanceWindows = jest.fn();
+
     return { service, locations };
   };
 
@@ -223,7 +225,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -289,7 +291,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -306,7 +308,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -323,7 +325,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -532,6 +534,8 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+
+    service.getMaintenanceWindows = jest.fn();
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;
