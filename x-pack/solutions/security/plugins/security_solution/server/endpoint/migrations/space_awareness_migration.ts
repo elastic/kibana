@@ -11,8 +11,7 @@ import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import { type Logger } from '@kbn/core/server';
 import type {
   BulkRequest,
   SearchRequest,
@@ -34,30 +33,26 @@ import type {
 } from '../../../common/endpoint/types';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { stringify } from '../utils/stringify';
-import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../lib/reference_data';
+import type { MigrationMetadata, ReferenceDataClientInterface } from '../lib/reference_data';
+import { REF_DATA_KEYS } from '../lib/reference_data';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
   hasGlobalOrPerPolicyTag,
 } from '../../../common/endpoint/service/artifacts/utils';
-import { catchAndWrapError, wrapErrorIfNeeded } from '../utils';
+import { catchAndWrapError } from '../utils';
 import { QueueProcessor } from '../utils/queue_processor';
 import type { EndpointAppContextService } from '../endpoint_app_context_services';
 import type { ReferenceDataSavedObject } from '../lib/reference_data/types';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
 const LOGGER_KEY = 'migrateEndpointDataToSupportSpaces';
-export const ARTIFACTS_MIGRATION_REF_DATA_ID = 'SPACE-AWARENESS-ARTIFACT-MIGRATION' as const;
+export const ARTIFACTS_MIGRATION_REF_DATA_ID = REF_DATA_KEYS.spaceAwarenessArtifactMigration;
 export const RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID =
-  'SPACE-AWARENESS-RESPONSE-ACTIONS-MIGRATION' as const;
+  REF_DATA_KEYS.spaceAwarenessResponseActionsMigration;
 export const NOT_FOUND_VALUE = 'MIGRATION:NOT-FOUND';
 
-export type MigrationStateReferenceData = ReferenceDataSavedObject<{
-  started: string;
-  finished: string;
-  status: 'not-started' | 'complete' | 'pending';
-  data?: unknown;
-}>;
+export type MigrationStateReferenceData = ReferenceDataSavedObject<MigrationMetadata>;
 
 type PolicyPartialUpdate = Pick<LogsEndpointAction, 'originSpaceId'> & {
   tags?: LogsEndpointAction['tags'];
@@ -80,67 +75,27 @@ export const migrateEndpointDataToSupportSpaces = async (
   ]);
 };
 
-// TODO:PT move this to a new data access client
 const getMigrationState = async (
-  soClient: SavedObjectsClientContract,
-  logger: Logger,
+  refDataClient: ReferenceDataClientInterface,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
 ): Promise<MigrationStateReferenceData> => {
-  return soClient
-    .get<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id)
-    .then((response) => {
-      logger.debug(`Retrieved migration state for [${id}]\n${stringify(response)}`);
-      return response.attributes;
-    })
-    .catch(async (err) => {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        logger.debug(`Creating migration state for [${id}]`);
-
-        const createResponse = await soClient
-          .create<MigrationStateReferenceData>(
-            REFERENCE_DATA_SAVED_OBJECT_TYPE,
-            {
-              id,
-              type: 'MIGRATION',
-              owner: 'EDR',
-              metadata: {
-                started: '',
-                finished: '',
-                status: 'not-started',
-              },
-            },
-            { id }
-          )
-          .catch(catchAndWrapError);
-
-        return createResponse.attributes;
-      }
-
-      throw wrapErrorIfNeeded(err, `Failed to retrieve migration state for [${id}]`);
-    });
+  return refDataClient.get<MigrationStateReferenceData['metadata']>(id);
 };
 
-// TODO:PT move this to a new data access client
 const updateMigrationState = async (
-  soClient: SavedObjectsClientContract,
+  refDataClient: ReferenceDataClientInterface,
   id: typeof ARTIFACTS_MIGRATION_REF_DATA_ID | typeof RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
   update: MigrationStateReferenceData
 ): Promise<MigrationStateReferenceData> => {
-  await soClient
-    .update<MigrationStateReferenceData>(REFERENCE_DATA_SAVED_OBJECT_TYPE, id, update, {
-      refresh: 'wait_for',
-    })
-    .catch(catchAndWrapError);
-
-  return update;
+  return refDataClient.update<MigrationStateReferenceData['metadata']>(id, update);
 };
 
 const migrateArtifactsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
   const logger = endpointService.createLogger(LOGGER_KEY, 'artifacts');
-  const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
-  const migrationState = await getMigrationState(soClient, logger, ARTIFACTS_MIGRATION_REF_DATA_ID);
+  const refDataClient = endpointService.getReferenceDataClient();
+  const migrationState = await getMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID);
 
   if (migrationState.metadata.status !== 'not-started') {
     logger.debug(
@@ -153,7 +108,7 @@ const migrateArtifactsToSpaceAware = async (
 
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
-  await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   const exceptionsClient = endpointService.getExceptionListsClient();
   const listIds: string[] = Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id);
@@ -207,7 +162,7 @@ const migrateArtifactsToSpaceAware = async (
         { stopOnError: false, concurrency: 10 }
       );
 
-      await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+      await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
     },
   });
 
@@ -268,7 +223,7 @@ const migrateArtifactsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  await updateMigrationState(soClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, ARTIFACTS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
     `migration of endpoint artifacts in support of spaces done.\n${JSON.stringify(
@@ -283,10 +238,9 @@ const migrateResponseActionsToSpaceAware = async (
   endpointService: EndpointAppContextService
 ): Promise<void> => {
   const logger = endpointService.createLogger(LOGGER_KEY, 'responseActions');
-  const soClient = endpointService.savedObjects.createInternalScopedSoClient({ readonly: false });
+  const refDataClient = endpointService.getReferenceDataClient();
   const migrationState = await getMigrationState(
-    soClient,
-    logger,
+    refDataClient,
     RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID
   );
 
@@ -311,7 +265,7 @@ const migrateResponseActionsToSpaceAware = async (
   migrationState.metadata.status = 'pending';
   migrationState.metadata.started = new Date().toISOString();
   migrationState.metadata.data = migrationStats;
-  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
   const indexInfo = await ensureResponseActionsIndexHasRequiredMappings(endpointService);
 
@@ -322,7 +276,11 @@ const migrateResponseActionsToSpaceAware = async (
   if (!indexInfo.successful) {
     migrationState.metadata.status = 'complete';
     migrationState.metadata.finished = new Date().toISOString();
-    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+    await updateMigrationState(
+      refDataClient,
+      RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+      migrationState
+    );
 
     return;
   }
@@ -334,7 +292,11 @@ const migrateResponseActionsToSpaceAware = async (
     migrationState.metadata.status = 'complete';
     migrationState.metadata.finished = new Date().toISOString();
     migrationStats.warnings.push(exitMessage);
-    await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+    await updateMigrationState(
+      refDataClient,
+      RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+      migrationState
+    );
 
     return;
   }
@@ -399,7 +361,11 @@ const migrateResponseActionsToSpaceAware = async (
       }
 
       // Write stats so we can see intermediate stats if required
-      await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+      await updateMigrationState(
+        refDataClient,
+        RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID,
+        migrationState
+      );
     },
   });
 
@@ -454,7 +420,7 @@ const migrateResponseActionsToSpaceAware = async (
 
   migrationState.metadata.status = 'complete';
   migrationState.metadata.finished = new Date().toISOString();
-  await updateMigrationState(soClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
+  await updateMigrationState(refDataClient, RESPONSE_ACTIONS_MIGRATION_REF_DATA_ID, migrationState);
 
   logger.info(
     `migration of endpoint response actions in support of spaces done.\n${JSON.stringify(
