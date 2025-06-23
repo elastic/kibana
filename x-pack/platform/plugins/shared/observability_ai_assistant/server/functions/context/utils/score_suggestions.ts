@@ -158,19 +158,25 @@ export async function scoreSuggestions({
     return { relevantDocuments: suggestions, llmScores: [] };
   }
 
-  const suggestionIds = suggestions.map((document) => document.id);
-
   // get top 5 documents ids
-  const relevantDocumentIds = llmScores
+  const relevantDocuments = llmScores
     .filter(({ llmScore }) => llmScore > 4)
     .sort((a, b) => b.llmScore - a.llmScore)
     .slice(0, 5)
-    .filter(({ id }) => suggestionIds.includes(id ?? '')) // Remove hallucinated documents
-    .map(({ id }) => id);
+    .map(({ id, llmScore }) => {
+      const suggestion = suggestions.find((doc) => doc.id === id);
+      if (!suggestion) {
+        return; // remove hallucinated documents
+      }
 
-  const relevantDocuments = suggestions.filter((suggestion) =>
-    relevantDocumentIds.includes(suggestion.id)
-  );
+      return {
+        id,
+        llmScore,
+        esScore: suggestion.esScore,
+        text: suggestion.text,
+      };
+    })
+    .filter(filterNil);
 
   logger.debug(() => `Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
@@ -178,4 +184,8 @@ export async function scoreSuggestions({
     relevantDocuments,
     llmScores: llmScores.map((score) => ({ id: score.id, llmScore: score.llmScore })),
   };
+}
+
+function filterNil<TValue>(value: TValue | null | undefined): value is TValue {
+  return value !== null && value !== undefined;
 }
