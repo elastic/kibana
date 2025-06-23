@@ -6,26 +6,6 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    PromptIdsSet:
-      description: Set of prompt IDs for a specific group of prompts.
-      type: object
-      required:
-        - promptIds
-        - promptGroupId
-      properties:
-        promptIds:
-          type: array
-          description: Array of IDs for a specific prompts
-          minItems: 1
-          items:
-            type: string
-          example:
-            - "systemPrompt"
-            - "userPrompt"
-        promptGroupId:
-          type: string
-          description: The unique identifier for a group of prompts.
-          example: "aiAssistant"
     PromptItem:
       type: object
       properties:

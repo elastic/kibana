@@ -16,21 +16,6 @@
 
 import { z } from '@kbn/zod';
 
-/**
- * Set of prompt IDs for a specific group of prompts.
- */
-export type PromptIdsSet = z.infer<typeof PromptIdsSet>;
-export const PromptIdsSet = z.object({
-  /**
-   * Array of IDs for a specific prompts
-   */
-  promptIds: z.array(z.string()).min(1),
-  /**
-   * The unique identifier for a group of prompts.
-   */
-  promptGroupId: z.string(),
-});
-
 export type PromptItem = z.infer<typeof PromptItem>;
 export const PromptItem = z.object({
   promptId: z.string(),
