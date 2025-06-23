@@ -25,38 +25,6 @@ const artifactsFolder = '/tmp/artifacts';
 const artifactRepositoryUrl = 'https://artifacts.elastic.co';
 const kibanaVersion = '8.16.3';
 
-export const fetchArtifactVersionsMock = jest.fn();
-export const validateArtifactArchiveMock = jest.fn();
-export const downloadMock = jest.fn();
-export const openZipArchiveMock = jest.fn();
-export const loadMappingFileMock = jest.fn();
-export const loadManifestFileMock = jest.fn();
-
-jest.doMock('./utils', () => {
-  const actual = jest.requireActual('./utils');
-  return {
-    ...actual,
-    fetchArtifactVersions: fetchArtifactVersionsMock,
-    validateArtifactArchive: validateArtifactArchiveMock,
-    download: downloadMock,
-    openZipArchive: openZipArchiveMock,
-    loadMappingFile: loadMappingFileMock,
-    loadManifestFile: loadManifestFileMock,
-  };
-});
-
-export const majorMinorMock = jest.fn();
-export const latestVersionMock = jest.fn();
-
-jest.doMock('./utils/semver', () => {
-  const actual = jest.requireActual('./utils/semver');
-  return {
-    ...actual,
-    majorMinor: majorMinorMock,
-    latestVersion: latestVersionMock,
-  };
-});
-
 describe('ArtifactManager', () => {
   let logger: MockedLogger;
   let artifactManager: ArtifactManager;
