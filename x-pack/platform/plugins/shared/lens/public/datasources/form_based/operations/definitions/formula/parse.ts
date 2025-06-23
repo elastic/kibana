@@ -292,7 +292,7 @@ function generateFormulaColumns(
     params: {
       ...column.params,
       formula,
-      isFormulaBroken: !isValid,
+      ...(isValid ? {} : { isFormulaBroken: !isValid }),
     },
   } as FormulaIndexPatternColumn;
 
