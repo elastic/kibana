@@ -24,7 +24,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
@@ -91,7 +91,7 @@ export const OptionsListPopoverActionBar = ({
     [searchTechnique, compatibleSearchTechniques]
   );
 
-  const styles = useMemoizedStyles(optionsListPopoverStyles);
+  const styles = useMemoCss(optionsListPopoverStyles);
 
   return (
     <div className="optionsList__actions" css={styles.actions}>

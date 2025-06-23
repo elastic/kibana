@@ -25,7 +25,7 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classNames from 'classnames';
 import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
@@ -105,7 +105,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   const insertBefore = isOver && (index ?? -1) < (activeIndex ?? -1);
   const insertAfter = isOver && (index ?? -1) > (activeIndex ?? -1);
 
-  const styles = useMemoizedStyles(controlPanelStyles);
+  const styles = useMemoCss(controlPanelStyles);
 
   return (
     <EuiFlexItem
