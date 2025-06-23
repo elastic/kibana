@@ -217,27 +217,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud, share } = plugins;
 
-    const { app } = plugins.searchHomepage!;
-    core.application.register({
-      ...app,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
-      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(app.title);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { SearchHomepage } = await import('./applications/search_homepage');
-
-        return renderApp(SearchHomepage, kibanaDeps, pluginData);
-      },
-    });
-
     core.application.register({
       appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
@@ -252,11 +231,9 @@ export class EnterpriseSearchPlugin implements Plugin {
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchOverview } = await import(
-          './applications/enterprise_search_overview'
-        );
+        const { SearchHomepage } = await import('./applications/search_homepage');
 
-        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+        return renderApp(SearchHomepage, kibanaDeps, pluginData);
       },
       order: 0,
       title: ENTERPRISE_SEARCH_HOME_PLUGIN.NAV_TITLE,
