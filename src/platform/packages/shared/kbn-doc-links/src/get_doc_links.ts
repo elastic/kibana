@@ -32,7 +32,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/v8/`;
-  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
+  const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
@@ -659,6 +659,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       monitorLogs: isServerless
         ? `${SERVERLESS_DOCS}observability-discover-and-explore-logs.html`
         : `${OBSERVABILITY_DOCS}monitor-logs.html`,
+      logsStreams: `${ELASTIC_WEBSITE_URL}docs/solutions/observability/logs/streams/streams`,
       analyzeMetrics: isServerless
         ? `${SERVERLESS_DOCS}observability-infrastructure-monitoring.html`
         : `${OBSERVABILITY_DOCS}analyze-metrics.html`,
