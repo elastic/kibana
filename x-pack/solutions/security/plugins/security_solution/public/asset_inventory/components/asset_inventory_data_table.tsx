@@ -97,10 +97,14 @@ const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
     return <RiskBadge risk={risk} />;
   },
   [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const criticality = rows[rowIndex].flattened[
-      ASSET_FIELDS.ASSET_CRITICALITY
-    ] as CriticalityLevelWithUnassigned;
-    return <AssetCriticalityBadge criticalityLevel={criticality} />;
+    const criticality = rows[rowIndex].flattened[ASSET_FIELDS.ASSET_CRITICALITY] as
+      | CriticalityLevelWithUnassigned
+      | 'deleted';
+    return (
+      <AssetCriticalityBadge
+        criticalityLevel={criticality === 'deleted' ? 'unassigned' : criticality}
+      />
+    );
   },
 });
 
