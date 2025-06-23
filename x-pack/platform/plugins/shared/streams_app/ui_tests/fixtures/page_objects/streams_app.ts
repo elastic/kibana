@@ -34,28 +34,24 @@ export class StreamsApp {
     await this.page.getByRole('tab', { name: 'Dashboards' }).click();
   }
 
-  async gotoManageStream(stream: string) {
-    this.gotoStream(stream);
-    await this.page.getByRole('link', { name: 'Manage stream' }).click();
-  }
-
-  async gotoCreateChildStream(parent: string) {
-    await this.gotoManageStream(parent);
+  async gotoCreateChildStream(stream: string) {
+    await this.gotoStream(stream);
+    await this.page.getByRole('tab', { name: 'Partitioning' }).click();
     await this.page.getByRole('button', { name: 'Create child stream' }).click();
   }
 
   async gotoDataRetentionTab(stream: string) {
-    await this.gotoManageStream(stream);
+    await this.gotoStream(stream);
     await this.page.getByRole('tab', { name: 'Data retention' }).click();
   }
 
-  async gotoExtractFieldTab(stream: string) {
-    await this.gotoManageStream(stream);
-    await this.page.getByRole('tab', { name: 'Extract field' }).click();
+  async gotoProcessingTab(stream: string) {
+    await this.gotoStream(stream);
+    await this.page.getByRole('tab', { name: 'Processing' }).click();
   }
 
   async gotoSchemaEditorTab(stream: string) {
-    await this.gotoManageStream(stream);
+    await this.gotoStream(stream);
     await this.page.getByRole('tab', { name: 'Schema editor' }).click();
   }
 }
