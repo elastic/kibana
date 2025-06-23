@@ -20,18 +20,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { IndexUpdateService } from '../index_update_service';
-import { EditLookupIndexContentContext } from '../types';
 
 export interface FlyoutFooterProps {
   indexUpdateService: IndexUpdateService;
-  onClose: EditLookupIndexContentContext['onClose'];
+  onClose: () => void;
 }
 
 export const FlyoutFooter: FC<FlyoutFooterProps> = ({ indexUpdateService, onClose }) => {
   const undoTimeLeft = useObservable(indexUpdateService.undoTimer$);
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
-  const { uploadStatus, uploadStarted, onImportClick, canImport } = useFileUploadContext();
+  const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
   const undoInSeconds = undoTimeLeft ? `${Math.floor(undoTimeLeft / 1000)}s` : null;
 

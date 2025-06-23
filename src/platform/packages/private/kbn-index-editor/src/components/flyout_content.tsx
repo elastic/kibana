@@ -25,7 +25,7 @@ import { RowColumnCreator } from './row_column_creator';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
-  props: EditLookupIndexContentContext;
+  props: EditLookupIndexContentContext & { onClose: () => void };
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
