@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE } from '../../../common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
@@ -28,27 +29,38 @@ export function LandingPage() {
 function ObservabilityCompleteLandingPage() {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
   const {
-    application: { navigateToUrl, navigateToApp },
+    application: { navigateToUrl },
     http: { basePath },
-    share: { url },
+    share,
+    logsDataAccess,
   } = useKibana().services;
 
   useEffect(() => {
-    if (isAllRequestsComplete) {
-      const { apm, infra_logs: logs } = hasDataMap;
-      const hasApmData = apm?.hasData;
-      const hasLogsData = logs?.hasData;
+    async function redirectToLanding() {
+      if (isAllRequestsComplete) {
+        const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
+        const { apm } = hasDataMap;
+        const hasApmData = apm?.hasData;
 
-      if (hasLogsData) {
-        const logsLocator = url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
-        logsLocator?.navigate({});
-      } else if (hasApmData) {
-        navigateToUrl(basePath.prepend('/app/apm/services'));
-      } else {
-        navigateToUrl(basePath.prepend('/app/observabilityOnboarding'));
+        if (hasLogsData) {
+          redirectToDiscoverLogs(share);
+        } else if (hasApmData) {
+          navigateToUrl(basePath.prepend('/app/apm/services'));
+        } else {
+          redirectToOnboarding(share);
+        }
       }
     }
-  }, [basePath, hasDataMap, isAllRequestsComplete, navigateToApp, navigateToUrl, url.locators]);
+
+    redirectToLanding();
+  }, [
+    basePath,
+    hasDataMap,
+    isAllRequestsComplete,
+    logsDataAccess.services.logDataService,
+    navigateToUrl,
+    share,
+  ]);
 
   return <></>;
 }
@@ -57,16 +69,28 @@ function ObservabilityLogsEssentialsLandingPage() {
   const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
-    logsDataAccess.services.logDataService.getStatus().then(({ hasData }) => {
-      if (hasData) {
-        const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
-        logsLocator?.navigate({});
+    async function redirectToLanding() {
+      const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
+
+      if (hasLogsData) {
+        redirectToDiscoverLogs(share);
       } else {
-        const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
-        onboardingLocator?.navigate({});
+        redirectToOnboarding(share);
       }
-    });
-  }, [logsDataAccess.services.logDataService, share.url.locators]);
+    }
+
+    redirectToLanding();
+  }, [logsDataAccess.services.logDataService, share]);
 
   return <></>;
 }
+
+const redirectToDiscoverLogs = (share: SharePublicStart) => {
+  const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
+  logsLocator?.navigate({});
+};
+
+const redirectToOnboarding = (share: SharePublicStart) => {
+  const onboardingLocator = share.url.locators.get(OBSERVABILITY_ONBOARDING_LOCATOR);
+  onboardingLocator?.navigate({});
+};
