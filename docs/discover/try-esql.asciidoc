@@ -124,12 +124,3 @@ FROM kibana_sample_data_ecommerce
 ----
 
 image::images/esql-custom-time-series.png[ESQL query with a custom time field enabled]
-
-
-[float]
-==== ES|QL and LOOKUP JOINs
-
-The ES|QL editor supports {ref}/esql-commands.html#esql-lookup-join[`LOOKUP JOIN`] commands and suggests lookup mode indices and join condition fields.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93241d650/67c23670045f5839e5bfd1e4/lookup-join-demo.gif[Using the LOOKUP JOIN command to autocomplete an ES|QL query]
-
