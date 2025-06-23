@@ -64,6 +64,10 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   });
 
   const onFileSelectorClick = useCallback(() => {
+    // Clear the input value to allow re-selecting the same file
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
     inputRef.current?.click();
   }, [inputRef]);
 
