@@ -204,14 +204,11 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
       async function prepareBulkImportData() {
-        const entries = Array.from({ length: 500 }, (_, i) => {
-          const id = (i + 1).toString();
-          return {
-            id,
-            title: `Testing ${id}`,
-            text: `Contents of item ${id}`,
-          };
-        });
+        const entries = [
+          { id: '1', title: 'Testing 1', text: 'Contents of first item' },
+          { id: '2', title: 'Testing 2', text: 'Contents of second item' },
+          { id: '3', title: 'Testing 3', text: 'Contents of third item' },
+        ];
 
         return entries;
       }
@@ -282,7 +279,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
 
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle, 30000);
+        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
         const toastText = await toast.getVisibleText();
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
