@@ -226,7 +226,6 @@ export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
   context: `default`,
   mappings: { fieldMap: {} },
   shouldWrite: true,
-  dangerouslyCreateAlertsInAllSpaces: true,
 };
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
