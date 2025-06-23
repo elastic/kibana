@@ -107,11 +107,17 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 
   esClient.search.mockImplementation(async (payload) => {
     if (payload) {
-      switch (payload.index) {
-        case ENDPOINT_ACTIONS_INDEX:
-          return createActionRequestsEsSearchResultsMock();
-        case ACTION_RESPONSE_INDICES:
-          return createActionResponsesEsSearchResultsMock();
+      if (
+        !Array.isArray(payload.index) &&
+        (payload.index ?? '').startsWith(
+          ENDPOINT_ACTIONS_INDEX.substring(0, ENDPOINT_ACTIONS_INDEX.length - 1)
+        )
+      ) {
+        return createActionRequestsEsSearchResultsMock();
+      }
+
+      if (payload.index === ACTION_RESPONSE_INDICES) {
+        return createActionResponsesEsSearchResultsMock();
       }
     }
 
