@@ -13,6 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -45,12 +46,19 @@ export interface InternalStateDataRequestParams {
   searchSessionId: string | undefined;
 }
 
+export interface TabStateGlobalState {
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: Filter[];
+}
+
 export interface TabState extends TabItem {
-  lastPersistedGlobalState: {
-    timeRange?: TimeRange;
-    refreshInterval?: RefreshInterval;
-    filters?: Filter[];
-  };
+  // Initial app and global state for the tab (provided before the tab is initialized).
+  initialAppState?: DiscoverAppState;
+  initialGlobalState?: TabStateGlobalState;
+
+  // The following properties are used to manage the tab's state after it has been initialized.
+  lastPersistedGlobalState: TabStateGlobalState;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;

@@ -18,10 +18,12 @@ describe('TheHiveParamsFields renders', () => {
     description: 'description test',
     tlp: 2,
     severity: 2,
+    isRuleSeverity: false,
     tags: ['test1'],
     source: 'source test',
     type: 'sourceType test',
     sourceRef: 'sourceRef test',
+    body: null,
   };
   const actionParams: ExecutorParams = {
     subAction: SUB_ACTION.CREATE_ALERT,

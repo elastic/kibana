@@ -58,7 +58,6 @@
     "@kbn/dev-utils",
     "@kbn/dev-proc-runner",
     "@kbn/ftr-common-functional-services",
-    "@kbn/securitysolution-list-constants",
     "@kbn/expect",
     "@kbn/dev-cli-errors",
     "@kbn/ci-stats-reporter",
@@ -171,5 +170,6 @@
     "@kbn/saved-search-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/event-log-plugin",
+    "@kbn/intercepts-plugin"
   ]
 }
