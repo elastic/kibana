@@ -39,9 +39,11 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
   />
   <EuiFlexGrid
     columns={2}
+    component="ul"
     gutterSize="m"
   >
     <EuiFlexItem
+      component="li"
       key="wizard 1"
     >
       <EuiCard
@@ -59,6 +61,7 @@ exports[`LayerWizardSelect Should render layer select after layer wizards are lo
       />
     </EuiFlexItem>
     <EuiFlexItem
+      component="li"
       key="wizard 2"
     >
       <EuiCard

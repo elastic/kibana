@@ -125,7 +125,9 @@ export class AppMenuRegistry {
     const secondaryItems = this.getSortedItemsForType(AppMenuActionType.secondary);
     const customItems = this.getSortedItemsForType(AppMenuActionType.custom);
 
-    return [...customItems, ...secondaryItems, ...primaryItems];
+    return [...customItems, ...secondaryItems, ...primaryItems].filter(
+      (item) => !isAppMenuActionSubmenu(item) || item.actions.length > 0
+    );
   }
 }
 

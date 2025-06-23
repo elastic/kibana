@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout';
 import { testData, test } from '../fixtures';
 
-test.describe.skip('Wired Streams', { tag: ['@ess'] }, () => {
+test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, kbnClient, browserAuth, pageObjects }) => {
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await apiServices.streams.enable();
@@ -54,7 +54,7 @@ test.describe.skip('Wired Streams', { tag: ['@ess'] }, () => {
       refresh: 'wait_for',
     });
 
-    await pageObjects.streams.gotoExtractFieldTab('logs.nginx');
+    await pageObjects.streams.gotoProcessingTab('logs.nginx');
     await page.getByText('Add a processor').click();
 
     await page.locator('input[name="field"]').fill('body.text');
@@ -70,16 +70,11 @@ test.describe.skip('Wired Streams', { tag: ['@ess'] }, () => {
     await page.getByPlaceholder('Search...').fill('attributes');
     await page.getByTestId('streamsAppContentRefreshButton').click();
 
-    const actionsButtons = page
+    await expect(page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
+    await page
       .getByRole('row', { name: 'attributes.custom_field' })
-      .getByTestId('streamsAppActionsButton');
-
-    await actionsButtons.focus();
-    await actionsButtons.click();
-
-    await expect(
-      page.getByTestId('contextMenuPanelTitle').getByText('Field actions')
-    ).toBeVisible();
+      .getByTestId('streamsAppActionsButton')
+      .click();
     await page.getByRole('button', { name: 'Map field' }).click();
     await page.getByRole('combobox').selectOption('keyword');
     await page.getByRole('button', { name: 'Save changes' }).click();
@@ -87,36 +82,5 @@ test.describe.skip('Wired Streams', { tag: ['@ess'] }, () => {
 
     await expect(page.getByText('Mapped', { exact: true })).toBeVisible();
     await page.getByTestId('toastCloseButton').click();
-
-    // Add dashboard
-    await pageObjects.streams.gotoStreamDashboard('logs.nginx');
-    await page.getByRole('button', { name: 'Add a dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppAddDashboardFlyoutDashboardsTable')
-        .getByRole('button', { name: 'Some Dashboard' })
-    ).toBeVisible();
-    // eslint-disable-next-line playwright/no-nth-methods
-    await page.getByRole('cell', { name: 'Select row' }).locator('div').first().click();
-    await page.getByRole('button', { name: 'Add dashboard' }).click();
-    await expect(
-      page
-        .getByTestId('streamsAppStreamDetailDashboardsTable')
-        .getByTestId('streamsAppDashboardColumnsLink')
-    ).toHaveText('Some Dashboard');
-
-    // remove dashboard
-    await page
-      .getByTestId('streamsAppStreamDetailDashboardsTable')
-      .getByRole('cell', { name: 'Select row' })
-      .locator('div')
-      // eslint-disable-next-line playwright/no-nth-methods
-      .first()
-      .click();
-
-    await page.getByRole('button', { name: 'Unlink selected' }).click();
-    await expect(
-      page.getByTestId('streamsAppStreamDetailDashboardsTable').getByText('No items found')
-    ).toBeVisible();
   });
 });

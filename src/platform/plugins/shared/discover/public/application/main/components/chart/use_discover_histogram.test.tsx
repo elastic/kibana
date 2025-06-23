@@ -17,7 +17,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { UnifiedHistogramState } from '@kbn/unified-histogram';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
@@ -26,12 +25,9 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
-import {
-  CurrentTabProvider,
-  RuntimeStateProvider,
-  internalStateActions,
-} from '../../state_management/redux';
+import { internalStateActions } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -112,13 +108,12 @@ describe('useDiscoverHistogram', () => {
     stateContainer: DiscoverStateContainer = getStateContainer()
   ) => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
-      <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMockWithTimeField} adHocDataViews={[]}>
-            {children}
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </CurrentTabProvider>
+      <DiscoverTestProvider
+        stateContainer={stateContainer}
+        runtimeState={{ currentDataView: dataViewMockWithTimeField, adHocDataViews: [] }}
+      >
+        {children}
+      </DiscoverTestProvider>
     );
 
     const hook = renderHook(() => useDiscoverHistogram(stateContainer), {
