@@ -178,7 +178,6 @@ export const getTrends = async (
     if (!trendsQueryResult.aggregations?.by_namespace?.buckets)
       throw new Error('missing trend results from score index');
 
-    // console.log('trendsQueryResult', trendsQueryResult);
     const scoreTrendDocs =
       trendsQueryResult.aggregations.by_namespace.buckets.map((bucket) => {
         const namespaceKey = bucket.key;
