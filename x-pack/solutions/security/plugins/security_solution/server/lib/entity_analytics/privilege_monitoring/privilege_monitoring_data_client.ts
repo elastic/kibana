@@ -211,8 +211,10 @@ export class PrivilegeMonitoringDataClient {
     source: PrivMonUserSource
   ): Promise<CreatePrivMonUserResponse> {
     const doc = merge(user, {
+      user: {
+        is_privileged: true,
+      },
       labels: {
-        monitoring: { privileged_users: 'monitored' },
         sources: [source],
       },
     });
