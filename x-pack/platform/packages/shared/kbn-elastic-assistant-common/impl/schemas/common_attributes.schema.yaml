@@ -100,8 +100,8 @@ components:
             - "1234"
             - "5678"
 
-    PromptIds:
-      description: User screen context.
+    PromptIdSet:
+      description: IDs for a specific prompt within a group of prompts.
       type: object
       required:
         - promptId
@@ -111,6 +111,28 @@ components:
           type: string
           description: The unique identifier for a specific prompt.
           example: "chatTitle"
+        promptGroupId:
+          type: string
+          description: The unique identifier for a group of prompts.
+          example: "aiAssistant"
+
+
+    PromptIdsSet:
+      description: Set of prompt IDs for a specific group of prompts.
+      type: object
+      required:
+        - promptIds
+        - promptGroupId
+      properties:
+        promptIds:
+          type: array
+          description: Array of IDs for a specific prompts
+          minItems: 1
+          items:
+            type: string
+          example:
+            - "systemPrompt"
+            - "userPrompt"
         promptGroupId:
           type: string
           description: The unique identifier for a group of prompts.

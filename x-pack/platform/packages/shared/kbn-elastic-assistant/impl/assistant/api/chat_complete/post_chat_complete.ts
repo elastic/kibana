@@ -9,7 +9,7 @@ import { HttpFetchQuery, HttpSetup } from '@kbn/core-http-browser';
 import {
   API_VERSIONS,
   MessageMetadata,
-  PromptIds,
+  PromptIdSet,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { TraceOptions } from '../../types';
@@ -21,7 +21,7 @@ export interface PostChatCompleteParams {
   connectorId: string;
   http: HttpSetup;
   message: string;
-  promptIds?: PromptIds;
+  promptIds?: PromptIdSet;
   replacements: Replacements;
   query?: HttpFetchQuery;
   signal?: AbortSignal | undefined;

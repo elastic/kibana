@@ -104,8 +104,8 @@ export const BulkActionBase = z.object({
 /**
  * User screen context.
  */
-export type PromptIds = z.infer<typeof PromptIds>;
-export const PromptIds = z.object({
+export type PromptIdSet = z.infer<typeof PromptIdSet>;
+export const PromptIdSet = z.object({
   /**
    * The unique identifier for a specific prompt.
    */

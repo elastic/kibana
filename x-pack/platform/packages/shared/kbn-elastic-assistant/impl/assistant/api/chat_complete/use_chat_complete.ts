@@ -6,14 +6,14 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import { PromptIdSet, Replacements } from '@kbn/elastic-assistant-common';
 import { HttpFetchQuery } from '@kbn/core-http-browser';
 import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
 
 interface SendMessageProps {
   message: string;
-  promptIds?: PromptIds;
+  promptIds?: PromptIdSet;
   replacements: Replacements;
   query?: HttpFetchQuery;
 }
