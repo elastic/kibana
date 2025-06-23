@@ -88,6 +88,7 @@ export function SettingsForm() {
         <EuiFormRow label={remoteClustersSwitchLabel}>
           <EuiSwitch
             label={remoteClustersSwitchLabel}
+            ariaLabel={remoteClustersSwitchLabel}
             checked={useAllRemoteClusters}
             onChange={(evt) => setUseAllRemoteClusters(evt.target.checked)}
           />
