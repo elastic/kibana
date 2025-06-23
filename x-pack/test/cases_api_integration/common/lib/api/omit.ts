@@ -37,7 +37,11 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 };
 
 export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<Case> => {
-  return removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, ['closed_at']);
+  return removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, [
+    'closed_at',
+    'in_progress_at',
+    'time_to_acknowledge',
+  ]);
 };
 
 export const removeServerGeneratedPropertiesFromComments = (
