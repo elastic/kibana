@@ -98,7 +98,6 @@ export const createRestorableStateProvider = <TState extends object>() => {
             initialState={initialState}
             onInitialStateChange={onInitialStateChange}
           >
-            {/* TODO: Why is `as TProps` necessary here? */}
             <Component {...(props as TProps)} />
           </RestorableStateProvider>
         );
