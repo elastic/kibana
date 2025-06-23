@@ -84,5 +84,8 @@ Microsoft 365 connectors are being [retired](https://devblogs.microsoft.com/micr
             }
         }
         ```
+:::{note}
+If you want to post to a private group, set **Post as** to `User`. Note that the formatting might be affected.
+:::
 
 5. Save the workflow and copy the HTTP POST URL from the first step. This is the URL required by the Microsoft Teams connector.
