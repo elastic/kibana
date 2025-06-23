@@ -27,6 +27,6 @@ export const useFindProximalAlerts = (alertDetail: AlertData) => {
     ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
     consumers: observabilityAlertFeatureIds,
     query: esQuery,
-    useDefaultContext: true,
+    skipAlertsQueryContext: true,
   });
 };

@@ -71,7 +71,7 @@ export interface SearchAlertsParams {
   /**
    * Force using the default context, otherwise use the AlertQueryContext
    */
-  useDefaultContext?: boolean;
+  skipAlertsQueryContext?: boolean;
   /**
    * The minimum score to apply to the query
    */

@@ -29,7 +29,7 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  */
 export const useSearchAlertsQuery = ({
   data,
-  useDefaultContext,
+  skipAlertsQueryContext,
   ...params
 }: UseSearchAlertsQueryParams) => {
   const {
@@ -68,7 +68,7 @@ export const useSearchAlertsQuery = ({
         trackScores,
       }),
     refetchOnWindowFocus: false,
-    context: useDefaultContext ? undefined : AlertsQueryContext,
+    context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
     enabled: ruleTypeIds.length > 0,
     // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
     keepPreviousData: true,
