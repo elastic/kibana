@@ -60,14 +60,11 @@ export const createRestorableStateProvider = <TState extends object>() => {
     RestorableStateProviderApi,
     PropsWithChildren<RestorableStateProviderProps<TState>>
   >(function RestorableStateProvider(
-    {
-      initialState: currentInitialState,
-      onInitialStateChange: currentOnInitialStateChange,
-      children,
-    },
+    { initialState, onInitialStateChange: currentOnInitialStateChange, children },
     ref
   ) {
-    const [initialState$] = useState(() => new BehaviorSubject(currentInitialState));
+    const latestInitialState = useLatest(initialState);
+    const [initialState$] = useState(() => new BehaviorSubject(latestInitialState.current));
     const [initialStateRefresh$] = useState(() => new Subject<Partial<TState> | undefined>());
     const onInitialStateChange = useStableFunction((newInitialState: Partial<TState>) => {
       initialState$.next(newInitialState);
@@ -78,11 +75,11 @@ export const createRestorableStateProvider = <TState extends object>() => {
       ref,
       () => ({
         refreshInitialState: () => {
-          initialState$.next(currentInitialState);
+          initialState$.next(latestInitialState.current);
           initialStateRefresh$.next(initialState$.getValue());
         },
       }),
-      [currentInitialState, initialState$, initialStateRefresh$]
+      [initialState$, initialStateRefresh$, latestInitialState]
     );
 
     const value = useMemo<RestorableStateContext<TState>>(
