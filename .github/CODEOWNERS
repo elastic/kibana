@@ -71,7 +71,7 @@ x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
 packages/kbn-cbor @elastic/kibana-operations
-packages/kbn-cell-actions @elastic/security-threat-hunting-explore
+packages/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
@@ -397,8 +397,8 @@ packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
-x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
-x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/packages/kbn-elastic-assistant-common @elastic/security-generative-ai
@@ -804,19 +804,19 @@ x-pack/packages/security/plugin_types_server @elastic/kibana-security
 x-pack/packages/security/role_management_model @elastic/kibana-security
 x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/plugins/security_solution_ess @elastic/security-solution
-x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/features @elastic/security-threat-hunting-investigations
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
-x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-investigations
 x-pack/plugins/security_solution @elastic/security-solution
 x-pack/plugins/security_solution_serverless @elastic/security-solution
-x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-explore
-x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-explore
-x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-explore
+x-pack/packages/security-solution/side_nav @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/storybook/config @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/upselling @elastic/security-threat-hunting-investigations
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/packages/security/ui_components @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
-packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
+packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
