@@ -8,7 +8,6 @@
 import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { padChartStyling } from './pad_chart_styling';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
 
@@ -32,10 +31,10 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
 
   return (
     <EuiFlexItem
-      css={css`
-        margin-top: ${padChartStyling.heightOfTopLegend}px;
-        height: ${padChartStyling.heightOfUserNamesList(userNames)}px;
-      `}
+      css={{
+        marginTop: `${padChartStyling.heightOfTopLegend}px`,
+        height: `${padChartStyling.heightOfUserNamesList(userNames)}px`,
+      }}
       grow={false}
     >
       <EuiFlexGroup gutterSize={'none'} direction={'column'} justifyContent={'center'}>

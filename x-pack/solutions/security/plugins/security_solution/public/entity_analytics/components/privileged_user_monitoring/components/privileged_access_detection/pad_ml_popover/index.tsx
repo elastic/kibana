@@ -8,7 +8,6 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import { PrivilegedAccessDetectionMLPopoverHeader } from './pad_ml_popover_header';
 import { useEnableDataFeed } from '../../../../../../common/components/ml_popover/hooks/use_enable_data_feed';
@@ -82,13 +81,13 @@ export const PrivilegedAccessDetectionMLPopover: React.FC = () => {
       >
         <EuiFlexGroup
           direction={'column'}
-          css={css`
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding-bottom: 15px;
-          `}
+          css={{
+            maxWidth: '700px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            paddingBottom: '15px',
+          }}
         >
           <PrivilegedAccessDetectionMLPopoverHeader />
           <EuiFieldSearch
