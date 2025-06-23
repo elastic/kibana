@@ -16,8 +16,41 @@ export const CAI_ACTIVITY_INDEX_ALIAS = '.cases-activity';
 export const CAI_ACTIVITY_INDEX_VERSION = 1;
 
 export const CAI_ACTIVITY_SOURCE_QUERY: QueryDslQueryContainer = {
-  term: {
-    type: 'cases-user-actions',
+  bool: {
+    must: [
+      {
+        term: {
+          type: 'cases-user-actions',
+        },
+      },
+      {
+        bool: {
+          should: [
+            {
+              term: {
+                'cases-user-actions.type': 'severity',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'category',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'status',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'tags',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
   },
 };
 
@@ -42,6 +75,33 @@ export const getActivitySynchronizationSourceQuery = (
           'cases-user-actions.created_at': {
             gte: lastSyncAt.toISOString(),
           },
+        },
+      },
+      {
+        bool: {
+          should: [
+            {
+              term: {
+                'cases-user-actions.type': 'severity',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'category',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'status',
+              },
+            },
+            {
+              term: {
+                'cases-user-actions.type': 'tags',
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       },
     ],
