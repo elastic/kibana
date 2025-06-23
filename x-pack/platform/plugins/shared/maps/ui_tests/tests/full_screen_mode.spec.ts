@@ -19,10 +19,11 @@ test.describe(
     tag: tags.DEPLOYMENT_AGNOSTIC,
   },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects, log }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.maps.gotoNewMap();
       await pageObjects.maps.waitForRenderComplete();
+      log.debug('Maps app is ready for testing');
     });
 
     test('Full screen mode', async ({ page }) => {
