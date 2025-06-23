@@ -17,8 +17,7 @@ export interface SearchNavigationPluginSetup {}
 export interface SearchNavigationPluginStart {
   registerOnAppMountHandler: (onAppMount: () => Promise<void>) => void;
   handleOnAppMount: () => Promise<void>;
-  // This is temporary until we can migrate building the class nav item list out of `enterprise_search` plugin
-  setGetBaseClassicNavItems: (classicNavItemsFn: () => ClassicNavItem[]) => void;
+  getBaseClassicNavItems: () => ClassicNavItem[];
   useClassicNavigation: (history: ScopedHistory<unknown>) => SolutionNavProps | undefined;
   breadcrumbs: {
     setSearchBreadCrumbs: (
