@@ -43,7 +43,7 @@ export const AdaptiveAllocationsTitle: FC = () => {
                 color="text"
                 size="xs"
                 onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                iconType="iInCircle"
+                iconType="info"
                 aria-label={i18n.translate(
                   'xpack.inferenceEndpointUICommon.components.adaptiveResourcesAriaLabel',
                   {
