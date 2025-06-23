@@ -64,7 +64,6 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
               migrationsStats={migrationsStats}
               isConnectorsCardComplete={isConnectorsCardComplete}
               expandConnectorsCard={expandConnectorsCard}
-              refreshStats={refreshStats}
             />
           )}
           <EuiSpacer size="m" />

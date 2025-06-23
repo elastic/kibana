@@ -19,10 +19,9 @@ export interface RuleMigrationsPanelsProps {
   migrationsStats: RuleMigrationStats[];
   isConnectorsCardComplete: boolean;
   expandConnectorsCard: () => void;
-  refreshStats: () => void;
 }
 export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
-  ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard, refreshStats }) => {
+  ({ migrationsStats, isConnectorsCardComplete, expandConnectorsCard }) => {
     const latestMigrationsStats = useMemo(
       () => migrationsStats.slice().reverse(),
       [migrationsStats]
@@ -89,7 +88,6 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
                 migrationStats={migrationStats}
                 isCollapsed={migrationStats.id !== expandedCardId}
                 onToggleCollapsed={getOnToggleCollapsed(migrationStats.id)}
-                refreshStats={refreshStats}
               />
             )}
           </EuiFlexItem>

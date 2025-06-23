@@ -68,11 +68,10 @@ export interface MigrationResultPanelProps {
   migrationStats: RuleMigrationStats;
   isCollapsed: boolean;
   onToggleCollapsed: (isCollapsed: boolean) => void;
-  refreshStats: () => void;
 }
 
 export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
-  ({ migrationStats, isCollapsed = false, onToggleCollapsed, refreshStats }) => {
+  ({ migrationStats, isCollapsed = false, onToggleCollapsed }) => {
     const { data: translationStats, isLoading: isLoadingTranslationStats } =
       useGetMigrationTranslationStats(migrationStats.id);
 
