@@ -10,7 +10,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import type { Map as MapboxMap } from '@kbn/mapbox-gl';
 import { css } from '@emotion/react';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 const MAX_WIDTH = 110;
 
@@ -59,7 +59,7 @@ const componentStyles = {
 export const ScaleControl: React.FC<Props> = ({ isFullScreen, mbMap }) => {
   const [label, setLabel] = useState('');
   const [width, setWidth] = useState(0);
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
   const onUpdate = useCallback(() => {
     const container = mbMap.getContainer();
     const centerHeight = container.clientHeight / 2;
