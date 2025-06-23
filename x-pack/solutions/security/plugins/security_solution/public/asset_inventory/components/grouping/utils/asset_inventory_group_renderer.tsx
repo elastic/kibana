@@ -69,6 +69,13 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
 
   switch (selectedGroup) {
     case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
+      const rawCriticalityLevel = firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key) as
+        | CriticalityLevelWithUnassigned
+        | 'deleted';
+
+      const criticalityLevel =
+        rawCriticalityLevel === 'deleted' ? 'unassigned' : rawCriticalityLevel;
+
       return nullGroupMessage ? (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -84,13 +91,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <AssetCriticalityBadge
-                  criticalityLevel={
-                    firstNonNullValue(
-                      bucket.assetCriticality?.buckets?.[0]?.key
-                    ) as CriticalityLevelWithUnassigned
-                  }
-                />
+                <AssetCriticalityBadge criticalityLevel={criticalityLevel} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
