@@ -107,6 +107,7 @@
     "@kbn/unified-histogram",
     "@kbn/alerts-ui-shared",
     "@kbn/core-pricing-browser-mocks",
+    "@kbn/css-utils",
     "@kbn/index-editor",
     "@kbn/file-upload-plugin"
   ],
