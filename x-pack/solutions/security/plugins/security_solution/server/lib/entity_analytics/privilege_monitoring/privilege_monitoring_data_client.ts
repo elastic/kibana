@@ -494,7 +494,7 @@ export class PrivilegeMonitoringDataClient {
         bool: {
           must: [
             { term: { 'labels.monitoring.privileged_users': 'monitored' } }, // This will need updated after https://github.com/elastic/kibana/pull/224623
-            { term: { 'labels.source_indices': indexName } },
+            { term: { 'labels.source_indices.keyword': indexName } },
           ],
           must_not: {
             terms: { 'user.name': userNames },
@@ -593,7 +593,7 @@ export class PrivilegeMonitoringDataClient {
             }
 
             if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
-              ctx._source.labels.monitoring_status = 'privileged_user_not_monitored';
+              ctx._source.labels.monitoring = ['privileged_users': 'not_monitored'];
             }
           `,
             params: {
