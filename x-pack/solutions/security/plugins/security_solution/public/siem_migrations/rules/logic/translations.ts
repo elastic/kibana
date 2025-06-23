@@ -54,3 +54,17 @@ export const RETRY_FAILED_RULES_FAILURE = i18n.translate(
     defaultMessage: 'Failed to reprocess migration rules',
   }
 );
+
+export const UPDATE_MIGRATION_NAME_SUCCESS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateMigrationNameSuccess',
+  {
+    defaultMessage: 'Migration name updated',
+  }
+);
+
+export const UPDATE_MIGRATION_NAME_FAILURE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.updateMigrationNameFailDescription',
+  {
+    defaultMessage: 'Failed to update migration name',
+  }
+);
