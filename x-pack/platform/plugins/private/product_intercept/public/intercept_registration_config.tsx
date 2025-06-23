@@ -39,18 +39,15 @@ export const productInterceptRegistrationConfig = ({
             productOffering,
           },
         }),
-        content: () =>
-          React.createElement(
-            EuiText,
-            { key: 'productInterceptPrompterStartContent', size: 's' },
-            i18n.translate('productIntercept.prompter.step.start.content', {
-              defaultMessage:
-                'We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us.',
-              values: {
-                productOffering,
-              },
-            })
-          ),
+        content: () => (
+          <EuiText size="s" key="productInterceptPrompterStartContent">
+            <FormattedMessage
+              id="productIntercept.prompter.step.start.content"
+              defaultMessage="We are always looking for ways to improve {productOffering}. Please take a moment to share your feedback with us."
+              values={{ productOffering }}
+            />
+          </EuiText>
+        ),
       },
       {
         id: 'satisfaction',
@@ -61,21 +58,23 @@ export const productInterceptRegistrationConfig = ({
           },
         }),
         content: ({ onValue }) => {
-          return React.createElement(NPSScoreInput, {
-            lowerBoundHelpText: i18n.translate(
-              'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
-              {
-                defaultMessage: 'Very dissatisfied',
-              }
-            ),
-            upperBoundHelpText: i18n.translate(
-              'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
-              {
-                defaultMessage: 'Very satisfied',
-              }
-            ),
-            onChange: onValue,
-          });
+          return (
+            <NPSScoreInput
+              lowerBoundHelpText={i18n.translate(
+                'productIntercept.prompter.step.satisfaction.lowerBoundDescriptionText',
+                {
+                  defaultMessage: 'Very dissatisfied',
+                }
+              )}
+              upperBoundHelpText={i18n.translate(
+                'productIntercept.prompter.step.satisfaction.upperBoundDescriptionText',
+                {
+                  defaultMessage: 'Very satisfied',
+                }
+              )}
+              onChange={onValue}
+            />
+          );
         },
       },
       {
@@ -87,21 +86,23 @@ export const productInterceptRegistrationConfig = ({
           },
         }),
         content: ({ onValue }) => {
-          return React.createElement(NPSScoreInput, {
-            lowerBoundHelpText: i18n.translate(
-              'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
-              {
-                defaultMessage: 'Very difficult',
-              }
-            ),
-            upperBoundHelpText: i18n.translate(
-              'productIntercept.prompter.step.ease.upperBoundDescriptionText',
-              {
-                defaultMessage: 'Very easy',
-              }
-            ),
-            onChange: onValue,
-          });
+          return (
+            <NPSScoreInput
+              lowerBoundHelpText={i18n.translate(
+                'productIntercept.prompter.step.ease.lowerBoundDescriptionText',
+                {
+                  defaultMessage: 'Very difficult',
+                }
+              )}
+              upperBoundHelpText={i18n.translate(
+                'productIntercept.prompter.step.ease.upperBoundDescriptionText',
+                {
+                  defaultMessage: 'Very easy',
+                }
+              )}
+              onChange={onValue}
+            />
+          );
         },
       },
       {
@@ -110,27 +111,21 @@ export const productInterceptRegistrationConfig = ({
           defaultMessage: 'Thanks for the feedback!',
         }),
         content: () => {
-          return React.createElement(
-            EuiText,
-            { size: 's' },
-            React.createElement(FormattedMessage, {
-              id: 'productIntercept.prompter.step.completion.content',
-              defaultMessage:
-                "If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>.",
-              values: {
-                productOffering,
-                link: (chunks) =>
-                  React.createElement(
-                    EuiLink,
-                    {
-                      external: true,
-                      href: surveyUrl.toString(),
-                      target: '_blank',
-                    },
-                    chunks
+          return (
+            <EuiText size="s" key="productInterceptPrompterCompletionContent">
+              <FormattedMessage
+                id="productIntercept.prompter.step.completion.content"
+                defaultMessage="If you'd like to participate in future research to help improve {productOffering}, <link>click here</link>."
+                values={{
+                  productOffering,
+                  link: (chunks) => (
+                    <EuiLink external target="_blank" href={surveyUrl.toString()}>
+                      {chunks}
+                    </EuiLink>
                   ),
-              },
-            })
+                }}
+              />
+            </EuiText>
           );
         },
       },

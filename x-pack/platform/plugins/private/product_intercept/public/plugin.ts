@@ -6,6 +6,7 @@
  */
 
 import { Subscription } from 'rxjs';
+import capitalize from 'lodash/capitalize';
 import { type CoreSetup, type CoreStart, Plugin } from '@kbn/core/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { InterceptsStart } from '@kbn/intercepts-plugin/public';
@@ -38,9 +39,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
       analytics: core.analytics,
     });
 
-    const productOffering = `Elastic ${function (string: string) {
-      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-    }.call(null, cloud.serverless?.projectType || '')}`.trim();
+    const productOffering = `Elastic ${capitalize(cloud.serverless.projectType || '')}`.trim();
 
     void (async () => {
       const currentUser = await core.security.authc.getCurrentUser();
