@@ -17,36 +17,8 @@ import {
 import { performUserActions } from '../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../types';
-import { SIEM_VERSIONS, type SiemVersion } from '../common/constants';
+import { SIEM_VERSIONS } from '../common/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
-import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users';
-
-const loginWithArtifactAccess = (
-  siemVersion: SiemVersion,
-  privilegePrefix: string,
-  access: 'none' | 'read' | 'all'
-) => {
-  const base = getT1Analyst();
-
-  const customRole: typeof base = {
-    ...base,
-    kibana: [
-      {
-        ...base.kibana[0],
-        feature: {
-          [siemVersion]: [
-            // siemVX: read
-            'read',
-            // none/read/all for selected artifact
-            ...(access !== 'none' ? [`${privilegePrefix}${access}`] : []),
-          ],
-        },
-      },
-    ],
-  };
-
-  login.withCustomRole({ name: 'customRole', ...customRole });
-};
 
 /**
  * Notes:
@@ -97,20 +69,22 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
             if (isServerless) {
               login(ROLE.endpoint_policy_manager);
             } else {
-              loginWithArtifactAccess(siemVersion, privilegePrefix, 'all');
+              login.withCustomKibanaPrivileges({
+                [siemVersion]: ['read', `${privilegePrefix}all`],
+              });
             }
           };
 
           loginWithReadAccess = () => {
             expect(isServerless, 'Testing read access is implemented only on ESS').to.equal(false);
-            loginWithArtifactAccess(siemVersion, privilegePrefix, 'read');
+            login.withCustomKibanaPrivileges({ [siemVersion]: ['read', `${privilegePrefix}read`] });
           };
 
           loginWithoutAccess = () => {
             if (isServerless) {
               login(ROLE.t1_analyst);
             } else {
-              loginWithArtifactAccess(siemVersion, privilegePrefix, 'none');
+              login.withCustomKibanaPrivileges({ [siemVersion]: ['read'] });
             }
           };
         });
