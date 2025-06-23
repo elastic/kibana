@@ -26,7 +26,6 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
-    "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/core",
     "@kbn/data-plugin",
