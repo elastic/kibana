@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     // list paths to the files that contain your plugins tests
-    testFiles: [],
+    testFiles: [resolve(__dirname, './apps/security/basic_license')],
 
     services,
     pageObjects,
