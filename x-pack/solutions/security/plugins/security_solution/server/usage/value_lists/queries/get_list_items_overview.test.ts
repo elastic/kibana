@@ -31,7 +31,7 @@ describe('getListItemsOverview', () => {
         items_per_list: { buckets: [] },
         min_items_per_list: { value: null },
         max_items_per_list: { value: null },
-        avg_items_per_list: { value: null },
+        median_items_per_list: { value: null },
       },
       hits: {
         total: { value: 0, relation: 'eq' },
@@ -46,7 +46,7 @@ describe('getListItemsOverview', () => {
       total: 0,
       max_items_per_list: 0,
       min_items_per_list: 0,
-      average_items_per_list: 0,
+      median_items_per_list: 0,
     });
   });
 
@@ -69,7 +69,7 @@ describe('getListItemsOverview', () => {
         },
         min_items_per_list: { value: 5 },
         max_items_per_list: { value: 10 },
-        avg_items_per_list: { value: 7.5 },
+        median_items_per_list: { values: { '50.0': 7.5 } },
       },
       hits: {
         total: { value: 15, relation: 'eq' },
@@ -84,7 +84,7 @@ describe('getListItemsOverview', () => {
       total: 15,
       max_items_per_list: 10,
       min_items_per_list: 5,
-      average_items_per_list: 7.5,
+      median_items_per_list: 7.5,
     });
   });
 
@@ -97,7 +97,7 @@ describe('getListItemsOverview', () => {
       total: 0,
       max_items_per_list: 0,
       min_items_per_list: 0,
-      average_items_per_list: 0,
+      median_items_per_list: 0,
     });
   });
 });

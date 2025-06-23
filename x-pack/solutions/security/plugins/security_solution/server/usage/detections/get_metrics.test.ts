@@ -110,6 +110,7 @@ describe('Detections Usage and Metrics', () => {
               has_alert_suppression_per_rule_execution: false,
               has_alert_suppression_per_time_period: false,
               alert_suppression_fields_count: 0,
+              has_exceptions: false,
             },
           ],
           detection_rule_usage: {
@@ -125,6 +126,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
             elastic_total: {
               alerts: 3400,
@@ -137,6 +139,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
           },
         },
@@ -185,6 +188,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
             query: {
               alerts: 800,
@@ -197,6 +201,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
           },
         },
@@ -251,6 +256,7 @@ describe('Detections Usage and Metrics', () => {
               has_alert_suppression_missing_fields_strategy_do_not_suppress: false,
               has_alert_suppression_per_rule_execution: false,
               has_alert_suppression_per_time_period: false,
+              has_exceptions: false,
             },
           ],
           detection_rule_usage: {
@@ -266,6 +272,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
             query: {
               alerts: 0,
@@ -278,6 +285,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
             },
           },
         },

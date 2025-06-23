@@ -160,6 +160,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of query rules with exceptions' },
+              },
             },
             threshold: {
               enabled: {
@@ -268,6 +272,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of threshold rules with exceptions' },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -363,6 +371,10 @@ export const registerCollector: RegisterCollector = ({
                       'Number of eql rules configured do not suppress alerts with missing fields',
                   },
                 },
+              },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of eql rules with exceptions' },
               },
             },
             machine_learning: {
@@ -474,6 +486,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of machine_learning rules with exceptions' },
+              },
             },
             threat_match: {
               enabled: {
@@ -583,6 +599,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of threat_match rules with exceptions' },
+              },
             },
             new_terms: {
               enabled: {
@@ -691,6 +711,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of new_terms rules with exceptions' },
+              },
             },
             esql: {
               enabled: {
@@ -795,6 +819,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of esql rules with exceptions' },
+              },
             },
             elastic_total: {
               enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -896,6 +924,10 @@ export const registerCollector: RegisterCollector = ({
                   },
                 },
               },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of elastic rules with exceptions' },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -992,6 +1024,10 @@ export const registerCollector: RegisterCollector = ({
                       'Number of custom rules configured do not suppress alerts with missing fields',
                   },
                 },
+              },
+              has_exceptions: {
+                type: 'long',
+                _meta: { description: 'Number of custom rules with exceptions' },
               },
             },
           },

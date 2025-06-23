@@ -8,37 +8,12 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ValueListsOverviewMetricsSchema, ListsOverviewAggsResponse } from '../types';
+import { METRICS_LISTS_DEFAULT_STATE } from '../utils';
 
 export interface GetExceptionsOverviewOptions {
   logger: Logger;
   esClient: ElasticsearchClient;
 }
-
-const METRICS_DEFAULT_STATE = {
-  binary: 0,
-  boolean: 0,
-  byte: 0,
-  date: 0,
-  date_nanos: 0,
-  date_range: 0,
-  double: 0,
-  double_range: 0,
-  float: 0,
-  float_range: 0,
-  geo_point: 0,
-  geo_shape: 0,
-  half_float: 0,
-  integer: 0,
-  integer_range: 0,
-  ip: 0,
-  ip_range: 0,
-  keyword: 0,
-  long: 0,
-  long_range: 0,
-  shape: 0,
-  short: 0,
-  text: 0,
-};
 
 export const getListsOverview = async ({
   logger,
@@ -59,10 +34,12 @@ export const getListsOverview = async ({
       },
     };
 
+    logger.debug(`Fetching value lists overview metrics: ${JSON.stringify(query, null, 2)}`);
+
     const response = await esClient.search(query);
     const { aggregations: aggs, hits } = response as unknown as ListsOverviewAggsResponse;
 
-    type MetricKeys = keyof typeof METRICS_DEFAULT_STATE;
+    type MetricKeys = keyof typeof METRICS_LISTS_DEFAULT_STATE;
 
     const listTypes = aggs.by_type.buckets.reduce((aggResult, typeBucket) => {
       const listType = typeBucket.key as MetricKeys;
@@ -73,13 +50,19 @@ export const getListsOverview = async ({
         [listType]: (aggResult[listType] ?? 0) + count,
       };
       return updatedResult;
-    }, METRICS_DEFAULT_STATE);
+    }, METRICS_LISTS_DEFAULT_STATE);
+
+    logger.debug(
+      `Returning value lists overview metrics response: ${JSON.stringify(listTypes, null, 2)}`
+    );
 
     return {
       ...listTypes,
       total: hits.total.value,
     };
   } catch (error) {
-    return { ...METRICS_DEFAULT_STATE, total: 0 };
+    logger.error(`Error fetching value lists overview metrics: ${error.message}`);
+    // Return default state if an error occurs
+    return { ...METRICS_LISTS_DEFAULT_STATE, total: 0 };
   }
 };

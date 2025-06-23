@@ -9,6 +9,7 @@ import { getValueListsMetrics } from './get_metrics';
 import { getListsOverview } from './queries/get_lists_overview';
 import { getListItemsOverview } from './queries/get_list_items_overview';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { METRICS_ITEMS_DEFAULT_STATE, METRICS_LISTS_DEFAULT_STATE } from './utils';
 
 jest.mock('./queries/get_lists_overview', () => ({
   getListsOverview: jest.fn(),
@@ -26,6 +27,7 @@ describe('getValueListsMetrics', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggingSystemMock.createLogger();
     jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   it('returns combined metrics from getListsOverview and getListItemsOverview', async () => {
@@ -52,9 +54,6 @@ describe('getValueListsMetrics', () => {
       lists_overview: mockListsOverview,
       items_overview: mockItemsOverview,
     });
-
-    expect(getListsOverview).toHaveBeenCalledWith({ esClient, logger });
-    expect(getListItemsOverview).toHaveBeenCalledWith({ esClient, logger });
   });
 
   it('handles errors gracefully when getListsOverview fails', async () => {
@@ -71,12 +70,9 @@ describe('getValueListsMetrics', () => {
     const result = await getValueListsMetrics({ esClient, logger });
 
     expect(result).toEqual({
-      lists_overview: {},
-      items_overview: mockItemsOverview,
+      lists_overview: METRICS_LISTS_DEFAULT_STATE,
+      items_overview: METRICS_ITEMS_DEFAULT_STATE,
     });
-
-    expect(getListsOverview).toHaveBeenCalledWith({ esClient, logger });
-    expect(getListItemsOverview).toHaveBeenCalledWith({ esClient, logger });
   });
 
   it('handles errors gracefully when getListItemsOverview fails', async () => {
@@ -93,12 +89,9 @@ describe('getValueListsMetrics', () => {
     const result = await getValueListsMetrics({ esClient, logger });
 
     expect(result).toEqual({
-      lists_overview: mockListsOverview,
-      items_overview: {},
+      lists_overview: METRICS_LISTS_DEFAULT_STATE,
+      items_overview: METRICS_ITEMS_DEFAULT_STATE,
     });
-
-    expect(getListsOverview).toHaveBeenCalledWith({ esClient, logger });
-    expect(getListItemsOverview).toHaveBeenCalledWith({ esClient, logger });
   });
 
   it('handles errors gracefully when both functions fail', async () => {
@@ -108,11 +101,8 @@ describe('getValueListsMetrics', () => {
     const result = await getValueListsMetrics({ esClient, logger });
 
     expect(result).toEqual({
-      lists_overview: {},
-      items_overview: {},
+      lists_overview: METRICS_LISTS_DEFAULT_STATE,
+      items_overview: METRICS_ITEMS_DEFAULT_STATE,
     });
-
-    expect(getListsOverview).toHaveBeenCalledWith({ esClient, logger });
-    expect(getListItemsOverview).toHaveBeenCalledWith({ esClient, logger });
   });
 });

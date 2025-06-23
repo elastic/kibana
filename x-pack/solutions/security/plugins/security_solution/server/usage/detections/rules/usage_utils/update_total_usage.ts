@@ -55,5 +55,8 @@ export const updateTotalUsage = ({
       usage: updatedUsage[totalType],
       detectionRuleMetric,
     }),
+    has_exceptions: detectionRuleMetric.has_exceptions
+      ? updatedUsage[totalType].has_exceptions + 1
+      : updatedUsage[totalType].has_exceptions,
   };
 };

@@ -8,18 +8,12 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ValueListItemsOverviewMetricsSchema, ListItemsOverviewAggsResponse } from '../types';
+import { METRICS_ITEMS_DEFAULT_STATE } from '../utils';
 
 export interface GetExceptionsOverviewOptions {
   logger: Logger;
   esClient: ElasticsearchClient;
 }
-
-const METRICS_DEFAULT_STATE = {
-  total: 0,
-  max_items_per_list: 0,
-  min_items_per_list: 0,
-  median_items_per_list: 0,
-};
 
 export const getListItemsOverview = async ({
   logger,
@@ -56,8 +50,12 @@ export const getListItemsOverview = async ({
       },
     };
 
+    logger.debug(`Fetching value list items metrics: ${JSON.stringify(query, null, 2)}`);
+
     const response = await esClient.search(query);
     const { aggregations: aggs, hits } = response as unknown as ListItemsOverviewAggsResponse;
+
+    logger.debug(`Returning value list items metrics response: ${JSON.stringify(aggs, null, 2)}`);
 
     return {
       total: hits.total.value,
@@ -66,6 +64,8 @@ export const getListItemsOverview = async ({
       median_items_per_list: aggs.median_items_per_list.values['50.0'],
     };
   } catch (error) {
-    return { ...METRICS_DEFAULT_STATE, total: 0 };
+    logger.error(`Error fetching value list items metrics: ${error.message}`);
+
+    return { ...METRICS_ITEMS_DEFAULT_STATE, total: 0 };
   }
 };
