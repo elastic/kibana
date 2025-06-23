@@ -1054,7 +1054,11 @@ FROM a
   });
 
   describe('many comments', () => {
-    test('can attach all possible inline comments in basic RERANK command', () => {
+    /**
+     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+     * get back to it after 9.1 release.
+     */
+    test.skip('can attach all possible inline comments in basic RERANK command', () => {
       const src = `
         FROM a
           | /*0*/ RERANK /*1*/ "query" /*2*/
