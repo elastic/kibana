@@ -6907,6 +6907,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/restorable-state@link:src/platform/packages/shared/kbn-restorable-state":
+  version "0.0.0"
+  uid ""
+
 "@kbn/rison@link:src/platform/packages/shared/kbn-rison":
   version "0.0.0"
   uid ""
