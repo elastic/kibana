@@ -15,3 +15,4 @@ export type EsqlToolApiObj = Omit<EsqlToolDefinition, 'id'> & {
 
 export type EsqlToolCreateRequest = EsqlToolApiObj;
 export type EsqlToolCreateResponse = EsqlToolApiObj;
+export type EsqlToolUpdateRequest = Partial<EsqlToolApiObj>

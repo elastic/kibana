@@ -9,14 +9,27 @@ import { esqlToolProviderId } from '@kbn/onechat-common';
 import { v4 as uuidv4 } from 'uuid';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { EsqlToolCreateRequest } from '../../common/tools';
+import { EsqlToolCreateRequest, EsqlToolUpdateRequest } from '../../common/tools';
 import { apiPrivileges } from '../../common/features';
 import { ESQL_TOOL_API_UI_SETTING_ID } from '../../common/constants';
 
 const TECHNICAL_PREVIEW_WARNING =
   'Elastic ESQL Tool API is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
 
-export function registerESQLToolsRoutes({
+const paramValueTypeSchema = schema.oneOf([
+  schema.literal('text'),
+  schema.literal('keyword'),
+  schema.literal('long'),
+  schema.literal('integer'),
+  schema.literal('double'),
+  schema.literal('float'),
+  schema.literal('boolean'),
+  schema.literal('date'),
+  schema.literal('object'),
+  schema.literal('nested'),
+]);
+
+  export function registerESQLToolsRoutes({
   router,
   getInternalServices,
   logger,
@@ -53,32 +66,23 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
-        try {
-          const { esql: esqlToolClientService } = getInternalServices();
-          const client = await esqlToolClientService.getScopedClient({ request });
-          const tool = await client.get(request.params.id);
+        const { esql: esqlToolClientService } = getInternalServices();
+        const client = await esqlToolClientService.getScopedClient({ request });
+        const tool = await client.get(request.params.id);
 
-          if (!tool) {
-            return response.notFound({
-              body: {
-                message: `Tool with id ${request.params.id} not found.`,
-              },
-            });
-          }
-
-          return response.ok({
+        if (!tool) {
+          return response.notFound({
             body: {
-              tool,
-            },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Error: ${error.message}`,
+              message: `Tool with id ${request.params.id} not found.`,
             },
           });
         }
+
+        return response.ok({
+          body: {
+            tool,
+          },
+        });
       })
     );
 
@@ -111,25 +115,16 @@ export function registerESQLToolsRoutes({
           return response.notFound();
         }
 
-        try {
-          const { esql: esqlToolClientService } = getInternalServices();
-          const client = await esqlToolClientService.getScopedClient({ request });
+        const { esql: esqlToolClientService } = getInternalServices();
+        const client = await esqlToolClientService.getScopedClient({ request });
 
-          const tools = await client.list();
+        const tools = await client.list();
 
-          return response.ok({
-            body: {
-              tools,
-            },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Error: ${error.message}`,
-            },
-          });
-        }
+        return response.ok({
+          body: {
+            tools,
+          },
+        });
       })
     );
 
@@ -162,18 +157,7 @@ export function registerESQLToolsRoutes({
               params: schema.recordOf(
                 schema.string(),
                 schema.object({
-                  type: schema.oneOf([
-                    schema.literal('text'),
-                    schema.literal('keyword'),
-                    schema.literal('long'),
-                    schema.literal('integer'),
-                    schema.literal('double'),
-                    schema.literal('float'),
-                    schema.literal('boolean'),
-                    schema.literal('date'),
-                    schema.literal('object'),
-                    schema.literal('nested'),
-                  ]),
+                  type: paramValueTypeSchema,
                   description: schema.string(),
                 })
               ),
@@ -191,41 +175,32 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
-        try {
-          const { esql: esqlToolService } = getInternalServices();
-          const client = await esqlToolService.getScopedClient({ request });
-          const toolid = request.body.id || uuidv4();
-          const now = new Date();
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
+        const toolid = request.body.id || uuidv4();
+        const now = new Date();
 
-          const tool: EsqlToolCreateRequest = {
-            id: toolid,
-            name: request.body.name,
-            description: request.body.description,
-            query: request.body.query,
-            params: request.body.params || {},
-            meta: {
-              tags: request.body.meta.tags || [],
-              providerId: esqlToolProviderId,
-            },
-            created_at: now.toISOString(),
-            updated_at: now.toISOString(),
-          };
+        const tool: EsqlToolCreateRequest = {
+          id: toolid,
+          name: request.body.name,
+          description: request.body.description,
+          query: request.body.query,
+          params: request.body.params || {},
+          meta: {
+            tags: request.body.meta.tags || [],
+            providerId: esqlToolProviderId,
+          },
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+        };
 
-          const createResponse = await client.create(tool);
+        const createResponse = await client.create(tool);
 
-          return response.ok({
-            body: {
-              tool: createResponse,
-            },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Error: ${error.message}`,
-            },
-          });
-        }
+        return response.ok({
+          body: {
+            tool: createResponse,
+          },
+        });
       })
     );
 
@@ -259,18 +234,7 @@ export function registerESQLToolsRoutes({
                 schema.recordOf(
                   schema.string(),
                   schema.object({
-                    type: schema.oneOf([
-                      schema.literal('text'),
-                      schema.literal('keyword'),
-                      schema.literal('long'),
-                      schema.literal('integer'),
-                      schema.literal('double'),
-                      schema.literal('float'),
-                      schema.literal('boolean'),
-                      schema.literal('date'),
-                      schema.literal('object'),
-                      schema.literal('nested'),
-                    ]),
+                    type: paramValueTypeSchema,
                     description: schema.string(),
                   })
                 )
@@ -291,43 +255,33 @@ export function registerESQLToolsRoutes({
         if (!enabled) {
           return response.notFound();
         }
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
 
-        try {
-          const { esql: esqlToolService } = getInternalServices();
-          const client = await esqlToolService.getScopedClient({ request });
+        const toolId = request.params.id;
+        const { name, description, query, params, meta } = request.body;
 
-          const toolId = request.params.id;
-          const { name, description, query, params, meta } = request.body;
-
-          const updates: Partial<EsqlToolCreateRequest> = {
-            id: toolId,
-            name: name || undefined,
-            description: description || undefined,
-            query: query || undefined,
-            params: params || undefined,
-            ...(meta?.tags && {
-              meta: {
-                tags: meta.tags,
-                providerId: esqlToolProviderId,
-              },
-            }),
-          };
-
-          const updatedTool = await client.update(toolId, updates);
-
-          return response.ok({
-            body: {
-              esqlTool: updatedTool,
+        const updates: EsqlToolUpdateRequest = {
+          id: toolId,
+          name: name,
+          description: description,
+          query: query,
+          params: params,
+          ...(meta?.tags && {
+            meta: {
+              tags: meta.tags,
+              providerId: esqlToolProviderId,
             },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Error: ${error.message}`,
-            },
-          });
-        }
+          }),
+        };
+
+        const updatedTool = await client.update(toolId, updates);
+
+        return response.ok({
+          body: {
+            esqlTool: updatedTool,
+          },
+        });
       })
     );
 
@@ -362,32 +316,23 @@ export function registerESQLToolsRoutes({
           return response.notFound();
         }
 
-        try {
-          const { esql: esqlToolService } = getInternalServices();
-          const client = await esqlToolService.getScopedClient({ request });
-          const result = await client.delete(request.params.id);
+        const { esql: esqlToolService } = getInternalServices();
+        const client = await esqlToolService.getScopedClient({ request });
+        const result = await client.delete(request.params.id);
 
-          if (result === null || result === undefined) {
-            return response.notFound({
-              body: {
-                message: `Tool with name "${request.params.id}" not found.`,
-              },
-            });
-          }
-
-          return response.ok({
+        if (result === null || result === undefined) {
+          return response.notFound({
             body: {
-              success: result,
-            },
-          });
-        } catch (error) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: `Error: ${error.message}`,
+              message: `Tool with name "${request.params.id}" not found.`,
             },
           });
         }
+
+        return response.ok({
+          body: {
+            success: result,
+          },
+        });
       })
     );
 }

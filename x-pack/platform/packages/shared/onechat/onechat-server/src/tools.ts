@@ -90,7 +90,10 @@ export interface EsqlToolDefinition extends ToolDescriptor {
   >;
 }
 
-export interface EsqlTool extends RegisteredTool {
+export interface EsqlTool<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+> extends RegisteredTool<RunInput, RunOutput> {
   /**
    * The ESQL id to be executed.
    */
@@ -115,20 +118,17 @@ export interface EsqlTool extends RegisteredTool {
    * Parameters that can be used in the query.
    * Each parameter has a key identifier and metadata about its type and usage.
    */
-  params: Record<
-    string,
-    {
-      /**
-       * The data type of the parameter.
-       */
-      type: string;
+  params: Record<string, {
+    /**
+     * The data type of the parameter.
+     */
+    type: string;
 
-      /**
-       * Description of the parameter's purpose or expected values.
-       */
-      description: string;
-    }
-  >;
+    /**
+     * Description of the parameter's purpose or expected values.
+     */
+    description: string;
+  }>;
 }
 
 /**

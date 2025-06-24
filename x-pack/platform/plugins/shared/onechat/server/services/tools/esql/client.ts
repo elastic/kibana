@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { esqlToolProviderId } from '@kbn/onechat-common';
+import { createInternalError, esqlToolProviderId } from '@kbn/onechat-common';
 import { logger } from 'elastic-apm-node';
-import { EsqlToolCreateRequest, EsqlToolCreateResponse } from '../../../../common/tools';
+import { EsqlToolCreateRequest, EsqlToolCreateResponse, EsqlToolUpdateRequest } from '../../../../common/tools';
 import { esqlToolIndexName } from './storage';
 import { EsqlToolStorage } from './storage';
+import { EsqlToolDefinition } from '@kbn/onechat-server';
 
 export interface EsqlToolClient {
-  get(toolId: string): Promise<EsqlToolCreateResponse>;
-  list(): Promise<EsqlToolCreateResponse[]>;
+  get(toolId: string): Promise<EsqlToolDefinition>;
+  list(): Promise<EsqlToolDefinition[]>;
   create(esqlTool: EsqlToolCreateResponse): Promise<EsqlToolCreateResponse>;
   update(toolId: string, updates: Partial<EsqlToolCreateRequest>): Promise<EsqlToolCreateResponse>;
   delete(toolId: string): Promise<boolean>;
@@ -31,20 +32,21 @@ class EsqlToolClientImpl {
     this.storage = storage;
   }
 
-  async get(id: string): Promise<EsqlToolCreateResponse> {
+  async get(id: string): Promise<EsqlToolDefinition> {
     try {
       const document = await this.storage.getClient().get({ id });
 
-      const tool = document._source as EsqlToolCreateResponse;
+      const tool = document._source as EsqlToolDefinition;
 
       return tool;
     } catch (error) {
-      logger.error(`Error retrieving ESQL tool with Id ${id}: ${error}`);
-      throw error;
+      const message = `Error retrieving ESQL tool with Id ${id}: ${error}`
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
 
-  async list(): Promise<EsqlToolCreateResponse[]> {
+  async list(): Promise<EsqlToolDefinition[]> {
     try {
       const document = await this.storage.getClient().search({
         index: esqlToolIndexName,
@@ -55,10 +57,11 @@ class EsqlToolClientImpl {
         track_total_hits: true,
       });
 
-      return document.hits.hits.map((hit) => hit._source as EsqlToolCreateResponse);
+      return document.hits.hits.map((hit) => hit._source as EsqlToolDefinition);
     } catch (error) {
-      logger.error(`Error fetching all ESQL tools: ${error}`);
-      throw error;
+      const message = `Error fetching all ESQL tools: ${error}`;
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
 
@@ -83,13 +86,14 @@ class EsqlToolClientImpl {
 
       return document as EsqlToolCreateResponse;
     } catch (error) {
-      logger.info(`Error creating ESQL tool with Id ${tool.id}: ${error}`);
-      throw error;
+      const message = `Error creating ESQL tool with id ${tool.id}: ${error}`;
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
   async update(
     id: string,
-    updates: Partial<EsqlToolCreateRequest>
+    updates: EsqlToolUpdateRequest
   ): Promise<EsqlToolCreateResponse> {
     try {
       const now = new Date();
@@ -123,25 +127,22 @@ class EsqlToolClientImpl {
 
       return updatedTool;
     } catch (error) {
-      logger.error(`Error updating/creating ESQL tool with ID ${id}: ${error}`);
-      throw error;
+      const message = `Error updating/creating ESQL tool with id ${id}: ${error}`;
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
   async delete(id: string): Promise<boolean> {
     try {
-      const document = await this.storage.getClient().get({ id });
-
-      if (!document) {
-        throw new Error(`Tool with id ${id} not found`);
-      }
-
-      const tool = document._source as EsqlToolCreateResponse;
-
-      await this.storage.getClient().delete({ id: tool.id });
+      const response = await this.storage.getClient().delete({ id: id });
+      if (response.result !== 'deleted') {
+        throw createInternalError(`Failed to delete ESQL tool with id ${id}`);
+    }
       return true;
     } catch (error) {
-      logger.error(`Error deleting ESQL tool with id ${id}: ${error}`);
-      throw error;
+      const message = `Error deleting ESQL tool with id ${id}: ${error}`;
+      logger.error(message);
+      throw createInternalError(message);
     }
   }
 }
