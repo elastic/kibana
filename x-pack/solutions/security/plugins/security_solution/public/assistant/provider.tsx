@@ -89,7 +89,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   const PROMPT_CONTEXTS = useFindPromptContexts({
     context: {
-      isAssistantEnabled: assistantAvailability.isAssistantEnabled,
+      isAssistantEnabled:
+        hasEnterpriseLicence &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege,
       httpFetch: http.fetch,
       toasts: notifications.toasts,
     },
