@@ -95,7 +95,7 @@ EXAMPLES
 
     logger.debug(`The user prompt "${userPrompt}" was re-written to "${rewrittenUserPrompt}"`);
 
-    return rewrittenUserPrompt;
+    return rewrittenUserPrompt || userPrompt!;
   } catch (error) {
     logger.error(`Failed to rewrite the user prompt: "${userPrompt}"`);
     logger.error(error);

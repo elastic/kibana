@@ -287,11 +287,9 @@ export class LlmProxy {
     return this.intercept(
       `interceptQueryRewrite: "${rewrittenQuery}"`,
       (body) => {
-        const systemMessage = body.messages.find((msg) => msg.role === MessageRole.System)!;
-        return systemMessage.content!.includes(
-          // @ts-expect-error
-          'You are a retrieval query-rewriting assistant'
-        );
+        const systemMessageContent = body.messages.find((msg) => msg.role === MessageRole.System)
+          ?.content as string;
+        return systemMessageContent.includes('You are a retrieval query-rewriting assistant');
       },
       rewrittenQuery
     ).completeAfterIntercept();
