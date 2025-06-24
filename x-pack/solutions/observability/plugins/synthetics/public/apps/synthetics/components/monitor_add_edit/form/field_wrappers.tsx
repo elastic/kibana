@@ -29,6 +29,10 @@ import {
   EuiTextAreaProps,
 } from '@elastic/eui';
 import {
+  MaintenanceWindowsField,
+  MaintenanceWindowsFieldProps,
+} from '../fields/maintenance_windows/maintenance_windows';
+import {
   ThrottlingConfigField,
   ThrottlingConfigFieldProps,
 } from '../fields/throttling/throttling_config_field';
@@ -154,3 +158,8 @@ export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseB
 export const ThrottlingWrapper = React.forwardRef<unknown, ThrottlingConfigFieldProps>(
   (props, _ref) => <ThrottlingConfigField {...props} />
 );
+
+export const MaintenanceWindowsFieldWrapper = React.forwardRef<
+  unknown,
+  MaintenanceWindowsFieldProps
+>((props, _ref) => <MaintenanceWindowsField {...props} />);

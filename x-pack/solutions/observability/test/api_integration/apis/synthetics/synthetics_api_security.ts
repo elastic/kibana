@@ -39,7 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
       let resp;
       const { statusCodes, SPACE_ID, username, password, writeAccess, readUser } = options;
       let tags = !writeAccess ? '[uptime-read]' : options.tags ?? '[uptime-read,uptime-write]';
-      if ((method === 'POST' || method === 'DELETE') && path.includes('private_locations')) {
+      if (
+        (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
+        path.includes('private_locations')
+      ) {
         tags = readUser
           ? '[private-location-write,uptime-write]'
           : '[uptime-read,private-location-write,uptime-write]';

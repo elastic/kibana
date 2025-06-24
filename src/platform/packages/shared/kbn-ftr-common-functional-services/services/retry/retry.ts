@@ -12,8 +12,13 @@ import { retryForSuccess } from './retry_for_success';
 import { retryForTruthy } from './retry_for_truthy';
 
 export interface TryWithRetriesOptions {
+  // The initial delay before the first attempt
+  initialDelay?: number;
+  // The number of retry attempts
   retryCount: number;
+  // The delay between retry attempts
   retryDelay?: number;
+  // The timeout for the retry attempts
   timeout?: number;
 }
 
@@ -108,7 +113,12 @@ export class RetryService extends FtrService {
     options: TryWithRetriesOptions,
     onFailureBlock?: () => Promise<T>
   ): Promise<T> {
-    const { retryCount, timeout = this.config.get('timeouts.try'), retryDelay = 200 } = options;
+    const {
+      retryCount,
+      timeout = this.config.get('timeouts.try'),
+      retryDelay = 200,
+      initialDelay,
+    } = options;
 
     return await retryForSuccess<T>(this.log, {
       description,
@@ -118,6 +128,7 @@ export class RetryService extends FtrService {
       onFailureBlock,
       retryDelay,
       retryCount,
+      initialDelay,
     });
   }
 }
