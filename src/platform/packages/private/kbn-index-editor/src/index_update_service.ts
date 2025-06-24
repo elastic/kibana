@@ -216,8 +216,8 @@ export class IndexUpdateService {
     this._subscription.add(
       this.bufferState$
         .pipe(
-          tap(() => {
-            this._isSaving$.next(true);
+          tap((updates) => {
+            this._isSaving$.next(updates.length > 0);
           }),
           debounceTime(BUFFER_TIMEOUT_MS),
           filter((updates) => updates.length > 0),

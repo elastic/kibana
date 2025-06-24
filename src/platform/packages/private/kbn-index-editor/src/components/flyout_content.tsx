@@ -51,6 +51,13 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     (res) => {
       deps.indexUpdateService.setIndexName(res!.index);
       deps.indexUpdateService.setIndexCreated(true);
+
+      // temp fix to fetch docs when the index is ready
+      setTimeout(() => {
+        if (res?.files.some((v) => v.docCount > 0)) {
+          deps.indexUpdateService.refresh();
+        }
+      }, 3000);
     }
   );
 
