@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FeedbackButton } from './feedback';
 import { InterceptPrompter } from './prompter';
