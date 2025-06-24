@@ -192,10 +192,10 @@ export const ScheduledReportFlyoutContent = ({
   });
 
   useEffect(() => {
-    if (!hasManageReportingPrivilege && userProfile?.user.email) {
+    if (!readOnly && !hasManageReportingPrivilege && userProfile?.user.email) {
       form.setFieldValue('emailRecipients', [userProfile.user.email]);
     }
-  }, [form, hasManageReportingPrivilege, userProfile?.user.email]);
+  }, [form, hasManageReportingPrivilege, readOnly, userProfile?.user.email]);
 
   const isRecurring = recurring || false;
   const isEmailActive = sendByEmail || false;
@@ -222,7 +222,7 @@ export const ScheduledReportFlyoutContent = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {isReportingHealthLoading || isUserProfileLoading ? (
+        {!readOnly && (isReportingHealthLoading || isUserProfileLoading) ? (
           <EuiLoadingSpinner size="l" />
         ) : isReportingHealthError ? (
           <EuiCallOut
@@ -309,9 +309,11 @@ export const ScheduledReportFlyoutContent = ({
             <ResponsiveFormGroup
               title={<h3>{i18n.SCHEDULED_REPORT_FORM_EXPORTS_SECTION_TITLE}</h3>}
               description={
-                <p>
-                  {i18n.SCHEDULED_REPORT_FORM_EXPORTS_SECTION_DESCRIPTION} {reportingPageLink}.
-                </p>
+                !readOnly && (
+                  <p>
+                    {i18n.SCHEDULED_REPORT_FORM_EXPORTS_SECTION_DESCRIPTION} {reportingPageLink}.
+                  </p>
+                )
               }
             >
               <FormField
@@ -340,25 +342,28 @@ export const ScheduledReportFlyoutContent = ({
                         componentProps={{
                           compressed: true,
                           fullWidth: true,
-                          helpText: hasManageReportingPrivilege
-                            ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
-                            : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT,
+                          helpText: !readOnly
+                            ? hasManageReportingPrivilege
+                              ? i18n.SCHEDULED_REPORT_FORM_EMAIL_RECIPIENTS_HINT
+                              : i18n.SCHEDULED_REPORT_FORM_EMAIL_SELF_HINT
+                            : undefined,
                           euiFieldProps: {
                             compressed: true,
                             fullWidth: true,
-                            readOnly,
-                            isDisabled: !hasManageReportingPrivilege,
+                            isDisabled: readOnly || !hasManageReportingPrivilege,
                             'data-test-subj': 'emailRecipientsCombobox',
                           },
                         }}
                       />
-                      <EuiCallOut
-                        title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
-                        iconType="iInCircle"
-                        size="s"
-                      >
-                        <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
-                      </EuiCallOut>
+                      {!readOnly && (
+                        <EuiCallOut
+                          title={i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_TITLE}
+                          iconType="iInCircle"
+                          size="s"
+                        >
+                          <p>{i18n.SCHEDULED_REPORT_FORM_EMAIL_SENSITIVE_INFO_MESSAGE}</p>
+                        </EuiCallOut>
+                      )}
                     </EuiFlexGroup>
                   </>
                 )
