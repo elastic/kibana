@@ -7,13 +7,13 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/security_solution/public/one_discover'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/one_discover'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/security_solution/public/one_discover',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/one_discover',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/security_solution/public/one_discover/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/one_discover/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
 };
