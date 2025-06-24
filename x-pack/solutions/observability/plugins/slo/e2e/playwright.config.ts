@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './slos_overview.journey';
-export * from './annotation_list.journey';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
