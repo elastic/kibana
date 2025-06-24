@@ -13,6 +13,7 @@ import {
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import { IndexPattern } from '../../types';
+import { documentField } from '../../document_field';
 
 export function getInvalidFieldMessage(
   column: FieldBasedIndexPatternColumn,
@@ -22,7 +23,13 @@ export function getInvalidFieldMessage(
     return;
   }
   const { sourceField, operationType } = column;
-  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+  let field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
+
+  if (!field && operationType === 'count') {
+    // This is a hotfix for https://github.com/elastic/kibana/issues/224593
+    field = documentField;
+  }
+
   const operationDefinition = operationType && operationDefinitionMap[operationType];
 
   const isInvalid = Boolean(
