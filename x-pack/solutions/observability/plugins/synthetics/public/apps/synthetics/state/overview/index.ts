@@ -12,6 +12,7 @@ import {
   setFlyoutConfig,
   setOverviewGroupByAction,
   setOverviewPageStateAction,
+  setRollupLocations,
   setOverviewViewAction,
   toggleErrorPopoverOpen,
   trendStatsBatch,
@@ -29,6 +30,7 @@ const initialState: MonitorOverviewState = {
   groupBy: { field: 'none', order: 'asc' },
   flyoutConfig: null,
   isErrorPopoverOpen: null,
+  rollupLocations: null,
   view: DEFAULT_OVERVIEW_VIEW,
 };
 
@@ -77,6 +79,8 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         }
       }
     })
+    .addCase(setRollupLocations, (state, action) => {
+      state.rollupLocations = action.payload;
     .addCase(setOverviewViewAction, (state, action) => {
       state.view = action.payload;
     });

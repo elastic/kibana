@@ -40,6 +40,7 @@ export interface SyntheticsUrlParams {
   packagePolicyId?: string;
   cloneId?: string;
   spaceId?: string;
+  rollupLocations?: string;
   useLogicalAndFor?: UseLogicalAndField[];
   view?: Exclude<OverviewView, typeof DEFAULT_OVERVIEW_VIEW>;
 }
@@ -98,6 +99,7 @@ export const getSupportedUrlParams = (params: {
     groupOrderBy,
     packagePolicyId,
     spaceId,
+    rollupLocations,
     useLogicalAndFor,
     view,
   } = filteredParams;
@@ -132,6 +134,7 @@ export const getSupportedUrlParams = (params: {
     locationId: locationId || undefined,
     cloneId: filteredParams.cloneId,
     spaceId: spaceId || undefined,
+    rollupLocations: rollupLocations || '',
     useLogicalAndFor: parseFilters(useLogicalAndFor),
     view: view && isOverviewView(view) && view !== DEFAULT_OVERVIEW_VIEW ? view : undefined,
   };

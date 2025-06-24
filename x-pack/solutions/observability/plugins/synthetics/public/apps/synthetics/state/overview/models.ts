@@ -35,6 +35,7 @@ export interface MonitorOverviewState {
   isErrorPopoverOpen?: string | null;
   groupBy: GroupByState;
   trendStats: TrendTable;
+  rollupLocations: boolean | null;
   view: OverviewView;
 }
 
