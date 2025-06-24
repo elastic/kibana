@@ -41,7 +41,7 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  experimentalKey: 'privilegeMonitoringEnabled',
+  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
@@ -86,7 +86,7 @@ export const entityAnalyticsLinks: LinkItem = {
   links: [eaOverviewLinks, privMonLinks],
   hideTimeline: true,
   skipUrlState: true,
-  experimentalKey: 'privilegeMonitoringEnabled',
+  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };
