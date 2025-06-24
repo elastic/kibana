@@ -11,9 +11,10 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isEmpty } from 'lodash';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { useEnablement } from '../../../../hooks';
+import { getMonitorSpaceToAppend, useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   isStatusEnabled,
@@ -223,16 +224,11 @@ export function useMonitorListColumns({
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
           href: (fields) => {
-            if (space) {
-              if (
-                'spaceId' in fields &&
-                space.id !== fields.spaceId &&
-                !fields.spaces?.includes(space.id)
-              ) {
-                return http?.basePath.prepend(
-                  `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
-                )!;
-              }
+            const appendSpaceId = getMonitorSpaceToAppend(space, fields.spaces);
+            if (!isEmpty(appendSpaceId)) {
+              return http?.basePath.prepend(
+                `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaces?.[0]}`
+              )!;
             }
             return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;
           },
