@@ -9,7 +9,7 @@
  * React component for rendering a select element with threshold levels.
  */
 import type { FC } from 'react';
-import React, { Fragment, useMemo, useCallback, useEffect } from 'react';
+import React, { Fragment, useMemo, useCallback } from 'react';
 
 import type { EuiSelectableOption, EuiSuperSelectProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
@@ -20,6 +20,7 @@ import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '../../../../../common/types/anomalies';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
+import { resolveSeverityFormat } from './severity_format_resolver';
 
 export interface TableSeverityPageUrlState {
   pageKey: 'mlSelectSeverity';
@@ -55,31 +56,20 @@ const useTableSeverityDefault = () => {
  */
 export const useTableSeverity = () => {
   const defaultSeverity = useTableSeverityDefault();
-  const severityOptions = useSeverityOptions();
 
-  const [urlState, setUrlState, urlStateService] = usePageUrlState<TableSeverityPageUrlState>(
+  const [rawUrlState, setUrlState, urlStateService] = usePageUrlState<TableSeverityPageUrlState>(
     'mlSelectSeverity',
     defaultSeverity
   );
 
-  useEffect(() => {
-    const state = urlState.val;
+  const resolvedUrlState = useMemo(
+    () => ({
+      val: resolveSeverityFormat(rawUrlState.val),
+    }),
+    [rawUrlState.val]
+  );
 
-    // Check if this is the old format (single number instead of array)
-    if (typeof state === 'number') {
-      // Convert old single number format to new array format
-      // Find all severities with val >= the old value
-      const compatibleSeverities = severityOptions
-        .filter((option) => option.val >= state)
-        .map((option) => option.threshold);
-
-      setUrlState({
-        val: compatibleSeverities,
-      });
-    }
-  }, [urlState, severityOptions, setUrlState]);
-
-  return [urlState, setUrlState, urlStateService] as const;
+  return [resolvedUrlState, setUrlState, urlStateService] as const;
 };
 
 /**

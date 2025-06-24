@@ -17,6 +17,7 @@ import { getDefaultChartsData } from './explorer_charts/explorer_charts_containe
 import type { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { getSelectionInfluencers, getSelectionJobIds } from './explorer_utils';
 import type { TableSeverityState } from '../components/controls/select_severity';
+import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 export class AnomalyChartsStateService extends StateService {
@@ -82,12 +83,15 @@ export class AnomalyChartsStateService extends StateService {
               viewBySwimlaneFieldName!
             );
 
+            // Resolve the severity format in case it's in the old format
+            const resolvedSeverity = resolveSeverityFormat(severityState.val);
+
             return this._anomalyExplorerChartsService.getAnomalyData$(
               jobIds,
               containerWidth!,
               selectedCells?.times[0] * 1000,
               selectedCells?.times[1] * 1000,
-              severityState.val,
+              resolvedSeverity,
               influencerFilterQuery,
               selectionInfluencers,
               6

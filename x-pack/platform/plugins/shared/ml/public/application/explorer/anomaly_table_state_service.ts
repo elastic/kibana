@@ -32,6 +32,7 @@ import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { TableSeverityState } from '../components/controls/select_severity';
+import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -124,13 +125,16 @@ export class AnomalyTableStateService extends StateService {
               tableSeverity,
               influencersFilterQuery,
             ]) => {
+              // Resolve the severity format in case it's in the old format
+              const resolvedSeverity = resolveSeverityFormat(tableSeverity.val);
+
               return this.loadAnomaliesTableData(
                 selectedCells,
                 selectedJobs,
                 // viewBySwimlaneFieldName is guaranteed to be defined by the skipWhile
                 viewBySwimlaneFieldName!,
                 tableInterval.val,
-                tableSeverity.val,
+                resolvedSeverity,
                 influencersFilterQuery
               ).pipe(
                 map((tableData) => ({
