@@ -76,13 +76,6 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
     }
   }, [data]);
 
-  useEffect(() => {
-    // set space as current value if no value is provided
-    if ((!value || value.length === 0) && currentSpace) {
-      onChange([currentSpace.id]);
-    }
-  }, [onChange, currentSpace, value]);
-
   // Ensure selected options always include the current space
   const selectedIds = React.useMemo(() => {
     if (!currentSpace) {
@@ -91,9 +84,11 @@ export const MonitorSpaces = ({ value, onChange, ...rest }: MonitorSpacesProps) 
     if (!value || value.length === 0) {
       return [currentSpace.id];
     }
-    return value.includes(currentSpace.id) || value.includes(ALL_SPACES_ID)
-      ? value
-      : [...value, currentSpace.id];
+    if (value.includes(ALL_SPACES_ID)) {
+      // If "All spaces" is selected, return it alone
+      return [ALL_SPACES_ID];
+    }
+    return value.includes(currentSpace.id) ? value : [...value, currentSpace.id];
   }, [value, currentSpace]);
 
   // Compute if "All spaces" is selected

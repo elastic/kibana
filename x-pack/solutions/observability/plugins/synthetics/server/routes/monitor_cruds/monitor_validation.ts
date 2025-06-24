@@ -247,6 +247,10 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   let unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 
   const result = omit(rawConfig, unsupportedKeys);
+  let kSpaces = (rawConfig[ConfigKey.KIBANA_SPACES] as string[]) ?? [];
+  if (kSpaces.includes('*')) {
+    kSpaces = ['*'];
+  }
 
   const formattedConfig = {
     ...result,
@@ -254,6 +258,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     private_locations: _privateLocations,
     retest_on_failure: _retestOnFailure,
     custom_heartbeat_id: _customHeartbeatId,
+    spaces: kSpaces,
   } as CreateMonitorPayLoad;
 
   const requestBodyCheck = formattedConfig[ConfigKey.REQUEST_BODY_CHECK];
