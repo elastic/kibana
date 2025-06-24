@@ -38,7 +38,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/i18n",
     "@kbn/onechat-genai-utils",
-    "@kbn/wci-common",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
