@@ -31,6 +31,10 @@ export const useSelectDataView = () => {
        */
       scope: DataViewManagerScopeName;
     }) => {
+      if (!(params.id || params.fallbackPatterns?.length)) {
+        return;
+      }
+
       dispatch(selectDataViewAsync(params));
     },
     [dispatch]
