@@ -144,6 +144,8 @@ export default function ({ getService }: FtrProviderContext) {
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
         'apm-telemetry-task',
+        'cai:cases_analytics_index_backfill',
+        'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
