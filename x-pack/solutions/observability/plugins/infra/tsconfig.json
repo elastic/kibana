@@ -118,6 +118,9 @@
     "@kbn/presentation-containers",
     "@kbn/object-utils",
     "@kbn/saved-search-component",
+    "@kbn/core-ui-settings-common",
+    "@kbn/management-settings-ids",
+    "@kbn/xstate-utils",
   ],
   "exclude": ["target/**/*"]
 }
