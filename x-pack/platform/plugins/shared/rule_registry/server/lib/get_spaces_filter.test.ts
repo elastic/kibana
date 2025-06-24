@@ -8,8 +8,8 @@ import { getSpacesFilter } from '.';
 describe('getSpacesFilter()', () => {
   it('should return a spaces filter', () => {
     expect(getSpacesFilter('1')).toStrictEqual({
-      term: {
-        'kibana.space_ids': '1',
+      terms: {
+        'kibana.space_ids': ['1', '*'],
       },
     });
   });

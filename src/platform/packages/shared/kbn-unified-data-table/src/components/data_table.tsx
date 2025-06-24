@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './data_table.scss';
@@ -50,6 +50,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -95,6 +96,7 @@ import {
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { useRestorableState, withRestorableState } from '../restorable_state';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -114,7 +116,7 @@ export enum DataLoadingState {
 /**
  * Unified Data Table props
  */
-export interface UnifiedDataTableProps {
+interface InternalUnifiedDataTableProps {
   /**
    * Determines which element labels the grid for ARIA
    */
@@ -442,7 +444,7 @@ export interface UnifiedDataTableProps {
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
-export const UnifiedDataTable = ({
+const InternalUnifiedDataTable = ({
   ariaLabelledBy,
   columns,
   columnsMeta,
@@ -514,12 +516,12 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
   onUpdatePageIndex,
-}: UnifiedDataTableProps) => {
+}: InternalUnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const [isCompareActive, setIsCompareActive] = useState(false);
+  const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
@@ -819,21 +821,28 @@ export const UnifiedDataTable = ({
     [displayedRows]
   );
 
-  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
-    () =>
-      cellActionsTriggerId
-        ? visibleColumns.map(
-            (columnName) =>
-              dataView.getFieldByName(columnName)?.toSpec() ?? {
-                name: '',
-                type: '',
-                aggregatable: false,
-                searchable: false,
-              }
-          )
-        : undefined,
-    [cellActionsTriggerId, visibleColumns, dataView]
-  );
+  const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(() => {
+    if (!cellActionsTriggerId) {
+      return undefined;
+    }
+
+    return visibleColumns.map((columnName) => {
+      const field = getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName: columnName,
+        columnMeta: columnsMeta?.[columnName],
+      });
+      return (
+        field?.toSpec() ?? {
+          name: '',
+          type: '',
+          aggregatable: false,
+          searchable: false,
+        }
+      );
+    });
+  }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
     [dataView, cellActionsMetadata]
@@ -1020,21 +1029,21 @@ export const UnifiedDataTable = ({
 
     return leftControls;
   }, [
-    selectedDocsCount,
-    selectedDocsState,
     externalAdditionalControls,
+    selectedDocsCount,
+    inTableSearchControl,
     isPlainRecord,
     isFilterActive,
-    setIsFilterActive,
-    enableComparisonMode,
     rows,
+    selectedDocsState,
+    enableComparisonMode,
+    setIsCompareActive,
     fieldFormats,
     unifiedDataTableContextValue.pageIndex,
     unifiedDataTableContextValue.pageSize,
     toastNotifications,
     visibleColumns,
     renderCustomToolbar,
-    inTableSearchControl,
   ]);
 
   const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
@@ -1338,3 +1347,7 @@ export const UnifiedDataTable = ({
     </UnifiedDataTableContext.Provider>
   );
 };
+
+export const UnifiedDataTable = withRestorableState(InternalUnifiedDataTable);
+
+export type UnifiedDataTableProps = ComponentProps<typeof UnifiedDataTable>;

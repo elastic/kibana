@@ -74,3 +74,5 @@ export const ASSET_GROUPING_OPTIONS = {
 };
 
 export const ASSET_INVENTORY_CLOUD_CREDENTIALS_PACKAGE_VERSION = '0.9.0-preview02';
+
+export const CLOUD_ASSET_DISCOVERY_INTEGRATION_PACKAGE_NAME = 'cloud_asset_inventory';

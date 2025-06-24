@@ -15,6 +15,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
+import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 
 interface DiscoverRuntimeState {
@@ -25,6 +26,7 @@ interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
+  scopedProfilesManager: ScopedProfilesManager;
   currentDataView: DataView;
 }
 
@@ -45,11 +47,18 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
   tabs: { byId: {} },
 });
 
-export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+export const createTabRuntimeState = ({
+  profilesManager,
+}: {
+  profilesManager: ProfilesManager;
+}): ReactiveTabRuntimeState => ({
   stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
   customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
   unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
     undefined
+  ),
+  scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
+    profilesManager.createScopedProfilesManager()
   ),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
@@ -95,7 +104,8 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
+export type CombinedRuntimeState = DiscoverRuntimeState &
+  Omit<TabRuntimeState, 'scopedProfilesManager'>;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 

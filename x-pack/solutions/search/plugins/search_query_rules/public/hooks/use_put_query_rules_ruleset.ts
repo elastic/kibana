@@ -10,6 +10,7 @@ import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import {
+  QUERY_RULES_QUERY_RULESET_EXISTS_KEY,
   QUERY_RULES_QUERY_RULESET_FETCH_KEY,
   QUERY_RULES_SETS_QUERY_KEY,
 } from '../../common/constants';
@@ -19,6 +20,7 @@ import { useKibana } from './use_kibana';
 interface MutationArgs {
   rulesetId: string;
   forceWrite?: boolean;
+  rules?: QueryRulesQueryRuleset['rules'];
 }
 
 export const usePutRuleset = (
@@ -31,18 +33,20 @@ export const usePutRuleset = (
   } = useKibana();
 
   return useMutation(
-    async ({ rulesetId, forceWrite }: MutationArgs) => {
+    async ({ rulesetId, forceWrite, rules }: MutationArgs) => {
       return await http.put<QueryRulesQueryRuleset>(
         `/internal/search_query_rules/ruleset/${rulesetId}`,
         {
           query: { forceWrite },
+          ...(rules ? { body: JSON.stringify({ rules }) } : {}),
         }
       );
     },
     {
       onSuccess: (_, { rulesetId }) => {
-        queryClient.invalidateQueries([QUERY_RULES_QUERY_RULESET_FETCH_KEY]);
-        queryClient.invalidateQueries([QUERY_RULES_SETS_QUERY_KEY]);
+        queryClient.invalidateQueries({ queryKey: [QUERY_RULES_QUERY_RULESET_FETCH_KEY] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_RULES_SETS_QUERY_KEY] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_RULES_QUERY_RULESET_EXISTS_KEY] });
         notifications?.toasts?.addSuccess({
           title: i18n.translate('xpack.queryRules.putRulesetSuccess', {
             defaultMessage: 'Ruleset added',

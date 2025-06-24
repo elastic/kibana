@@ -3317,6 +3317,20 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ConfigFieldSchema.requireTld",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "requireTld",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.ConfigFieldSchema.defaultValue",
             "type": "CompoundType",
             "tags": [],
@@ -7563,12 +7577,32 @@
           "label": "getRulesSettingsLink",
           "description": [],
           "signature": [
-            "() => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            "(props: ",
+            "RuleSettingsLinkProps",
+            ") => React.ReactElement<",
+            "RuleSettingsLinkProps",
+            ", string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [],
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRulesSettingsLink.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RuleSettingsLinkProps"
+              ],
+              "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         },
         {
@@ -9049,7 +9083,7 @@
           "\nA list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly alertDeletionSettingsEnabled: false; }"
+          "{ readonly rulesListDatagrid: true; readonly stackAlertsPage: true; readonly ruleTagFilter: true; readonly ruleStatusFilter: true; readonly rulesDetailLogs: true; readonly ruleUseExecutionStatus: false; readonly ruleKqlBar: false; readonly isMustacheAutocompleteOn: false; readonly showMustacheAutocompleteSwitch: false; readonly alertDeletionSettingsEnabled: true; }"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/experimental_features.ts",
         "deprecated": false,

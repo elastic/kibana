@@ -6,6 +6,7 @@ exports[`ThreatMatchRowView matches the registered snapshot 1`] = `
   data-test-subj="threat-match-row"
   gutterSize="s"
   justifyContent="center"
+  wrap={true}
 >
   <EuiFlexItem
     grow={false}
