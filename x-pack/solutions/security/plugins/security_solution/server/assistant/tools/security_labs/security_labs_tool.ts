@@ -53,10 +53,12 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           query: input.question,
         });
 
-        const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
-        if (docs.length === 0 && !isKnowledgeBaseInstalled) {
-          // prompt to help user install knowledge base
-          return 'The "AI Assistant knowledge base" needs to be installed, containing the Security Labs content. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.';
+        if (docs.length === 0) {
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+          if (!isKnowledgeBaseInstalled) {
+            // prompt to help user install knowledge base
+            return 'The "AI Assistant knowledge base" needs to be installed, containing the Security Labs content. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.';
+          }
         }
 
         const citedDocs = docs.map((doc) => {
