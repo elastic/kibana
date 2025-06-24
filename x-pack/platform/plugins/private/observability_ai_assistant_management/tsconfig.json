@@ -32,7 +32,8 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/test-jest-helpers",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
     "target/**/*"
