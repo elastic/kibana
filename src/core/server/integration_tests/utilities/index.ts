@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getErrorBoundaryLabels = (
-  errorType: 'PageFatalReactError' | 'SectionFatalReactError'
-) => {
-  return {
-    error_type: errorType,
-  };
-};
+export { createInternalHttpService } from './create_internal_http_service';
