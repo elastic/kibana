@@ -38,7 +38,7 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
@@ -136,7 +136,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);

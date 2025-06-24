@@ -124,9 +124,13 @@ components:
         - type: object
           required:
             - id
+            - name
           properties:
             id:
               description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            name:
+              description: The rule migration name
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/RuleMigrationData'
 
@@ -207,6 +211,7 @@ components:
       description: The rule migration task stats object.
       required:
         - id
+        - name
         - status
         - rules
         - created_at
@@ -214,6 +219,9 @@ components:
       properties:
         id:
           description: The migration id
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The migration name
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
