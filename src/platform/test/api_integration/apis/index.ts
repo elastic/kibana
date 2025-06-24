@@ -35,6 +35,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./guided_onboarding'));
     loadTestFile(require.resolve('./esql'));
-    loadTestFile(require.resolve('./lens'));
   });
 }

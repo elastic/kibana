@@ -1260,7 +1260,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/test/functional/es_archives/lens @elastic/kibana-visualizations
 /x-pack/test/examples/embedded_lens @elastic/kibana-visualizations
-/x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json @elastic/kibana-visualizations
+/x-pack/test/api_integration/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 /x-pack/test/functional/fixtures/kbn_archiver/visualize @elastic/kibana-visualizations
@@ -2736,9 +2736,6 @@ x-pack/solutions/security/plugins/security_solution/common/security_integrations
 x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
-
-# Visualizations overrides
-/src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/lens.json @elastic/kibana-visualizations
 
 # Kibana design
 # scss overrides should be below this line for specificity
