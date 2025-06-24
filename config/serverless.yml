@@ -266,7 +266,7 @@ xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
 
 # Search Homepage
-xpack.searchHomepage.enabled: true
+xpack.searchHomepage.enabled: false
 
 
 ## Content Connectors in stack management
