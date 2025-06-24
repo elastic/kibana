@@ -43,5 +43,6 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/cases-plugin",
   ]
 }
