@@ -166,9 +166,9 @@ export function SettingsPage() {
   ];
 
   const logos =
-    currentSpaceSolution === 'oblt'
+    currentSolution === 'oblt'
       ? ['logoObservability']
-      : currentSpaceSolution === 'es'
+      : currentSolution === 'es'
       ? ['logoEnterpriseSearch']
       : ['logoObservability', 'logoEnterpriseSearch'];
 
