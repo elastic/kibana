@@ -21,8 +21,6 @@ import { UserName } from '../../../user_name';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import type { TableItemType } from './types';
 import { formatRiskScoreWholeNumber } from '../../../../common/utils';
-import { useAssetCriticalityData } from '../../../asset_criticality/use_asset_criticality';
-import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
@@ -38,6 +36,7 @@ import {
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../../../overview/components/detection_response/translations';
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
 
@@ -151,16 +150,12 @@ const getRiskScoreColumn = (euiTheme: EuiThemeComputed) => ({
   },
 });
 
-const AssetCriticalityCell: React.FC<{ userName: string }> = ({ userName }) => {
-  const {
-    query: { data },
-  } = useAssetCriticalityData({
-    entity: { type: EntityType.user, name: userName },
-  });
-
-  return data?.criticality_level ? (
+const AssetCriticalityCell: React.FC<{
+  criticalityLevel?: CriticalityLevelWithUnassigned;
+}> = ({ criticalityLevel }) => {
+  return criticalityLevel ? (
     <AssetCriticalityBadge
-      criticalityLevel={data.criticality_level}
+      criticalityLevel={criticalityLevel}
       dataTestSubj="privileged-user-monitoring-asset-criticality-badge"
     />
   ) : (
@@ -175,7 +170,9 @@ const getAssetCriticalityColumn = () => ({
       defaultMessage="Asset Criticality"
     />
   ),
-  render: (record: TableItemType) => <AssetCriticalityCell userName={record['user.name']} />,
+  render: (record: TableItemType) => (
+    <AssetCriticalityCell criticalityLevel={record.criticality_level} />
+  ),
 });
 
 function dataSourcesIsArray(dataSources: string | string[]): dataSources is string[] {

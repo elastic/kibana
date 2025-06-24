@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { EntityRiskLevels } from '../../../../../../common/api/entity_analytics/common';
 
 export interface TableItemType extends Record<string, string | string[] | number | undefined> {
@@ -12,4 +13,6 @@ export interface TableItemType extends Record<string, string | string[] | number
   'labels.sources'?: string | string[];
   risk_score?: number;
   risk_level?: EntityRiskLevels;
+  criticality_level?: CriticalityLevelWithUnassigned;
+  'labels.monitoring_label'?: string;
 }

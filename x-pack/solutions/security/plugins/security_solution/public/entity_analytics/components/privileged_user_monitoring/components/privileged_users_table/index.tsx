@@ -14,8 +14,8 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiButtonEmpty,
-  EuiLoadingSpinner,
   EuiBasicTable,
+  EuiProgress,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { take } from 'lodash/fp';
@@ -36,6 +36,8 @@ import { esqlResponseToRecords } from '../../../../../common/utils/esql';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { HeaderSection } from '../../../../../common/components/header_section';
+import { useAssetCriticalityFetchList } from '../../../asset_criticality/use_asset_criticality';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -67,6 +69,10 @@ const useOpenUserFlyout = () => {
 
 interface RiskScoresByUserName {
   [key: string]: EntityRiskScore<EntityType.user>;
+}
+
+interface AssetCriticalityByUserName {
+  [key: string]: CriticalityLevelWithUnassigned;
 }
 
 export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId }) => {
@@ -128,24 +134,58 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     riskScores.map((riskScore) => [riskScore.user.name, riskScore])
   );
 
+  const {
+    data: assetCriticalityData,
+    error: assetCriticalityError,
+    isLoading: loadingAssetCriticality,
+  } = useAssetCriticalityFetchList({
+    idField: 'user.name',
+    idValues: records.map((user) => user['user.name']),
+  });
+
+  const assetCriticalityRecords =
+    assetCriticalityData && assetCriticalityData.records.length > 0
+      ? assetCriticalityData.records
+      : [];
+
+  const assetCriticalityByUserName: AssetCriticalityByUserName = Object.fromEntries(
+    assetCriticalityRecords.map((assetCriticalityRecord) => [
+      assetCriticalityRecord.id_value,
+      assetCriticalityRecord.criticality_level,
+    ])
+  );
+
   const enrichedRecords: TableItemType[] = useMemo(
     () =>
       records.map((record, index) => {
+        let enrichedFields = {};
+
         const riskScore: EntityRiskScore<EntityType.user> | undefined =
           riskScoreByUserName[record['user.name']];
-        let enrichedFields = {};
-        if (riskScore)
+        if (riskScore) {
           enrichedFields = {
             ...enrichedFields,
             risk_score: riskScore.user.risk.calculated_score_norm,
             risk_level: riskScore.user.risk.calculated_level,
           };
+        }
+
+        const assetCriticality: CriticalityLevelWithUnassigned | undefined =
+          assetCriticalityByUserName[record['user.name']];
+
+        if (assetCriticality) {
+          enrichedFields = {
+            ...enrichedFields,
+            criticality_level: assetCriticality,
+          };
+        }
+
         return {
           ...record,
           ...enrichedFields,
         };
       }),
-    [records, riskScoreByUserName]
+    [records, riskScoreByUserName, assetCriticalityByUserName]
   );
 
   const visibleRecords = take(currentPage * DEFAULT_PAGE_SIZE, enrichedRecords);
@@ -165,7 +205,9 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
       {toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            {(loadingPrivilegedUsers || loadingRiskScore) && <EuiLoadingSpinner size="m" />}
+            {(loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality) && (
+              <EuiProgress size="xs" color="accent" />
+            )}
           </EuiFlexItem>
           {records.length > 0 && (
             <>
@@ -191,7 +233,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
               <EuiHorizontalRule margin="none" style={{ height: 2 }} />
               <EuiBasicTable
                 id={PRIVILEGED_USERS_TABLE_QUERY_ID}
-                loading={loadingPrivilegedUsers || loadingRiskScore}
+                loading={loadingPrivilegedUsers || loadingRiskScore || loadingAssetCriticality}
                 items={visibleRecords || []}
                 columns={columns}
               />
@@ -200,7 +242,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
           {records.length > currentPage * DEFAULT_PAGE_SIZE && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                isLoading={loadingRiskScore || loadingPrivilegedUsers}
+                isLoading={loadingRiskScore || loadingPrivilegedUsers || loadingAssetCriticality}
                 onClick={() => {
                   setCurrentPage((page) => page + 1);
                 }}
