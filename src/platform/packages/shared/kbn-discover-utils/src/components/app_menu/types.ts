@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export interface AppMenuControlOnClickParams {
@@ -16,10 +15,16 @@ export interface AppMenuControlOnClickParams {
   onFinishAction: () => void;
 }
 
-export type AppMenuControlProps = Pick<
-  TopNavMenuData,
-  'testId' | 'isLoading' | 'label' | 'description' | 'disableButton' | 'href' | 'tooltip'
-> & {
+export interface TopNavMenuData {
+  testId?: string;
+  isLoading?: boolean;
+  label: string;
+  description?: string;
+  href?: string;
+  tooltip?: string | (() => string | undefined);
+}
+
+export type AppMenuControlProps = TopNavMenuData & {
   onClick:
     | ((params: AppMenuControlOnClickParams) => Promise<React.ReactNode | void>)
     | ((params: AppMenuControlOnClickParams) => React.ReactNode | void)

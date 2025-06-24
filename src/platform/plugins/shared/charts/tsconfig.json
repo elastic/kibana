@@ -7,7 +7,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/expressions-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/coloring",
     "@kbn/i18n",
     "@kbn/utility-types",
