@@ -835,6 +835,28 @@ export function defineRoutes(
 
   router.post(
     {
+      path: '/_test/event_log/refresh',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
+      const [, { eventLog }] = await core.getStartServices();
+      const eventLogClient = eventLog.getClient(req);
+      await eventLogClient.refreshIndex();
+      return res.ok({ body: { ok: true } });
+    }
+  );
+
+  router.post(
+    {
       path: '/_test/event_log/update_documents',
       security: {
         authz: {

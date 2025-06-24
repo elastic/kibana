@@ -208,6 +208,11 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         // Verify in-progress intervals are removed after timeout
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/_test/event_log/refresh`)
+          .set('kbn-xsrf', 'foo')
+          .send();
+
         const finalGapResponse = await supertest
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
           .set('kbn-xsrf', 'foo')
