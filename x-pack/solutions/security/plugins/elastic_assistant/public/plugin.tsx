@@ -24,7 +24,6 @@ import { licenseService } from './src/hooks/licence/use_licence';
 import { ReactQueryClientProvider } from './src/context/query_client_context/elastic_assistant_query_client_provider';
 import { AssistantSpaceIdProvider } from './src/context/assistant_space_id/assistant_space_id_provider';
 import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
-import { isSecuritySolutionAccessible } from './helpers_access';
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
@@ -71,16 +70,13 @@ export class ElasticAssistantPublicPlugin
       return services;
     };
 
-    if (isSecuritySolutionAccessible(capabilities)) {
-      // Only register the assistant button if the user has access to Security Solution
-      coreStart.chrome.navControls.registerRight({
-        order: 1001,
-        mount: (target) => {
-          const startService = startServices();
-          return this.mountAIAssistantButton(target, coreStart, startService);
-        },
-      });
-    }
+    coreStart.chrome.navControls.registerRight({
+      order: 1001,
+      mount: (target) => {
+        const startService = startServices();
+        return this.mountAIAssistantButton(target, coreStart, startService);
+      },
+    });
 
     return {};
   }
