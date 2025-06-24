@@ -11,7 +11,6 @@ import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { History } from 'history';
 import { skip } from 'rxjs';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { DashboardState } from '../../../common/types';
 import { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
@@ -20,10 +19,9 @@ import { extractDashboardState } from './bwc/extract_dashboard_state';
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
-export const loadAndRemoveDashboardState = async (
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  embeddableService: EmbeddableStart
-): Promise<Partial<DashboardState>> => {
+export const loadAndRemoveDashboardState = (
+  kbnUrlStateStorage: IKbnUrlStateStorage
+): Partial<DashboardState> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<unknown>(DASHBOARD_STATE_STORAGE_KEY);
 
   if (!rawAppStateInUrl) return {};
@@ -35,7 +33,7 @@ export const loadAndRemoveDashboardState = async (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
 
-  return await extractDashboardState(rawAppStateInUrl);
+  return extractDashboardState(rawAppStateInUrl);
 };
 
 export const startSyncingExpandedPanelState = ({

@@ -8,11 +8,9 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { asyncMap } from '@kbn/std';
-import type { Reference } from '@kbn/content-management-utils';
 import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
-import { DashboardState, getReferencesForPanelId } from '../../../../common';
-import { coreServices, embeddableService } from '../../../services/kibana_services';
+import { DashboardState } from '../../../../common';
+import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
 
 type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
@@ -39,9 +37,7 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export async function extractPanelsState(state: {
-  [key: string]: unknown;
-}): Promise<Partial<PanelState>> {
+export function extractPanelsState(state: { [key: string]: unknown }): Partial<PanelState> {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -65,16 +61,5 @@ export async function extractPanelsState(state: {
     return panel;
   });
 
-  const references = Array.isArray(state.references) ? (state.references as Reference[]) : [];
-
-  const transformedPanels = await asyncMap(standardizedPanels, async (panel) => {
-    const transforms = await embeddableService.getTransforms(panel.type);
-    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
-    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
-    return transforms?.transformOut
-      ? transforms.transformOut(panel.panelConfig, panelReferences)
-      : panel.panelConfig;
-  });
-
-  return convertPanelsArrayToPanelSectionMaps(transformedPanels);
+  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
 }

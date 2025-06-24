@@ -13,7 +13,7 @@ import { extractSettings } from './extract_dashboard_settings';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 
-export async function extractDashboardState(state?: unknown): Promise<Partial<DashboardState>> {
+export function extractDashboardState(state?: unknown): Partial<DashboardState> {
   let dashboardState: Partial<DashboardState> = {};
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
@@ -26,10 +26,10 @@ export async function extractDashboardState(state?: unknown): Promise<Partial<Da
 
     if (typeof stateAsObject.viewMode === 'string')
       dashboardState.viewMode = stateAsObject.viewMode as DashboardState['viewMode'];
-    const panelsState = await extractPanelsState(stateAsObject);
+
     dashboardState = {
       ...dashboardState,
-      ...panelsState,
+      ...extractPanelsState(stateAsObject),
       ...extractSearchState(stateAsObject),
       ...extractSettings(stateAsObject),
     };

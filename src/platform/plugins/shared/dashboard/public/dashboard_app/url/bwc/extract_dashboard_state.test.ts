@@ -14,7 +14,7 @@ import { extractDashboardState } from './extract_dashboard_state';
 const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
 
 describe('extractDashboardState', () => {
-  test('should extract all DashboardState fields', async () => {
+  test('should extract all DashboardState fields', () => {
     const optionalState = {
       timeRange: {
         from: 'now-15m',
@@ -27,7 +27,7 @@ describe('extractDashboardState', () => {
       },
     };
     expect(
-      await extractDashboardState({
+      extractDashboardState({
         ...DASHBOARD_STATE,
         ...optionalState,
       })

@@ -7,30 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractControlGroupState } from './extract_control_group_state';
+import { extractDashboardState } from './extract_dashboard_state';
 
-describe('extractControlGroupState', () => {
+describe('extractDashboardState', () => {
   describe('>= 8.19 state', () => {
     test('should extract labelPosition', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           labelPosition: 'twoLine',
         },
       });
-      expect(controlGroupState?.labelPosition).toBe('twoLine');
+      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
     });
 
     test('should extract autoApplySelections', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           autoApplySelections: false,
         },
       });
-      expect(controlGroupState?.autoApplySelections).toBe(false);
+      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
     });
 
     test('should extract controls', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           controls: [
             {
@@ -47,7 +47,7 @@ describe('extractControlGroupState', () => {
           ],
         },
       });
-      expect(controlGroupState?.controls).toEqual([
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -65,7 +65,7 @@ describe('extractControlGroupState', () => {
 
   describe('>= 8.16 to < 8.19 state', () => {
     test('should convert controlGroupState to controlGroupInput', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupState: {
           autoApplySelections: false,
           initialChildControlState: {
@@ -79,9 +79,9 @@ describe('extractControlGroupState', () => {
           labelPosition: 'twoLine',
         },
       });
-      expect(controlGroupState?.autoApplySelections).toBe(false);
-      expect(controlGroupState?.labelPosition).toBe('twoLine');
-      expect(controlGroupState?.controls).toEqual([
+      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
+      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -97,25 +97,25 @@ describe('extractControlGroupState', () => {
 
   describe('< 8.16 state', () => {
     test('should convert controlStyle to labelPosition', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           controlStyle: 'twoLine',
         },
       });
-      expect(controlGroupState?.labelPosition).toBe('twoLine');
+      expect(dashboardState.controlGroupInput?.labelPosition).toBe('twoLine');
     });
 
     test('should convert showApplySelections to autoApplySelections', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           showApplySelections: true,
         },
       });
-      expect(controlGroupState?.autoApplySelections).toBe(false);
+      expect(dashboardState.controlGroupInput?.autoApplySelections).toBe(false);
     });
 
     test('should convert panels to controls', () => {
-      const controlGroupState = extractControlGroupState({
+      const dashboardState = extractDashboardState({
         controlGroupInput: {
           panels: {
             ['8311639d-92e5-4aa5-99a4-9502b10eead5']: {
@@ -132,7 +132,7 @@ describe('extractControlGroupState', () => {
           },
         },
       });
-      expect(controlGroupState?.controls).toEqual([
+      expect(dashboardState.controlGroupInput?.controls).toEqual([
         {
           controlConfig: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
