@@ -62,20 +62,18 @@ import {
   type NLPSettings,
 } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
-import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import { isFullLicense } from '@kbn/ml-license/is_full_license';
 import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
 import { getMlLocator } from '@kbn/ml-locator/get_ml_locator';
 import type { getMlManagementLocator } from '@kbn/ml-locator/get_ml_management_locator';
-import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-common-types/plugin';
-import type { ElasticModels } from '@kbn/ml-services/elastic_models_service';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
+import { AnomalySwimLane } from '@kbn/ml-shared-components';
 
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { getElasticModels } from './application/services/get_elastic_models';
 import { renderApp } from './application/render_app';
-import { AnomalySwimLane } from './shared_components';
-import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';
 import { registerEmbeddables } from './embeddables';
 
@@ -151,14 +149,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     initModelDeploymentSettings(this.nlpSettings, initializerContext.config.get());
   }
 
-  setup(
-    core: MlCoreSetup,
-    pluginsSetup: MlSetupDependencies
-  ): {
-    getLocator?: () => ReturnType<typeof getMlLocator>;
-    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
-    elasticModels?: ElasticModels;
-  } {
+  setup(core: MlCoreSetup, pluginsSetup: MlSetupDependencies): MlPluginSetup {
     const deps = {
       home: pluginsSetup.home,
       licenseManagement: pluginsSetup.licenseManagement,
@@ -329,16 +320,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     };
   }
 
-  start(
-    core: CoreStart,
-    deps: MlStartDependencies
-  ): {
-    getLocator?: () => ReturnType<typeof getMlLocator>;
-    getManagementLocator?: () => ReturnType<typeof getMlManagementLocator>;
-    elasticModels?: ElasticModels;
-    getMlApi: () => Promise<MlApi>;
-    components: { AnomalySwimLane: typeof AnomalySwimLane };
-  } {
+  start(core: CoreStart, deps: MlStartDependencies): MlPluginStart {
     return {
       getLocator: this.getLocator,
       elasticModels: getElasticModels(core.http),
