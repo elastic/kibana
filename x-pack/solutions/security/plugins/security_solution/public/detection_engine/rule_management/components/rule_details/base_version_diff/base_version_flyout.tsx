@@ -48,7 +48,7 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
           try {
             await revertPrebuiltRule({
               id: currentRule.id,
-              version: currentRule.version + 1,
+              version: currentRule.version,
               revision: currentRule.revision,
             });
           } catch {

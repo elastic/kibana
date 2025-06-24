@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { RuleActionsOverflow } from '.';
 import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
@@ -326,13 +326,13 @@ describe('RuleActionsOverflow', () => {
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
-      expect(getByTestId('rules-details-menu-panel')).toHaveTextContent(
+      const revertRuleButton = within(getByTestId('rules-details-menu-panel')).getByText(
         'Revert to Elastic version'
       );
 
-      fireEvent.click(getByTestId('rules-details-revert-rule'));
+      fireEvent.click(revertRuleButton);
       // Popover is not shown
-      expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
+      expect(getByTestId('rules-details-popover')).not.toBeInTheDocument();
     });
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {
