@@ -7,22 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardState } from '../../common';
+import type { DashboardAttributes, DashboardSection } from '../server/content_management';
 
-export const DEFAULT_DASHBOARD_STATE: DashboardState = {
-  viewMode: 'view',
-  timeRestore: false,
-  query: { query: '', language: 'kuery' },
-  description: '',
-  filters: [],
-  panels: [],
-  title: '',
-  tags: [],
-
-  // options
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-  hidePanelTitles: false,
+export const isDashboardSection = (
+  widget: DashboardAttributes['panels'][number]
+): widget is DashboardSection => {
+  return 'panels' in widget;
 };
