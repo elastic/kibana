@@ -23,6 +23,7 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
   lookupIndexFields,
+  policies,
 } from './helpers';
 
 describe('autocomplete.suggest', () => {
@@ -59,8 +60,10 @@ describe('autocomplete.suggest', () => {
           'EVAL ',
           'GROK ',
           'CHANGE_POINT ',
+          'COMPLETION ',
           'MV_EXPAND ',
           'DROP ',
+          'ENRICH ',
           'KEEP ',
           'RENAME ',
           'SAMPLE ',
@@ -184,6 +187,18 @@ describe('autocomplete.suggest', () => {
             expected.sort();
 
             expect(labels).toEqual(expected);
+          });
+
+          test('enrich', async () => {
+            const expectedPolicyNameSuggestions = policies
+              .map(({ name, suggestedAs }) => suggestedAs || name)
+              .map((name) => `${name} `);
+
+            await assertSuggestions(`FROM a | FORK (ENRICH /)`, expectedPolicyNameSuggestions);
+            await assertSuggestions(
+              `FROM a | FORK (ENRICH policy ON /)`,
+              getFieldNamesByType('any').map((v) => `${v} `)
+            );
           });
 
           describe('stats', () => {

@@ -29,6 +29,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalIdService: { enabled: true, taskInterValMinutes: 10, taskStartDelayMinutes: 10 },
+    analytics: {},
     ...overrides,
   };
 }
@@ -75,6 +76,7 @@ describe('Cases Plugin', () => {
       security: securityMock.createStart(),
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
+      taskManager: taskManagerMock.createStart(),
     };
   });
 
