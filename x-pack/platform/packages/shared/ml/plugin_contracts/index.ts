@@ -6,19 +6,21 @@
  */
 
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-
-import type { MlLocatorParams } from './locator';
+import type { IElasticModels } from '@kbn/ml-trained-models-utils';
+import type { MlLocatorParams, MlManagementLocator } from '@kbn/ml-common-types/locator';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { AnomalySwimLane } from '@kbn/ml-shared-components';
 
 export interface MlPluginSetup {
   getLocator?: (() => Promise<LocatorPublic<MlLocatorParams>>) | undefined;
-  getManagementLocator?: (() => Promise<MlManagementLocatorInternal>) | undefined;
-  elasticModels?: ElasticModels | undefined;
+  getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
+  elasticModels?: IElasticModels | undefined;
 }
 
 export interface MlPluginStart {
   getLocator?: (() => Promise<LocatorPublic<MlLocatorParams>>) | undefined;
-  getManagementLocator?: (() => Promise<MlManagementLocatorInternal>) | undefined;
-  elasticModels?: ElasticModels | undefined;
+  getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
+  elasticModels?: IElasticModels | undefined;
   getMlApi: () => Promise<MlApi>;
   components: {
     AnomalySwimLane: typeof AnomalySwimLane;
