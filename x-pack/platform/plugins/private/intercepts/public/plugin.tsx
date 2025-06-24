@@ -15,9 +15,11 @@ import type { ServerConfigSchema } from '../common/config';
 export class InterceptPublicPlugin implements Plugin {
   private readonly prompter?: InterceptPrompter;
   private interceptsTargetDomElement?: HTMLDivElement;
+  private isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ServerConfigSchema>();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
     if (enabled) {
       this.prompter = new InterceptPrompter();
@@ -43,12 +45,10 @@ export class InterceptPublicPlugin implements Plugin {
       targetDomElement: this.interceptsTargetDomElement,
     });
 
-    const isServerless = false; // TODO: Implement actual logic
-
     core.chrome.navControls.registerRight({
-      order: isServerless ? 1 : 1002,
+      order: this.isServerless ? 1 : 1002,
       mount: toMountPoint(
-        <FeedbackButton core={core} isServerless={isServerless} />,
+        <FeedbackButton core={core} isServerless={this.isServerless} />,
         core.rendering
       ),
     });

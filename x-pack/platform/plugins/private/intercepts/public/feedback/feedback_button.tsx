@@ -17,7 +17,7 @@ interface Props {
   isServerless: boolean;
 }
 
-export const FeedbackButton = ({ core, isServerless = false }: Props) => {
+export const FeedbackButton = ({ core, isServerless }: Props) => {
   const openFlyout = () => {
     core.overlays.openFlyout(toMountPoint(<FeedbackFlyout />, core.rendering), {
       'data-test-subj': 'feedbackFlyout',
