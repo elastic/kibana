@@ -154,7 +154,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('includes instructions to rewrite the user prompt in the system message', () => {
           const systemMessage = getSystemMessage(firstRequestBody);
           expect(systemMessage?.content).to.contain(
-            `Your ONLY task is to transform the user\'s last message (<UserPrompt>) into a single question that will be embedded and searched against "semantic_text" fields in Elasticsearch`
+            `You are a retrieval query-rewriting assistant`
           );
         });
 
