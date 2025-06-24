@@ -239,8 +239,10 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       : undefined;
   }
 
-  private prepareRegexpQuery(str: string | undefined): string | undefined {
-    return this.prepareSearchString(str, /[@#&*+()[\]{}|.?~"<]/, '.*');
+  private prepareExactPolicyIdQuery(policyId: string | undefined): string | undefined {
+    if (!policyId) return undefined;
+    // Escape special characters but don't add wildcards for exact matching
+    return policyId.replace(new RegExp(/[@#&*+()\[\]{}|.?~"<]/, 'g'), '\\$&');
   }
 
   private prepareQueryStringQuery(str: string | undefined): string | undefined {
@@ -279,7 +281,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       `getting token metadata with policyIdSearchTerm [${policyIdSearchTerm}] and poliyNameSearchTerm [${policyNameSearchTerm}] and excluded policy ids [${excludedPolicyIds}]`
     );
 
-    const policyIdFilter = this.prepareRegexpQuery(policyIdSearchTerm);
+    // Use exact matching for policy IDs instead of partial matching
+    const policyIdFilter = this.prepareExactPolicyIdQuery(policyIdSearchTerm);
 
     let policyIdsFoundByName: string[] | undefined;
     const policyNameSearchString = this.prepareQueryStringQuery(policyNameSearchTerm);
