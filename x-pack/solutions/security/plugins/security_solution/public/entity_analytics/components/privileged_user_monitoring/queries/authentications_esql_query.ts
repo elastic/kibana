@@ -8,6 +8,13 @@
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { getPrivilegedMonitorUsersJoin, removeInvalidForkBranchesFromESQL } from './helpers';
 
+// TODO add test cases for okta type column logic
+// '/api/v1/authn/something' ===> Direct
+// /oauth2/v1/authorize' ===> Federated
+// /oauth2/v1/token' ===> Federated
+// /some/path/sso/saml' ===> Federated
+// /api/v1/authn' ===> Direct
+
 // TODO Verify if we can improve the type field logic https://github.com/elastic/security-team/issues/12713
 export const getAuthenticationsEsqlSource = (
   namespace: string,
