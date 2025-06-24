@@ -16,7 +16,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { asDynamicBytes, asAbsoluteDateTime } from '@kbn/observability-plugin/common';
+import { asDynamicBytes } from '@kbn/observability-plugin/common';
+import { asAbsoluteDateTime } from '@kbn/elapsed-datetime-formatter';
 import React, { useMemo, useState } from 'react';
 import type { StorageExplorerHostDetails } from '../../../../common/storage_explorer';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
