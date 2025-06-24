@@ -8,13 +8,13 @@
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 
-import { TestProviders } from '../../../../mock';
+import { TestProviders } from '../../../../../../../common/mock';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
 
 const mockHandleClick = jest.fn();
 
-jest.mock('../../../inspect/use_inspect', () => ({
+jest.mock('../../../../../../../common/components/inspect/use_inspect', () => ({
   useInspect: () => ({ handleClick: mockHandleClick }),
 }));
 
