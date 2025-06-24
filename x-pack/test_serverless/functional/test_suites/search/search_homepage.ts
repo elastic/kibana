@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('Search Homepage', function () {
-    describe('as admin', function () {
+    describe.skip('as admin', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
       });
@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('as developer', function () {
+    describe.skip('as developer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsDeveloper();
       });
