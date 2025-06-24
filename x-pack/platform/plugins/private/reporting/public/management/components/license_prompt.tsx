@@ -20,7 +20,7 @@ import { useKibana } from '@kbn/reporting-public';
 const title = (
   <h2 data-test-subj="license-prompt-title">
     {i18n.translate('xpack.reporting.schedules.licenseCheck.title', {
-      defaultMessage: `Upgrade your license to use Machine Learning`,
+      defaultMessage: `Upgrade your license to use Scheduled Reporting`,
     })}
   </h2>
 );
