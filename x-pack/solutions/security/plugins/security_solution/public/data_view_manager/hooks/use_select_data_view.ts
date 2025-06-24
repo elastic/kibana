@@ -21,6 +21,9 @@ export const useSelectDataView = () => {
 
   return useCallback(
     (params: {
+      /**
+       * Data view id, if empty - you have to specify fallbackPatterns instead
+       */
       id?: string | null;
       /**
        * List of patterns that will be used to construct the adhoc data view when
