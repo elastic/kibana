@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiSpacer,
@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
@@ -34,39 +35,77 @@ export function SettingsPage() {
     services: {
       application: { navigateToApp, isAppRegistered },
       serverless,
-      cloud,
+      spaces,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
   const { euiTheme } = useEuiTheme();
-  const serverlessProjectType = cloud?.serverless?.projectType;
+
+  const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
 
   const {
     query: { tab },
   } = useObservabilityAIAssistantManagementRouterParams('/');
 
   useEffect(() => {
+    const getCurrentSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setCurrentSpaceSolution(space?.solution);
+      }
+    };
+
+    getCurrentSpace();
+  }, [spaces]);
+
+  let breadcrumbText: string;
+  let title: string;
+  if (currentSpaceSolution === 'oblt') {
+    breadcrumbText = i18n.translate(
+      'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
+      {
+        defaultMessage: 'Observability',
+      }
+    );
+
+    title = i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.title.observability',
+      {
+        defaultMessage: 'AI Assistant for Observability',
+      }
+    );
+  } else if (currentSpaceSolution === 'es') {
+    breadcrumbText = i18n.translate('xpack.observabilityAiAssistantManagement.breadcrumb.search', {
+      defaultMessage: 'Search',
+    });
+
+    title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title.search', {
+      defaultMessage: 'AI Assistant for Search',
+    });
+  } else {
+    breadcrumbText = i18n.translate(
+      'xpack.observabilityAiAssistantManagement.breadcrumb.observabilityAndSearch',
+      {
+        defaultMessage: 'Observability and Search',
+      }
+    );
+
+    title = i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.title.observabilityAndSearch',
+      {
+        defaultMessage: 'AI Assistant for Observability and Search',
+      }
+    );
+  }
+
+  useEffect(() => {
     if (serverless) {
       serverless.setBreadcrumbs([
-        serverlessProjectType === 'observability'
-          ? {
-              text: i18n.translate(
-                'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.observability',
-                {
-                  defaultMessage: 'Observability',
-                }
-              ),
-            }
-          : {
-              text: i18n.translate(
-                'xpack.observabilityAiAssistantManagement.breadcrumb.serverless.search',
-                {
-                  defaultMessage: 'Search',
-                }
-              ),
-            },
+        {
+          text: breadcrumbText,
+        },
       ]);
     } else {
       setBreadcrumbs([
@@ -80,16 +119,11 @@ export function SettingsPage() {
           },
         },
         {
-          text: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.breadcrumb.observabilityAndSearch',
-            {
-              defaultMessage: 'Observability and Search',
-            }
-          ),
+          text: breadcrumbText,
         },
       ]);
     }
-  }, [navigateToApp, serverless, serverlessProjectType, setBreadcrumbs]);
+  }, [breadcrumbText, navigateToApp, serverless, setBreadcrumbs]);
 
   const tabs: Array<{ id: TabsRt; name: string; content: JSX.Element; disabled?: boolean }> = [
     {
@@ -123,28 +157,12 @@ export function SettingsPage() {
     },
   ];
 
-  let title;
-  if (cloud?.isServerlessEnabled) {
-    if (serverlessProjectType === 'observability') {
-      title = i18n.translate(
-        'xpack.observabilityAiAssistantManagement.settingsPage.title.observability',
-        {
-          defaultMessage: 'AI Assistant for Observability',
-        }
-      );
-    } else {
-      title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title.search', {
-        defaultMessage: 'AI Assistant for Search',
-      });
-    }
-  } else {
-    title = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.title.observabilityAndSearch',
-      {
-        defaultMessage: 'AI Assistant for Observability and Search',
-      }
-    );
-  }
+  const logos =
+    currentSpaceSolution === 'oblt'
+      ? ['logoObservability']
+      : currentSpaceSolution === 'es'
+      ? ['logoEnterpriseSearch']
+      : ['logoObservability', 'logoEnterpriseSearch'];
 
   const selectedTabId = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
@@ -162,30 +180,20 @@ export function SettingsPage() {
         responsive={false}
       >
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} direction="row">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              size="xl"
-              type="logoObservability"
-              style={{
-                backgroundColor: euiTheme.colors.backgroundBasePlain,
-                borderRadius: '50%',
-                padding: 6,
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              size="xl"
-              type="logoEnterpriseSearch"
-              style={{
-                backgroundColor: euiTheme.colors.backgroundBasePlain,
-                borderRadius: '50%',
-                padding: 6,
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
-              }}
-            />
-          </EuiFlexItem>
+          {logos.map((logo) => (
+            <EuiFlexItem key={logo} grow={false}>
+              <EuiIcon
+                size="xl"
+                type={logo}
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundBasePlain,
+                  borderRadius: '50%',
+                  padding: 6,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.12)',
+                }}
+              />
+            </EuiFlexItem>
+          ))}
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h2>{title}</h2>
