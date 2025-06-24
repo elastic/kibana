@@ -2737,6 +2737,8 @@ x-pack/solutions/security/plugins/security_solution/public/security_integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
 
+# Visualizations overrides
+/src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/lens.json @elastic/kibana-visualizations
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -2835,11 +2837,11 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/linters                              @elastic/core-docs @elastic/experience-docs 
-oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs 
-oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs 
-oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs 
-oas_docs/output                               @elastic/core-docs @elastic/experience-docs 
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
