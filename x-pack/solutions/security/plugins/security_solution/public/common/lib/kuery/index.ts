@@ -12,7 +12,7 @@ import {
   FilterStateStore,
   buildEsQuery,
 } from '@kbn/es-query';
-import { get, isEmpty, memoize } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
