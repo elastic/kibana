@@ -78,7 +78,15 @@ const componentStyles = (defaultRowHeight: number | undefined) => {
   // the keywords are slightly larger than the default text height,
   // so they need to be adjusted to fit within the row height while
   // not truncating the bottom of the text
-  const rowHeight = defaultRowHeight ? Math.floor(defaultRowHeight / 1.5) : 2;
+  let rowHeight = 2;
+  if (defaultRowHeight === undefined) {
+    rowHeight = 2;
+  } else if (defaultRowHeight < 2) {
+    rowHeight = 1;
+  } else {
+    rowHeight = Math.floor(defaultRowHeight / 1.5);
+  }
+
   return {
     cellContainer: ({ euiTheme }: UseEuiTheme) =>
       css({
