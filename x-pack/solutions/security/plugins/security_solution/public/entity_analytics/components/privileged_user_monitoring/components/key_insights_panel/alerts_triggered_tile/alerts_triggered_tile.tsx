@@ -37,4 +37,3 @@ export const AlertsTriggeredTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
     />
   );
 };
-
