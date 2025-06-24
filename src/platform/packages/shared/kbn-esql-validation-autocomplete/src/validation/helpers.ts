@@ -144,44 +144,6 @@ export function collapseWrongArgumentTypeMessages(
 }
 
 /**
- * Checks if the provided object or any of its nested objects contains an 'enrich' command.
- *
- * @param obj - The object or array of objects to check.
- * @returns {boolean} - Returns true if an 'enrich' command is found, otherwise false.
- */
-export function hasEnrichCommand(obj: ESQLCommand | ESQLCommand[]): boolean {
-  if (typeof obj !== 'object' || obj === null) {
-    return false;
-  }
-
-  if (Array.isArray(obj)) {
-    for (const item of obj) {
-      if (hasEnrichCommand(item)) {
-        return true;
-      }
-    }
-  } else {
-    // Check if the current object has a 'name' property and it's 'enrich'
-    if ('name' in obj && obj.name === 'enrich') {
-      return true;
-    }
-
-    // Recursively check all properties of the current object
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const value = (obj as unknown as Record<string, unknown>)[key];
-        if (typeof value === 'object' && value !== null) {
-          if (hasEnrichCommand(value as ESQLCommand | ESQLCommand[])) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
-}
-
-/**
  * Collects all 'enrich' commands from a list of ESQL commands.
  * @param commands - The list of ESQL commands to search through.
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
