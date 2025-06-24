@@ -36,6 +36,7 @@ export function SettingsPage() {
       application: { navigateToApp, isAppRegistered },
       serverless,
       spaces,
+      cloud,
     },
   } = useKibana();
 
@@ -44,6 +45,13 @@ export function SettingsPage() {
   const { euiTheme } = useEuiTheme();
 
   const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
+
+  // Determine the current solution. For serverless projects, derive it from cloud.serverless.projectType
+  const currentSolution: SolutionView | undefined = serverless
+    ? cloud?.serverless?.projectType === 'observability'
+      ? 'oblt'
+      : 'es'
+    : currentSpaceSolution;
 
   const {
     query: { tab },
@@ -62,7 +70,7 @@ export function SettingsPage() {
 
   let breadcrumbText: string;
   let title: string;
-  if (currentSpaceSolution === 'oblt') {
+  if (currentSolution === 'oblt') {
     breadcrumbText = i18n.translate(
       'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
       {
@@ -76,7 +84,7 @@ export function SettingsPage() {
         defaultMessage: 'AI Assistant for Observability',
       }
     );
-  } else if (currentSpaceSolution === 'es') {
+  } else if (currentSolution === 'es') {
     breadcrumbText = i18n.translate('xpack.observabilityAiAssistantManagement.breadcrumb.search', {
       defaultMessage: 'Search',
     });

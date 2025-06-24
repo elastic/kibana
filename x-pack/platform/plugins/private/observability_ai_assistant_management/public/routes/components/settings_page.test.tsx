@@ -22,11 +22,16 @@ const createSpacesMock = (solution: string) =>
     },
   } as any);
 
-const createServerlessMock = (solution?: string) => {
+const createServerlessMock = (projectType: 'observability' | 'search' = 'observability') => {
   const setBreadcrumbs = jest.fn();
   return {
-    ...createSpacesMock(solution ?? 'classic'),
+    ...createSpacesMock('classic'),
     serverless: { setBreadcrumbs },
+    cloud: {
+      serverless: {
+        projectType,
+      },
+    },
   } as any;
 };
 
@@ -148,7 +153,7 @@ describe('Settings Page', () => {
   });
 
   it('should set the correct breadcrumb when the Serverless solution is oblt', async () => {
-    const coreStart = createServerlessMock('oblt');
+    const coreStart = createServerlessMock('observability');
     render(<SettingsPage />, {
       coreStart,
       appContextValue,
@@ -162,7 +167,7 @@ describe('Settings Page', () => {
   });
 
   it('should set the correct breadcrumb when the Serverless solution is es', async () => {
-    const coreStart = createServerlessMock('es');
+    const coreStart = createServerlessMock('search');
     render(<SettingsPage />, {
       coreStart,
       appContextValue,
