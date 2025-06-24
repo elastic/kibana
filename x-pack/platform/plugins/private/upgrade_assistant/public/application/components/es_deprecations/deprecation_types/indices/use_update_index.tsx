@@ -7,7 +7,7 @@
 
 import { useCallback, useState } from 'react';
 import type { UpdateIndexOperation } from '../../../../../../common/update_index';
-import type { CorrectiveAction, UpdateActions } from '../../../../../../common/types';
+import type { UpdateActions } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
@@ -20,10 +20,9 @@ export interface UpdateIndexState {
 export interface UseUpdateIndexParams {
   indexName: string;
   api: ApiService;
-  correctiveAction?: CorrectiveAction;
 }
 
-export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {
+export const useUpdateIndex = ({ indexName, api }: UseUpdateIndexParams) => {
   const [failedState, setFailedState] = useState<boolean>(false);
   const [updateIndexState, setUpdateIndexState] = useState<UpdateIndexState>({
     failedBefore: false,
@@ -54,7 +53,7 @@ export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIn
         updateAction: action,
       });
     },
-    [api, correctiveAction, failedState, indexName]
+    [api, failedState, indexName]
   );
 
   return {

@@ -59,7 +59,6 @@ export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   const { updateIndexState, updateIndex } = useUpdateIndex({
     indexName,
     api,
-    correctiveAction: deprecation.correctiveAction,
   });
 
   return (

@@ -116,6 +116,7 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
     reindexStatus,
     selectedResolutionType,
     updateIndexStatus,
+    updateAction,
   ]);
 
   const modalContent = useMemo(() => {
@@ -200,6 +201,8 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
     onMakeReadonlyRetry,
     onMakeReadonly,
     onUnfreeze,
+    onDeleteIndex,
+    onDeleteRetry,
   ]);
 
   return (
