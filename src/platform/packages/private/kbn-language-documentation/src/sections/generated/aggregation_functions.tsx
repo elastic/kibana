@@ -379,7 +379,7 @@ export const functions = {
             {
               defaultMessage: `
   ### STD DEV
-  The standard deviation of a numeric field.
+  The population standard deviation of a numeric field.
 
   \`\`\`esql
   FROM employees

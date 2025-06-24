@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ApplicationStart, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
-
+import { OBSERVABILITY_ENABLE_STREAMS_UI } from '@kbn/management-settings-ids';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { of, Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
-import { CloudStart } from '@kbn/cloud-plugin/public';
 import type { StreamsPublicConfig } from '../common/config';
 import {
   StreamsPluginClass,
@@ -42,12 +41,7 @@ export class Plugin implements StreamsPluginClass {
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable({
-        cloud: pluginsStart.cloud,
-        application: core.application,
-        repositoryClient: this.repositoryClient,
-        logger: this.logger,
-      }),
+      status$: createStreamsStatusObservable(core, this.repositoryClient, this.logger),
       config$: of(this.config),
     };
   }
@@ -60,27 +54,20 @@ const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
 const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
 
 const createStreamsStatusObservable = once(
-  ({
-    cloud,
-    application,
-    repositoryClient,
-    logger,
-  }: {
-    cloud?: CloudStart;
-    application: ApplicationStart;
-    repositoryClient: StreamsRepositoryClient;
-    logger: Logger;
-  }): Observable<StreamsStatus> => {
-    const isObservabilityServerless =
-      cloud?.isServerlessEnabled && cloud.serverless.projectType === 'observability';
-
+  (
+    core: CoreStart,
+    repositoryClient: StreamsRepositoryClient,
+    logger: Logger
+  ): Observable<StreamsStatus> => {
+    const { application, uiSettings } = core;
     const hasCapabilities = application.capabilities?.streams?.show;
+    const isUIEnabled = uiSettings.get(OBSERVABILITY_ENABLE_STREAMS_UI);
 
     if (!hasCapabilities) {
       return of(DISABLED_STATUS);
     }
 
-    if (isObservabilityServerless) {
+    if (isUIEnabled) {
       return of(ENABLED_STATUS);
     }
 

@@ -15,6 +15,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { previewSignificantEvents } from './preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
+import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -109,9 +110,10 @@ const readSignificantEventsRoute = createServerRoute({
     },
   },
   handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, assetClient, scopedClusterClient } = await getScopedClients({
+    const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
       request,
     });
+    await assertEnterpriseLicense(licensing);
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {

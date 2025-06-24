@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { EuiBadgeGroup, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
+import React from 'react';
+import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { StreamsFeatures, useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { RedirectTo } from '../redirect_to';
+import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamDetailSignificantEventsView } from '../stream_detail_significant_events_view';
-import { useStreamDetail } from '../../hooks/use_stream_detail';
-import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { RedirectTo } from '../redirect_to';
-import { StreamsFeatures, useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+import { StreamDescription } from './description';
 
 const getStreamDetailTabs = ({
   definition,
@@ -82,7 +83,7 @@ export function StreamDetailView() {
   const { features } = useStreamsPrivileges();
 
   if (tab === 'management') {
-    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'lifecycle' } }} />;
   }
 
   if (!isValidStreamDetailTab(tab)) {
@@ -100,6 +101,7 @@ export function StreamDetailView() {
     <>
       <StreamsAppPageTemplate.Header
         bottomBorder="extended"
+        description={<StreamDescription definition={definition} />}
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {key}

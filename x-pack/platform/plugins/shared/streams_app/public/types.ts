@@ -29,6 +29,7 @@ import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/publi
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -56,6 +57,7 @@ export interface StreamsAppStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
+  fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;

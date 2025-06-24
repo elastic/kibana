@@ -7,8 +7,10 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+} from '@kbn/cloud-security-posture-common';
 import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
 import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
 import {
@@ -26,7 +28,10 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
-  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const latestFindingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
   const latestVulnerabilitiesIndex = new EsIndexDataProvider(
     es,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
@@ -76,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
+      it(`Return kspm status indexed when security_solution-cloud_security_posture.misconfiguration_latestration_latest contains new kspm documents`, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
@@ -104,7 +109,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
+      it(`Return cspm status indexed when security_solution-cloud_security_posture.misconfiguration_latestration_latest contains new cspm documents`, async () => {
         await createPackagePolicy(
           supertestWithoutAuth,
           agentPolicyId,
