@@ -66,8 +66,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.base_version).toEqual(baseVersion);
         expect(response.current_version).toEqual(modifiedCurrentVersion);
         expect(response.diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 1,
+          num_fields_with_updates: 0,
+          num_fields_with_conflicts: 0,
           num_fields_with_non_solvable_conflicts: 0,
         });
         expect(response.diff.fields).toEqual({
