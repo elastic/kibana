@@ -8,13 +8,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { BoolQuery } from '@kbn/es-query';
 import {
-  colorSchema,
+  edgeColorSchema,
   edgeDataSchema,
   entityNodeDataSchema,
   graphRequestSchema,
   graphResponseSchema,
   groupNodeDataSchema,
   labelNodeDataSchema,
+  nodeColorSchema,
   nodeShapeSchema,
 } from '../../schema/graph/v1';
 
@@ -25,7 +26,8 @@ export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'>
   messages?: ApiMessageCode[];
 };
 
-export type Color = typeof colorSchema.type;
+export type EdgeColor = typeof edgeColorSchema.type;
+export type NodeColor = typeof nodeColorSchema.type;
 
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
 

@@ -7228,60 +7228,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggType.Unnamed",
-            "type": "Function",
-            "tags": [
-              "class",
-              "private"
-            ],
-            "label": "Constructor",
-            "description": [
-              "\nGeneric AggType Constructor\n\nUsed to create the values exposed by the agg_types module.\n"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.AggType.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "config",
-                "description": [
-                  "- used to set the properties of the AggType"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggTypeConfig",
-                    "text": "AggTypeConfig"
-                  },
-                  "<TAggConfig, ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.AggParamType",
-                    "text": "AggParamType"
-                  },
-                  "<TAggConfig>>"
-                ],
-                "path": "src/platform/plugins/shared/data/common/search/aggs/agg_type.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
