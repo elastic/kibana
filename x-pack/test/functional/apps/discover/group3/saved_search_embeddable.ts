@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects/schema';
+import { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

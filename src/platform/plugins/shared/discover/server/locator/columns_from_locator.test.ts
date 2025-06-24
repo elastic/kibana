@@ -19,7 +19,7 @@ import type { LocatorServicesDeps as Services } from '.';
 import type { DiscoverAppLocatorParams } from '../../common';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { columnsFromLocatorFactory } from './columns_from_locator';
-import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects/schema';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 
 const mockSavedSearchId = 'abc-test-123';
 const mockSavedSearchAttributes: Omit<SavedSearchAttributes, 'title' | 'description'> = {

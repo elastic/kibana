@@ -23,7 +23,10 @@ export interface SavedSearch extends SavedSearchCommon {
 }
 
 // TODO: Clean up after https://github.com/elastic/kibana/pull/221975 is merged
-export type SavedSearchByValueAttributes = (DiscoverSessionAttributes | SavedSearchAttributes) & {
+export type SavedSearchByValueAttributes = (
+  | Omit<DiscoverSessionAttributes, 'description'>
+  | Omit<SavedSearchAttributes, 'description'>
+) & {
   description?: string;
   references: Reference[];
 };

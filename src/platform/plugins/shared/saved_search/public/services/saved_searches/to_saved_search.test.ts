@@ -21,7 +21,7 @@ const mockServices = {
 
 describe('toSavedSearch', () => {
   it('succesfully converts SavedSearchAttributes to saved search', async () => {
-    const attributes = {
+    const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
@@ -38,7 +38,7 @@ describe('toSavedSearch', () => {
           type: 'index-pattern',
         },
       ],
-    } as SavedSearchByValueAttributes;
+    };
     const savedSearch = await byValueToSavedSearch({ attributes }, mockServices);
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {

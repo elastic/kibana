@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects/schema';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 
 export const savedSearches: {

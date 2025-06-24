@@ -149,9 +149,10 @@ export const SCHEMA_SEARCH_MODEL_VERSION_6 = schema.object({
   tabs: schema.arrayOf(
     schema.object({
       id: schema.string(),
-      label: schema.string({ defaultValue: '' }),
+      label: schema.string(),
       attributes: TAB_ATTRIBUTES,
-    })
+    }),
+    { minSize: 1 }
   ),
 });
 
