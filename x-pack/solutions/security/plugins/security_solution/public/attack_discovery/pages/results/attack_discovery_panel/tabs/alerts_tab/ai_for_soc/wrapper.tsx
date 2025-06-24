@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
@@ -33,10 +32,6 @@ export const CONTENT_TEST_ID = 'attack-discovery-alert-content';
 
 interface AiForSOCAlertsTabProps {
   /**
-   * Overrides the default columns
-   */
-  defaultColumns?: EuiDataGridColumn[];
-  /**
    * Id to pass down to the ResponseOps alerts table
    */
   id: string;
@@ -51,7 +46,7 @@ interface AiForSOCAlertsTabProps {
  * It fetches rules, packages (integrations) and creates a local dataView.
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
-export const AiForSOCAlertsTab = memo(({ defaultColumns, id, query }: AiForSOCAlertsTabProps) => {
+export const AiForSOCAlertsTab = memo(({ id, query }: AiForSOCAlertsTabProps) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const spaceId = useSpaceId();
@@ -97,7 +92,6 @@ export const AiForSOCAlertsTab = memo(({ defaultColumns, id, query }: AiForSOCAl
         ) : (
           <div data-test-subj={CONTENT_TEST_ID}>
             <Table
-              defaultColumns={defaultColumns}
               dataView={dataView}
               id={id}
               packages={installedPackages}
