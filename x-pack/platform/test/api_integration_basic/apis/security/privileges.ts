@@ -465,7 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             if (!success) {
               throw new Error(
-                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''} Expected ${util.inspect(
+                `${errorPointerMessage ? errorPointerMessage + '\n\n' : ''}Expected ${util.inspect(
                   res.body
                 )} to equal ${util.inspect(expected)}`
               );
