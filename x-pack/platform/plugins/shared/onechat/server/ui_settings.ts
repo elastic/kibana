@@ -17,10 +17,10 @@ import {
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
     [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
-      description: i18n.translate('onechat.uiSettings.mcpServer.description', {
+      description: i18n.translate('xpack.onechat.uiSettings.mcpServer.description', {
         defaultMessage: 'Enables MCP server with access to tools.',
       }),
-      name: i18n.translate('onechat.uiSettings.mcpServer.name', {
+      name: i18n.translate('xpack.onechat.uiSettings.mcpServer.name', {
         defaultMessage: 'MCP Server',
       }),
       schema: schema.boolean(),
@@ -29,10 +29,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonlyMode: 'ui',
     },
     [ONECHAT_CHAT_UI_SETTING_ID]: {
-      description: i18n.translate('onechat.uiSettings.chatUI.description', {
+      description: i18n.translate('xpack.onechat.uiSettings.chatUI.description', {
         defaultMessage: 'Enables the OneChat chat UI.',
       }),
-      name: i18n.translate('onechat.uiSettings.chatUI.name', {
+      name: i18n.translate('xpack.onechat.uiSettings.chatUI.name', {
         defaultMessage: 'OneChat Chat UI',
       }),
       schema: schema.boolean(),
@@ -41,10 +41,10 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonlyMode: 'ui',
     },
     [ONECHAT_TOOLS_UI_SETTING_ID]: {
-      description: i18n.translate('onechat.uiSettings.toolsPage.description', {
+      description: i18n.translate('xpack.onechat.uiSettings.toolsPage.description', {
         defaultMessage: 'Enables the OneChat tools page.',
       }),
-      name: i18n.translate('onechat.uiSettings.toolsPage.name', {
+      name: i18n.translate('xpack.onechat.uiSettings.toolsPage.name', {
         defaultMessage: 'OneChat Tools Page',
       }),
       schema: schema.boolean(),
