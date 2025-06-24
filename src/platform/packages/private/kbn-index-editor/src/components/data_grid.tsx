@@ -67,7 +67,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
   // Track which cell is being edited
-  const [editingCell, setEditingCell] = useState({ row: null, col: null });
+  const [editingCell, setEditingCell] = useState<{ row: number | null; col: string | null }>({
+    row: null,
+    col: null,
+  });
 
   const onSetColumns = useCallback((columns: string[]) => {
     setActiveColumns(columns);
