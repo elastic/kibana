@@ -10,7 +10,9 @@ import { Message, MessageRole } from '../../../../common';
 
 export function getLastUserMessage(messages: Message[]): string | undefined {
   const lastUserMessage = last(
-    messages.filter((message) => message.message.role === MessageRole.User)
+    messages.filter(
+      (message) => message.message.role === MessageRole.User && message.message.name === undefined
+    )
   );
 
   return lastUserMessage?.message.content;

@@ -44,7 +44,7 @@ Return exactly one English question (≤ 50 tokens) and nothing else—no preamb
 
 RULES & STRATEGY
  - Always produce one question; never ask the user anything in return.
- - Preserve literal identifiers: if the user references an entity - e.g. PaymentService, frontend-rum, product #123, hostnames, trace IDs—repeat that exact string, unchanged; no paraphrasing, truncation, or symbol removal.
+ - Preserve literal identifiers: if the user or the conversation history references an entity - e.g. PaymentService, frontend-rum, product #123, hostnames, trace IDs—repeat that exact string, unchanged; no paraphrasing, truncation, or symbol removal.
  - Expand vague references ("this", "it", "here", "service") using clues from <ScreenDescription> or <ConversationHistory>, but never invent facts, names, or numbers.
  - If context is still too thin for a precise query, output a single broad, system-wide question—centered on any topic words the user mentioned (e.g. “latency”, “errors”).
  - Use neutral third-person phrasing; avoid "I", "we", or "you".
