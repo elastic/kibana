@@ -23,9 +23,13 @@ import { TopAlert } from '../../../../typings/alerts';
 
 interface Props {
   alert: TopAlert<ObservabilityFields>;
+  filterProximal: boolean;
 }
 
-export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryContainer {
+export function getBuildRelatedAlertsQuery({
+  alert,
+  filterProximal,
+}: Props): QueryDslQueryContainer {
   const groups = alert.fields[ALERT_GROUP];
   const shouldGroups: QueryDslQueryContainer[] = [];
   groups?.forEach(({ field, value }) => {
@@ -58,14 +62,22 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
   const tags = alert.fields[ALERT_RULE_TAGS] ?? [];
   const instanceId = alert.fields[ALERT_INSTANCE_ID]?.split(',') ?? [];
 
+  const range = filterProximal ? [30, 'minutes'] : [1, 'days'];
+
   return {
     bool: {
       filter: [
         {
           range: {
             [ALERT_START]: {
-              gte: startDate.clone().subtract(1, 'days').toISOString(),
-              lte: startDate.clone().add(1, 'days').toISOString(),
+              gte: startDate
+                .clone()
+                .subtract(...range)
+                .toISOString(),
+              lte: startDate
+                .clone()
+                .add(...range)
+                .toISOString(),
             },
           },
         },
