@@ -12,7 +12,7 @@ import {
   FilterStateStore,
   buildEsQuery,
 } from '@kbn/es-query';
-import { get, isEmpty } from 'lodash/fp';
+import { get, isEmpty, memoize } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { prepareKQLParam } from '../../../../common/utils/kql';
@@ -200,9 +200,34 @@ export const isDataProviderEmpty = (dataProviders: DataProvider[]) => {
   return isEmpty(dataProviders) || isEmpty(dataProviders.filter((d) => d.enabled === true));
 };
 
-export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBase => {
-  return { title: dataViewSpec?.title || '', fields: Object.values(dataViewSpec?.fields || {}) };
+const dataViewSpecToViewBaseFactory = () => {
+  const cache = new Map<string, DataViewBase>();
+
+  const getKey = (dataViewSpec?: DataViewSpec) =>
+    `${dataViewSpec?.id}${dataViewSpec?.title}${dataViewSpec?.version}`;
+
+  return (dataViewSpec?: DataViewSpec): DataViewBase => {
+    const key = getKey(dataViewSpec);
+    const cachedEntry = cache.get(key);
+
+    if (!cachedEntry) {
+      const newCacheEntry = {
+        title: dataViewSpec?.title || '',
+        fields: Object.values(dataViewSpec?.fields || {}),
+      };
+      cache.set(key, newCacheEntry);
+
+      return newCacheEntry;
+    }
+
+    return cachedEntry;
+  };
 };
+
+/**
+ * Cached function that converts view spec to view base. Uses data view id, title and version to generate cache keys.
+ */
+export const dataViewSpecToViewBase = dataViewSpecToViewBaseFactory();
 
 export const convertToBuildEsQuery = ({
   config,
