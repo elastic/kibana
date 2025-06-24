@@ -14,8 +14,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
-import { AddDataContextMenu } from './add_data_context_menu';
-import { useEntityCentricExperienceSetting } from '../../../../hooks/use_entity_centric_experience_setting';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config } = useApmPluginContext();
@@ -31,7 +29,6 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -92,6 +89,19 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+<<<<<<< HEAD
+=======
+
+      <EuiHeaderLink
+        color="primary"
+        href={kibanaHref('/app/apm/tutorial')}
+        data-test-subj="apmAddDataHeaderLink"
+      >
+        {i18n.translate('xpack.apm.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
+>>>>>>> c1563c2f453 ([ObsUX] Remove entities v2 code and Inventory (#224696))
     </EuiHeaderLinks>
   );
 }

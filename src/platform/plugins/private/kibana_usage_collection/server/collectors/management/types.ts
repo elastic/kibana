@@ -153,7 +153,6 @@ export interface UsageStats {
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;
   'securitySolution:showRelatedIntegrations': boolean;
