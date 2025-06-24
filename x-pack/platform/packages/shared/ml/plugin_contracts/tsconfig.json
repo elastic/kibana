@@ -9,21 +9,15 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/share-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/ml-url-state",
+    "@kbn/ml-trained-models-utils",
     "@kbn/ml-common-types",
-    "@kbn/ml-is-populated-object",
-    "@kbn/ml-data-frame-analytics-utils",
-    "@kbn/deeplinks-management",
-    "@kbn/utility-types",
-    "@kbn/ml-common-utils",
-    "@kbn/ml-plugin-contracts",
+    "@kbn/ml-services",
+    "@kbn/ml-shared-components",
   ]
 }
