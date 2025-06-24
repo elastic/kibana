@@ -13,6 +13,7 @@ Review important information about the {kib} 7.17.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.17.29>>
 * <<release-notes-7.17.28>>
 * <<release-notes-7.17.27>>
 * <<release-notes-7.17.26>>
@@ -98,6 +99,20 @@ Review important information about the {kib} 7.17.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.17.29]]
+== {kib} 7.17.29
+
+The 7.17.29 release includes the following fixes.
+
+[float]
+[[fixes-v7.17.29]]
+=== Fixes
+Elastic Observability solution::
+* Allows grouping for IP type fields in custom threshold rules ({kibana-pull}216062[#216062]).
+
+Kibana security::
+* Fixes an issue where the Saved Objects Rotate Encryption Key API would not affect sharable encrypted object types that exist in all spaces ({kibana-pull}217625[#217625]).
 
 [[release-notes-7.17.28]]
 == {kib} 7.17.28
