@@ -73,5 +73,6 @@ export type StartServices = CoreStart &
     kibanaVersion: string;
     storage: IStorageWrapper;
   } & MlServicesContext;
+
 export const useMlKibana = () => useKibana<StartServices>();
 export type MlKibanaReactContextValue = KibanaReactContextValue<StartServices>;

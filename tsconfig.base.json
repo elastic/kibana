@@ -1460,6 +1460,8 @@
       "@kbn/ml-parse-interval/*": ["x-pack/platform/packages/private/ml/parse_interval/*"],
       "@kbn/ml-plugin": ["x-pack/platform/plugins/shared/ml"],
       "@kbn/ml-plugin/*": ["x-pack/platform/plugins/shared/ml/*"],
+      "@kbn/ml-plugin-contracts": ["x-pack/platform/packages/shared/ml/plugin_contracts"],
+      "@kbn/ml-plugin-contracts/*": ["x-pack/platform/packages/shared/ml/plugin_contracts/*"],
       "@kbn/ml-query-utils": ["x-pack/platform/packages/private/ml/query_utils"],
       "@kbn/ml-query-utils/*": ["x-pack/platform/packages/private/ml/query_utils/*"],
       "@kbn/ml-random-sampler-utils": ["x-pack/platform/packages/shared/ml/random_sampler_utils"],

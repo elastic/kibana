@@ -7415,6 +7415,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-plugin-contracts@link:x-pack/platform/packages/shared/ml/plugin_contracts":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-plugin@link:x-pack/platform/plugins/shared/ml":
   version "0.0.0"
   uid ""

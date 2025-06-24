@@ -8,11 +8,12 @@
 import type {
   ModelDefinitionResponse,
   GetModelDownloadConfigOptions,
+  IElasticModels,
 } from '@kbn/ml-trained-models-utils';
 
 import { type TrainedModelsApiService } from './ml_api_service/trained_models';
 
-export class ElasticModels {
+export class ElasticModels implements IElasticModels {
   constructor(private readonly trainedModels: TrainedModelsApiService) {}
 
   /**
