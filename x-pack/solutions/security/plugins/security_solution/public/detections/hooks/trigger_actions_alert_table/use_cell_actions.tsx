@@ -30,7 +30,7 @@ export const useCellActionsOptions = (
   >
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const dataView = useDataView(SourcererScopeName.detections);
+  const experimentalDataView = useDataView(SourcererScopeName.detections);
 
   const {
     columns = [],
@@ -41,7 +41,7 @@ export const useCellActionsOptions = (
   } = context ?? {};
   const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
   const oldDataViewId = useDataViewId(SourcererScopeName.detections);
-  const dataViewId = newDataViewPickerEnabled ? dataView?.dataView?.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.dataView?.id : oldDataViewId;
 
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
@@ -52,7 +52,7 @@ export const useCellActionsOptions = (
       columns.map(
         (column) =>
           (newDataViewPickerEnabled
-            ? dataView.dataView?.fields?.getByName(column.id)?.toSpec()
+            ? experimentalDataView.dataView?.fields?.getByName(column.id)?.toSpec()
             : getFieldSpec(column.id)) ?? {
             name: '',
             type: '', // When type is an empty string all cell actions are incompatible
@@ -60,7 +60,7 @@ export const useCellActionsOptions = (
             searchable: false,
           }
       ),
-    [columns, dataView.dataView?.fields, getFieldSpec, newDataViewPickerEnabled]
+    [columns, experimentalDataView.dataView?.fields, getFieldSpec, newDataViewPickerEnabled]
   );
 
   /**
