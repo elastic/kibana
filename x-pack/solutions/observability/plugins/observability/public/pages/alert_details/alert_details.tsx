@@ -195,6 +195,10 @@ export function AlertDetails() {
   usePageReady({
     isRefreshing: isLoading,
     isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+    meta: {
+      description:
+        '[ttfmp_services] The Observability Alert Details overview page has loaded successfully',
+    },
   });
 
   if (isLoading) {
