@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
 
-export const getAlertsTriggeredEsqlCount = (namespace: string, sourcerDataView: DataViewSpec) => {
-  const indexPattern = sourcerDataView?.title ?? '';
-  return `FROM ${indexPattern} METADATA _id, _index
+export const getAlertsTriggeredEsqlCount = (namespace: string, alertsIndexName: string | null) => {
+  if (!alertsIndexName) return '';
+  return `FROM ${alertsIndexName} METADATA _id, _index
     ${getPrivilegedMonitorUsersJoin(namespace)}
     | STATS COUNT(*)`;
 };

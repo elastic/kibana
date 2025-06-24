@@ -47,7 +47,7 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AlertsTriggeredTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
+          <AlertsTriggeredTile spaceId={spaceId} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
