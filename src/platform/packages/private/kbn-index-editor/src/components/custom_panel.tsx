@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -45,6 +45,20 @@ export const CustomPanel = () => {
 
   return (
     <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          display="fill"
+          size={'s'}
+          color={'text'}
+          onClick={() => {
+            indexUpdateService.refresh();
+          }}
+          iconType="refresh"
+          aria-label={i18n.translate('indexEditor.filePicker.refreshAriaLabel', {
+            defaultMessage: 'Refresh button',
+          })}
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilePicker />
       </EuiFlexItem>

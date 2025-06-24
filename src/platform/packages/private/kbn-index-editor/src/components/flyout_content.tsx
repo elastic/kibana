@@ -36,7 +36,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
 
-  const totalHits = 10;
+  const totalHits = useObservable(deps.indexUpdateService.totalHits$);
 
   const rows = useObservable(deps.indexUpdateService.rows$, []);
   const isLoading = useObservable(deps.indexUpdateService.isFetching$, true);

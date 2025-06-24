@@ -88,6 +88,11 @@ export class IndexUpdateService {
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
   public readonly rows$: Observable<DataTableRecord[]> = this._rows$.asObservable();
 
+  private readonly _totalHits$ = new BehaviorSubject<number>(0);
+  public readonly totalHits$: Observable<number> = this._totalHits$.asObservable();
+
+  private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
+
   private readonly _subscription = new Subscription();
 
   // Accumulate updates in buffer with undo
@@ -275,6 +280,7 @@ export class IndexUpdateService {
         this.dataView$,
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
+        this._refreshSubject$,
       ])
         .pipe(
           tap(() => {
@@ -306,13 +312,17 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ([response, dataView]) => {
-            const { hits } = response.rawResponse.hits;
+            const { hits, total } = response.rawResponse.hits;
 
             const resultRows: DataTableRecord[] = hits.map((hit) => {
               return buildDataTableRecord(hit, dataView);
             });
 
             this._rows$.next(resultRows);
+            // `total` can be either a number or an object of type `SearchTotalHits`.
+            // We need to explicitly narrow the type before accessing `.value`.
+            const totalHitsCount = typeof total === 'number' ? total : total?.value ?? 0;
+            this._totalHits$.next(totalHitsCount);
             this._isFetching$.next(false);
           },
           error: (error) => {
@@ -320,6 +330,11 @@ export class IndexUpdateService {
           },
         })
     );
+  }
+
+  public refresh() {
+    this._isFetching$.next(true);
+    this._refreshSubject$.next(Date.now());
   }
 
   public setIndexName(indexName: string) {
