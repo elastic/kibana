@@ -30,7 +30,7 @@ import {
   CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID,
   DEFAULT_FEATURES,
 } from '../../../common/constants';
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import type { CasesContextStoreAction } from './state/cases_context_reducer';
@@ -93,7 +93,13 @@ export const CasesProvider: FC<
   const {
     settings: { client },
   } = useKibana().services;
-  const displayIncrementalCaseId = client.get(CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID);
+
+  // UI setting enablement is behind the configuration flag, so will error without this wrapper
+  let displayIncrementalCaseId = false;
+  if (KibanaServices.getConfig()?.incrementalIdService?.enabled) {
+    displayIncrementalCaseId = client.get(CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID);
+  }
+
   const [state, dispatch] = useReducer(casesContextReducer, getInitialCasesContextState());
 
   const value: CasesContextValue = useMemo(

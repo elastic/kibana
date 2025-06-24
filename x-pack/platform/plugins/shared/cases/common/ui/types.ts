@@ -72,6 +72,9 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
+  incrementalIdService: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;

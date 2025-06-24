@@ -36,7 +36,7 @@ export const useGetCases = (
   } = {}
 ): UseQueryResult<CasesFindResponseUI> => {
   const toasts = useToasts();
-  const { owner } = useCasesContext();
+  const { owner, settings } = useCasesContext();
   const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
 
   const hasOwner = !!owner.length;
@@ -48,18 +48,20 @@ export const useGetCases = (
       : { owner: initialOwner };
 
   // overrides for incremental_id search
-  let search = params.filterOptions?.search?.trim();
   let overrides: Partial<FilterOptions> = {};
-  const isIncrementalIdSearch = incrementalIdRegEx.test(search ?? '');
-  if (search && isIncrementalIdSearch) {
-    // extract the number portion of the inc id search: #123 -> 123
-    search = incrementalIdRegEx.exec(search)?.[1] ?? search;
-    // search only in `incremental_id` since types with `title`
-    // and `description` don't overlap
-    overrides = {
-      searchFields: ['incremental_id'],
-      search,
-    };
+  if (settings.displayIncrementalCaseId) {
+    let search = params.filterOptions?.search?.trim();
+    const isIncrementalIdSearch = incrementalIdRegEx.test(search ?? '');
+    if (search && isIncrementalIdSearch) {
+      // extract the number portion of the inc id search: #123 -> 123
+      search = incrementalIdRegEx.exec(search)?.[1] ?? search;
+      // search only in `incremental_id` since types with `title`
+      // and `description` don't overlap
+      overrides = {
+        searchFields: ['incremental_id'],
+        search,
+      };
+    }
   }
 
   return useQuery(
