@@ -313,7 +313,7 @@ export const waitForRuleToUpdate = () => {
   cy.get(RULE_SWITCH_LOADER, { timeout: 300000 }).should('not.exist');
 };
 
-export const importRules = (rulesFile: string) => {
+export const importRules = (rulesFile: Cypress.FileReference | Cypress.FileReference[]) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
@@ -454,7 +454,9 @@ const selectOverwriteConnectorsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_CONNECTORS_CHECKBOX).should('be.checked');
 };
 
-export const importRulesWithOverwriteAll = (rulesFile: string) => {
+export const importRulesWithOverwriteAll = (
+  rulesFile: Cypress.FileReference | Cypress.FileReference[]
+) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).click({ force: true });
   cy.get(INPUT_FILE).selectFile(rulesFile);

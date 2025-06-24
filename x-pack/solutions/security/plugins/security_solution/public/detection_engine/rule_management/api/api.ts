@@ -48,6 +48,7 @@ import type {
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
   ImportRulesResponse,
+  BulkManualRuleFillGaps,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -358,6 +359,7 @@ type PlainBulkAction = {
     | BulkActionTypeEnum['export']
     | BulkActionTypeEnum['duplicate']
     | BulkActionTypeEnum['run']
+    | BulkActionTypeEnum['fill_gaps']
   >;
 } & QueryOrIds;
 
@@ -376,11 +378,17 @@ export type ManualRuleRunBulkAction = {
   runPayload: BulkManualRuleRun['run'];
 } & QueryOrIds;
 
+export type ManualRuleFillGapsAction = {
+  type: BulkActionTypeEnum['fill_gaps'];
+  fillGapsPayload: BulkManualRuleFillGaps['fill_gaps'];
+} & QueryOrIds;
+
 export type BulkAction =
   | PlainBulkAction
   | EditBulkAction
   | DuplicateBulkAction
-  | ManualRuleRunBulkAction;
+  | ManualRuleRunBulkAction
+  | ManualRuleFillGapsAction;
 
 export interface PerformRulesBulkActionProps {
   bulkAction: BulkAction;
@@ -409,6 +417,8 @@ export async function performBulkAction({
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
     gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
     gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
+    fill_gaps:
+      bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
