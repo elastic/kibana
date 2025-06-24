@@ -243,6 +243,7 @@ export class LlmProxy {
       log.debug(`Extracted documents to score: ${JSON.stringify(documentsToScore, null, 2)}`);
       return documentsToScore;
     }
+
     let documentsToScore: KnowledgeBaseDocument[] = [];
 
     const simulator = this.interceptWithFunctionRequest({
@@ -253,7 +254,7 @@ export class LlmProxy {
       arguments: (requestBody) => {
         const systemMessage = first(requestBody.messages)?.content as string;
         const userMessage = last(requestBody.messages)?.content as string;
-        log.debug(`interceptScoreToolChoice: ${userMessage}`);
+        log.debug(`interceptScoreSuggestionsToolChoice: ${userMessage}`);
         documentsToScore = extractDocumentsToScore(systemMessage);
         const scores = documentsToScore
           .map((doc: KnowledgeBaseDocument) => `${doc.id},7`)

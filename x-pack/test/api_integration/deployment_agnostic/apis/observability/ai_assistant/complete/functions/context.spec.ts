@@ -151,19 +151,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(first(firstRequestBody.messages)?.role === MessageRole.System);
         });
 
-        it('system message contains instructions for rewriting the user prompt', () => {
+        it('includes instructions to rewrite the user prompt in the system message', () => {
           const systemMessage = getSystemMessage(firstRequestBody);
           expect(systemMessage?.content).to.contain(
             `Your ONLY task is to transform the user\'s last message (<UserPrompt>) into a single question that will be embedded and searched against "semantic_text" fields in Elasticsearch`
           );
         });
 
-        it('system message contains conversation history', () => {
+        it('includes the conversation history in the system message', () => {
           const systemMessage = getSystemMessage(firstRequestBody);
           expect(systemMessage?.content).to.contain('<ConversationHistory>');
         });
 
-        it('system message contains screen context', () => {
+        it('includes the screen context in the system message', () => {
           const systemMessage = getSystemMessage(firstRequestBody);
           expect(systemMessage?.content).to.contain('<ScreenDescription>');
           expect(systemMessage?.content).to.contain(screenContexts[0].screenDescription);
@@ -185,7 +185,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(first(secondRequestBody.messages)?.role === MessageRole.System);
         });
 
-        it('system message contains instructions for scoring', () => {
+        it('includes instructions for scoring in the system message', () => {
           const systemMessage = secondRequestBody.messages.find(
             (message) => message.role === MessageRole.System
           );
