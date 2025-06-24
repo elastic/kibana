@@ -68,7 +68,7 @@ describe('getCasesConnectorType', () => {
       tags: ['my-tag'],
       consumer: 'test-consumer',
       producer: 'test-producer',
-      alertTypeId: 'test-rule-1',
+      ruleTypeId: 'test-rule-1',
     };
 
     const getParams = (overrides = {}) => ({

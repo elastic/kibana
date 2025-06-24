@@ -9,11 +9,9 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { RuleTypeParams, SanitizedRule } from '../../common';
 import type { CombinedSummarizedAlerts } from '../types';
 
-type Rule = Pick<
-  SanitizedRule<RuleTypeParams>,
-  'id' | 'name' | 'tags' | 'consumer' | 'alertTypeId'
-> & {
+type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags' | 'consumer'> & {
   producer: string;
+  ruleTypeId: string;
 };
 
 export interface ConnectorAdapterParams {

@@ -107,7 +107,7 @@ export const getCasesConnectorAdapter = ({
        */
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
-      if (rule.alertTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
+      if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
         groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
         internallyManagedAlerts = true;
       }
