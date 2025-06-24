@@ -394,7 +394,7 @@ export const BULK_FILL_RULE_GAPS_CONFIRMATION_CONFIRM = i18n.translate(
 export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
   {
-    defaultMessage: 'This action can only be applied',
+    defaultMessage: 'Cannot execute the bulk action',
   }
 );
 
@@ -410,6 +410,30 @@ export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
 
 export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorMessage',
+  {
+    defaultMessage: 'Cannot execute the bulk action',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Cannot schedule gap fills for more than {rulesCount, plural, =1 {# rule} other {# rules}}.',
+    }
+  );
+
+export const BULK_FILL_RULE_GAPS_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkFillRuleGapsRuleLimitErrorCloseButton',
   {
     defaultMessage: 'Close',
   }
