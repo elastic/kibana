@@ -7,6 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
