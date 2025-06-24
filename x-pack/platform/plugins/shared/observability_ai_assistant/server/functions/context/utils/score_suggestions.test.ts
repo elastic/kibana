@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { scoreSuggestions } from './score_suggestions';
+import { SCORE_SUGGESTIONS_FUNCTION_NAME, scoreSuggestions } from './score_suggestions';
 import { Logger } from '@kbn/logging';
 import { of } from 'rxjs';
-import { MessageRole, StreamingChatResponseEventType } from '../../../common';
+import { StreamingChatResponseEventType } from '../../../../common';
 import { RecalledSuggestion } from './recall_and_score';
-import { FunctionCallChatFunction } from '../../service/types';
-import { ChatEvent } from '../../../common/conversation_complete';
+import { FunctionCallChatFunction } from '../../../service/types';
+import { ChatEvent } from '../../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
 
 const suggestions: RecalledSuggestion[] = [
@@ -20,8 +20,7 @@ const suggestions: RecalledSuggestion[] = [
   { id: 'doc3', text: 'Less relevant document 3', esScore: 0.3 },
 ];
 
-const userPrompt = 'What is my favourite color?';
-const context = 'Some context';
+const screenDescription = 'The user is currently looking at Discover';
 
 describe('scoreSuggestions', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
@@ -33,7 +32,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,7\ndoc2,5\ndoc3,3' }),
           },
         },
@@ -45,8 +44,7 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -59,8 +57,8 @@ describe('scoreSuggestions', () => {
     ]);
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
-      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9, llmScore: 7 },
+      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8, llmScore: 5 },
     ]);
   });
 
@@ -71,7 +69,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,2\ndoc2,3\ndoc3,1' }),
           },
         },
@@ -81,9 +79,7 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
-      userMessageFunctionName: 'score',
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
@@ -99,7 +95,7 @@ describe('scoreSuggestions', () => {
         type: StreamingChatResponseEventType.ChatCompletionChunk,
         message: {
           function_call: {
-            name: 'score',
+            name: SCORE_SUGGESTIONS_FUNCTION_NAME,
             arguments: JSON.stringify({ scores: 'doc1,6\nfake_doc,5' }),
           },
         },
@@ -109,15 +105,14 @@ describe('scoreSuggestions', () => {
     const result = await scoreSuggestions({
       suggestions,
       messages: normalConversationMessages,
-      userPrompt,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
     });
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9, llmScore: 6 },
     ]);
   });
 
@@ -126,7 +121,9 @@ describe('scoreSuggestions', () => {
       of({
         id: 'mock-id',
         type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: { function_call: { name: 'score', arguments: 'invalid_json' } },
+        message: {
+          function_call: { name: SCORE_SUGGESTIONS_FUNCTION_NAME, arguments: 'invalid_json' },
+        },
       })
     );
 
@@ -134,8 +131,7 @@ describe('scoreSuggestions', () => {
       scoreSuggestions({
         suggestions,
         messages: normalConversationMessages,
-        userPrompt,
-        context,
+        screenDescription,
         chat: mockChat,
         signal: new AbortController().signal,
         logger: mockLogger,
@@ -144,16 +140,10 @@ describe('scoreSuggestions', () => {
   });
 
   it('should handle scenarios where the last user message is a tool response', async () => {
-    const lastUserMessage = contextualInsightsMessages
-      .filter((message) => message.message.role === MessageRole.User)
-      .pop();
-
     const result = await scoreSuggestions({
       suggestions,
       messages: contextualInsightsMessages,
-      userPrompt: lastUserMessage?.message.content!,
-      userMessageFunctionName: lastUserMessage?.message.name,
-      context,
+      screenDescription,
       chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
