@@ -256,3 +256,11 @@ Configure Claude Desktop by adding this to its configuration:
   }
 }
 ```
+
+## Chat UI
+To enable the Chat UI located at `/app/onechat/chat`, add the following to your Kibana config:
+
+```yaml
+uiSettings.overrides:
+  onechat:chat:enabled: true
+```
