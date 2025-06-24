@@ -59,6 +59,7 @@ describe('autocomplete.suggest', () => {
           'STATS ',
           'EVAL ',
           'GROK ',
+          'COMPLETION ',
           'MV_EXPAND ',
           'DROP ',
           'KEEP ',
