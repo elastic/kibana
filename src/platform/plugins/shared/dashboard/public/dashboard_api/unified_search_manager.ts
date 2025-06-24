@@ -93,7 +93,14 @@ export function initializeUnifiedSearchManager(
       timefilterService.setRefreshInterval(refreshIntervalOrDefault);
     }
   }
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRestore$.value && initialState.timeFrom && initialState.timeTo
+    ? {
+      from: initialState.timeFrom,
+      to: initialState.timeTo,
+    }
+    : undefined
+  );
   function setTimeRange(timeRange: TimeRange) {
     if (!fastIsEqual(timeRange, timeRange$.value)) {
       timeRange$.next(timeRange);
@@ -302,7 +309,7 @@ export function initializeUnifiedSearchManager(
   const getState = (): {
     state: Pick<
       DashboardState,
-      'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+      'filters' | 'query' | 'refreshInterval' | 'timeFrom' | 'timeTo' | 'timeRestore'
     >;
     references: SavedObjectReference[];
   } => {
@@ -312,13 +319,24 @@ export function initializeUnifiedSearchManager(
       filter: serializableFilters,
       query: query$.value,
     });
+
+    const timeRestore = timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore;
+
+    /**
+     * Parse global time filter settings
+     */
+    const { from, to } = dataService.query.timefilter.timefilter.getTime();
+    const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
+    const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
+
     return {
       state: {
         filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
         query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
         refreshInterval: refreshInterval$.value,
-        timeRange: timeRange$.value,
-        timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
+        timeFrom,
+        timeRestore,
+        timeTo,
       },
       references,
     };

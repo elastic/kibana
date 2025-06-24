@@ -120,11 +120,9 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       language: 'kuery',
       query: 'hi',
     },
-    timeRange: {
-      to: 'now',
-      from: 'now-15m',
-    },
+    timeFrom: 'now-15m',
     timeRestore: false,
+    timeTo: 'now',
     viewMode: 'view',
     panels: [],
     ...overrides,

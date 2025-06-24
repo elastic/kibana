@@ -9,7 +9,6 @@
 
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { pick } from 'lodash';
-import moment, { Moment } from 'moment';
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardAttributes } from '../../server';
@@ -25,16 +24,6 @@ import { DashboardApi } from './types';
 import { generateNewPanelIds } from './generate_new_panel_ids';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
-
-export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
-  if (moment(time).isValid()) {
-    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
-  } else {
-    // If it's not a valid moment date, then it should be a string representing a relative time
-    // like 'now' or 'now-15m'.
-    return time as string;
-  }
-};
 
 export const getSerializedState = ({
   controlGroupReferences,
@@ -59,7 +48,9 @@ export const getSerializedState = ({
     query,
     title,
     filters,
+    timeFrom,
     timeRestore,
+    timeTo,
     description,
 
     // Dashboard options
@@ -92,12 +83,6 @@ export const getSerializedState = ({
     hidePanelTitles,
   };
 
-  /**
-   * Parse global time filter settings
-   */
-  const { from, to } = timefilter.getTime();
-  const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
-  const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
   const refreshInterval = timeRestore
     ? (pick(timefilter.getRefreshInterval(), [
         'display',
