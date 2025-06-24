@@ -45,6 +45,8 @@ const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
 const UNDO_EMIT_MS = 500; // 0.5 seconds
 
+const DOCS_PER_FETCH = 1000;
+
 interface DocUpdate {
   id?: string;
   value: Record<string, any>;
@@ -290,7 +292,7 @@ export class IndexUpdateService {
             return from(
               this.data.search.searchSource.create({
                 index: dataView.toSpec(),
-                size: 1000, // Adjust size as needed
+                size: DOCS_PER_FETCH,
               })
             ).pipe(
               tap((searchSource) => {
