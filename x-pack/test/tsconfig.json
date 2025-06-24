@@ -168,5 +168,7 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/event-log-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/intercepts-plugin",
   ]
 }
