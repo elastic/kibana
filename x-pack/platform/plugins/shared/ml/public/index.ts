@@ -10,12 +10,9 @@
 // use `getMlSharedImports()` to export static code.
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import type {
-  MlPluginSetup,
-  MlPluginStart,
-  MlSetupDependencies,
-  MlStartDependencies,
-} from './plugin';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
+
+import type { MlSetupDependencies, MlStartDependencies } from './plugin';
 import { MlPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
@@ -31,11 +28,3 @@ export type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimLaneEmbeddableState,
 } from './embeddables/types';
-
-// export type { MlLocator } from './locator/ml_locator';
-// export { useMlManagementHref } from './locator/use_ml_management_href';
-// export { MlManagementLocatorInternal } from './locator/ml_management_locator';
-// export { MlLocatorDefinition } from './locator/ml_locator';
-// export { useMlHref } from './locator/use_ml_href';
-
-// export { MlNodeAvailableWarningShared } from './application/components/node_available_warning';
