@@ -59,18 +59,22 @@ const UnfreezeActionButtons: React.FunctionComponent<{
   setSelectedResolutionType: (step: Exclude<IndicesResolutionType, 'readonly'>) => void;
   deprecation: EnrichedDeprecationInfo;
 }> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal, deprecation }) => {
-  const { reindexState, updateIndexState: { status, updateAction } } = useIndexContext();
+  const {
+    reindexState,
+    updateIndexState: { status, updateAction },
+  } = useIndexContext();
   const reindexingInProgressOrCompleted =
     reindexState.status === ReindexStatus.inProgress ||
     reindexState.status === ReindexStatus.completed;
-  const updateInProgressOrCompleted =
-    status === 'complete' || status === 'inProgress';
+  const updateInProgressOrCompleted = status === 'complete' || status === 'inProgress';
 
   const isUnfreezing = updateAction === 'unfreeze' && updateInProgressOrCompleted;
   const isDeleting = updateAction === 'delete' && updateInProgressOrCompleted;
 
   const canDisplayUnfreeze = !!(
-    reindexState.hasRequiredPrivileges && !reindexingInProgressOrCompleted && !isDeleting
+    reindexState.hasRequiredPrivileges &&
+    !reindexingInProgressOrCompleted &&
+    !isDeleting
   );
   const canDisplayReindex = !!(reindexState.hasRequiredPrivileges && !updateInProgressOrCompleted);
   const canDisplayDelete = !!(
@@ -122,14 +126,16 @@ const ReindexActionButtons: React.FunctionComponent<{
   deprecation: EnrichedDeprecationInfo;
 }> = ({ openFlyout, correctiveAction, setSelectedResolutionType, openModal, deprecation }) => {
   const { excludedActions = [] } = correctiveAction;
-  const { reindexState, updateIndexState: { status, updateAction } } = useIndexContext();
+  const {
+    reindexState,
+    updateIndexState: { status, updateAction },
+  } = useIndexContext();
   const { meta } = reindexState;
   const { isReadonly, isFollowerIndex } = meta;
   const reindexingInProgressOrCompleted =
     reindexState.status === ReindexStatus.inProgress ||
     reindexState.status === ReindexStatus.completed;
-  const updateInProgressOrCompleted =
-    status === 'complete' || status === 'inProgress';
+  const updateInProgressOrCompleted = status === 'complete' || status === 'inProgress';
 
   const isSettingReadOnly = updateAction === 'readonly' && updateInProgressOrCompleted;
   const isDeleting = updateAction === 'delete' && updateInProgressOrCompleted;

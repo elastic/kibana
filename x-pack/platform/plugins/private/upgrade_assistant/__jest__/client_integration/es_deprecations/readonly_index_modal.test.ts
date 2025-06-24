@@ -191,9 +191,9 @@ describe('Readonly index modal', () => {
 
       expect(exists('startDeleteButton')).toBe(true);
       expect(find('startDeleteButton').props().disabled).toBe(true);
-      await actions.reindexDeprecationFlyout.fillDeleteInputText("bad input");
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('bad input');
       expect(find('startDeleteButton').props().disabled).toBe(true);
-      await actions.reindexDeprecationFlyout.fillDeleteInputText("delete");
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('delete');
 
       expect(find('startDeleteButton').props().disabled).toBe(false);
     });

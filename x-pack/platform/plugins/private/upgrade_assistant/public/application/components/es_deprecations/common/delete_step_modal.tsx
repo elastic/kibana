@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -30,26 +29,51 @@ interface Props {
   type: 'index' | 'dataStream';
 }
 
-
-
 export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props) => {
   const i18nTexts = {
     index: {
-      deleteTitle: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.titleLabel" defaultMessage="Delete index" />,
-      calloutTitle: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.calloutTitle" defaultMessage="Deleting index cannot be reversed" />,
-      calloutText: <FormattedMessage
-        id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.calloutText"
-        defaultMessage="You are about to delete index {targetName}. This is an irreversible action, and the data cannot be recovered from a deleted index. Make sure you have appropriate backups."
-        values={{
-          targetName: <EuiCode>{targetName}</EuiCode>
-        }}
-      />,
-      deleteButtonLabel: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.deleteButtonLabel" defaultMessage="Delete index" />
+      deleteTitle: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.titleLabel"
+          defaultMessage="Delete index"
+        />
+      ),
+      calloutTitle: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.calloutTitle"
+          defaultMessage="Deleting index cannot be reversed"
+        />
+      ),
+      calloutText: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.calloutText"
+          defaultMessage="You are about to delete index {targetName}. This is an irreversible action, and the data cannot be recovered from a deleted index. Make sure you have appropriate backups."
+          values={{
+            targetName: <EuiCode>{targetName}</EuiCode>,
+          }}
+        />
+      ),
+      deleteButtonLabel: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.deleteModal.index.deleteButtonLabel"
+          defaultMessage="Delete index"
+        />
+      ),
     },
 
     dataStream: {
-      deleteTitle: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.titleLabel" defaultMessage="Delete data stream" />,
-      calloutTitle: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.calloutTitle" defaultMessage="Deleting data stream cannot be reversed" />,
+      deleteTitle: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.titleLabel"
+          defaultMessage="Delete data stream"
+        />
+      ),
+      calloutTitle: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.calloutTitle"
+          defaultMessage="Deleting data stream cannot be reversed"
+        />
+      ),
       calloutText: (
         <>
           <p>
@@ -69,10 +93,14 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
           </p>
         </>
       ),
-      deleteButtonLabel: <FormattedMessage id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.deleteButtonLabel" defaultMessage="Delete data stream" />
+      deleteButtonLabel: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.dataStreams.deleteModal.dataStream.deleteButtonLabel"
+          defaultMessage="Delete data stream"
+        />
+      ),
     },
   };
-
 
   const [value, setValue] = useState<string>('');
 
@@ -88,11 +116,7 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          title={i18nTexts[type].calloutTitle}
-          color="warning"
-          iconType="warning"
-        >
+        <EuiCallOut title={i18nTexts[type].calloutTitle} color="warning" iconType="warning">
           {i18nTexts[type].calloutText}
         </EuiCallOut>
         <EuiSpacer size="m" />
@@ -133,10 +157,8 @@ export const DeleteModal = ({ closeModal, targetName, deleteIndex, type }: Props
           >
             {i18nTexts[type].deleteButtonLabel}
           </EuiButton>
-
         </EuiFlexGroup>
       </EuiModalFooter>
     </>
   );
 };
-

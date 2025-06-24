@@ -90,7 +90,8 @@ describe('ES deprecations table', () => {
       expect.anything()
     );
     expect(httpSetup.get).toHaveBeenCalledWith(
-      `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${(mlDeprecation.correctiveAction as MlAction).snapshotId
+      `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${
+        (mlDeprecation.correctiveAction as MlAction).snapshotId
       }`,
       expect.anything()
     );
@@ -339,15 +340,15 @@ describe('ES deprecations table', () => {
           (deprecation, idx) =>
             idx === deprecationIndex
               ? ({
-                level: 'critical',
-                resolveDuringUpgrade: false,
-                type: 'index_settings',
-                message: 'Index created before 7.0',
-                details: 'deprecation details',
-                url: 'doc_url',
-                index: correctiveAction.index || 'reindex_index',
-                correctiveAction,
-              } as EnrichedDeprecationInfo)
+                  level: 'critical',
+                  resolveDuringUpgrade: false,
+                  type: 'index_settings',
+                  message: 'Index created before 7.0',
+                  details: 'deprecation details',
+                  url: 'doc_url',
+                  index: correctiveAction.index || 'reindex_index',
+                  correctiveAction,
+                } as EnrichedDeprecationInfo)
               : deprecation
         ),
       } as ESUpgradeStatus);
@@ -554,22 +555,22 @@ describe('ES deprecations table', () => {
             (deprecation) =>
               deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
                 ? ({
-                  level: 'critical',
-                  resolveDuringUpgrade: false,
-                  type: 'index_settings',
-                  message: 'Index created before 7.0',
-                  details: 'deprecation details',
-                  url: 'doc_url',
-                  index: 'reindex_index',
-                  correctiveAction: {
-                    type: 'unfreeze',
-                    metadata: {
-                      isClosedIndex: false,
-                      isFrozenIndex: true,
-                      isInDataStream: false,
-                    },
-                  } as UnfreezeAction,
-                } as EnrichedDeprecationInfo)
+                    level: 'critical',
+                    resolveDuringUpgrade: false,
+                    type: 'index_settings',
+                    message: 'Index created before 7.0',
+                    details: 'deprecation details',
+                    url: 'doc_url',
+                    index: 'reindex_index',
+                    correctiveAction: {
+                      type: 'unfreeze',
+                      metadata: {
+                        isClosedIndex: false,
+                        isFrozenIndex: true,
+                        isInDataStream: false,
+                      },
+                    } as UnfreezeAction,
+                  } as EnrichedDeprecationInfo)
                 : deprecation
           ),
         } as ESUpgradeStatus);
@@ -678,24 +679,24 @@ describe('ES deprecations table', () => {
             (deprecation) =>
               deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
                 ? ({
-                  level: 'critical',
-                  resolveDuringUpgrade: false,
-                  type: 'index_settings',
-                  message: 'Index created before 7.0',
-                  details: 'deprecation details',
-                  url: 'doc_url',
-                  index,
-                  correctiveAction: {
-                    type: 'reindex',
-                    excludedActions,
-                    metadata: {
-                      isClosedIndex: false,
-                      isFrozenIndex: false,
-                      isInDataStream: false,
-                      ...metaOverrides,
-                    },
-                  } as ReindexAction,
-                } as EnrichedDeprecationInfo)
+                    level: 'critical',
+                    resolveDuringUpgrade: false,
+                    type: 'index_settings',
+                    message: 'Index created before 7.0',
+                    details: 'deprecation details',
+                    url: 'doc_url',
+                    index,
+                    correctiveAction: {
+                      type: 'reindex',
+                      excludedActions,
+                      metadata: {
+                        isClosedIndex: false,
+                        isFrozenIndex: false,
+                        isInDataStream: false,
+                        ...metaOverrides,
+                      },
+                    } as ReindexAction,
+                  } as EnrichedDeprecationInfo)
                 : deprecation
           ),
         } as ESUpgradeStatus);

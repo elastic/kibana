@@ -10,7 +10,11 @@ import React, { createContext, useContext } from 'react';
 import { ApiService } from '../../../../lib/api';
 import { useReindex, ReindexState } from './use_reindex';
 import { UpdateIndexState, useUpdateIndex } from './use_update_index';
-import { EnrichedDeprecationInfo, IndexAction, UpdateActions } from '../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  IndexAction,
+  UpdateActions,
+} from '../../../../../../common/types';
 
 export interface IndexStateContext {
   deprecation: EnrichedDeprecationInfo;

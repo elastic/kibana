@@ -74,8 +74,8 @@ const getTitle = (actionType: UpdateIndexModalStepProps['action'], indexName: st
 const getModalTitle = (actionType: UpdateIndexModalStepProps['action']) => {
   const messages = {
     makeReadonly: {
-      id: "xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStep.title",
-      defaultMessage: "Setting index to read-only",
+      id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.readonlyStep.title',
+      defaultMessage: 'Setting index to read-only',
     },
     unfreeze: {
       id: 'xpack.upgradeAssistant.esDeprecations.indices.indexModal.updateStep.checklist.step.unfreezeStep.title',
@@ -90,12 +90,7 @@ const getModalTitle = (actionType: UpdateIndexModalStepProps['action']) => {
   const message = messages[actionType];
   if (!message) return null;
 
-  return (
-    <FormattedMessage
-      id={message.id}
-      defaultMessage={message.defaultMessage}
-    />
-  );
+  return <FormattedMessage id={message.id} defaultMessage={message.defaultMessage} />;
 };
 
 /**

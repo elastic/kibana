@@ -41,13 +41,13 @@ const createActions = (testBed: TestBed) => {
     },
     clickDeprecationRowAt: async (config: {
       deprecationType:
-      | 'mlSnapshot'
-      | 'indexSetting'
-      | 'reindex'
-      | 'default'
-      | 'clusterSetting'
-      | 'dataStream'
-      | 'unfreeze';
+        | 'mlSnapshot'
+        | 'indexSetting'
+        | 'reindex'
+        | 'default'
+        | 'clusterSetting'
+        | 'dataStream'
+        | 'unfreeze';
       index: number;
       action?: 'reindex' | 'readonly' | 'unfreeze' | 'delete';
     }) => {
@@ -221,7 +221,7 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
 
-    fillDeleteInputText: async (value: string = "delete") => {
+    fillDeleteInputText: async (value: string = 'delete') => {
       await act(async () => {
         find('deleteIndexInput').simulate('change', {
           target: {
@@ -231,7 +231,7 @@ const createActions = (testBed: TestBed) => {
       });
 
       component.update();
-    }
+    },
   };
   const dataStreamDeprecationFlyout = {
     clickReindexButton: async () => {

@@ -12,10 +12,7 @@ import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 
-export function registerDeleteIndexRoute({
-  router,
-  lib: { handleEsError },
-}: RouteDependencies) {
+export function registerDeleteIndexRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.delete(
     {
       path: `${API_BASE_PATH}/delete_index/{index}`,

@@ -172,7 +172,10 @@ const i18nTexts = {
 export const ReindexResolutionCell: React.FunctionComponent<{
   deprecation: EnrichedDeprecationInfo;
 }> = ({ deprecation }) => {
-  const { reindexState, updateIndexState: { updateAction, status: updateIndexStateStatus } } = useIndexContext();
+  const {
+    reindexState,
+    updateIndexState: { updateAction, status: updateIndexStateStatus },
+  } = useIndexContext();
   const { correctiveAction } = deprecation;
 
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
@@ -221,7 +224,6 @@ export const ReindexResolutionCell: React.FunctionComponent<{
     correctiveAction?.type === 'unfreeze'
       ? getRecommendedActionForUnfreezeAction()
       : getRecommendedActionForReindexingAction();
-
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -358,7 +360,6 @@ export const ReindexResolutionCell: React.FunctionComponent<{
         </EuiFlexGroup>
       );
   }
-
 
   if (recommendedAction) {
     return (
