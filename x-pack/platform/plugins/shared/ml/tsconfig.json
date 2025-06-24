@@ -153,5 +153,6 @@
     "@kbn/ml-server-api-schemas",
     "@kbn/ml-saved-objects",
     "@kbn/ml-locator",
+    "@kbn/ml-plugin-contracts",
   ]
 }
