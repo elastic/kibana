@@ -275,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('color of event of failed event should be subdued', async () => {
+      it('color of event of failed event should be primary', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
