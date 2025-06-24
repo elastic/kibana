@@ -297,7 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect((await historyDocs()).length).to.eql(0);
     });
 
-    it('testtest should schedule a task with rrule with fixed time and dtstart', async () => {
+    it('should schedule a task with rrule with fixed time and dtstart', async () => {
       const now = new Date();
       const todayDay = now.getUTCDate();
       const todayMonth = now.getUTCMonth();
