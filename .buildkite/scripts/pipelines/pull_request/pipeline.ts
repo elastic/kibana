@@ -100,16 +100,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/inventory/,
-        /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/inventory_cypress.yml'));
-    }
-
-    if (
       (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -470,7 +460,10 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:security-genai-run-evals')) {
+    if (
+      GITHUB_PR_LABELS.includes('ci:security-genai-run-evals') ||
+      GITHUB_PR_LABELS.includes('ci:security-genai-run-evals-local-prompts')
+    ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/gen_ai_evals.yml')
       );

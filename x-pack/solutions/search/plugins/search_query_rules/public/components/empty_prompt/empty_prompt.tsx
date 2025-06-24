@@ -33,9 +33,11 @@ import { CREATE_QUERY_RULE_SET_API_SNIPPET } from '../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
+import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import backgroundPaneDarklImg from '../../assets/query-rule-panel-background-dark.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
@@ -43,7 +45,7 @@ interface EmptyPromptProps {
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
   const usageTracker = useUsageTracker();
   const { application, share, console: consolePlugin } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
 
   useEffect(() => {
     usageTracker?.load(AnalyticsEvents.emptyPromptLoaded);
@@ -71,7 +73,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
     position: 'relative',
   });
   const backgroundPanel = css({
-    backgroundImage: `url(${backgroundPanelImg})`,
+    backgroundImage: `url(${colorMode === 'DARK' ? backgroundPaneDarklImg : backgroundPanelImg})`,
     backgroundSize: '50%',
     backgroundRepeat: 'no-repeat',
     backgroundPosition: 'top right',
@@ -214,7 +216,11 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
             </EuiFlexItem>
 
             <EuiFlexItem grow css={positionRelative}>
-              <img src={queryRulesImg} alt="Query Rules" css={imgProps} />
+              <img
+                src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
+                alt="Query Rules"
+                css={imgProps}
+              />
               <div css={gradientOverlay}>&nbsp;</div>
             </EuiFlexItem>
           </EuiFlexGroup>
