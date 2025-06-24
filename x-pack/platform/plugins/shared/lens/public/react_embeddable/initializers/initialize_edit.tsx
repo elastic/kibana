@@ -261,6 +261,7 @@ export function initializeEditApi(
        * Lens will leverage the neutral nature of this function to build the inline editing experience
        */
       onEdit: async () => {
+        console.log('onEdit called');
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }

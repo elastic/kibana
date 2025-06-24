@@ -45,9 +45,7 @@ export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
   const openFlyout = useCallback(() => {
     const overlayRef = coreServices.overlays.openFlyout(
       toMountPoint(
-        React.createElement(function () {
-          return <AddPanelFlyout1 dashboardApi={dashboardApi} />;
-        }),
+        <AddPanelFlyout1 dashboardApi={dashboardApi} />,
         coreServices
       ),
       {
