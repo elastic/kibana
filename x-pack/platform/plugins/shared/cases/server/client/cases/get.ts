@@ -103,7 +103,7 @@ export const getCasesByAlertID = async (
       return [];
     }
 
-    const commentStats = await attachmentService.getter.getCaseCommentStats({
+    const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
       caseIds,
     });
 

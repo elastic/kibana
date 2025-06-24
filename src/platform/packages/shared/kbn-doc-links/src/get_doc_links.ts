@@ -32,7 +32,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/v8/`;
-  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
+  const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
@@ -494,6 +494,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${SECURITY_SOLUTION_DOCS}detections-permissions-section.html`,
       networkMap: `${SECURITY_SOLUTION_DOCS}conf-map-ui.html`,
       troubleshootGaps: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#troubleshoot-gaps`,
+      gapsTable: `${SECURITY_SOLUTION_DOCS}alerts-ui-monitor.html#gaps-table`,
       ruleApiOverview: isServerless
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_APIS}group/endpoint-security-detections-api`,
@@ -659,6 +660,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       monitorLogs: isServerless
         ? `${SERVERLESS_DOCS}observability-discover-and-explore-logs.html`
         : `${OBSERVABILITY_DOCS}monitor-logs.html`,
+      logsStreams: `${ELASTIC_WEBSITE_URL}docs/solutions/observability/logs/streams/streams`,
       analyzeMetrics: isServerless
         ? `${SERVERLESS_DOCS}observability-infrastructure-monitoring.html`
         : `${OBSERVABILITY_DOCS}analyze-metrics.html`,
@@ -1113,6 +1115,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     queryRules: {
       queryRulesAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/group/endpoint-query_rules`,
+    },
+    datasetQuality: {
+      failureStore: `${OBSERVABILITY_DOCS}monitor-datasets.html`,
     },
   });
 };
