@@ -65,6 +65,7 @@ const ruleTypes: string[] = [
   'siem.thresholdRule',
   'siem.newTermsRule',
   'siem.notifications',
+  'datasetQuality.degradedDocs',
 ];
 
 describe('Alert as data fields checks', () => {

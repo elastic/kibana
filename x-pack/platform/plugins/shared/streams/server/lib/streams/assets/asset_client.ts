@@ -35,7 +35,7 @@ import {
   STREAM_NAME,
 } from './fields';
 import { AssetStorageSettings } from './storage_settings';
-import { AssetNotFoundError } from '../errors/query_not_found_error';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
