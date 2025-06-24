@@ -42,8 +42,6 @@ export const EmptyState: React.FC<{
   alertsQuerySnapshot,
   showInspectButton,
 }) => {
-  const title = messageTitle || 'No results match your search criteria';
-  const body = messageBody || 'Try searching over a longer period of time or modifying your search';
   return (
     <EuiPanel color={variant} data-test-subj="alertsTableEmptyState">
       <EuiFlexGroup
@@ -82,17 +80,23 @@ export const EmptyState: React.FC<{
                     <EuiText size="s">
                       <EuiTitle>
                         <h3>
+                          ( messageTitle ? messageTitle :
                           <FormattedMessage
                             id="xpack.triggersActionsUI.empty.title"
-                            defaultMessage={title}
+                            defaultMessage={'No results match your search criteria'}
                           />
+                          )
                         </h3>
                       </EuiTitle>
                       <p>
+                        ( messageBody ? messageBody :
                         <FormattedMessage
                           id="xpack.triggersActionsUI.empty.description"
-                          defaultMessage={body}
+                          defaultMessage={
+                            'Try searching over a longer period of time or modifying your search'
+                          }
                         />
+                        )
                       </p>
                     </EuiText>
                   </EuiFlexItem>
