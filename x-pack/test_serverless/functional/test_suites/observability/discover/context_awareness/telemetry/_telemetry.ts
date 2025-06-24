@@ -64,7 +64,6 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
           'observability-root-profile-with-attributes-tab',
-          'observability-root-profile',
           'default-data-source-profile',
         ]);
       });
