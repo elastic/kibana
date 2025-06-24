@@ -183,7 +183,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const connectorData = getInferenceApiParams(data, !!enforceAdaptiveAllocations);
+      const connectorData = getInferenceApiParams(data, !!enforceAdaptiveAllocations) ?? data;
       const { name, config, secrets } = connectorData;
       const validConnector = {
         id: connector.id,
