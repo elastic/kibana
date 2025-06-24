@@ -45,7 +45,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
   const hookSpaceId = useSpaceId();
-  
+
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
 
@@ -57,6 +57,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     title: titleString,
     label: labelString,
     esqlQuery: getEsqlQuery(effectiveSpaceId),
+    dataViewId: 'default-dataview',
     filterQuery,
   });
 

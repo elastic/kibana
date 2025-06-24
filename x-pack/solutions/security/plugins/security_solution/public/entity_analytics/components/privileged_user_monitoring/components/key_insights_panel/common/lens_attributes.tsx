@@ -12,8 +12,7 @@ interface KeyInsightsPanelParams {
   title: string;
   label: string;
   esqlQuery: string;
-  dataViewId?: string;
-  dataViewTitle?: string;
+  dataViewId: string;
   filterQuery: ESBoolQuery | undefined;
 }
 
@@ -21,42 +20,9 @@ export const createKeyInsightsPanelLensAttributes = ({
   title,
   label,
   esqlQuery,
-  dataViewTitle = 'logs-*',
+  dataViewId,
   filterQuery,
 }: KeyInsightsPanelParams): LensAttributes => {
-  // Determine appropriate data view based on the query
-  const isMLQuery = esqlQuery.includes('.ml-anomalies');
-  const isAlertsQuery = esqlQuery.includes('.alerts-');
-
-  let adHocDataView;
-  if (isMLQuery) {
-    adHocDataView = {
-      'ml-anomalies-dataview': {
-        id: 'ml-anomalies-dataview',
-        title: '.ml-anomalies-*',
-        timeFieldName: '@timestamp',
-        allowNoIndex: true, // Allow queries even if ML indices don't exist
-      },
-    };
-  } else if (isAlertsQuery) {
-    adHocDataView = {
-      'alerts-dataview': {
-        id: 'alerts-dataview',
-        title: '.alerts-*',
-        timeFieldName: '@timestamp',
-      },
-    };
-  } else {
-    // Default for logs data
-    adHocDataView = {
-      'logs-dataview': {
-        id: 'logs-dataview',
-        title: dataViewTitle,
-        timeFieldName: '@timestamp',
-      },
-    };
-  }
-
   return {
     title,
     description: '',
@@ -100,7 +66,11 @@ export const createKeyInsightsPanelLensAttributes = ({
           },
         },
       },
-      adHocDataViews: adHocDataView,
+      adHocDataViews: {
+        [dataViewId]: {
+          id: dataViewId,
+        },
+      },
     },
     references: [],
   };
