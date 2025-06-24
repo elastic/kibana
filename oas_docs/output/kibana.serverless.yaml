@@ -11180,7 +11180,11 @@ paths:
                     required:
                       - status
                   status:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                    oneOf:
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
                 required:
                   - status
           description: Successful response
