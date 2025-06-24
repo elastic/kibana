@@ -160,11 +160,11 @@ describe('Privilege Monitoring Data Client', () => {
           findByIndex: findByIndexMock,
         },
       });
-      dataClient.getAllUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
+      dataClient.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1', 'user2']);
       await dataClient.plainIndexSync();
       expect(findByIndexMock).toHaveBeenCalled();
-      expect(dataClient.getAllUsernamesFromIndex).toHaveBeenCalledTimes(2);
-      expect(dataClient.getAllUsernamesFromIndex).toHaveBeenCalledWith({
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledTimes(2);
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledWith({
         indexName: 'index1',
         kuery: undefined,
       });
@@ -201,14 +201,14 @@ describe('Privilege Monitoring Data Client', () => {
         },
       });
 
-      dataClient.getAllUsernamesFromIndex = jest.fn().mockResolvedValue(['user1']);
+      dataClient.syncUsernamesFromIndex = jest.fn().mockResolvedValue(['user1']);
       Object.defineProperty(dataClient, 'findStaleUsersForIndex', {
         value: jest.fn().mockResolvedValue([]),
       });
       await dataClient.plainIndexSync();
       // Should only be called for the source with indexPattern
-      expect(dataClient.getAllUsernamesFromIndex).toHaveBeenCalledTimes(1);
-      expect(dataClient.getAllUsernamesFromIndex).toHaveBeenCalledWith({
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledTimes(1);
+      expect(dataClient.syncUsernamesFromIndex).toHaveBeenCalledWith({
         indexName: 'foo',
         kuery: undefined,
       });
@@ -252,7 +252,7 @@ describe('Privilege Monitoring Data Client', () => {
       dataClient.buildBulkOperationsForUsers = jest.fn().mockReturnValue([{ index: { _id: '1' } }]);
       dataClient.getIndex = jest.fn().mockReturnValue('test-index');
 
-      const usernames = await dataClient.getAllUsernamesFromIndex({
+      const usernames = await dataClient.syncUsernamesFromIndex({
         indexName: 'test-index',
       });
 

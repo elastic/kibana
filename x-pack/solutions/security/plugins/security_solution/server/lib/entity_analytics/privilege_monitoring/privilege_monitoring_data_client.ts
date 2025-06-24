@@ -156,7 +156,6 @@ export class PrivilegeMonitoringDataClient {
         duration,
       });
       // sync all index users from monitoring sources
-      // await this.syncAllIndexUsers();
       await this.plainIndexSync();
     } catch (e) {
       this.log('error', `Error initializing privilege monitoring engine: ${e}`);
@@ -383,10 +382,21 @@ export class PrivilegeMonitoringDataClient {
     return this.opts.auditLogger?.log(event);
   }
 
-  /** Privileged User Sync Orchestration
-   *  These methods coordinate syncing users from monitoring sources.
+  /**
+   * Synchronizes users from monitoring index sources and soft-deletes (mark as not privileged) stale entries.
+   *
+   * This method:
+   * - Retrieves all saved objects of type 'index' that define monitoring sources.
+   * - For each valid source with an index pattern, fetches usernames from the monitoring index.
+   * - Identifies users no longer present in the source index (stale users).
+   * - Performs a bulk soft-delete (marks as not privileged) for all stale users found.
+   * - Handles missing indices gracefully by logging a warning and skipping them.
+   *
+   * Additionally, all users from index sources are synced with the internal privileged user index,
+   * ensuring each user is either created or updated with the latest data.
+   *
+   * @returns {Promise<void>} Resolves when synchronization and soft-deletion are complete.
    */
-
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
     const indexSources: MonitoringEntitySourceDescriptor[] =
@@ -403,7 +413,7 @@ export class PrivilegeMonitoringDataClient {
       const index: string = source.indexPattern;
 
       try {
-        const batchUserNames = await this.getAllUsernamesFromIndex({
+        const batchUserNames = await this.syncUsernamesFromIndex({
           indexName: index,
           kuery: source.filter?.kuery,
         });
@@ -430,7 +440,24 @@ export class PrivilegeMonitoringDataClient {
     }
   }
 
-  public async getAllUsernamesFromIndex({
+  /**
+   * Synchronizes usernames from a specified index by collecting them in batches
+   * and performing create or update operations in the privileged user index.
+   *
+   * This method:
+   * - Executes a paginated search on the provided index (with optional KQL filter).
+   * - Extracts `user.name` values from each document.
+   * - Checks for existing monitored users to determine if each username should be created or updated.
+   * - Performs bulk operations to insert or update users in the internal privileged user index.
+   *
+   * Designed to support large indices through pagination (`search_after`) and batching.
+   * Logs each step and handles errors during bulk writes.
+   *
+   * @param indexName - Name of the Elasticsearch index to pull usernames from.
+   * @param kuery - Optional KQL filter to narrow down results.
+   * @returns A list of all usernames processed from the source index.
+   */
+  public async syncUsernamesFromIndex({
     indexName,
     kuery,
   }: {
@@ -527,6 +554,20 @@ export class PrivilegeMonitoringDataClient {
     });
   }
 
+  /**
+   * Builds a list of Elasticsearch bulk operations to upsert privileged users.
+   *
+   * For each user:
+   * - If the user already exists (has an ID), generates an `update` operation using a Painless script
+   *   to append the index name to `labels.source_indices` and ensure `'index'` is listed in `labels.sources`.
+   * - If the user is new, generates an `index` operation to create a new document with default labels.
+   *
+   * Logs key steps during operation generation and returns the bulk operations array, ready for submission to the ES Bulk API.
+   *
+   * @param users - List of users to create or update.
+   * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
+   * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
+   */
   public buildBulkOperationsForUsers(users: PrivMonBulkUser[], userIndexName: string): object[] {
     const ops: object[] = [];
     this.log('info', `Building bulk operations for ${users.length} users`);
@@ -564,7 +605,7 @@ export class PrivilegeMonitoringDataClient {
             user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
-              source_indices: [user.indexName],             
+              source_indices: [user.indexName],
             },
           }
         );
@@ -574,6 +615,21 @@ export class PrivilegeMonitoringDataClient {
     return ops;
   }
 
+  /**
+   * Builds bulk operations to soft-delete users by updating their privilege status.
+   *
+   * For each user:
+   * - Removes the specified `index` from `labels.source_indices`.
+   * - If no source indices remain, removes `'index'` from `labels.sources`.
+   * - If no sources remain, sets `user.is_privileged` to `false`, effectively marking the user as no longer privileged.
+   *
+   * These operations are used to clean up users that are no longer found in the associated index sources
+   * without deleting their documents entirely.
+   *
+   * @param users - Users to be soft-deleted based on missing index source association.
+   * @param userIndexName - The Elasticsearch index where user documents are stored.
+   * @returns An array of bulk update operations compatible with the Elasticsearch Bulk API.
+   */
   public bulkOperationsForSoftDeleteUsers(
     users: PrivMonBulkUser[],
     userIndexName: string
