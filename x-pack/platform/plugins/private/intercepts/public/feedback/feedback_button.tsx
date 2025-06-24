@@ -54,8 +54,8 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
         iconType="popout"
         iconSide="right"
         target="_blank"
-        onClick={toogleFlyout}
         data-test-subj="serverlessFeedbackButton"
+        onClick={toogleFlyout}
       >
         {i18n.translate('xpack.intercept.giveFeedbackButton.label', {
           defaultMessage: 'Give feedback',
