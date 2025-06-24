@@ -82,6 +82,9 @@ export function SloList() {
   usePageReady({
     isReady: !isLoading && sloList !== undefined,
     isRefreshing: isLoading,
+    meta: {
+      description: '[ttfmp_services] The SLOs list has loaded and SLO data is present',
+    },
   });
 
   return (
