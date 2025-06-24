@@ -16,6 +16,7 @@ import {
   EuiFormControlLayout,
   EuiIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getSeverityRangeDisplay } from '../../../components/controls/select_severity';
 import { useSeverityLegendControlStyles } from './severity_legend_control_styles';
 import type { SeverityOption } from '../../hooks/use_severity_options';
@@ -106,7 +107,9 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
   return (
     <EuiFormControlLayout
       compressed
-      prepend="Anomaly score"
+      prepend={i18n.translate('xpack.ml.explorer.severityLegendControl.anomalyScoreLabel', {
+        defaultMessage: 'Anomaly score',
+      })}
       fullWidth
       data-test-subj={dataTestSubj}
     >
