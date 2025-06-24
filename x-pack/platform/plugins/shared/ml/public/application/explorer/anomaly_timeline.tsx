@@ -158,24 +158,23 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
     const severityOptions = useSeverityOptions();
     const thresholdToSeverity = useThresholdToSeverity();
 
-    const [severityUpdate, setSeverityUpdate] = useState<SeverityOption[] | null>(null);
+    const [localSeverityOptions, setLocalSeverityOptions] = useState<SeverityOption[] | null>(null);
 
     useDebounce(
       () => {
-        if (severityUpdate) {
-          const thresholds = severityUpdate.map((severity) => severity.threshold);
+        if (localSeverityOptions) {
+          const thresholds = localSeverityOptions.map((severity) => severity.threshold);
           anomalyTimelineStateService.setSeverity(thresholds);
-          setSeverityUpdate(null);
         }
       },
       500,
-      [severityUpdate]
+      [localSeverityOptions]
     );
 
-    // Use local state for immediate feedback, fall back to URL state
+    // Use URL state on initial load, then local state for UI updates
     const selectedSeverityOptions = useMemo(() => {
-      if (severityUpdate) {
-        return severityUpdate;
+      if (localSeverityOptions) {
+        return localSeverityOptions;
       }
 
       if (!swimLaneSeverity?.length) {
@@ -183,10 +182,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
 
       return thresholdToSeverity(swimLaneSeverity);
-    }, [severityUpdate, swimLaneSeverity, severityOptions, thresholdToSeverity]);
+    }, [localSeverityOptions, swimLaneSeverity, severityOptions, thresholdToSeverity]);
 
     const handleSeverityChange = useCallback((newSelectedSeverities: SeverityOption[]) => {
-      setSeverityUpdate(newSelectedSeverities);
+      setLocalSeverityOptions(newSelectedSeverities);
     }, []);
 
     const viewBySwimlaneFieldName = useObservable(
