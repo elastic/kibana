@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiLoadingSpinner,
@@ -15,6 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useBoolean } from '@kbn/react-hooks';
 import { useGetLatestCSVPrivilegedUserUploadQuery } from './hooks/manage_data_sources_query_hooks';
 import { UploadPrivilegedUsersModal } from '../privileged_user_monitoring_onboarding/components/file_uploader';
 import type { AddDataSourceResult } from '.';
@@ -27,14 +28,15 @@ export const CsvUploadManageDataSource = ({
   setAddDataSourceResult: (result: AddDataSourceResult) => void;
   namespace: string;
 }) => {
-  const [isImportFileModalVisible, { on: showImportFileModal, off: closeImportFileModal }] = useBoolean(false);
+  const [isImportFileModalVisible, { on: showImportFileModal, off: closeImportFileModal }] =
+    useBoolean(false);
 
   const { latestTimestamp, isLoading, isError, refetch } =
     useGetLatestCSVPrivilegedUserUploadQuery(namespace);
 
   return (
     <>
-      <EuiFlexGroup alignItems={'flexStart'} direction='column'>
+      <EuiFlexGroup alignItems={'flexStart'} direction={'column'}>
         <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
           <EuiIcon size={'l'} type={'importAction'} />
           <EuiText>
