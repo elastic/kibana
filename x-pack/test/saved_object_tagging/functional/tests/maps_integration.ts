@@ -46,22 +46,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows to filter by selecting a tag in the filter menu', async () => {
         await listingTable.selectFilterTags('tag-3');
 
-        await listingTable.expectItemsCount('map', 3);
+        await listingTable.expectItemsCount('map', 2);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql(['map 2 (tag-3)', 'map 3 (tag-1 and tag-3)', 'my-new-map']);
+        expect(itemNames).to.eql(['map 2 (tag-3)', 'map 3 (tag-1 and tag-3)']);
       });
 
       it('allows to filter by multiple tags', async () => {
         await listingTable.selectFilterTags('tag-2', 'tag-3');
 
-        await listingTable.expectItemsCount('map', 4);
+        await listingTable.expectItemsCount('map', 3);
         const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.eql([
-          'map 1 (tag-2)',
-          'map 2 (tag-3)',
-          'map 3 (tag-1 and tag-3)',
-          'my-new-map',
-        ]);
+        expect(itemNames).to.eql(['map 1 (tag-2)', 'map 2 (tag-3)', 'map 3 (tag-1 and tag-3)']);
       });
     });
 
