@@ -21,19 +21,19 @@ import { SecurityRoutePageWrapper } from '../../common/components/security_route
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { SafeDataViewProvider } from '../../data_view_manager/containers/SafeDataViewProvider';
+import { useDataViewSafe } from '../../data_view_manager/hooks/use_data_view_safe';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
 
-export const TimelinesPage = React.memo(() => {
+const TimelinesPageContent = () => {
   const { tabName } = useParams<{ pageName: SecurityPageName; tabName: string }>();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { indicesExist: oldIndicesExist } = useSourcererDataView();
 
-  const { dataView } = useDataView(DataViewManagerScopeName.default);
-  // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
-  const experimentalIndicesExist = !!dataView?.matchedIndices?.length;
+  const dataView = useDataViewSafe(DataViewManagerScopeName.default);
+  const experimentalIndicesExist = !!dataView.matchedIndices.length;
 
   const indicesExist = newDataViewPickerEnabled ? experimentalIndicesExist : oldIndicesExist;
 
@@ -49,42 +49,51 @@ export const TimelinesPage = React.memo(() => {
   const timelineType =
     tabName === TimelineTypeEnum.default ? TimelineTypeEnum.default : TimelineTypeEnum.template;
 
+  return indicesExist ? (
+    <SecuritySolutionPageWrapper>
+      <HeaderPage title={i18n.PAGE_TITLE}>
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          {canWriteTimeline && (
+            <EuiFlexItem>
+              <EuiButton
+                iconType="indexOpen"
+                onClick={openImportModal}
+                data-test-subj="timelines-page-open-import-data"
+              >
+                {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem data-test-subj="timelines-page-new">
+            <NewTimelineButton type={timelineType} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </HeaderPage>
+
+      <StatefulOpenTimeline
+        defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+        isModal={false}
+        importDataModalToggle={isImportDataModalOpen && canWriteTimeline}
+        setImportDataModalToggle={setImportDataModal}
+        title={i18n.ALL_TIMELINES_PANEL_TITLE}
+        data-test-subj="stateful-open-timeline"
+      />
+    </SecuritySolutionPageWrapper>
+  ) : (
+    <EmptyPrompt />
+  );
+};
+
+export const TimelinesPage = React.memo(() => {
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>
-      {indicesExist ? (
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              {canWriteTimeline && (
-                <EuiFlexItem>
-                  <EuiButton
-                    iconType="indexOpen"
-                    onClick={openImportModal}
-                    data-test-subj="timelines-page-open-import-data"
-                  >
-                    {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-
-              <EuiFlexItem data-test-subj="timelines-page-new">
-                <NewTimelineButton type={timelineType} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
-
-          <StatefulOpenTimeline
-            defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-            isModal={false}
-            importDataModalToggle={isImportDataModalOpen && canWriteTimeline}
-            setImportDataModalToggle={setImportDataModal}
-            title={i18n.ALL_TIMELINES_PANEL_TITLE}
-            data-test-subj="stateful-open-timeline"
-          />
-        </SecuritySolutionPageWrapper>
-      ) : (
-        <EmptyPrompt />
-      )}
+      <SafeDataViewProvider
+        scopes={[DataViewManagerScopeName.default, DataViewManagerScopeName.timeline]}
+        fallback={null}
+      >
+        <TimelinesPageContent />
+      </SafeDataViewProvider>
     </SecurityRoutePageWrapper>
   );
 });
