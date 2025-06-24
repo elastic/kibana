@@ -185,3 +185,20 @@ export { useChatComplete } from './impl/assistant/api/chat_complete/use_chat_com
 export { useFetchAnonymizationFields } from './impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
 export { useFindPrompts } from './impl/assistant/api/security_ai_prompts/use_find_prompts';
+
+export interface UseAssistantAvailability {
+  // True when searchAiLake configurations is available
+  hasSearchAILakeConfigurations: boolean;
+  // True when user is Enterprise. When false, the Assistant is disabled and unavailable
+  isAssistantEnabled: boolean;
+  // When true, the Assistant is hidden and unavailable
+  hasAssistantPrivilege: boolean;
+  // When true, user has `All` privilege for `Connectors and Actions` (show/execute/delete/save ui capabilities)
+  hasConnectorsAllPrivilege: boolean;
+  // When true, user has `Read` privilege for `Connectors and Actions` (show/execute ui capabilities)
+  hasConnectorsReadPrivilege: boolean;
+  // When true, user has `Edit` privilege for `AnonymizationFields`
+  hasUpdateAIAssistantAnonymization: boolean;
+  // When true, user has `Edit` privilege for `Global Knowledge Base`
+  hasManageGlobalKnowledgeBase: boolean;
+}
