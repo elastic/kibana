@@ -5775,6 +5775,23 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG",
+        "description": [
+          "\nThis feature flag enables the InferenceChatModel feature.\n\nIt may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:\n```\nfeature_flags.overrides:\n  securitySolution.inferenceChatModelEnabled: true\n```"
+        ],
+        "signature": [
+          "\"securitySolution.inferenceChatModelEnabled\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.InputSchema",
         "type": "Type",
         "tags": [],
