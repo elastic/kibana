@@ -11,7 +11,7 @@ exports[`DefaultEditorAgg component should init with the default set of props 1`
     </React.Fragment>
   }
   buttonContentClassName="visEditorSidebar__aggGroupAccordionButtonContent eui-textTruncate"
-  className="visEditorSidebar__section visEditorSidebar__collapsible visEditorSidebar__collapsible--marginBottom"
+  css="unknown styles"
   data-test-subj="visEditorAggAccordion1"
   extraAction={
     <React.Fragment>
