@@ -7,22 +7,25 @@
 
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
-  createSpaces,
-  deleteSpaces,
+  createSpacesAndUsers,
+  deleteSpacesAndUsers,
+  activateUserProfiles,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication';
 
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('cases spaces only enabled: trial', function () {
-    this.tags('skipFIPS');
+  describe('cases security and spaces enabled: trial', function () {
     before(async () => {
-      await createSpaces(getService);
+      await createSpacesAndUsers(getService);
+      // once a user profile is created the only way to remove it is to delete the user and roles, so best to activate
+      // before all the tests
+      await activateUserProfiles(getService);
     });
 
     after(async () => {
-      await deleteSpaces(getService);
+      await deleteSpacesAndUsers(getService);
     });
 
-    loadTestFile(require.resolve('../common'));
+    // Trial
     loadTestFile(require.resolve('./cases/push_case'));
   });
 };
