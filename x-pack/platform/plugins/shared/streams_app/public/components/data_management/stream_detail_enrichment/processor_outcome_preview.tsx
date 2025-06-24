@@ -20,7 +20,6 @@ import { isEmpty } from 'lodash';
 import { Sample } from '@kbn/grok-ui';
 import { GrokProcessorDefinition } from '@kbn/streams-schema';
 import { PreviewTable } from '../preview_table';
-import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
@@ -38,8 +37,40 @@ import { WithUIAttributes } from './types';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
-    (state) => state.matches('debouncingChanges') || state.matches('runningSimulation')
+    (snapshot) => snapshot.matches('debouncingChanges') || snapshot.matches('runningSimulation')
   );
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+
+  if (isEmpty(previewDocuments)) {
+    return (
+      <EuiEmptyPrompt
+        color="warning"
+        iconType="warning"
+        titleSize="s"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataTitle',
+              { defaultMessage: 'No data available to validate processor changes' }
+            )}
+          </h2>
+        }
+        body={
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
+              {
+                defaultMessage:
+                  'Changes will be applied, but we can’t confirm they’ll work as expected. Proceed with caution.',
+              }
+            )}
+          </p>
+        }
+      />
+    );
+  }
 
   return (
     <>
@@ -139,6 +170,9 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
+  const previewColumnsSorting = useSimulatorSelector(
+    (state) => state.context.previewColumnsSorting
+  );
   const explicitlyEnabledPreviewColumns = useSimulatorSelector(
     (state) => state.context.explicitlyEnabledPreviewColumns
   );
@@ -154,6 +188,7 @@ const OutcomePreviewTable = () => {
     setExplicitlyEnabledPreviewColumns,
     setExplicitlyDisabledPreviewColumns,
     setPreviewColumnsOrder,
+    setPreviewColumnsSorting,
   } = useStreamEnrichmentEvents();
 
   const allColumns = useMemo(() => {
@@ -246,34 +281,6 @@ const OutcomePreviewTable = () => {
     setPreviewColumnsOrder(visibleColumns);
   };
 
-  if (!previewDocuments || isEmpty(previewDocuments)) {
-    return (
-      <EuiEmptyPrompt
-        titleSize="xs"
-        icon={<AssetImage type="unableToGeneratePreview" />}
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.noDataTitle',
-              { defaultMessage: 'Unable to generate a preview' }
-            )}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomePreviewTable.noDataBody',
-              {
-                defaultMessage:
-                  "There are no sample documents to test the processors. Try updating the time range or ingesting more data, it might be possible we could not find any matching documents with the processors' source fields.",
-              }
-            )}
-          </p>
-        }
-      />
-    );
-  }
-
   return (
     <PreviewTable
       documents={previewDocuments}
@@ -281,6 +288,8 @@ const OutcomePreviewTable = () => {
       rowHeightsOptions={grokMode ? { defaultHeight: 'auto' } : undefined}
       toolbarVisibility
       setVisibleColumns={setVisibleColumns}
+      sorting={previewColumnsSorting}
+      setSorting={setPreviewColumnsSorting}
       columnOrderHint={previewColumnsOrder}
       renderCellValue={
         grokMode

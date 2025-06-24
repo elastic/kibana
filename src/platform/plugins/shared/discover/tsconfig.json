@@ -103,6 +103,7 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/core-application-browser-mocks",
+    "@kbn/rison",
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
     "@kbn/alerts-ui-shared",
@@ -110,5 +111,7 @@
     "@kbn/css-utils",
     "@kbn/file-upload-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
