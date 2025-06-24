@@ -225,6 +225,7 @@ export class SyntheticsMonitorClient {
       privateConfig ? [privateConfig] : [],
       allPrivateLocations,
       spaceId,
+      [],
       monitor.testRunId,
       runOnce
     );

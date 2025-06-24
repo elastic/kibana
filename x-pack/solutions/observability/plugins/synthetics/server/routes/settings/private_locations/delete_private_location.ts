@@ -63,10 +63,9 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
     });
 
     if (data.total > 0) {
-      const count = monitors.find((monitor) => monitor.id === locationId)?.count;
       return response.badRequest({
         body: {
-          message: `Private location with id ${locationId} cannot be deleted because it is used by ${count} monitor(s).`,
+          message: `Private location with id ${locationId} cannot be deleted because it is used by ${data.total} monitor(s).`,
         },
       });
     }
