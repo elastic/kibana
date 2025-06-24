@@ -40,6 +40,7 @@ import {
   StartRuleMigrationRequestBody,
   StartRuleMigrationResponse,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationRequestBody,
   UpdateRuleMigrationRulesResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
@@ -56,12 +57,17 @@ export interface RequestParams {
   expectStatusCode?: number;
 }
 
-export interface CreateMigrationRequestParams extends RequestParams {
+export interface CreateRuleMigrationRequestParams extends RequestParams {
   body?: CreateRuleMigrationRequestBody;
 }
+
 export interface MigrationRequestParams extends RequestParams {
   /** `id` of the migration to get rules documents for */
   migrationId: string;
+}
+
+export interface UpdateRuleMigrationRequestParams extends MigrationRequestParams {
+  body: UpdateRuleMigrationRequestBody;
 }
 
 export interface GetRuleMigrationRulesParams extends MigrationRequestParams {
@@ -96,7 +102,7 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
     create: async ({
       body = { name: 'test migration' },
       expectStatusCode = 200,
-    }: CreateMigrationRequestParams): Promise<{
+    }: CreateRuleMigrationRequestParams): Promise<{
       body: CreateRuleMigrationResponse;
     }> => {
       const response = await supertest
@@ -108,6 +114,22 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
 
       assertStatusCode(expectStatusCode, response);
 
+      return response;
+    },
+
+    update: async ({
+      migrationId,
+      body,
+      expectStatusCode = 200,
+    }: UpdateRuleMigrationRequestParams): Promise<{ body: undefined }> => {
+      const response = await supertest
+        .patch(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(body);
+
+      assertStatusCode(expectStatusCode, response);
       return response;
     },
 
