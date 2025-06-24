@@ -210,6 +210,7 @@ export const useMonitorsTableColumns = ({
     minInterval,
     onClickMonitorFilter,
     openFlyout,
+    showFromAllSpaces,
     space,
     spaces?.ui.components.getSpaceList,
   ]);
