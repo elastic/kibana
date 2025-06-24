@@ -270,11 +270,6 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Automatically installs the security AI prompts package
-   */
-  securityAIPromptsEnabled: false,
-
-  /**
    * Enables Microsoft Defender for  Endpoint's RunScript RTR command
    * Release: 8.19/9.1
    */
