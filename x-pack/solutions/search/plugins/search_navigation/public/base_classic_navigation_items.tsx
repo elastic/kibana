@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiText } from '@elastic/eui';
 import {
-  ENTERPRISE_SEARCH_APP_ID,
+  SEARCH_HOMEPAGE,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -23,7 +23,7 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
   {
     'data-test-subj': 'searchSideNav-Home',
     deepLink: {
-      link: ENTERPRISE_SEARCH_APP_ID,
+      link: SEARCH_HOMEPAGE,
       shouldShowActiveForSubroutes: true,
     },
     id: 'home',
