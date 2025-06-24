@@ -75,7 +75,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
             await createBasePrompts(notifications, http);
           }
           // eslint-disable-next-line no-empty
-        } catch (e) { }
+        } catch (e) {}
       }
     });
     createSecurityPrompts();
@@ -100,12 +100,12 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   });
 
   useEffect(() => {
-    const unmountPromptContexts = elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
+    const unmountPromptContexts =
+      elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
     return () => {
       unmountPromptContexts();
     };
   }, [PROMPT_CONTEXTS]);
-
 
   if (!assistantContextValue) {
     return null;
