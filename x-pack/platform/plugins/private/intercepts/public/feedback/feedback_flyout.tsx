@@ -59,12 +59,17 @@ export const FeedbackFlyout = ({ closeFlyout }: Props) => {
   const [_feedbackFiles, setFeedbackFiles] = useState({});
   const [isFeedbackChecked, setIsFeedbackChecked] = useState(true);
 
-  const boldText = {
+  const boldTextCss = {
     fontWeight: euiTheme.font.weight.semiBold,
   };
 
+  const footerBackgroundCss = {
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+  };
+
   const Label = ({ children }: PropsWithChildren) => (
-    <EuiText size="xs" css={boldText}>
+    <EuiText size="xs" css={boldTextCss}>
       {children}
     </EuiText>
   );
@@ -104,7 +109,7 @@ export const FeedbackFlyout = ({ closeFlyout }: Props) => {
               iconType="cross"
               color="neutral"
               size="xs"
-              css={boldText}
+              css={boldTextCss}
               onClick={closeFlyout}
             />
           </EuiFlexItem>
@@ -191,8 +196,7 @@ export const FeedbackFlyout = ({ closeFlyout }: Props) => {
           />
         </EuiFormRow>
       </EuiFlyoutBody>
-      {/* TODO: Possibly change background of footer to match design */}
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter css={footerBackgroundCss}>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton
