@@ -36,6 +36,8 @@ export function createEditLookupIndexContentAction(
 
       const indexUpdateService = new IndexUpdateService(coreStart.http, data);
 
+      const { indexName, doesIndexExist } = context;
+
       const fileManager = new FileUploadManager(
         fileUpload,
         coreStart.http,
@@ -44,7 +46,8 @@ export function createEditLookupIndexContentAction(
         null,
         false,
         true,
-        null,
+        // existingIndexName
+        doesIndexExist ? indexName : null,
         { index: { mode: 'lookup' } }
       );
 
