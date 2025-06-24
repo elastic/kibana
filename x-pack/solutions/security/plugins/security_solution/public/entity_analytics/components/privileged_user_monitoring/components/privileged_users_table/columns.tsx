@@ -10,10 +10,20 @@ import { isArray } from 'lodash/fp';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn, EuiThemeComputed } from '@elastic/eui';
-import { EuiLink, EuiBadge, EuiText, EuiLoadingSpinner, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiFlexItem,
+  useEuiTheme,
+  EuiBadge,
+  EuiText,
+  EuiLoadingSpinner,
+  EuiButtonIcon,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
+import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { ALERTS_QUERY_NAMES } from '../../../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertsByStatusAgg } from '../../../../../overview/components/detection_response/alerts_by_status/types';
 import { getRowItemsWithActions } from '../../../../../common/components/tables/helpers';
@@ -37,6 +47,7 @@ import {
 } from '../../../../../overview/components/detection_response/translations';
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
+import { getFormattedAlertStats } from '../../../../../flyout/document_details/shared/components/alert_count_insight';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };
 
@@ -223,6 +234,7 @@ const getDataSourceColumn = () => ({
 const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userName }) => {
   const { signalIndexName } = useSignalIndex();
   const { from, to } = useGlobalTime();
+  const { euiTheme } = useEuiTheme();
 
   const { data } = useQueryAlerts<{}, AlertsByStatusAgg>({
     query: getAlertsByStatusQuery({
@@ -238,6 +250,7 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   if (!data) return <EuiLoadingSpinner size="m" />;
 
   const alertsData = parseAlertsData(data);
+  const alertStats = getFormattedAlertStats(alertsData, euiTheme);
 
   const alertCount = (alertsData?.open?.total ?? 0) + (alertsData?.acknowledged?.total ?? 0);
 
@@ -277,7 +290,16 @@ const PrivilegedUserAlertDistribution: React.FC<{ userName: string }> = ({ userN
   };
 
   return (
-    <EuiBadge color="hollow">{<EuiLink onClick={openAlertsPage}>{alertCount}</EuiLink>}</EuiBadge>
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem>
+        <DistributionBar
+          stats={alertStats}
+          hideLastTooltip
+          data-test-subj={`privileged-users-alerts-distribution-bar`}
+        />
+      </EuiFlexItem>
+      <EuiBadge color="hollow">{<EuiLink onClick={openAlertsPage}>{alertCount}</EuiLink>}</EuiBadge>
+    </EuiFlexGroup>
   );
 };
 
