@@ -77,8 +77,8 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
   const resetLayout = () => {
-    layout$.next(lastSavedLayout);
-    currentChildState = lastSavedChildState;
+    layout$.next({ ...lastSavedLayout });
+    currentChildState = { ...lastSavedChildState };
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
