@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import moment from 'moment';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -218,7 +219,15 @@ export const ScheduledReportFlyoutContent = ({
     <>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="s">
-          <h2>{i18n.SCHEDULED_REPORT_FLYOUT_TITLE}</h2>
+          <h2>
+            {i18n.SCHEDULED_REPORT_FLYOUT_TITLE}{' '}
+            <EuiBetaBadge
+              className="eui-alignMiddle"
+              iconType="flask"
+              label={i18n.TECH_PREVIEW_LABEL}
+              tooltipContent={i18n.TECH_PREVIEW_DESCRIPTION}
+            />
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

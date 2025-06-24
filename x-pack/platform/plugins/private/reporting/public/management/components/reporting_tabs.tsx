@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { RouteComponentProps } from 'react-router-dom';
@@ -33,6 +39,7 @@ import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
 import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 
 export interface MatchParams {
   section: Section;
@@ -116,6 +123,7 @@ export const ReportingTabs: React.FunctionComponent<
       name: i18n.translate('xpack.reporting.tabs.schedules', {
         defaultMessage: 'Schedules',
       }),
+      isBeta: true,
     },
   ];
 
@@ -227,8 +235,21 @@ export const ReportingTabs: React.FunctionComponent<
             defaultMessage="Get reports generated in Kibana applications."
           />
         }
-        tabs={tabs.map(({ id, name }) => ({
-          label: name,
+        tabs={tabs.map(({ id, name, isBeta = false }) => ({
+          label: !isBeta ? (
+            name
+          ) : (
+            <>
+              {name}{' '}
+              <EuiBetaBadge
+                className="eui-alignMiddle"
+                size="s"
+                iconType="flask"
+                label={TECH_PREVIEW_LABEL}
+                tooltipContent={TECH_PREVIEW_DESCRIPTION}
+              />
+            </>
+          ),
           onClick: () => onSectionChange(id as Section),
           isSelected: id === section,
           key: id,
