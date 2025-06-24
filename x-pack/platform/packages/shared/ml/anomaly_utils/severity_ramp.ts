@@ -6,10 +6,11 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_ANOMALY_THRESHOLD } from './anomaly_threshold';
 import { getThemeResolvedSeverityColor } from './use_severity_color';
 
-export interface ColorRampStop {
+export interface ColorRampStop extends SerializableRecord {
   stop: number;
   color: string;
 }
