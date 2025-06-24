@@ -101,7 +101,7 @@ const componentStyles = (defaultRowHeight: number | undefined) => {
       }),
     detailsContainer: ({ euiTheme }: UseEuiTheme) =>
       css({
-        maxWidth: '500px',
+        maxWidth: '600px',
       }),
   };
 };
