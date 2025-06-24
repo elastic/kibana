@@ -981,7 +981,6 @@ x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elasti
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
-x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 x-pack/solutions/chat/packages/wc-framework-types-browser @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/packages/wc-framework-types-common @elastic/search-kibana @elastic/workchat-eng
@@ -1103,6 +1102,7 @@ x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 x-pack/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
+x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
@@ -1298,7 +1298,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
 /x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
-/x-pack/platform/test/reporting_functional/ @elastic/response-ops
+/x-pack/test/reporting_functional/ @elastic/response-ops
 /x-pack/test/stack_functional_integration/apps/reporting/ @elastic/response-ops
 /docs/user/reporting @elastic/response-ops
 /docs/settings/reporting-settings.asciidoc @elastic/response-ops
@@ -2115,7 +2115,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/upgrade/apps/rules @elastic/response-ops
 /x-pack/test/examples/triggers_actions_ui_examples @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/main/x-pack/examples/triggers_actions_ui_example/kibana.jsonc#L4
 /x-pack/test/functional/services/rules @elastic/response-ops
-/x-pack/test/functional/services/reporting @appex-qa
+/x-pack/test/functional/services/reporting @elastic/appex-qa
 /x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/cases @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional/es_archives/cases @elastic/response-ops @elastic/kibana-cases

@@ -30,8 +30,8 @@ disabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
   - x-pack/platform/test/alerting_api_integration/spaces_only_legacy/config.ts
   - x-pack/test/cloud_integration/config.ts
-  - x-pack/test/load/config.ts
-  - x-pack/test/plugin_api_perf/config.js
+  - x-pack/platform/test/load/config.ts
+  - x-pack/platform/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
 
@@ -174,7 +174,7 @@ enabled:
   - x-pack/platform/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
   - x-pack/test/fleet_tasks/config.ts
-  - x-pack/test/ftr_apis/security_and_spaces/config.ts
+  - x-pack/platform/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group1/config.ts
   - x-pack/test/functional_basic/apps/ml/data_visualizer/group2/config.ts
@@ -278,8 +278,8 @@ enabled:
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/plugin_functional/config.ts
-  - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
-  - x-pack/test/reporting_api_integration/reporting_without_security.config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
+  - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
