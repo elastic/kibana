@@ -51,13 +51,23 @@ echo "+++ ⚠️ WARNING ⚠️"
 echo "
   console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
   of noise on CI without any percevable benefit, so they have been disabled. If you want to log
-  output in your test temporarily, you can modify 'packages/kbn-test/src/jest/setup/disable_console_logs.js'
+  output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
-  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  # --trace-warnings to debug
+  # Node.js process-warning detected:
+  # Warning: Closing file descriptor 24 on garbage collection
+  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+
+  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
+  fi
+
+  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+
   echo "actual full command is:"
   echo "$cmd"
   echo ""

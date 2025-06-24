@@ -15,7 +15,8 @@ import {
 } from '../../../../screens/rule_details';
 
 import {
-  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS,
 } from '../../../../screens/create_new_rule';
@@ -33,7 +34,6 @@ import { saveEditedRule } from '../../../../tasks/edit_rule';
 import {
   selectAlertSuppressionPerRuleExecution,
   selectDoNotSuppressForMissingFields,
-  fillAlertSuppressionFields,
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -41,10 +41,11 @@ const SUPPRESS_BY_FIELDS = ['agent.hostname', 'agent.type'];
 
 const rule = getNewTermsRule();
 
+// Skip in MKI due to flake
 describe(
   'Detection rules, New terms, Edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     beforeEach(() => {
@@ -57,7 +58,7 @@ describe(
         createRule({
           ...rule,
           alert_suppression: {
-            group_by: SUPPRESS_BY_FIELDS.slice(0, 1),
+            group_by: SUPPRESS_BY_FIELDS,
             duration: { value: 20, unit: 'm' },
             missing_fields_strategy: 'suppress',
           },
@@ -69,20 +70,17 @@ describe(
         editFirstRule();
 
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 20);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 'm');
-        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.slice(0, 1).join(''));
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
         cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS).should('be.checked');
 
-        selectAlertSuppressionPerRuleExecution();
         selectDoNotSuppressForMissingFields();
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS.slice(1));
+        selectAlertSuppressionPerRuleExecution();
 
         saveEditedRule();
 

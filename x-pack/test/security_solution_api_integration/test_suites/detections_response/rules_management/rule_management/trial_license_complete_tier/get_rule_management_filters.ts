@@ -23,7 +23,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('@ess @serverless get_rule_management_filters', () => {
+  describe('@ess @serverless @serverlessQA get_rule_management_filters', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });
@@ -87,7 +87,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('when there are installed prebuilt rules', () => {
+    // https://github.com/elastic/kibana/issues/183241
+    describe('@skipInServerlessMKI when there are installed prebuilt rules', () => {
       beforeEach(async () => {
         await deleteAllPrebuiltRuleAssets(es, log);
         await installMockPrebuiltRules(supertest, es);
@@ -115,7 +116,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.aggregated_fields.tags).to.eql(['test-tag-1', 'test-tag-2', 'test-tag-3']);
+        expect(body.aggregated_fields.tags).to.eql([
+          'test-tag',
+          'test-tag-1',
+          'test-tag-2',
+          'test-tag-3',
+        ]);
       });
     });
   });

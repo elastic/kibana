@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -15,7 +16,7 @@ import { listenForCompatibleApi } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, fetch$ } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, lastValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { StartDeps } from '../../plugin';
-import { apiPublishesSelectedFields } from '../field_list/publishes_selected_fields';
+import { apiPublishesSelectedFields } from './publishes_selected_fields';
 import { DataTableApi } from './types';
 
 export const initializeDataTableQueries = async (
@@ -40,8 +41,7 @@ export const initializeDataTableQueries = async (
 
   // set up search source
   let abortController: AbortController | undefined;
-  const fields: Record<string, string> = { field: '*', include_unmapped: 'true' };
-  searchSource.setField('fields', [fields]);
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   searchSource.setField('size', 50);
 
   // initialize state for API.
@@ -60,7 +60,7 @@ export const initializeDataTableQueries = async (
         dataView$.next(defaultDataView);
         return;
       }
-      const dataViewSubscription = dataViewProvider.dataViews.subscribe((dataViews) => {
+      const dataViewSubscription = dataViewProvider.dataViews$.subscribe((dataViews) => {
         dataView$.next(dataViews?.[0] ?? defaultDataView);
       });
       return () => dataViewSubscription.unsubscribe();

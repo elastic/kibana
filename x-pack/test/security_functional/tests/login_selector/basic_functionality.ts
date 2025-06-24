@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import expect from '@kbn/expect';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -65,6 +67,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.pathname).to.eql('/app/management/security/users');
     });
 
+    it('can login with Login Form resetting target URL', async () => {
+      this.timeout(120000);
+
+      for (const targetURL of [
+        '///example.com',
+        '//example.com',
+        'https://example.com',
+
+        '/\t/example.com',
+        '/\n/example.com',
+        '/\r/example.com',
+
+        '/\t//example.com',
+        '/\n//example.com',
+        '/\r//example.com',
+
+        '//\t/example.com',
+        '//\n/example.com',
+        '//\r/example.com',
+
+        'ht\ttps://example.com',
+        'ht\ntps://example.com',
+        'ht\rtps://example.com',
+      ]) {
+        await browser.get(
+          `${deployment.getHostPort()}/login?next=${encodeURIComponent(targetURL)}`
+        );
+
+        await PageObjects.common.waitUntilUrlIncludes('next=');
+        await PageObjects.security.loginSelector.login('basic', 'basic1');
+        // We need to make sure that both path and hash are respected.
+        const currentURL = parse(await browser.getCurrentUrl());
+
+        expect(currentURL.pathname).to.eql('/app/home');
+        await PageObjects.security.forceLogout();
+      }
+    });
+
     it('can login with SSO preserving original URL', async () => {
       await PageObjects.common.navigateToUrl('management', 'security/users', {
         ensureCurrentUrl: false,
@@ -94,11 +134,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         full_name: 'Guest',
       });
       await PageObjects.security.loginSelector.login('anonymous', 'anonymous1');
-      await security.user.delete('anonymous_user');
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
       expect(currentURL.pathname).to.eql('/app/management/security/users');
+
+      await security.user.delete('anonymous_user');
     });
 
     it('can login after `Unauthorized` error after request authentication preserving original URL', async () => {

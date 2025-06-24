@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-object-export-transforms-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "savedObjectExportTransforms",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "saved_object_export_transforms"
+    ]
+  }
+}

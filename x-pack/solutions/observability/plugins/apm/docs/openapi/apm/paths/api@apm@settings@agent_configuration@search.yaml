@@ -1,0 +1,47 @@
+post:
+  summary: Lookup single agent configuration
+  description: |
+    This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
+  operationId: searchSingleConfiguration
+  tags:
+    - APM agent configuration
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/search_agent_configuration_object.yaml'
+        examples:
+          searchSingleConfigurationRequest1:
+            $ref: '../components/examples/agent_configuration_intake_object_search_request1.yaml'
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/search_agent_configuration_response.yaml'
+          examples:
+            searchSingleConfigurationResponse1:
+              $ref: '../components/examples/agent_configuration_intake_object_search_200_response1.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '404':
+      description: Not found response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/404_response.yaml'

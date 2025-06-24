@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Alerts } from '../../../../common/lib/alerts';
 import {
-  Alerts,
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,
   getAlertById,
@@ -18,7 +18,7 @@ import {
   deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getPostCaseRequest,
@@ -42,6 +42,7 @@ import {
   superUserSpace1Auth,
   bulkCreateAttachments,
   getAllComments,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -129,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
           await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
-          alerts = [signals.hits.hits[0], signals.hits.hits[1]];
+          alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
         });
 
         afterEach(async () => {
@@ -359,6 +360,33 @@ export default ({ getService }: FtrProviderContext): void => {
             deleteCommentAuth: { user: obsSec, space: 'space1' },
           });
         });
+      });
+    });
+
+    describe('attachment stats', () => {
+      it('should set the attachment stats correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postCommentUserReq, postCommentUserReq, postCommentAlertReq],
+          expectedHttpCode: 200,
+        });
+
+        await deleteAllComments({
+          supertest,
+          caseId: postedCase.id,
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+
+        const theCase = res.body.hits.hits[0]._source?.cases!;
+
+        expect(theCase.total_alerts).to.eql(0);
+        expect(theCase.total_comments).to.eql(0);
       });
     });
 

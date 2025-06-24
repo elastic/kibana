@@ -7,12 +7,8 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  createEsQueryRule as createRule,
-  createSlackConnector,
-  createIndexConnector,
-} from '../../../../api_integration/test_suites/common/alerting/helpers/alerting_api_helper';
 
 export enum RuleNotifyWhen {
   CHANGE = 'onActionGroupChange',
@@ -33,6 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const comboBox = getService('comboBox');
   const config = getService('config');
+  const alertingApi = getService('alertingApi');
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
@@ -46,7 +43,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+    await svlCommonNavigation.sidenav.openSection(
+      'search_project_nav_footer.project_settings_project_nav'
+    );
     await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
     await testSubjects.click('app-card-triggersActionsConnectors');
   };
@@ -65,12 +64,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     let ruleIdList: string[];
     let connectorIdList: string[];
 
+    const svlUserManager = getService('svlUserManager');
+    let roleAuthc: RoleCredentials;
+
     before(async () => {
-      await svlCommonPage.login();
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      await svlCommonPage.loginAsViewer();
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('Header', () => {
@@ -79,8 +82,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,
@@ -250,8 +253,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const RULE_TYPE_ID = '.es-query';
 
       before(async () => {
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,
@@ -291,11 +294,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toBe(false);
 
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -313,18 +319,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuidv4(), {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
-        await testSubjects.click('cancelSaveEditedRuleButton');
+        await testSubjects.click('ruleFlyoutFooterCancelButton');
         await testSubjects.existOrFail('confirmRuleCloseModal');
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedRuleButton"]');
+        await find.waitForDeletedByCssSelector('[data-test-subj="ruleFlyoutFooterCancelButton"]');
 
         await editButton.click();
 
-        const nameInputAfterCancel = await testSubjects.find('ruleNameInput');
+        await testSubjects.click('ruleFormStep-details');
+        const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).toEqual(updatedRuleName);
       });
@@ -356,20 +364,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
 
-        const connector1 = await createSlackConnector({
-          supertest,
+        const connector1 = await alertingApi.helpers.createSlackConnector({
+          roleAuthc,
           name: `slack-${testRunUuid}-${0}`,
         });
 
-        const connector2 = await createSlackConnector({
-          supertest,
+        const connector2 = await alertingApi.helpers.createSlackConnector({
+          roleAuthc,
           name: `slack-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector2.id];
 
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: testRunUuid,
           ruleTypeId: RULE_TYPE_ID,
@@ -431,14 +439,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
-        const connector = await createIndexConnector({
-          supertest,
+        const connector = await alertingApi.helpers.createIndexConnector({
+          roleAuthc,
           name: `index-${testRunUuid}-${2}`,
           indexName: ALERT_ACTION_INDEX,
         });
 
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: testRunUuid,
           ruleTypeId: RULE_TYPE_ID,
@@ -553,20 +561,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const testRunUuid = uuidv4();
         const RULE_TYPE_ID = '.es-query';
 
-        const connector1 = await createSlackConnector({
-          supertest,
+        const connector1 = await alertingApi.helpers.createSlackConnector({
+          roleAuthc,
           name: `slack-${testRunUuid}-${0}`,
         });
 
-        const connector2 = await createSlackConnector({
-          supertest,
+        const connector2 = await alertingApi.helpers.createSlackConnector({
+          roleAuthc,
           name: `slack-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector1.id, connector2.id];
 
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: `test-rule-${testRunUuid}`,
           ruleTypeId: RULE_TYPE_ID,
@@ -611,11 +619,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const throttleUnitInput = await testSubjects.find('throttleUnitInput');
         expect(await throttleInput.getAttribute('value')).toEqual('2');
         expect(await throttleUnitInput.getAttribute('value')).toEqual('d');
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -641,8 +652,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('renders a disabled rule details view in app button', async () => {
-        const rule = await createRule({
-          supertest,
+        const rule = await alertingApi.helpers.createEsQueryRule({
+          roleAuthc,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,

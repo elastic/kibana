@@ -34,7 +34,7 @@
         "signature": [
           "{ readonly query?: any; readonly intervalMs?: number | undefined; readonly index: string; readonly field: string; readonly from: number; readonly to: number; readonly timeField: string; }"
         ],
-        "path": "x-pack/packages/ml/aiops_log_pattern_analysis/schema.ts",
+        "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -116,7 +116,7 @@
           },
           "<number | undefined>; }>"
         ],
-        "path": "x-pack/packages/ml/aiops_log_pattern_analysis/schema.ts",
+        "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

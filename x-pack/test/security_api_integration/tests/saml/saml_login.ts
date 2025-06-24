@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
-import url from 'url';
 import { resolve } from 'path';
+import { stringify } from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+import url from 'url';
+
 import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -39,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createLogoutRequest(options: { sessionIndex: string }) {
     return getLogoutRequest({
-      destination: `http://localhost:${kibanaServerConfig.port}/logout`,
+      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
       ...options,
     });
   }
@@ -623,7 +626,7 @@ export default function ({ getService }: FtrProviderContext) {
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          body: { query: { match: { doc_type: 'token' } } },
+          query: { match: { doc_type: 'token' } },
           refresh: true,
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);
@@ -708,7 +711,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
-              body: { query: { match: { doc_type: 'token' } } },
+              query: { match: { doc_type: 'token' } },
               refresh: true,
             });
             expect(esResponse).to.have.property('deleted').greaterThan(0);
@@ -740,9 +743,9 @@ export default function ({ getService }: FtrProviderContext) {
         existingSessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
-      for (const [description, setup] of testScenarios) {
+      for (const [description, setupFn] of testScenarios) {
         it(`should renew session and redirect to the home page if login is for the same user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const samlAuthenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -770,7 +773,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it(`should create a new session and redirect to the \`overwritten_session\` if login is for another user ${description}`, async () => {
-          await setup();
+          await setupFn();
 
           const newUsername = 'c@d.e';
           const samlAuthenticationResponse = await supertest

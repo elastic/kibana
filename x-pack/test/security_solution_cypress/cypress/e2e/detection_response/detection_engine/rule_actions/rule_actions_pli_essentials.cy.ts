@@ -12,7 +12,10 @@ import {
   SLACK_ACTION_BTN,
   WEBHOOK_ACTION_BTN,
   EMAIL_ACTION_BTN,
+  XMATTERS_ACTION_BTN,
+  SERVER_LOG_ACTION_BTN,
   ACTION_BTN,
+  CASES_SYSTEM_ACTION_BTN,
 } from '../../../../screens/common/rule_actions';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -62,8 +65,11 @@ describe(
       cy.get(SLACK_ACTION_BTN).should('be.visible');
       cy.get(EMAIL_ACTION_BTN).should('be.visible');
 
-      // webhook is not available
+      // complete tier actions are not available
       cy.get(WEBHOOK_ACTION_BTN).should('not.exist');
+      cy.get(XMATTERS_ACTION_BTN).should('not.exist');
+      cy.get(SERVER_LOG_ACTION_BTN).should('not.exist');
+      cy.get(CASES_SYSTEM_ACTION_BTN).should('not.exist');
     });
   }
 );

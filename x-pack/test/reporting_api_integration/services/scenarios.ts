@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
-import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
-import rison from '@kbn/rison';
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import type { LoadActionPerfOptions } from '@kbn/es-archiver';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
+import {
+  REPORTING_DATA_STREAM_WILDCARD,
+  REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+} from '@kbn/reporting-server';
+import rison from '@kbn/rison';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -21,9 +27,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const security = getService('security');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
@@ -35,6 +41,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
   const REPORTING_ROLE = 'test_reporting_user';
+  const MANAGE_REPORTING_USER_USERNAME = 'manage_reporting_user';
+  const MANAGE_REPORTING_USER_PASSWORD = 'manage_reporting_user-password';
+  const MANAGE_REPORTING_ROLE = 'manage_reporting_role';
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -64,7 +73,6 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const teardownEcommerce = async () => {
     await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
-    await deleteAllReports();
   };
 
   const initLogs = async () => {
@@ -123,11 +131,49 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
+  const createManageReportingUserRole = async () => {
+    await security.role.create(MANAGE_REPORTING_ROLE, {
+      metadata: {},
+      elasticsearch: {
+        cluster: [],
+        indices: [
+          {
+            names: ['ecommerce'],
+            privileges: ['read', 'view_index_metadata'],
+            allow_restricted_indices: false,
+          },
+        ],
+        run_as: [],
+      },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            manageReporting: ['all'],
+            dashboard: ['minimal_read', 'download_csv_report', 'generate_report'],
+            discover: ['minimal_read', 'generate_report'],
+            canvas: ['minimal_read', 'generate_report'],
+            visualize: ['minimal_read', 'generate_report'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    });
+  };
+
   const createDataAnalyst = async () => {
     await security.user.create('data_analyst', {
       password: 'data_analyst-password',
       roles: ['data_analyst'],
       full_name: 'Data Analyst User',
+    });
+  };
+
+  const createManageReportingUser = async () => {
+    await security.user.create(MANAGE_REPORTING_USER_USERNAME, {
+      password: MANAGE_REPORTING_USER_PASSWORD,
+      roles: [MANAGE_REPORTING_ROLE],
+      full_name: 'Manage Reporting User',
     });
   };
 
@@ -139,40 +185,124 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFDeprecated) => {
+  const generatePdf = async (
+    username: string,
+    password: string,
+    job: JobParamsPDFV2,
+    spaceId: string = 'default'
+  ) => {
     const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdf`)
+      .post(`${spacePrefix}/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
+  const schedulePdf = async (
+    username: string,
+    password: string,
+    job: JobParamsPDFV2,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
     const jobParams = rison.encode(job);
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/pngV2`)
+      .post(`/internal/reporting/schedule/printablePdfV2`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
+  };
+  const generatePng = async (
+    username: string,
+    password: string,
+    job: JobParamsPNGV2,
+    spaceId: string = 'default'
+  ) => {
+    const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+    return await supertestWithoutAuth
+      .post(`${spacePrefix}/api/reporting/generate/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
+  };
+  const schedulePng = async (
+    username: string,
+    password: string,
+    job: JobParamsPNGV2,
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
+    const jobParams = rison.encode(job);
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/pngV2`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
   };
   const generateCsv = async (
     job: JobParamsCSV,
     username = 'elastic',
-    password = process.env.TEST_KIBANA_PASS || 'changeme'
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    spaceId: string = 'default'
   ) => {
     const jobParams = rison.encode(job);
-
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/csv_searchsource`)
+      .post(`${spacePrefix}/api/reporting/generate/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
+  const scheduleCsv = async (
+    job: JobParamsCSV,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+  ) => {
+    const jobParams = rison.encode(job);
 
-  const postJob = async (apiPath: string): Promise<string> => {
+    return await supertestWithoutAuth
+      .post(`/internal/reporting/schedule/csv_searchsource`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ jobParams, schedule });
+  };
+
+  const listScheduledReports = async (
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const res = await supertestWithoutAuth
+      .get(INTERNAL_ROUTES.SCHEDULED.LIST)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx');
+
+    return res.body;
+  };
+
+  const disableScheduledReports = async (
+    ids: string[],
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ) => {
+    const { body } = await supertestWithoutAuth
+      .patch(INTERNAL_ROUTES.SCHEDULED.BULK_DISABLE)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send({ ids })
+      .expect(200);
+    return body;
+  };
+
+  const postJob = async (
+    apiPath: string,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ): Promise<string> => {
     log.debug(`ReportingAPI.postJob(${apiPath})`);
-    const { body } = await supertest
+    const { body } = await supertestWithoutAuth
       .post(removeWhitespace(apiPath))
+      .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.path;
@@ -180,7 +310,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const postJobJSON = async (apiPath: string, jobJSON: object = {}): Promise<string> => {
     log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
-    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
+    const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON).expect(200);
     return body.path;
   };
 
@@ -200,9 +330,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .get(`${INTERNAL_ROUTES.JOBS.LIST}?page=0&ids=${id}`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send()
       .expect(200);
     return job?.output?.error_code;
+  };
+
+  const listReports = async (
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme',
+    spaceId: string = 'default'
+  ) => {
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+    return await supertestWithoutAuth
+      .get(`${spacePrefix}${INTERNAL_ROUTES.JOBS.LIST}?page=0`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx')
+      .send()
+      .expect(200);
   };
 
   const deleteAllReports = async () => {
@@ -211,7 +354,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     // ignores 409 errs and keeps retrying
     await retry.tryForTime(5000, async () => {
       await esSupertest
-        .post('/.reporting*/_delete_by_query')
+        .post(`/${REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY}/_delete_by_query`)
         .send({ query: { match_all: {} } })
         .expect(200);
     });
@@ -248,11 +391,35 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       'index.lifecycle.name': null,
     };
     await esSupertest
-      .put('/.reporting*/_settings')
+      .put(`/${REPORTING_DATA_STREAM_WILDCARD}/_settings`)
       .send({
         settings,
       })
       .expect(200);
+  };
+
+  const getScheduledReports = async (id: string) => {
+    return await esSupertest.get(
+      `/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`
+    );
+  };
+
+  const deleteScheduledReports = async (ids: string[]) => {
+    return await Promise.all(
+      ids.map((id) =>
+        esSupertest.delete(`/${ALERTING_CASES_SAVED_OBJECT_INDEX}/_doc/scheduled_report:${id}`)
+      )
+    );
+  };
+
+  const getTask = async (taskId: string) => {
+    return await esSupertest.get(`/.kibana_task_manager/_doc/task:${taskId}`);
+  };
+
+  const deleteTasks = async (ids: string[]) => {
+    return await Promise.all(
+      ids.map((id) => esSupertest.delete(`/.kibana_task_manager/_doc/task:${id}`))
+    );
   };
 
   return {
@@ -266,13 +433,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
+    MANAGE_REPORTING_USER_USERNAME,
+    MANAGE_REPORTING_USER_PASSWORD,
+    MANAGE_REPORTING_ROLE,
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
     createTestReportingUser,
+    createManageReportingUserRole,
+    createManageReportingUser,
     generatePdf,
     generatePng,
     generateCsv,
+    schedulePdf,
+    schedulePng,
+    scheduleCsv,
+    listReports,
     postJob,
     postJobJSON,
     getCompletedJobOutput,
@@ -281,5 +457,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     migrateReportingIndices,
     makeAllReportingIndicesUnmanaged,
     getJobErrorCode,
+    getScheduledReports,
+    deleteScheduledReports,
+    getTask,
+    deleteTasks,
+    listScheduledReports,
+    disableScheduledReports,
   };
 }

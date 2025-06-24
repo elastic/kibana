@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  const PageObjects = getPageObjects(['common', 'context', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['common', 'context', 'svlCommonPage', 'discover']);
   const testSubjects = getService('testSubjects');
 
   describe('context filters', function contextSize() {
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginAsViewer();
       await PageObjects.common.navigateToApp('discover');
     });
 
@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('inclusive filter should be addable via expanded data grid rows', async function () {
       await retry.waitFor(`filter ${TEST_ANCHOR_FILTER_FIELD} in filterbar`, async () => {
         await dataGrid.clickRowToggle({ isAnchorRow: true, renderMoreRows: true });
+        await PageObjects.discover.findFieldByNameOrValueInDocViewer(TEST_ANCHOR_FILTER_FIELD);
         await dataGrid.clickFieldActionInFlyout(
           TEST_ANCHOR_FILTER_FIELD,
           'addFilterForValueButton'

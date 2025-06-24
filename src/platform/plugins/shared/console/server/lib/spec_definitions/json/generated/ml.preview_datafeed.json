@@ -1,0 +1,25 @@
+{
+  "ml.preview_datafeed": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "start": [],
+      "end": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}/_preview",
+      "_ml/datafeeds/_preview"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-preview-datafeed",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

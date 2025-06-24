@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/securitysolution-autocomplete",
+  "version": "1.0.0",
+  "description": "Security Solution auto complete",
+  "license": "Elastic License 2.0",
+  "private": true,
+  "sideEffects": false
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiCodeBlock } from '@elastic/eui';
@@ -36,11 +37,6 @@ function getCallbacksCode(callbacks: CodeSnippetProps['callbacks']) {
             : ''
         }
         ${
-          callbacks.metaFields
-            ? `getMetaFields: async () => ['_version', '_id', '_index', '_source'],`
-            : ''
-        }
-        ${
           callbacks.policies
             ? `getPolicies: async () => [
             {
@@ -60,7 +56,7 @@ export function CodeSnippet({ currentQuery, callbacks, ignoreErrors }: CodeSnipp
     <EuiCodeBlock language="typescript" isCopyable>
       {`
 import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 
 const currentQuery = "${currentQuery}";
 
@@ -68,7 +64,6 @@ const callbacks: ESQLCallbacks = () => ${getCallbacksCode(callbacks)};
 
 const {errors, warnings} = validateQuery(
     currentQuery,
-    getAstAndSyntaxErrors,
     { ignoreOnMissingCallbacks: ${Boolean(ignoreErrors)} },
     callbacks
 );

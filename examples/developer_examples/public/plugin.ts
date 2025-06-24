@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreSetup, Plugin, AppMountParameters, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
@@ -27,11 +28,13 @@ export class DeveloperExamplesPlugin implements Plugin<DeveloperExamplesSetup, v
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./app');
         const [coreStart] = await core.getStartServices();
+        const { rendering } = coreStart;
         return renderApp(
           {
             examples,
             navigateToApp: (appId: string) => coreStart.application.navigateToApp(appId),
             getUrlForApp: (appId: string) => coreStart.application.getUrlForApp(appId),
+            rendering,
           },
           params.element
         );

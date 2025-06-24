@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
 
 interface CommonSavedObjectAttributes {
@@ -29,7 +29,7 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 >(
   attributes: T,
   keys: Array<keyof T> = []
-): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> => {
+): Omit<T, (typeof savedObjectCommonAttributes)[number] | (typeof keys)[number]> => {
   return removeServerGeneratedPropertiesFromObject(attributes, [
     ...savedObjectCommonAttributes,
     ...keys,
@@ -37,7 +37,11 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 };
 
 export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<Case> => {
-  return removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, ['closed_at']);
+  return removeServerGeneratedPropertiesFromSavedObject<Case>(theCase, [
+    'closed_at',
+    'in_progress_at',
+    'time_to_acknowledge',
+  ]);
 };
 
 export const removeServerGeneratedPropertiesFromComments = (

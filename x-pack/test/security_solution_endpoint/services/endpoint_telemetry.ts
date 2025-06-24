@@ -9,7 +9,7 @@ import fs from 'fs';
 import Path from 'path';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 const TELEMETRY_API_ROOT = '/api/stats?extended=true';
 const TELEMETRY_DATA_ROOT = Path.join(

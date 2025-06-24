@@ -38,6 +38,8 @@ export const TIMELINES_PINNED_EVENT_COUNT = '[data-test-subj="pinned-event-count
 
 export const TIMELINES_TABLE = '[data-test-subj="timelines-table"]';
 
+export const DUPLICATE_TIMELINE = '[data-test-subj="open-duplicate"]';
+
 export const TIMELINES_USERNAME = '[data-test-subj="username"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton-linkIcon"]';

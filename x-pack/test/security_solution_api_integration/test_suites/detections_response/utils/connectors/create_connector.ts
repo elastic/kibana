@@ -15,7 +15,7 @@ export interface CreateConnectorBody {
 }
 
 export async function createConnector(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   connector: CreateConnectorBody,
   id = ''
 ): Promise<string> {

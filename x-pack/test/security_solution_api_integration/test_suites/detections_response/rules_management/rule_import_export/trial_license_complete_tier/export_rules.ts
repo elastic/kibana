@@ -396,6 +396,9 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     rule_id: expect.any(String),
     enabled: expect.any(Boolean),
     immutable: false,
+    rule_source: {
+      type: 'internal',
+    },
     updated_at: expect.any(String),
     updated_by: expect.any(String),
     created_at: expect.any(String),
@@ -408,6 +411,7 @@ function expectToMatchRuleSchema(obj: RuleResponse): void {
     severity: expect.any(String),
     output_index: expect.any(String),
     author: expect.arrayContaining([]),
+    license: expect.any(String),
     false_positives: expect.arrayContaining([]),
     from: expect.any(String),
     max_signals: expect.any(Number),

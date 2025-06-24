@@ -9,14 +9,12 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { Case, AttachmentType } from '@kbn/cases-plugin/common';
-import { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
-import {
-  ExternalReferenceSOAttachmentPayload,
-  CaseStatuses,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Case } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -28,6 +26,7 @@ import {
   postExternalReferenceSOReq,
   fileMetadata,
   postCommentAlertMultipleIdsReq,
+  postCommentActionsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -37,12 +36,13 @@ import {
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createAndUploadFile,
   deleteAllFiles,
   getAllComments,
   createComment,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import {
   createAlertsIndex,
@@ -68,7 +68,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import { arraysToEqual } from '../../../../common/lib/validation';
 
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: theCase.id });
 
         userActions.slice(1).forEach((userAction, index) => {
           const userActionWithoutServerGeneratedAttributes =
@@ -163,7 +163,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...attachments[index],
               },
             },
-            case_id: theCase.id,
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
             owner: 'securitySolutionFixture',
@@ -883,12 +882,12 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(alert._source?.[ALERT_WORKFLOW_STATUS]).eql('open');
 
             alerts.push({
-              id: alert._id,
+              id: alert._id!,
               index: alert._index,
             });
 
             indices.push(alert._index);
-            ids.push(alert._id);
+            ids.push(alert._id!);
           });
 
           await bulkCreateAttachmentsAndRefreshIndex({
@@ -921,13 +920,13 @@ export default ({ getService }: FtrProviderContext): void => {
           for (const theCase of cases) {
             await bulkCreateAttachmentsAndRefreshIndex({
               caseId: theCase.id,
-              alerts: [{ id: alert._id, index: alert._index }],
+              alerts: [{ id: alert._id!, index: alert._index }],
             });
           }
 
           await es.indices.refresh({ index: alert._index });
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           const caseIds = cases.map((theCase) => theCase.id);
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
@@ -1002,10 +1001,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alerts: [{ id: alert._id, index: alert._index }],
+            alerts: [{ id: alert._id!, index: alert._index }],
           });
 
-          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           expect(updatedAlertSecondTime.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql([
             postedCase.id,
           ]);
@@ -1022,7 +1021,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alerts: [{ id: alert._id, index: alert._index }],
+            alerts: [{ id: alert._id!, index: alert._index }],
             expectedHttpCode: 400,
           });
         });
@@ -1043,7 +1042,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alerts: [{ id: alert._id, index: alert._index }],
+            alerts: [{ id: alert._id!, index: alert._index }],
             expectedHttpCode: 200,
             auth: { user: secOnlyReadAlerts, space: 'space1' },
           });
@@ -1065,7 +1064,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alerts: [{ id: alert._id, index: alert._index }],
+            alerts: [{ id: alert._id!, index: alert._index }],
             expectedHttpCode: 403,
             auth: { user: obsSec, space: 'space1' },
           });
@@ -1087,7 +1086,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await bulkCreateAttachmentsAndRefreshIndex({
             caseId: postedCase.id,
-            alerts: [{ id: alert._id, index: alert._index }],
+            alerts: [{ id: alert._id!, index: alert._index }],
             expectedHttpCode: 200,
             auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
           });
@@ -1539,6 +1538,32 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [postCommentUserReq],
           expectedHttpCode: 200,
         });
+      });
+
+      it('should set the attachment stats correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            postCommentUserReq,
+            postCommentAlertReq,
+            // an attachment that is not a comment or an alert should not affect the stats
+            postCommentActionsReq,
+          ],
+          expectedHttpCode: 200,
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+
+        const theCase = res.body.hits.hits[0]._source?.cases!;
+
+        expect(theCase.total_alerts).to.eql(1);
+        expect(theCase.total_comments).to.eql(2);
       });
     });
 

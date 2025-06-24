@@ -22,7 +22,7 @@ jobs:
       issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: closing_issues
         with:
           query: |
@@ -46,7 +46,7 @@ jobs:
           prnumber: ${{ github.event.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: sergeysova/jq-action@v2
+      - uses: sergeysova/jq-action@a3f0d4ff59cc1dddf023fc0b325dd75b10deec58 # v2.3.0
         id: issues_to_label
         with:
           # Map to the issues' node id
@@ -54,7 +54,7 @@ jobs:
           multiline: true
         env:
           CLOSING_ISSUES: ${{ steps.closing_issues.outputs.data }}
-      - uses: sergeysova/jq-action@v2
+      - uses: sergeysova/jq-action@a3f0d4ff59cc1dddf023fc0b325dd75b10deec58 # v2.3.0
         id: label_ids
         with:
           # Get list of version labels on pull request and map to label's node id, append 'QA:Ready For Testing' id ("MDU6TGFiZWwyNTQ1NjcwOTI4")
@@ -78,7 +78,7 @@ jobs:
 
     name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
         id: add_labels_to_closed_issue
         with:
           query: |

@@ -37,7 +37,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             id: ((await row.getAttribute('data-test-search-session-id')) ?? '').split('id-')[1],
             name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
-            mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
+            mainUrl: $.findTestSubject('sessionManagementNameCol').attr('href'),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
             searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),

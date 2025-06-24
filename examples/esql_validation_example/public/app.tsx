@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -23,8 +24,11 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import {
+  ESQLCallbacks,
+  ESQLFieldWithMetadata,
+  validateQuery,
+} from '@kbn/esql-validation-autocomplete';
 import type { StartDependencies } from './plugin';
 import { CodeSnippet } from './code_snippet';
 
@@ -52,13 +56,11 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
             ['index1', 'anotherIndex', 'dataStream'].map((name) => ({ name, hidden: false }))
         : undefined,
       getFieldsFor: callbacksEnabled.fields
-        ? async () => [
-            { name: 'numberField', type: 'number' },
-            { name: 'stringField', type: 'string' },
-          ]
-        : undefined,
-      getMetaFields: callbacksEnabled.metaFields
-        ? async () => ['_version', '_id', '_index', '_source']
+        ? async () =>
+            [
+              { name: 'doubleField', type: 'double' },
+              { name: 'keywordField', type: 'keyword' },
+            ] as ESQLFieldWithMetadata[]
         : undefined,
       getPolicies: callbacksEnabled.policies
         ? async () => [
@@ -78,16 +80,13 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
     if (currentQuery === '') {
       return;
     }
-    validateQuery(
-      currentQuery,
-      getAstAndSyntaxErrors,
-      { ignoreOnMissingCallbacks: ignoreErrors },
-      callbacks
-    ).then(({ errors: validationErrors, warnings: validationWarnings }) => {
-      // syntax errors come with a slight different format than other validation errors
-      setErrors(validationErrors.map((e) => ('severity' in e ? e.message : e.text)));
-      setWarnings(validationWarnings.map((e) => e.text));
-    });
+    validateQuery(currentQuery, { ignoreOnMissingCallbacks: ignoreErrors }, callbacks).then(
+      ({ errors: validationErrors, warnings: validationWarnings }) => {
+        // syntax errors come with a slight different format than other validation errors
+        setErrors(validationErrors.map((e) => ('severity' in e ? e.message : e.text)));
+        setWarnings(validationWarnings.map((e) => e.text));
+      }
+    );
   }, [currentQuery, ignoreErrors, callbacks]);
 
   const checkboxes = [
@@ -103,15 +102,11 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
       id: 'policies',
       label: 'getPolicies callback => my-policy',
     },
-    {
-      id: 'metaFields',
-      label: 'getMetaFields callback => _version, _id, _index, _source',
-    },
   ];
 
   return (
     <EuiPage>
-      <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
+      <EuiPageBody css={{ maxWidth: 800, margin: '0 auto' }}>
         <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL validation example" />
         <EuiPageSection paddingSize="s">
           <p>This app shows how to use the ES|QL validation API with all its options</p>

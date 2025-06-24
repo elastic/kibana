@@ -45,8 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         'filter list delete loads the filter list management page'
       );
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToSettings();
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToFilterListsManagement();
 
       await ml.testExecution.logTestStep(

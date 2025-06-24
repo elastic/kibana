@@ -1,0 +1,1023 @@
+{
+  "id": "@kbn/security-solution-common",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_CONTENT_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_CONTENT_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_CONTENT_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_HEADER_LEFT_SECTION_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_LOADING_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_LOADING_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_LOADING_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.ExpandablePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "ExpandablePanel",
+        "description": [
+          "\nWrapper component that is composed of a header section and a content section.\nThe header can display an icon, a title (that can be a link), and an optional content section on the right.\nThe content section can display a loading spinner, an error message, or any other content.\nThe component can be expanded or collapsed by clicking on the chevron icon on the left of the title."
+        ],
+        "signature": [
+          "{ ({ header: { title, link, iconType, headerContent }, content: { loading, error, paddingSize: contentPaddingSize }, expand: { expandable, expandedOnFirstRender }, \"data-test-subj\": dataTestSubj, children, }: React.PropsWithChildren<",
+          "ExpandablePanelPanelProps",
+          ">): React.JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/expandable_panel.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.ExpandablePanel.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  header: { title, link, iconType, headerContent },\n  content: { loading, error, paddingSize: contentPaddingSize } = {\n    loading: false,\n    error: false,\n    paddingSize: 'm',\n  },\n  expand: { expandable, expandedOnFirstRender } = {\n    expandable: false,\n    expandedOnFirstRender: false,\n  },\n  'data-test-subj': dataTestSubj,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "ExpandablePanelPanelProps",
+              ">"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/components/expandable_panel.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutBody",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutBody",
+        "description": [
+          "\nWrapper of `EuiFlyoutBody`, setting the recommended `16px` padding using a EuiPanel."
+        ],
+        "signature": [
+          "React.FunctionComponent<FlyoutBodyProps>"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_body.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutBody.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutBody.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutError",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutError",
+        "description": [
+          "\nUse this when you need to show an error state in the flyout"
+        ],
+        "signature": [
+          "{ (): React.JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_error.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutFooter",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutFooter",
+        "description": [
+          "\nWrapper of `EuiFlyoutFooter`, setting the recommended `16px` padding using a EuiPanel."
+        ],
+        "signature": [
+          "React.FunctionComponent<FlyoutFooterProps>"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_footer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutFooter.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutFooter.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutHeader",
+        "description": [
+          "\nWrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel."
+        ],
+        "signature": [
+          "React.FunctionComponent<FlyoutHeaderProps>"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_header.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutHeader.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutHeaderTabs",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutHeaderTabs",
+        "description": [
+          "\nWrapper of `EuiTabs`, setting bottom margin to align with the flyout header divider"
+        ],
+        "signature": [
+          "React.FunctionComponent<FlyoutHeaderTabsProps>"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_header_tabs.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutHeaderTabs.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutHeaderTabs.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutLoading",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutLoading",
+        "description": [
+          "\nUse this when you need to show a loading state in the flyout"
+        ],
+        "signature": [
+          "({ \"data-test-subj\": dataTestSubj, }: ",
+          "FlyoutLoadingProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_loading.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutLoading.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  'data-test-subj': dataTestSubj = FLYOUT_LOADING_TEST_ID,\n}",
+            "description": [],
+            "signature": [
+              "FlyoutLoadingProps"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_loading.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutNavigation",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutNavigation",
+        "description": [
+          "\nNavigation menu on the right panel only, with expand/collapse button and option to\npass in a list of actions to be displayed on top."
+        ],
+        "signature": [
+          "React.FunctionComponent<",
+          "FlyoutNavigationProps",
+          ">"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_navigation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutNavigation.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutNavigation.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FlyoutTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "FlyoutTitle",
+        "description": [
+          "\nTitle component with optional icon to indicate the type of document, can be used for text or a link"
+        ],
+        "signature": [
+          "React.FunctionComponent<",
+          "FlyoutTitleProps",
+          ">"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_title.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutTitle.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.FlyoutTitle.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.getDiscoverCellRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiscoverCellRenderer",
+        "description": [],
+        "signature": [
+          "({ fieldName }: GetRendererArgs) => ",
+          {
+            "pluginId": "@kbn/security-solution-common",
+            "scope": "public",
+            "docId": "kibKbnSecuritySolutionCommonPluginApi",
+            "section": "def-public.DiscoverCellRenderer",
+            "text": "DiscoverCellRenderer"
+          }
+        ],
+        "path": "x-pack/packages/security-solution/common/src/cells/renderers/discover.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.getDiscoverCellRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ fieldName }",
+            "description": [],
+            "signature": [
+              "GetRendererArgs"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/cells/renderers/discover.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.HostDetailsButton",
+        "type": "Function",
+        "tags": [],
+        "label": "HostDetailsButton",
+        "description": [],
+        "signature": [
+          "({ children, onClick, title, }: HostDetailsButtonProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/cells/renderers/host/button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.HostDetailsButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  onClick,\n  title,\n}",
+            "description": [],
+            "signature": [
+              "HostDetailsButtonProps"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/cells/renderers/host/button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.HostRightPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "HostRightPanel",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "HostRightPanelParamProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/panels/host/right/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.HostRightPanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "HostRightPanelParamProps"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/panels/host/right/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.TITLE_HEADER_ICON_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "TITLE_HEADER_ICON_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.TITLE_HEADER_ICON_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.TITLE_HEADER_TEXT_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "TITLE_HEADER_TEXT_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.TITLE_HEADER_TEXT_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.TITLE_LINK_ICON_TEST_ID",
+        "type": "Function",
+        "tags": [],
+        "label": "TITLE_LINK_ICON_TEST_ID",
+        "description": [],
+        "signature": [
+          "(dataTestSubj: string) => string"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-common",
+            "id": "def-public.TITLE_LINK_ICON_TEST_ID.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.COLLAPSE_DETAILS_BUTTON_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "COLLAPSE_DETAILS_BUTTON_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutNavigationCollapseDetailButton\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.DiscoverCellRenderer",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverCellRenderer",
+        "description": [],
+        "signature": [
+          "React.ComponentClass<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.DataGridCellValueElementProps",
+            "text": "DataGridCellValueElementProps"
+          },
+          ">, any> | React.FunctionComponent<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/unified-data-table",
+            "scope": "public",
+            "docId": "kibKbnUnifiedDataTablePluginApi",
+            "section": "def-public.DataGridCellValueElementProps",
+            "text": "DataGridCellValueElementProps"
+          },
+          ">>"
+        ],
+        "path": "x-pack/packages/security-solution/common/src/cells/renderers/discover.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.EXPAND_DETAILS_BUTTON_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EXPAND_DETAILS_BUTTON_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutNavigationExpandDetailButton\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FLYOUT_ERROR_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FLYOUT_ERROR_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutError\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.FLYOUT_LOADING_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FLYOUT_LOADING_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutLoading\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.HEADER_ACTIONS_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HEADER_ACTIONS_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutNavigationActions\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.HEADER_NAVIGATION_BUTTON_TEST_ID",
+        "type": "string",
+        "tags": [],
+        "label": "HEADER_NAVIGATION_BUTTON_TEST_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyoutNavigationButton\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-common",
+        "id": "def-public.PREFIX",
+        "type": "string",
+        "tags": [],
+        "label": "PREFIX",
+        "description": [],
+        "signature": [
+          "\"securitySolutionFlyout\""
+        ],
+        "path": "x-pack/packages/security-solution/common/src/flyout/common/test_ids.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

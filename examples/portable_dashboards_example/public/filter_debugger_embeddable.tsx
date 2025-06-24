@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   PublishesUnifiedSearch,
   useStateFromPublishingSubject,
@@ -18,23 +19,17 @@ import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export type Api = DefaultEmbeddableApi<{}>;
 
-export const factory: ReactEmbeddableFactory<{}, Api> = {
+export const factory: EmbeddableFactory<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
-  deserializeState: () => {
-    return {};
-  },
-  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-    const api = buildApi(
-      {
-        serializeState: () => {
-          return {
-            rawState: {},
-            references: [],
-          };
-        },
+  buildEmbeddable: async ({ finalizeApi, parentApi }) => {
+    const api = finalizeApi({
+      serializeState: () => {
+        return {
+          rawState: {},
+          references: [],
+        };
       },
-      {}
-    );
+    });
 
     return {
       api,

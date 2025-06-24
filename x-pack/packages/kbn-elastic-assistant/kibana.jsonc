@@ -1,5 +1,0 @@
-{
-  "id": "@kbn/elastic-assistant",
-  "owner": "@elastic/security-generative-ai",
-  "type": "shared-browser"
-}

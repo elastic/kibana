@@ -11,23 +11,20 @@ import { FLEET_ELASTIC_AGENT_PACKAGE } from '@kbn/fleet-plugin/common/constants/
 import { DASHBOARD_LOCATORS_IDS } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   describe('Install elastic_agent package', () => {
     const { getService } = providerContext;
+    const fleetAndAgents = getService('fleetAndAgents');
+
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertest');
-    const dockerServers = getService('dockerServers');
-    const server = dockerServers.get('registry');
-
     let pkgVersion: string;
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
       const getPkRes = await supertest
         .get(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}`)
         .set('kbn-xsrf', 'xxxx')
@@ -53,7 +50,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      if (!server.enabled) return;
       return supertest
         .delete(`/api/fleet/epm/packages/${FLEET_ELASTIC_AGENT_PACKAGE}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx');

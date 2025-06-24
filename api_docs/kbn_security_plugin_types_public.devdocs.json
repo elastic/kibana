@@ -1,7 +1,76 @@
 {
   "id": "@kbn/security-plugin-types-public",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.PrivilegesAPIClientPublicContract",
+        "type": "Class",
+        "tags": [],
+        "label": "PrivilegesAPIClientPublicContract",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientPublicContract.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "(args: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientGetAllArgs",
+                "text": "PrivilegesAPIClientGetAllArgs"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RawKibanaPrivileges",
+                "text": "RawKibanaPrivileges"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.PrivilegesAPIClientPublicContract.getAll.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.PrivilegesAPIClientGetAllArgs",
+                    "text": "PrivilegesAPIClientGetAllArgs"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -11,7 +80,7 @@
         "tags": [],
         "label": "AuthenticationServiceSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,16 +95,10 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               ">"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -53,7 +116,7 @@
             "signature": [
               "() => Promise<boolean>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -69,7 +132,7 @@
         "tags": [],
         "label": "AuthorizationServiceSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -85,11 +148,146 @@
             "signature": [
               "() => boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthorizationServiceSetup.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [
+              "\nA set of methods to work with Kibana user roles."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.RolesAPIClient",
+                "text": "RolesAPIClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthorizationServiceSetup.privileges",
+            "type": "Object",
+            "tags": [],
+            "label": "privileges",
+            "description": [
+              "\nA set of methods to work with Kibana role privileges"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.PrivilegesAPIClientPublicContract",
+                "text": "PrivilegesAPIClientPublicContract"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdatePayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdatePayload",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdatePayload.rolesUpdate",
+            "type": "Array",
+            "tags": [],
+            "label": "rolesUpdate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.BulkUpdateRoleResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkUpdateRoleResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.created",
+            "type": "Array",
+            "tags": [],
+            "label": "created",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.updated",
+            "type": "Array",
+            "tags": [],
+            "label": "updated",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.BulkUpdateRoleResponse.errors",
+            "type": "Object",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "Record<string, { type: string; reason: string; }> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -102,32 +300,14 @@
         "label": "GetUserProfileResponse",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.GetUserProfileResponse",
-            "text": "GetUserProfileResponse"
-          },
+          "GetUserProfileResponse",
           "<D> extends ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileWithSecurity",
-            "text": "UserProfileWithSecurity"
-          },
+          "UserProfileWithSecurity",
           "<D, ",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileLabels",
-            "text": "UserProfileLabels"
-          },
+          "UserProfileLabels",
           ">"
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,26 +321,308 @@
               "\nInformation about the currently authenticated user that owns the profile."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileUserInfoWithSecurity",
-                "text": "UserProfileUserInfoWithSecurity"
-              },
+              "UserProfileUserInfoWithSecurity",
               " & Pick<",
-              {
-                "pluginId": "@kbn/core-security-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSecurityCommonPluginApi",
-                "section": "def-common.AuthenticatedUser",
-                "text": "AuthenticatedUser"
-              },
+              "AuthenticatedUser",
               ", \"authentication_provider\">"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.PrivilegesAPIClientGetAllArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegesAPIClientGetAllArgs",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientGetAllArgs.includeActions",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeActions",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.PrivilegesAPIClientGetAllArgs.respectLicenseLevel",
+            "type": "boolean",
+            "tags": [],
+            "label": "respectLicenseLevel",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/privileges/privileges_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.RolePutPayload",
+        "type": "Interface",
+        "tags": [],
+        "label": "RolePutPayload",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolePutPayload.role",
+            "type": "Object",
+            "tags": [],
+            "label": "role",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolePutPayload.createOnly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.RolesAPIClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "RolesAPIClient",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.getRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "getRoles",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.getRole",
+            "type": "Function",
+            "tags": [],
+            "label": "getRole",
+            "description": [],
+            "signature": [
+              "(roleName: string) => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.getRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "roleName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.deleteRole",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteRole",
+            "description": [],
+            "signature": [
+              "(roleName: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.deleteRole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "roleName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.saveRole",
+            "type": "Function",
+            "tags": [],
+            "label": "saveRole",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.RolePutPayload",
+                "text": "RolePutPayload"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.saveRole.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.RolePutPayload",
+                    "text": "RolePutPayload"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.RolesAPIClient.bulkUpdateRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkUpdateRoles",
+            "description": [],
+            "signature": [
+              "(payload: ",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdatePayload",
+                "text": "BulkUpdatePayload"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.BulkUpdateRoleResponse",
+                "text": "BulkUpdateRoleResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-public",
+                "id": "def-public.RolesAPIClient.bulkUpdateRoles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "payload",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/security-plugin-types-public",
+                    "scope": "public",
+                    "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                    "section": "def-public.BulkUpdatePayload",
+                    "text": "BulkUpdatePayload"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/roles/roles_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -172,7 +634,7 @@
         "tags": [],
         "label": "SecurityNavControlServiceStart",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,7 +660,7 @@
               },
               "[]>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -224,7 +686,7 @@
               },
               "[]) => void"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -245,7 +707,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+                "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -263,7 +725,7 @@
         "tags": [],
         "label": "SecurityPluginSetup",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -271,10 +733,12 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginSetup.authc",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "authc",
             "description": [
-              "\nExposes authentication information about the currently logged in user."
+              "\nExposes authentication information about the currently logged in user.\n"
             ],
             "signature": [
               {
@@ -285,9 +749,15 @@
                 "text": "AuthenticationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
@@ -307,7 +777,7 @@
                 "text": "AuthorizationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -329,7 +799,7 @@
                 "text": "SecurityLicense"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -343,7 +813,7 @@
         "tags": [],
         "label": "SecurityPluginStart",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,7 +835,7 @@
                 "text": "SecurityNavControlServiceStart"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -373,10 +843,12 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginStart.authc",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "authc",
             "description": [
-              "\nExposes authentication information about the currently logged in user."
+              "\nExposes authentication information about the currently logged in user.\n"
             ],
             "signature": [
               {
@@ -387,9 +859,31 @@
                 "text": "AuthenticationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/links.ts"
+              },
+              {
+                "plugin": "cloudLinks",
+                "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/common/lib/kibana/hooks.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kibana/hooks.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-public",
@@ -409,7 +903,7 @@
                 "text": "AuthorizationServiceSetup"
               }
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,49 +911,71 @@
             "parentPluginId": "@kbn/security-plugin-types-public",
             "id": "def-public.SecurityPluginStart.userProfiles",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "userProfiles",
             "description": [
-              "\nA set of methods to work with Kibana user profiles."
+              "\nA set of methods to work with Kibana user profiles.\n"
             ],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-common.UserProfileService",
-                "text": "UserProfileService"
-              },
-              ", \"getUserProfile$\"> & { userProfile$: ",
+              "UserProfileService",
+              ", \"getUserProfile$\" | \"getEnabled$\"> & { userProfile$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              " | null>; } & { readonly userProfile$: ",
+              "UserProfileData",
+              " | null>; enabled$: ",
               "Observable",
-              "<",
-              {
-                "pluginId": "@kbn/core-user-profile-common",
-                "scope": "common",
-                "docId": "kibKbnCoreUserProfileCommonPluginApi",
-                "section": "def-common.UserProfileData",
-                "text": "UserProfileData"
-              },
-              " | null>; readonly userProfileLoaded$: ",
-              "Observable",
-              "<boolean>; readonly enabled$: ",
+              "<boolean>; } & { readonly userProfileLoaded$: ",
               "Observable",
               "<boolean>; }"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/plugin.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_bulk_get_user_profiles.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -471,7 +987,7 @@
         "tags": [],
         "label": "UserMenuLink",
         "description": [],
-        "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,7 +998,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -496,7 +1012,7 @@
             "signature": [
               "string | React.ComponentType<{}>"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -507,7 +1023,7 @@
             "tags": [],
             "label": "href",
             "description": [],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -521,7 +1037,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -535,7 +1051,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -549,9 +1065,9 @@
               "Render a custom ReactNode instead of the default <EuiContextMenuItem />"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "React.ReactNode | ((args: { closePopover: () => void; }) => React.ReactNode)"
             ],
-            "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -567,7 +1083,7 @@
         "description": [
           "\nParameters for the bulk get API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -583,7 +1099,7 @@
             "signature": [
               "Set<string>"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,7 +1115,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -615,7 +1131,7 @@
         "description": [
           "\nParameters for the get user profile for the current user API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -628,7 +1144,7 @@
             "description": [
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -644,7 +1160,7 @@
         "description": [
           "\nParameters for the suggest API."
         ],
-        "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+        "path": "src/core/packages/user-profile/browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -657,7 +1173,7 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -673,7 +1189,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -689,7 +1205,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
+            "path": "src/core/packages/user-profile/browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -717,7 +1233,7 @@
             "text": "AuthenticationServiceSetup"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -740,7 +1256,19 @@
             "text": "AuthorizationServiceSetup"
           }
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authorization/authorization_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-public",
+        "id": "def-public.SecurityLicense",
+        "type": "Type",
+        "tags": [],
+        "label": "SecurityLicense",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/license/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -754,40 +1282,18 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-common.UserProfileService",
-            "text": "UserProfileService"
-          },
-          ", \"getUserProfile$\"> & { userProfile$: ",
+          "UserProfileService",
+          ", \"getUserProfile$\" | \"getEnabled$\"> & { userProfile$: ",
           "Observable",
           "<",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileData",
-            "text": "UserProfileData"
-          },
-          " | null>; } & { readonly userProfile$: ",
+          "UserProfileData",
+          " | null>; enabled$: ",
           "Observable",
-          "<",
-          {
-            "pluginId": "@kbn/core-user-profile-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUserProfileCommonPluginApi",
-            "section": "def-common.UserProfileData",
-            "text": "UserProfileData"
-          },
-          " | null>; readonly userProfileLoaded$: ",
-          "Observable",
-          "<boolean>; readonly enabled$: ",
+          "<boolean>; } & { readonly userProfileLoaded$: ",
           "Observable",
           "<boolean>; }"
         ],
-        "path": "x-pack/packages/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
+        "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/user_profile/user_profile_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

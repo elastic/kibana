@@ -1,0 +1,101 @@
+env:
+  ELASTIC_PR_COMMENTS_ENABLED: 'true'
+  ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+  GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-deploy-cloud-from-pr
+
+steps:
+  - group: 'Notify if missing labels'
+    if: "build.env('GITHUB_PR_LABELS') !~ /(ci:cloud-deploy|ci:cloud-redeploy)/"
+
+    steps:
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Cloud deployments require a Github label, please add \`ci:cloud-deploy\` or \`ci:cloud-redeploy\` and trigger the job through the checkbox again." \
+            --context "cloud-deploy-job" \
+            --clear-previous
+        label: Comment missing labels
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+  - group: 'Cloud Deployment'
+    if: "build.env('GITHUB_PR_LABELS') =~ /(ci:cloud-deploy|ci:cloud-redeploy)/"
+
+    steps:
+      - command: .buildkite/scripts/lifecycle/pre_build.sh
+        label: Pre-Build
+        timeout_in_minutes: 10
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        retry:
+          automatic:
+            - exit_status: '*'
+              limit: 1
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "PR Cloud deployment started at: $BUILDKITE_BUILD_URL" \
+            --context "cloud-deploy-job" \
+            --clear-previous
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5
+
+      - wait: ~
+
+      - command: .buildkite/scripts/steps/build_kibana.sh
+        label: Build Kibana Distribution
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-8
+          preemptible: true
+          diskSizeGb: 125
+        if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+        timeout_in_minutes: 90
+        key: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
+        label: 'Build and Deploy to Cloud'
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+          preemptible: true
+        timeout_in_minutes: 30
+        depends_on: build
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - wait: ~
+
+      - command: |
+          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+            --message "Cloud deployment initiated, see credentials at: $BUILDKITE_BUILD_URL" \
+            --context "cloud-deploy-job" \
+            --clear-previous
+        label: Comment with job URL
+        agents:
+          provider: gcp
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          machineType: n2-standard-2
+        timeout_in_minutes: 5

@@ -6,18 +6,18 @@
  */
 
 import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
-import {
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import {
+import type {
   CaseConnector,
   Configuration,
   Configurations,
-  ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -43,6 +43,7 @@ export const getConfigurationRequest = ({
     closure_type: 'close-by-user',
     owner: 'securitySolutionFixture',
     customFields: [],
+    templates: [],
     ...overrides,
   };
 };
@@ -55,20 +56,21 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
     customFields: [],
+    observableTypes: [],
     ...overwrite,
   };
 };
 
 export const createConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   req: ConfigurationRequest = getConfigurationRequest(),
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
+  headers: Record<string, string | string[]> = {}
 ): Promise<Configuration> => {
   const apiCall = supertest.post(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')
@@ -86,7 +88,7 @@ export const getConfiguration = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -102,16 +104,16 @@ export const getConfiguration = async ({
 };
 
 export const updateConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   id: string,
   req: ConfigurationPatchRequest,
   expectedHttpCode: number = 200,
   auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
+  headers: Record<string, string | string[]> = {}
 ): Promise<Configuration> => {
   const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
 
-  setupAuth({ apiCall, headers, auth });
+  void setupAuth({ apiCall, headers, auth });
 
   const { body: configuration } = await apiCall
     .set('kbn-xsrf', 'true')

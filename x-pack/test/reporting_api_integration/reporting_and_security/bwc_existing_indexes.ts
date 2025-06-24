@@ -28,8 +28,12 @@ export default function ({ getService }: FtrProviderContext) {
       before('load data and add index alias', async () => {
         await reportingAPI.deleteAllReports();
         // data to report on
-        await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.load(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
 
         // archive with reporting index mappings v6.2
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
@@ -43,8 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after('remove index alias', async () => {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
+        await kibanaServer.importExport.unload(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
 
         await cleanupIndexAlias();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/bwc/6_2');

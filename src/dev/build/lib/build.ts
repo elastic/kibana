@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import chalk from 'chalk';
@@ -12,29 +13,33 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
+  private buildDesc: string = '';
+  private buildArch: string = '';
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
-  constructor(private config: Config) {}
+  constructor(private config: Config, private bufferLogs = false) {}
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
   }
 
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
+    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
     return this.config.resolveFromRepo(
       'build',
       'default',
-      `kibana-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
+      `kibana${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
   }
 
   getPlatformArchivePath(platform: Platform) {
     const ext = platform.isWindows() ? 'zip' : 'tar.gz';
+    const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
     return this.config.resolveFromRepo(
       'target',
-      `${this.name}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
+      `${this.name}${variant}-${this.config.getBuildVersion()}-${platform.getBuildName()}.${ext}`
     );
   }
 
@@ -48,5 +53,25 @@ export class Build {
 
   getLogTag() {
     return this.logTag;
+  }
+
+  getBufferLogs() {
+    return this.bufferLogs;
+  }
+
+  setBuildDesc(desc: string) {
+    this.buildDesc = desc;
+  }
+
+  getBuildDesc() {
+    return this.buildDesc;
+  }
+
+  setBuildArch(arch: string) {
+    this.buildArch = arch;
+  }
+
+  getBuildArch() {
+    return this.buildArch;
   }
 }

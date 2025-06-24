@@ -34,14 +34,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
+  // https://github.com/elastic/kibana/pull/190690
+  // fails after missing `awaits` were added
   describe('Case View', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await svlCommonPage.forceLogout();
     });
 
     describe('page', () => {
@@ -234,6 +235,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
+        await header.waitUntilLoadingHasFinished();
+
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
         await header.waitUntilLoadingHasFinished();
@@ -271,7 +274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY
-    describe.skip('Lens visualization', () => {
+    describe('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
         await createAndNavigateToCase(getPageObject, getService, owner);
@@ -316,7 +319,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pagination', async () => {
+    describe('pagination', () => {
       let createdCase: any;
 
       before(async () => {
@@ -364,7 +367,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
-        testSubjects.click('cases-show-more-user-actions');
+        await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 

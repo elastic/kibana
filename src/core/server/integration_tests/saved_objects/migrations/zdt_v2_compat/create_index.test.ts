@@ -1,32 +1,35 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import fs from 'fs/promises';
+import { join } from 'path';
 import '../jest_matchers';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../test_utils';
+import {
+  clearLog,
+  getKibanaMigratorTestKit,
+  startElasticsearch,
+} from '../kibana_migrator_test_kit';
+import { parseLogFile } from '../test_utils';
 import { getBaseMigratorParams, getFooType, getLegacyType } from '../fixtures/zdt_base.fixtures';
 
-const logFilePath = Path.join(__dirname, 'create_index.test.log');
+const logFilePath = join(__dirname, 'create_index.test.log');
 
 describe('ZDT with v2 compat - running on a fresh cluster', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   beforeAll(async () => {
-    await fs.unlink(logFilePath).catch(() => {});
+    await clearLog(logFilePath);
     esServer = await startElasticsearch();
   });
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   it('create the index with the correct mappings and meta', async () => {
@@ -70,11 +73,11 @@ describe('ZDT with v2 compat - running on a fresh cluster', () => {
     expect(mappingMeta).toEqual({
       docVersions: {
         foo: '10.2.0',
-        legacy: '7.5.0',
+        legacy: '10.0.0',
       },
       mappingVersions: {
         foo: '10.2.0',
-        legacy: '7.5.0',
+        legacy: '10.0.0',
       },
       migrationState: expect.objectContaining({
         convertingDocuments: false,

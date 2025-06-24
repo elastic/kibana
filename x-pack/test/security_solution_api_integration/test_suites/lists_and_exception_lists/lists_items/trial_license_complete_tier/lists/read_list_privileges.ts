@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 
 import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
 import { getReadPrivilegeMock } from '@kbn/lists-plugin/server/routes/list_privileges/read_list_privileges_route.mock';
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces) => {
   const supertest = getService('supertest');
@@ -38,7 +39,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           {
             feature: {
               dashboard: ['all'],
-              siem: ['all', 'read'],
+              [SECURITY_FEATURE_ID]: ['all', 'read'],
             },
             spaces: [space1Id],
           },

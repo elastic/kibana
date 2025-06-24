@@ -20,14 +20,14 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ES_SERVERLESS_IMAGE: latest
+        ES_SERVERLESS_IMAGE: docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_serverless/verify_es_serverless_image.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -52,3 +52,6 @@ spec:
           env:
             PUBLISH_DOCKER_TAG: 'true'
           branch: main
+      tags:
+        - kibana
+        - kibana-serverless-release

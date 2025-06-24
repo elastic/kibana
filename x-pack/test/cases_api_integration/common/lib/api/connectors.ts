@@ -6,30 +6,35 @@
  */
 
 import getPort from 'get-port';
-import http from 'http';
+import type http from 'http';
 
 import type SuperTest from 'supertest';
 import { CASE_CONFIGURE_CONNECTORS_URL } from '@kbn/cases-plugin/common/constants';
 import { getCaseConnectorsUrl } from '@kbn/cases-plugin/common/api';
-import {
+import type {
   ActionResult,
   ActionTypeExecutorResult,
   FindActionResult,
 } from '@kbn/actions-plugin/server/types';
-import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import {
+  getServiceNowServer,
+  RecordingServiceNowSimulator,
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import type {
   Case,
   CaseConnector,
   Configuration,
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
+import type {
+  CasePostRequest,
+  GetCaseConnectorsResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import { camelCase, mapKeys } from 'lodash';
-import { User } from '../authentication/types';
+import type { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getPostCaseRequest } from '../mock';
-import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { createConfiguration, getConfigurationRequest } from './configuration';
 import { createCase } from './case';
 import { getSpaceUrlPrefix } from './helpers';
@@ -194,7 +199,7 @@ export const getCaseConnectors = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<FindActionResult[]> => {
@@ -215,13 +220,13 @@ export const createCaseWithConnector = async ({
   createCaseReq = getPostCaseRequest(),
   headers = {},
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   serviceNowSimulatorURL: string;
   actionsRemover: ActionsRemover;
   configureReq?: Record<string, unknown>;
   auth?: { user: User; space: string | null } | null;
   createCaseReq?: CasePostRequest;
-  headers?: Record<string, unknown>;
+  headers?: Record<string, string | string[]>;
 }): Promise<{
   postedCase: Case;
   connector: CreateConnectorResponse;
@@ -236,7 +241,7 @@ export const createCaseWithConnector = async ({
     auth: auth ?? undefined,
   });
 
-  actionsRemover.add(auth?.space ?? 'default', connector.id, 'action', 'actions');
+  actionsRemover.add(auth?.space ?? 'default', connector.id, 'connector', 'actions');
 
   const [configuration, postedCase] = await Promise.all([
     createConfiguration(
@@ -288,7 +293,7 @@ export const createConnector = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   req: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -309,7 +314,7 @@ export const getConnectors = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   caseId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -329,7 +334,7 @@ export const executeConnector = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   req: Record<string, unknown>;
   expectedHttpCode?: number;
@@ -352,7 +357,7 @@ export const executeSystemConnector = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   req: Record<string, unknown>;
   expectedHttpCode?: number;

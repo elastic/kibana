@@ -32,7 +32,22 @@
         "signature": [
           "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.CANVAS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "CANVAS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"CANVAS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +62,7 @@
         "signature": [
           "\"dashboards\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +77,7 @@
         "signature": [
           "\"DASHBOARD_APP_LOCATOR\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +92,7 @@
         "signature": [
           "\"graph\" | \"dashboards\" | \"canvas\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +107,7 @@
         "signature": [
           "\"discover\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,7 +122,22 @@
         "signature": [
           "\"DISCOVER_ESQL_LOCATOR\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.LENS_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"LENS_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -122,7 +152,22 @@
         "signature": [
           "\"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.VISUALIZE_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "VISUALIZE_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"VISUALIZE_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

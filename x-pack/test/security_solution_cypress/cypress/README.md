@@ -45,11 +45,11 @@ Please, before opening a PR with the new test, please make sure that the test fa
 Note that we use tags in order to select which tests we want to execute:
 
 - `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
-- `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want you run in CI for the second quality gate. These tests should be stable, otherwise they will be blocking the release pipeline. They should be also critical enough, so that when they fail, there's a high chance of an SDH or blocker issue to be reported.
+- `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want you run in CI for the Kibana QA quality gate. These tests should be stable, otherwise they will be blocking the release pipeline. They should be also critical enough, so that when they fail, there's a high chance of an SDH or blocker issue to be reported.
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
 - `@skipInEss` excludes a test from the non-Serverless test suite. The test will not be executed as part for the PR process. All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
 - `@skipInServerlessMKI` excludes a test from the execution on any MKI environment (even if it's tagged as `@serverless` or `@serverlessQA`). Could indicate many things, e.g. "the test is flaky in Serverless MKI", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
-- `@skipInServerless` excludes a test from the Serverless test suite and Serverless QA environment for both, periodic pipeline and second quality gate (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environment", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
+- `@skipInServerless` excludes a test from the Serverless test suite and Serverless QA environment for both, periodic pipeline and Kibana QA quality gate (even if it's tagged as `@serverless`). Could indicate many things, e.g. "the test is flaky in Serverless", "the test is Flaky in any type of environment", "the test has been temporarily excluded, see the comment above why". All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
 
 Please, before opening a PR with a new test, make sure that the test fails. If you never see your test fail you don’t know if your test is actually testing the right thing, or testing anything at all.
 
@@ -79,6 +79,8 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:detection_engine:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` excluding `e2e/detection_response/detection_engine` directory in headless mode |
 | cypress:ai_assistant:run:ess | Runs all tests tagged as ESS in the `e2e/ai_assistant` directory in headless mode |
 | cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
+| cypress:cloud_security_posture:run:ess | Runs all tests tagged as ESS in the `e2e/cloud_security_posture` directory in headless mode |
+| cypress:cloud_security_posture:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode |
 | cypress:detection_engine:exceptions:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:investigations:run:ess | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
@@ -88,6 +90,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:run:qa:serverless:entity_analytics | Runs all tests tagged as SERVERLESS placed in the `e2e/entity_analytics` directory in headless mode using the QA environment and real MKI projects.|
 | cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
 | cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:cloud_security_posture | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` directory, excluding `e2e/detection_response/rule_management/prebuilt_rules` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
@@ -150,6 +153,7 @@ If you belong to one of the teams listed in the table, please add new e2e specs 
 | `e2e/detection_response/detection_engine` | Detection Engine |
 | `e2e/ai_assistant` | AI Assistant |
 | `e2e/entity_analytics` | Entity Analytics |
+| `e2e/asset_inventory` | Cloud Security Posture |
 
 
 ### fixtures/
@@ -220,13 +224,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/test/security_solution_cypress`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../src/platform/test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../src/platform/test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.
@@ -243,11 +247,12 @@ cy.task('esArchiverUnload', { archiveName: 'overview'});
 
 ```
 
-You can also use archives stored in `kibana/x-pack/test/functional/es_archives`. In order to do sow uste it on the tests as follow.
+You can also use archives located in `x-pack/test/functional/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
 
 ```typescript
-cy.task('esArchiverLoad', { archiveName: 'security_solution/alias', type: 'ftr'});
-cy.task('esArchiverUnload', { archiveName: 'security_solution/alias', type:'ftr'});
+// loads then unloads from x-pack/test/functional/es_archives/security_solution/alias
+cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr'});
+cy.task('esArchiverUnload', { archiveName: 'alias', type:'ftr'});
 ```
 
 ## Serverless
@@ -302,8 +307,86 @@ Per the way we set the environment during the execution process on CI, the above
 
 For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
 
+#### Custom Roles
 
-### Running serverless tests locally pointing to a MKI project created in QA environment (Second Quality Gate)
+Custom roles for serverless is currently supported only for stateless environments (non MKI environments).
+
+##### Creating a Custom Role
+
+To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
+- **`roleDescriptor`**: Defines the permissions and access for the role.
+- **`roleName`**: A unique name for the custom role.
+
+Example:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+```
+
+##### Using a Custom Role
+
+Once the custom role is created, you can log in to the application using your regular `login`` method and passing the name of the role.
+
+```typescript
+login('customRole');
+```
+
+
+##### Deleting a Custom Role
+
+After your tests, always delete the custom role to ensure a clean environment. Use the `deleteServerlessCustomRole` task and provide the name of the role as the parameter.
+
+```typescript
+cy.task('deleteServerlessCustomRole', 'customRole');
+```
+
+##### Full workflow
+
+Here’s the complete workflow for creating, using, and deleting a custom role:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+before(() => {
+  cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+});
+
+beforeEach(() => {
+  login('customRole');
+});
+
+after(() => {
+  cy.task('deleteServerlessCustomRole', 'customRole');
+});
+```
+
+### Running serverless tests locally pointing to a MKI project created in QA environment
 
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.
@@ -349,11 +432,15 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-Store the email and password of the account you used to login in the QA Environment at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
+By default all our Serverless tests are executed with the `platform_engineer` role. 
+
+So you need to add to your organization a new user that has the required role. You can achieve that by using email aliases.
+
+Store the email and password of the account of the `platform_engineer` user at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   }
@@ -379,7 +466,7 @@ If you want to execute a test using Cypress on visual mode with MKI, you need to
 
 ```json
 {
-  "admin": {
+  "platform_engineer": {
     "email": "<email>",
     "password": "<password>"
   },

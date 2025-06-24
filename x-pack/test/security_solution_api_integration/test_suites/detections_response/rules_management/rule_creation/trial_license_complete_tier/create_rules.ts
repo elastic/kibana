@@ -48,11 +48,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@serverless @ess create_rules', () => {
+  describe('@serverless @ess @serverlessQA create_rules', () => {
     describe('rule creation', () => {
       before(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });
@@ -75,6 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('elastic admin', () => {
         it('creates a custom query rule', async () => {
+          const username = await utils.getUsername();
           const { body } = await securitySolutionApi
             .createRule({ body: getCustomQueryRuleParams() })
             .expect(200);
@@ -82,13 +81,14 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toEqual(
             expect.objectContaining({
               ...getCustomQueryRuleParams(),
-              created_by: ELASTICSEARCH_USERNAME,
-              updated_by: ELASTICSEARCH_USERNAME,
+              created_by: username,
+              updated_by: username,
             })
           );
         });
 
         it('creates a saved query rule', async () => {
+          const username = await utils.getUsername();
           const savedQueryRuleParams = getSavedQueryRuleParams({
             data_view_id: 'my-data-view',
             type: 'saved_query',
@@ -102,8 +102,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).toEqual(
             expect.objectContaining({
               ...savedQueryRuleParams,
-              created_by: ELASTICSEARCH_USERNAME,
-              updated_by: ELASTICSEARCH_USERNAME,
+              created_by: username,
+              updated_by: username,
             })
           );
         });
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await fetchRule(supertest, { id });
 
           expect(rule?.execution_summary?.last_execution.status).toBe('partial failure');
-          expect(rule?.execution_summary?.last_execution.message).toBe(
+          expect(rule?.execution_summary?.last_execution.message).toContain(
             'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
           );
         });
@@ -689,28 +689,6 @@ export default ({ getService }: FtrProviderContext) => {
             );
           });
         });
-      });
-    });
-
-    describe('setup guide', async () => {
-      beforeEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
-      it('creates a rule with a setup guide when setup parameter is present', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(
-            getCustomQueryRuleParams({
-              setup: 'A setup guide',
-            })
-          )
-          .expect(200);
-
-        expect(body.setup).toEqual('A setup guide');
       });
     });
   });

@@ -8,5 +8,5 @@
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_ALERT_REASON_PREVIEW_CONTAINER = getDataTestSubjectSelector(
-  'securitySolutionFlyoutAlertReasonPreviewBody'
+  'securitySolutionFlyoutAlertReasonBody'
 );

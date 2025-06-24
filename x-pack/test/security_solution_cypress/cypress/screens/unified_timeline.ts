@@ -9,11 +9,13 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const TIMELINE_DETAILS_FLYOUT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');
 
+export const UNIFIED_TABLE = getDataTestSubjectSelector('discoverDocTable');
+
 export const HOST_DETAILS_LINK = getDataTestSubjectSelector('host-details-button');
 
 export const USER_DETAILS_LINK = getDataTestSubjectSelector('users-link-anchor');
 
-export const TIMELINE_DETAILS_FLYOUT = getDataTestSubjectSelector('timeline:details-panel:flyout');
+export const TIMELINE_DETAILS_FLYOUT = getDataTestSubjectSelector('securitySolutionFlyoutBody');
 
 export const HOST_DETAILS_FLYOUT = getDataTestSubjectSelector('host-panel-header');
 
@@ -48,4 +50,16 @@ export const GET_UNIFIED_DATA_GRID_CELL = (columnId: string, rowIndex: number) =
   return `${TIMELINE_UNIFIED_DATA_GRID} ${getDataTestSubjectSelector(
     'dataGridRowCell'
   )}[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="${rowIndex}"] .unifiedDataTable__cellValue`;
+};
+
+export const GET_UNIFIED_FIELD_LIST_FIELD = (columnId: string) =>
+  `${getDataTestSubjectSelector(`field-${columnId}`)}`;
+
+export const UNIFIED_TABLE_HOVER_ACTIONS = {
+  ADD_TO_TIMELINE:
+    '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]',
 };

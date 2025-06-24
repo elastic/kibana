@@ -1,16 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';
-import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -39,19 +39,22 @@ import {
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
-  initAction,
+  fetchIndices,
   cloneIndex,
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   createBulkIndexOperationTuple,
+  checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
+import { defaultKibanaIndex } from '../../kibana_migrator_test_kit';
 
 const { startES } = createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
   settings: {
     es: {
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
       license: 'basic',
-      dataArchive: Path.resolve(__dirname, '../../archives/7.7.2_xpack_100k_obj.zip'),
       esArgs: ['http.max_content_length=10Kb'],
     },
   },
@@ -63,11 +66,14 @@ describe('migration actions', () => {
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
   beforeAll(async () => {
+    // start ES and get capabilities
     esServer = await startES();
     // we don't need a long timeout for testing purposes
     client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
+  });
 
+  beforeAll(async () => {
     // Create test fixture data:
     await createIndex({
       client,
@@ -89,12 +95,14 @@ describe('migration actions', () => {
       },
     })();
     const docs = [
-      { _source: { title: 'doc 1' } },
-      { _source: { title: 'doc 2' } },
-      { _source: { title: 'doc 3' } },
-      { _source: { title: 'saved object 4', type: 'another_unused_type' } },
-      { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
-      { _source: { title: new Array(1000).fill('a').join(), type: 'large' } }, // "large" saved object
+      { _source: { title: 'doc 1', order: 1 } },
+      { _source: { title: 'doc 2', order: 2 } },
+      { _source: { title: 'doc 3', order: 3 } },
+      { _source: { title: 'saved object 4', type: 'another_unused_type', order: 4 } },
+      { _source: { title: 'f-agent-event 5', type: 'f_agent_event', order: 5 } },
+      {
+        _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+      }, // "large" saved objects
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
       client,
@@ -132,20 +140,18 @@ describe('migration actions', () => {
     await esServer.stop();
   });
 
-  describe('initAction', () => {
+  describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Reset persistent test settings
-            cluster: { routing: { allocation: { enable: null } } },
-          },
+        persistent: {
+          // Reset persistent test settings
+          cluster: { routing: { allocation: { enable: null } } },
         },
       });
     });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = initAction({ client, indices: ['no_such_index'] });
+      const task = fetchIndices({ client, indices: ['no_such_index'] });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
@@ -155,7 +161,7 @@ describe('migration actions', () => {
     });
     it('resolves right record with found indices', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['no_such_index', 'existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -174,7 +180,7 @@ describe('migration actions', () => {
     });
     it('includes the _meta data of the indices in the response', async () => {
       expect.assertions(1);
-      const res = (await initAction({
+      const res = (await fetchIndices({
         client,
         indices: ['existing_index_with_docs'],
       })()) as Either.Right<unknown>;
@@ -200,20 +206,18 @@ describe('migration actions', () => {
         })
       );
     });
+  });
+
+  describe('checkClusterRoutingAllocation', () => {
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Disable all routing allocation
-            cluster: { routing: { allocation: { enable: 'none' } } },
-          },
+        persistent: {
+          // Disable all routing allocation
+          cluster: { routing: { allocation: { enable: 'none' } } },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -223,17 +227,12 @@ describe('migration actions', () => {
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to existing primaries only
-            cluster: { routing: { allocation: { enable: 'primaries' } } },
-          },
+        persistent: {
+          // Allow routing to existing primaries only
+          cluster: { routing: { allocation: { enable: 'primaries' } } },
         },
       });
-      const task2 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task2 = checkClusterRoutingAllocationEnabled(client);
       await expect(task2()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -243,17 +242,12 @@ describe('migration actions', () => {
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to new primaries only
-            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
-          },
+        persistent: {
+          // Allow routing to new primaries only
+          cluster: { routing: { allocation: { enable: 'new_primaries' } } },
         },
       });
-      const task3 = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task3 = checkClusterRoutingAllocationEnabled(client);
       await expect(task3()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -266,16 +260,11 @@ describe('migration actions', () => {
     it('resolves right when cluster.routing.allocation.enabled=all', async () => {
       expect.assertions(1);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            cluster: { routing: { allocation: { enable: 'all' } } },
-          },
+        persistent: {
+          cluster: { routing: { allocation: { enable: 'all' } } },
         },
       });
-      const task = initAction({
-        client,
-        indices: ['existing_index_with_docs'],
-      });
+      const task = checkClusterRoutingAllocationEnabled(client);
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
     });
@@ -404,14 +393,12 @@ describe('migration actions', () => {
       await client.indices.create({
         index: 'red_then_yellow_index',
         timeout: '5s',
-        body: {
-          mappings: { properties: {} },
-          settings: {
-            // Allocate 1 replica so that this index stays yellow
-            number_of_replicas: '1',
-            // Disable all shard allocation so that the index status is red
-            routing: { allocation: { enable: 'none' } },
-          },
+        mappings: { properties: {} },
+        settings: {
+          // Allocate 1 replica so that this index stays yellow
+          number_of_replicas: '1',
+          // Disable all shard allocation so that the index status is red
+          routing: { allocation: { enable: 'none' } },
         },
       });
 
@@ -425,9 +412,9 @@ describe('migration actions', () => {
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
+      void client.indices.putSettings({
         index: 'red_then_yellow_index',
-        body: {
+        settings: {
           // Enable all shard allocation so that the index status turns yellow
           routing: { allocation: { enable: 'all' } },
         },
@@ -436,7 +423,9 @@ describe('migration actions', () => {
       await indexStatusPromise;
       // Assert that the promise didn't resolve before the index became yellow
 
-      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      const yellowStatusResponse = await client.cluster.health({
+        index: 'red_then_yellow_index',
+      });
       expect(yellowStatusResponse.status).toBe('yellow');
     });
     it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
@@ -445,14 +434,12 @@ describe('migration actions', () => {
         .create({
           index: 'red_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays red
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays red
+            number_of_replicas: '0',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -480,12 +467,10 @@ describe('migration actions', () => {
         .create({
           index: 'yellow_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays yellow
-              number_of_replicas: '0',
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays yellow
+            number_of_replicas: '0',
           },
         })
         .catch((e) => {});
@@ -552,14 +537,12 @@ describe('migration actions', () => {
         .create({
           index: 'clone_red_then_green_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index can go to green
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index can go to green
+            number_of_replicas: '0',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -574,9 +557,9 @@ describe('migration actions', () => {
 
       let indexGreen = false;
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'clone_red_then_green_index',
-          body: {
+          settings: {
             // Enable all shard allocation so that the index status goes green
             routing: { allocation: { enable: 'all' } },
           },
@@ -604,14 +587,12 @@ describe('migration actions', () => {
         .create({
           index: 'clone_red_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -639,7 +620,7 @@ describe('migration actions', () => {
 
       await client.indices.putSettings({
         index: 'clone_red_index',
-        body: {
+        settings: {
           // Enable all shard allocation so that the index status goes yellow
           routing: { allocation: { enable: 'all' } },
         },
@@ -668,7 +649,7 @@ describe('migration actions', () => {
 
       await client.indices.putSettings({
         index: 'clone_red_index',
-        body: {
+        settings: {
           // Set zero replicas so status goes green
           number_of_replicas: 0,
         },
@@ -885,7 +866,7 @@ describe('migration actions', () => {
       `);
     });
     it('resolves right and proceeds to add missing documents if there are some existing docs conflicts', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex({
@@ -894,13 +875,22 @@ describe('migration actions', () => {
         mappings: { properties: {} },
         esCapabilities,
       })();
-      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+
+      const response = await client.search({
+        index: 'existing_index_with_docs',
+        size: 2,
+        sort: 'order',
+      });
+
       const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
         .slice(0, 2)
         .map(({ _id, _source }) => ({
           _id,
           _source,
         }));
+      expect(sourceDocs[0]._source.title).toEqual('doc 1');
+      expect(sourceDocs[1]._source.title).toEqual('doc 2');
+
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
@@ -1098,13 +1088,13 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
       await waitForIndexStatus({
         client,
-        index: '.kibana_1',
+        index: defaultKibanaIndex,
         status: 'yellow',
       })();
 
       const res = (await reindex({
         client,
-        sourceIndex: '.kibana_1',
+        sourceIndex: defaultKibanaIndex,
         targetIndex: 'reindex_target',
         reindexScript: Option.none,
         requireAlias: false,
@@ -1132,11 +1122,7 @@ describe('migration actions', () => {
 
       expect(pitResponse.right.pitId).toEqual(expect.any(String));
 
-      const searchResponse = await client.search({
-        body: {
-          pit: { id: pitResponse.right.pitId },
-        },
-      });
+      const searchResponse = await client.search({ pit: { id: pitResponse.right.pitId } });
 
       await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
@@ -1352,11 +1338,7 @@ describe('migration actions', () => {
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      });
+      const searchTask = client.search({ pit: { id: pitId } });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });
@@ -1441,7 +1423,7 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1',
+        defaultKibanaIndex,
         1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
@@ -1817,14 +1799,12 @@ describe('migration actions', () => {
         .create({
           index: 'red_then_yellow_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-              // Disable all shard allocation so that the index status starts as red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
+            // Disable all shard allocation so that the index status starts as red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {
@@ -1844,9 +1824,9 @@ describe('migration actions', () => {
       let indexYellow = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
-          body: {
+          settings: {
             // Renable allocation so that the status becomes yellow
             routing: { allocation: { enable: 'all' } },
           },
@@ -1875,12 +1855,10 @@ describe('migration actions', () => {
         .create({
           index: 'yellow_then_green_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate 1 replica so that this index stays yellow
+            number_of_replicas: '1',
           },
         })
         .catch((e) => {
@@ -1897,9 +1875,9 @@ describe('migration actions', () => {
       let indexGreen = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'yellow_then_green_index',
-          body: {
+          settings: {
             // Set 0 replican so that this index becomes green
             number_of_replicas: '0',
           },
@@ -2035,28 +2013,6 @@ describe('migration actions', () => {
               "type": "target_index_had_write_block",
             },
           }
-      `);
-    });
-
-    it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-      const newDocs = new Array(10000).fill({
-        _source: {
-          title:
-            'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-        },
-      }) as SavedObjectsRawDoc[];
-      const task = bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_docs',
-        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-      });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
       `);
     });
   });

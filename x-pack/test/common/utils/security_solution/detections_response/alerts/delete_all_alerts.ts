@@ -16,7 +16,7 @@ import { countDownTest } from '../count_down_test';
  * For use inside of afterEach blocks of tests
  */
 export const deleteAllAlerts = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   es: Client,
   index: Array<'.alerts-security.alerts-*' | '.preview.alerts-security.alerts-*'> = [
@@ -32,10 +32,8 @@ export const deleteAllAlerts = async (
         .send();
       await es.deleteByQuery({
         index,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
         refresh: true,
       });

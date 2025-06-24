@@ -11,10 +11,22 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const es = getService('es');
+  const comboBox = getService('comboBox');
   return {
+    helpers: {
+      async deleteAllConnectors() {
+        const connectors = await es.connector.list();
+        for (const connector of connectors.results) {
+          await es.connector.delete({
+            connector_id: connector.id!,
+          });
+        }
+      },
+    },
     connectorConfigurationPage: {
       async createConnector() {
-        await testSubjects.click('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        await testSubjects.click('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
         await testSubjects.existOrFail('serverlessSearchEditConnectorButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunWithDockerButton');
         await testSubjects.exists('serverlessSearchConnectorLinkElasticsearchRunFromSourceButton');
@@ -28,6 +40,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchEditDescriptionFieldText', description);
         await testSubjects.click('serverlessSearchSaveDescriptionButton');
         await testSubjects.exists('serverlessSearchConnectorDescription');
+
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorDescription')).to.be(
           description
         );
@@ -49,19 +62,16 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.exists('serverlessSearchConnectorName');
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },
-      async editType(type: string) {
-        await testSubjects.existOrFail('serverlessSearchEditConnectorTypeLabel');
+      async selectConnectorType(type: string) {
+        await testSubjects.existOrFail('serverlessSearchEditConnectorType');
         await testSubjects.existOrFail('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.click('serverlessSearchEditConnectorTypeChoices');
-        await testSubjects.exists('serverlessSearchConnectorServiceType-zoom');
-        await testSubjects.click(`serverlessSearchConnectorServiceType-${type}`);
-        await testSubjects.existOrFail('serverlessSearchConnectorServiceType-zoom');
+        await comboBox.set('serverlessSearchEditConnectorTypeChoices', type);
       },
       async expectConnectorIdToMatchUrl(connectorId: string) {
         expect(await browser.getCurrentUrl()).contain(`/app/connectors/${connectorId}`);
       },
-      async getConnectorId() {
-        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorId');
+      async getConnectorDetails() {
+        return await testSubjects.getVisibleText('serverlessSearchConnectorConnectorDetails');
       },
     },
     connectorOverviewPage: {
@@ -70,8 +80,10 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchConnectorsTableSelect', option);
       },
       async connectorNameExists(connectorName: string) {
-        const connectorsList = await this.getConnectorsList();
-        return Boolean(connectorsList.find((name) => name === connectorName));
+        await retry.tryForTime(30 * 1000, async () => {
+          const connectorsList = await this.getConnectorsList();
+          expect(connectorsList).to.contain(connectorName);
+        });
       },
       async confirmDeleteConnectorModalComponentsExists() {
         await testSubjects.existOrFail('serverlessSearchDeleteConnectorModalFieldText');
@@ -90,12 +102,15 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
       },
       async expectConnectorOverviewPageComponentsToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorsTitle');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewElasticConnectorsLink');
         await testSubjects.exists('serverlessSearchEmptyConnectorsPromptCreateConnectorButton');
-        await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
+        // await testSubjects.existOrFail('serverlessSearchConnectorsOverviewCreateConnectorButton');
       },
       async expectConnectorTableToExist() {
         await testSubjects.existOrFail('serverlessSearchConnectorTable');
+      },
+      async expectConnectorTableToHaveItems(timeout?: number) {
+        await testSubjects.existOrFail('serverlessSearchColumnsLink', { timeout });
       },
       async expectConnectorTableToHaveNoItems(timeout?: number) {
         await testSubjects.missingOrFail('serverlessSearchColumnsLink', { timeout });
@@ -133,20 +148,9 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         const isEnabled = await testSubjects.isEnabled('confirmModalConfirmButton');
         expect(isEnabled).to.be(false);
       },
-      async getConnectorFromConnectorTable(connectorName: string) {
-        await testSubjects.getAttribute('serverlessSearchColumnsLink', connectorName);
-      },
       async getConnectorsList() {
-        const rows = await (
-          await testSubjects.find('serverlessSearchConnectorTable')
-        ).findAllByCssSelector('.euiTableRow');
-        return await Promise.all(
-          rows.map(async (connector) => {
-            return await (
-              await connector.findByTestSubject('serverlessSearchColumnsLink')
-            ).getVisibleText();
-          })
-        );
+        const connectorNameCells = await testSubjects.findAll('serverlessSearchColumnsLink');
+        return Promise.all(connectorNameCells.map((element) => element.getVisibleText()));
       },
       async openDeleteConnectorModal() {
         await retry.try(

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Embeddable it renders 1`] = `
+<section
+  class="siemEmbeddable"
+  data-test-subj="siemEmbeddable"
+>
+  <div
+    class="euiPanel euiPanel--plain e1x7l1i0 emotion-euiPanel-grow-m-plain-hasBorder-Panel"
+  >
+    <p>
+      Test content
+    </p>
+  </div>
+</section>
+`;

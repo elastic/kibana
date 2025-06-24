@@ -101,8 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation loads the categorization wizard for the source data', async () => {
       await ml.testExecution.logTestStep('job creation loads the job management page');
       await ml.testExecution.logTestStep('');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.testExecution.logTestStep('job creation loads the new job source selection page');
       await ml.jobManagement.navigateToNewJobSourceSelection();
@@ -117,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('job creation navigates through the categorization wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -217,8 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
       await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
@@ -227,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobId, getExpectedRow(jobId, jobGroups));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobId,
         getExpectedCounts(jobId),
         getExpectedModelSizeStats(jobId)
@@ -332,8 +331,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
       await ml.testExecution.logTestStep('job cloning displays the created job in the job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 
@@ -342,7 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobTable.assertJobRowFields(jobIdClone, getExpectedRow(jobIdClone, jobGroupsClone));
 
-      await ml.jobTable.assertJobRowDetailsCounts(
+      await ml.jobExpandedDetails.assertJobRowDetailsCounts(
         jobIdClone,
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)

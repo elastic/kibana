@@ -11,7 +11,7 @@
         "tags": [],
         "label": "CloudConfigType",
         "description": [],
-        "path": "x-pack/plugins/cloud/public/plugin.tsx",
+        "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25,7 +25,21 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.organization_id",
+            "type": "string",
+            "tags": [],
+            "label": "organization_id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -39,7 +53,21 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.csp",
+            "type": "string",
+            "tags": [],
+            "label": "csp",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,7 +81,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,7 +95,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -81,7 +109,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -95,7 +123,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -109,7 +137,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,7 +151,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,7 +165,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -151,7 +179,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -165,7 +193,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +207,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,7 +221,21 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudConfigType.onboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "onboarding",
+            "description": [],
+            "signature": [
+              "{ default_solution?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,9 +247,9 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: string | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: string | undefined; orchestrator_target?: string | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -221,7 +263,7 @@
         "tags": [],
         "label": "CloudStart",
         "description": [],
-        "path": "x-pack/plugins/cloud/public/types.ts",
+        "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -235,9 +277,9 @@
               "\nA React component that provides a pre-wired `React.Context` which connects components to Cloud services."
             ],
             "signature": [
-              "React.FunctionComponent<{}>"
+              "React.FunctionComponent<{ children?: React.ReactNode; }>"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -245,14 +287,14 @@
               {
                 "parentPluginId": "cloud",
                 "id": "def-public.CloudStart.CloudContextProvider.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -266,7 +308,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -281,7 +323,7 @@
             "description": [
               "\n`true` when Kibana is running on Elastic Cloud."
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -297,7 +339,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -313,7 +355,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -329,7 +371,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -345,7 +387,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,7 +403,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -377,7 +419,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -393,7 +435,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -409,7 +451,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,25 +467,29 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "cloud",
-            "id": "def-public.CloudStart.elasticsearchUrl",
-            "type": "string",
+            "id": "def-public.CloudStart.fetchElasticsearchConfig",
+            "type": "Function",
             "tags": [],
-            "label": "elasticsearchUrl",
+            "label": "fetchElasticsearchConfig",
             "description": [
-              "\nThe full URL to the elasticsearch cluster."
+              "\nFetches the full URL to the elasticsearch cluster."
             ],
             "signature": [
-              "string | undefined"
+              "() => Promise<",
+              "PublicElasticsearchConfigType",
+              ">"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "cloud",
@@ -457,7 +503,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -470,7 +516,7 @@
             "description": [
               "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -486,7 +532,7 @@
             "signature": [
               "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
             ],
-            "path": "x-pack/plugins/cloud/public/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -504,7 +550,7 @@
       "tags": [],
       "label": "CloudSetup",
       "description": [],
-      "path": "x-pack/plugins/cloud/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -520,7 +566,23 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.organizationId",
+          "type": "string",
+          "tags": [],
+          "label": "organizationId",
+          "description": [
+            "\nThe Elastic Cloud Organization that owns this deployment/project."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -536,7 +598,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -552,7 +614,25 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -568,7 +648,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -584,7 +664,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -600,7 +680,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -616,7 +696,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -632,7 +712,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -648,25 +728,29 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
-          "id": "def-public.CloudSetup.elasticsearchUrl",
-          "type": "string",
+          "id": "def-public.CloudSetup.fetchElasticsearchConfig",
+          "type": "Function",
           "tags": [],
-          "label": "elasticsearchUrl",
+          "label": "fetchElasticsearchConfig",
           "description": [
-            "\nThe full URL to the elasticsearch cluster."
+            "\nFetches the full URL to the elasticsearch cluster."
           ],
           "signature": [
-            "string | undefined"
+            "() => Promise<",
+            "PublicElasticsearchConfigType",
+            ">"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         },
         {
           "parentPluginId": "cloud",
@@ -680,7 +764,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -696,7 +780,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -712,7 +796,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -725,7 +809,7 @@
           "description": [
             "\n`true` when Kibana is running on Elastic Cloud."
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -741,7 +825,7 @@
           "signature": [
             "Date | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -757,7 +841,7 @@
           "signature": [
             "boolean | undefined"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -773,7 +857,7 @@
           "signature": [
             "(contextProvider: React.FC<{}>) => void"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -789,13 +873,29 @@
               "signature": [
                 "React.FC<{}>"
               ],
-              "path": "x-pack/plugins/cloud/public/types.ts",
+              "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.onboarding",
+          "type": "Object",
+          "tags": [],
+          "label": "onboarding",
+          "description": [
+            "\nOnboarding configuration"
+          ],
+          "signature": [
+            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cloud",
@@ -806,7 +906,7 @@
           "description": [
             "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -820,9 +920,9 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
           ],
-          "path": "x-pack/plugins/cloud/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -833,7 +933,43 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "cloud",
+        "id": "def-server.getOnboardingToken",
+        "type": "Function",
+        "tags": [],
+        "label": "getOnboardingToken",
+        "description": [],
+        "signature": [
+          "(savedObjectsClient: ",
+          "SavedObjectsClientContract",
+          ") => Promise<string | null>"
+        ],
+        "path": "x-pack/platform/plugins/shared/cloud/server/saved_objects/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloud",
+            "id": "def-server.getOnboardingToken.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/platform/plugins/shared/cloud/server/saved_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -847,7 +983,7 @@
       "description": [
         "\nSetup contract"
       ],
-      "path": "x-pack/plugins/cloud/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -865,7 +1001,41 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.csp",
+          "type": "string",
+          "tags": [
+            "note"
+          ],
+          "label": "csp",
+          "description": [
+            "\nThe cloud service provider identifier.\n"
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.organizationId",
+          "type": "string",
+          "tags": [],
+          "label": "organizationId",
+          "description": [
+            "\nThe Elastic Cloud Organization that owns this deployment/project."
+          ],
+          "signature": [
+            "string | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -881,7 +1051,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -897,7 +1067,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -913,7 +1083,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -929,7 +1099,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -945,7 +1115,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -961,7 +1131,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -977,7 +1147,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -990,7 +1160,7 @@
           "description": [
             "\nThis is set to `true` for both ESS and ECE deployments."
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1006,7 +1176,7 @@
           "signature": [
             "number | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1022,7 +1192,7 @@
           "signature": [
             "Date | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1038,7 +1208,7 @@
           "signature": [
             "boolean | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1054,7 +1224,23 @@
           "signature": [
             "{ url?: string | undefined; secretToken?: string | undefined; }"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-server.CloudSetup.onboarding",
+          "type": "Object",
+          "tags": [],
+          "label": "onboarding",
+          "description": [
+            "\nOnboarding configuration."
+          ],
+          "signature": [
+            "{ defaultSolution?: \"security\" | \"oblt\" | \"es\" | \"chat\" | undefined; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1067,7 +1253,7 @@
           "description": [
             "\n`true` when running on Serverless Elastic Cloud\nNote that `isCloudEnabled` will always be true when `isServerlessEnabled` is."
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1083,9 +1269,9 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: string | undefined; orchestratorTarget?: string | undefined; }"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1102,7 +1288,7 @@
       "description": [
         "\nStart contract"
       ],
-      "path": "x-pack/plugins/cloud/server/plugin.ts",
+      "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1115,7 +1301,7 @@
           "description": [
             "\nThis is set to `true` for both ESS and ECE deployments."
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1131,7 +1317,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1147,7 +1333,7 @@
           "signature": [
             "string | undefined"
           ],
-          "path": "x-pack/plugins/cloud/server/plugin.ts",
+          "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }

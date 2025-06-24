@@ -27,7 +27,8 @@ import {
   deleteExceptionList,
 } from '../../../../../tasks/api_calls/exceptions';
 
-describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/172758
+describe.skip('Exceptions viewer read only', { tags: ['@ess'] }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {

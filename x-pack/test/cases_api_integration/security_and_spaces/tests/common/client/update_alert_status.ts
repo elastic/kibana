@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { Cases, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { Cases } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
@@ -24,7 +25,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
 
   describe('update_alert_status', () => {
-    const defaultSignalsIndex = '.siem-signals-default-000001';
+    const defaultSignalsIndex = 'siem-signals-default-000001';
 
     beforeEach(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');

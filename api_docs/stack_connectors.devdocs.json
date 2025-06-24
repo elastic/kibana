@@ -30,9 +30,9 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; incident: Readonly<{} & { labels: string[] | null; summary: string; description: string | null; issueType: string | null; priority: string | null; parent: string | null; externalId: string | null; otherFields: Record<string, any> | null; }>; }>; }> | Readonly<{} & { subAction: \"issueTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"fieldsByIssueType\"; subActionParams: Readonly<{} & { id: string; }>; }> | Readonly<{} & { subAction: \"issues\"; subActionParams: Readonly<{} & { title: string; }>; }> | Readonly<{} & { subAction: \"issue\"; subActionParams: Readonly<{} & { id: string; }>; }>>"
+          "<Readonly<{} & { subAction: \"getFields\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"getIncident\"; subActionParams: Readonly<{} & { externalId: string; }>; }> | Readonly<{} & { subAction: \"handshake\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"pushToService\"; subActionParams: Readonly<{} & { comments: Readonly<{} & { comment: string; commentId: string; }>[] | null; incident: Readonly<{} & { description: string | null; summary: string; labels: string[] | null; parent: string | null; issueType: string | null; priority: string | null; externalId: string | null; otherFields: Record<string, any> | null; }>; }>; }> | Readonly<{} & { subAction: \"issueTypes\"; subActionParams: Readonly<{} & {}>; }> | Readonly<{} & { subAction: \"fieldsByIssueType\"; subActionParams: Readonly<{} & { id: string; }>; }> | Readonly<{} & { subAction: \"issues\"; subActionParams: Readonly<{} & { title: string; }>; }> | Readonly<{} & { subAction: \"issue\"; subActionParams: Readonly<{} & { id: string; }>; }>>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/jira/schema.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/jira/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
           },
           "<string>; }>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/slack/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/slack/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -154,9 +154,17 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string>; }>; }>"
+          "<string>; }>; attachments: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ contentType?: string | undefined; encoding?: string | undefined; } & { content: string; filename: string; }>[] | undefined>; }>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/email/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -186,7 +194,7 @@
           },
           "<string | undefined>; }>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/webhook/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -214,7 +222,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"resolve\" | \"trigger\" | \"acknowledge\" | undefined>; dedupKey: ",
+          "<\"resolve\" | \"acknowledge\" | \"trigger\" | undefined>; dedupKey: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -296,7 +304,7 @@
           },
           "<Record<string, any> | undefined>; }>"
         ],
-        "path": "x-pack/plugins/stack_connectors/server/connector_types/pagerduty/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/pagerduty/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -318,7 +326,7 @@
           },
           "<Readonly<{} & { subAction: \"validChannelId\"; subActionParams: Readonly<{ channelId?: string | undefined; } & {}>; }> | Readonly<{} & { subAction: \"postMessage\"; subActionParams: Readonly<{ channels?: string[] | undefined; channelIds?: string[] | undefined; } & { text: string; }>; }> | Readonly<{} & { subAction: \"postBlockkit\"; subActionParams: Readonly<{ channels?: string[] | undefined; channelIds?: string[] | undefined; } & { text: string; }>; }>>"
         ],
-        "path": "x-pack/plugins/stack_connectors/common/slack_api/schema.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/slack_api/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -337,7 +345,7 @@
         "tags": [],
         "label": "AdditionalEmailServices",
         "description": [],
-        "path": "x-pack/plugins/stack_connectors/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -349,7 +357,7 @@
         "tags": [],
         "label": "OpsgenieSubActions",
         "description": [],
-        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -366,7 +374,7 @@
         "signature": [
           "\"/internal/stack_connectors\""
         ],
-        "path": "x-pack/plugins/stack_connectors/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -381,7 +389,7 @@
         "signature": [
           "\".opsgenie\""
         ],
-        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
+        "path": "x-pack/platform/plugins/shared/stack_connectors/common/opsgenie/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

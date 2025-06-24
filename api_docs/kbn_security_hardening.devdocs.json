@@ -30,7 +30,7 @@
         "tags": [],
         "label": "unsafeConsole",
         "description": [],
-        "path": "packages/kbn-security-hardening/console.ts",
+        "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +44,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,7 +58,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,7 +72,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,7 +86,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -100,7 +100,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -114,7 +114,7 @@
             "signature": [
               "{ (...data: any[]): void; (message?: any, ...optionalParams: any[]): void; }"
             ],
-            "path": "packages/kbn-security-hardening/console.ts",
+            "path": "src/platform/packages/shared/kbn-security-hardening/console.ts",
             "deprecated": false,
             "trackAdoption": false
           }

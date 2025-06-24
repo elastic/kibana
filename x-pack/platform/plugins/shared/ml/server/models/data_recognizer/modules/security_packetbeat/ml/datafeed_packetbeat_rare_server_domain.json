@@ -1,0 +1,20 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"agent.type": "packetbeat"}},
+        {"exists": {"field": "server.domain"}}
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
+        }
+      }
+    }
+  }
+}

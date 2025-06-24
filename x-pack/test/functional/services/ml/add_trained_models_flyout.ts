@@ -93,6 +93,10 @@ export function TrainedModelsFlyoutProvider({ getService }: FtrProviderContext) 
         });
     },
 
+    async changeTab(tab: AddModelFlyoutTabId) {
+      await testSubjects.click(`mlAddTrainedModelFlyoutTab ${tab}`);
+    },
+
     async assertElandPythonClientCodeBlocks() {
       expect(await testSubjects.getVisibleText('mlElandPipInstallCodeBlock')).to.match(
         /python -m pip install eland/

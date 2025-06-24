@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
 
@@ -14,7 +14,7 @@ steps:
     label: Install All Packages
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       machineType: n2-standard-2
@@ -32,6 +32,6 @@ steps:
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

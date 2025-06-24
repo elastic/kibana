@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167073
   describe.skip('security', function () {
     this.tags('upgradeAssistant');
     before(async () => {
@@ -36,8 +35,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not render the "Stack" section', async () => {
         await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+        const sections = await managementMenu.getSections();
+
+        const sectionIds = sections.map((section) => section.sectionId);
+        expect(sectionIds).to.contain('data');
+        expect(sectionIds).to.contain('insightsAndAlerting');
+        expect(sectionIds).to.contain('kibana');
+
+        const dataSection = sections.find((section) => section.sectionId === 'data');
+        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
       });
     });
 

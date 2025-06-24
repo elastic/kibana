@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 import { targetTags } from '../../target_tags';
 
@@ -91,8 +91,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointSummary['Endpoint version']).to.be(endpoint.agent.version);
 
           // The values for these are calculated, so let's just make sure its not teh default when no data is returned
-          expect(endpointSummary['Policy status']).not.be('—');
-          expect(endpointSummary['Agent status']).not.to.be('—');
+          expect(endpointSummary['Policy status']).not.to.equal('—');
+          expect(endpointSummary['Agent status']).not.to.equal('—');
         });
       });
     }

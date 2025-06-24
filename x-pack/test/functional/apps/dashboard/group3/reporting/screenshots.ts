@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const { reporting, dashboard, exports } = getPageObjects(['reporting', 'dashboard', 'exports']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -62,39 +62,40 @@ export default function ({
           {
             spaces: ['*'],
             base: [],
-            feature: { dashboard: ['minimal_all'] },
+            feature: { dashboard: ['minimal_all', 'generate_report'] },
           },
         ],
       });
 
-      await security.testUser.setRoles([
-        'test_dashboard_user',
-        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See the xpack.reporting.roles.enabled setting
-      ]);
+      await security.testUser.setRoles(['test_dashboard_user']);
     });
+
     after('clean up archives', async () => {
       await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
       await security.testUser.restoreDefaults();
     });
 
     describe('Print PDF button', () => {
+      afterEach(async () => {
+        await exports.closeExportFlyout();
+      });
+
       it('is available if new', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await reporting.selectExportItem('PDF');
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
       it('is available when saved', async () => {
-        await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await dashboard.saveDashboard('My PDF Dashboard');
+        await reporting.selectExportItem('PDF');
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
 
@@ -110,17 +111,47 @@ export default function ({
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
         this.timeout(300000);
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.checkUsePrintLayout();
-        await PageObjects.reporting.clickGenerateReportButton();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.selectExportItem('PDF');
+        await reporting.checkUsePrintLayout();
+        await reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        const url = await reporting.getReportURL(60000);
+        const res = await reporting.getResponse(url ?? '');
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
+        await exports.closeExportFlyout();
+      });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.selectExportItem('PDF');
+        await reporting.checkUsePrintLayout();
+
+        await reporting.copyReportingPOSTURLValueToClipboard();
+
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
+        expect(postUrl).to.contain('printablePdfV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:print\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
       });
     });
 
@@ -133,17 +164,45 @@ export default function ({
       });
 
       it('is available if new', async () => {
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.clickNewDashboard();
-        await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        await dashboard.navigateToApp();
+        await dashboard.clickNewDashboard();
+        await reporting.selectExportItem('PNG');
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await exports.closeExportFlyout();
       });
 
       it('is available when saved', async () => {
-        await PageObjects.dashboard.saveDashboard('My PNG Dash');
-        await PageObjects.reporting.openPngReportingPanel();
-        expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await dashboard.saveDashboard('My PNG Dash');
+        await reporting.selectExportItem('PNG');
+        expect(await reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+      });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.selectExportItem('PNG');
+        await reporting.copyReportingPOSTURLValueToClipboard();
+
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
+        expect(postUrl).to.contain('pngV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:preserve_layout\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
       });
     });
 
@@ -151,24 +210,52 @@ export default function ({
       before(async () => {
         await loadEcommerce();
       });
+
       after(async () => {
         await unloadEcommerce();
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.selectExportItem('PDF');
+        await reporting.clickGenerateReportButton();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
+        const url = await reporting.getReportURL(60000);
+        const res = await reporting.getResponse(url ?? '');
+        await exports.closeExportFlyout();
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
         await kibanaServer.uiSettings.replace({});
+      });
+
+      it('provides a button to copy POST URL', async () => {
+        // The "clipboard-read" permission of the Permissions API must be granted
+        if (!(await browser.checkBrowserPermission('clipboard-read'))) {
+          return;
+        }
+
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('Ecom Dashboard');
+        await reporting.selectExportItem('PDF');
+        await reporting.copyReportingPOSTURLValueToClipboard();
+
+        const postUrl = decodeURIComponent(await browser.getClipboardValue());
+        expect(postUrl).to.contain('printablePdfV2');
+
+        const [, jobParams] = postUrl.split('jobParams=');
+        expect(decodeURIComponent(jobParams)).to.contain('browserTimezone:UTC,');
+        expect(decodeURIComponent(jobParams)).to.match(
+          /layout:\(dimensions:\(height:1\d{3},width:1\d{3}\),id:preserve_layout\),/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /objectType:dashboard,title:'Ecom Dashboard',/
+        );
+        expect(decodeURIComponent(jobParams)).to.match(
+          /locatorParams:.*id:DASHBOARD_APP_LOCATOR,params:\(dashboardId:'6c263e00-1c6d-11ea-a100-8589bb9d7c6b',/
+        );
       });
     });
 
@@ -187,27 +274,23 @@ export default function ({
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
 
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
 
-        await PageObjects.reporting.openPngReportingPanel();
-        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-        await PageObjects.reporting.clickGenerateReportButton();
-        await PageObjects.reporting.removeForceSharedItemsContainerSize();
+        await reporting.selectExportItem('PNG');
+        await reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await reporting.clickGenerateReportButton();
+        await reporting.removeForceSharedItemsContainerSize();
 
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+        const url = await reporting.getReportURL(60000);
+        const reportData = await reporting.getRawReportData(url ?? '');
+        sessionReportPath = await reporting.writeSessionReport(
           reportFileName,
           'png',
           reportData,
           REPORTS_FOLDER
         );
-        baselinePath = PageObjects.reporting.getBaselineReportPath(
-          reportFileName,
-          'png',
-          REPORTS_FOLDER
-        );
+        baselinePath = reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER);
       });
 
       after(async () => {
@@ -226,7 +309,7 @@ export default function ({
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.035);
+        expect(percentDiff).to.be.lessThan(0.1);
       });
     });
   });

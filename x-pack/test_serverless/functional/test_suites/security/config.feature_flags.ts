@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
- * This tests most likely will fail on default MKI project
+ * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
   serverlessProject: 'security',
@@ -18,11 +18,7 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSec'] },
   // add feature flags
-  kbnServerArgs: [
-    `--xpack.security.roleManagementEnabled=true`,
-    `--xpack.cloud.base_url='https://cloud.elastic.co'`,
-    `--xpack.cloud.organization_url='/account/members'`,
-  ],
+  kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 

@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/router-to-openapispec",
-        "id": "def-common.generateOpenApiDocument",
+        "id": "def-server.generateOpenApiDocument",
         "type": "Function",
         "tags": [],
         "label": "generateOpenApiDocument",
@@ -30,45 +22,33 @@
           "(appRouters: { routers: ",
           "Router",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">[]; versionedRouters: ",
-          {
-            "pluginId": "@kbn/core-http-router-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-            "section": "def-common.CoreVersionedRouter",
-            "text": "CoreVersionedRouter"
-          },
+          "CoreVersionedRouter",
           "[]; }, opts: ",
           "GenerateOpenApiDocumentOptions",
-          ") => ",
+          ") => Promise<",
           "OpenAPIV3",
-          ".Document<{}>"
+          ".Document<{}>>"
         ],
-        "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+        "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/router-to-openapispec",
-            "id": "def-common.generateOpenApiDocument.$1",
+            "id": "def-server.generateOpenApiDocument.$1",
             "type": "Object",
             "tags": [],
             "label": "appRouters",
             "description": [],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/router-to-openapispec",
-                "id": "def-common.generateOpenApiDocument.$1.routers",
+                "id": "def-server.generateOpenApiDocument.$1.routers",
                 "type": "Array",
                 "tags": [],
                 "label": "routers",
@@ -76,37 +56,25 @@
                 "signature": [
                   "Router",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-common.RequestHandlerContextBase",
-                    "text": "RequestHandlerContextBase"
-                  },
+                  "RequestHandlerContextBase",
                   ">[]"
                 ],
-                "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+                "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/router-to-openapispec",
-                "id": "def-common.generateOpenApiDocument.$1.versionedRouters",
+                "id": "def-server.generateOpenApiDocument.$1.versionedRouters",
                 "type": "Array",
                 "tags": [],
                 "label": "versionedRouters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-router-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpRouterServerInternalPluginApi",
-                    "section": "def-common.CoreVersionedRouter",
-                    "text": "CoreVersionedRouter"
-                  },
+                  "CoreVersionedRouter",
                   "[]"
                 ],
-                "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+                "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -114,7 +82,7 @@
           },
           {
             "parentPluginId": "@kbn/router-to-openapispec",
-            "id": "def-common.generateOpenApiDocument.$2",
+            "id": "def-server.generateOpenApiDocument.$2",
             "type": "Object",
             "tags": [],
             "label": "opts",
@@ -122,7 +90,7 @@
             "signature": [
               "GenerateOpenApiDocumentOptions"
             ],
-            "path": "packages/kbn-router-to-openapispec/src/generate_oas.ts",
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,6 +100,91 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/router-to-openapispec",
+        "id": "def-server.GenerateOpenApiDocumentOptionsFilters",
+        "type": "Interface",
+        "tags": [],
+        "label": "GenerateOpenApiDocumentOptionsFilters",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.GenerateOpenApiDocumentOptionsFilters.pathStartsWith",
+            "type": "Array",
+            "tags": [],
+            "label": "pathStartsWith",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.GenerateOpenApiDocumentOptionsFilters.excludePathsMatching",
+            "type": "Array",
+            "tags": [],
+            "label": "excludePathsMatching",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.GenerateOpenApiDocumentOptionsFilters.access",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"public\" | \"internal\""
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/router-to-openapispec",
+            "id": "def-server.GenerateOpenApiDocumentOptionsFilters.version",
+            "type": "string",
+            "tags": [
+              "default"
+            ],
+            "label": "version",
+            "description": [
+              "\nWe generate spec for one version at a time"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-router-to-openapispec/src/generate_oas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

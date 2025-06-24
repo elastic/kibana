@@ -13,7 +13,7 @@ This package exposes a class which can be used to efficiently classify all of th
  - `browser package`: plugin code in the root `public/` directory (and a few others in specific plugins), eventually this will include packages of type `browser-plugin` or `browser-shared`
  - `common packages`: includes any existing package, plugin code in root `common/` directories, (and a few others in specific plugins), Eventually this will include `common-shared` packages
  - `tests or mocks`: code that is loaded by jest/storybook, and mocks/helpers intended for use by that code. These files usually live along side package code but will have a separate dependency tree and are pieces of code which should never end up in the product.
- - `static`: static files, currently any .json file or things loaded via `raw-loader` in browser code
+ - `static`: static files, currently any .json file or things loaded via `?raw` or `?asUrl` in browser code
  - `tooling`: scripts, config files for tools like eslint, webpack, etc. 
  - `non-package`: code that lives outside of packages/plugins or doesn't fit into other more specific categories. Once the package project is complete this category should be limited to just `@kbn/pm`
 

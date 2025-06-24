@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to configure the Risk Engine Saved Object.
+paths:
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ConfigureRiskEngineSavedObject
+      summary: Configure the Risk Engine Saved Object
+      description: Configuring the Risk Engine Saved Object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  type: array
+                  items:
+                    type: string
+                range:
+                  type: object
+                  properties:
+                    start:
+                      type: string
+                    end:
+                      type: string
+                exclude_alert_tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
+
+components:
+  schemas:
+    ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      required:
+        - risk_engine_saved_object_configured
+        - errors
+      properties:
+        risk_engine_saved_object_configured:
+          type: boolean
+          example: false
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - seq
+              - error
+            properties:
+              seq:
+                type: integer
+              error:
+                type: string

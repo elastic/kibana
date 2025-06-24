@@ -1,0 +1,21 @@
+{
+  "connector.post": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_connector"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-put",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -24,55 +24,61 @@ import type {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
 import type { Actions, AlertsFilter } from '../objects/types';
-// For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
+// For some reason importing these functions from ../../public/detection_engine/common/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
 import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rules';
 
 import {
   ABOUT_CONTINUE_BTN,
-  ALERT_SUPPRESSION_DURATION_INPUT,
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
-  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
-  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
-  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
-  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
+  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
+  ALERTS_INDEX_BUTTON,
   ANOMALY_THRESHOLD_INPUT,
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
+  CREATE_WITHOUT_ENABLING_BTN,
+  CUSTOM_INDEX_PATTERN_INPUT,
   CUSTOM_QUERY_INPUT,
   CUSTOM_QUERY_REQUIRED,
+  DATA_VIEW_COMBO_BOX,
+  DATA_VIEW_OPTION,
   DEFAULT_RISK_SCORE_INPUT,
   DEFINE_CONTINUE_BUTTON,
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
-  ESQL_TYPE,
   ESQL_QUERY_BAR,
-  ESQL_QUERY_BAR_EXPAND_BTN,
   ESQL_QUERY_BAR_INPUT_AREA,
+  ESQL_TYPE,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
   INPUT,
   INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
+  INVESTIGATIONS_INPUT,
   LOAD_QUERY_DYNAMICALLY_CHECKBOX,
   LOAD_SAVED_QUERIES_LIST_BUTTON,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN_INPUT,
   MACHINE_LEARNING_TYPE,
+  MAX_SIGNALS_INPUT,
   MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON,
   MITRE_ATTACK_ADD_TACTIC_BUTTON,
   MITRE_ATTACK_ADD_TECHNIQUE_BUTTON,
@@ -80,11 +86,24 @@ import {
   MITRE_ATTACK_TACTIC_DROPDOWN,
   MITRE_ATTACK_TECHNIQUE_DROPDOWN,
   MITRE_TACTIC,
+  NEW_TERMS_HISTORY_SIZE,
+  NEW_TERMS_HISTORY_TIME_TYPE,
+  NEW_TERMS_INPUT_AREA,
+  NEW_TERMS_TYPE,
+  PREVIEW_HISTOGRAM,
+  PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_CHECKBOX,
+  PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON,
   QUERY_BAR,
+  QUERY_BAR_ADD_FILTER,
   REFERENCE_URLS_INPUT,
+  RELATED_INTEGRATION_COMBO_BOX_INPUT,
+  REQUIRED_FIELD_COMBO_BOX_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
+  RULE_INDICES,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
   RULE_NAME_OVERRIDE_FOR_ESQL,
@@ -94,9 +113,12 @@ import {
   RULES_CREATION_PREVIEW_REFRESH_BUTTON,
   RUNS_EVERY_INTERVAL,
   RUNS_EVERY_TIME_TYPE,
+  SAVE_WITH_ERRORS_MODAL,
+  SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN,
   savedQueryByName,
   SCHEDULE_CONTINUE_BUTTON,
   SCHEDULE_EDIT_TAB,
+  SETUP_GUIDE_TEXTAREA,
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
@@ -107,47 +129,38 @@ import {
   THREAT_MAPPING_COMBO_BOX_INPUT,
   THREAT_MATCH_AND_BUTTON,
   THREAT_MATCH_CUSTOM_QUERY_INPUT,
-  CUSTOM_INDEX_PATTERN_INPUT,
   THREAT_MATCH_INDICATOR_INDICATOR_INDEX,
   THREAT_MATCH_OR_BUTTON,
   THREAT_MATCH_QUERY_INPUT,
+  THREAT_MATCH_QUERY_REQUIRED,
+  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   THRESHOLD_INPUT_AREA,
   THRESHOLD_TYPE,
-  PREVIEW_HISTOGRAM,
-  DATA_VIEW_COMBO_BOX,
-  DATA_VIEW_OPTION,
-  NEW_TERMS_TYPE,
-  NEW_TERMS_HISTORY_SIZE,
-  NEW_TERMS_HISTORY_TIME_TYPE,
-  NEW_TERMS_INPUT_AREA,
-  CREATE_WITHOUT_ENABLING_BTN,
-  RULE_INDICES,
-  ALERTS_INDEX_BUTTON,
-  INVESTIGATIONS_INPUT,
-  QUERY_BAR_ADD_FILTER,
 } from '../screens/create_new_rule';
 import {
-  INDEX_SELECTOR,
+  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
+  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
+  CASES_SYSTEM_ACTION_BTN,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
-  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
-  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
-  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
-  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
-  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
+  INDEX_SELECTOR,
 } from '../screens/common/rule_actions';
-import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
+import { fillEmailConnectorForm, fillIndexConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
 import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
-import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
+import { COMBO_BOX_INPUT, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
+import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
-import { TOOLTIP } from '../screens/common';
+import { fillComboBox } from './eui_form_interactions';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -157,6 +170,14 @@ export const createAndEnableRule = () => {
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
+};
+
+export const createRuleWithNonBlockingErrors = () => {
+  cy.get(CREATE_AND_ENABLE_BTN).click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('exist');
+  cy.get(SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN).first().click();
+  cy.get(SAVE_WITH_ERRORS_MODAL).should('not.exist');
+  cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
@@ -196,11 +217,25 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
+export const fillMaxSignals = (maxSignals: number = ruleFields.maxSignals) => {
+  cy.get(MAX_SIGNALS_INPUT).clear({ force: true });
+  cy.get(MAX_SIGNALS_INPUT).type(maxSignals.toString());
+
+  return maxSignals;
+};
+
 export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true });
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {
@@ -270,6 +305,17 @@ export const importSavedQuery = (timelineId: string) => {
   cy.get(TIMELINE(timelineId)).click();
   cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
   removeAlertsIndex();
+};
+
+export const fillRelatedIntegrations = (): void => {
+  addFirstIntegration();
+  addFirstIntegration();
+};
+
+const addFirstIntegration = (): void => {
+  cy.get('button').contains('Add integration').click();
+  cy.get(RELATED_INTEGRATION_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
 };
 
 export const fillRuleName = (ruleName: string = ruleFields.ruleName) => {
@@ -419,7 +465,7 @@ export const removeAlertsIndex = () => {
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    fillComboBox({ parentSelector: DATA_VIEW_COMBO_BOX, options: rule.data_view_id });
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
@@ -450,6 +496,18 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
     cy.get(LOOK_BACK_TIME_TYPE).select(additionalLookbackType);
   }
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+};
+
+export const fillRequiredFields = (): void => {
+  addRequiredField();
+  addRequiredField();
+};
+
+const addRequiredField = (): void => {
+  cy.contains('button', 'Add required field').should('be.enabled').click();
+
+  cy.get(REQUIRED_FIELD_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
 };
 
 /**
@@ -485,6 +543,10 @@ export const fillRuleAction = (actions: Actions) => {
   });
 };
 
+export const createCasesAction = () => {
+  cy.get(CASES_SYSTEM_ACTION_BTN).click();
+};
+
 export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
   cy.get(ACTIONS_ALERTS_QUERY_FILTER_BUTTON).click();
   cy.get(ACTIONS_ALERTS_QUERY_FILTER_INPUT()).type(alertsFilter.query.kql);
@@ -504,7 +566,7 @@ export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
     .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
-export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
 
@@ -525,7 +587,11 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
       cy.wrap(inputs[threshold]).clear();
       cy.wrap(inputs[threshold]).type(`${rule.threshold.value}`);
     });
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
+  fillDefineThresholdRule(rule);
+  continueFromDefineStep();
 };
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
@@ -572,24 +638,23 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillEsqlQueryBar = (query: string) => {
+const typeEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
 };
 
-export const clearEsqlQueryBar = () => {
-  // monaco editor under the hood is quite complex in matter to clear it
-  // underlying textarea holds just the last character of query displayed in search bar
-  // in order to clear it - it requires to select all text within editor and type in it
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
-};
-
 /**
- * expands query bar, so query is not obscured on narrow screens
- * and validation message is not covered by input menu tooltip
+ * clears ES|QL search bar first
+ * types new query
  */
-export const expandEsqlQueryBar = () => {
-  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
+export const fillEsqlQueryBar = (query: string) => {
+  // before typing anything in query bar, we need to clear it
+  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
+  typeEsqlQueryBar(' ');
+  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+
+  // only after this query can be safely typed
+  typeEsqlQueryBar(query);
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
@@ -727,6 +792,9 @@ export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPU
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
 
+/** Returns threat match query required content */
+export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
+
 /**
  * Fills in the define indicator match rules and then presses the continue button
  * @param rule The rule to use to fill in everything
@@ -754,21 +822,23 @@ export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
-export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+const optionsToComboboxText = (options: string[]) => {
+  return options.map((o) => `${o}{downArrow}{enter}{esc}`).join('');
+};
+
+export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreateProps) => {
   const jobsAsArray = isArray(rule.machine_learning_job_id)
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
-  const text = jobsAsArray
-    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
-    .join('');
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
-
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
   });
+};
+
+export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+  fillDefineMachineLearningRule(rule);
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
@@ -814,6 +884,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
         if (emptyTableState.length > 0) {
@@ -825,7 +896,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval: 500, timeout: 30000 }
   );
   waitForAlerts();
 };
@@ -852,7 +923,8 @@ export const enablesAndPopulatesThresholdSuppression = (
 
   // enables suppression for threshold rule
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
-  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).click();
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.checked');
 
   setAlertSuppressionDuration(interval, timeUnit);
 
@@ -862,8 +934,17 @@ export const enablesAndPopulatesThresholdSuppression = (
 };
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+  });
+};
+
+export const clearAlertSuppressionFields = () => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS).within(() => {
+    cy.get(COMBO_BOX_CLEAR_BTN).click();
   });
 };
 
@@ -874,16 +955,16 @@ export const selectAlertSuppressionPerInterval = () => {
 };
 
 export const selectAlertSuppressionPerRuleExecution = () => {
-  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).click();
 };
 
 export const selectDoNotSuppressForMissingFields = () => {
-  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).click();
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).type(`{selectall}${interval}`);
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).select(timeUnit);
 };
 
 /**
@@ -898,6 +979,20 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(TOOLTIP).contains('Platinum license');
 };
 
+/**
+ * intercepts esql_async request that contains esqlQuery and adds alias to it
+ */
+export const interceptEsqlQueryFieldsRequest = (
+  esqlQuery: string,
+  alias: string = 'esqlQueryFields'
+) => {
+  cy.intercept('POST', '/internal/search/esql_async', (req) => {
+    if (req.body?.params?.query?.includes?.(esqlQuery)) {
+      req.alias = alias;
+    }
+  });
+};
+
 export const checkLoadQueryDynamically = () => {
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).click({ force: true });
   cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('be.checked');
@@ -910,4 +1005,25 @@ export const uncheckLoadQueryDynamically = () => {
 
 export const openAddFilterPopover = () => {
   cy.get(QUERY_BAR_ADD_FILTER).click();
+};
+
+export const checkEnableLoggedRequests = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).click();
+  cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('be.checked');
+};
+
+export const submitRulePreview = () => {
+  cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsPageAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON).first().click();
+};
+
+export const toggleLoggedRequestsAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON).first().click();
+};
+
+export const toggleLoggedRequestsItemAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON).should('be.visible').first().click();
 };

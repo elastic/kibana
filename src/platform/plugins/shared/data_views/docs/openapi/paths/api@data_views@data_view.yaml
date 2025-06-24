@@ -1,0 +1,29 @@
+post:
+  summary: Create a data view
+  operationId: createDataViewDefaultw
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_data_view_request_object.yaml'
+        examples:
+          createDataViewRequest:
+            $ref: '../components/examples/create_data_view_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/data_view_response_object.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

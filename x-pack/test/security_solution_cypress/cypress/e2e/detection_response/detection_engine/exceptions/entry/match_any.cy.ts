@@ -15,7 +15,6 @@ import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   visitRuleDetailsPage,
   clickEnableRuleSwitch,
-  waitForTheRuleToBeExecuted,
   goToAlertsTab,
 } from '../../../../../tasks/rule_details';
 import {
@@ -43,10 +42,9 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
     login();
     createRule(
       getNewRule({
-        index: ['exceptions-*'],
+        index: ['auditbeat-exceptions-*'],
         enabled: false,
         query: '*',
-        from: 'now-438300h',
       })
     ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'rule_exceptions' }));
     cy.get(RULE_STATUS).should('have.text', '—');
@@ -77,7 +75,6 @@ describe('Exceptions match_any', { tags: ['@ess', '@serverless'] }, () => {
 
     goToAlertsTab();
 
-    waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
     // Will match document with value "foo" and document with value "FOO"

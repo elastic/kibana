@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -18,8 +19,8 @@ export const DownloadCloudDependencies: Task = {
   async run(config, log, build) {
     const subdomain = config.isRelease ? 'artifacts-staging' : 'artifacts-snapshot';
 
-    const downloadBeat = async (beat: string, id: string) => {
-      const version = config.getBuildVersion();
+    const downloadBeat = async (beat: string, id: string, variant?: string) => {
+      const version = variant ? `${variant}-${config.getBuildVersion()}` : config.getBuildVersion();
       const localArchitecture = [process.arch === 'arm64' ? 'arm64' : 'x86_64'];
       const allArchitectures = ['arm64', 'x86_64'];
       const architectures = config.getDockerCrossCompile() ? allArchitectures : localArchitecture;
@@ -78,8 +79,15 @@ export const DownloadCloudDependencies: Task = {
 
     await del([config.resolveFromRepo('.beats')]);
 
-    await downloadBeat('metricbeat', buildId);
-    await downloadBeat('filebeat', buildId);
+    if (config.buildOptions.createDockerCloud) {
+      await downloadBeat('metricbeat', buildId);
+      await downloadBeat('filebeat', buildId);
+    }
+
+    if (config.buildOptions.createDockerCloudFIPS) {
+      await downloadBeat('metricbeat', buildId, 'fips');
+      await downloadBeat('filebeat', buildId, 'fips');
+    }
 
     await writeManifest(manifestUrl, manifestJSON);
   },

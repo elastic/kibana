@@ -55,7 +55,7 @@ export default function ({
       await PageObjects.common.dismissBanner();
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(2000);
-      await browser.setScreenshotSize(1000, 1937);
+      await browser.setScreenshotSize(1400, 1937);
       await PageObjects.common.sleep(2000);
     });
 

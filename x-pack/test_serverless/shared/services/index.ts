@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import { SupertestProvider, SupertestWithoutAuthProvider } from './supertest';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services as commonDeploymentAgnosticServices } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
+import { SupertestProvider } from './supertest';
 import { SvlCommonApiServiceProvider } from './svl_common_api';
 import { SvlReportingServiceProvider } from './svl_reporting';
-import { SvlUserManagerProvider } from './svl_user_manager';
+import { DataViewApiProvider } from './data_view_api';
+import { PlatformSecurityUtilsProvider } from './platform_security_utils';
 
-export type { RoleCredentials } from './svl_user_manager';
+export type {
+  InternalRequestHeader,
+  RoleCredentials,
+  SupertestWithoutAuthProviderType,
+} from '@kbn/ftr-common-functional-services';
+
+const SupertestWithoutAuthProvider = commonFunctionalServices.supertestWithoutAuth;
 
 export const services = {
   supertest: SupertestProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
   svlCommonApi: SvlCommonApiServiceProvider,
   svlReportingApi: SvlReportingServiceProvider,
-  svlUserManager: SvlUserManagerProvider,
+  svlUserManager: commonFunctionalServices.samlAuth,
+  samlAuth: commonFunctionalServices.samlAuth, // <--temp workaround until we can unify naming
+  roleScopedSupertest: commonDeploymentAgnosticServices.roleScopedSupertest,
+  customRoleScopedSupertest: commonDeploymentAgnosticServices.customRoleScopedSupertest,
+  dataViewApi: DataViewApiProvider,
+  platformSecurityUtils: PlatformSecurityUtilsProvider,
 };
+
+export type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';

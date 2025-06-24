@@ -1,0 +1,46 @@
+# summary: 
+description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
+value: >
+  [
+    {
+        "agent_name": "go",
+        "service": {
+        "name": "opbeans-go",
+        "environment": "production"
+        },
+        "settings": {
+        "transaction_sample_rate": "1",
+        "capture_body": "off",
+        "transaction_max_spans": "200"
+        },
+        "@timestamp": 1581934104843,
+        "applied_by_agent": false,
+        "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+    },
+    {
+        "agent_name": "go",
+        "service": {
+        "name": "opbeans-go"
+        },
+        "settings": {
+        "transaction_sample_rate": "1",
+        "capture_body": "off",
+        "transaction_max_spans": "300"
+        },
+        "@timestamp": 1581934111727,
+        "applied_by_agent": false,
+        "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+    },
+    {
+        "agent_name": "nodejs",
+        "service": {
+        "name": "frontend"
+        },
+        "settings": {
+        "transaction_sample_rate": "1",
+        },
+        "@timestamp": 1582031336265,
+        "applied_by_agent": false,
+        "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+    }
+  ]

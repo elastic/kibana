@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/app-link-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "appLinkTest",
+    "server": false,
+    "browser": true
+  }
+}

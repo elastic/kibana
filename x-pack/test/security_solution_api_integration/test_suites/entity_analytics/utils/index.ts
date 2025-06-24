@@ -8,3 +8,6 @@
 export * from './risk_engine';
 export * from './get_risk_engine_stats';
 export * from './asset_criticality';
+export * from './entity_store';
+export * from './elastic_asset_checker';
+export * from './entity_analytics';

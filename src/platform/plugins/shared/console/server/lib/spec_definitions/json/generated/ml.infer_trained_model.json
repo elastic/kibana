@@ -1,0 +1,26 @@
+{
+  "ml.infer_trained_model": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "10s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}/_infer"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-infer-trained-model",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -9,16 +9,15 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
+import type { CaseCustomFields, Cases } from '@kbn/cases-plugin/common/types/domain';
 import {
   AttachmentType,
-  CaseCustomFields,
-  Cases,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   getPostCaseRequest,
@@ -38,7 +37,7 @@ import {
   superUserSpace1Auth,
   delay,
   calculateDuration,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
@@ -138,13 +137,14 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        const { duration, ...dataWithoutDuration } = data;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(dataWithoutDuration).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
@@ -156,7 +156,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses.closed },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
@@ -177,11 +176,13 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
+          removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
-        expect(data).to.eql({
+        expect(dataWithoutMetrics).to.eql({
           ...postCaseResp(),
           status: CaseStatuses['in-progress'],
           updated_by: defaultUser,
@@ -192,10 +193,64 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses['in-progress'] },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
+      });
+
+      it('should set the in_progress_at when marking a case to in progress', async () => {
+        const originalCase = await createCase(supertest, postCaseReq);
+
+        expect(originalCase.in_progress_at).to.eql(undefined);
+
+        const [inProgressCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: originalCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        expect(inProgressCase.in_progress_at).to.be.a('string');
+      });
+
+      it('should not reset in_progress_at when the case is reopened', async () => {
+        const originalCase = await createCase(supertest, postCaseReq);
+
+        const [inProgressCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: originalCase.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        const previousInProgressAt = inProgressCase.in_progress_at;
+
+        const [reopenedCase] = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: originalCase.id,
+                version: inProgressCase.version,
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+        });
+
+        expect(reopenedCase.in_progress_at).to.equal(previousInProgressAt);
       });
 
       it('should patch the severity of a case correctly', async () => {
@@ -334,6 +389,13 @@ export default ({ getService }: FtrProviderContext): void => {
                   defaultValue: false,
                   required: true,
                 },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'toggle',
+                  type: CustomFieldTypes.NUMBER,
+                  defaultValue: 1,
+                  required: true,
+                },
               ],
             },
           })
@@ -367,6 +429,11 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     value: true,
                   },
+                  {
+                    key: 'test_custom_field_3',
+                    type: CustomFieldTypes.NUMBER,
+                    value: 2,
+                  },
                 ],
               },
             ],
@@ -383,6 +450,11 @@ export default ({ getService }: FtrProviderContext): void => {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
             value: true,
+          },
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.NUMBER,
+            value: 2,
           },
         ]);
       });
@@ -405,6 +477,12 @@ export default ({ getService }: FtrProviderContext): void => {
                   type: CustomFieldTypes.TOGGLE,
                   defaultValue: false,
                   required: true,
+                },
+                {
+                  key: 'test_custom_field_3',
+                  label: 'number',
+                  type: CustomFieldTypes.NUMBER,
+                  required: false,
                 },
               ],
             },
@@ -444,6 +522,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(patchedCases[0].customFields).to.eql([
           { key: 'test_custom_field_2', type: 'toggle', value: true },
           { key: 'test_custom_field_1', type: 'text', value: null },
+          { key: 'test_custom_field_3', type: 'number', value: null },
         ]);
       });
 
@@ -506,6 +585,110 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
+      describe('metrics', () => {
+        it('should set the metrics correctly when the case is marked as in-progress', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          expect(inProgressCase.time_to_acknowledge).to.be.a('number');
+          expect(inProgressCase.time_to_investigate).to.equal(null);
+          expect(inProgressCase.time_to_resolve).to.equal(null);
+        });
+
+        it('sets all metrics when the case is closed', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          const [closedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: inProgressCase.id,
+                  version: inProgressCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          expect(closedCase.time_to_investigate).to.be.a('number');
+          expect(closedCase.time_to_resolve).to.be.a('number');
+          expect(closedCase.time_to_acknowledge).to.be.a('number');
+        });
+
+        it('should reset timing metrics when reopening a case', async () => {
+          const originalCase = await createCase(supertest, postCaseReq);
+
+          const [inProgressCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: originalCase.version,
+                  status: CaseStatuses['in-progress'],
+                },
+              ],
+            },
+          });
+
+          const [closedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: inProgressCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          const [reopenedCase] = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: originalCase.id,
+                  version: closedCase.version,
+                  status: CaseStatuses.open,
+                },
+              ],
+            },
+          });
+
+          expect(reopenedCase.time_to_acknowledge).to.equal(null);
+          expect(reopenedCase.time_to_investigate).to.equal(null);
+          expect(reopenedCase.time_to_resolve).to.equal(null);
+        });
+      });
+
       it('should return the expected total comments and alerts', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
@@ -521,7 +704,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: {
             alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-            index: '.siem-signals-default-000001',
+            index: 'siem-signals-default-000001',
             rule: { id: 'test-rule-id', name: 'test-index-id' },
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
@@ -569,7 +752,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCaseId,
             params: {
               alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-              index: '.siem-signals-default-000001',
+              index: 'siem-signals-default-000001',
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
@@ -799,7 +982,6 @@ export default ({ getService }: FtrProviderContext): void => {
                 connector: {
                   id: 'jira',
                   name: 'Jira',
-                  // @ts-expect-error
                   type: ConnectorTypes.jira,
                   // @ts-expect-error
                   fields: { unsupported: 'value' },
@@ -849,7 +1031,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('title', async () => {
+      describe('title', () => {
         it('400s if the title is too long', async () => {
           const longTitle = 'a'.repeat(161);
 
@@ -904,7 +1086,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('description', async () => {
+      describe('description', () => {
         it('400s if the description is too long', async () => {
           const longDescription = 'a'.repeat(30001);
 
@@ -959,7 +1141,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('categories', async () => {
+      describe('categories', () => {
         it('400s when a too long category value is passed', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
           await updateCase({
@@ -1012,7 +1194,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('tags', async () => {
+      describe('tags', () => {
         it('400s when tags array is too long', async () => {
           const tags = Array(201).fill('foo');
 
@@ -1086,7 +1268,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('customFields', async () => {
+      describe('customFields', () => {
         it('patches a case with missing required custom fields to their default values', async () => {
           await createConfiguration(
             supertest,
@@ -1107,6 +1289,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 3,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1122,6 +1311,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 4,
             },
           ] as CaseCustomFields;
 
@@ -1146,6 +1340,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[0], value: 'default value' },
             { ...originalValues[1], value: false },
+            { ...originalValues[2], value: 3 },
           ]);
         });
 
@@ -1169,6 +1364,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     defaultValue: false,
                     required: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    defaultValue: 5,
+                    required: false,
+                  },
                 ],
               },
             })
@@ -1184,6 +1386,11 @@ export default ({ getService }: FtrProviderContext): void => {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
               value: true,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
+              value: 6,
             },
           ] as CaseCustomFields;
 
@@ -1214,6 +1421,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(patchedCases[0].customFields).to.eql([
             { ...originalValues[1], value: false },
             { ...originalValues[0], value: 'default value' },
+            { ...originalValues[2], value: 5 },
           ]);
         });
 
@@ -1235,6 +1443,12 @@ export default ({ getService }: FtrProviderContext): void => {
                     type: CustomFieldTypes.TOGGLE,
                     required: true,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                  },
                 ],
               },
             })
@@ -1252,6 +1466,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 key: 'toggle_custom_field',
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
+              },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 7,
               },
             ],
           });
@@ -1359,6 +1578,13 @@ export default ({ getService }: FtrProviderContext): void => {
                     required: true,
                     defaultValue: false,
                   },
+                  {
+                    key: 'number_custom_field',
+                    label: 'number',
+                    type: CustomFieldTypes.NUMBER,
+                    required: true,
+                    defaultValue: 8,
+                  },
                 ],
               },
             })
@@ -1377,6 +1603,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: CustomFieldTypes.TOGGLE,
                 value: true,
               },
+              {
+                key: 'number_custom_field',
+                type: CustomFieldTypes.NUMBER,
+                value: 9,
+              },
             ],
           });
 
@@ -1389,6 +1620,11 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               key: 'toggle_custom_field',
               type: CustomFieldTypes.TOGGLE,
+              value: null,
+            },
+            {
+              key: 'number_custom_field',
+              type: CustomFieldTypes.NUMBER,
               value: null,
             },
           ];
@@ -1450,8 +1686,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alerts', () => {
-      describe('esArchiver', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+      describe('Update', () => {
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
@@ -1584,8 +1820,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('esArchiver', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+      describe('No update', () => {
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
@@ -1604,12 +1840,12 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           };
 
-          // this id exists only in .siem-signals-default-000001
+          // this id exists only in siem-signals-default-000001
           const signalIDInFirstIndex =
             'cae78067e65582a3b277c1ad46ba3cb29044242fe0d24bbf3fcde757fdd31d1c';
-          // This id exists in both .siem-signals-default-000001 and .siem-signals-default-000002
+          // This id exists in both siem-signals-default-000001 and siem-signals-default-000002
           const signalIDInSecondIndex = 'duplicate-signal-id';
-          const signalsIndex2 = '.siem-signals-default-000002';
+          const signalsIndex2 = 'siem-signals-default-000002';
 
           const individualCase = await createCase(supertest, {
             ...postCaseReq,
@@ -1742,7 +1978,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1774,7 +2010,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1805,7 +2041,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1832,7 +2068,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
@@ -1861,7 +2097,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1906,7 +2142,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1933,7 +2169,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1975,7 +2211,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');

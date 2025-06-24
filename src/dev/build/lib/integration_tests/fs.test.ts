@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
@@ -12,6 +13,7 @@ import { chmodSync, statSync } from 'fs';
 import del from 'del';
 
 import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
+import { getFips } from 'crypto';
 
 const TMP = resolve(__dirname, '../__tmp__');
 const FIXTURES = resolve(__dirname, '../__fixtures__');
@@ -265,9 +267,12 @@ describe('getFileHash()', () => {
       '7d865e959b2466918c9863afca942d0fb89d7c9ac0c99bafc3749504ded97730'
     );
   });
-  it('resolves with the md5 hash of a file', async () => {
-    expect(await getFileHash(BAR_TXT_PATH, 'md5')).toBe('c157a79031e1c40f85931829bc5fc552');
-  });
+
+  if (getFips() !== 1) {
+    it('resolves with the md5 hash of a file', async () => {
+      expect(await getFileHash(BAR_TXT_PATH, 'md5')).toBe('c157a79031e1c40f85931829bc5fc552');
+    });
+  }
 });
 
 describe('untar()', () => {
@@ -305,11 +310,10 @@ describe('untar()', () => {
     expect(await read(resolve(destination, 'foo_dir/foo/foo.txt'))).toBe('foo\n');
   });
 
-  it('passed thrid argument to Extract class, overriding path with destination', async () => {
+  it('passed thrid argument to Extract class', async () => {
     const destination = resolve(TMP, 'a/b/c');
 
     await untar(FOO_TAR_PATH, destination, {
-      path: '/dev/null',
       strip: 1,
     });
 

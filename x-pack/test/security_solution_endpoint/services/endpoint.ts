@@ -7,21 +7,16 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { errors } from '@elastic/elasticsearch';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
-  METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
   HOST_METADATA_GET_ROUTE,
   METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
+  DeleteIndexedHostsAndAlertsResponse,
   IndexedHostsAndAlertsResponse,
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
@@ -29,7 +24,6 @@ import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/end
 import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import { DeepPartial } from 'utility-types';
 import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
@@ -38,20 +32,44 @@ import { merge } from 'lodash';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import seedrandom from 'seedrandom';
+import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
+import { KbnClient } from '@kbn/test';
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
+import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { catchAxiosErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_axios_error';
+import {
+  startMetadataTransforms,
+  stopMetadataTransforms,
+} from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
 import { FtrService } from '../../functional/ftr_provider_context';
+
+export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
+  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;
+  spaceId: string;
+};
 
 // Document Generator override that uses a custom Endpoint Metadata generator and sets the
 // `agent.version` to the current version
-const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
-  constructor(seedValue: string | seedrandom.prng) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
-
-    super(seedValue, MetadataGenerator);
+const createDocGeneratorClass = async (kbnClient: KbnClient, isServerless: boolean) => {
+  let version = kibanaPackageJson.version;
+  if (isServerless) {
+    version = await fetchFleetLatestAvailableAgentVersion(kbnClient);
   }
+  // TS doesn't like the `version` let being used in the class definition
+  const capturedVersion = version;
+
+  return class extends EndpointDocGenerator {
+    constructor(seedValue: string | seedrandom.prng) {
+      const MetadataGenerator = class extends EndpointMetadataGenerator {
+        protected randomVersion(): string {
+          return capturedVersion;
+        }
+      };
+
+      super(seedValue, MetadataGenerator);
+    }
+  };
 };
 
 export class EndpointTestResources extends FtrService {
@@ -62,28 +80,24 @@ export class EndpointTestResources extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
 
-  private async stopTransform(transformId: string) {
-    const stopRequest = {
-      transform_id: `${transformId}*`,
-      force: true,
-      wait_for_completion: true,
-      allow_no_match: true,
-    };
-    return this.esClient.transform.stopTransform(stopRequest);
-  }
+  public getScopedKbnClient(spaceId: string = DEFAULT_SPACE_ID): KbnClient {
+    if (!spaceId || spaceId === DEFAULT_SPACE_ID) {
+      return this.kbnClient;
+    }
 
-  private async startTransform(transformId: string) {
-    const transformsResponse = await this.esClient.transform.getTransformStats({
-      transform_id: `${transformId}*`,
-    });
-    return Promise.all(
-      transformsResponse.transforms.map((transform) => {
-        if (STARTED_TRANSFORM_STATES.has(transform.state)) {
-          return Promise.resolve();
-        }
-        return this.esClient.transform.startTransform({ transform_id: transform.id });
-      })
-    );
+    const kbnClientOptions: Parameters<typeof createKbnClient>[0] = {
+      url: this.kbnClient.resolveUrl('/'),
+      username: this.config.get('servers.elasticsearch.username'),
+      password: this.config.get('servers.elasticsearch.password'),
+      spaceId,
+    };
+
+    this.log.info(`creating new KbnClient with:\n${JSON.stringify(kbnClientOptions, null, 2)}`);
+
+    // Was not included above in order to keep the output of the log.info() above clean in the output
+    kbnClientOptions.log = this.log;
+
+    return createKbnClient(kbnClientOptions);
   }
 
   /**
@@ -93,7 +107,7 @@ export class EndpointTestResources extends FtrService {
    * @param [options.numHostDocs=1] Number of Document to be loaded per Endpoint Host (Endpoint hosts index uses a append-only index)
    * @param [options.alertsPerHost=1] Number of Alerts and Events to be loaded per Endpoint Host
    * @param [options.enableFleetIntegration=true] When set to `true`, Fleet data will also be loaded (ex. Integration Policies, Agent Policies, "fake" Agents)
-   * @param [options.generatorSeed='seed`] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
+   * @param [options.generatorSeed='seed'] The seed to be used by the data generator. Important in order to ensure the same data is generated on very run.
    * @param [options.waitUntilTransformed=true] If set to `true`, the data loading process will wait until the endpoint hosts metadata is processed by the transform
    * @param [options.waitTimeout=120000] If waitUntilTransformed=true, number of ms to wait until timeout
    * @param [options.customIndexFn] If provided, will use this function to generate and index data instead
@@ -108,8 +122,10 @@ export class EndpointTestResources extends FtrService {
       waitUntilTransformed: boolean;
       waitTimeout: number;
       customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
+      spaceId: string;
+      withResponseActions: boolean;
     }> = {}
-  ): Promise<IndexedHostsAndAlertsResponse> {
+  ): Promise<IndexedHostsAndAlertsResponseExtended> {
     const {
       numHosts = 1,
       numHostDocs = 1,
@@ -119,33 +135,28 @@ export class EndpointTestResources extends FtrService {
       waitUntilTransformed = true,
       waitTimeout = 120000,
       customIndexFn,
+      spaceId = DEFAULT_SPACE_ID,
+      withResponseActions = true,
     } = options;
 
-    let currentTransformName = metadataTransformPrefix;
-    let unitedTransformName = METADATA_UNITED_TRANSFORM;
-    if (waitUntilTransformed && customIndexFn) {
-      const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
-      const isV2 = isEndpointPackageV2(endpointPackage.version);
-
-      if (isV2) {
-        currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
-        unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
-      }
-    }
+    const kbnClient = this.getScopedKbnClient(spaceId);
+    const endpointPackage = await getEndpointPackageInfo(kbnClient);
 
     if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
-      await this.stopTransform(currentTransformName);
-      await this.stopTransform(unitedTransformName);
+      await stopMetadataTransforms(this.esClient, endpointPackage.version);
     }
+
+    const isServerless = await isServerlessKibanaFlavor(kbnClient);
+    const CurrentKibanaVersionDocGenerator = await createDocGeneratorClass(kbnClient, isServerless);
 
     // load data into the system
     const indexedData = customIndexFn
       ? await customIndexFn()
       : await indexHostsAndAlerts(
           this.esClient as Client,
-          this.kbnClient,
+          kbnClient,
           generatorSeed,
           numHosts,
           numHostDocs,
@@ -157,6 +168,7 @@ export class EndpointTestResources extends FtrService {
           enableFleetIntegration,
           undefined,
           CurrentKibanaVersionDocGenerator,
+          withResponseActions,
           undefined,
           undefined,
           undefined,
@@ -164,10 +176,11 @@ export class EndpointTestResources extends FtrService {
         );
 
     if (waitUntilTransformed && customIndexFn) {
-      await this.startTransform(currentTransformName);
-      const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
-      await this.waitForEndpoints(metadataIds, waitTimeout);
-      await this.startTransform(unitedTransformName);
+      await startMetadataTransforms(
+        this.esClient,
+        Array.from(new Set(indexedData.hosts.map((host) => host.agent.id))),
+        endpointPackage.version
+      );
     }
 
     if (waitUntilTransformed) {
@@ -175,15 +188,29 @@ export class EndpointTestResources extends FtrService {
       await this.waitForUnitedEndpoints(agentIds, waitTimeout);
     }
 
-    return indexedData;
+    return {
+      ...indexedData,
+      spaceId,
+      unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse> => {
+        return this.unloadEndpointData(indexedData, { spaceId });
+      },
+    };
   }
 
   /**
    * Deletes the loaded data created via `loadEndpointData()`
    * @param indexedData
+   * @param options
    */
-  async unloadEndpointData(indexedData: IndexedHostsAndAlertsResponse) {
-    return deleteIndexedHostsAndAlerts(this.esClient as Client, this.kbnClient, indexedData);
+  async unloadEndpointData(
+    indexedData: IndexedHostsAndAlertsResponse,
+    { spaceId = DEFAULT_SPACE_ID }: { spaceId?: string } = {}
+  ): Promise<DeleteIndexedHostsAndAlertsResponse> {
+    return deleteIndexedHostsAndAlerts(
+      this.esClient as Client,
+      this.getScopedKbnClient(spaceId),
+      indexedData
+    );
   }
 
   private async waitForIndex(
@@ -222,38 +249,6 @@ export class EndpointTestResources extends FtrService {
         throw new EndpointError(error.message, error);
       }
     });
-  }
-
-  /**
-   * Waits for endpoints to show up on the `metadata-current` index.
-   * Optionally, specific endpoint IDs (agent.id) can be provided to ensure those specific ones show up.
-   *
-   * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
-   * @param [timeout] optional max timeout to waitFor in ms. default is 20000.
-   */
-  async waitForEndpoints(ids: string[] = [], timeout = this.config.get('timeouts.waitFor')) {
-    const body = ids.length
-      ? {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'agent.id': ids,
-                  },
-                },
-              ],
-            },
-          },
-        }
-      : {
-          size: 1,
-          query: {
-            match_all: {},
-          },
-        };
-
-    await this.waitForIndex(ids, metadataCurrentIndexPattern, body, timeout);
   }
 
   /**
@@ -296,26 +291,28 @@ export class EndpointTestResources extends FtrService {
    * installs (or upgrades) the Endpoint Fleet package
    * (NOTE: ensure that fleet is setup first before calling this function)
    */
-  async installOrUpgradeEndpointFleetPackage(): ReturnType<
-    typeof installOrUpgradeEndpointFleetPackage
-  > {
-    return installOrUpgradeEndpointFleetPackage(this.kbnClient, this.log);
+  async installOrUpgradeEndpointFleetPackage(
+    spaceId: string = DEFAULT_SPACE_ID
+  ): ReturnType<typeof installOrUpgradeEndpointFleetPackage> {
+    return installOrUpgradeEndpointFleetPackage(this.getScopedKbnClient(spaceId), this.log);
   }
 
   /**
    * Fetch (GET) the details of an endpoint
    * @param endpointAgentId
+   * @param spaceId
    */
-  async fetchEndpointMetadata(endpointAgentId: string): Promise<HostInfo> {
-    const metadata = this.supertest
-      .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
+  async fetchEndpointMetadata(
+    endpointAgentId: string,
+    spaceId: string = DEFAULT_SPACE_ID
+  ): Promise<HostInfo> {
+    return this.supertest
+      .get(addSpaceIdToPath('/', spaceId, HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId)))
       .set('kbn-xsrf', 'true')
       .set('Elastic-Api-Version', '2023-10-31')
       .send()
       .expect(200)
       .then((response) => response.body as HostInfo);
-
-    return metadata;
   }
 
   /**
@@ -324,9 +321,13 @@ export class EndpointTestResources extends FtrService {
    */
   async sendEndpointMetadataUpdate(
     endpointAgentId: string,
-    updates: DeepPartial<HostMetadata> = {}
+    updates: DeepPartial<HostMetadata> = {},
+    spaceId: string = DEFAULT_SPACE_ID
   ): Promise<HostInfo> {
-    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId);
+    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
+    const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
+
+    await stopMetadataTransforms(this.esClient, endpointPackage.version);
     const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
 
     const updatedMetadataDoc = merge(
@@ -339,19 +340,27 @@ export class EndpointTestResources extends FtrService {
       updates
     );
 
-    await this.esClient.index({
-      index: METADATA_DATASTREAM,
-      body: updatedMetadataDoc,
-      op_type: 'create',
-    });
+    await this.esClient
+      .index({
+        index: METADATA_DATASTREAM,
+        body: updatedMetadataDoc,
+        op_type: 'create',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+
+    await startMetadataTransforms(this.esClient, [], endpointPackage.version);
+
+    this.log.info(
+      `Endpoint metadata update was indexed for endpoint agent id [${endpointAgentId}] in space [${spaceId}]`
+    );
 
     let response: HostInfo | undefined;
 
     // Wait for the update to show up on Metadata API (after transform runs)
     await this.retry.waitFor(
-      `Waiting for update to endpoint id [${endpointAgentId}] to be processed by transform`,
+      `update to endpoint id [${endpointAgentId}] to be processed by transform`,
       async () => {
-        response = await this.fetchEndpointMetadata(endpointAgentId);
+        response = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
 
         return response.metadata.event.id === updatedMetadataDoc.event.id;
       }
@@ -361,13 +370,14 @@ export class EndpointTestResources extends FtrService {
       throw new Error(`Response object not set. Issue fetching endpoint metadata`);
     }
 
-    this.log.info(`Endpoint metadata doc update done: \n${JSON.stringify(response)}`);
+    this.log.info(`Endpoint metadata doc update done for agent ID [${endpointAgentId}]`);
+    this.log.verbose(JSON.stringify(response, null, 2));
 
     return response;
   }
 
-  async isEndpointPackageV2(): Promise<boolean> {
-    const endpointPackage = await getEndpointPackageInfo(this.kbnClient);
+  async isEndpointPackageV2(spaceId: string = DEFAULT_SPACE_ID): Promise<boolean> {
+    const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
     return isEndpointPackageV2(endpointPackage.version);
   }
 }

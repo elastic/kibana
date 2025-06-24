@@ -1,84 +1,110 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditor, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
-  initializeTitles,
-  useInheritedViewMode,
+  StateComparators,
+  WithAllKeys,
+  getViewModeSubject,
+  initializeStateManager,
+  initializeTitleManager,
+  titleComparators,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
+import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
 
-export const markdownEmbeddableFactory: ReactEmbeddableFactory<
+const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
+  content: '',
+};
+
+const markdownComparators: StateComparators<MarkdownEditorState> = { content: 'referenceEquality' };
+
+export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEditorSerializedState,
   MarkdownEditorApi
 > = {
   type: EUI_MARKDOWN_ID,
-  deserializeState: (state) => {
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     /**
-     * Here we can run clientside migrations and inject references.
+     * Initialize state managers.
      */
-    return state.rawState as MarkdownEditorSerializedState;
-  },
-  /**
-   * The buildEmbeddable function is async so you can async import the component or load a saved
-   * object here. The loading will be handed gracefully by the Presentation Container.
-   */
-  buildEmbeddable: async (state, buildApi) => {
-    /**
-     * initialize state (source of truth)
-     */
-    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    const content$ = new BehaviorSubject(state.content);
-
-    /**
-     * Register the API for this embeddable. This API will be published into the imperative handle
-     * of the React component. Methods on this API will be exposed to siblings, to registered actions
-     * and to the parent api.
-     */
-    const api = buildApi(
-      {
-        ...titlesApi,
-        serializeState: () => {
-          return {
-            rawState: {
-              ...serializeTitles(),
-              content: content$.getValue(),
-            },
-          };
-        },
-      },
-
-      /**
-       * Provide state comparators. Each comparator is 3 element tuple:
-       * 1) current value (publishing subject)
-       * 2) setter, allowing parent to reset value
-       * 3) optional comparator which provides logic to diff lasted stored value and current value
-       */
-      {
-        content: [content$, (value) => content$.next(value)],
-        ...titleComparators,
-      }
+    const titleManager = initializeTitleManager(initialState.rawState);
+    const markdownStateManager = initializeStateManager(
+      initialState.rawState,
+      defaultMarkdownState
     );
+
+    /**
+     * if this embeddable had a difference between its runtime and serialized state, we could define and run a
+     * "deserializeState" function here. If this embeddable could be by reference, we could load the saved object
+     * in the deserializeState function.
+     */
+
+    function serializeState() {
+      return {
+        rawState: {
+          ...titleManager.getLatestState(),
+          ...markdownStateManager.getLatestState(),
+        },
+        // references: if this embeddable had any references - this is where we would extract them.
+      };
+    }
+
+    const unsavedChangesApi = initializeUnsavedChanges({
+      uuid,
+      parentApi,
+      serializeState,
+      anyStateChange$: merge(
+        titleManager.anyStateChange$,
+        markdownStateManager.anyStateChange$
+      ).pipe(map(() => undefined)),
+      getComparators: () => {
+        /**
+         * comparators are provided in a callback to allow embeddables to change how their state is compared based
+         * on the values of other state. For instance, if a saved object ID is present (by reference), the embeddable
+         * may want to skip comparison of certain state.
+         */
+        return { ...titleComparators, ...markdownComparators };
+      },
+      onReset: (lastSaved) => {
+        /**
+         * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
+         * function here before resetting. onReset can be async so to support a potential async deserialize function.
+         */
+
+        titleManager.reinitializeState(lastSaved?.rawState);
+        markdownStateManager.reinitializeState(lastSaved?.rawState);
+      },
+    });
+
+    const api = finalizeApi({
+      ...unsavedChangesApi,
+      ...titleManager.api,
+      serializeState,
+    });
 
     return {
       api,
       Component: () => {
         // get state for rendering
-        const content = useStateFromPublishingSubject(content$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
+        const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
+        const viewMode = useStateFromPublishingSubject(
+          getViewModeSubject(api) ?? new BehaviorSubject('view')
+        );
+        const { euiTheme } = useEuiTheme();
 
         return viewMode === 'edit' ? (
           <EuiMarkdownEditor
@@ -86,8 +112,8 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
               width: 100%;
             `}
             value={content ?? ''}
-            onChange={(value) => content$.next(value)}
-            aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+            onChange={(value) => markdownStateManager.api.setContent(value)}
+            aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.embeddableAriaLabel', {
               defaultMessage: 'Dashboard markdown editor',
             })}
             height="full"
@@ -95,7 +121,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
         ) : (
           <EuiMarkdownFormat
             css={css`
-              padding: ${euiThemeVars.euiSizeM};
+              padding: ${euiTheme.size.m};
             `}
           >
             {content ?? ''}

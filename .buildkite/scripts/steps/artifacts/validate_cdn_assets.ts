@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as glob from 'glob';
@@ -46,14 +47,22 @@ async function main() {
 
 async function headAssetUrl(assetPath: string) {
   const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
-  const response = await axios.head(testUrl, {
-    timeout: 1000,
-  });
-  return {
-    status: response.status,
-    testUrl,
-    assetPath,
-  };
+  try {
+    const response = await axios.head(testUrl, {
+      timeout: 1000,
+    });
+    return {
+      status: response.status,
+      testUrl,
+      assetPath,
+    };
+  } catch (error) {
+    return {
+      status: error.response?.status || 0,
+      testUrl,
+      assetPath,
+    };
+  }
 }
 
 async function headAssetUrlWithRetry(

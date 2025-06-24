@@ -88,9 +88,12 @@ module.exports = {
     ],
     "nav": {
       "structure": [
-        "nav-elastic-developer-guide",
-        "nav-kibana-team",
-        "nav-kibana-dev"
+        {
+          collection: 'Elastic Developer Guide',
+          navs: ['nav-elastic-developer-guide'],
+        },
+        { collection: 'Kibana Team', navs: ['nav-kibana-team'] },
+        { collection: 'Kibana Developer Guide', navs: ['nav-kibana-dev'] },
       ],
       "default": "nav-kibana-dev"
     }

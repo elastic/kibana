@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -43,8 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/179704
-  describe.skip('@ess @serverless change alert status endpoints', () => {
+  describe('@ess @serverless change alert status endpoints', () => {
     describe('validation checks', () => {
       describe('update by ids', () => {
         it('should not give errors when querying and the alerts index does not exist yet', async () => {
@@ -152,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
+          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
 
           await supertest
             .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
@@ -182,7 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccess({ supertest, log, id });
           await waitForAlertsToBePresent(supertest, log, 10, [id]);
           const alertsOpen = await getAlertsByIds(supertest, log, [id]);
-          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
+          const alertIds = alertsOpen.hits.hits.map((alert) => alert._id!);
 
           // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
           // as this route intentionally has a waitFor within it and should only return when the query has

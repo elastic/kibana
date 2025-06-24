@@ -1,0 +1,12 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/key-value-metadata-table",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team",
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
+
+

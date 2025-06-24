@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { PluginInitializerContext } from '@kbn/core/public';
+import { VisTypeXyPlugin as Plugin } from './plugin';
+import type { XyPublicConfig } from '../server/config';
+
+export type { VisTypeXyPluginSetup } from './plugin';
+
+// TODO: Remove when vis_type_vislib is removed
+// https://github.com/elastic/kibana/issues/56143
+export type {
+  CategoryAxis,
+  ThresholdLine,
+  ValueAxis,
+  Grid,
+  SeriesParam,
+  Dimension,
+  Dimensions,
+} from './types';
+export { ScaleType, AxisType } from './types';
+export type { ValidationVisOptionsProps } from './editor/components/common/validation_wrapper';
+export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
+export { getPositions } from './editor/positions';
+export { getScaleTypes } from './editor/scale_types';
+
+export function plugin(initializerContext: PluginInitializerContext<XyPublicConfig>) {
+  return new Plugin(initializerContext);
+}

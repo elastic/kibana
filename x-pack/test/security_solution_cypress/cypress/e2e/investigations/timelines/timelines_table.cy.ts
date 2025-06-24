@@ -26,11 +26,11 @@ import { clearSearchBar, searchForTimeline, toggleFavoriteFilter } from '../../.
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();
 
-// FLAKY: https://github.com/elastic/kibana/issues/181466
 // Failing: See https://github.com/elastic/kibana/issues/181466
 describe.skip('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
+    // create timeline which is not favorited
     createTimeline();
     login();
 
@@ -40,7 +40,7 @@ describe.skip('timeline overview search', { tags: ['@ess', '@serverless'] }, () 
     // create timeline and favorite it
     // we're doing it through the UI because doing it through the API currently has a problem on MKI environment
     createTimeline(mockFavoritedTimeline)
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((response) => response.body.savedObjectId)
       .then((timelineId) => {
         refreshTimelinesUntilTimeLinePresent(timelineId);
         openTimelineById(timelineId);

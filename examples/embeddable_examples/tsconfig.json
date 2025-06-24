@@ -15,9 +15,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
@@ -29,7 +29,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/unified-field-list",
     "@kbn/presentation-containers",
-    "@kbn/core-application-browser",
     "@kbn/developer-examples-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/discover-utils",
@@ -37,6 +36,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/unified-data-table",
-    "@kbn/kibana-utils-plugin"
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-mount-utils-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/shared-ux-router"
   ]
 }

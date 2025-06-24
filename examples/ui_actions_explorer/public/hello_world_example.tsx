@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
@@ -18,10 +19,13 @@ const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-Waldo`;
 
 interface Props {
   uiActionsStartService: UiActionsStart;
-  startServices: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
+  startServices: Pick<CoreStart, 'overlays' | 'rendering'>;
 }
 
-export const HelloWorldExample = ({ uiActionsStartService, startServices }: Props) => {
+export const HelloWorldExample = ({
+  uiActionsStartService,
+  startServices: { overlays, rendering },
+}: Props) => {
   const [isChecked, setIsChecked] = useState(false);
 
   const actionsMessage = isChecked ? '2 actions attached' : '1 action attached';
@@ -70,7 +74,7 @@ export const HelloWorldExample = ({ uiActionsStartService, startServices }: Prop
                 type: ACTION_HELLO_WORLD,
                 getDisplayName: () => 'Say hello to Waldo',
                 execute: async () => {
-                  const overlay = startServices.overlays.openModal(
+                  const overlay = overlays.openModal(
                     toMountPoint(
                       <EuiModalBody>
                         <EuiText data-test-subj="dynamicHelloWorldActionText">Hello Waldo</EuiText>{' '}
@@ -78,7 +82,7 @@ export const HelloWorldExample = ({ uiActionsStartService, startServices }: Prop
                           Close
                         </EuiButton>
                       </EuiModalBody>,
-                      startServices
+                      rendering
                     )
                   );
                 },

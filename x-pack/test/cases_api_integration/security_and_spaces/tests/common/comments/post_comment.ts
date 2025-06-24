@@ -9,16 +9,18 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import {
-  AttachmentType,
+import type {
   UserCommentAttachmentAttributes,
   AlertAttachmentAttributes,
-  CaseStatuses,
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
+import {
+  AttachmentType,
+  CaseStatuses,
   ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -29,6 +31,7 @@ import {
   fileAttachmentMetadata,
   fileMetadata,
   postCommentAlertMultipleIdsReq,
+  postCommentActionsReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -40,10 +43,11 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
   bulkCreateAttachments,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
 import {
   createAlertsIndex,
@@ -69,7 +73,7 @@ import {
   createSecuritySolutionAlerts,
   getAlertById,
 } from '../../../../common/lib/alerts';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -148,7 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
@@ -162,7 +166,6 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           },
-          case_id: postedCase.id,
           comment_id: patchedCase.comments![0].id,
           owner: 'securitySolutionFixture',
         });
@@ -632,13 +635,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: attachmentExpectedHttpCode,
             auth: attachmentAuth,
           });
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_WORKFLOW_STATUS]).eql(
             expectedAlertStatus
@@ -661,12 +664,12 @@ export default ({ getService }: FtrProviderContext): void => {
           for (const theCase of cases) {
             await createCommentAndRefreshIndex({
               caseId: theCase.id,
-              alertId: alert._id,
+              alertId: alert._id!,
               alertIndex: alert._index,
             });
           }
 
-          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlert = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           const caseIds = cases.map((theCase) => theCase.id);
 
           expect(updatedAlert.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql(caseIds);
@@ -741,11 +744,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
           });
 
-          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id]);
+          const updatedAlertSecondTime = await getSecuritySolutionAlerts(supertest, [alert._id!]);
           expect(updatedAlertSecondTime.hits.hits[0]._source?.[ALERT_CASE_IDS]).eql([
             postedCase.id,
           ]);
@@ -762,7 +765,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 400,
           });
@@ -784,7 +787,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 200,
             auth: { user: secOnlyReadAlerts, space: 'space1' },
@@ -807,7 +810,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 403,
             auth: { user: obsSec, space: 'space1' },
@@ -830,7 +833,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await createCommentAndRefreshIndex({
             caseId: postedCase.id,
-            alertId: alert._id,
+            alertId: alert._id!,
             alertIndex: alert._index,
             expectedHttpCode: 200,
             auth: { user: secSolutionOnlyReadNoIndexAlerts, space: 'space1' },
@@ -1150,6 +1153,48 @@ export default ({ getService }: FtrProviderContext): void => {
           params: postCommentUserReq,
           expectedHttpCode: 200,
         });
+      });
+
+      it('should set the attachment stats correctly', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentAlertReq,
+          expectedHttpCode: 200,
+        });
+
+        // an attachment that is not a comment or an alert should not affect the stats
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentActionsReq,
+          expectedHttpCode: 200,
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(1);
+
+        const theCase = res.body.hits.hits[0]._source?.cases!;
+
+        expect(theCase.total_alerts).to.eql(1);
+        expect(theCase.total_comments).to.eql(2);
       });
     });
 

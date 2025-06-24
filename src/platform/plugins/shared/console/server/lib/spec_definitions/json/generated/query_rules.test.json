@@ -1,0 +1,21 @@
+{
+  "query_rules.test": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_query_rules/{ruleset_id}/_test"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-test",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

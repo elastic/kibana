@@ -1,0 +1,44 @@
+{
+  "indices.validate_query": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "all_shards": "__flag__",
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "default_operator": [
+        "and",
+        "or"
+      ],
+      "df": "",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "explain": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "lenient": "__flag__",
+      "rewrite": "__flag__",
+      "q": ""
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_validate/query",
+      "{index}/_validate/query"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

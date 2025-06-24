@@ -1,0 +1,30 @@
+{
+  "scroll": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "scroll": [
+        "1d",
+        "-1",
+        "0"
+      ],
+      "scroll_id": "",
+      "rest_total_hits_as_int": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_search/scroll",
+      "_search/scroll/{scroll_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

@@ -7,19 +7,20 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateCasesResponse } from '@kbn/cases-plugin/common/types/api';
 import { CaseSeverity } from '@kbn/cases-plugin/common';
 import { CaseStatuses, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import { defaultUser, getPostCaseRequest, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
-  getCaseUserActions,
+  findCaseUserActions,
   getSpaceUrlPrefix,
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromUserAction,
+  getCaseSavedObjectsFromES,
 } from '../../../../common/lib/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   secOnly,
   secOnlyRead,
@@ -41,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * There is no official route that supports
    * bulk creating cases. The purpose of this test
    * is to test the bulkCreate method of the cases client in
-   * x-pack/plugins/cases/server/client/cases/bulk_create.ts
+   * x-pack/platform/plugins/shared/cases/server/client/cases/bulk_create.ts
    *
    * The test route is configured here x-pack/test/cases_api_integration/common/plugins/cases/server/routes.ts
    */
@@ -52,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expectedHttpCode = 200,
       auth = { user: superUser, space: null },
     }: {
-      superTestService?: SuperTest.SuperTest<SuperTest.Test>;
+      superTestService?: SuperTest.Agent;
       data: object;
       expectedHttpCode?: number;
       auth?: { user: User; space: string | null };
@@ -168,12 +169,12 @@ export default ({ getService }: FtrProviderContext): void => {
       const firstCase = createdCases.cases[0];
       const secondCase = createdCases.cases[1];
 
-      const firstCaseUserActions = await getCaseUserActions({
+      const { userActions: firstCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: firstCase.id,
       });
 
-      const secondCaseUserActions = await getCaseUserActions({
+      const { userActions: secondCaseUserActions } = await findCaseUserActions({
         supertest,
         caseID: secondCase.id,
       });
@@ -193,7 +194,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: firstCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {
@@ -215,7 +215,6 @@ export default ({ getService }: FtrProviderContext): void => {
         action: 'create',
         type: 'create_case',
         created_by: defaultUser,
-        case_id: secondCase.id,
         comment_id: null,
         owner: 'securitySolutionFixture',
         payload: {
@@ -231,6 +230,28 @@ export default ({ getService }: FtrProviderContext): void => {
           category: null,
           customFields: [],
         },
+      });
+    });
+
+    describe('attachment stats', () => {
+      it('should set the attachment stats to zero', async () => {
+        await bulkCreateCases({
+          data: {
+            cases: [getPostCaseRequest(), getPostCaseRequest({ severity: CaseSeverity.MEDIUM })],
+          },
+        });
+
+        const res = await getCaseSavedObjectsFromES({ es });
+
+        expect(res.body.hits.hits.length).to.eql(2);
+
+        const firstCase = res.body.hits.hits[0]._source?.cases!;
+        const secondCase = res.body.hits.hits[1]._source?.cases!;
+
+        expect(firstCase.total_alerts).to.eql(0);
+        expect(firstCase.total_comments).to.eql(0);
+        expect(secondCase.total_alerts).to.eql(0);
+        expect(secondCase.total_comments).to.eql(0);
       });
     });
 

@@ -12,6 +12,7 @@ import type { FieldStatsType } from '../common/types';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const testSubjects = getService('testSubjects');
   const editedDescription = 'Edited description';
 
   describe('classification saved search creation', function () {
@@ -118,7 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
                 expectedEntries: [
-                  'STOPPED',
+                  'Status',
+                  'stopped',
                   'Create time',
                   'Model memory limit',
                   '20mb',
@@ -218,7 +220,8 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
                 expectedEntries: [
-                  'STOPPED',
+                  'Status',
+                  'stopped',
                   'Create time',
                   'Model memory limit',
                   '20mb',
@@ -316,7 +319,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '7mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '7mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -406,7 +416,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '6mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '6mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -467,8 +484,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('loads the data frame analytics wizard', async () => {
           await ml.testExecution.logTestStep('loads the data frame analytics page');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
 
           await ml.testExecution.logTestStep('loads the source selection modal');
 
@@ -605,7 +621,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(testData.jobId);
 
           await ml.testExecution.logTestStep('displays the analytics table');
-          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalytics.assertAnalyticsTableExists();
 
           await ml.testExecution.logTestStep('displays the stats bar');
@@ -684,26 +700,15 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the ROC curve chart');
 
-          // NOTE: Temporarily disabling these assertions since the colors can vary quite a bit on each run and cause flakiness
-          // Tracking in https://github.com/elastic/kibana/issues/176938
-
-          // await ml.commonUI.assertColorsInCanvasElement(
-          //   'mlDFAnalyticsClassificationExplorationRocCurveChart',
-          //   testData.expected.rocCurveColorState,
-          //   ['#000000'],
-          //   undefined,
-          //   undefined,
-          //   // increased tolerance for ROC curve chart up from 10 to 20
-          //   // since the returned colors vary quite a bit on each run.
-          //   20
-          // );
+          // This is a basic check that the chart exists since the returned colors vary quite a bit on each run and cause flakiness.
+          await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
 
           await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {
           await ml.testExecution.logTestStep('should open the map view for created job');
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);

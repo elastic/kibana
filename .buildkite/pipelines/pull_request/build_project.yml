@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+    label: 'Build Project Image'
+    agents:
+      machineType: n2-standard-16
+      preemptible: true
+    timeout_in_minutes: 60
+    soft_fail: true
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

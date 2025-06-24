@@ -1,0 +1,28 @@
+{
+  "connector.list": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": "",
+      "index_name": [],
+      "connector_name": [],
+      "service_type": [],
+      "include_deleted": "__flag__",
+      "query": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_connector"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-connector-list",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

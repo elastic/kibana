@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { riskEngineRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { usersAndRolesFactory } from '../../utils/users_and_roles';
@@ -16,7 +17,7 @@ const ROLES = [
       kibana: [
         {
           feature: {
-            siem: ['read'],
+            [SECURITY_FEATURE_ID]: ['read'],
           },
           spaces: ['default'],
         },
@@ -36,6 +37,14 @@ const ROLES = [
     privileges: {
       elasticsearch: {
         cluster: ['manage_transform'],
+      },
+    },
+  },
+  {
+    name: 'manage_ingest_pipelines',
+    privileges: {
+      elasticsearch: {
+        cluster: ['manage_ingest_pipelines'],
       },
     },
   },
@@ -113,6 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -121,6 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
       it('returns has_all_required false for user with no write access to risk indices', async () => {
@@ -131,6 +142,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -139,6 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
       it('returns has_all_required false for user with no read access to risk indices', async () => {
@@ -149,6 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -157,6 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
       it('returns has_all_required false for user with no cluster manage transform privilege', async () => {
@@ -167,6 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: false,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -175,6 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
       it('returns has_all_required false for user with no cluster manage index templates privilege', async () => {
@@ -185,6 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: false,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -193,6 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          kibana: {},
         });
       });
     });

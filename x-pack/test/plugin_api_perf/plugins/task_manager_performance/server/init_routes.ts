@@ -29,6 +29,12 @@ export function initRoutes(
   router.post(
     {
       path: '/api/perf_tasks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           tasksToSpawn: schema.number(),
@@ -75,9 +81,9 @@ export function initRoutes(
         }, Promise.resolve<ConcreteTaskInstance[] | undefined>(undefined));
 
       return res.ok({
-        body: await new Promise<PerfResult>((resolve) => {
+        body: await new Promise<PerfResult>((resolve, reject) => {
           setTimeout(() => {
-            performanceApi.endCapture().then((perf) => resolve(perf));
+            performanceApi.endCapture().then((perf) => resolve(perf), reject);
           }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);
         }),
       });

@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/charts-plugin",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "charts",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "expressions",
+      "data"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

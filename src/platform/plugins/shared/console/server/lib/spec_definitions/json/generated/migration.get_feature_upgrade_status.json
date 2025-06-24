@@ -1,0 +1,21 @@
+{
+  "migration.get_feature_upgrade_status": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_migration/system_features"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-migration-get-feature-upgrade-status",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

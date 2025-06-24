@@ -6,9 +6,9 @@
  */
 
 import { constructFileKindIdByOwner } from '@kbn/cases-plugin/common/files';
-import { Owner } from '@kbn/cases-plugin/common/constants/types';
+import type { Owner } from '@kbn/cases-plugin/common/constants/types';
 import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   bulkCreateAttachments,
   createCase,

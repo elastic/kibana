@@ -16,28 +16,35 @@ import {
   waitForRiskScoresToBePresent,
   normalizeScores,
   riskEngineRouteHelpersFactory,
-  cleanRiskEngine,
-  deleteRiskScoreIndices,
 } from '../../../utils';
 
-import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
+import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
 
   describe('@ess Risk Scoring Task in non-default space', () => {
-    context('with auditbeat data', () => {
+    describe('with alerts in a non-default space', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
         log,
       });
+      const namespace = uuidv4();
+      const documentId = uuidv4();
+      const index = [`risk-score.risk-score-${namespace}`];
+      const createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
+        supertest,
+        log,
+        namespace,
+      });
+      const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
 
       before(async () => {
+        await riskEngineRoutesForNamespace.cleanUp();
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
       });
 
@@ -48,82 +55,56 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
       });
 
       beforeEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        const spaces = getService('spaces');
+        await spaces.create({
+          id: namespace,
+          name: namespace,
+          disabledFeatures: [],
+        });
+
+        const baseEvent = buildDocument({ host: { name: 'host-1' } }, documentId);
+        await indexListOfDocuments(
+          Array(10)
+            .fill(baseEvent)
+            .map((_baseEvent, _index) => ({
+              ..._baseEvent,
+              'host.name': `host-${_index}`,
+            }))
+        );
+
+        await createAndSyncRuleAndAlertsForOtherSpace({
+          query: `id: ${documentId}`,
+          alerts: 10,
+          riskScore: 40,
+        });
+
+        await riskEngineRoutesForNamespace.init();
       });
 
       afterEach(async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutesForNamespace.cleanUp();
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+        await getService('spaces').delete(namespace);
       });
-      describe('with alerts in a non-default space', () => {
-        let namespace: string;
-        let index: string[];
-        let documentId: string;
-        let createAndSyncRuleAndAlertsForOtherSpace: ReturnType<
-          typeof createAndSyncRuleAndAlertsFactory
-        >;
 
-        beforeEach(async () => {
-          documentId = uuidv4();
-          namespace = uuidv4();
-          index = [`risk-score.risk-score-${namespace}`];
-
-          createAndSyncRuleAndAlertsForOtherSpace = createAndSyncRuleAndAlertsFactory({
-            supertest,
-            log,
-            namespace,
-          });
-          const riskEngineRoutesForNamespace = riskEngineRouteHelpersFactory(supertest, namespace);
-
-          const spaces = getService('spaces');
-          await spaces.create({
-            id: namespace,
-            name: namespace,
-            disabledFeatures: [],
-          });
-
-          const baseEvent = buildDocument({ host: { name: 'host-1' } }, documentId);
-          await indexListOfDocuments(
-            Array(10)
-              .fill(baseEvent)
-              .map((_baseEvent, _index) => ({
-                ..._baseEvent,
-                'host.name': `host-${_index}`,
-              }))
-          );
-
-          await createAndSyncRuleAndAlertsForOtherSpace({
-            query: `id: ${documentId}`,
-            alerts: 10,
-            riskScore: 40,
-          });
-
-          await riskEngineRoutesForNamespace.init();
+      it('calculates and persists risk scores for alert documents', async () => {
+        await waitForRiskScoresToBePresent({
+          es,
+          log,
+          scoreCount: 10,
+          index,
         });
 
-        afterEach(async () => {
-          await getService('spaces').delete(namespace);
-          await deleteRiskScoreIndices({ log, es, namespace });
-        });
-
-        it('calculates and persists risk scores for alert documents', async () => {
-          await waitForRiskScoresToBePresent({
-            es,
-            log,
-            scoreCount: 10,
-            index,
-          });
-
-          const scores = await readRiskScores(es, index);
-          expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
-            Array(10)
-              .fill(0)
-              .map((_, _index) => `host-${_index}`)
-          );
-        });
+        const scores = await readRiskScores(es, index);
+        expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+          Array(10)
+            .fill(0)
+            .map((_, _index) => `host-${_index}`)
+        );
       });
     });
   });

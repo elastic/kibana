@@ -1,0 +1,39 @@
+summary: Get all role details
+value:
+  - name: my_kibana_role
+    description: My kibana role description
+    metadata:
+      version: 1
+    transient_metadata: 
+      enabled: true
+    elasticsearch:
+      indices: []
+      cluster: []
+      run_as: []
+    kibana:
+      - base:
+          - all
+        feature: {}
+        spaces:
+          - "*"
+  - name: my_admin_role
+    description: My admin role description
+    metadata:
+      version: 1
+    transient_metadata:
+      enabled: true
+    elasticsearch:
+      cluster:
+        - all
+      indices:
+        - names:
+            - index1
+            - index2
+          privileges:
+            - all
+          field_security:
+            grant:
+              - title
+              - body
+          query: '{\"match\": {\"title\": \"foo\"}}'
+    kibana: []

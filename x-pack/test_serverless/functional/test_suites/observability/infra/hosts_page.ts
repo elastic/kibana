@@ -42,26 +42,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Hosts Page', function () {
     before(async () => {
-      await Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
-      await pageObjects.svlCommonPage.login();
-      await browser.setWindowSize(1600, 1200);
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await pageObjects.svlCommonPage.loginAsViewer();
+
+      await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
-      await Promise.all([
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
-      ]);
-      await pageObjects.svlCommonPage.forceLogout();
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     describe('#Single Host Flyout', () => {
-      before(async () => {
-        await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-      });
-
       describe('Tabs', () => {
         before(async () => {
           await pageObjects.timePicker.setAbsoluteRange(
@@ -76,7 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           await retry.try(async () => {
-            await pageObjects.infraHostsView.clickCloseFlyoutButton();
+            await pageObjects.infraHome.clickCloseFlyoutButton();
           });
         });
 
@@ -100,10 +94,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
-            const CreateRuleButtonExist = await testSubjects.exists(
-              'infraAssetDetailsCreateAlertsRuleButton'
-            );
-            expect(CreateRuleButtonExist).to.be(true);
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
           });
         });
 
@@ -123,7 +114,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should show processes title', async () => {
-            await await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
+            await testSubjects.existOrFail('infraAssetDetailsTopProcessesTitle');
           });
         });
 
@@ -155,11 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
         });
 
-        it('should render the title beta badge', async () => {
-          await pageObjects.infraHostsView.getBetaBadgeExists();
-        });
-
-        describe('Hosts table', async () => {
+        describe('Hosts table', () => {
           let hostRows: WebElementWrapper[] = [];
 
           before(async () => {
@@ -179,7 +166,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -195,7 +181,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Logs Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitLogsTab();
           });
 
@@ -204,13 +189,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should load the Logs tab section when clicking on it', async () => {
-            await testSubjects.existOrFail('hostsView-logs');
+            await testSubjects.existOrFail('embeddedSavedSearchDocTable');
           });
         });
 
         describe('Alerts Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitAlertTab();
           });
 
@@ -219,7 +203,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should correctly load the Alerts tab section when clicking on it', async () => {
-            testSubjects.existOrFail('hostsView-alerts');
+            await testSubjects.existOrFail('hostsView-alerts');
           });
         });
       });

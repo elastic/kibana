@@ -12,32 +12,61 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN {{packageManager}} install -y findutils tar gzip
+RUN microdnf install -y findutils tar gzip
 {{/ubi}}
-{{#ubuntu}}
-RUN {{packageManager}} update && DEBIAN_FRONTEND=noninteractive {{packageManager}} install -y curl
-{{/ubuntu}}
+{{#wolfi}}
+RUN apk --no-cache add curl
+{{/wolfi}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  curl --retry 8 -s -L \
+  {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
+  curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-${arch}.tar.gz && \
   cd -
 {{/usePublicArtifact}}
-
 {{^usePublicArtifact}}
 COPY {{artifactTarball}} /tmp/kibana.tar.gz
 {{/usePublicArtifact}}
 
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
-RUN tar --strip-components=1 -zxf /tmp/kibana.tar.gz
+RUN tar \
+  --strip-components=1 \
+  -zxf /tmp/kibana.tar.gz
+
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
 # REF: https://docs.openshift.org/latest/creating_images/guidelines.html
 RUN chmod -R g=u /usr/share/kibana
+
+# Add an init process, check the checksum to make sure it's a match
+RUN set -e ; \
+    TINI_BIN="" ; \
+    {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}}; \
+    case "$arch" in \
+        aarch64) \
+            TINI_BIN='tini-arm64' ; \
+            TINI_CHECKSUM='07952557df20bfd2a95f9bef198b445e006171969499a1d361bd9e6f8e5e0e81' ; \
+            ;; \
+        x86_64) \
+            TINI_BIN='tini-amd64' ; \
+            TINI_CHECKSUM='93dcc18adc78c65a028a84799ecf8ad40c936fdfc5f2a57b1acda5a8117fa82c' ; \
+            ;; \
+        *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
+    esac ; \
+  TINI_VERSION='v0.19.0' ; \
+  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  echo "${TINI_CHECKSUM} ${TINI_BIN}" | sha256sum -c - ; \
+  mv "${TINI_BIN}" /bin/tini ; \
+  chmod +x /bin/tini
+{{^serverless}}
+RUN mkdir -p /usr/share/fonts/local && \
+  curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc && \
+  echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
+{{/serverless}}
 
 {{#cloud}}
 COPY {{filebeatTarball}} /tmp/filebeat.tar.gz
@@ -58,113 +87,48 @@ FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}
-RUN for iter in {1..10}; do \
-      {{packageManager}} update --setopt=tsflags=nodocs -y && \
-      {{packageManager}} install --setopt=tsflags=nodocs -y \
-        fontconfig freetype shadow-utils nss findutils {{#fips}}perl make gcc tar {{/fips}}&& \
-      {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+RUN microdnf install --setopt=tsflags=nodocs -y \
+      fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
+      microdnf clean all
 {{/ubi}}
-{{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      {{packageManager}} update  && \
-      {{packageManager}} upgrade -y  && \
-      {{packageManager}} install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
-      {{packageManager}} clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
-{{/ubuntu}}
-
-# Add an init process, check the checksum to make sure it's a match
-RUN set -e ; \
-    TINI_BIN="" ; \
-    case "$(arch)" in \
-        aarch64) \
-            TINI_BIN='tini-arm64' ; \
-            ;; \
-        x86_64) \
-            TINI_BIN='tini-amd64' ; \
-            ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
-    esac ; \
-  TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
-  mv "${TINI_BIN}" /bin/tini ; \
-  chmod +x /bin/tini
-
-RUN mkdir /usr/share/fonts/local
-RUN curl --retry 8 -S -L -o /usr/share/fonts/local/NotoSansCJK-Regular.ttc https://github.com/googlefonts/noto-cjk/raw/NotoSansV2.001/NotoSansCJK-Regular.ttc
-RUN echo "5dcd1c336cc9344cb77c03a0cd8982ca8a7dc97d620fd6c9c434e02dcb1ceeb3  /usr/share/fonts/local/NotoSansCJK-Regular.ttc" | sha256sum -c -
-RUN fc-cache -v
+{{#wolfi}}
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+{{/wolfi}}
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
+COPY --from=builder --chown=0:0 /bin/tini /bin/tini
 {{#cloud}}
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
+{{^serverless}}
+# Load reporting fonts
+COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /usr/share/fonts/local/NotoSansCJK-Regular.ttc
+RUN fc-cache -v
+{{/serverless}}
 WORKDIR /usr/share/kibana
-{{#fips}}
 
-# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
-# need to be compiled on the machine to pass its own self validation on startup.
-#
-# See:
-# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
-# https://www.openssl.org/docs/man3.0/man7/fips_module.html
-
-# Ideally we would handle this in the builder step, but make is installing over the OS version
-# of OpenSSL and requires linking of many submodules.
-RUN set -e ; \
- curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
- curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256  ; \
- echo "$(cat openssl-3.0.8.tar.gz.sha256) openssl-3.0.8.tar.gz" | sha256sum -c ; \
- tar -zxf openssl-3.0.8.tar.gz  ; \
- rm -rf openssl-3.0.8.tar*  ; \
- cd /usr/share/kibana/openssl-3.0.8   ; \
- ./Configure enable-fips  ; \
- make -j $(nproc)  ; \
- make install  ; \
- ldconfig /usr/local/lib64/  ; \
- chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
-
-# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /usr/bin/echo -e '\n--enable-fips' >> config/node.options
-RUN /usr/bin/echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
-COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
-ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
-
-{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
 {{! Kibana applications may depend on the ELASTIC_CONTAINER value. Screenshotting uses this to conditionally disable the Chromium sandbox when launching Puppeteer. }}
-ENV ELASTIC_CONTAINER true
+ENV ELASTIC_CONTAINER=true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
-COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.yml
-COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
-COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
-COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
-# Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
-RUN /usr/bin/echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
-RUN /usr/bin/echo '--diagnostic-dir=./data' >> config/node.options
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
-{{^opensslLegacyProvider}}
-RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
-{{/opensslLegacyProvider}}
+{{#fips}}
+
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
+ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
+RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
+
+{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
@@ -212,8 +176,7 @@ LABEL name="Kibana" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
 
-RUN mkdir /licenses && \
-    cp LICENSE.txt /licenses/LICENSE
+RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
 ENTRYPOINT ["/bin/tini", "--"]
@@ -222,7 +185,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    /bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
@@ -33,6 +34,7 @@ import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team'
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 import { getPathsByPackage } from './get_paths_by_package';
+import { countEnzymeImports, EnzymeImportCounts } from './count_enzyme_imports';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -143,7 +145,9 @@ export function runBuildApiDocsCli() {
 
       const reporter = CiStatsReporter.fromEnv(log);
 
-      const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
+      const allPluginStats: {
+        [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts & EnzymeImportCounts;
+      } = {};
       for (const plugin of plugins) {
         const id = plugin.id;
 
@@ -161,6 +165,7 @@ export function runBuildApiDocsCli() {
 
         allPluginStats[id] = {
           ...(await countEslintDisableLines(paths)),
+          ...(await countEnzymeImports(paths)),
           ...collectApiStatsForPlugin(
             pluginApi,
             missingApiItems,
@@ -281,6 +286,12 @@ export function runBuildApiDocsCli() {
             meta: { pluginTeam },
             group: 'Total ESLint disabled count',
             value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Enzyme imports',
+            value: pluginStats.enzymeImportCount,
           },
         ]);
 
@@ -456,7 +467,11 @@ function getTsProject(repoPath: string, overridePath?: string) {
   if (!overridePath) {
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/platform/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/x-pack/solutions/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/src/platform/**/*.ts`, '!**/*.d.ts']);
+    project.addSourceFilesAtPaths([`${repoPath}/src/core/packages/**/*.ts`, '!**/*.d.ts']);
     project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   } else {
     project.addSourceFilesAtPaths([`${overridePath}/**/*.ts`, '!**/*.d.ts']);

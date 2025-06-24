@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-fips-daily
-  description: Run Kibana FIPS smoke tests
+  description: Run Kibana test suite with FIPS agents
   links:
     - title: Pipeline link
       url: https://buildkite.com/elastic/kibana-fips
@@ -16,23 +16,32 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / fips
-      description: Run Kibana FIPS smoke tests
+      description: Run Kibana test suite with FIPS agents
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       repository: elastic/kibana
-      branch_configuration: main
+      branch_configuration: main 8.19
       default_branch: main
-      pipeline_file: ".buildkite/pipelines/fips.yml"
+      pipeline_file: '.buildkite/pipelines/fips.yml'
       provider_settings:
         trigger_mode: none
       schedules:
-        daily:
+        Daily build (main):
+          message: Daily build
           branch: main
-          cronline: 0 9 * * * America/New_York
+          cronline: 0 5 * * * America/New_York
+        Daily build (8.19):
+          message: Daily build
+          branch: '8.19'
+          cronline: 0 5 * * * America/New_York
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        kibana-security:
+          access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+      tags:
+        - kibana

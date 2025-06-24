@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   createConfiguration,
   getConfiguration,
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         auth: authSpace1,
       });
-      actionsRemover.add('space1', connector.id, 'action', 'actions');
+      actionsRemover.add('space1', connector.id, 'connector', 'actions');
 
       await createConfiguration(
         supertestWithoutAuth,
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
         auth: authSpace1,
       });
-      actionsRemover.add('space1', connector.id, 'action', 'actions');
+      actionsRemover.add('space1', connector.id, 'connector', 'actions');
 
       await createConfiguration(
         supertest,

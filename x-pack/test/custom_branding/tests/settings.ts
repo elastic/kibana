@@ -44,7 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaGlobalSettings();
@@ -53,7 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaGlobalSettings();
       await resetSettings();
@@ -91,8 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         require.resolve('./acme_text.png')
       );
       await goToSettings();
-      const logo = await testSubjects.find('logo');
-      const img = await logo.findByCssSelector('.chrHeaderLogo__mark');
+      const img = await testSubjects.find('logoMark');
       const imgSrc = (await img.getAttribute('src')) ?? '';
       expect(imgSrc.startsWith('data:image/png')).to.be(true);
     });

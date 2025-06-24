@@ -7,14 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import http from 'http';
+import type http from 'http';
 
 import expect from '@kbn/expect';
-import { CaseStatuses, AttachmentType, User } from '@kbn/cases-plugin/common/types/domain';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
-import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
+import type { User } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type {
+  RecordingServiceNowSimulator,
+  ServiceNowRequest,
+} from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import type { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,
@@ -216,11 +220,13 @@ export default ({ getService }: FtrProviderContext): void => {
          * If the request contains the work_notes property then
          * it is a create comment request
          */
-        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
-          Boolean(request.work_notes)
+        const allCommentRequests = serviceNowServer.allRequestData.filter(
+          (request: ServiceNowRequest) => Boolean(request.work_notes)
         );
 
-        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const allWorkNotes = allCommentRequests.map(
+          (request: ServiceNowRequest) => request.work_notes
+        );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
           'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
@@ -267,8 +273,8 @@ export default ({ getService }: FtrProviderContext): void => {
          * If the request contains the work_notes property then
          * it is a create comment request
          */
-        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
-          Boolean(request.work_notes)
+        const allCommentRequests = serviceNowServer.allRequestData.filter(
+          (request: ServiceNowRequest) => Boolean(request.work_notes)
         );
 
         expect(allCommentRequests.length).be(1);
@@ -359,7 +365,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', newConnector.id, 'action', 'actions');
+        actionsRemover.add('default', newConnector.id, 'connector', 'actions');
         await updateCase({
           supertest,
           params: {
@@ -399,7 +405,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        actionsRemover.add('default', connector.id, 'action', 'actions');
+        actionsRemover.add('default', connector.id, 'connector', 'actions');
 
         const postedCase = await createCase(
           supertest,
@@ -488,7 +494,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path = 409s when case is closed', async () => {
+      it('should push a closed case', async () => {
         const { postedCase, connector } = await createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
@@ -511,7 +517,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           connectorId: connector.id,
-          expectedHttpCode: 409,
+          expectedHttpCode: 200,
         });
       });
 
@@ -615,7 +621,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('alerts', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
         const signalID = '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78';
         const signalID2 = '1023bcfea939643c5e51fd8df53797e0ea693cee547db579ab56d96402365c1e';
 
@@ -836,7 +842,6 @@ export default ({ getService }: FtrProviderContext): void => {
           const theCase = await getCase({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            includeComments: false,
             auth: { user: superUser, space: 'space1' },
           });
 

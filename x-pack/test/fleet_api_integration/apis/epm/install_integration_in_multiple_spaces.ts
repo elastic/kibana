@@ -7,10 +7,8 @@
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 
 const testSpaceId = 'fleet_test_space';
 
@@ -18,10 +16,10 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
-  const server = dockerServers.get('registry');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
+  const retry = getService('retry');
 
   const pkgName = 'system';
   const pkgVersion = '1.27.0';
@@ -72,12 +70,14 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  describe('When installing system integration in multiple spaces', async () => {
+  describe('When installing system integration in multiple spaces', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+        return;
+      }
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 
@@ -93,23 +93,25 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install kibana assets', async function () {
       // These are installed from Fleet along with every package
-      const resIndexPatternLogs = await pRetry(
+      const resIndexPatternLogs = await retry.tryWithRetries(
+        'get logs-* index pattern',
         () =>
           kibanaServer.savedObjects.get({
             type: 'index-pattern',
             id: 'logs-*',
           }),
-        { retries: 3 }
+        { retryCount: 3 }
       );
       expect(resIndexPatternLogs.id).equal('logs-*');
 
-      const resIndexPatternMetrics = await pRetry(
+      const resIndexPatternMetrics = await retry.tryWithRetries(
+        'get metrics-* index pattern',
         () =>
           kibanaServer.savedObjects.get({
             type: 'index-pattern',
             id: 'metrics-*',
           }),
-        { retries: 3 }
+        { retryCount: 3 }
       );
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });
@@ -151,11 +153,9 @@ export default function (providerContext: FtrProviderContext) {
       await es.update({
         index: INGEST_SAVED_OBJECT_INDEX,
         id: `${PACKAGES_SAVED_OBJECT_TYPE}:${nginxPkgName}`,
-        body: {
-          doc: {
-            [PACKAGES_SAVED_OBJECT_TYPE]: {
-              install_format_schema_version: '99.99.99',
-            },
+        doc: {
+          [PACKAGES_SAVED_OBJECT_TYPE]: {
+            install_format_schema_version: '99.99.99',
           },
         },
       });

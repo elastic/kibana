@@ -13,7 +13,15 @@
       "developerExamples",
       "kibanaReact",
       "cases",
-      "actions"
+      "actions",
+      "charts",
+      "dataViews",
+      "dataViewEditor",
+      "unifiedSearch",
+      "taskManager",
+      "fieldFormats",
+      "licensing",
+      "fieldsMetadata"
     ],
     "optionalPlugins": ["spaces"]
   }

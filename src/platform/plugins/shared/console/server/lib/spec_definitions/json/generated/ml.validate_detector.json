@@ -1,0 +1,21 @@
+{
+  "ml.validate_detector": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/_validate/detector"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

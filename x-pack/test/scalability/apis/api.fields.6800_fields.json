@@ -24,7 +24,7 @@
     "maxDuration": "5m"
   },
   "testData": {
-    "esArchives": ["test/functional/fixtures/es_archiver/many_fields"]
+    "esArchives": ["src/platform/test/functional/fixtures/es_archiver/many_fields"]
   },
   "streams": [
     {

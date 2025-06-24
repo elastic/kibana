@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import expect from '@kbn/expect';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
+import { CookieCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
-const INTERNAL_HEADER: [string, string] = [X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'Kibana'];
 
 /**
- * Services to create roles and users for security testing
+ * Services to handle report job lifecycle phases for tests
  */
 export function SvlReportingServiceProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertestWithoutAuth');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
   const config = getService('config');
-
-  const REPORTING_USER_USERNAME = config.get('servers.kibana.username');
-  const REPORTING_USER_PASSWORD = config.get('servers.kibana.password');
 
   return {
     /**
@@ -34,46 +30,47 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     async createReportJobInternal(
       jobType: string,
       job: object,
-      username: string = REPORTING_USER_USERNAME,
-      password: string = REPORTING_USER_PASSWORD
+      cookieCredentials: CookieCredentials,
+      internalReqHeader: InternalRequestHeader
     ) {
       const requestPath = `${INTERNAL_ROUTES.GENERATE_PREFIX}/${jobType}`;
       log.debug(`POST request to ${requestPath}`);
 
-      const { status, body } = await supertest
+      const { body }: { status: number; body: ReportingJobResponse } = await supertestWithoutAuth
         .post(requestPath)
-        .auth(username, password)
-        .set(...API_HEADER)
-        .set(...INTERNAL_HEADER)
-        .send({ jobParams: rison.encode(job) });
+        .set(internalReqHeader)
+        .set(cookieCredentials)
+        .send({ jobParams: rison.encode(job) })
+        .expect(200);
 
-      expect(status).to.be(200);
+      log.info(`ReportingAPI.createReportJobInternal created report job` + ` ${body.job.id}`);
 
       return {
-        job: (body as ReportingJobResponse).job,
-        path: (body as ReportingJobResponse).path,
+        job: body.job,
+        path: body.path,
       };
     },
 
     /*
-     * This function is only used in the API tests
+     * If a test requests a report, it must wait for the job to finish before deleting the report.
+     * Otherwise, report task success metrics will be affected.
      */
     async waitForJobToFinish(
       downloadReportPath: string,
-      username = REPORTING_USER_USERNAME,
-      password = REPORTING_USER_PASSWORD,
+      cookieCredentials: CookieCredentials,
+      internalReqHeader: InternalRequestHeader,
       options?: { timeout?: number }
     ) {
       await retry.waitForWithTimeout(
         `job ${downloadReportPath} finished`,
         options?.timeout ?? config.get('timeouts.kibanaReportCompletion'),
         async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-            .auth(username, password)
             .responseType('blob')
             .set(...API_HEADER)
-            .set(...INTERNAL_HEADER);
+            .set(internalReqHeader)
+            .set(cookieCredentials);
 
           if (response.status === 500) {
             throw new Error(`Report at path ${downloadReportPath} has failed`);
@@ -81,6 +78,10 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
 
           if (response.status === 503) {
             log.debug(`Report at path ${downloadReportPath} is pending`);
+
+            // add a delay before retrying
+            await new Promise((resolve) => setTimeout(resolve, 2500));
+
             return false;
           }
 
@@ -97,16 +98,35 @@ export function SvlReportingServiceProvider({ getService }: FtrProviderContext) 
     },
 
     /*
-     * This function is only used in the API tests, funtional tests we have to click the download link in the UI
+     * This function is only used in the API tests, functional tests we have to click the download link in the UI
      */
     async getCompletedJobOutput(
       downloadReportPath: string,
-      username = REPORTING_USER_USERNAME,
-      password = REPORTING_USER_PASSWORD
+      cookieCredentials: CookieCredentials,
+      internalReqHeader: InternalRequestHeader
     ) {
-      const response = await supertest
+      const response = await supertestWithoutAuth
         .get(`${downloadReportPath}?elasticInternalOrigin=true`)
-        .auth(username, password);
+        .set(internalReqHeader)
+        .set(cookieCredentials);
+      return response.text as unknown;
+    },
+
+    /*
+     * Ensures reports are cleaned up through the delete report API
+     */
+    async deleteReport(
+      reportId: string,
+      cookieCredentials: CookieCredentials,
+      internalReqHeader: InternalRequestHeader
+    ) {
+      log.debug(`ReportingAPI.deleteReport ${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/${reportId}`);
+      const response = await supertestWithoutAuth
+        .delete(INTERNAL_ROUTES.JOBS.DELETE_PREFIX + `/${reportId}`)
+        .set(internalReqHeader)
+        .set(cookieCredentials)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
       return response.text as unknown;
     },
   };

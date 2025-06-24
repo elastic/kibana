@@ -8,6 +8,8 @@ if [[ "$(type -t vault_get)" != "function" ]]; then
   source .buildkite/scripts/common/vault_fns.sh
 fi
 
+source .buildkite/scripts/common/util.sh
+
 # Set up general-purpose tokens and credentials
 {
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
@@ -16,14 +18,14 @@ fi
   GITHUB_TOKEN=$(vault_get kibanamachine github_token)
   export GITHUB_TOKEN
 
-  KIBANA_CI_GITHUB_TOKEN=$(vault_get kibana-ci-github github_token)
-  export KIBANA_CI_GITHUB_TOKEN
-
   KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  export KIBANA_DOCKER_USERNAME
-
   KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  export KIBANA_DOCKER_PASSWORD
+  function docker_login() {
+      if (command -v docker && docker version) &> /dev/null; then
+        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
+      fi
+  }
+  retry 5 15 docker_login
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -130,6 +132,22 @@ EOF
   export ELASTIC_APM_API_KEY
 }
 
+# Set up GenAI keys
+{
+  if [[ "${FTR_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci-connectors connectors-config)"
+  fi
+}
+
+# Set up Security GenAI keys
+{
+  if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
+  fi
+}
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
@@ -155,6 +173,17 @@ EOF
 
   TEST_FAILURES_ES_PASSWORD=$(vault_get failed_tests_reporter_es password)
   export TEST_FAILURES_ES_PASSWORD
+}
+
+# Scout reporter settings
+{
+  export SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-false}"
+
+  SCOUT_REPORTER_ES_URL="$(vault_get scout/reporter/cluster-credentials es-url)"
+  export SCOUT_REPORTER_ES_URL
+
+  SCOUT_REPORTER_ES_API_KEY="$(vault_get scout/reporter/cluster-credentials es-api-key)"
+  export SCOUT_REPORTER_ES_API_KEY
 }
 
 # Setup Bazel Remote/Local Cache Credentials

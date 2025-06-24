@@ -9,30 +9,29 @@ import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
 import stringify from 'json-stable-stringify';
-import {
+import type {
   CasesConnectorRunParams,
   OracleRecordAttributes,
 } from '@kbn/cases-plugin/server/connectors/cases/types';
-import { AttachmentType, CasePostRequest } from '@kbn/cases-plugin/common';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import type { AlertAttachment, Attachments, Case } from '@kbn/cases-plugin/common/types/domain';
 import {
-  AlertAttachment,
-  Attachments,
-  Case,
   CaseStatuses,
   CaseSeverity,
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { KbnClient } from '@kbn/test';
-import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
+import type { KbnClient } from '@kbn/test';
+import type { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import {
   SEVERITY_EXTERNAL_TO_ESMODEL,
   STATUS_EXTERNAL_TO_ESMODEL,
 } from '@kbn/cases-plugin/server/common/constants';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_RULES_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
-import { User } from '../../../../../common/lib/authentication/types';
+import type { User } from '../../../../../common/lib/authentication/types';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -50,7 +49,7 @@ import {
   createComment,
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCommentAlertReq } from '../../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { roles as api_int_roles } from '../../../../../../api_integration/apis/cases/common/roles';
 import {
   casesAllUser,
@@ -135,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 for unsupported time units', async () => {
-        for (const unit of ['s', 'm', 'H', 'h']) {
+        for (const unit of ['s', 'H']) {
           const res = await executeSystemConnector({
             supertest,
             connectorId,
@@ -147,6 +146,18 @@ export default ({ getService }: FtrProviderContext): void => {
             'Request validation failed (Error: [timeWindow]: Not a valid time window)'
           );
         }
+      });
+
+      it('returns 400 for timeWindow < 5m ', async () => {
+        const res = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: '4m' }),
+        });
+        expect(res.status).to.be('error');
+        expect(res.serviceMessage).to.be(
+          'Request validation failed (Error: [timeWindow]: Time window should be at least 5 minutes)'
+        );
       });
 
       it('returns 400 when maximumCasesToOpen > 10', async () => {
@@ -326,7 +337,7 @@ export default ({ getService }: FtrProviderContext): void => {
               "This case was created by the rule ['Test rule'](https://example.com/rules/rule-test-id).",
             duration: null,
             external_service: null,
-            id: 'ee06877e50151293e75cd6c5bd81812c15c25be55ed970f91c6f7dc40e1eafa6',
+            id: theCase.id,
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
@@ -342,6 +353,120 @@ export default ({ getService }: FtrProviderContext): void => {
               full_name: null,
               username: 'elastic',
             },
+            observables: [],
+          });
+        });
+
+        it('should create a case with template', async () => {
+          const customFields = [
+            {
+              key: 'first_custom_field_key',
+              label: 'text 1',
+              type: CustomFieldTypes.TEXT,
+              required: true,
+            },
+          ];
+
+          const connector = {
+            id: 'jira-1',
+            name: 'Jira',
+            type: ConnectorTypes.jira,
+            fields: { issueType: 'Task', priority: 'Low', parent: null },
+          };
+
+          const templates = [
+            {
+              key: 'test_template',
+              name: 'Test template',
+              description: 'This is a test template',
+              tags: ['foo', 'bar'],
+              caseFields: {
+                title: 'Case with sample template',
+                description: 'case desc',
+                severity: CaseSeverity.HIGH,
+                category: 'my category',
+                tags: ['sample'],
+                assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+                customFields: [
+                  {
+                    key: 'first_custom_field_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+                connector,
+              },
+            },
+          ];
+
+          const newReq = getRequest({ templateId: 'test_template' });
+
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: { templates, customFields, connector },
+            })
+          );
+
+          await executeConnectorAndVerifyCorrectness({ supertest, connectorId, req: newReq });
+
+          const cases = await findCases({ supertest });
+          expect(cases.total).to.be(1);
+
+          const theCase = removeServerGeneratedData(cases.cases[0]);
+
+          expect(theCase).to.eql({
+            assignees: [
+              {
+                uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+              },
+            ],
+            category: 'my category',
+            closed_at: null,
+            closed_by: null,
+            comments: [],
+            connector: {
+              fields: {
+                issueType: 'Task',
+                parent: null,
+                priority: 'Low',
+              },
+              id: 'jira-1',
+              name: 'Jira',
+              type: '.jira',
+            },
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            customFields: [
+              {
+                key: 'first_custom_field_key',
+                type: 'text',
+                value: 'this is a text field value',
+              },
+            ],
+            description: 'case desc',
+            duration: null,
+            external_service: null,
+            id: theCase.id,
+            owner: 'securitySolutionFixture',
+            settings: {
+              syncAlerts: false,
+            },
+            severity: 'high',
+            status: 'open',
+            tags: ['auto-generated', 'rule:rule-test-id', 'rule', 'test', 'sample'],
+            title: 'Case with sample template',
+            totalAlerts: 5,
+            totalComment: 0,
+            updated_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            observables: [],
           });
         });
 
@@ -719,6 +844,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
 
             expect(secondCase).to.eql({
@@ -766,6 +892,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 full_name: null,
                 username: 'elastic',
               },
+              observables: [],
             });
           });
 
@@ -1174,6 +1301,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen: 5,
+      templateId: null,
       ...params,
     },
   };
@@ -1302,6 +1430,8 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      observables: [],
+      incremental_id: undefined,
     },
     overwrite: false,
   });
@@ -1352,7 +1482,7 @@ const executeConnectorAndVerifyCorrectness = async ({
   connectorId,
   req,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   req: Record<string, unknown>;
 }) => {

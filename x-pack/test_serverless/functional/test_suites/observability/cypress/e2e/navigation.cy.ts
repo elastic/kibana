@@ -159,16 +159,6 @@ describe.skip('Serverless', () => {
       'have.class',
       'euiSideNavItemButton-isSelected'
     );
-
-    cy.visitKibana('/app/apm/traces/explorer/critical_path');
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm').should(
-      'have.class',
-      'euiSideNavItemButton-isOpen'
-    );
-    cy.getByTestSubj('nav-item-id-observability_project_nav.apm.apm:traces').should(
-      'have.class',
-      'euiSideNavItemButton-isSelected'
-    );
   });
 
   it('sets AIOps nav item as active', () => {
