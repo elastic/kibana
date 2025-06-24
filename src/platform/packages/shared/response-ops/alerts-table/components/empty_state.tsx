@@ -80,23 +80,27 @@ export const EmptyState: React.FC<{
                     <EuiText size="s">
                       <EuiTitle>
                         <h3>
-                          ( messageTitle ? messageTitle :
-                          <FormattedMessage
-                            id="xpack.triggersActionsUI.empty.title"
-                            defaultMessage={'No results match your search criteria'}
-                          />
-                          )
+                          {messageTitle ? (
+                            messageTitle
+                          ) : (
+                            <FormattedMessage
+                              id="xpack.triggersActionsUI.empty.title"
+                              defaultMessage={'No results match your search criteria'}
+                            />
+                          )}
                         </h3>
                       </EuiTitle>
                       <p>
-                        ( messageBody ? messageBody :
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.empty.description"
-                          defaultMessage={
-                            'Try searching over a longer period of time or modifying your search'
-                          }
-                        />
-                        )
+                        {messageBody ? (
+                          messageBody
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.empty.description"
+                            defaultMessage={
+                              'Try searching over a longer period of time or modifying your search'
+                            }
+                          />
+                        )}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
