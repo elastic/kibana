@@ -14,3 +14,10 @@ export const FLEET_PROXY_SAVED_OBJECT_TYPE = 'fleet-proxy';
 export const PROXY_URL_REGEX = /^(http[s]?|socks5):\/\/[^\s$.?#].[^\s]*$/gm;
 
 export const SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID = 'default-fleet-server';
+
+// Agentless policies on Cloud need to use managed Fleet Server host:
+//   - For ECH, this is an `is_internal: true` host with the ID `internal-fleet-server`
+//   - For Serverless, this is the `default-fleet-server` host that is created from
+//     preconfiguration via project controller (and thus not editable by the user)
+export const ECH_AGENTLESS_FLEET_SERVER_HOST_ID = 'internal-fleet-server';
+export const SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID = SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID;

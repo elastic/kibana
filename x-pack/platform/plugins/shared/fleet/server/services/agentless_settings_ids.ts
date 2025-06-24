@@ -12,10 +12,10 @@ import pMap from 'p-map';
 import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   SO_SEARCH_LIMIT,
-  DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../constants';
 
 import type { AgentPolicySOAttributes } from '../types';
@@ -31,14 +31,14 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
   const isCloud = cloudSetup?.isCloudEnabled;
   const isServerless = cloudSetup?.isServerlessEnabled;
   const correctOutputId = isServerless
-    ? SERVERLESS_DEFAULT_OUTPUT_ID
+    ? SERVERLESS_AGENTLESS_OUTPUT_ID
     : isCloud
-    ? DEFAULT_OUTPUT_ID
+    ? ECH_AGENTLESS_OUTPUT_ID
     : undefined;
   const correctFleetServerId = isServerless
-    ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+    ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
     : isCloud
-    ? DEFAULT_FLEET_SERVER_HOST_ID
+    ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
     : undefined;
   let fixOutput = false;
   let fixFleetServer = false;
@@ -87,7 +87,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
       fixOutput = output != null;
     }
   } catch (e) {
-    // Silently swallow
+    // Silently swallow so that output will not be fixed if the correct output ID does not exist
   }
 
   try {
@@ -100,7 +100,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
       fixFleetServer = fleetServerHost != null;
     }
   } catch (e) {
-    // Silently swallow
+    // Silently swallow so that fleet server host will not be fixed if the correct fleet server host ID does not exist
   }
 
   const allIdsToFix = Array.from(

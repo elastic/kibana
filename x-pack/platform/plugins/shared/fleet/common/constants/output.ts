@@ -28,6 +28,13 @@ export const DEFAULT_OUTPUT: NewOutput = {
 
 export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 
+// Agentless policies on Cloud need to use managed output:
+//   - For ECH, this is an `is_internal: true` output with the ID `es-containerhost`
+//   - For Serverless, this is the `es-default-output` output that is created from
+//     preconfiguration via project controller (and thus not editable by the user)
+export const ECH_AGENTLESS_OUTPUT_ID = 'es-containerhost';
+export const SERVERLESS_AGENTLESS_OUTPUT_ID = SERVERLESS_DEFAULT_OUTPUT_ID;
+
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 export const LICENCE_FOR_OUTPUT_PER_INTEGRATION = 'enterprise';
 

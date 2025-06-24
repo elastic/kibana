@@ -24,10 +24,10 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  DEFAULT_OUTPUT_ID,
-  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
-  DEFAULT_FLEET_SERVER_HOST_ID,
+  ECH_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -147,9 +147,9 @@ export function useSetupTechnology({
   useEffect(() => {
     const fetchOutputId = async () => {
       const outputId = isServerless
-        ? SERVERLESS_DEFAULT_OUTPUT_ID
+        ? SERVERLESS_AGENTLESS_OUTPUT_ID
         : isCloud
-        ? DEFAULT_OUTPUT_ID
+        ? ECH_AGENTLESS_OUTPUT_ID
         : undefined;
       if (outputId) {
         const outputData = await sendGetOneOutput(outputId);
@@ -160,9 +160,9 @@ export function useSetupTechnology({
     };
     const fetchFleetServerHostId = async () => {
       const hostId = isServerless
-        ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+        ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
         : isCloud
-        ? DEFAULT_FLEET_SERVER_HOST_ID
+        ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
         : undefined;
 
       if (hostId) {
