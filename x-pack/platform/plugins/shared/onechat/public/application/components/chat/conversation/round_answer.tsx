@@ -19,11 +19,11 @@ import {
 import { css } from '@emotion/css';
 import { ChatMessageText } from './chat_message_text';
 
-export interface RoundTabAnswerProps {
+export interface RoundAnswerProps {
   round: ConversationRound;
 }
 
-export const RoundTabAnswer: React.FC<RoundTabAnswerProps> = ({ round }) => {
+export const RoundAnswer: React.FC<RoundAnswerProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
   const { assistantResponse, steps } = round;
 

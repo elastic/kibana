@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ConversationRound } from '@kbn/onechat-common';
-import { ConversationEvent } from '../../../../../common/conversation_events';
 import { ChatConversationRound } from './conversation_round';
-import { getConversationRounds } from '../../../utils/conversation_rounds';
 
 interface ChatConversationProps {
   conversationRounds: ConversationRound[];
-  conversationEvents: ConversationEvent[];
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({
-  conversationRounds,
-  conversationEvents,
-}) => {
-  const rounds = useMemo(() => {
-    const pendingRounds = getConversationRounds({ conversationEvents });
-    return [...conversationRounds, ...pendingRounds];
-  }, [conversationRounds, conversationEvents]);
-
+export const ChatConversation: React.FC<ChatConversationProps> = ({ conversationRounds }) => {
   return (
     <>
-      {rounds.map((round, index) => {
+      {conversationRounds.map((round, index) => {
         return <ChatConversationRound key={index} round={round} />;
       })}
     </>

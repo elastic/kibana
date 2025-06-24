@@ -9,7 +9,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { EuiPanel, EuiText, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 import { ConversationRound } from '@kbn/onechat-common';
-import { RoundTabAnswer } from './round_tab_answer';
+import { RoundAnswer } from './round_answer';
 
 interface ConversationRoundProps {
   round: ConversationRound;
@@ -52,7 +52,7 @@ export const ChatConversationRound: React.FC<ConversationRoundProps> = ({ round 
       </div>
 
       <div className={tabContentPanelClass}>
-        <RoundTabAnswer key={`round-answer-tab`} round={round} />
+        <RoundAnswer key={`round-answer-tab`} round={round} />
       </div>
     </EuiPanel>
   );

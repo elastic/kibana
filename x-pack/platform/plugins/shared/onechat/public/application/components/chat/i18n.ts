@@ -8,21 +8,35 @@
 import { i18n } from '@kbn/i18n';
 
 export const chatCommonLabels = {
-  newConversationLabel: i18n.translate('workchatApp.chat.conversations.newConversationLabel', {
-    defaultMessage: 'New conversation',
-  }),
+  chat: {
+    conversations: {
+      conversationsListTitle: i18n.translate(
+        'xpack.onechat.chat.conversations.conversationListTitle',
+        {
+          defaultMessage: 'Conversations',
+        }
+      ),
+      newConversationLabel: i18n.translate(
+        'xpack.onechat.chat.conversations.newConversationLabel',
+        {
+          defaultMessage: 'New conversation',
+        }
+      ),
+    },
+  },
+
   userInputBox: {
-    placeholder: i18n.translate('xpack.workchatApp.chatInputForm.placeholder', {
+    placeholder: i18n.translate('xpack.onechat.userInputBox.placeholder', {
       defaultMessage: 'Ask anything',
     }),
   },
   assistant: {
-    defaultNameLabel: i18n.translate('xpack.workchatApp.assistant.defaultNameLabel', {
+    defaultNameLabel: i18n.translate('xpack.onechat.assistant.defaultNameLabel', {
       defaultMessage: 'Assistant',
     }),
   },
   assistantStatus: {
-    healthy: i18n.translate('workchatApp.chat.assistantStatus.healthy', {
+    healthy: i18n.translate('xpack.onechat.chat.assistantStatus.healthy', {
       defaultMessage: 'Healthy',
     }),
   },

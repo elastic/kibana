@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
   euiScrollBarStyles,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { chatCommonLabels } from '../i18n';
 
 interface ConversationPanelProps {
   onNewConversationSelect?: () => void;
@@ -85,9 +85,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiText size="s" className={titleClassName}>
-                {i18n.translate('xpack.workchatApp.conversationList.conversationTitle', {
-                  defaultMessage: 'Conversations',
-                })}
+                {chatCommonLabels.chat.conversations.conversationsListTitle}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -113,9 +111,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = ({
               onNewConversationSelect?.();
             }}
           >
-            {i18n.translate('xpack.workchatApp.newConversationButtonLabel', {
-              defaultMessage: 'New conversation',
-            })}
+            {chatCommonLabels.chat.conversations.newConversationLabel}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

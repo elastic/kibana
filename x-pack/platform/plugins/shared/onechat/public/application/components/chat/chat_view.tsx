@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OneChatDefaultAgentId } from '@kbn/onechat-common';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { ChatHeader } from './chat_header';
-import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
+import { ChatHeader } from './chat_header';
 import { ConversationPanel } from './conversation_panel/conversation_panel';
 
 export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ conversationId }) => {
@@ -32,15 +31,6 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
     max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-
-  const onConversationUpdate = useCallback(
-    (changes: ConversationEventChanges) => {
-      if (!conversationId) {
-        navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: changes.id }));
-      }
-    },
-    [navigateToOnechatUrl, conversationId]
-  );
 
   return (
     <KibanaPageTemplate
@@ -67,11 +57,7 @@ export const OnechatChatView: React.FC<{ conversationId?: string }> = ({ convers
           responsive={false}
         >
           <ChatHeader conversationId={conversationId} />
-          <Chat
-            agentId={OneChatDefaultAgentId}
-            conversationId={conversationId}
-            onConversationUpdate={onConversationUpdate}
-          />
+          <Chat agentId={OneChatDefaultAgentId} conversationId={conversationId} />
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
