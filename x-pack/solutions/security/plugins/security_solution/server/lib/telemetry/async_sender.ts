@@ -69,7 +69,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     telemetryUsageCounter?: IUsageCounter,
     analytics?: AnalyticsServiceSetup
   ): void {
-    this.logger.l(`Setting up ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Setting up service');
 
     this.ensureStatus(ServiceStatus.CREATED);
 
@@ -86,7 +86,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public start(telemetryStart?: TelemetryPluginStart): void {
-    this.logger.l(`Starting ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Starting service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED);
 
@@ -138,7 +138,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           } as LogMeta);
         },
         complete: () => {
-          this.logger.l('Shutting down');
+          this.logger.debug('Shutting down');
           this.finished$.next();
         },
       });
@@ -148,7 +148,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public async stop(): Promise<void> {
-    this.logger.l(`Stopping ${AsyncTelemetryEventsSender.name}`);
+    this.logger.debug('Stopping service');
 
     this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 
@@ -231,9 +231,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         if (inflightEventsCounter < this.getConfigFor(channel).inflightEventsThreshold) {
           return rx.of(event);
         }
-        this.logger.l(
-          `>> Dropping event ${event} (channel: ${channel}, inflightEventsCounter: ${inflightEventsCounter})`
-        );
+        this.logger.info('Dropping event', { event, channel, inflightEventsCounter } as LogMeta);
         this.senderUtils?.incrementCounter(TelemetryCounter.DOCS_DROPPED, 1, channel);
 
         return rx.EMPTY;
@@ -370,7 +368,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
-            this.logger.l('Unexpected response', {
+            this.logger.warn('Unexpected response', {
               status: r.status,
             } as LogMeta);
             throw newFailure(`Got ${r.status}`, channel, events.length);

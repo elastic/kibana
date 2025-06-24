@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryFilterListArtifact } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -36,7 +36,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       const log = newTelemetryLogger(logger.get('filterlists'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const artifactName = 'telemetry-filterlists-v1';
@@ -48,14 +48,14 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         }
 
         const artifact = manifest.data as unknown as TelemetryFilterListArtifact;
-        log.l('New filterlist artifact', { artifact });
+        log.debug('New filterlist artifact', { artifact } as LogMeta);
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
         await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
-        log.l('Failed to set telemetry filterlist artifact', { error: err.message });
+        log.warn('Failed to set telemetry filterlist artifact', { error: err.message } as LogMeta);
         filterList.resetAllToDefault();
         await taskMetricsService.end(trace, err);
         return 0;
