@@ -34,6 +34,7 @@ export const dataStreamStatRt = rt.intersection([
     integration: rt.string,
     totalDocs: rt.number,
     creationDate: rt.number,
+    hasFailureStore: rt.boolean,
   }),
 ]);
 
@@ -236,6 +237,7 @@ export const dataStreamSettingsRt = rt.partial({
 export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
 
 export const dataStreamDetailsRt = rt.partial({
+  hasFailureStore: rt.boolean,
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   failedDocsCount: rt.number,
