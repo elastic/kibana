@@ -25,15 +25,12 @@ const safeFs = createFsProxy(fs);
 const safeFsPromises = createFsPromisesProxy(fsPromises);
 
 describe('Hardened FS', () => {
-  afterAll(() => {
-    safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
-    safeFs.unlinkSync(join(DATA_PATH, 'stream.json'));
-  });
-
   describe('callback', () => {
     it('should allow writing to safe paths', (done) => {
       safeFs.writeFile(join(DATA_PATH, 'good.json'), 'hello', (err) => {
         expect(err).toBeFalsy();
+
+        safeFs.unlinkSync(join(DATA_PATH, 'good.json'));
         done();
       });
     });
@@ -47,31 +44,48 @@ describe('Hardened FS', () => {
     });
   });
 
-  describe('promise', () => {
-    it('should allow writing to safe paths', async () => {
-      await expect(
-        safeFsPromises.writeFile(join(DATA_PATH, 'good.json'), 'world')
-      ).resolves.not.toThrow();
-    });
-
-    it('should prevent writing to unsafe paths', async () => {
-      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(/Unsafe path/);
-    });
-  });
-
   describe('stream', () => {
-    it('should allow creating write streams to safe paths', () => {
-      expect(() => {
-        const ws = safeFs.createWriteStream(join(DATA_PATH, 'stream.json'));
-        ws.write('streaming');
-        ws.end();
-      }).not.toThrow();
+    it('should allow creating write streams to safe paths', (done) => {
+      const filePath = join(DATA_PATH, 'stream.json');
+      const ws = safeFs.createWriteStream(filePath);
+
+      ws.write('streaming');
+      ws.end();
+
+      ws.on('error', done);
+
+      ws.on('close', () => {
+        safeFsPromises
+          .readFile(filePath, 'utf8')
+          .then((content) => {
+            expect(content).toBe('streaming');
+            return safeFsPromises.unlink(filePath);
+          })
+          .then(() => done())
+          .catch(done);
+      });
     });
 
     it('should prevent creating write streams to unsafe paths', () => {
       expect(() => {
         safeFs.createWriteStream('../../stream-bad.json');
       }).toThrow(/Unsafe path/);
+    });
+  });
+
+  describe('promise', () => {
+    it('should allow writing to safe paths', async () => {
+      const filePath = join(DATA_PATH, 'good.json');
+
+      await expect(
+        safeFsPromises.writeFile(join(DATA_PATH, 'good.json'), 'world')
+      ).resolves.not.toThrow();
+
+      await safeFsPromises.unlink(filePath);
+    });
+
+    it('should prevent writing to unsafe paths', async () => {
+      expect(() => safeFsPromises.writeFile('../../evil2.json', 'hax')).toThrow(/Unsafe path/);
     });
   });
 });
