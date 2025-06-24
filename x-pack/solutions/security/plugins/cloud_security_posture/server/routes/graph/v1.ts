@@ -179,6 +179,7 @@ const fetchGraph = async ({
 | EVAL docData = CONCAT("{",
     "\\"id\\":\\"", _id, "\\"",
     ",\\"type\\":\\"", docType, "\\"",
+    ",\\"index\\":\\"", _index, "\\"",
   "}")
 | STATS badge = COUNT(*),
   docs = VALUES(docData),

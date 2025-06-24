@@ -37,6 +37,7 @@ export const DOCUMENT_TYPE_ALERT = 'alert' as const;
 export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
   type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
+  index: schema.maybe(schema.string()),
 });
 
 export const graphResponseSchema = () =>
@@ -90,6 +91,7 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('rectangle'),
       schema.literal('diamond'),
     ]),
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 
@@ -106,7 +108,7 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
-    documentsData: schema.arrayOf(nodeDocumentDataSchema),
+    documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);
 

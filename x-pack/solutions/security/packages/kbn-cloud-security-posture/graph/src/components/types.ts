@@ -51,10 +51,8 @@ export type NodeDocumentDataViewModel = NodeDocumentDataModel;
 
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
-    Omit<LabelNodeDataModel, 'documentsData'>,
+    LabelNodeDataModel,
     BaseNodeDataViewModel {
-  // We force it to be optional here to avoid breaking changes, but it should be required in the future.
-  documentsData?: NodeDocumentDataViewModel[];
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }

@@ -27,7 +27,7 @@ import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { EVENT_PREVIEW_BANNER } from '../../preview/constants';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -69,14 +69,22 @@ export const GraphVisualization: React.FC = memo(() => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
-      if (getNodeDocumentMode(node) === 'single-event' && hasNodeDocumentsData(node)) {
+      if (
+        hasNodeDocumentsData(node) &&
+        node.documentsData[0].index &&
+        (getNodeDocumentMode(node) === 'single-event' ||
+          getNodeDocumentMode(node) === 'single-alert')
+      ) {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
             id: node.documentsData[0].id,
-            indexName: 'logs-*',
+            indexName: node.documentsData[0].index,
             scopeId,
-            banner: EVENT_PREVIEW_BANNER,
+            banner:
+              getNodeDocumentMode(node) === 'single-alert'
+                ? ALERT_PREVIEW_BANNER
+                : EVENT_PREVIEW_BANNER,
             isPreviewMode: true,
           },
         });
@@ -85,7 +93,7 @@ export const GraphVisualization: React.FC = memo(() => {
           title: i18n.translate(
             'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
             {
-              defaultMessage: 'Cannot open preview for this node',
+              defaultMessage: 'Failed showing preview',
             }
           ),
         });
