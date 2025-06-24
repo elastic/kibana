@@ -42,7 +42,7 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
 
   if (isDetails) {
     return (
-      <>
+      <div css={styles.detailsContainer}>
         <EuiText size="s">
           <strong>
             <FormattedMessage
@@ -67,11 +67,11 @@ export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowH
           <span data-test-subj="euiDataGridExpansionPopover-patternRegex">{pattern}</span>
         </EuiText>
         <EuiSpacer size="s" />
-      </>
+      </div>
     );
   }
 
-  return <div css={styles.container}>{formattedTokens}</div>;
+  return <div css={styles.cellContainer}>{formattedTokens}</div>;
 };
 
 const componentStyles = (defaultRowHeight: number | undefined) => {
@@ -80,7 +80,7 @@ const componentStyles = (defaultRowHeight: number | undefined) => {
   // not truncating the bottom of the text
   const rowHeight = defaultRowHeight ? Math.floor(defaultRowHeight / 1.5) : 2;
   return {
-    container: ({ euiTheme }: UseEuiTheme) =>
+    cellContainer: ({ euiTheme }: UseEuiTheme) =>
       css({
         display: '-webkit-box',
         WebkitBoxOrient: 'vertical' as const,
@@ -98,6 +98,10 @@ const componentStyles = (defaultRowHeight: number | undefined) => {
         borderRadius: euiTheme.border.radius.small,
         color: euiTheme.colors.textPrimary,
         fontSize: euiTheme.size.m,
+      }),
+    detailsContainer: ({ euiTheme }: UseEuiTheme) =>
+      css({
+        maxWidth: '500px',
       }),
   };
 };

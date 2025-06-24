@@ -58,6 +58,14 @@ export const createPatternDataSourceProfileProvider = (
               defaultMessage: 'View matching results',
             }),
           getIconType: () => 'discoverApp',
+          isCompatible: (context) => {
+            const { query, field } = context;
+            if (!isOfAggregateQueryType(query) || field === undefined) {
+              return false;
+            }
+            const patternColumns = getCategorizeColumns(query.esql);
+            return patternColumns.includes(field.name);
+          },
           execute: (context) => {
             const index = context.dataView?.getIndexPattern();
             if (!isOfAggregateQueryType(context.query) || !context.value || !index) {
