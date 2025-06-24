@@ -23,6 +23,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.0.3 [kibana-9.0.3-release-notes]
 
+:::{important}
+The 9.0.3 release contains fixes for potential security vulnerabilities. Check our [security advisory for more details](https://discuss.elastic.co/c/announcements/security-announcements/31).
+:::
+
 ### Features and enhancements [kibana-9.0.3-features-enhancements]
 
 **Elastic Observability solution**:
