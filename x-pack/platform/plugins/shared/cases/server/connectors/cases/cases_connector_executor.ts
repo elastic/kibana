@@ -1143,7 +1143,7 @@ export class CasesConnectorExecutor {
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
-        const commentAttachment: UserCommentAttachmentPayload[] =
+        const extraComments: UserCommentAttachmentPayload[] =
           comments?.map((comment) => ({
             type: AttachmentType.user,
             comment,
@@ -1152,7 +1152,7 @@ export class CasesConnectorExecutor {
         return {
           caseId: theCase.id,
           attachments: [
-            ...commentAttachment,
+            ...extraComments,
             {
               type: AttachmentType.alert,
               rule: internallyManagedAlerts
