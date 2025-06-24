@@ -37,11 +37,11 @@
             "section": "def-common.ESQLSingleAstItem",
             "text": "ESQLSingleAstItem"
           },
-          ", parameterDefinition: { name: string; type: ",
-          "FunctionParameterType",
-          "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; mapParams?: string | undefined; }, references: ",
+          ", parameterDefinition: ",
+          "FunctionParameter",
+          ", references: ",
           "ReferenceMaps",
-          ", parentCommand: string | undefined) => boolean | undefined"
+          ", parentCommand: string | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
@@ -76,9 +76,7 @@
             "label": "parameterDefinition",
             "description": [],
             "signature": [
-              "{ name: string; type: ",
-              "FunctionParameterType",
-              "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; mapParams?: string | undefined; }"
+              "FunctionParameter"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
@@ -2249,6 +2247,14 @@
                 "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.RecommendedQuery",
                 "text": "RecommendedQuery"
+              },
+              "[]; recommendedFields: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.RecommendedField",
+                "text": "RecommendedField"
               },
               "[]; }>) | undefined"
             ],
