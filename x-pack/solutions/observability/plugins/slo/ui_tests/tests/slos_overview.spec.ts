@@ -29,7 +29,7 @@ test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
   test('Go to slos overview', async ({ page }) => {
     // Already navigated in beforeEach
     // This test ensures the page loads
-    await expect(page).toBeDefined();
+    expect(page).toBeDefined();
   });
 
   test('validate data retention tab', async ({ page }) => {
