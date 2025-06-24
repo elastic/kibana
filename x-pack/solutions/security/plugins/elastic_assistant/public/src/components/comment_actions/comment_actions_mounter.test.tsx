@@ -11,9 +11,7 @@ import type { ClientMessage } from '@kbn/elastic-assistant';
 import { EuiFlexItem } from '@elastic/eui';
 import { CommentActionsMounter } from './comment_actions_mounter';
 import { CommentsService } from '@kbn/elastic-assistant-shared-state';
-
-// eslint-disable-next-line @kbn/eslint/module_migration
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom';
 
 describe('CommentActionsMounter', () => {
   it('multiple comment actions are mounted', async () => {
@@ -32,10 +30,12 @@ describe('CommentActionsMounter', () => {
       mount: (args) => (target: HTMLElement) => {
         const div = document.createElement('div');
         target.appendChild(div);
-        const root = createRoot(div);
-        root.render(<EuiFlexItem data-test-subj="placeholder_actions_1">{'Hello'}</EuiFlexItem>);
+        ReactDOM.render(
+          <EuiFlexItem data-test-subj="placeholder_actions_1">{'Hello'}</EuiFlexItem>,
+          div
+        );
         return () => {
-          root.unmount();
+          ReactDOM.unmountComponentAtNode(div);
           target.removeChild(div);
         };
       },
@@ -46,10 +46,12 @@ describe('CommentActionsMounter', () => {
       mount: (args) => (target: HTMLElement) => {
         const div = document.createElement('div');
         target.appendChild(div);
-        const root = createRoot(div);
-        root.render(<EuiFlexItem data-test-subj="placeholder_actions_2">{'Bye'}</EuiFlexItem>);
+        ReactDOM.render(
+          <EuiFlexItem data-test-subj="placeholder_actions_2">{'Bye'}</EuiFlexItem>,
+          div
+        );
         return () => {
-          root.unmount();
+          ReactDOM.unmountComponentAtNode(div);
           target.removeChild(div);
         };
       },
@@ -85,10 +87,13 @@ describe('CommentActionsMounter', () => {
       mount: (args) => (target: HTMLElement) => {
         const div = document.createElement('div');
         target.appendChild(div);
-        const root = createRoot(div);
-        root.render(<EuiFlexItem data-test-subj="placeholder_actions_1">{'Hello'}</EuiFlexItem>);
+
+        ReactDOM.render(
+          <EuiFlexItem data-test-subj="placeholder_actions_1">{'Hello'}</EuiFlexItem>,
+          div
+        );
         return () => {
-          root.unmount();
+          ReactDOM.unmountComponentAtNode(div);
           target.removeChild(div);
         };
       },
@@ -99,10 +104,12 @@ describe('CommentActionsMounter', () => {
       mount: (args) => (target: HTMLElement) => {
         const div = document.createElement('div');
         target.appendChild(div);
-        const root = createRoot(div);
-        root.render(<EuiFlexItem data-test-subj="placeholder_actions_2">{'Bye'}</EuiFlexItem>);
+        ReactDOM.render(
+          <EuiFlexItem data-test-subj="placeholder_actions_2">{'Bye'}</EuiFlexItem>,
+          div
+        );
         return () => {
-          root.unmount();
+          ReactDOM.unmountComponentAtNode(div);
           target.removeChild(div);
         };
       },
