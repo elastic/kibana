@@ -2042,7 +2042,12 @@ export const TimeseriesChart = (props) => {
     () =>
       d3.scale
         .threshold()
-        .domain([3, 25, 50, 75, 100])
+        .domain([
+          ML_ANOMALY_THRESHOLD.WARNING,
+          ML_ANOMALY_THRESHOLD.MINOR,
+          ML_ANOMALY_THRESHOLD.MAJOR,
+          ML_ANOMALY_THRESHOLD.CRITICAL,
+        ])
         .range([
           getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.LOW, euiTheme),
           getThemeResolvedSeverityColor(ML_ANOMALY_THRESHOLD.WARNING, euiTheme),
