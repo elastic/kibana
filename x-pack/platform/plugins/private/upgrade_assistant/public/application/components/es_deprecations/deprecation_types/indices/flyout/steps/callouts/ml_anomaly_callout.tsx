@@ -28,7 +28,7 @@ export const MlAnomalyCallout: FunctionComponent = () => {
       >
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText"
-          defaultMessage="Anomaly result indices that were created in 7.x must be either reindexed, marked as read-only, or deleted before upgrading to 9.x. {learnMore}."
+          defaultMessage="Anomaly result indices that were created in 7.x must be either reindexed, set to read-only, or deleted before upgrading to 9.x. {learnMore}."
           values={{
             learnMore: (
               <EuiLink target="_blank" href={docLinks.links.ml.anomalyMigrationGuide}>

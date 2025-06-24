@@ -27,14 +27,14 @@ export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) 
         data-test-subj="lowDiskSpaceCallout"
         title={
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutTitle"
+            id="xpack.upgradeAssistant.common.warning.lowDiskSpaceCalloutTitle"
             defaultMessage="Nodes with low disk space"
           />
         }
       >
         <>
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceCalloutDescription"
+            id="xpack.upgradeAssistant.common.warning.lowDiskSpaceCalloutDescription"
             defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
           />
 
@@ -44,7 +44,7 @@ export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) 
             {nodes.map(({ nodeName, available, nodeId }) => (
               <li key={nodeId} data-test-subj="impactedNodeListItem">
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.lowDiskSpaceUsedText"
+                  id="xpack.upgradeAssistant.common.warning.lowDiskSpaceUsedText"
                   defaultMessage="{nodeName} ({available} available)"
                   values={{
                     nodeName,

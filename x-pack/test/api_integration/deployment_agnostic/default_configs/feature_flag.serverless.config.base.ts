@@ -108,9 +108,12 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...esServerArgsFromController[options.serverlessProject],
           ...(options.esServerArgs || []),
-          'xpack.security.authc.native_roles.enabled=true',
         ],
       },
       kbnTestServer: {
@@ -119,8 +122,6 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // Enable custom roles
-          '--xpack.security.roleManagementEnabled=true',
           ...(options.serverlessProject === 'oblt'
             ? [
                 // defined in MKI control plane. Necessary for Synthetics app testing
@@ -128,7 +129,6 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
                 '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
                 '--xpack.uptime.service.devUrl=mockDevUrl',
                 '--xpack.uptime.service.manifestUrl=mockDevUrl',
-                `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
               ]
             : []),
           ...(dockerRegistryPort

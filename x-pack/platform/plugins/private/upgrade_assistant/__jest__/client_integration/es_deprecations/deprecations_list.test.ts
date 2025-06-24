@@ -489,6 +489,28 @@ describe('ES deprecations table', () => {
       expect(find('reindexTableCell-correctiveAction').text()).toContain('Recommended: reindex');
     });
 
+    it('recommends manual fix if follower index and already read-only', async () => {
+      await setupRecommendedActionTest({
+        correctiveAction: {
+          type: 'reindex',
+          index: 'large_and_readonly_index',
+          metadata: {
+            isClosedIndex: false,
+            isFrozenIndex: false,
+            isInDataStream: false,
+          },
+        },
+        reindexMeta: {
+          isFollowerIndex: true,
+          isReadonly: true,
+          indexName: 'large_and_readonly_index',
+          reindexName: 'reindexed-large_and_readonly_index',
+        },
+      });
+      const { find } = testBed;
+      expect(find('reindexTableCell-correctiveAction').length).toBe(1);
+      expect(find('reindexTableCell-correctiveAction').text()).toContain('Resolve manually');
+    });
     it('recommends reindexing by default', async () => {
       await setupRecommendedActionTest({
         correctiveAction: {
@@ -612,6 +634,7 @@ describe('ES deprecations table', () => {
           index: 0,
           action: 'unfreeze',
         });
+        await actions.reindexDeprecationFlyout.clickUnfreezeButton();
 
         expect(find('reindexTableCell-actions').length).toBe(1);
 

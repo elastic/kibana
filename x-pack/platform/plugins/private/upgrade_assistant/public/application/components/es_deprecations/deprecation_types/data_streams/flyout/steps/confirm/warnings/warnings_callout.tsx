@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
@@ -19,20 +19,18 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
   learnMoreUrl,
 }) => {
   return (
-    <EuiCallOut color="primary" data-test-subj="dataStreamMigrationWarningsCallout">
-      <p>
+    <>
+      <EuiCallOut color="primary" data-test-subj="dataStreamMigrationWarningsCallout">
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"
-          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or marked as read-only."
+          defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or set to read-only."
           values={{ formattedDate }}
         />
-        <br />
         <br />
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.backingIndicesUnfrozen"
           defaultMessage="If any of the backing indices of the data stream are frozen, they will be converted to non-frozen indices during the update process."
         />
-        <br />
         <br />
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.suggestReadOnly"
@@ -48,7 +46,8 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
             ),
           }}
         />
-      </p>
-    </EuiCallOut>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
   );
 };

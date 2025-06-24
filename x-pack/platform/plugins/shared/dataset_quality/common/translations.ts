@@ -716,14 +716,6 @@ export const failedDocsErrorsColumnName = i18n.translate(
   }
 );
 
-export const noAccessToFailureStoreWarningDescription = i18n.translate(
-  'xpack.datasetQuality.noAccessToFailureStore.title',
-  {
-    defaultMessage:
-      'Some documents might have been sent to the Failure store. Access is restricted due to potential sensitive information. Please contact your administrator for access',
-  }
-);
-
 export const readMore = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
   {
@@ -737,3 +729,7 @@ export const readLess = i18n.translate(
     defaultMessage: 'Read less',
   }
 );
+
+export const createAlertText = i18n.translate('xpack.datasetQuality.createAlert', {
+  defaultMessage: 'Create rule',
+});

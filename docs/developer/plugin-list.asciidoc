@@ -650,14 +650,6 @@ the infrastructure monitoring use-case within Kibana.
 |Home of the Inventory plugin, which renders the... inventory.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate/README.md[investigate]
-|WARNING: Missing or empty README.
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
-|WARNING: Missing or empty README.
-
-
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 

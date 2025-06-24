@@ -194,6 +194,13 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    clickUnfreezeButton: async () => {
+      await act(async () => {
+        find('startIndexUnfreezeButton').simulate('click');
+      });
+
+      component.update();
+    },
     checkMigrationWarningCheckbox: async () => {
       await act(async () => {
         find('warninStepCheckbox')

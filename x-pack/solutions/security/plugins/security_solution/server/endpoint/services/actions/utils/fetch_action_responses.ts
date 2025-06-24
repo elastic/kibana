@@ -17,7 +17,7 @@ import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
 import { catchAndWrapError } from '../../../utils';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
 
-/** @private */
+/** @internal */
 const buildSearchQuery = (
   actionIds: string[] = [],
   agentIds: string[] = []

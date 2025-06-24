@@ -10,35 +10,23 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import {
-  EnrichedDeprecationInfo,
-  IndicesResolutionType,
-  ReindexStatus,
-} from '../../../../../../../common/types';
+import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import { DeprecationBadge, WarningLevels } from '../../../../shared';
 import {
-  UIM_REINDEX_READONLY_CLICK,
-  UIM_REINDEX_READONLY_RETRY_CLICK,
   UIM_REINDEX_START_CLICK,
   UIM_REINDEX_STOP_CLICK,
-  UIM_REINDEX_UNFREEZE_CLICK,
-  UIM_REINDEX_UNFREEZE_RETRY_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
-import {
-  UpdateIndexFlyoutStep,
-  ReindexFlyoutStep,
-  WarningFlyoutStep,
-  type FlyoutStep,
-} from './steps';
-import { InitializingFlyoutStep } from './steps/initializing/initializing_step';
+import { InitializingStep } from '../../../common/initializing_step';
+import { WarningFlyoutStep } from './steps/warning/warning_step';
+import { ReindexFlyoutStep } from './steps/reindex/reindex_step';
+import { FlyoutStep } from './steps/types';
 
 export interface IndexFlyoutProps extends IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
-  selectedResolutionType: IndicesResolutionType | undefined;
 }
 
 export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
@@ -46,14 +34,12 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   startReindex,
   cancelReindex,
   updateIndexState,
-  updateIndex,
   closeFlyout,
   deprecation,
-  selectedResolutionType,
 }) => {
   const { status: reindexStatus, reindexWarnings, errorMessage } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
-  const { index, correctiveAction } = deprecation;
+  const { index } = deprecation;
 
   const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
 
@@ -62,26 +48,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     startReindex();
   }, [startReindex]);
 
-  const onMakeReadonly = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_CLICK);
-    await updateIndex();
-  }, [updateIndex]);
-
-  const onMakeReadonlyRetry = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_RETRY_CLICK);
-    await updateIndex();
-  }, [updateIndex]);
-
-  const onUnfreeze = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_CLICK);
-    await updateIndex();
-  }, [updateIndex]);
-
-  const onUnfreezeRetry = useCallback(async () => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_RETRY_CLICK);
-    await updateIndex();
-  }, [updateIndex]);
-
   const onStopReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_STOP_CLICK);
     cancelReindex();
@@ -89,12 +55,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
 
   useEffect(() => {
     switch (reindexStatus) {
-      case ReindexStatus.failed: {
-        if (updateIndexStatus === 'complete' || updateIndexStatus === 'inProgress') {
-          setFlyoutStep(correctiveAction?.type === 'unfreeze' ? 'unfreeze' : 'makeReadonly');
-          break;
-        }
-      }
+      case ReindexStatus.failed:
       case ReindexStatus.fetchFailed:
       case ReindexStatus.cancelled:
       case ReindexStatus.inProgress:
@@ -103,43 +64,11 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
         break;
       }
       default: {
-        switch (updateIndexStatus) {
-          case 'inProgress':
-          case 'complete':
-          case 'failed': {
-            setFlyoutStep(correctiveAction?.type === 'unfreeze' ? 'unfreeze' : 'makeReadonly');
-            break;
-          }
-          default: {
-            switch (selectedResolutionType) {
-              case 'readonly': {
-                setFlyoutStep('confirmReadonly');
-                break;
-              }
-              case 'reindex': {
-                setFlyoutStep('confirmReindex');
-                break;
-              }
-              case 'unfreeze':
-                setFlyoutStep('unfreeze');
-                onUnfreeze();
-                break;
-              default: {
-                setFlyoutStep('initializing');
-                break;
-              }
-            }
-          }
-        }
+        setFlyoutStep('confirmReindex');
+        break;
       }
     }
-  }, [
-    correctiveAction?.type,
-    onUnfreeze,
-    reindexStatus,
-    selectedResolutionType,
-    updateIndexStatus,
-  ]);
+  }, [reindexStatus]);
 
   const startReindexWithWarnings = useCallback(() => {
     if (
@@ -157,27 +86,19 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep errorMessage={errorMessage} />;
-      case 'confirmReadonly':
+        return <InitializingStep errorMessage={errorMessage} type="index" mode="flyout" />;
       case 'confirmReindex':
-        const flow = flyoutStep === 'confirmReadonly' ? 'readonly' : 'reindex';
         return (
           <WarningFlyoutStep
             warnings={
               reindexState.reindexWarnings?.filter(
-                ({ flow: warningFlow }) => warningFlow === 'all' || warningFlow === flow
+                ({ flow: warningFlow }) => warningFlow === 'all' || warningFlow === 'reindex'
               ) ?? []
             }
             meta={reindexState.meta}
-            flow={flow}
             closeFlyout={closeFlyout}
             confirm={() => {
-              if (flyoutStep === 'confirmReadonly') {
-                setFlyoutStep('makeReadonly');
-                onMakeReadonly();
-              } else {
-                onStartReindex();
-              }
+              onStartReindex();
             }}
             deprecation={deprecation}
             reindexState={reindexState}
@@ -192,40 +113,16 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             cancelReindex={onStopReindex}
           />
         );
-      case 'unfreeze':
-        return (
-          <UpdateIndexFlyoutStep
-            action={flyoutStep}
-            meta={reindexState.meta}
-            retry={onUnfreezeRetry}
-            updateIndexState={updateIndexState}
-            closeFlyout={closeFlyout}
-          />
-        );
-      case 'makeReadonly':
-        return (
-          <UpdateIndexFlyoutStep
-            action={flyoutStep}
-            meta={reindexState.meta}
-            retry={onMakeReadonlyRetry}
-            updateIndexState={updateIndexState}
-            closeFlyout={closeFlyout}
-          />
-        );
     }
   }, [
-    flyoutStep,
-    errorMessage,
-    reindexState,
     closeFlyout,
-    startReindexWithWarnings,
-    onStopReindex,
-    onUnfreezeRetry,
-    updateIndexState,
-    onMakeReadonlyRetry,
-    onMakeReadonly,
-    onStartReindex,
     deprecation,
+    errorMessage,
+    flyoutStep,
+    onStartReindex,
+    onStopReindex,
+    reindexState,
+    startReindexWithWarnings,
   ]);
 
   return (
@@ -240,7 +137,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
           <h2 id="reindexDetailsFlyoutTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.flyoutHeader"
-              defaultMessage="Update {index}"
+              defaultMessage="Reindex {index}"
               values={{ index }}
             />
           </h2>

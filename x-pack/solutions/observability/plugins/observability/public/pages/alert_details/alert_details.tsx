@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -36,6 +35,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -59,6 +59,8 @@ import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
+import { ProximalAlertsCallout } from './proximal_alerts_callout';
+import { useTabId } from './hooks/use_tab_id';
 import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
@@ -73,7 +75,6 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
 
 const TAB_IDS = [
   'overview',
@@ -90,6 +91,7 @@ const isTabId = (value: string): value is TabId => {
 };
 
 export function AlertDetails() {
+  const { services } = useKibana();
   const {
     cases: {
       helpers: { canUseCases },
@@ -100,13 +102,11 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-  } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
-
-  const { search } = useLocation();
-  const history = useHistory();
+  } = services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const { getUrlTabId, setUrlTabId } = useTabId();
+  const urlTabId = getUrlTabId();
   const {
     isLoadingRelatedDashboards,
     suggestedDashboards,
@@ -130,22 +130,18 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
-    return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
-  });
+  const [activeTabId, setActiveTabId] = useState<TabId>();
+
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
-    let searchParams = new URLSearchParams(search);
     if (tabId === 'related_alerts') {
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+      setUrlTabId(tabId, true, {
+        filterProximal: 'true',
+      });
     } else {
-      searchParams = new URLSearchParams();
-      searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
+      setUrlTabId(tabId, true);
     }
-    history.replace({ search: searchParams.toString() });
   };
 
   useEffect(() => {
@@ -171,8 +167,9 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry, urlTabId]);
 
   useBreadcrumbs(
     [
@@ -196,11 +193,14 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === 'overview') {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
+  const showRelatedAlertsFromCallout = () => {
+    handleSetTabId('related_alerts');
+  };
+
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -251,6 +251,10 @@ export function AlertDetails() {
 
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
+          <ProximalAlertsCallout
+            alertDetail={alertDetail}
+            switchTabs={showRelatedAlertsFromCallout}
+          />
           <SourceBar alert={alertDetail.formatted} sources={sources} />
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
@@ -271,6 +275,11 @@ export function AlertDetails() {
       </>
     ) : (
       <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel" paddingSize="none">
+        <EuiSpacer size="l" />
+        <ProximalAlertsCallout
+          alertDetail={alertDetail}
+          switchTabs={showRelatedAlertsFromCallout}
+        />
         <EuiSpacer size="l" />
         <AlertDetailContextualInsights alert={alertDetail} />
         <EuiSpacer size="l" />

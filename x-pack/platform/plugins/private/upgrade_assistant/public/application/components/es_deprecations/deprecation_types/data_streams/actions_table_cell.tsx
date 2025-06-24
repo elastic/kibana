@@ -8,11 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import {
-  DataStreamMigrationStatus,
-  DataStreamResolutionType,
-  DataStreamsAction,
-} from '../../../../../../common/types';
+import { DataStreamMigrationStatus, DataStreamsAction } from '../../../../../../common/types';
 import { useDataStreamMigrationContext } from './context';
 import { LoadingState } from '../../../types';
 import { ActionButtonConfig, ActionButtons } from '../../common/action_buttons';
@@ -41,13 +37,13 @@ const actionsI18nTexts = {
 interface Props {
   correctiveAction: DataStreamsAction;
   openFlyout: () => void;
-  setSelectedResolutionType: (resolutionType: DataStreamResolutionType) => void;
+  openModal: () => void;
 }
 
 export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
   correctiveAction,
   openFlyout,
-  setSelectedResolutionType,
+  openModal,
 }) => {
   const { migrationState } = useDataStreamMigrationContext();
   const reindexExcluded = correctiveAction.metadata.excludedActions?.includes('reindex');
@@ -70,23 +66,24 @@ export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
       (migrationInProgressOrCompleted && migrationState.resolutionType === 'reindex'))
   );
 
-  const clickResolution = (resolutionType: DataStreamResolutionType) => {
-    openFlyout();
-    setSelectedResolutionType(resolutionType);
-  };
-
   const actions: ActionButtonConfig[] = [
     {
       tooltip: actionsI18nTexts.reindexTooltipLabel,
       iconType: 'indexSettings',
       canDisplay: canDisplayReindex,
       resolutionType: 'reindex',
+      onClick: () => {
+        openFlyout();
+      },
     },
     {
       tooltip: actionsI18nTexts.readOnlyTooltipLabel,
       iconType: 'readOnly',
       canDisplay: canDisplayReadOnly,
       resolutionType: 'readonly',
+      onClick: () => {
+        openModal();
+      },
     },
   ];
 
@@ -102,11 +99,5 @@ export const DataStreamReindexActionsCell: React.FunctionComponent<Props> = ({
       </EuiFlexGroup>
     );
   }
-  return (
-    <ActionButtons
-      actions={actions}
-      onClick={(resolution: string) => clickResolution(resolution as DataStreamResolutionType)}
-      dataTestSubjPrefix={correctiveAction.type}
-    />
-  );
+  return <ActionButtons actions={actions} dataTestSubjPrefix={correctiveAction.type} />;
 };

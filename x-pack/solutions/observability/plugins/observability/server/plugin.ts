@@ -25,6 +25,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { ObservabilityConfig } from '.';
 import { observabilityFeatureId } from '../common';
 import {
@@ -46,6 +47,7 @@ import { uiSettings } from './ui_settings';
 import { getCasesFeature } from './features/cases_v1';
 import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
+import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -59,6 +61,7 @@ interface PluginSetup {
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
   contentManagement: ContentManagementServerSetup;
+  esql: ESQLSetup;
 }
 
 interface PluginStart {
@@ -146,6 +149,8 @@ export class ObservabilityPlugin
      * Register a config for the observability guide
      */
     plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
+    setEsqlRecommendedQueries(plugins.esql);
 
     return {
       getAlertDetailsConfig() {

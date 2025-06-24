@@ -41,7 +41,6 @@ disabled:
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.synthetics.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts
   - x-pack/test/api_integration/deployment_agnostic/feature_flag_configs/serverless/oblt.serverless.config.ts
-  - x-pack/test/api_integration/deployment_agnostic/default_configs/feature_flag.serverless.config.base.ts
 
 # Serverless tests only run on main
 defaultQueue: 'n2-4-spot'
