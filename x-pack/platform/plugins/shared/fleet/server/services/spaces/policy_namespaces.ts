@@ -105,7 +105,7 @@ export async function validatePackagePoliciesUniqueNameAcrossSpaces(
     packagePolicies,
     async (pkgPolicy) => {
       const { items } = await packagePolicyService.list(allSpacesSoClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:${pkgPolicy.name}`,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${pkgPolicy.name}"`,
         spaceId: '*',
       });
 
