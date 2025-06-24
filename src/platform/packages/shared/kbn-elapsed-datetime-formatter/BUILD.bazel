@@ -1,0 +1,34 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+SHARED_DEPS = [
+  "@npm//moment",
+  "//src/platform/packages/shared/kbn-i18n"
+]
+
+js_library(
+  name = "kbn-elapsed-datetime-formatter",
+  package_name = "@kbn/elapsed-datetime-formatter",
+  srcs = ["package.json"] + SRCS,
+  deps = SHARED_DEPS,
+  visibility = ["//visibility:public"],
+)

@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/elapsed-datetime-formatter",
+  "owner": "@elastic/obs-ux-management",
+  "group": "platform",
+  "visibility": "shared"
+}

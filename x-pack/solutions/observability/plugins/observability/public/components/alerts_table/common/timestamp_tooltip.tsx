@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import { asAbsoluteDateTime, TimeUnit } from '../../../../common/utils/formatters/datetime';
+import { asAbsoluteDateTime, TimeUnit } from '@kbn/elapsed-datetime-formatter';
 
 interface Props {
   /**

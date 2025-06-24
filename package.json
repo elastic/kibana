@@ -491,6 +491,7 @@
     "@kbn/ebt-tools": "link:src/platform/packages/shared/kbn-ebt-tools",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/solutions/security/packages/ecs-data-quality-dashboard",
     "@kbn/ecs-data-quality-dashboard-plugin": "link:x-pack/solutions/security/plugins/ecs_data_quality_dashboard",
+    "@kbn/elapsed-datetime-formatter": "link:src/platform/packages/shared/kbn-elapsed-datetime-formatter",
     "@kbn/elastic-agent-utils": "link:src/platform/packages/shared/kbn-elastic-agent-utils",
     "@kbn/elastic-assistant": "link:x-pack/platform/packages/shared/kbn-elastic-assistant",
     "@kbn/elastic-assistant-common": "link:x-pack/platform/packages/shared/kbn-elastic-assistant-common",

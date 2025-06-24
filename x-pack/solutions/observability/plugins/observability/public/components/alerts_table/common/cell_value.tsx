@@ -27,6 +27,7 @@ import {
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
+import { ElapsedTimestampTooltip } from '@kbn/elapsed-datetime-formatter';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
@@ -42,7 +43,6 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
-import { RelativeTimestampTooltip } from './relative_timestamp_tooltip';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -94,10 +94,10 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
     ),
     [ALERT_START]: (value) => (
-      <RelativeTimestampTooltip
+      <ElapsedTimestampTooltip
         time={new Date(value ?? '').getTime()}
         timeUnit="milliseconds"
-        relativeDisplayThreshold={2}
+        elapsedDisplayThreshold={2}
       />
     ),
     [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
