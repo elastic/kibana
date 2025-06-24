@@ -1499,13 +1499,9 @@
             "label": "createLlmInstance",
             "description": [],
             "signature": [
-              "(() => ",
-              "ActionsClientChatBedrockConverse",
-              " | ",
-              "ActionsClientChatOpenAI",
-              " | ",
-              "ActionsClientChatVertexAI",
-              ") | undefined"
+              "(() => Promise<",
+              "AssistantToolLlm",
+              ">) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

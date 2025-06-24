@@ -305,7 +305,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_centroid_agg', {
         defaultMessage: 'ST_CENTROID_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
@@ -336,7 +336,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.st_extent_agg', {
         defaultMessage: 'ST_EXTENT_AGG',
       }),
-      preview: false,
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab
