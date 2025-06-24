@@ -20,7 +20,10 @@ paths:
                 type: object
                 properties:
                   status:
-                    $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                    oneOf:
+                    - $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                    - type: string
+                      enum: [not_found]
                   error:
                     type: object
                     required:
