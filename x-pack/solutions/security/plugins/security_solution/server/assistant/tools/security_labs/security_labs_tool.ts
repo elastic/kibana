@@ -18,6 +18,7 @@ import {
   knowledgeBaseReference,
 } from '@kbn/elastic-assistant-common/impl/content_references/references';
 import { Document } from 'langchain/document';
+import { getIsKnowledgeBaseInstalled } from '@kbn/elastic-assistant-plugin/server/routes/helpers';
 import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
@@ -51,9 +52,11 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
-        if (docs.length === 0 && !params.isEnabledKnowledgeBase) {
+        // this value does not tell me if security labs exists
+        const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+        if (docs.length === 0 && !isKnowledgeBaseInstalled) {
           // prompt to help user install knowledge base
-          return 'No relevant Elastic Security Labs content found for the provided query. Ensure knowledge base is installed.';
+          return 'The "AI Assistant knowledge base" needs to be installed, containing the Security Labs content. Navigate to the Knowledge Base page in the AI Assistant Settings to install it.';
         }
 
         const citedDocs = docs.map((doc) => {
