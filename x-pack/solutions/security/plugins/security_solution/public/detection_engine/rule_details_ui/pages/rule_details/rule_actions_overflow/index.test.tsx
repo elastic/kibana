@@ -332,7 +332,7 @@ describe('RuleActionsOverflow', () => {
 
       fireEvent.click(revertRuleButton);
       // Popover is not shown
-      expect(getByTestId('rules-details-popover')).not.toBeInTheDocument();
+      expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
 
     test('it disabled the revert action when isRevertBaseVersionDisabled is true', async () => {

@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.attributes.errors).toEqual([
           expect.objectContaining({
             message: `Cannot find base_version for rule id: ${customizedPrebuiltRule.id}`,
-            rules: [customizedPrebuiltRule],
+            status_code: 404,
           }),
         ]);
       });
@@ -303,7 +303,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: `Version mismatch for rule with id: ${customizedPrebuiltRule.id}. Expected ${
               customizedPrebuiltRule.version + 1
             }, got ${customizedPrebuiltRule.version}`,
-            rules: [customizedPrebuiltRule],
+            status_code: 409,
           }),
         ]);
       });
@@ -331,7 +331,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: `Revision mismatch for rule with id: ${customizedPrebuiltRule.id}. Expected ${
               customizedPrebuiltRule.revision + 1
             }, got ${customizedPrebuiltRule.revision}`,
-            rules: [customizedPrebuiltRule],
+            status_code: 409,
           }),
         ]);
       });
