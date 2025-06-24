@@ -49,10 +49,6 @@ export interface ExpressionRenderDefinition<Config = unknown> {
     config: Config,
     handlers: IInterpreterRenderHandlers
   ) => void | Promise<void>;
-
-  loadComponent?: () => Promise<
-    React.ComponentType<{ config: Config; handlers: IInterpreterRenderHandlers }>
-  >;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
