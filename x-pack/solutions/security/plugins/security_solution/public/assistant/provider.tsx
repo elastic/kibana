@@ -105,7 +105,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     return () => {
       unmountPromptContexts();
     };
-  }, [PROMPT_CONTEXTS]);
+  }, [elasticAssistantSharedState.promptContexts, PROMPT_CONTEXTS]);
 
   if (!assistantContextValue) {
     return null;
