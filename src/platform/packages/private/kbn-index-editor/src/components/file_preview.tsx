@@ -146,7 +146,7 @@ export const FilesPreview: FC = () => {
     } catch (error) {
       // Handle error appropriately, e.g., log it or show a notification
     }
-  }, [data.dataViews, filesStatus, isMounted, previewDocsMemo]);
+  }, [data.dataViews, filesStatus, isMounted, previewDocs]);
 
   useEffect(() => {
     // wait for all files to be analyzed before fetching previews
