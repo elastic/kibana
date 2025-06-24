@@ -107,7 +107,7 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
-      getInitialInput: async () => {
+      getInitialInput: () => {
         return initialInput.value;
       },
       getIncomingEmbeddable: () =>
