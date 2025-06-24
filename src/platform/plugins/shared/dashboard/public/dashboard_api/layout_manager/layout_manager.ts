@@ -339,7 +339,7 @@ export function initializeLayoutManager(
           map(([currentLayout]) => {
             if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
               logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
-              return serializeLayout(currentLayout, currentChildState);
+              return { panels: serializeLayout(currentLayout, currentChildState).panels };
             }
             return {};
           })
