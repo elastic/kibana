@@ -128,7 +128,7 @@ The List operation is critical for Terraform's data source and import functional
    ```json
    // Good - returns complete state
    {
-     "id": "my-resource",
+     "id": "my-resource", // it is best to call this field "id"
      "name": "My Resource",
      "config": { "setting1": "value1" },
      "created_at": "2025-06-24T08:15:30Z",
@@ -226,6 +226,100 @@ API design decisions can create real challenges for Terraform resource implement
 [Index settings update bug](https://github.com/elastic/terraform-provider-elasticstack/issues/52)
 
 A better API design would separate these concerns with different endpoints or provide metadata about which settings require recreation.
+
+### Handle resource references and dependencies
+
+Terraform configurations frequently define multiple resources that depend on each other. Your API design needs to account for these interdependencies in a way that enables Terraform's declarative model to work smoothly.
+
+#### Use stable, predictable resource identifiers
+
+Resource references must use identifiers that remain stable throughout a resource's lifecycle and across operations:
+
+```json
+// Resource reference using stable ID
+{
+  "name": "My Report",
+  "space_id": "marketing",            // Reference to a space by ID
+  "visualization_ids": ["vis-123"]    // References to visualizations by ID
+}
+```
+
+Note: provide users with a way to choose their own ID when creating resources, otherwise use auto-generated UUIDs.
+
+#### Support referencing resources by identifiers, not just names
+
+Ensure your API accepts references by ID, not just by name or other properties that may change:
+
+```typescript
+// Good: Reference by ID
+router.post(
+  {
+    path: '/api/alerting/rule',
+    validate: {
+      body: schema.object({
+        name: schema.string(),
+        space_id: schema.string(),       // Space ID reference
+        actions: schema.arrayOf(schema.object({
+          connector_id: schema.string(), // Connector ID reference
+          group: schema.string(),
+          params: schema.recordOf(schema.string(), schema.any())
+        }))
+      })
+    }
+  },
+  handler
+);
+```
+
+#### Use consistent reference patterns across APIs
+
+Apply the same patterns for referencing resources across all your APIs:
+
+1. **Consistent naming**: Use the same suffix for IDs (e.g., `space_id`, `dashboard_id`, etc.).
+2. **Consistent structure**: Use the same structure for referencing resources in all APIs.
+3. **Consistent validation**: Apply the same validation rules across all APIs.
+
+#### Example: Resource with dependencies
+
+```typescript
+// Generic object API that references other objects and spaces
+router.post(
+  {
+    path: '/api/objects/object',
+    validate: {
+      body: schema.object({
+        title: schema.string(),
+        description: schema.maybe(schema.string()),
+        // Reference to space by ID
+        space_id: schema.string(),
+        // References to other objects by ID
+        other_objects: schema.arrayOf(
+          schema.object({
+            object_id: schema.string(),
+          })
+        )
+      })
+    }
+  },
+  async (context, request, response) => {
+    // Implementation with dependency validation
+    const validationResult = await validateDependencies(request);
+    if (!validationResult.valid) {
+      return response.badRequest({
+        body: {
+          message: 'Validation failed',
+          validation: {
+            dependencies: validationResult.errors
+          }
+        }
+      });
+    }
+
+    // Proceed with creation
+    // ...
+  }
+);
+```
 
 ### Design human-friendly APIs
 
