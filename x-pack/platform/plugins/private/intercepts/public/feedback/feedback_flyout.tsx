@@ -8,6 +8,7 @@
 import React, { ChangeEvent, PropsWithChildren, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCheckbox,
   EuiFilePicker,
   EuiFlexGroup,
@@ -47,7 +48,11 @@ const feedbackTypes = [
   },
 ];
 
-export const FeedbackFlyout = () => {
+interface Props {
+  closeFlyout: () => void;
+}
+
+export const FeedbackFlyout = ({ closeFlyout }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackType, setFeedbackType] = useState(feedbackTypes[0].value);
@@ -83,12 +88,27 @@ export const FeedbackFlyout = () => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          {/* TODO: Align close button  */}
-          <h2>
-            <FormattedMessage id="xpack.intercept.feedbackFlyout.title" defaultMessage="Feedback" />
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>
+                <FormattedMessage
+                  id="xpack.intercept.feedbackFlyout.title"
+                  defaultMessage="Feedback"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              color="neutral"
+              size="xs"
+              css={boldText}
+              onClick={closeFlyout}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFormRow
@@ -113,11 +133,11 @@ export const FeedbackFlyout = () => {
           <EuiSelect
             options={feedbackTypes}
             value={feedbackType}
-            onChange={handleChangeFeedbackType}
             aria-label={i18n.translate('xpack.intercept.feedbackFlyout.selectAriaLabel', {
               defaultMessage: 'Select feedback type',
             })}
             data-test-subj="feedbackTypeSelect"
+            onChange={handleChangeFeedbackType}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -132,11 +152,11 @@ export const FeedbackFlyout = () => {
         >
           <EuiTextArea
             value={feedbackText}
-            onChange={handleChangeFeedbackText}
             aria-label={i18n.translate('xpack.intercept.feedbackFlyout.textAreaAriaLabel', {
               defaultMessage: 'Enter your feedback here',
             })}
             data-test-subj="feedbackTextArea"
+            onChange={handleChangeFeedbackText}
           />
         </EuiFormRow>
         <EuiFormRow>
@@ -149,18 +169,17 @@ export const FeedbackFlyout = () => {
                 defaultMessage="Drag here files you want to attach"
               />
             }
-            onChange={handleUploadFeedbackFiles}
             aria-label={i18n.translate('xpack.intercept.feedbackFlyout.filePickerAriaLabel', {
               defaultMessage: 'Select files to attach',
             })}
             data-test-subj="feedbackFilePicker"
+            onChange={handleUploadFeedbackFiles}
           />
         </EuiFormRow>
         <EuiFormRow>
           <EuiCheckbox
             id="feedbackCheckbox"
             checked={isFeedbackChecked}
-            onChange={handleChangeIsFeedbackChecked}
             label={
               <FormattedMessage
                 id="xpack.intercept.feedbackFlyout.checkboxLabel"
@@ -168,6 +187,7 @@ export const FeedbackFlyout = () => {
               />
             }
             data-test-subj="feedbackCheckbox"
+            onChange={handleChangeIsFeedbackChecked}
           />
         </EuiFormRow>
       </EuiFlyoutBody>
