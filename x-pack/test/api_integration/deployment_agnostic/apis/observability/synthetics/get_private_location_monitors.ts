@@ -31,8 +31,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     let newMonitor: { id: string; name: string };
     const testPrivateLocations = new PrivateLocationTestService(getService);
-    const NEW_LOCATION_LABEL = 'Barcelona';
-    const NEW_TAGS = ['myAwesomeTag'];
 
     before(async () => {
       supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
