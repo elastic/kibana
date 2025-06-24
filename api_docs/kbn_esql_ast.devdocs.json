@@ -4506,6 +4506,14 @@
             "path": "src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/logs_data_source_profile/accessors/get_row_additional_leading_controls.ts"
           },
           {
+            "plugin": "stackAlerts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
+          },
+          {
             "plugin": "@kbn/securitysolution-utils",
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts"
           },
@@ -4546,14 +4554,6 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/assistant/tools/esql/graphs/generate_esql/nodes/validate_esql_in_last_message_node/utils.ts"
           },
           {
-            "plugin": "stackAlerts",
-            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
-          },
-          {
-            "plugin": "stackAlerts",
-            "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts"
-          },
-          {
             "plugin": "inference",
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/like.test.ts"
           },
@@ -4616,6 +4616,18 @@
           {
             "plugin": "inference",
             "path": "x-pack/platform/plugins/shared/inference/common/tasks/nl_to_esql/ast/corrections/timespan_literals.test.ts"
+          },
+          {
+            "plugin": "@kbn/esql-utils",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+          },
+          {
+            "plugin": "@kbn/esql-utils",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+          },
+          {
+            "plugin": "@kbn/esql-utils",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
@@ -4744,8 +4756,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstItem",
-            "text": "ESQLAstItem"
+            "section": "def-common.ESQLSingleAstItem",
+            "text": "ESQLSingleAstItem"
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/visitor/utils.ts",
@@ -5661,53 +5673,6 @@
                 "text": "ESQLAstCommand"
               },
               "[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.ESQLAstRenameExpression",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESQLAstRenameExpression",
-        "description": [
-          "\nRight now rename expressions (\"clauses\") are parsed as options in the\nRENAME command."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstRenameExpression",
-            "text": "ESQLAstRenameExpression"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommandOption",
-            "text": "ESQLCommandOption"
-          }
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstRenameExpression.name",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "\"=\" | \"as\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,

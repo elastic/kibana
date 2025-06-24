@@ -547,19 +547,6 @@ export class WrappingPrettyPrinter {
       return { txt, indented };
     })
 
-    .on('visitRenameExpression', (ctx, inp: Input): Output => {
-      const operator = this.keyword('AS');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp);
-      const { txt, indented } = this.decorateWithComments(
-        { ...inp, suffix: '' },
-        ctx.node,
-        expression.txt,
-        expression.indented
-      );
-
-      return { txt, indented };
-    })
-
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
       const args = this.printChildrenList(ctx, {
         indent: inp.indent,

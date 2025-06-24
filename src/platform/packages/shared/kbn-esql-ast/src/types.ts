@@ -130,14 +130,6 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
   args: ESQLAstItem[];
 }
 
-/**
- * Right now rename expressions ("clauses") are parsed as options in the
- * RENAME command.
- */
-export interface ESQLAstRenameExpression extends ESQLCommandOption {
-  name: 'as' | '=';
-}
-
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
   type: 'query';
   commands: ESQLAstCommand[];
@@ -238,11 +230,11 @@ export type BinaryExpressionOperator =
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
-export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRegexOperator = 'like' | 'not like' | 'rlike' | 'not rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
-export type BinaryExpressionIn = 'in' | 'not_in';
+export type BinaryExpressionIn = 'in' | 'not in';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
