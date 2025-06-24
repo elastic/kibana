@@ -498,7 +498,7 @@ export class PrivilegeMonitoringDataClient {
       query: {
         bool: {
           must: [
-            { term: { 'labels.monitoring.privileged_users': 'monitored' } }, // This will need updated after https://github.com/elastic/kibana/pull/224623
+            { term: { 'user.is_privileged': true } },
             { term: { 'labels.source_indices.keyword': indexName } },
           ],
           must_not: {
@@ -561,11 +561,10 @@ export class PrivilegeMonitoringDataClient {
         ops.push(
           { index: { _index: userIndexName } },
           {
-            user: { name: user.username },
+            user: { name: user.username, is_privileged: true },
             labels: {
               sources: ['index'],
-              source_indices: [user.indexName],
-              monitoring: { privileged_users: 'monitored' }, // This will need updated after https://github.com/elastic/kibana/pull/224623
+              source_indices: [user.indexName],             
             },
           }
         );
@@ -598,7 +597,7 @@ export class PrivilegeMonitoringDataClient {
             }
 
             if (ctx._source.labels?.sources == null || ctx._source.labels.sources.isEmpty()) {
-              ctx._source.labels.monitoring = ['privileged_users': 'not_monitored'];
+              ctx._source.user.is_privileged = false;
             }
           `,
             params: {
