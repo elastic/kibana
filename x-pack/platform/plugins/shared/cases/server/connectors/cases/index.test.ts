@@ -9,8 +9,11 @@ import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_acti
 import type { CasesConnectorConfig, CasesConnectorSecrets } from './types';
 import { getCasesConnectorAdapter, getCasesConnectorType } from '.';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 
 describe('getCasesConnectorType', () => {
+  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
   let caseConnectorType: SubActionConnectorType<CasesConnectorConfig, CasesConnectorSecrets>;
 
   beforeEach(() => {
@@ -83,26 +86,26 @@ describe('getCasesConnectorType', () => {
     });
 
     it('sets the correct connectorTypeId', () => {
-      const adapter = getCasesConnectorAdapter({});
+      const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
       expect(adapter.connectorTypeId).toEqual('.cases');
     });
 
     describe('ruleActionParamsSchema', () => {
       it('validates getParams() correctly', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(adapter.ruleActionParamsSchema.validate(getParams())).toEqual(getParams());
       });
 
       it('throws if missing getParams()', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(() => adapter.ruleActionParamsSchema.validate({})).toThrow();
       });
 
       it('does not accept more than one groupingBy key', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(() =>
           adapter.ruleActionParamsSchema.validate(
@@ -112,7 +115,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('should fail with not valid time window', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(() =>
           adapter.ruleActionParamsSchema.validate(getParams({ timeWindow: '10d+3d' }))
@@ -122,7 +125,7 @@ describe('getCasesConnectorType', () => {
 
     describe('buildActionParams', () => {
       it('builds the action getParams() correctly', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(
           adapter.buildActionParams({
@@ -169,7 +172,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('builds the action getParams() and templateId correctly', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(
           adapter.buildActionParams({
@@ -216,7 +219,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('builds the action getParams() correctly without ruleUrl', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
         expect(
           adapter.buildActionParams({
             // @ts-expect-error: not all fields are needed
@@ -261,7 +264,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps observability consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         for (const consumer of [
           AlertConsumers.OBSERVABILITY,
@@ -285,7 +288,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps security solution consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         for (const consumer of [AlertConsumers.SIEM]) {
           const connectorParams = adapter.buildActionParams({
@@ -301,7 +304,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps stack consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         for (const consumer of [AlertConsumers.ML, AlertConsumers.STACK_ALERTS]) {
           const connectorParams = adapter.buildActionParams({
@@ -317,7 +320,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('fallback to the cases owner if the consumer is not in the mapping', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         const connectorParams = adapter.buildActionParams({
           // @ts-expect-error: not all fields are needed
@@ -331,7 +334,10 @@ describe('getCasesConnectorType', () => {
       });
 
       it('correctly fallsback to security owner if the project is serverless security', () => {
-        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+        const adapter = getCasesConnectorAdapter({
+          isServerlessSecurity: true,
+          logger: mockLogger,
+        });
 
         for (const consumer of [AlertConsumers.ML, AlertConsumers.STACK_ALERTS]) {
           const connectorParams = adapter.buildActionParams({
@@ -349,7 +355,7 @@ describe('getCasesConnectorType', () => {
 
     describe('getKibanaPrivileges', () => {
       it('constructs the correct privileges from the consumer', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(
           adapter.getKibanaPrivileges?.({
@@ -371,7 +377,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('constructs the correct privileges from the producer if the consumer is not found', () => {
-        const adapter = getCasesConnectorAdapter({});
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         expect(
           adapter.getKibanaPrivileges?.({
@@ -393,7 +399,10 @@ describe('getCasesConnectorType', () => {
       });
 
       it('correctly overrides the consumer and producer if the project is serverless security', () => {
-        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+        const adapter = getCasesConnectorAdapter({
+          isServerlessSecurity: true,
+          logger: mockLogger,
+        });
 
         expect(
           adapter.getKibanaPrivileges?.({
