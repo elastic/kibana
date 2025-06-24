@@ -43,7 +43,7 @@ test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
 
   test('validate annotation list', async ({ page }) => {
     await page.waitForSelector('text="Test annotation"');
-    await expect(await page.locator('.euiTableRow')).toHaveCount(1);
+    await expect(page.locator('.euiTableRow')).toHaveCount(1);
     await page.locator('.echAnnotation__marker').first().hover();
     await page.waitForSelector('text="Test annotation description"');
   });
@@ -78,6 +78,6 @@ test.describe('Annotations List', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.locator('.echAnnotation__marker').nth(1).click();
     await page.getByTestId('annotationDeleteButton').first().click();
     await page.getByTestId('toastCloseButton').click();
-    await expect(await page.locator('.echAnnotation__marker')).toHaveCount(1);
+    await expect(page.locator('.echAnnotation__marker')).toHaveCount(1);
   });
 });
