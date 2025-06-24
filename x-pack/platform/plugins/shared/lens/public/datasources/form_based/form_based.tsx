@@ -169,7 +169,7 @@ export function columnToOperation(
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
-    label: uniqueLabel || label,
+    label: uniqueLabel || label || '',
     isStaticValue: operationType === 'static_value',
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),

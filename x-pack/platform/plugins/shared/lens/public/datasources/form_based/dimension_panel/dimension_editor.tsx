@@ -1182,7 +1182,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           <>
             {!incompleteInfo && selectedColumn && temporaryState === 'none' && (
               <NameInput
-                value={selectedColumn.label}
+                value={selectedColumn.label ?? ''}
                 defaultValue={defaultLabel}
                 onChange={(value) => {
                   updateLayer({

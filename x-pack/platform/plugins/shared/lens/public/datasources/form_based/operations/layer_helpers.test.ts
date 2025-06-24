@@ -2196,7 +2196,7 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: ['metric', 'ref'],
           columns: {
-            metric: { ...expectedColumn, label: 'Avg', customLabel: true },
+            metric: { ...expectedColumn, label: 'Avg' },
             ref: {
               label: 'Reference',
               dataType: 'number',

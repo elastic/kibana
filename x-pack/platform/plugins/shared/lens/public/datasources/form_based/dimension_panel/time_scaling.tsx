@@ -33,7 +33,7 @@ export function setTimeScaling(
   const label =
     currentColumn.label ??
     adjustTimeScaleLabelSuffix(
-      currentColumn.label,
+      currentColumn.label ?? '',
       currentColumn.timeScale,
       timeScale,
       currentColumn.timeShift,

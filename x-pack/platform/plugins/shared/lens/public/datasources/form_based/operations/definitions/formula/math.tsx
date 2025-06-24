@@ -43,7 +43,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
         function: 'mathColumn',
         arguments: {
           id: [columnId],
-          name: [column.label],
+          name: [column.label ?? ''],
           expression: [astToString(column.params.tinymathAst)],
           onError: ['null'],
           // cast everything into number

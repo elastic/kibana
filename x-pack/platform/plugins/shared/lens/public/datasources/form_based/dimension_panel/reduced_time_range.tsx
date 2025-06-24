@@ -32,7 +32,7 @@ export function setReducedTimeRange(
   const label =
     currentColumn.label ??
     adjustTimeScaleLabelSuffix(
-      currentColumn.label,
+      currentColumn.label ?? '',
       currentColumn.timeScale,
       currentColumn.timeScale,
       currentColumn.timeShift,
