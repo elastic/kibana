@@ -1,6 +1,6 @@
 # @kbn/elapsed-datetime-formatter
 
-This package is intended to show the elapsed time from a provided date in days or hours and minutes. It also provides the ability to show a tooltip with the original timestamp in ISO format.
+This package is intended to show the elapsed time from a provided date in days or hours and minutes. It also provides the ability to show a tooltip with the original timestamp in a readable format.
 
 ## Examples
 
