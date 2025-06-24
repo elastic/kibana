@@ -239,7 +239,7 @@ export class PrivilegeMonitoringDataClient {
     const { indices } = await this.esClient.fieldCaps({
       index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
       types: ['keyword'],
-      fields: ['user.name.keyword'], // search for indices with field 'user.name.keyword' of type 'keyword'
+      fields: ['user.name'],
       include_unmapped: false,
       ignore_unavailable: true,
       allow_no_indices: true,
@@ -251,7 +251,7 @@ export class PrivilegeMonitoringDataClient {
           must: [
             {
               exists: {
-                field: 'user.name.keyword',
+                field: 'user.name',
               },
             },
           ],
@@ -720,7 +720,7 @@ export class PrivilegeMonitoringDataClient {
       index: indexName,
       size: batchSize,
       _source: ['user.name'],
-      sort: [{ 'user.name.keyword': 'asc' }],
+      sort: [{ 'user.name': 'asc' }],
       search_after: searchAfter,
       query,
     });
