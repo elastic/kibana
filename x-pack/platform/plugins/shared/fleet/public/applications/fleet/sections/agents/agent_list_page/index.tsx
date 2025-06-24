@@ -9,6 +9,7 @@ import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
 
 import type { Agent } from '../../../types';
 
@@ -86,7 +87,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   // migrateAgentState
-  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
+  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
   const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
@@ -179,8 +181,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  const openMigrateFlyout = (agent: Agent) => {
-    setAgentToMigrate(agent);
+  const openMigrateFlyout = (agents: Agent[]) => {
+    const protectedAgents = agents.filter(
+      (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+    );
+    const fleetAgents = agents.filter((agent) =>
+      agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+        (p) => p.package?.name === FLEET_SERVER_PACKAGE
+      )
+    );
+
+    const unallowedAgents = [...protectedAgents, ...fleetAgents];
+    setProtectedAndFleetAgents(unallowedAgents);
+    setAgentsToMigrate(agents.filter((agent) => !unallowedAgents.some((a) => a.id === agent.id)));
     setMigrateFlyoutOpen(true);
   };
 
@@ -206,7 +219,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
-        onMigrateAgentClick={() => openMigrateFlyout(agent)}
+        onMigrateAgentClick={() => openMigrateFlyout([agent])}
       />
     );
   };
@@ -410,13 +423,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       {migrateFlyoutOpen && (
         <EuiPortal>
           <AgentMigrateFlyout
-            agents={[agentToMigrate]}
+            agents={agentsToMigrate ?? []}
+            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
             onClose={() => {
-              setAgentToMigrate(undefined);
+              setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
               setMigrateFlyoutOpen(false);
             }}
             onSave={() => {
-              setAgentToMigrate(undefined);
+              setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
               setMigrateFlyoutOpen(false);
               refreshAgents();
             }}
@@ -475,6 +491,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}
+        onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

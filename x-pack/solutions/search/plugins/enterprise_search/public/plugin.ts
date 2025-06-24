@@ -91,7 +91,7 @@ export interface PluginsStart {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
-  searchNavigation?: SearchNavigationPluginStart;
+  searchNavigation: SearchNavigationPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
@@ -489,22 +489,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         })
       );
     });
-    if (plugins.searchNavigation !== undefined) {
-      // while we have ent-search apps in the side nav, we need to provide access
-      // to the base set of classic side nav items to the search-navigation plugin.
-      import('./applications/shared/layout/base_nav').then(({ buildBaseClassicNavItems }) => {
-        plugins.searchNavigation?.setGetBaseClassicNavItems(() => {
-          return buildBaseClassicNavItems();
-        });
-      });
-
-      // This is needed so that we can fetch product access for plugins
-      // that need to share the classic nav. This can be removed when we
-      // remove product access and ent-search apps.
-      plugins.searchNavigation.registerOnAppMountHandler(async () => {
-        return this.getInitialData(core.http);
-      });
-    }
 
     this.licenseSubscription = plugins.licensing?.license$.subscribe((license) => {
       if (hasEnterpriseLicense(license)) {
