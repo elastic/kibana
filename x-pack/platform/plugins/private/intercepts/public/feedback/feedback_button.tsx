@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
