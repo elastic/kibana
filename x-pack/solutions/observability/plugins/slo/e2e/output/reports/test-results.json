@@ -1,0 +1,865 @@
+{
+  "config": {
+    "configFile": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/playwright.config.ts",
+    "rootDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "./output/reports",
+          "open": "never"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "./output/reports/test-results.json"
+        }
+      ],
+      [
+        "null",
+        null
+      ],
+      [
+        "null",
+        null
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "local",
+        "name": "local",
+        "testDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "ech",
+        "name": "ech",
+        "testDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      },
+      {
+        "outputDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "mki",
+        "name": "mki",
+        "testDir": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.53.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "annotation_list.spec.ts",
+      "file": "annotation_list.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Annotations List",
+          "file": "annotation_list.spec.ts",
+          "line": 13,
+          "column": 6,
+          "specs": [
+            {
+              "title": "create an annotation",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5627,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [logger] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] Reading test servers configuration from file: /Users/shahzad/elastic/kibana/.scout/servers/local.json\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnClient] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnUrl] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [esClient] loaded\n"
+                        },
+                        {
+                          "text": "http://localhost:5620/ this.kibanaUrl\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Starting index to http://localhost:9220 with a payload size of 10000 using 5 workers to index 1 events per cycle\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing base component template: kbn-data-forge_base\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index templates (logs-admin-console@template,logs-message_processor@template,logs-mongodb@template,logs-nginx_proxy@template,logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-admin-console@template (admin-console_8.0.0_base,admin-console_8.0.0_event,admin-console_8.0.0_http,admin-console_8.0.0_url,admin-console_8.0.0_user,admin-console_8.0.0_user_agent,admin-console_8.0.0_log,admin-console_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-admin-console@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-message_processor@template (message_processor_8.0.0_base,message_processor_8.0.0_log,message_processor_8.0.0_host,message_processor_8.0.0_processor)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-message_processor@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-mongodb@template (mongodb_8.0.0_base,mongodb_8.0.0_log,mongodb_8.0.0_host,mongodb_8.0.0_mongodb)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-mongodb@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-nginx_proxy@template (nginx_proxy_8.0.0_base,nginx_proxy_8.0.0_log,nginx_proxy_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-nginx_proxy@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-heartbeat@template (heartbeat_8.0.0_base,heartbeat_8.0.0_log,heartbeat_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing Kibana assets for fake_stack\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/assets/heartbeat.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/assets/mongodb.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/assets/nginx_proxy.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 5 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/assets/transaction_rates.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 3 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/assets/message_processor.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 8 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/assets/admin_console.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing \"good\" events from 2025-06-24T09:02:00.000Z to 2025-06-24T09:27:04.814Z\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing complete for good events.\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m { took: 205, latency: 168, indexed: 1525 } Indexing 1525 documents.\n"
+                        },
+                        {
+                          "text": "[\n  \u001b[32m'kbn-data-forge-fake_stack.admin-console-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.mongodb-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.nginx_proxy-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.message_processor-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.heartbeat-2025-06-01'\u001b[39m\n]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Requesting url (redacted): [http://localhost:5620/api/observability/slos]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [samlAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Creating new local SAML session for role 'admin'\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:17:04.295Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-8097e15c28b28df88a7b",
+              "file": "annotation_list.spec.ts",
+              "line": 31,
+              "column": 7
+            },
+            {
+              "title": "validate annotation list",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2850,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:17:13.109Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-ec74f05e962647a44dce",
+              "file": "annotation_list.spec.ts",
+              "line": 44,
+              "column": 7
+            },
+            {
+              "title": "Go to slos",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3676,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:17:15.964Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-9570a860d67b1e6d97b3",
+              "file": "annotation_list.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "check that annotation is displayed",
+              "ok": false,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60090,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts",
+                            "column": 57,
+                            "line": 60
+                          },
+                          "message": "Error: locator.hover: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.echAnnotation__marker').nth(1)\u001b[22m\n\n\n\u001b[0m \u001b[90m 58 |\u001b[39m\n \u001b[90m 59 |\u001b[39m   test(\u001b[32m'check that annotation is displayed'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 60 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m)\u001b[33m.\u001b[39mnth(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mhover()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 61 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'text=\"Test annotation description\"'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 62 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 63 |\u001b[39m\u001b[0m\n\u001b[2m    at /Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts:60:57\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:17:19.644Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts/annotation_list-Annotation-32348-hat-annotation-is-displayed-local/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts/annotation_list-Annotation-32348-hat-annotation-is-displayed-local/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-7cd32803416b82254ab6",
+              "file": "annotation_list.spec.ts",
+              "line": 59,
+              "column": 7
+            },
+            {
+              "title": "update annotation",
+              "ok": false,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60065,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts",
+                            "column": 57,
+                            "line": 65
+                          },
+                          "message": "Error: locator.click: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.echAnnotation__marker').nth(1)\u001b[22m\n\n\n\u001b[0m \u001b[90m 63 |\u001b[39m\n \u001b[90m 64 |\u001b[39m   test(\u001b[32m'update annotation'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 65 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m)\u001b[33m.\u001b[39mnth(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 66 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'annotationTitle'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'Updated annotation'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 67 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'annotationTitle'\u001b[39m)\u001b[33m.\u001b[39mblur()\u001b[33m;\u001b[39m\n \u001b[90m 68 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'annotationMessage'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'Updated annotation description'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at /Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts:65:57\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [logger] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] Reading test servers configuration from file: /Users/shahzad/elastic/kibana/.scout/servers/local.json\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnClient] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnUrl] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [esClient] loaded\n"
+                        },
+                        {
+                          "text": "http://localhost:5620/ this.kibanaUrl\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Starting index to http://localhost:9220 with a payload size of 10000 using 5 workers to index 1 events per cycle\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing base component template: kbn-data-forge_base\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index templates (logs-admin-console@template,logs-message_processor@template,logs-mongodb@template,logs-nginx_proxy@template,logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-admin-console@template (admin-console_8.0.0_base,admin-console_8.0.0_event,admin-console_8.0.0_http,admin-console_8.0.0_url,admin-console_8.0.0_user,admin-console_8.0.0_user_agent,admin-console_8.0.0_log,admin-console_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-admin-console@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-message_processor@template (message_processor_8.0.0_base,message_processor_8.0.0_log,message_processor_8.0.0_host,message_processor_8.0.0_processor)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-message_processor@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-mongodb@template (mongodb_8.0.0_base,mongodb_8.0.0_log,mongodb_8.0.0_host,mongodb_8.0.0_mongodb)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-mongodb@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-nginx_proxy@template (nginx_proxy_8.0.0_base,nginx_proxy_8.0.0_log,nginx_proxy_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-nginx_proxy@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-heartbeat@template (heartbeat_8.0.0_base,heartbeat_8.0.0_log,heartbeat_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing Kibana assets for fake_stack\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/assets/mongodb.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/assets/nginx_proxy.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 3 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/assets/message_processor.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 5 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/assets/transaction_rates.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/assets/heartbeat.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 8 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/assets/admin_console.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing \"good\" events from 2025-06-24T09:03:00.000Z to 2025-06-24T09:28:23.116Z\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing complete for good events.\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m { took: 204, latency: 144, indexed: 1530 } Indexing 1530 documents.\n"
+                        },
+                        {
+                          "text": "[\n  \u001b[32m'kbn-data-forge-fake_stack.admin-console-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.mongodb-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.nginx_proxy-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.message_processor-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.heartbeat-2025-06-01'\u001b[39m\n]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Requesting url (redacted): [http://localhost:5620/api/observability/slos]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [samlAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Creating new local SAML session for role 'admin'\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:18:22.476Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts/annotation_list-Annotations-List-update-annotation-local/test-failed-1.png"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts/annotation_list-Annotations-List-update-annotation-local/error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-323f1fc61c36bca6d7e5",
+              "file": "annotation_list.spec.ts",
+              "line": 64,
+              "column": 7
+            },
+            {
+              "title": "delete annotation",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "interrupted",
+                      "duration": 19379,
+                      "error": {
+                        "message": "Error: locator.click: Test ended.\nCall log:\n\u001b[2m  - waiting for locator('.echAnnotation__marker').nth(1)\u001b[22m\n",
+                        "stack": "Error: locator.click: Test ended.\nCall log:\n\u001b[2m  - waiting for locator('.echAnnotation__marker').nth(1)\u001b[22m\n\n    at /Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts:78:57",
+                        "location": {
+                          "file": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts",
+                          "column": 57,
+                          "line": 78
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 76 |\u001b[39m\n \u001b[90m 77 |\u001b[39m   test(\u001b[32m'delete annotation'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 78 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m)\u001b[33m.\u001b[39mnth(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 79 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'annotationDeleteButton'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 80 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'toastCloseButton'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 81 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m1\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts",
+                            "column": 57,
+                            "line": 78
+                          },
+                          "message": "Error: locator.click: Test ended.\nCall log:\n\u001b[2m  - waiting for locator('.echAnnotation__marker').nth(1)\u001b[22m\n\n\n\u001b[0m \u001b[90m 76 |\u001b[39m\n \u001b[90m 77 |\u001b[39m   test(\u001b[32m'delete annotation'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 78 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m)\u001b[33m.\u001b[39mnth(\u001b[35m1\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 79 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'annotationDeleteButton'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 80 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByTestId(\u001b[32m'toastCloseButton'\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 81 |\u001b[39m     \u001b[36mawait\u001b[39m expect(\u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'.echAnnotation__marker'\u001b[39m))\u001b[33m.\u001b[39mtoHaveCount(\u001b[35m1\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at /Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts:78:57\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [logger] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] Reading test servers configuration from file: /Users/shahzad/elastic/kibana/.scout/servers/local.json\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [config] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnClient] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [kbnUrl] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [esClient] loaded\n"
+                        },
+                        {
+                          "text": "http://localhost:5620/ this.kibanaUrl\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Starting index to http://localhost:9220 with a payload size of 10000 using 5 workers to index 1 events per cycle\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing base component template: kbn-data-forge_base\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index templates (logs-admin-console@template,logs-message_processor@template,logs-mongodb@template,logs-nginx_proxy@template,logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-admin-console@template (admin-console_8.0.0_base,admin-console_8.0.0_event,admin-console_8.0.0_http,admin-console_8.0.0_url,admin-console_8.0.0_user,admin-console_8.0.0_user_agent,admin-console_8.0.0_log,admin-console_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-admin-console@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-message_processor@template (message_processor_8.0.0_base,message_processor_8.0.0_log,message_processor_8.0.0_host,message_processor_8.0.0_processor)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-message_processor@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-mongodb@template (mongodb_8.0.0_base,mongodb_8.0.0_log,mongodb_8.0.0_host,mongodb_8.0.0_mongodb)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-mongodb@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-nginx_proxy@template (nginx_proxy_8.0.0_base,nginx_proxy_8.0.0_log,nginx_proxy_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-nginx_proxy@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing components for logs-heartbeat@template (heartbeat_8.0.0_base,heartbeat_8.0.0_log,heartbeat_8.0.0_host)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing index template (logs-heartbeat@template)\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Installing Kibana assets for fake_stack\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/mongodb/assets/mongodb.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 3 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/message_processor/assets/message_processor.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/heartbeat/assets/heartbeat.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 1 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/nginx_proxy/assets/nginx_proxy.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 5 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/assets/transaction_rates.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Imported 8 saved objects from \"/Users/shahzad/elastic/kibana/x-pack/platform/packages/shared/kbn-data-forge/src/data_sources/fake_stack/admin_console/assets/admin_console.ndjson\" into Kibana\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing \"good\" events from 2025-06-24T09:04:00.000Z to 2025-06-24T09:29:28.399Z\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m Indexing complete for good events.\n"
+                        },
+                        {
+                          "text": " \u001b[34minfo\u001b[39m { took: 204, latency: 152, indexed: 1538 } Indexing 1538 documents.\n"
+                        },
+                        {
+                          "text": "[\n  \u001b[32m'kbn-data-forge-fake_stack.admin-console-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.mongodb-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.nginx_proxy-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.message_processor-2025-06-01'\u001b[39m,\n  \u001b[32m'kbn-data-forge-fake_stack.heartbeat-2025-06-01'\u001b[39m\n]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Requesting url (redacted): [http://localhost:5620/api/observability/slos]\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [scoutPage] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [pageObjects] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [samlAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] [browserAuth] loaded\n"
+                        },
+                        {
+                          "text": " \u001b[2mdebg\u001b[22m [scout-worker] Creating new local SAML session for role 'admin'\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-24T09:19:27.976Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/output/test-artifacts/annotation_list-Annotations-List-delete-annotation-local/test-failed-1.png"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/shahzad/elastic/kibana/x-pack/solutions/observability/plugins/slo/e2e/tests/annotation_list.spec.ts",
+                        "column": 57,
+                        "line": 78
+                      }
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "753d39b3d5cbd56f3b48-bdca0556a5b55c545ae4",
+              "file": "annotation_list.spec.ts",
+              "line": 77,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "slos_overview.spec.ts",
+      "file": "slos_overview.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "SLOs Overview",
+          "file": "slos_overview.spec.ts",
+          "line": 13,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Go to slos overview",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b636c71d7a2d9ea0838e-bed1290c05fc49335481",
+              "file": "slos_overview.spec.ts",
+              "line": 29,
+              "column": 7
+            },
+            {
+              "title": "validate data retention tab",
+              "ok": true,
+              "tags": [
+                "ess",
+                "svlOblt"
+              ],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "local",
+                  "projectName": "local",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b636c71d7a2d9ea0838e-d8d51d1fc58ab47fa099",
+              "file": "slos_overview.spec.ts",
+              "line": 35,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-06-24T09:17:02.216Z",
+    "duration": 167210.686,
+    "expected": 3,
+    "skipped": 3,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}
