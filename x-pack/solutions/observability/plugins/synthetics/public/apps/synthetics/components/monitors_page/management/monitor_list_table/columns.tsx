@@ -179,7 +179,7 @@ export function useMonitorListColumns({
         defaultMessage: 'Spaces',
       }),
       field: 'spaces',
-      sortable: true,
+      sortable: false,
       render: (monSpaces: string[]) => {
         return (
           <LazySpaceList
