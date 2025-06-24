@@ -18,7 +18,6 @@ import type {
   SerializedFilterQuery,
   TimelineEventsType,
   KueryFilterQuery,
-  TimelineTabs,
 } from '../../../common/types/timeline';
 import type {
   RowRendererId,

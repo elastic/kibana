@@ -73,7 +73,7 @@ export type SecuritySolutionFeature =
 export type DiscoverFeature =
   | StreamsFeature
   | ObservabilityLogsAIAssistantFeature
-  | ObservabilityCreateSLOFeature;
+  | ObservabilityCreateSLOFeature
   | SecuritySolutionFeature;
 
 /**
