@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  AttackDiscovery,
-  AttackDiscoveryAlert,
-  Replacements,
+import {
+  getAttackDiscoveryMarkdown,
+  type AttackDiscovery,
+  type AttackDiscoveryAlert,
+  type Replacements,
 } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
@@ -19,7 +20,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { getAttackDiscoveryMarkdown } from '../attack_discovery_panel/get_attack_discovery_markdown/get_attack_discovery_markdown';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useViewInAiAssistant } from '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
