@@ -6,59 +6,34 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
-import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
 import { getAnomaliesDetectedEsqlQuery } from './esql_query';
-import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
-import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
-
-const LENS_VISUALIZATION_HEIGHT = 126;
-const LENS_VISUALIZATION_MIN_WIDTH = 160;
+import { KeyInsightsTile } from '../common/key_insights_tile';
 
 export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
-  const filterQuery = useEsqlGlobalFilterQuery();
-  const timerange = useGlobalTime();
-  const currentSpaceId = useSpaceId();
-
-  const esqlQuery = getAnomaliesDetectedEsqlQuery(spaceId || currentSpaceId || 'default');
-  const anomaliesDetectedLensAttributes = createKeyInsightsPanelLensAttributes({
-    title: 'Anomalies Detected',
-    label: 'Anomalies Detected',
-    esqlQuery,
-    filterQuery,
-  });
-
   return (
-    <EuiFlexItem grow={false}>
-      <div
-        css={css`
-          height: ${LENS_VISUALIZATION_HEIGHT}px;
-          min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
-          width: auto;
-          display: inline-block;
-        `}
-      >
-        <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={true}
-          applyPageAndTabsFilters={true}
-          lensAttributes={anomaliesDetectedLensAttributes}
-          id="privileged-user-monitoring-anomalies-detected"
-          timerange={timerange}
-          width="auto"
-          height={LENS_VISUALIZATION_HEIGHT}
-          disableOnClickFilter
-          inspectTitle={
-            <FormattedMessage
-              id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"
-              defaultMessage="Anomalies detected"
-            />
-          }
+    <KeyInsightsTile
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.anomaliesDetected.title"
+          defaultMessage="Anomalies Detected"
         />
-      </div>
-    </EuiFlexItem>
+      }
+      label={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.anomaliesDetected.label"
+          defaultMessage="Anomalies Detected"
+        />
+      }
+      getEsqlQuery={getAnomaliesDetectedEsqlQuery}
+      id="privileged-user-monitoring-anomalies-detected"
+      spaceId={spaceId}
+      inspectTitle={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.anomaliesDetected.inspectTitle"
+          defaultMessage="Anomalies detected"
+        />
+      }
+    />
   );
 };

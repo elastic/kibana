@@ -8,6 +8,7 @@
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { KeyInsightsPanel } from './components/key_insights_panel';
@@ -20,10 +21,14 @@ export interface OnboardingCallout {
 
 export const PrivilegedUserMonitoring = ({
   callout,
+  error,
   onManageUserClicked,
+  sourcererDataView,
 }: {
   callout?: OnboardingCallout;
+  error?: string;
   onManageUserClicked: () => void;
+  sourcererDataView: DataViewSpec;
 }) => {
   const spaceId = useSpaceId();
 
@@ -35,6 +40,20 @@ export const PrivilegedUserMonitoring = ({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
+        {error && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.errorTitle"
+                defaultMessage="Error loading privileged user monitoring data"
+              />
+            }
+            color="danger"
+            iconType="cross"
+          >
+            <p>{error}</p>
+          </EuiCallOut>
+        )}
         {callout && !dismissCallout && (
           <EuiCallOut
             title={
@@ -83,7 +102,7 @@ export const PrivilegedUserMonitoring = ({
       </EuiFlexItem>
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
-        <UserActivityPrivilegedUsersPanel />
+        <UserActivityPrivilegedUsersPanel sourcererDataView={sourcererDataView} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>

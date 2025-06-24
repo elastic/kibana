@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
+import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
 
 export const getGrantedRightsEsqlCount = (namespace: string) => {
   return `FROM logs-* METADATA _id, _index
@@ -22,10 +22,5 @@ export const getGrantedRightsEsqlCount = (namespace: string) => {
     ) OR (
       okta.event_type IN ("group.user_membership.add",  "user.account.privilege.grant")
      )
-    | EVAL okta_privilege = MV_FIRST(okta.target.display_name)
-    | EVAL group_name = COALESCE(group.name, user.target.group.name, okta_privilege)
-    | EVAL host_ip = COALESCE(host.ip, source.ip)
-    | EVAL target_user = COALESCE(user.target.name, user.target.full_name, winlog.event_data.TargetUserName)
-    | EVAL privileged_user = COALESCE(source.user.name, user.name)
     | STATS COUNT(*)`;
 };

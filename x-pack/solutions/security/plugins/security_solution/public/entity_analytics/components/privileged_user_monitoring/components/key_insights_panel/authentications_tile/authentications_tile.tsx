@@ -6,56 +6,34 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAuthenticationsEsqlCount } from './esql_query';
-import { VisualizationEmbeddable } from '../../../../../../common/components/visualization_actions/visualization_embeddable';
-import { createKeyInsightsPanelLensAttributes } from '../common/lens_attributes';
-import { useEsqlGlobalFilterQuery } from '../../../../../../common/hooks/esql/use_esql_global_filter';
-import { useGlobalTime } from '../../../../../../common/containers/use_global_time';
-
-const LENS_VISUALIZATION_HEIGHT = 126;
-const LENS_VISUALIZATION_MIN_WIDTH = 160;
+import { KeyInsightsTile } from '../common/key_insights_tile';
 
 export const AuthenticationsTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
-  const filterQuery = useEsqlGlobalFilterQuery();
-  const timerange = useGlobalTime();
-
-  const authenticationsTileLensAttributes = createKeyInsightsPanelLensAttributes({
-    title: 'Authentications',
-    label: 'Authentications',
-    esqlQuery: getAuthenticationsEsqlCount(spaceId || 'default'),
-    filterQuery,
-  });
-
   return (
-    <EuiFlexItem grow={false}>
-      <div
-        css={css`
-          height: ${LENS_VISUALIZATION_HEIGHT}px;
-          min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
-          width: auto;
-          display: inline-block;
-        `}
-      >
-        <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={true}
-          applyPageAndTabsFilters={true}
-          lensAttributes={authenticationsTileLensAttributes}
-          id="privileged-user-monitoring-authentications"
-          timerange={timerange}
-          width="auto"
-          height={LENS_VISUALIZATION_HEIGHT}
-          disableOnClickFilter
-          inspectTitle={
-            <FormattedMessage
-              id="xpack.securitySolution.privmon.authentications.inspectTitle"
-              defaultMessage="Authentications"
-            />
-          }
+    <KeyInsightsTile
+      title={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.authentications.title"
+          defaultMessage="Authentications"
         />
-      </div>
-    </EuiFlexItem>
+      }
+      label={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.authentications.label"
+          defaultMessage="Authentications"
+        />
+      }
+      getEsqlQuery={getAuthenticationsEsqlCount}
+      id="privileged-user-monitoring-authentications"
+      spaceId={spaceId}
+      inspectTitle={
+        <FormattedMessage
+          id="xpack.securitySolution.privmon.authentications.inspectTitle"
+          defaultMessage="Authentications"
+        />
+      }
+    />
   );
 };

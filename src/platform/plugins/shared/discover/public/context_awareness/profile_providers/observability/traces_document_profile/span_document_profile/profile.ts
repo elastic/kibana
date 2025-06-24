@@ -22,7 +22,6 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
   apmErrorsContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
-  isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
