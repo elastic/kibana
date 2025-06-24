@@ -136,9 +136,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       return;
     }
 
-    if (engineStatus.isError && engineStatus.error.body.status_code === 404) {
-      return dispatch({ type: 'SHOW_ONBOARDING' });
-    } else {
+    if (engineStatus.isError) {
       const errorMessage = engineStatus.error?.body.message ?? engineStatus.data?.error?.message;
 
       return dispatch({
@@ -147,8 +145,15 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         error: errorMessage,
       });
     }
+
+    if (engineStatus.data?.status === 'not_found') {
+      return dispatch({ type: 'SHOW_ONBOARDING' });
+    } else {
+      return dispatch({ type: 'SHOW_DASHBOARD' });
+    }
   }, [
     engineStatus.data?.error?.message,
+    engineStatus.data?.status,
     engineStatus.error?.body,
     engineStatus.isError,
     engineStatus.isLoading,
