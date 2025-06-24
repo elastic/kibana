@@ -193,8 +193,8 @@ export const createMockEndpointAppContextServiceStartContract =
     const esClientMock = elasticsearchClientMock.createElasticsearchClient();
 
     // Mock some ES client methods that may be invoked through out most tests
-    esClientMock.indices.getFieldMapping.mockResolvedValue({
-      'some-index-name': { mappings: {} },
+    esClientMock.indices.getMapping.mockResolvedValue({
+      'some-index-name': { mappings: { properties: {} } },
     });
 
     esClientMock.cluster.existsComponentTemplate.mockResolvedValue(true);
