@@ -5,66 +5,64 @@
  * 2.0.
  */
 
-import { parseDuration } from './parse_date';
-
-interface ConfigByConnector {
-  lookBackWindow: string;
-  limit: number;
-}
+import { duration } from 'moment';
+import type { ConnectorRateLimiterConfig } from '../config';
 
 export class ConnectorRateLimiter {
   private logsByConnectors: Map<string, number[]>;
-  private readonly configsByConnectors: { [key: string]: ConfigByConnector };
+  private readonly config?: ConnectorRateLimiterConfig;
 
-  constructor() {
+  constructor({ config }: { config?: ConnectorRateLimiterConfig }) {
     this.logsByConnectors = new Map();
-    this.configsByConnectors = {};
-    this.configsByConnectors.email = {
-      lookBackWindow: '1m',
-      limit: 300,
-    };
+    this.config = config;
   }
 
   log(connectorTypeId: string) {
-    const connector = this.trimLeadingDot(connectorTypeId);
-    const now = Date.now();
-    if (!this.logsByConnectors.has(connector)) {
-      this.logsByConnectors.set(connector, []);
+    if (!this.config) {
+      return;
     }
-    this.logsByConnectors.get(connector)!.push(now);
+    const trimmedConnectorTypeId = this.trimLeadingDot(connectorTypeId);
+    if (this.config[trimmedConnectorTypeId]) {
+      const now = Date.now();
+      if (!this.logsByConnectors.has(trimmedConnectorTypeId)) {
+        this.logsByConnectors.set(trimmedConnectorTypeId, []);
+      }
+      this.logsByConnectors.get(trimmedConnectorTypeId)!.push(now);
+    }
   }
 
   isRateLimited(connectorTypeId: string): boolean {
-    const connector = this.trimLeadingDot(connectorTypeId);
-    const count = this.getRequestCount(connector);
-    if (this.configsByConnectors[connector]) {
-      return count > this.configsByConnectors[connector].limit;
+    if (this.config) {
+      const trimmedConnectorTypeId = this.trimLeadingDot(connectorTypeId);
+      this.cleanupOldLogs(trimmedConnectorTypeId);
+      if (this.config[trimmedConnectorTypeId]) {
+        const count = this.getLogs(trimmedConnectorTypeId).length;
+        return count > this.config[trimmedConnectorTypeId].limit;
+      }
     }
     return false;
   }
 
-  private getRequestCount(connectorTypeId: string) {
-    const connector = this.trimLeadingDot(connectorTypeId);
-    const now = Date.now();
-    this.cleanupOldLogs({ connectorTypeId: connector, now });
-    return this.logsByConnectors.get(connector)?.length || 0;
+  getLogs(connectorTypeId: string): number[] {
+    return this.logsByConnectors.get(this.trimLeadingDot(connectorTypeId)) || [];
   }
 
-  private cleanupOldLogs({ connectorTypeId, now }: { connectorTypeId: string; now: number }) {
-    const connector = this.trimLeadingDot(connectorTypeId);
-    const connectorConfig = this.configsByConnectors[connector];
+  private cleanupOldLogs(connectorTypeId: string) {
+    const connectorConfig = this.config?.[connectorTypeId];
     if (connectorConfig) {
-      const cutoff = now - parseDuration(connectorConfig.lookBackWindow);
-      const filtered = this.logsByConnectors.get(connector)?.filter((ts) => ts >= cutoff) || [];
+      const now = Date.now();
+      const cutoff = now - duration(connectorConfig.lookbackWindow).asMilliseconds();
+      const filtered =
+        this.logsByConnectors.get(connectorTypeId)?.filter((ts) => ts >= cutoff) || [];
       if (filtered.length > 0) {
-        this.logsByConnectors.set(connector, filtered);
+        this.logsByConnectors.set(connectorTypeId, filtered);
       } else {
-        this.logsByConnectors.delete(connector);
+        this.logsByConnectors.delete(connectorTypeId);
       }
     }
   }
 
-  private trimLeadingDot(connectorTypeId: string) {
+  private trimLeadingDot(connectorTypeId: string): string {
     if (connectorTypeId.charAt(0) === '.') {
       return connectorTypeId.replace(/^\./, '');
     }

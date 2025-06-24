@@ -81,6 +81,23 @@ const enabledConnectorTypesSchema = schema.arrayOf(
   }
 );
 
+const rateLimiterSchema = schema.recordOf(
+  schema.string({
+    validate: (value) => {
+      const validConnectorTypeIds = new Set(['email']);
+      if (!validConnectorTypeIds.has(value)) {
+        return `Rate limiter configuration for connector type "${value}" is not supported. Supported types: ${Array.from(
+          validConnectorTypeIds
+        ).join(', ')}`;
+      }
+    },
+  }),
+  schema.object({
+    lookbackWindow: schema.duration({ defaultValue: '15m' }),
+    limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
+  })
+);
+
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
@@ -167,10 +184,12 @@ export const configSchema = schema.object({
       })
     ),
   }),
+  rateLimiter: schema.maybe(rateLimiterSchema),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
+export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

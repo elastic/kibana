@@ -52,7 +52,7 @@ import type { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { ConnectorRateLimiter } from './connector_rate_limiter';
+import type { ConnectorRateLimiter } from './connector_rate_limiter';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -114,9 +114,15 @@ export class ActionExecutor {
   private connectorRateLimiter: ConnectorRateLimiter;
   private actionInfo: ActionInfo | undefined;
 
-  constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
+  constructor({
+    isESOCanEncrypt,
+    connectorRateLimiter,
+  }: {
+    isESOCanEncrypt: boolean;
+    connectorRateLimiter: ConnectorRateLimiter;
+  }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
-    this.connectorRateLimiter = new ConnectorRateLimiter();
+    this.connectorRateLimiter = connectorRateLimiter;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -406,16 +412,11 @@ export class ActionExecutor {
         }
 
         if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
-          const error = createTaskRunError(
-            new Error(`Action execution rate limit exceeded for connector: ${actionTypeId}`),
-            TaskErrorSource.USER
-          );
-          logger.warn(error.message);
           return {
             actionId,
             status: 'error',
-            message: error.message,
-            retry: false,
+            message: `Action execution rate limit exceeded for connector: ${actionTypeId}`,
+            retry: true,
             errorSource: TaskErrorSource.USER,
           };
         }

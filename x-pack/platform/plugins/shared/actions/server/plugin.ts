@@ -102,6 +102,7 @@ import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_act
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
+import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 
 export interface PluginSetupContract {
   registerType<
@@ -250,6 +251,7 @@ export class ActionsPlugin
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
+      connectorRateLimiter: new ConnectorRateLimiter({ config: this.actionsConfig.rateLimiter }),
     });
 
     // get executions count
