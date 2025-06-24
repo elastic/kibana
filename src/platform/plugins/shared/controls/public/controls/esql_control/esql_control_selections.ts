@@ -46,7 +46,7 @@ export const selectionComparators: StateComparators<
 
 export function initializeESQLControlSelections(
   initialState: ESQLControlState,
-  parentApi: ControlGroupApi
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -77,8 +77,7 @@ export function initializeESQLControlSelections(
       availableOptions$.next(options);
     }
   }
-  updateAvailableOptions();
-  const reloadSubscription = parentApi.reload$?.subscribe(updateAvailableOptions);
+  const fetchSubscription = controlFetch$.subscribe(updateAvailableOptions);
 
   // derive ESQL control variable from state.
   const getEsqlVariable = () => ({
@@ -98,7 +97,7 @@ export function initializeESQLControlSelections(
   return {
     cleanup: () => {
       variableSubscriptions.unsubscribe();
-      reloadSubscription?.unsubscribe();
+      fetchSubscription.unsubscribe();
     },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
