@@ -20,6 +20,7 @@ import {
 } from '../../../common/types';
 
 import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
@@ -92,6 +93,9 @@ describe('Agentless Agent service', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
     (axios as jest.MockedFunction<typeof axios>).mockReset();
+    jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
+      outputs: { agentless: {} as any },
+    } as any);
     jest.clearAllMocks();
   });
 
@@ -116,6 +120,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -185,6 +193,13 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
         }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
@@ -212,6 +227,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest
@@ -270,7 +289,7 @@ describe('Agentless Agent service', () => {
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -281,7 +300,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -308,6 +334,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest
@@ -374,7 +404,7 @@ describe('Agentless Agent service', () => {
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -391,7 +421,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -418,6 +455,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest
@@ -488,7 +529,7 @@ describe('Agentless Agent service', () => {
     expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -509,7 +550,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -535,6 +583,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -609,6 +661,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -643,6 +699,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -683,6 +743,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest
@@ -722,6 +786,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -840,6 +908,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -904,6 +976,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -964,6 +1040,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
 
@@ -997,6 +1077,10 @@ describe('Agentless Agent service', () => {
               certificate: '/path/to/cert',
               key: '/path/to/key',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1047,6 +1131,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1084,6 +1172,10 @@ describe('Agentless Agent service', () => {
               certificate: '/path/to/cert',
               key: '/path/to/key',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1125,6 +1217,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1186,6 +1282,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1245,6 +1345,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1306,6 +1410,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1365,6 +1473,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1426,6 +1538,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1486,6 +1602,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1545,6 +1665,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);

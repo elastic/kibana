@@ -101,13 +101,11 @@ export function UnmanagedElasticsearchAssets({
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
-                defaultMessage:
-                  'Use composable index and components templates to automatically apply settings, mappings, and aliases to indices',
-              })}
-            </p>
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.streams.streamDetailView.unmanagedStreamOverview', {
+              defaultMessage:
+                'Use composable index and component templates to automatically apply settings, mappings, and aliases to indices',
+            })}
           </EuiText>
         </EuiFlexItem>
 
