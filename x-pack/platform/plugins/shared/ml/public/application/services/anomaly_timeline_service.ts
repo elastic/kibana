@@ -335,22 +335,7 @@ export class AnomalyTimelineService {
     Object.entries(scoresByTime).forEach(([timeMs, score]) => {
       const time = +timeMs / 1000;
 
-      // Always include points with score 0, or filter based on selected severity thresholds
-      // This handles non-contiguous ranges like [0-3, 75+] where API filtering by min
-      // would return all scores, but we only want specific ranges
-      const shouldIncludePoint =
-        score === 0 ||
-        selectedSeverity.length === 0 ||
-        selectedSeverity.some((threshold) => {
-          const minScore = threshold.min;
-          const maxScore = threshold.max;
-
-          if (maxScore !== undefined) {
-            return score >= minScore && score <= maxScore;
-          } else {
-            return score >= minScore;
-          }
-        });
+      const shouldIncludePoint = this.shouldIncludePointByScore(score, selectedSeverity);
 
       if (shouldIncludePoint) {
         dataset.points.push({
@@ -434,5 +419,32 @@ export class AnomalyTimelineService {
     }
 
     return dataset;
+  }
+
+  /**
+   * Determines if a point should be included based on its score and selected severity thresholds
+   * @param score - The anomaly score
+   * @param selectedSeverity - Array of selected severity thresholds
+   * @returns True if the point should be included in the results
+   */
+  private shouldIncludePointByScore(score: number, selectedSeverity: SeverityThreshold[]): boolean {
+    // Always include points with score 0, or if no severity thresholds are selected
+    if (score === 0 || selectedSeverity.length === 0) {
+      return true;
+    }
+
+    // Filter based on selected severity thresholds
+    // This handles non-contiguous ranges like [0-3, 75+] where API filtering by min
+    // would return all scores, but we only want specific ranges
+    return selectedSeverity.some((threshold) => {
+      const minScore = threshold.min;
+      const maxScore = threshold.max;
+
+      if (maxScore !== undefined) {
+        return score >= minScore && score <= maxScore;
+      } else {
+        return score >= minScore;
+      }
+    });
   }
 }
