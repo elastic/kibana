@@ -49,10 +49,16 @@ export interface SpacesUsage {
   rules_in_spaces: number[];
 }
 
+export interface CustomizedFieldsStatus {
+  rules_with_missing_base_version: number;
+  customized_fields_breakdown: Array<{ field: string; count: number }>;
+}
+
 export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  detection_rule_customized_fields_status: CustomizedFieldsStatus;
   spaces_usage: SpacesUsage;
 }
 

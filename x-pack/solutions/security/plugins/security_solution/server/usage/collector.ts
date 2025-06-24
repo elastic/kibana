@@ -3489,6 +3489,28 @@ export const registerCollector: RegisterCollector = ({
               },
             },
           },
+          detection_rules_customization_status: {
+            rules_with_missing_base_version: {
+              type: 'long',
+              _meta: { description: 'Number of rules with missing base version' },
+            },
+            customized_fields_breakdown: {
+              type: 'array',
+              items: {
+                field: {
+                  type: 'keyword',
+                  _meta: { description: 'Field name' },
+                },
+                count: {
+                  type: 'long',
+                  _meta: { description: 'Number of rules customizing this field' },
+                },
+              },
+              _meta: {
+                description: 'Breakdown of how many rules customized each field (field, count)',
+              },
+            },
+          },
         },
         ml_jobs: {
           ml_job_usage: {

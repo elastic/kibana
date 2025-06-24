@@ -315,6 +315,7 @@ export const getMockRuleSearchResponse = (
           tags: ['Elastic', 'Cloud', 'Azure', 'Continuous Monitoring', 'SecOps', 'Monitoring'],
           alertTypeId: 'siem.queryRule',
           consumer: 'siem',
+          revision: 4,
           params: {
             author: ['Elastic'],
             description:
@@ -333,6 +334,35 @@ export const getMockRuleSearchResponse = (
             outputIndex: '.siem-signals',
             maxSignals: 100,
             riskScore: 47,
+            riskScoreMapping: [],
+            severity: 'low',
+            severityMapping: [
+              {
+                field: 'kibana.alert.severity',
+                value: 'low',
+                operator: 'equals',
+                severity: 'low',
+              },
+            ],
+            threat: [
+              {
+                framework: 'MITRE ATT&CK',
+                tactic: {
+                  id: 'TA0040',
+                  name: 'Impact',
+                  reference: 'https://attack.mitre.org/tactics/TA0040/',
+                },
+                technique: [
+                  {
+                    id: 'T1564.001',
+                    name: 'Hide Artifacts: Indicator Removal on Host',
+                    reference: 'https://attack.mitre.org/techniques/T1564/001/',
+                  },
+                ],
+                reference:
+                  'https://attack.mitre.org/techniques/T1564/001/#mitigation-azure-activity-logs',
+              },
+            ],
             timestampOverride: 'event.ingested',
             to: 'now',
             type: 'query',
@@ -360,13 +390,27 @@ export const getMockRuleSearchResponse = (
           muteAll: true,
           mutedInstanceIds: [],
           monitoring: {
-            execution: {
+            run: {
               history: [],
               calculated_metrics: {
                 success_ratio: 1,
                 p99: 7981,
                 p50: 1653,
                 p95: 6523.699999999996,
+              },
+              last_run: {
+                outcome: 'succeeded' as 'succeeded',
+                outcomeOrder: 1,
+                warning: null,
+                outcomeMsg: ['Mocked last run'],
+                alertsCount: {
+                  active: 0,
+                  new: 0,
+                  recovered: 0,
+                  ignored: 0,
+                },
+                timestamp: new Date().toISOString(),
+                metrics: {},
               },
             },
           },

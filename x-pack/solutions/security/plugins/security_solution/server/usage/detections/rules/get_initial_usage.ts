@@ -13,6 +13,7 @@ import type {
   SingleEventMetric,
   AlertSuppressionUsage,
   SpacesUsage,
+  CustomizedFieldsStatus,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -146,6 +147,11 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
     legacy_investigation_fields: 0,
     alert_suppression: initialAlertSuppression,
   },
+});
+
+export const getInitialCustomizedFieldsStatus = (): CustomizedFieldsStatus => ({
+  rules_with_missing_base_version: 0,
+  customized_fields_breakdown: [],
 });
 
 /**
