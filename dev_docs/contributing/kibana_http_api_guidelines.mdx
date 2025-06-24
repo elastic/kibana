@@ -115,7 +115,9 @@ DELETE /api/resource/{id}         # Delete - remove an existing resource
 GET    /api/resource              # List - retrieve all resources (with pagination)
 ```
 
-The List operation is critical for Terraform's data source and import functionality.
+<DocCallOut title="Terraform import">
+  The "List" operation is critical for Terraform's data source and import functionality ([see the docs](https://developer.hashicorp.com/terraform/cli/import)).
+</DocCallOut>
 
 #### Implementation considerations
 
