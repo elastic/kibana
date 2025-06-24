@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './esql_query_to_options';
+export { esqlQueryToOptions } from './esql_query_to_options';

@@ -27,7 +27,7 @@ jest.mock('@kbn/presentation-controls', () => {
 });
 
 describe('ESQLControlApi', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.resetAllMocks();
   });
 
