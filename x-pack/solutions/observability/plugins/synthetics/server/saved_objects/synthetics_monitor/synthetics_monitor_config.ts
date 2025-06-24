@@ -25,6 +25,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
           values: { name: savedObject.attributes.name },
         }),
     },
+    modelVersions: {},
   };
 };
 

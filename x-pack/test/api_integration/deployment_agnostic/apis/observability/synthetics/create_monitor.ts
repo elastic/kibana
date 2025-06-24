@@ -31,10 +31,18 @@ export const addMonitorAPIHelper = async (
   statusCode = 200,
   roleAuthc: RoleCredentials,
   samlAuth: SamlAuthProviderType,
-  gettingStarted?: boolean
+  gettingStarted?: boolean,
+  savedObjectType?: string
 ) => {
+  let queryParams = savedObjectType ? `savedObjectType=${savedObjectType}` : '';
+  if (gettingStarted) {
+    queryParams = `?gettingStarted=true${queryParams}`;
+  } else if (queryParams) {
+    queryParams = `?${queryParams}`;
+  }
+
   const result = await supertestAPI
-    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + (gettingStarted ? '?gettingStarted=true' : ''))
+    .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + queryParams)
     .set(roleAuthc.apiKeyHeader)
     .set(samlAuth.getInternalRequestHeader())
     .send(monitor);

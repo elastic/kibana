@@ -30,7 +30,7 @@ import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_mo
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('PrivateLocationAddMonitor', function () {
+  describe('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
