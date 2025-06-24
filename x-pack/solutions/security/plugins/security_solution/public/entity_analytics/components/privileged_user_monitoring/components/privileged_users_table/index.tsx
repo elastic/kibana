@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   EuiBasicTable,
   EuiProgress,
+  EuiCallOut,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { take } from 'lodash/fp';
@@ -94,7 +95,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
   const {
     data: result,
     isLoading: loadingPrivilegedUsers,
-    error: privilegedUsersError,
+    isError: privilegedUsersError,
   } = useQuery({
     queryKey: ['privileged-users-table', privilegedUsersTableQuery, filterQueryWithoutTimerange],
     queryFn: async () => {
@@ -117,6 +118,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
     data: riskScoreData,
     error: riskScoreError,
     loading: loadingRiskScore,
+    hasEngineBeenInstalled: hasRiskEngineBeenInstalled,
   } = useRiskScore<EntityType.user>({
     riskEntity: EntityType.user,
     filterQuery: nameFilterQuery,
@@ -136,7 +138,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
 
   const {
     data: assetCriticalityData,
-    error: assetCriticalityError,
+    isError: assetCriticalityError,
     isLoading: loadingAssetCriticality,
   } = useAssetCriticalityFetchList({
     idField: 'user.name',
@@ -202,6 +204,21 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
         outerDirection="column"
         hideSubtitle
       />
+      {(privilegedUsersError ||
+        (hasRiskEngineBeenInstalled && riskScoreError) ||
+        assetCriticalityError) && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.error',
+            {
+              defaultMessage:
+                'There was an error retrieving privileged users. Results may be incomplete.',
+            }
+          )}
+          color="danger"
+          iconType="error"
+        />
+      )}
       {toggleStatus && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
