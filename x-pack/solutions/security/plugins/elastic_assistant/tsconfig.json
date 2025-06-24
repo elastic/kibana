@@ -65,7 +65,6 @@
     "@kbn/alerting-types",
     "@kbn/zod-helpers",
     "@kbn/rule-registry-plugin",
-    "@kbn/ai-security-labs-content",
     "@kbn/i18n-react",
     "@kbn/elastic-assistant",
     "@kbn/kibana-utils-plugin",
@@ -86,7 +85,7 @@
     "@kbn/deeplinks-security",
     "@kbn/core-application-browser",
     "@kbn/ai-security-labs-content",
-    "@kbn/inference-langchain"
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",
