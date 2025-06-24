@@ -25,7 +25,11 @@ export function useIngestSampleData() {
   const { mutate: ingestSampleData, isLoading } = useMutation<InstallResponse, ServerError, void>(
     [QueryKeys.IngestSampleData],
     () => {
-      return sampleDataIngest.install();
+      if (!sampleDataIngest) {
+        throw new Error('sampleDataIngest plugin not installed');
+      }
+
+      return sampleDataIngest?.install();
     },
     {
       onSuccess: ({ indexName }) => {

@@ -15,7 +15,7 @@ export const useSampleDataStatus = () => {
 
   const { data, isLoading } = useQuery<StatusResponse>({
     queryKey: [QueryKeys.FetchSampleDataStatus],
-    queryFn: sampleDataIngest.getStatus,
+    queryFn: sampleDataIngest?.getStatus,
   });
 
   return { isInstalled: data?.status === 'installed', indexName: data?.indexName, isLoading };

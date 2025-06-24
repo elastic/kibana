@@ -29,6 +29,7 @@ import { SampleDataPanel } from './sample_data_panel';
 import { useIngestSampleData } from '../../hooks/use_ingest_data';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface CreateIndexFormProps {
   indexName: string;
@@ -51,6 +52,7 @@ export const CreateIndexForm = ({
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
+  const { sampleDataIngest } = useKibana().services;
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
   const onIngestSampleData = useCallback(() => {
@@ -178,10 +180,12 @@ export const CreateIndexForm = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SampleDataPanel
-              isLoading={isIngestingSampleData}
-              onIngestSampleData={onIngestSampleData}
-            />
+            {sampleDataIngest && (
+              <SampleDataPanel
+                isLoading={isIngestingSampleData}
+                onIngestSampleData={onIngestSampleData}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
