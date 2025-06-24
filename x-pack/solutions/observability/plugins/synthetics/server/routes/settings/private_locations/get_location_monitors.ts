@@ -6,6 +6,7 @@
  */
 
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
@@ -44,8 +45,12 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
 
   validate: {},
-  handler: async ({ server }) => {
+  handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }) => {
     const soClient = server.coreStart.savedObjects.createInternalRepository();
+    const { locations } = await getPrivateLocationsAndAgentPolicies(
+      savedObjectsClient,
+      syntheticsMonitorClient
+    );
 
     const locationMonitors = await soClient.find({
       type: syntheticsMonitorSOTypes,
@@ -71,9 +76,13 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
       counts[key] = (counts[key] || 0) + docCount;
     });
 
-    return Object.entries(counts).map(([id, count]) => ({
-      id,
-      count,
-    }));
+    return Object.entries(counts)
+      .map(([id, count]) => ({
+        id,
+        count,
+      }))
+      .filter(({ id }) =>
+        locations.some((location) => location.id === id || location.label === id)
+      );
   },
 });
