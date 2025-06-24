@@ -27,6 +27,7 @@ import { revertPrebuiltRules } from '../../logic/rule_objects/merge_and_update_p
 import { getConcurrencyErrors } from './get_concurrrency_errors';
 import { filterRulesToRevert } from './filter_rules_to_revert';
 import { getRuleById } from '../../../rule_management/logic/detection_rules_client/methods/get_rule_by_id';
+import { createBulkActionError } from '../../../rule_management/utils/utils';
 
 export const revertPrebuiltRuleHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -51,10 +52,13 @@ export const revertPrebuiltRuleHandler = async (
     const ruleResponse = await getRuleById({ rulesClient, id });
 
     if (!ruleResponse) {
-      errors.push({
-        item: id,
-        error: new Error(`Cannot find rule with id: ${id}`),
-      });
+      errors.push(
+        createBulkActionError({
+          id,
+          message: `Cannot find rule with id: ${id}`,
+          statusCode: 404,
+        })
+      );
 
       // Return early as there's no reason to continue if we can't find the rule
       return buildRuleReversionResponse(response, {
@@ -76,20 +80,24 @@ export const revertPrebuiltRuleHandler = async (
       const baseVersion = ruleVersions?.target;
 
       if (!currentVersion) {
-        errors.push({
-          message: `Cannot find rule with id: ${rule.id}`,
-          status: 404,
-          rule,
-        });
+        errors.push(
+          createBulkActionError({
+            id: rule.id,
+            message: `Cannot find rule with id: ${rule.id}`,
+            statusCode: 404,
+          })
+        );
         return;
       }
 
       if (!baseVersion) {
-        errors.push({
-          message: `Cannot find base_version for rule id: ${rule.id}`,
-          status: 404,
-          rule,
-        });
+        errors.push(
+          createBulkActionError({
+            id: rule.id,
+            message: `Cannot find base_version for rule id: ${rule.id}`,
+            statusCode: 404,
+          })
+        );
         return;
       }
 

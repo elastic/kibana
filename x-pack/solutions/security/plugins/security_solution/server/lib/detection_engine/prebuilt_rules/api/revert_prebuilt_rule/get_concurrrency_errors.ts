@@ -7,6 +7,7 @@
 
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
 import type { BulkActionError } from '../../../rule_management/api/rules/bulk_actions/bulk_actions_response';
+import { createBulkActionError } from '../../../rule_management/utils/utils';
 
 export const getConcurrencyErrors = (
   revision: number,
@@ -14,18 +15,18 @@ export const getConcurrencyErrors = (
   rule: RuleResponse
 ): BulkActionError | undefined => {
   if (rule.version !== version) {
-    return {
-      message: `Version mismatch for id ${rule.id}: expected ${version}, got ${rule.version}`,
-      status: 409,
-      rule,
-    };
+    return createBulkActionError({
+      id: rule.id,
+      message: `Version mismatch for rule with id: ${rule.id}. Expected ${version}, got ${rule.version}`,
+      statusCode: 409,
+    });
   }
 
   if (rule.revision !== revision) {
-    return {
-      message: `Revision mismatch for id ${rule.id}: expected ${revision}, got ${rule.revision}`,
-      status: 409,
-      rule,
-    };
+    return createBulkActionError({
+      id: rule.id,
+      message: `Revision mismatch for rule with id: ${rule.id}. Expected ${revision}, got ${rule.revision}`,
+      statusCode: 409,
+    });
   }
 };

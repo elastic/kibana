@@ -45,14 +45,19 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     return isReverting ? (
       <EuiButton
         onClick={async () => {
-          await revertPrebuiltRule({
-            id: currentRule.id,
-            version: currentRule.version,
-            revision: currentRule.revision,
-          });
-          closeFlyout();
-          if (onRevert) {
-            onRevert();
+          try {
+            await revertPrebuiltRule({
+              id: currentRule.id,
+              version: currentRule.version + 1,
+              revision: currentRule.revision,
+            });
+          } catch {
+            // Error is handled by the mutation's onError callback, so no need to do anything here
+          } finally {
+            closeFlyout();
+            if (onRevert) {
+              onRevert();
+            }
           }
         }}
         isDisabled={isLoading}
@@ -87,7 +92,7 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
       id: 'updates',
       name: (
         <EuiToolTip position="top" content={i18n.BASE_VERSION_FLYOUT_UPDATES_TAB_TOOLTIP}>
-          <>{'Elastic rule diff overview'}</>
+          <>{i18n.BASE_VERSION_FLYOUT_UPDATES_TAB_TITLE}</>
         </EuiToolTip>
       ),
       content: (

@@ -300,7 +300,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(response.attributes.errors).toEqual([
           expect.objectContaining({
-            message: `Version mismatch for id ${customizedPrebuiltRule.id}: expected ${
+            message: `Version mismatch for rule with id: ${customizedPrebuiltRule.id}. Expected ${
               customizedPrebuiltRule.version + 1
             }, got ${customizedPrebuiltRule.version}`,
             rules: [customizedPrebuiltRule],
@@ -315,8 +315,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const response = await revertPrebuiltRule(supertest, {
           id: customizedPrebuiltRule.id,
-          version: customizedPrebuiltRule.version + 1,
-          revision: customizedPrebuiltRule.revision,
+          version: customizedPrebuiltRule.version,
+          revision: customizedPrebuiltRule.revision + 1,
         });
 
         expect(response.message).toEqual('Rule reversion failed');
@@ -328,9 +328,9 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(response.attributes.errors).toEqual([
           expect.objectContaining({
-            message: `Version mismatch for id ${customizedPrebuiltRule.id}: expected ${
-              customizedPrebuiltRule.version + 1
-            }, got ${customizedPrebuiltRule.version}`,
+            message: `Revision mismatch for rule with id: ${customizedPrebuiltRule.id}. Expected ${
+              customizedPrebuiltRule.revision + 1
+            }, got ${customizedPrebuiltRule.revision}`,
             rules: [customizedPrebuiltRule],
           }),
         ]);

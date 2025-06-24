@@ -66,6 +66,14 @@ export const RULE_REVERT_FAILED = i18n.translate(
   }
 );
 
+export const RULE_REVERT_FAILED_CONCURRENCY_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.prebuiltRules.toast.ruleRevertFailedConcurrencyMessage',
+  {
+    defaultMessage:
+      'Something in the rule object has changed before reversion was completed. Please review the diff and try again.',
+  }
+);
+
 export const REVERT_RULE_SUCCESS = (succeeded: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.prebuiltRules.toast.revertRuleSuccess', {
     defaultMessage: '{succeeded, plural, one {# rule} other {# rules}} reverted successfully.',
