@@ -75,13 +75,6 @@ export * from './telemetry';
 
 export { getSpaceUrlPrefix } from './helpers';
 
-function toArray<T>(input: T | T[]): T[] {
-  if (Array.isArray(input)) {
-    return input;
-  }
-  return [input];
-}
-
 interface SetStatusCasesParams {
   id: string;
   version: string;
