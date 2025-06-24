@@ -149,14 +149,12 @@ function findAstPosition(ast: ESQLAst, offset: number) {
 
   if (node) removeMarkerNode(node);
 
-  const position = {
+  return {
     command: removeMarkerArgFromArgsList(command)!,
     containingFunction: removeMarkerArgFromArgsList(containingFunction),
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
     node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
   };
-
-  return position;
 }
 
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
