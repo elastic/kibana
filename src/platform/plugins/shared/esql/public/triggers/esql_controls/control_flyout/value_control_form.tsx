@@ -147,7 +147,6 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
-      console.trace();
       setValuesQuery(query);
 
       const result = await esqlQueryToOptions(query, search);
