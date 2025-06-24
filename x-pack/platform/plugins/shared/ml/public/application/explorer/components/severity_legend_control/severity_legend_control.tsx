@@ -44,13 +44,23 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
       const allSelected = selectedSeverities.length === allSeverityOptions.length;
 
       let newSelectedSeverities: SeverityOption[];
+
+      // If all are selected, select only the clicked one
       if (allSelected) {
         newSelectedSeverities = [clickedSeverity];
-      } else if (isCurrentlySelected) {
+      }
+      // If trying to deselect the last selected option, select all instead
+      else if (isCurrentlySelected && selectedSeverities.length === 1) {
+        newSelectedSeverities = [...allSeverityOptions];
+      }
+      // If deselecting one of multiple selected options
+      else if (isCurrentlySelected) {
         newSelectedSeverities = selectedSeverities.filter(
           (severity) => severity.val !== clickedSeverity.val
         );
-      } else {
+      }
+      // If selecting an additional option
+      else {
         newSelectedSeverities = [...selectedSeverities, clickedSeverity];
       }
 
