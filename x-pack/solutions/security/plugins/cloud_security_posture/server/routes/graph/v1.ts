@@ -18,6 +18,11 @@ import type {
   GroupNodeDataModel,
   LabelNodeDataModel,
   NodeDataModel,
+  NodeDocumentDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import type { Writable } from '@kbn/utility-types';
@@ -26,15 +31,13 @@ type EsQuery = GraphRequest['query']['esQuery'];
 
 interface GraphEdge {
   badge: number;
-  docIds: string[] | string;
+  docs: string[] | string;
   ips?: string[] | string;
   hosts?: string[] | string;
   users?: string[] | string;
   actorIds: string[] | string;
-  actorIdsCount: number;
   action: string;
   targetIds: string[] | string;
-  targetIdsCount: number;
   isOrigin: boolean;
   isOriginAlert: boolean;
 }
@@ -98,7 +101,7 @@ interface ParseContext {
   readonly edgesMap: Record<string, EdgeDataModel>;
   readonly edgeLabelsNodes: Record<string, string[]>;
   readonly labelEdges: Record<string, LabelEdges>;
-  readonly nodeIdentifiers: Record<string, string | string[]>;
+  readonly nodeDocumentData: Record<string, NodeDocumentDataModel[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -107,11 +110,11 @@ const parseRecords = (
   logger: Logger,
   records: GraphEdge[],
   nodesLimit?: number
-): Pick<GraphResponse, 'nodes' | 'edges' | 'nodeIdentifiers' | 'messages'> => {
+): Pick<GraphResponse, 'nodes' | 'edges' | 'nodeDocumentData' | 'messages'> => {
   const ctx: ParseContext = {
     nodesLimit,
     logger,
-    nodeIdentifiers: {},
+    nodeDocumentData: {},
     nodesMap: {},
     edgeLabelsNodes: {},
     edgesMap: {},
@@ -136,7 +139,7 @@ const parseRecords = (
   return {
     nodes,
     edges: Object.values(ctx.edgesMap),
-    nodeIdentifiers: ctx.nodeIdentifiers,
+    nodeDocumentData: ctx.nodeDocumentData,
     messages: ctx.messages.length > 0 ? ctx.messages : undefined,
   };
 };
@@ -159,8 +162,9 @@ const fetchGraph = async ({
   esQuery?: EsQuery;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
-  const query = `FROM logs-* METADATA _id
+  const query = `FROM logs-* METADATA _id, _index
 | WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+// Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
       ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
@@ -171,19 +175,24 @@ const fetchGraph = async ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false'
   }
+// Aggregate document's data for popover expansion and metadata enhancements
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+| EVAL docType = CASE (_index LIKE "*.alerts-security.alerts-*", "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docData = CONCAT("{",
+    "\\"id\\":\\"", _id, "\\"",
+    ",\\"type\\":\\"", docType, "\\"",
+  "}")
 | STATS badge = COUNT(*),
-  docIds = VALUES(_id),
+  docs = VALUES(docData),
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
-  users = VALUES(related.user),
-  actorIds = VALUES(actor.entity.id),
-  actorIdsCount = COUNT_DISTINCT(actor.entity.id),
-  targetIds = VALUES(target.entity.id),
-  targetIdsCount = COUNT_DISTINCT(target.entity.id),
-  eventIds = VALUES(event.id)
-    BY action = event.action,
-      isOrigin,
-      isOriginAlert
+  users = VALUES(related.user)
+  BY actorIds = actor.entity.id,
+    action = event.action,
+    targetIds = target.entity.id,
+    isOrigin,
+    isOriginAlert
 | LIMIT 1000
 | SORT isOrigin DESC, action`;
 
@@ -255,7 +264,7 @@ const buildDslFilter = (
 });
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges, nodeIdentifiers } = context;
+  const { nodesMap, edgeLabelsNodes, labelEdges, nodeDocumentData } = context;
 
   for (const record of records) {
     if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
@@ -268,18 +277,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const {
-      docIds,
-      ips,
-      hosts,
-      users,
-      actorIds,
-      actorIdsCount,
-      action,
-      targetIds,
-      targetIdsCount,
-      isOriginAlert,
-    } = record;
+    const { docs, ips, hosts, users, actorIds, action, targetIds, isOriginAlert } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -293,19 +291,12 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
     });
 
     // Create entity nodes
-    const actorId = actorIdsCount === 1 ? actorIdsArray[0] : `group ${uuidv4()}`;
-    const targetId = targetIdsCount === 1 ? targetIdsArray[0] : `group ${uuidv4()}`;
-
-    [
-      { id: actorId, count: actorIdsCount, ids: actorIdsArray },
-      { id: targetId, count: targetIdsCount, ids: targetIdsArray },
-    ].forEach(({ id, count, ids }) => {
+    [...actorIdsArray, ...targetIdsArray].forEach((id) => {
       if (nodesMap[id] === undefined) {
         nodesMap[id] = {
           id,
-          label: unknownTargets.includes(id) ? 'Unknown' : count > 1 ? 'Entities' : undefined,
+          label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          count,
           ...determineEntityNodeShape(
             id,
             castArray(ips ?? []),
@@ -313,33 +304,35 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
             castArray(users ?? [])
           ),
         };
-
-        nodeIdentifiers[id] = ids;
       }
     });
 
     // Create label nodes
-    const edgeId = `a(${actorId})-b(${targetId})`;
+    for (const actorId of actorIdsArray) {
+      for (const targetId of targetIdsArray) {
+        const edgeId = `a(${actorId})-b(${targetId})`;
 
-    if (edgeLabelsNodes[edgeId] === undefined) {
-      edgeLabelsNodes[edgeId] = [];
+        if (edgeLabelsNodes[edgeId] === undefined) {
+          edgeLabelsNodes[edgeId] = [];
+        }
+
+        const labelNode: LabelNodeDataModel = {
+          id: edgeId + `label(${action})`,
+          label: action,
+          color: isOriginAlert ? 'danger' : 'primary',
+          shape: 'label',
+        };
+
+        nodesMap[labelNode.id] = labelNode;
+        nodeDocumentData[labelNode.id] = parseDocumentsData(docs);
+        edgeLabelsNodes[edgeId].push(labelNode.id);
+        labelEdges[labelNode.id] = {
+          source: actorId,
+          target: targetId,
+          edgeType: 'solid',
+        };
+      }
     }
-
-    const labelNode: LabelNodeDataModel = {
-      id: edgeId + `label(${action})`,
-      label: action,
-      color: isOriginAlert ? 'danger' : 'primary',
-      shape: 'label',
-    };
-
-    nodesMap[labelNode.id] = labelNode;
-    nodeIdentifiers[labelNode.id] = docIds;
-    edgeLabelsNodes[edgeId].push(labelNode.id);
-    labelEdges[labelNode.id] = {
-      source: actorId,
-      target: targetId,
-      edgeType: 'solid',
-    };
   }
 };
 
@@ -479,4 +472,12 @@ const connectNodes = (
     color: colorOverride ?? color,
     type: edgeType,
   };
+};
+
+const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+  if (typeof docs === 'string') {
+    return [JSON.parse(docs)];
+  }
+
+  return docs.map((doc) => JSON.parse(doc));
 };

@@ -31,17 +31,20 @@ export const graphRequestSchema = schema.object({
   }),
 });
 
+export const DOCUMENT_TYPE_EVENT = 'event' as const;
+export const DOCUMENT_TYPE_ALERT = 'alert' as const;
+
+export const nodeDocumentDataSchema = schema.object({
+  id: schema.string(),
+  type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
+});
+
 export const graphResponseSchema = () =>
   schema.object({
     nodes: schema.arrayOf(
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
-    nodeIdentifiers: schema.maybe(
-      schema.recordOf(
-        schema.string(),
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-      )
-    ),
+    nodeDocumentData: schema.recordOf(schema.string(), schema.arrayOf(nodeDocumentDataSchema)),
     edges: schema.arrayOf(edgeDataSchema),
     messages: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
