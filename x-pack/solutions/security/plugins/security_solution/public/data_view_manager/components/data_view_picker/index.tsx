@@ -18,7 +18,7 @@ import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DataViewManagerScopeName } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
@@ -56,6 +56,15 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const closeFieldEditor = useRef<() => void | undefined>();
 
   const { dataViewSpec, status } = useDataViewSpec(scope);
+
+  const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
+    useSelector(sharedStateSelector);
+  const adhocDataViews = useMemo(() => {
+    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
+  }, [adhocDataViewSpecs, fieldFormats]);
+
+  const managedDataViews = useManagedDataViews();
+  const savedDataViews = useSavedDataViews();
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
@@ -145,7 +154,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       return { label: LOADING };
     }
 
-    if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
+    if (dataViewSpec.id === defaultDataViewId) {
       return {
         label: DEFAULT_SECURITY_DATA_VIEW,
       };
@@ -154,22 +163,13 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     return {
       label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
     };
-  }, [dataViewSpec.id, dataViewSpec?.name, status]);
-
-  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
-
-  const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
-  }, [adhocDataViewSpecs, fieldFormats]);
-
-  const managedDataViews = useManagedDataViews();
-  const savedDataViews = useSavedDataViews();
+  }, [dataViewSpec.id, dataViewSpec?.name, defaultDataViewId, status]);
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
       <UnifiedDataViewPicker
         isDisabled={status !== 'ready' || disabled}
-        currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
+        currentDataViewId={dataViewId || (defaultDataViewId ?? undefined)}
         trigger={triggerConfig}
         onChangeDataView={handleChangeDataView}
         onEditDataView={handleDataViewModified}

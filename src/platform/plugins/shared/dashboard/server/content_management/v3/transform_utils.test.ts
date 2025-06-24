@@ -222,66 +222,6 @@ describe('dashboardAttributesOut', () => {
       title: 'title',
     });
   });
-
-  it('should call embeddable.inject for panels', async () => {
-    const input: DashboardSavedObjectAttributes = {
-      controlGroupInput: {
-        panelsJSON: JSON.stringify(controlGroupInputControlsSo),
-        ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
-        controlStyle: 'twoLine',
-        chainingSystem: 'NONE',
-        showApplySelections: true,
-      },
-      description: 'description',
-      kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ query: { query: 'test', language: 'KQL' } }),
-      },
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: true,
-        useMargins: false,
-        syncColors: false,
-        syncTooltips: false,
-        syncCursor: false,
-      }),
-      panelsJSON: JSON.stringify([
-        {
-          embeddableConfig: { enhancements: {}, some: 'key' },
-          gridData: { x: 0, y: 0, w: 10, h: 10, i: 'buzz' },
-          id: '2',
-          panelIndex: 'buzz',
-          title: 'title2',
-          type: 'type2',
-          version: '2',
-        },
-      ]),
-      refreshInterval: { pause: true, value: 1000 },
-      timeFrom: 'now-15m',
-      timeRestore: true,
-      timeTo: 'now',
-      title: 'title',
-    };
-    const referencePanel = {
-      name: 'buzz:ref2',
-      id: 'foobar',
-      type: 'type2',
-    };
-    const injectSpy = jest.spyOn(embeddableStartMock, 'inject');
-    await dashboardAttributesOut(input, embeddableStartMock, [...referencesSo, referencePanel]);
-    expect(injectSpy).toHaveBeenCalledTimes(1);
-    expect(injectSpy).toHaveBeenCalledWith(
-      {
-        type: 'type2',
-        enhancements: {},
-        some: 'key',
-      },
-      [
-        {
-          ...referencePanel,
-          name: 'ref2',
-        },
-      ]
-    );
-  });
 });
 
 describe('itemToSavedObject', () => {

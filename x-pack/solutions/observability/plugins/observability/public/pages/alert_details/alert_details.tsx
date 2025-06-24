@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -36,6 +35,7 @@ import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -101,7 +101,6 @@ export function AlertDetails() {
     uiSettings,
     serverless,
   } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
   const history = useHistory();
@@ -134,11 +133,7 @@ export function AlertDetails() {
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
-    return urlTabId && isTabId(urlTabId) ? urlTabId : 'overview';
-  });
+  const [activeTabId, setActiveTabId] = useState<TabId>();
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
@@ -175,8 +170,11 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
+      const searchParams = new URLSearchParams(search);
+      const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
+      setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry, search]);
 
   useBreadcrumbs(
     [
@@ -200,11 +198,10 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === 'overview') {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
