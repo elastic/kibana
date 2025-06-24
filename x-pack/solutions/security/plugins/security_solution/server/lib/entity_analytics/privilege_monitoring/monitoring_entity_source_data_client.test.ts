@@ -53,7 +53,7 @@ describe('MonitoringEntitySourceDataClient', () => {
       defaultOpts.soClient.update.mockImplementation(() => {
         const err = new Error('Not found');
         // Simulate Kibana-style 404 error
-        (err as unknown).output = { statusCode: 404 };
+        (err as Error & { output?: { statusCode: number } }).output = { statusCode: 404 };
         throw err;
       });
       defaultOpts.soClient.find.mockResolvedValue({
