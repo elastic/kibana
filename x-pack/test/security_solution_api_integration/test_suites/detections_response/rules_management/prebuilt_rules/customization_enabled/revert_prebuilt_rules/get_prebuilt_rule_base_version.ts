@@ -72,14 +72,15 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(response.diff.fields).toEqual({
           description: {
-            conflict: ThreeWayDiffConflict.SOLVABLE,
-            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Current,
+            base_version: 'some description',
             current_version: 'new description',
-            merged_version: 'some description',
+            merged_version: 'new description',
             target_version: 'some description',
-            has_update: true,
-            has_base_version: false,
+            has_update: false,
+            has_base_version: true,
           },
         });
       });
