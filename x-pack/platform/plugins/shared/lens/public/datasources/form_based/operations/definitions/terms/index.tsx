@@ -414,14 +414,15 @@ export const termsOperation: OperationDefinition<
     return {
       ...oldColumn,
       dataType: field.type as DataType,
-      label: oldColumn.label
-        ?? ofName(
-            field.displayName,
-            newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare',
-            newParams.orderBy.type === 'significant',
-            newParams.size
-          ),
+      label:
+        oldColumn.label ??
+        ofName(
+          field.displayName,
+          newParams.secondaryFields?.length,
+          newParams.orderBy.type === 'rare',
+          newParams.orderBy.type === 'significant',
+          newParams.size
+        ),
       sourceField: field.name,
       params: newParams,
     };
@@ -522,14 +523,15 @@ export const termsOperation: OperationDefinition<
               ...column,
               dataType: newDataType,
               sourceField: sourcefield,
-              label: column.label
-                ?? ofName(
-                    mainField?.displayName,
-                    fields.length - 1,
-                    newParams.orderBy.type === 'rare',
-                    newParams.orderBy.type === 'significant',
-                    newParams.size
-                  ),
+              label:
+                column.label ??
+                ofName(
+                  mainField?.displayName,
+                  fields.length - 1,
+                  newParams.orderBy.type === 'rare',
+                  newParams.orderBy.type === 'significant',
+                  newParams.size
+                ),
               params: {
                 ...newParams,
                 secondaryFields,
@@ -719,14 +721,15 @@ The top values of a specified field ranked by the chosen metric.
                 ...layer.columns,
                 [columnId]: {
                   ...currentColumn,
-                  label: currentColumn.label
-                    ?? ofName(
-                        indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
-                        secondaryFieldsCount,
-                        currentColumn.params.orderBy.type === 'rare',
-                        currentColumn.params.orderBy.type === 'significant',
-                        value
-                      ),
+                  label:
+                    currentColumn.label ??
+                    ofName(
+                      indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
+                      secondaryFieldsCount,
+                      currentColumn.params.orderBy.type === 'rare',
+                      currentColumn.params.orderBy.type === 'significant',
+                      value
+                    ),
                   params: {
                     ...currentColumn.params,
                     size: value,

@@ -249,7 +249,7 @@ describe('IndexPattern Data Source', () => {
         dataType: 'number',
         isBucketed: false,
         label: 'Foo',
-        
+
         operationType: 'count',
         sourceField: '___records___',
       };
@@ -754,7 +754,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   emptyAsNull: false,
                 },
-                
               } as CountIndexPatternColumn,
               col2X1: {
                 label:
@@ -768,7 +767,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   emptyAsNull: false,
                 },
-                
               } as SumIndexPatternColumn,
               col2X2: {
                 label:
@@ -785,7 +783,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   emptyAsNull: false,
                 },
-                
               } as AvgIndexPatternColumn,
               col2X3: {
                 label:
@@ -798,7 +795,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   emptyAsNull: false,
                 },
-                
               } as MedianIndexPatternColumn,
               col2X4: {
                 label:
@@ -820,7 +816,6 @@ describe('IndexPattern Data Source', () => {
                   },
                 },
                 references: ['col2X2', 'col2X3'],
-                
               } as MathIndexPatternColumn,
               col2X5: {
                 label:
@@ -834,7 +829,6 @@ describe('IndexPattern Data Source', () => {
                   query: 'category : *',
                   language: 'kuery',
                 },
-                
               },
               col2X6: {
                 label:
@@ -863,7 +857,6 @@ describe('IndexPattern Data Source', () => {
                   },
                 },
                 references: ['col2X0', 'col2X1', 'col2X5'],
-                
               } as MathIndexPatternColumn,
               col2X7: {
                 label:
@@ -877,7 +870,6 @@ describe('IndexPattern Data Source', () => {
                 params: {
                   window: 5,
                 },
-                
               } as MovingAverageIndexPatternColumn,
               col2: {
                 label:
@@ -1740,7 +1732,6 @@ describe('IndexPattern Data Source', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
-                  
                 },
                 date: {
                   label: 'timestamp',
@@ -1772,7 +1763,6 @@ describe('IndexPattern Data Source', () => {
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
-                  
                 },
                 math: {
                   label: 'math',
@@ -1793,7 +1783,6 @@ describe('IndexPattern Data Source', () => {
                     },
                   },
                   references: ['countX0', 'count'],
-                  
                 } as MathIndexPatternColumn,
               },
             },
@@ -2793,7 +2782,7 @@ describe('IndexPattern Data Source', () => {
                     isBucketed: false,
                     scale: 'ratio',
                     sourceField: '___records___',
-                    
+
                     filter: { language: 'kuery', query: 'memory > 5000' },
                   },
                   countX1: {
@@ -2803,7 +2792,6 @@ describe('IndexPattern Data Source', () => {
                     isBucketed: false,
                     scale: 'ratio',
                     sourceField: '___records___',
-                    
                   },
                   math: {
                     label: 'math',
@@ -2824,7 +2812,6 @@ describe('IndexPattern Data Source', () => {
                       },
                     },
                     references: ['countX0', 'countX1'],
-                    
                   } as MathIndexPatternColumn,
                 },
               },
@@ -2954,7 +2941,7 @@ describe('IndexPattern Data Source', () => {
                     isBucketed: false,
                     scale: 'ratio',
                     sourceField: '___records___',
-                    
+
                     filter: { language: 'kuery', query: 'bytes > 4000 AND memory > 5000' },
                   },
                   countX1: {
@@ -2964,7 +2951,7 @@ describe('IndexPattern Data Source', () => {
                     isBucketed: false,
                     scale: 'ratio',
                     sourceField: '___records___',
-                    
+
                     filter: { language: 'kuery', query: 'bytes > 4000' },
                   },
                   math: {
@@ -2986,7 +2973,6 @@ describe('IndexPattern Data Source', () => {
                       },
                     },
                     references: ['countX0', 'countX1'],
-                    
                   } as MathIndexPatternColumn,
                 },
               },

@@ -29,16 +29,17 @@ export function setReducedTimeRange(
 ) {
   const trimmedReducedTimeRange = reducedTimeRange?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = currentColumn.label
-      ?? adjustTimeScaleLabelSuffix(
-          currentColumn.label,
-          currentColumn.timeScale,
-          currentColumn.timeScale,
-          currentColumn.timeShift,
-          currentColumn.timeShift,
-          currentColumn.reducedTimeRange,
-          trimmedReducedTimeRange
-        );
+  const label =
+    currentColumn.label ??
+    adjustTimeScaleLabelSuffix(
+      currentColumn.label,
+      currentColumn.timeScale,
+      currentColumn.timeScale,
+      currentColumn.timeShift,
+      currentColumn.timeShift,
+      currentColumn.reducedTimeRange,
+      trimmedReducedTimeRange
+    );
   return {
     ...layer,
     columns: {

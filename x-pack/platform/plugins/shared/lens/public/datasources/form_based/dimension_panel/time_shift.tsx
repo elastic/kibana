@@ -32,16 +32,17 @@ export function setTimeShift(
 ) {
   const trimmedTimeShift = timeShift?.trim();
   const currentColumn = layer.columns[columnId];
-  const label = urrentColumn.label
-    ?? adjustTimeScaleLabelSuffix(
-        currentColumn.label,
-        currentColumn.timeScale,
-        currentColumn.timeScale,
-        currentColumn.timeShift,
-        trimmedTimeShift,
-        currentColumn.reducedTimeRange,
-        currentColumn.reducedTimeRange
-      );
+  const label =
+    urrentColumn.label ??
+    adjustTimeScaleLabelSuffix(
+      currentColumn.label,
+      currentColumn.timeScale,
+      currentColumn.timeScale,
+      currentColumn.timeShift,
+      trimmedTimeShift,
+      currentColumn.reducedTimeRange,
+      currentColumn.reducedTimeRange
+    );
   return {
     ...layer,
     columns: {

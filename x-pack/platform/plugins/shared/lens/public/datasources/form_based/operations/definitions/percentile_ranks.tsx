@@ -191,14 +191,15 @@ export const percentileRanksOperation: OperationDefinition<
         }
         paramEditorUpdater({
           ...currentColumn,
-          label: currentColumn.label
-            ?? ofName(
-                indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
-                  currentColumn.sourceField,
-                Number(value),
-                currentColumn.timeShift,
-                currentColumn.reducedTimeRange
-              ),
+          label:
+            currentColumn.label ??
+            ofName(
+              indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                currentColumn.sourceField,
+              Number(value),
+              currentColumn.timeShift,
+              currentColumn.reducedTimeRange
+            ),
           params: {
             ...currentColumn.params,
             value: Number(value),

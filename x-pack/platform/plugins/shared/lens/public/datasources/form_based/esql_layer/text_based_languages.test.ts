@@ -523,7 +523,8 @@ describe('Textbased Data Source', () => {
         },
         {
           id: 'dest',
-          name: 'dest',          meta: {
+          name: 'dest',
+          meta: {
             type: 'string',
           },
         },
