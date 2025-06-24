@@ -1,0 +1,113 @@
+# Page snapshot
+
+```yaml
+- status: Annotations - Observability - Elastic
+- button "Skip to main content"
+- banner:
+  - link "Elastic home":
+    - /url: /app/home
+    - img "Elastic Logo"
+  - searchbox "Find apps, content, and more."
+  - text: ⌘/
+  - paragraph: Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.
+  - button "Help menu"
+  - button "Newsfeed menu - unread items available"
+  - button "Open the AI Assistant": AI Assistant
+  - button "Account menu":
+    - img "test admin (elastic_admin@elastic.co)"
+  - button "admin"
+  - button "Toggle primary navigation"
+  - button "Spaces navigation":
+    - img "Default"
+  - navigation "Breadcrumbs":
+    - list:
+      - listitem:
+        - link "Observability":
+          - /url: /app/observability/overview
+      - listitem: Annotations
+  - navigation "App menu":
+    - link "Annotations":
+      - /url: /app/observability/annotations
+    - link "Add data":
+      - /url: /app/observabilityOnboarding
+    - button "Inspect"
+- heading "Observability Observability" [level=2]:
+  - img "Observability"
+  - strong: Observability
+- navigation "Observability Observability":
+  - link "Overview":
+    - /url: /app/observability/overview
+  - link "Alerts":
+    - /url: /app/observability/alerts
+  - link "SLOs":
+    - /url: /app/slos
+  - link "Cases":
+    - /url: /app/observability/cases
+  - link "AI Assistant":
+    - /url: /app/observabilityAIAssistant/conversations/new
+  - text: Logs
+  - link "Discover":
+    - /url: /app/observability-logs-explorer
+  - link "Logs Anomalies":
+    - /url: /app/logs/anomalies
+  - link "Logs Categories":
+    - /url: /app/logs/log-categories
+  - text: Infrastructure
+  - link "Infrastructure Inventory":
+    - /url: /app/metrics/inventory
+  - link "Metrics Explorer":
+    - /url: /app/metrics/explorer
+  - link "Hosts":
+    - /url: /app/metrics/hosts
+  - text: Applications
+  - link "Service Inventory":
+    - /url: /app/apm/services
+  - link "Traces":
+    - /url: /app/apm/traces
+  - link "Dependencies":
+    - /url: /app/apm/dependencies/inventory
+  - text: Synthetics
+  - link "Monitors":
+    - /url: /app/synthetics
+  - link "TLS Certificates":
+    - /url: /app/synthetics/certificates
+  - text: User Experience
+  - link "Dashboard":
+    - /url: /app/ux
+- button "Collapse side navigation"
+- main:
+  - heading "Annotations" [level=1]
+  - button "Create annotation"
+  - searchbox "This is a search bar. As you type, the results lower in the page will automatically filter."
+  - button "Tags Selection": Tags
+  - button "Date quick select"
+  - button "Last 30 days"
+  - button "Refresh"
+  - figure:
+    - term: "Chart type:"
+    - definition: bar chart
+  - img
+  - separator
+  - table "List of annotations for the selected time range.; Page 1 of 0.":
+    - caption: List of annotations for the selected time range.; Page 1 of 0.
+    - rowgroup:
+      - row "Select all rows Title Timestamp Message Tags Apply to":
+        - columnheader "Select all rows":
+          - checkbox "Select all rows" [disabled]
+        - columnheader "Title":
+          - button "Title"
+        - columnheader "Timestamp":
+          - button "Timestamp"
+        - columnheader "Message":
+          - button "Message"
+        - columnheader "Tags"
+        - columnheader "Apply to"
+        - columnheader
+    - rowgroup:
+      - row "No items found":
+        - cell "No items found"
+- button "Hide react query"
+- complementary "React Query Devtools":
+  - button "Open React Query Devtools"
+- log "Notification message list"
+```
