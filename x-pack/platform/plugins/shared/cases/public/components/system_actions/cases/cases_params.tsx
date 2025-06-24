@@ -76,10 +76,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [configurations, owner]
   );
 
-  const isAttackDiscoveryRuleType = useMemo(
-    () => ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
-    [ruleTypeId]
-  );
+  const isAttackDiscoveryRuleType = ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
 
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
