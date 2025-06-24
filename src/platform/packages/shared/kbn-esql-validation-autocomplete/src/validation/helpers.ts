@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAst,
-  ESQLAstItem,
-  ESQLAstTimeseriesCommand,
-  ESQLAstQueryExpression,
-  ESQLColumn,
-  ESQLMessage,
-  ESQLSingleAstItem,
-  ESQLSource,
-  ESQLCommand,
+import {
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLAstTimeseriesCommand,
+  type ESQLAstQueryExpression,
+  type ESQLColumn,
+  type ESQLMessage,
+  type ESQLSingleAstItem,
+  type ESQLSource,
+  type ESQLCommand,
+  Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
@@ -178,4 +179,22 @@ export function hasEnrichCommand(obj: ESQLCommand | ESQLCommand[]): boolean {
     }
   }
   return false;
+}
+
+/**
+ * Collects all 'enrich' commands from a list of ESQL commands.
+ * @param commands - The list of ESQL commands to search through.
+ * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
+ * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
+ */
+export function getEnrichCommands(commands: ESQLCommand[]): ESQLCommand[] {
+  const enrichCommands: ESQLCommand[] = [];
+  Walker.walk(commands, {
+    visitCommand: (node) => {
+      if (node.name === 'enrich') {
+        enrichCommands.push(node);
+      }
+    },
+  });
+  return enrichCommands;
 }
