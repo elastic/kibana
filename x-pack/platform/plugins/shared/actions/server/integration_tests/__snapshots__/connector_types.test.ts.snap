@@ -2559,7 +2559,9 @@ Object {
         Object {
           "schema": Object {
             "flags": Object {
+              "default": Array [],
               "error": [Function],
+              "presence": "optional",
             },
             "items": Array [
               Object {
@@ -2725,6 +2727,20 @@ Object {
                   },
                 },
                 "type": "object",
+              },
+            ],
+            "rules": Array [
+              Object {
+                "args": Object {
+                  "limit": 0,
+                },
+                "name": "min",
+              },
+              Object {
+                "args": Object {
+                  "limit": 10,
+                },
+                "name": "max",
               },
             ],
             "type": "array",
