@@ -101,6 +101,9 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/policy/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/search_ai_lake_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
