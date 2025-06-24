@@ -89,6 +89,7 @@ export function initializeESQLControlSelections(
     variableName$,
     variableType$,
     selectedOptions$,
+    availableOptions$,
   ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {
