@@ -778,6 +778,7 @@ export const useBulkActions = ({
       showBulkDuplicateConfirmation,
       showManualRuleRunConfirmation,
       showManualRuleRunLimitError,
+      showBulkFillRuleGapsRuleLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,
