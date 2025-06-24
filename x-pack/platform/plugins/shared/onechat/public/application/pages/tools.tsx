@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { OnechatTools } from '../components/tools/tools';
+import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 
 export const OnechatToolsPage = () => {
-  useBreadcrumb([{ text: 'Analyze' }, { text: 'Chat' }, { text: 'Tools' }]);
+  useBreadcrumb([
+    { text: i18n.translate('xpack.onechat.chat.title', { defaultMessage: 'Chat' }) },
+    { text: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }) },
+  ]);
   return <OnechatTools />;
 };

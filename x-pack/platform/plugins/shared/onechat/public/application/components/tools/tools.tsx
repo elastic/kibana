@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { OnechatBaseTools } from './base_tools';
+import { OnechatToolsTable } from './tools_table';
 export const OnechatTools = () => {
   return (
     <KibanaPageTemplate>
@@ -22,7 +22,7 @@ export const OnechatTools = () => {
         })}
       />
       <KibanaPageTemplate.Section>
-        <OnechatBaseTools />
+        <OnechatToolsTable />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

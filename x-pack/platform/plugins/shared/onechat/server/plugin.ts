@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { registerFeatures } from './features';
+import { registerRoutes } from './routes';
+import { ServiceManager } from './services';
+import { registerTools } from './tools';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { registerRoutes } from './routes';
-import { ServiceManager } from './services';
-import { registerFeatures } from './features';
-import { registerTools } from './tools';
-import {
-  ONECHAT_CHAT_UI_SETTING_ID,
-  ONECHAT_MCP_SERVER_UI_SETTING_ID,
-  ONECHAT_TOOLS_UI_SETTING_ID,
-} from '../common/constants';
+import { registerUISettings } from './ui_settings';
 
 export class OnechatPlugin
   implements
@@ -57,44 +51,7 @@ export class OnechatPlugin
 
     registerTools({ tools: serviceSetups.tools });
 
-    coreSetup.uiSettings.register({
-      [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
-        description: i18n.translate('onechat.uiSettings.mcpServer.description', {
-          defaultMessage: 'Enables MCP server with access to tools.',
-        }),
-        name: i18n.translate('onechat.uiSettings.mcpServer.name', {
-          defaultMessage: 'MCP Server',
-        }),
-        schema: schema.boolean(),
-        value: false,
-        readonly: true,
-        readonlyMode: 'ui',
-      },
-      [ONECHAT_CHAT_UI_SETTING_ID]: {
-        description: i18n.translate('onechat.uiSettings.chatUI.description', {
-          defaultMessage: 'Enables the OneChat chat UI.',
-        }),
-        name: i18n.translate('onechat.uiSettings.chatUI.name', {
-          defaultMessage: 'OneChat Chat UI',
-        }),
-        schema: schema.boolean(),
-        value: false,
-        readonly: true,
-        readonlyMode: 'ui',
-      },
-      [ONECHAT_TOOLS_UI_SETTING_ID]: {
-        description: i18n.translate('onechat.uiSettings.toolsPage.description', {
-          defaultMessage: 'Enables the OneChat tools page.',
-        }),
-        name: i18n.translate('onechat.uiSettings.toolsPage.name', {
-          defaultMessage: 'OneChat Tools Page',
-        }),
-        schema: schema.boolean(),
-        value: false,
-        readonly: true,
-        readonlyMode: 'ui',
-      },
-    });
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const router = coreSetup.http.createRouter();
     registerRoutes({

@@ -46,17 +46,18 @@ export class OnechatPlugin
   }
   setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
     const isOnechatEnabled = core.uiSettings.get<boolean>(ONECHAT_CHAT_UI_SETTING_ID, false);
-    if (!isOnechatEnabled) return {};
 
-    registerApp({
-      core,
-      getServices: () => {
-        if (!this.internalServices) {
-          throw new Error('getServices called before plugin start');
-        }
-        return this.internalServices;
-      },
-    });
+    if (isOnechatEnabled) {
+      registerApp({
+        core,
+        getServices: () => {
+          if (!this.internalServices) {
+            throw new Error('getServices called before plugin start');
+          }
+          return this.internalServices;
+        },
+      });
+    }
     return {};
   }
 

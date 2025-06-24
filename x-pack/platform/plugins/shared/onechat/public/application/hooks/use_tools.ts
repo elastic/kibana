@@ -8,11 +8,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useOnechatServices } from './use_onechat_service';
 
-export const useOnechatBaseTools = () => {
+export const useOnechatTools = () => {
   const { toolsService } = useOnechatServices();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['tools', 'baseTools', 'list'],
+    queryKey: ['tools', 'list'],
     queryFn: () => toolsService.list(),
   });
 
