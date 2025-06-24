@@ -129,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
         'alerting:slo.rules.burnRate',
+        'alerting:streams.rules.esql',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',
