@@ -18,9 +18,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { IndexSelectorModal } from '../privileged_user_monitoring_onboarding/components/select_index_modal';
 
 export interface AddDataSourceResult {
   successful: boolean;
@@ -29,11 +31,14 @@ export interface AddDataSourceResult {
 
 export const PrivilegedUserMonitoringManageDataSources = ({
   onBackToDashboardClicked,
+  onDone,
 }: {
   onBackToDashboardClicked: () => void;
+  onDone: (userCount: number) => void;
 }) => {
   const spaceId = useSpaceId();
   const [addDataSourceResult, setAddDataSourceResult] = useState<AddDataSourceResult | undefined>();
+  const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
 
   return (
     <>
@@ -100,7 +105,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
             />
           </h4>
         </EuiText>
-        <EuiButton fullWidth={false} iconType={'plusInCircle'}>
+        <EuiButton fullWidth={false} iconType={'plusInCircle'} onClick={showIndexModal}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"
             defaultMessage="Select index"
@@ -114,6 +119,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
           namespace={spaceId}
         />
       )}
+      {isIndexModalOpen && <IndexSelectorModal onClose={hideIndexModal} onImport={onDone} />}
     </>
   );
 };

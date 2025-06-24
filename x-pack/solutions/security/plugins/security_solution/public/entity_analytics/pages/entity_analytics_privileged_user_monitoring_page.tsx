@@ -291,6 +291,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
         {state.type === 'manageDataSources' && (
           <PrivilegedUserMonitoringManageDataSources
             onBackToDashboardClicked={onBackToDashboardClicked}
+            onDone={initEngineCallBack}
           />
         )}
 
