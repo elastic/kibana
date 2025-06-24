@@ -68,7 +68,7 @@ export interface AssetInventoryBarChartProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
 }
 
-const createAssetFilter = (key: string, value: string, index?: string) => {
+const createAssetFilter = (key: string, value: string, index: string) => {
   return {
     $state: { store: FilterStateStore.APP_STATE },
     meta: {
@@ -91,7 +91,7 @@ const createAssetFilter = (key: string, value: string, index?: string) => {
 export const handleElementClick = (
   elements: Array<[GeometryValue, SeriesIdentifier]>,
   setQuery: (v: Partial<AssetsURLQuery>) => void,
-  index?: string
+  index: string
 ): void => {
   if (!elements.length) return;
 
@@ -119,6 +119,12 @@ export const AssetInventoryBarChart = ({
   const xsFontSize = useEuiFontSize('xs');
   const baseTheme = useElasticChartsTheme();
   const { dataView } = useDataViewContext();
+
+  if (!dataView.id) {
+    return null;
+  }
+
+  const dataViewId = dataView.id;
 
   return (
     <div css={getChartStyles(euiTheme, xsFontSize)}>
@@ -169,7 +175,7 @@ export const AssetInventoryBarChart = ({
               handleElementClick(
                 elements as Array<[GeometryValue, SeriesIdentifier]>,
                 setQuery,
-                dataView?.id
+                dataViewId
               )
             }
           />
