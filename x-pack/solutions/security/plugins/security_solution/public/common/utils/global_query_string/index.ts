@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -15,6 +15,7 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
 import { useRouteSpy } from '../route/use_route_spy';
 import { useLinkInfo } from '../../links';
+import { useLocation } from 'react-router';
 
 /**
  * Adds urlParamKey and the initial value to redux store.
@@ -35,6 +36,7 @@ export const useInitializeUrlParam = <State extends {}>(
   newUrlParamKey?: string
 ) => {
   const dispatch = useDispatch();
+  const { search, pathname } = useLocation();
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
 
@@ -56,7 +58,7 @@ export const useInitializeUrlParam = <State extends {}>(
       dispatch(globalUrlParamActions.deregisterUrlParam({ key }));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
-  }, []);
+  }, [search, pathname]);
 };
 
 /**
@@ -116,6 +118,7 @@ export const useSyncGlobalQueryString = () => {
   const previousGlobalUrlParams = usePrevious(globalUrlParam);
   const replaceUrlParams = useReplaceUrlParams();
   const linkInfo = useLinkInfo(pageName);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const { skipUrlState } = linkInfo ?? { skipUrlState: true };
@@ -139,7 +142,10 @@ export const useSyncGlobalQueryString = () => {
     });
 
     if (Object.keys(paramsToUpdate).length > 0) {
-      replaceUrlParams(paramsToUpdate);
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        replaceUrlParams(paramsToUpdate);
+      }, 100);
     }
   }, [previousGlobalUrlParams, globalUrlParam, pageName, replaceUrlParams, linkInfo]);
 };
