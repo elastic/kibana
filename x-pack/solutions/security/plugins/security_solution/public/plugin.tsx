@@ -62,6 +62,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
+import { PROMPT_CONTEXTS } from './assistant/content/prompt_contexts';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -133,7 +134,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const subPluginRoutes = getSubPluginRoutesByCapabilities(subPlugins, services);
 
-        return renderApp({ ...params, services, store, usageCollection, subPluginRoutes });
+        const unmountPromptContext =
+          services.elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
+
+        const unmountApp = renderApp({
+          ...params,
+          services,
+          store,
+          usageCollection,
+          subPluginRoutes,
+        });
+
+        return () => {
+          unmountApp();
+          unmountPromptContext();
+        };
       },
     });
 
