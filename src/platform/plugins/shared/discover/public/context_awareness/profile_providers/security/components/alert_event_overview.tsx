@@ -112,7 +112,7 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
               lines={2}
               size={'s'}
               isLoading={result?.loading}
-              contentAriaLabel="Demo skeleton text"
+              contentAriaLabel={i18n.ecsDescriptionLoadingAriaLable}
             />
           ) : (
             <EuiText size="s" data-test-subj="about">
