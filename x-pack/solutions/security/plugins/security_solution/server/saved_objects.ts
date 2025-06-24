@@ -8,6 +8,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 
 import { promptType } from '@kbn/security-ai-prompts';
+import { referenceDataSavedObjectType } from './endpoint/lib/reference_data';
 import { protectionUpdatesNoteType } from './endpoint/lib/protection_updates_note/saved_object_mappings';
 import { noteType, pinnedEventType, timelineType } from './lib/timeline/saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -37,6 +38,7 @@ const types = [
   monitoringEntitySourceType,
   protectionUpdatesNoteType,
   promptType,
+  referenceDataSavedObjectType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);

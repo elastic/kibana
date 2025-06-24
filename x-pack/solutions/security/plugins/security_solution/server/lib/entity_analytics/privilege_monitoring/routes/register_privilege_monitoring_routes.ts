@@ -15,14 +15,15 @@ import {
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 import {
-  getUserRoute,
   createUserRoute,
   deleteUserRoute,
   listUsersRoute,
   updateUserRoute,
   uploadUsersCSVRoute,
-  uploadUsersJSONRoute,
 } from './users';
+
+import { padInstallRoute } from './privileged_access_detection/pad_install';
+import { padGetStatusRoute } from './privileged_access_detection/pad_get_installation_status';
 
 export const registerPrivilegeMonitoringRoutes = ({
   router,
@@ -31,14 +32,14 @@ export const registerPrivilegeMonitoringRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  padInstallRoute(router, logger, config);
+  padGetStatusRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
   monitoringEntitySourceRoute(router, logger, config);
   listMonitoringEntitySourceRoute(router, logger, config);
-  getUserRoute(router, logger);
   createUserRoute(router, logger);
   deleteUserRoute(router, logger);
   listUsersRoute(router, logger);
   updateUserRoute(router, logger);
-  uploadUsersCSVRoute(router, logger);
-  uploadUsersJSONRoute(router, logger);
+  uploadUsersCSVRoute(router, logger, config);
 };

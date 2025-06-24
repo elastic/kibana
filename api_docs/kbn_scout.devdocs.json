@@ -2506,7 +2506,7 @@
             "tags": [],
             "label": "evaluate",
             "description": [
-              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst tweets = page.locator('.tweet .retweets');\nexpect(await tweets.evaluate(node => node.innerText)).toBe('10 retweets');\n```\n"
+              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
               "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
@@ -2591,7 +2591,7 @@
             "tags": [],
             "label": "evaluate",
             "description": [
-              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\n```js\nconst tweets = page.locator('.tweet .retweets');\nexpect(await tweets.evaluate(node => node.innerText)).toBe('10 retweets');\n```\n"
+              "\nExecute JavaScript code in the page, taking the matching element as an argument.\n\n**Details**\n\nReturns the return value of\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression), called with the\nmatching element as a first argument, and\n[`arg`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-arg) as a second argument.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) returns a\n[Promise], this method will wait for the promise to resolve and return its value.\n\nIf [`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression) throws or\nrejects, this method throws.\n\n**Usage**\n\nPassing argument to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression):\n\n```js\nconst result = await page.getByTestId('myId').evaluate((element, [x, y]) => {\n  return element.textContent + ' ' + x * y;\n}, [7, 8]);\nconsole.log(result); // prints \"myId text 56\"\n```\n"
             ],
             "signature": [
               "{ <R, Arg, E extends HTMLElement | SVGElement = HTMLElement | SVGElement>(pageFunction: ",
@@ -3724,12 +3724,49 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.Locator.describe",
+            "type": "Function",
+            "tags": [],
+            "label": "describe",
+            "description": [
+              "\nDescribes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the\nsame element.\n\n**Usage**\n\n```js\nconst button = page.getByTestId('btn-sub').describe('Subscribe button');\nawait button.click();\n```\n"
+            ],
+            "signature": [
+              "(description: string) => ",
+              "Locator"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.Locator.describe.$1",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [
+                  "Locator description."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.Locator.dispatchEvent",
             "type": "Function",
             "tags": [],
             "label": "dispatchEvent",
             "description": [
-              "\nProgrammatically dispatch an event on the matching element.\n\n**Usage**\n\n```js\nawait locator.dispatchEvent('click');\n```\n\n**Details**\n\nThe snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,\n`click` is dispatched. This is equivalent to calling\n[element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).\n\nUnder the hood, it creates an instance of an event based on the given\n[`type`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-type), initializes it with\n[`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) properties\nand dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.\n\nSince [`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) is\nevent-specific, please refer to the events documentation for the lists of initial properties:\n- [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)\n- [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)\n- [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)\n- [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)\n- [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)\n- [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)\n- [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)\n- [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)\n- [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)\n- [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)\n\nYou can also specify [JSHandle](https://playwright.dev/docs/api/class-jshandle) as the property value if you want\nlive objects to be passed into the event:\n\n```js\n// Note you can only create DataTransfer in Chromium and Firefox\nconst dataTransfer = await page.evaluateHandle(() => new DataTransfer());\nawait locator.dispatchEvent('dragstart', { dataTransfer });\n```\n"
+              "\nProgrammatically dispatch an event on the matching element.\n\n**Usage**\n\n```js\nawait locator.dispatchEvent('click');\n```\n\n**Details**\n\nThe snippet above dispatches the `click` event on the element. Regardless of the visibility state of the element,\n`click` is dispatched. This is equivalent to calling\n[element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).\n\nUnder the hood, it creates an instance of an event based on the given\n[`type`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-type), initializes it with\n[`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) properties\nand dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.\n\nSince [`eventInit`](https://playwright.dev/docs/api/class-locator#locator-dispatch-event-option-event-init) is\nevent-specific, please refer to the events documentation for the lists of initial properties:\n- [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)\n- [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)\n- [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)\n- [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)\n- [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)\n- [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)\n- [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)\n- [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)\n- [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)\n- [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)\n\nYou can also specify [JSHandle](https://playwright.dev/docs/api/class-jshandle) as the property value if you want\nlive objects to be passed into the event:\n\n```js\nconst dataTransfer = await page.evaluateHandle(() => new DataTransfer());\nawait locator.dispatchEvent('dragstart', { dataTransfer });\n```\n"
             ],
             "signature": [
               "(type: string, eventInit?: ",
@@ -4091,7 +4128,7 @@
               "Locator",
               " | undefined; hasNot?: ",
               "Locator",
-              " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
+              " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; visible?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
@@ -4170,6 +4207,22 @@
                     ],
                     "signature": [
                       "string | RegExp | undefined"
+                    ],
+                    "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.Locator.filter.$1.visible",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "visible",
+                    "description": [
+                      "\nOnly matches visible or invisible elements."
+                    ],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
                     "deprecated": false,
@@ -5306,7 +5359,7 @@
             "tags": [],
             "label": "isEditable",
             "description": [
-              "\nReturns whether the element is [editable](https://playwright.dev/docs/actionability#editable).\n\n**NOTE** If you need to assert that an element is editable, prefer\n[expect(locator).toBeEditable([options])](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-editable)\nto avoid flakiness. See [assertions guide](https://playwright.dev/docs/test-assertions) for more details.\n\n**Usage**\n\n```js\nconst editable = await page.getByRole('textbox').isEditable();\n```\n"
+              "\nReturns whether the element is [editable](https://playwright.dev/docs/actionability#editable). If the target element is not an `<input>`,\n`<textarea>`, `<select>`, `[contenteditable]` and does not have a role allowing `[aria-readonly]`, this method\nthrows an error.\n\n**NOTE** If you need to assert that an element is editable, prefer\n[expect(locator).toBeEditable([options])](https://playwright.dev/docs/api/class-locatorassertions#locator-assertions-to-be-editable)\nto avoid flakiness. See [assertions guide](https://playwright.dev/docs/test-assertions) for more details.\n\n**Usage**\n\n```js\nconst editable = await page.getByRole('textbox').isEditable();\n```\n"
             ],
             "signature": [
               "(options?: { timeout?: number | undefined; } | undefined) => Promise<boolean>"
@@ -5677,7 +5730,7 @@
             "tags": [],
             "label": "or",
             "description": [
-              "\nCreates a locator matching all elements that match one or both of the two locators.\n\nNote that when both locators match something, the resulting locator will have multiple matches and violate\n[locator strictness](https://playwright.dev/docs/locators#strictness) guidelines.\n\n**Usage**\n\nConsider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog\nshows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.\n\n```js\nconst newEmail = page.getByRole('button', { name: 'New' });\nconst dialog = page.getByText('Confirm security settings');\nawait expect(newEmail.or(dialog)).toBeVisible();\nif (await dialog.isVisible())\n  await page.getByRole('button', { name: 'Dismiss' }).click();\nawait newEmail.click();\n```\n"
+              "\nCreates a locator matching all elements that match one or both of the two locators.\n\nNote that when both locators match something, the resulting locator will have multiple matches, potentially causing\na [locator strictness](https://playwright.dev/docs/locators#strictness) violation.\n\n**Usage**\n\nConsider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog\nshows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.\n\n**NOTE** If both \"New email\" button and security dialog appear on screen, the \"or\" locator will match both of them,\npossibly throwing the [\"strict mode violation\" error](https://playwright.dev/docs/locators#strictness). In this case, you can use\n[locator.first()](https://playwright.dev/docs/api/class-locator#locator-first) to only match one of them.\n\n```js\nconst newEmail = page.getByRole('button', { name: 'New' });\nconst dialog = page.getByText('Confirm security settings');\nawait expect(newEmail.or(dialog).first()).toBeVisible();\nif (await dialog.isVisible())\n  await page.getByRole('button', { name: 'Dismiss' }).click();\nawait newEmail.click();\n```\n"
             ],
             "signature": [
               "(locator: ",
@@ -6020,7 +6073,7 @@
             "tags": [],
             "label": "selectOption",
             "description": [
-              "\nSelects option or options in `<select>`.\n\n**Details**\n\nThis method waits for [actionability](https://playwright.dev/docs/actionability) checks, waits until all specified options are present in\nthe `<select>` element and selects these options.\n\nIf the target element is not a `<select>` element, this method throws an error. However, if the element is inside\nthe `<label>` element that has an associated\n[control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used\ninstead.\n\nReturns the array of option values that have been successfully selected.\n\nTriggers a `change` and `input` event once all the provided options have been selected.\n\n**Usage**\n\n```html\n<select multiple>\n  <option value=\"red\">Red</div>\n  <option value=\"green\">Green</div>\n  <option value=\"blue\">Blue</div>\n</select>\n```\n\n```js\n// single selection matching the value or label\nelement.selectOption('blue');\n\n// single selection matching the label\nelement.selectOption({ label: 'Blue' });\n\n// multiple selection for red, green and blue options\nelement.selectOption(['red', 'green', 'blue']);\n```\n"
+              "\nSelects option or options in `<select>`.\n\n**Details**\n\nThis method waits for [actionability](https://playwright.dev/docs/actionability) checks, waits until all specified options are present in\nthe `<select>` element and selects these options.\n\nIf the target element is not a `<select>` element, this method throws an error. However, if the element is inside\nthe `<label>` element that has an associated\n[control](https://developer.mozilla.org/en-US/docs/Web/API/HTMLLabelElement/control), the control will be used\ninstead.\n\nReturns the array of option values that have been successfully selected.\n\nTriggers a `change` and `input` event once all the provided options have been selected.\n\n**Usage**\n\n```html\n<select multiple>\n  <option value=\"red\">Red</option>\n  <option value=\"green\">Green</option>\n  <option value=\"blue\">Blue</option>\n</select>\n```\n\n```js\n// single selection matching the value or label\nelement.selectOption('blue');\n\n// single selection matching the label\nelement.selectOption({ label: 'Blue' });\n\n// multiple selection for red, green and blue options\nelement.selectOption(['red', 'green', 'blue']);\n```\n"
             ],
             "signature": [
               "(values: string | readonly string[] | ",
@@ -6406,7 +6459,7 @@
             "tags": [],
             "label": "tap",
             "description": [
-              "\nPerform a tap gesture on the element matching the locator.\n\n**Details**\n\nThis method taps the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-tap-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.touchscreen](https://playwright.dev/docs/api/class-page#page-touchscreen) to tap the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-tap-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-tap-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.\n"
+              "\nPerform a tap gesture on the element matching the locator. For examples of emulating other gestures by manually\ndispatching touch events, see the [emulating legacy touch events](https://playwright.dev/docs/touch-events) page.\n\n**Details**\n\nThis method taps the element by performing the following steps:\n1. Wait for [actionability](https://playwright.dev/docs/actionability) checks on the element, unless\n   [`force`](https://playwright.dev/docs/api/class-locator#locator-tap-option-force) option is set.\n1. Scroll the element into view if needed.\n1. Use [page.touchscreen](https://playwright.dev/docs/api/class-page#page-touchscreen) to tap the center of the\n   element, or the specified\n   [`position`](https://playwright.dev/docs/api/class-locator#locator-tap-option-position).\n\nIf the element is detached from the DOM at any moment during the action, this method throws.\n\nWhen all steps combined have not finished during the specified\n[`timeout`](https://playwright.dev/docs/api/class-locator#locator-tap-option-timeout), this method throws a\n[TimeoutError](https://playwright.dev/docs/api/class-timeouterror). Passing zero timeout disables this.\n\n**NOTE** `element.tap()` requires that the `hasTouch` option of the browser context be set to true.\n"
             ],
             "signature": [
               "(options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>"
