@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useAppContext } from '../../../../../../app_context';
+import { useAppContext } from '../../../../../../../app_context';
 
 export const FrozenCallOut: React.FunctionComponent = () => {
   const {
@@ -46,7 +46,7 @@ export const FrozenCallOut: React.FunctionComponent = () => {
           }}
         />
       </EuiCallOut>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
     </Fragment>
   );
 };

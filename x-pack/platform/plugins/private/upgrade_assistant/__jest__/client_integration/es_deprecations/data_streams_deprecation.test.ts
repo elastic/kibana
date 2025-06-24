@@ -50,7 +50,7 @@ const defaultMigrationResponse = {
   ],
 };
 
-describe('Data streams deprecation flyout', () => {
+describe('Data streams deprecation', () => {
   let testBed: ElasticsearchTestBed;
 
   beforeAll(() => {
@@ -97,113 +97,7 @@ describe('Data streams deprecation flyout', () => {
     testBed.component.update();
   });
 
-  it('opens a flyout when clicking on a data stream row', async () => {
-    const { actions, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-    expect(exists('reindexDataStreamDetails')).toBe(true);
-    await actions.dataStreamDeprecationFlyout.closeFlyout();
-    expect(exists('reindexDataStreamDetails')).toBe(false);
-  });
-
-  it('renders a flyout with data stream details for both reindex and read-only', async () => {
-    const dataStreamDeprecation = esDeprecationsMockResponse.migrationsDeprecations[5];
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-
-    expect(exists('reindexDataStreamDetails')).toBe(true);
-    expect(find('reindexDataStreamDetails.flyoutTitle').text()).toBe(
-      `${dataStreamDeprecation.index}`
-    );
-
-    expect(exists('dataStreamLastIndexCreationDate')).toBe(true);
-    expect(find('dataStreamLastIndexCreationDate').text()).toBe(
-      `Migration required for indices created on or before${moment(
-        defaultMetaResponse.lastIndexRequiringUpgradeCreationDate
-      ).format(DATE_FORMAT)}`
-    );
-
-    expect(exists('dataStreamSize')).toBe(true);
-    expect(find('dataStreamSize').text()).toBe(
-      `Size${numeral(defaultMetaResponse.indicesRequiringUpgradeDocsSize).format(
-        FILE_SIZE_DISPLAY_FORMAT
-      )}`
-    );
-
-    expect(exists('dataStreamDocumentCount')).toBe(true);
-    expect(find('dataStreamDocumentCount').text()).toBe(
-      `Document Count${defaultMetaResponse.indicesRequiringUpgradeDocsCount}`
-    );
-
-    expect(exists('dataStreamMigrationWarningsCallout')).toBe(true);
-    expect(find('dataStreamMigrationWarningsCallout').text()).toContain(
-      `Indices created on or before ${moment(
-        defaultMetaResponse.lastIndexRequiringUpgradeCreationDate
-      ).format(DATE_FORMAT)} need to be reindexed to a compatible format or marked as read-only.`
-    );
-
-    expect(exists('dataStreamDetailsText')).toBe(true);
-    expect(find('dataStreamDetailsText').text()).toContain(
-      `You have ${defaultMetaResponse.indicesRequiringUpgradeCount} backing indices on this data stream that were created in ES 7.x and will not be compatible with next version.`
-    );
-    expect(find('dataStreamDetailsText').text()).toContain(
-      `${defaultMetaResponse.allIndicesCount} total backing indices, and ${defaultMetaResponse.indicesRequiringUpgradeCount} requires upgrade.`
-    );
-    expect(find('dataStreamDetailsText').text()).toContain(
-      `If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed.`
-    );
-    expect(find('dataStreamDetailsText').text()).toContain('Reindex');
-    expect(find('dataStreamDetailsText').text()).toContain(
-      `If you no longer need this data, you can also proceed by deleting these indices.`
-    );
-
-    expect(exists('closeDataStreamReindexingButton')).toBe(true);
-    expect(exists('startDataStreamReindexingButton')).toBe(true);
-    expect(exists('startDataStreamReadonlyButton')).toBe(true);
-  });
-
-  it('renders a callout if user has not the required privileges', async () => {
-    httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
-      hasRequiredPrivileges: false,
-      migrationOp: { status: 0 },
-      warnings: [],
-    });
-
-    await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup);
-    });
-
-    const { actions, exists, component } = testBed;
-    component.update();
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-
-    expect(exists('dsInsufficientPrivilegesCallout')).toBe(true);
-  });
-
-  it('renders a warning callout if nodes detected with low disk space', async () => {
-    httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([
-      {
-        nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
-        nodeName: 'MacBook-Pro.local',
-        available: '25%',
-        lowDiskWatermarkSetting: '50%',
-      },
-    ]);
-
-    const { actions, find } = testBed;
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-
-    expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
-    expect(find('impactedNodeListItem').length).toEqual(1);
-    expect(find('impactedNodeListItem').at(0).text()).toContain(
-      'MacBook-Pro.local (25% available)'
-    );
-  });
-
-  describe('reindexing', () => {
+  describe('reindexing flyout', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
         MOCK_DS_DEPRECATION_REINDEX.index!,
@@ -220,37 +114,71 @@ describe('Data streams deprecation flyout', () => {
 
       testBed.component.update();
     });
-    it('renders a flyout with data stream details for reindex', async () => {
+    it('renders a warning callout if nodes detected with low disk space', async () => {
+      httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([
+        {
+          nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
+          nodeName: 'MacBook-Pro.local',
+          available: '25%',
+          lowDiskWatermarkSetting: '50%',
+        },
+      ]);
+
+      const { actions, find } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 0,
+        action: 'reindex',
+      });
+
+      expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
+      expect(find('impactedNodeListItem').length).toEqual(1);
+      expect(find('impactedNodeListItem').at(0).text()).toContain(
+        'MacBook-Pro.local (25% available)'
+      );
+    });
+
+    it('renders a flyout with data stream confirm step for reindex', async () => {
+      const dataStreamDeprecation = esDeprecationsMockResponse.migrationsDeprecations[6];
       const { actions, find, exists } = testBed;
 
-      const dataStreamDeprecation = esDeprecationsMockResponse.migrationsDeprecations[6];
-
-      await actions.table.clickDeprecationRowAt('dataStream', 1);
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 1,
+        action: 'reindex',
+      });
 
       expect(exists('reindexDataStreamDetails')).toBe(true);
       expect(find('reindexDataStreamDetails.flyoutTitle').text()).toBe(
         `${dataStreamDeprecation.index}`
       );
 
-      expect(exists('dataStreamDetailsText')).toBe(true);
-      expect(find('dataStreamDetailsText').text()).not.toContain(
-        `If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed.`
-      );
-      expect(find('dataStreamDetailsText').text()).toContain('Reindex');
-      expect(find('dataStreamDetailsText').text()).toContain(
-        `If you no longer need this data, you can also proceed by deleting these indices.`
+      expect(exists('dataStreamLastIndexCreationDate')).toBe(true);
+      expect(find('dataStreamLastIndexCreationDate').text()).toBe(
+        `Migration required for indices created on or before${moment(
+          defaultMetaResponse.lastIndexRequiringUpgradeCreationDate
+        ).format(DATE_FORMAT)}`
       );
 
-      expect(exists('closeDataStreamReindexingButton')).toBe(true);
-      expect(exists('startDataStreamReindexingButton')).toBe(true);
-      expect(exists('startDataStreamReadonlyButton')).toBe(false);
-    });
-    it('renders a flyout with data stream confirm step for reindex', async () => {
-      const { actions, find, exists } = testBed;
+      expect(exists('dataStreamSize')).toBe(true);
+      expect(find('dataStreamSize').text()).toBe(
+        `Size${numeral(defaultMetaResponse.indicesRequiringUpgradeDocsSize).format(
+          FILE_SIZE_DISPLAY_FORMAT
+        )}`
+      );
 
-      await actions.table.clickDeprecationRowAt('dataStream', 1);
+      expect(exists('dataStreamDocumentCount')).toBe(true);
+      expect(find('dataStreamDocumentCount').text()).toBe(
+        `Document Count${defaultMetaResponse.indicesRequiringUpgradeDocsCount}`
+      );
 
-      await actions.dataStreamDeprecationFlyout.clickReindexButton(); // details step
+      expect(exists('dataStreamMigrationWarningsCallout')).toBe(true);
+      expect(find('dataStreamMigrationWarningsCallout').text()).toContain(
+        `Indices created on or before ${moment(
+          defaultMetaResponse.lastIndexRequiringUpgradeCreationDate
+        ).format(DATE_FORMAT)} need to be reindexed to a compatible format or set to read-only.`
+      );
 
       expect(exists('reindexDsWarningCallout')).toBe(true);
       expect(find('reindexDsWarningCallout').text()).toContain(
@@ -259,13 +187,13 @@ describe('Data streams deprecation flyout', () => {
 
       expect(exists('migrationWarningCheckbox')).toBe(true);
       expect(find('migrationWarningCheckbox').length).toBe(1);
-      expect(find('migrationWarningCheckbox').text()).toBe(
+      expect(find('migrationWarningCheckbox').text()).toContain(
         'Reindex all incompatible data for this data stream'
       );
       expect(exists('startActionButton')).toBe(true);
       expect(find('startActionButton').text()).toBe('Start reindexing');
       expect(find('startActionButton').props().disabled).toBe(true);
-      expect(exists('backButton')).toBe(true);
+      expect(exists('closeDataStreamConfirmStepButton')).toBe(true);
 
       await actions.dataStreamDeprecationFlyout.checkMigrationWarningCheckbox();
 
@@ -304,11 +232,15 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          'Reindexing in progress…'
+          `Reindexing ${MOCK_DS_DEPRECATION_REINDEX.index} in progress…`
         );
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
           '0 Indices successfully reindexed.'
@@ -355,7 +287,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
         expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
@@ -405,7 +341,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
 
@@ -456,7 +396,11 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 1);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'reindex',
+        });
 
         expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
 
@@ -478,65 +422,9 @@ describe('Data streams deprecation flyout', () => {
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
         expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
-      describe('reindexing failed', () => {
-        it('offers read-only if reindexing fails and if read-only is not excluded', async () => {
-          httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
-            hasRequiredPrivileges: true,
-            migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.failed },
-            warnings: [
-              {
-                warningType: 'incompatibleDataStream',
-                resolutionType: 'reindex',
-              },
-            ],
-          });
-          const { actions, find, exists } = testBed;
-
-          await actions.table.clickDeprecationRowAt('dataStream', 0);
-          await actions.dataStreamDeprecationFlyout.clickReindexButton();
-
-          expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
-          expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
-
-          expect(exists('startDataStreamMigrationButton')).toBe(true);
-          expect(find('startDataStreamMigrationButton').props().disabled).toBe(false);
-          expect(find('startDataStreamMigrationButton').text()).toBe('Try again');
-
-          expect(exists('startDataStreamReadonlyButton')).toBe(true);
-          expect(find('startDataStreamReadonlyButton').text()).toBe('Mark as read-only');
-        });
-        it('does not offers read-only if reindexing fails and read-only is excluded', async () => {
-          httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
-            MOCK_DS_DEPRECATION_REINDEX.index!,
-            {
-              hasRequiredPrivileges: true,
-              migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.failed },
-              warnings: [
-                {
-                  warningType: 'incompatibleDataStream',
-                  resolutionType: 'reindex',
-                },
-              ],
-            }
-          );
-          const { actions, find, exists } = testBed;
-
-          await actions.table.clickDeprecationRowAt('dataStream', 1);
-          await actions.dataStreamDeprecationFlyout.clickReindexButton();
-
-          expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
-          expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
-
-          expect(exists('startDataStreamMigrationButton')).toBe(true);
-          expect(find('startDataStreamMigrationButton').props().disabled).toBe(false);
-          expect(find('startDataStreamMigrationButton').text()).toBe('Try again');
-
-          expect(exists('startDataStreamReadonlyButton')).toBe(false);
-        });
-      });
     });
   });
-  describe('read-only', () => {
+  describe('read-only modal', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
         MOCK_DS_DEPRECATION_READ_ONLY.index!,
@@ -553,49 +441,55 @@ describe('Data streams deprecation flyout', () => {
 
       testBed.component.update();
     });
-    it('renders a flyout with data stream details for read-only', async () => {
-      const { actions, find, exists } = testBed;
 
-      const dataStreamDeprecation = esDeprecationsMockResponse.migrationsDeprecations[7];
+    it('renders a warning callout if nodes detected with low disk space', async () => {
+      httpRequestsMockHelpers.setLoadNodeDiskSpaceResponse([
+        {
+          nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
+          nodeName: 'MacBook-Pro.local',
+          available: '25%',
+          lowDiskWatermarkSetting: '50%',
+        },
+      ]);
 
-      await actions.table.clickDeprecationRowAt('dataStream', 2);
+      const { actions, find } = testBed;
 
-      expect(exists('reindexDataStreamDetails')).toBe(true);
-      expect(find('reindexDataStreamDetails.flyoutTitle').text()).toBe(
-        `${dataStreamDeprecation.index}`
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 0,
+        action: 'reindex',
+      });
+
+      expect(find('lowDiskSpaceCallout').text()).toContain('Nodes with low disk space');
+      expect(find('impactedNodeListItem').length).toEqual(1);
+      expect(find('impactedNodeListItem').at(0).text()).toContain(
+        'MacBook-Pro.local (25% available)'
       );
-
-      expect(exists('dataStreamDetailsText')).toBe(true);
-      expect(find('dataStreamDetailsText').text()).toContain(
-        `If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed.`
-      );
-      expect(find('dataStreamDetailsText').text()).not.toContain('Reindex');
-
-      expect(exists('closeDataStreamReindexingButton')).toBe(true);
-      expect(exists('startDataStreamReindexingButton')).toBe(false);
-      expect(exists('startDataStreamReadonlyButton')).toBe(true);
     });
-    it('renders a flyout with data stream confirm step for read-only', async () => {
+
+    it('renders a modal with data stream confirm step for read-only', async () => {
       const { actions, find, exists } = testBed;
 
-      await actions.table.clickDeprecationRowAt('dataStream', 2);
-
-      await actions.dataStreamDeprecationFlyout.clickReadOnlyButton(); // details step
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'dataStream',
+        index: 1,
+        action: 'readonly',
+      });
 
       expect(exists('readOnlyDsWarningCallout')).toBe(true);
       expect(find('readOnlyDsWarningCallout').text()).toContain(
-        'Marking this data read-only could affect some of the existing setups'
+        'Setting this data to read-only could affect some of the existing setups'
       );
 
       expect(exists('migrationWarningCheckbox')).toBe(true);
       expect(find('migrationWarningCheckbox').length).toBe(1);
-      expect(find('migrationWarningCheckbox').text()).toBe(
+      expect(find('migrationWarningCheckbox').text()).toContain(
         'Reindex all incompatible data for this data stream'
       );
       expect(exists('startActionButton')).toBe(true);
-      expect(find('startActionButton').text()).toBe('Mark all read-only');
+      expect(find('startActionButton').text()).toBe('Set all to read-only');
       expect(find('startActionButton').props().disabled).toBe(true);
-      expect(exists('backButton')).toBe(true);
+      expect(exists('cancelDataStreamMigrationModal')).toBe(true);
 
       await actions.dataStreamDeprecationFlyout.checkMigrationWarningCheckbox();
 
@@ -634,19 +528,23 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 2);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
-        expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          'Marking as read-only in progress…'
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          `Setting to read-only ${MOCK_DS_DEPRECATION_READ_ONLY.index} in progress…`
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices successfully marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices successfully set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices currently getting marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices currently getting set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
           '1 Index waiting to start.'
         );
         expect(exists('startDataStreamMigrationButton')).toBe(true);
@@ -685,16 +583,20 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 2);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
-        expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices successfully marked as read-only.'
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices successfully set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '1 Index currently getting marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '1 Index currently getting set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
           '0 Indices waiting to start.'
         );
 
@@ -734,16 +636,20 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 2);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
-        expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '1 Index successfully marked as read-only.'
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '1 Index successfully set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices currently getting marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices currently getting set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
           '0 Indices waiting to start.'
         );
 
@@ -783,20 +689,24 @@ describe('Data streams deprecation flyout', () => {
         testBed.component.update();
         const { actions, find, exists } = testBed;
 
-        await actions.table.clickDeprecationRowAt('dataStream', 2);
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'dataStream',
+          index: 1,
+          action: 'readonly',
+        });
 
-        expect(exists('dataStreamMigrationChecklistFlyout')).toBe(true);
+        expect(exists('dataStreamMigrationChecklistModal')).toBe(true);
 
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '1 Index failed to get marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '1 Index failed to get set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices successfully marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices successfully set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
-          '0 Indices currently getting marked as read-only.'
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
+          '0 Indices currently getting set to read-only.'
         );
-        expect(find('dataStreamMigrationChecklistFlyout').text()).toContain(
+        expect(find('dataStreamMigrationChecklistModal').text()).toContain(
           '0 Indices waiting to start.'
         );
 
@@ -805,21 +715,5 @@ describe('Data streams deprecation flyout', () => {
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
       });
     });
-  });
-
-  it('renders a callout if fetch fails', async () => {
-    httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
-      hasRequiredPrivileges: true,
-      migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.fetchFailed },
-      warnings: [],
-    });
-
-    const { actions, exists, find } = testBed;
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-    await actions.dataStreamDeprecationFlyout.clickReindexButton();
-
-    expect(exists('fetchFailedCallout')).toBe(true);
-    expect(find('fetchFailedCallout').text()).toBe('Migration status not available');
   });
 });
