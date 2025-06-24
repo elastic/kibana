@@ -5,32 +5,18 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { KbnClient } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 
 export class AnnotationDataService {
-  kibanaUrl: string;
-  elasticsearchUrl: string;
-  params: Record<string, any>;
-  requester: KbnClient['requester'];
-  getService: FtrProviderContext['getService'];
-
-  constructor(params: Record<string, any>) {
-    this.kibanaUrl = params.kibanaUrl;
-    this.elasticsearchUrl = params.elasticsearchUrl;
-    this.requester = params.getService('kibanaServer').requester;
-    this.params = params;
-    this.getService = params.getService;
-  }
+  constructor(private esClient: Client) {}
 
   async deleteAnnotationsIndex() {
-    const esClient = this.getService('es');
     try {
-      await esClient.indices.delete({
+      await this.esClient.indices.delete({
         index: 'observability-annotations',
         ignore_unavailable: true,
       });
-      await esClient.indices.delete({
+      await this.esClient.indices.delete({
         index: 'observability-annotations',
         ignore_unavailable: true,
       });

@@ -9,4 +9,5 @@ ui_tests:
     - painless_lab
     - security_solution
     - streams_app
+    - slo_app
   disabled:

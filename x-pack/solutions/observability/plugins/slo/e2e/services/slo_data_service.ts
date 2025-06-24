@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/test';
 import { cli, DEFAULTS } from '@kbn/data-forge';
+import { KbnClient } from '@kbn/scout';
 
-export class SLoDataService {
-  kibanaUrl: string;
-  elasticsearchUrl: string;
-  params: Record<string, any>;
-  requester: KbnClient['requester'];
+export class SLODataService {
+  constructor(
+    private kibanaUrl: string,
+    private elasticsearchUrl: string,
+    private kbnClient: KbnClient
+  ) {}
 
-  constructor(params: Record<string, any>) {
-    this.kibanaUrl = params.kibanaUrl;
-    this.elasticsearchUrl = params.elasticsearchUrl;
-    this.requester = params.getService('kibanaServer').requester;
-    this.params = params;
-  }
-
-  async generateSloData({
-    lookback = 'now-1d',
-    eventsPerCycle = 50,
-  }: {
-    lookback?: string;
-    eventsPerCycle?: number;
-  } = {}) {
+  async generateSloData() {
+    console.log(this.kibanaUrl, 'this.kibanaUrl');
     await cli({
       kibanaUrl: this.kibanaUrl,
       elasticsearchHost: this.elasticsearchUrl,
@@ -81,7 +70,7 @@ export class SLoDataService {
       groupBy: ['user.id'],
     };
     try {
-      const { data } = await this.requester.request({
+      const { data } = await this.kbnClient.request({
         description: 'get monitor by id',
         path: '/api/observability/slos',
         body: example,
