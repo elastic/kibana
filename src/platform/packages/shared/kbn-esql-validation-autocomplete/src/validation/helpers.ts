@@ -149,5 +149,5 @@ export function collapseWrongArgumentTypeMessages(
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
  * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export const getEnrichCommands = (commands: ESQLCommand[]) =>
-  Walker.matchAll(commands, {type: 'command', name: 'enrich'});
+export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+  Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];
