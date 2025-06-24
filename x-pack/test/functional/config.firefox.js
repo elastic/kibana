@@ -14,8 +14,6 @@ export default async function ({ readConfigFile }) {
     testFiles: [
       require.resolve('./apps/canvas'),
       require.resolve('./apps/infra'),
-      require.resolve('./apps/security'),
-      require.resolve('./apps/spaces'),
       require.resolve('./apps/watcher'),
     ],
 

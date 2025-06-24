@@ -44,6 +44,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
         top: 0,
         left: 0,
       }}
+      data-test-subj="vertical-lines"
     >
       <g transform={`translate(0 ${margins.top})`}>
         {tickPositions.map((position, index) => (
