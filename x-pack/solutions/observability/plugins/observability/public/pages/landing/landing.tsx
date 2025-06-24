@@ -11,6 +11,7 @@ import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE } from '../../../common';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
+import { APM_APP_LOCATOR_ID } from '../../components/alert_sources/get_apm_app_url';
 
 export function LandingPage() {
   const { pricing } = useKibana().services;
@@ -28,24 +29,18 @@ export function LandingPage() {
 
 function ObservabilityCompleteLandingPage() {
   const { hasDataMap, isAllRequestsComplete } = useHasData();
-  const {
-    application: { navigateToUrl },
-    http: { basePath },
-    share,
-    logsDataAccess,
-  } = useKibana().services;
+  const { share, logsDataAccess } = useKibana().services;
 
   useEffect(() => {
     async function redirectToLanding() {
       if (isAllRequestsComplete) {
         const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus();
-        const { apm } = hasDataMap;
-        const hasApmData = apm?.hasData;
+        const hasApmData = hasDataMap.apm?.hasData;
 
         if (hasLogsData) {
           redirectToDiscoverLogs(share);
         } else if (hasApmData) {
-          navigateToUrl(basePath.prepend('/app/apm/services'));
+          redirectToAPM(share);
         } else {
           redirectToOnboarding(share);
         }
@@ -53,14 +48,7 @@ function ObservabilityCompleteLandingPage() {
     }
 
     redirectToLanding();
-  }, [
-    basePath,
-    hasDataMap,
-    isAllRequestsComplete,
-    logsDataAccess.services.logDataService,
-    navigateToUrl,
-    share,
-  ]);
+  }, [hasDataMap, isAllRequestsComplete, logsDataAccess, share]);
 
   return <></>;
 }
@@ -84,6 +72,11 @@ function ObservabilityLogsEssentialsLandingPage() {
 
   return <></>;
 }
+
+const redirectToAPM = (share: SharePublicStart) => {
+  const apmLocator = share.url.locators.get(APM_APP_LOCATOR_ID);
+  apmLocator?.navigate({});
+};
 
 const redirectToDiscoverLogs = (share: SharePublicStart) => {
   const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);

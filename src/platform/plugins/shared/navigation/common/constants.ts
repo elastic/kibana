@@ -12,7 +12,9 @@ export const DEFAULT_ROUTE_UI_SETTING_ID = 'defaultRoute';
 export const DEFAULT_ROUTES = {
   classic: '/app/home',
   es: '/app/elasticsearch/overview',
-  oblt: '/app/observabilityOnboarding',
+  // O11y aliases
+  oblt: '/app/observability/landing',
+  observability: '/app/observability/landing',
   security: '/app/security/get_started',
   chat: '/app/workchat',
 };
