@@ -365,6 +365,7 @@ src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/platform/plugins/shared/custom_integrations @elastic/fleet
 src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
+src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 src/platform/plugins/shared/dashboard @elastic/kibana-presentation
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
