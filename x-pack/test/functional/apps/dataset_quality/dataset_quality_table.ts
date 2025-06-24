@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     'datasetQuality',
   ]);
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
@@ -202,7 +203,25 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
         const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
-        expect(failedDocsColCellTexts).to.eql(['0%', '0%', '20%', '0%']);
+        expect(failedDocsColCellTexts).to.eql(['N/A', 'N/A', '20%', 'N/A']);
+      });
+
+      it('changes link text on hover when failure store is not enabled', async () => {
+        const linkSelector = 'datasetQualitySetFailureStoreLink';
+        const links = await testSubjects.findAll(linkSelector);
+        expect(links.length).to.be.greaterThan(0);
+        const link = links[links.length - 1];
+
+        expect(await link.getVisibleText()).to.eql('N/A');
+
+        await link.moveMouseTo();
+
+        await retry.try(async () => {
+          expect(await link.getVisibleText()).to.eql('Set failure store');
+        });
+
+        const table = await PageObjects.datasetQuality.getDatasetsTable();
+        await table.moveMouseTo();
       });
     });
   });

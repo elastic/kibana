@@ -2296,6 +2296,9 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 /x-pack/solutions/security/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns @elastic/security-threat-hunting
 
+/x-pack/test_serverless/functional/test_suites/security/ftr/discover @elastic/security-threat-hunting
+x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting
+
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
 /x-pack/solutions/security/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
@@ -2735,9 +2738,11 @@ packages/react @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/.spectral.yaml                       @elastic/platform-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
-oas_docs/kibana.info.yaml                     @elastic/platform-docs
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
