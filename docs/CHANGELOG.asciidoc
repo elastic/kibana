@@ -105,6 +105,8 @@ Review important information about the {kib} 7.17.x releases.
 
 The 7.17.29 release includes the following fixes.
 
+IMPORTANT: The 7.17.29 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
+
 [float]
 [[fixes-v7.17.29]]
 === Fixes
