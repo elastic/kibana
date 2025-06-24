@@ -21,7 +21,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock the necessary hooks and components
 jest.mock('@kbn/elastic-assistant', () => ({
-  AssistantSpaceIdProvider: jest.fn(({children}) => <div data-test-subj="AssistantSpaceProvider" >{children}</div>),
+  AssistantSpaceIdProvider: jest.fn(({ children }) => (
+    <div data-test-subj="AssistantSpaceProvider">{children}</div>
+  )),
   useAssistantContext: jest.fn(),
   useFetchCurrentUserConversations: jest.fn(),
   mergeBaseWithPersistedConversations: jest.fn(),
