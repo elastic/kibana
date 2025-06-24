@@ -5,11 +5,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiLink, EuiPanel } from '@elastic/eui';
+import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
-import { docLinks } from '../../common/doc_links';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application } = useKibana().services;
@@ -47,7 +46,6 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         />
-
         {/* TODO:   Enable The “Sample Data” section when the one-click sample data ingestion feature is complete. */}
         {/* <EuiCard
           display="plain"
@@ -74,6 +72,8 @@ export const ConnectToElasticsearchSidePanel = () => {
             </EuiButtonEmpty>
           }
         /> */}
+
+        {/* TODO: Enable CE block once we can discern the billing type.
         <EuiCard
           display="transparent"
           textAlign="left"
@@ -103,7 +103,7 @@ export const ConnectToElasticsearchSidePanel = () => {
               )}
             </EuiLink>
           }
-        />
+        /> */}
       </EuiFlexGroup>
     </EuiPanel>
   );

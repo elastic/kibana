@@ -21,7 +21,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
-import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
+import { LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 
 interface DataViewPickerProps {
@@ -154,16 +154,10 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       return { label: LOADING };
     }
 
-    if (dataViewSpec.id === defaultDataViewId) {
-      return {
-        label: DEFAULT_SECURITY_DATA_VIEW,
-      };
-    }
-
     return {
       label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
     };
-  }, [dataViewSpec.id, dataViewSpec?.name, defaultDataViewId, status]);
+  }, [dataViewSpec?.name, dataViewSpec?.id, status]);
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
