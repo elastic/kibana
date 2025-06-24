@@ -20,6 +20,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -46,6 +47,7 @@ interface ValueControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
+  timeRange?: TimeRange;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -63,6 +65,7 @@ export function ValueControlForm({
   search,
   setControlState,
   valuesRetrieval,
+  timeRange,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -157,6 +160,7 @@ export function ValueControlForm({
           signal: undefined,
           filter: undefined,
           dropNullColumns: true,
+          timeRange,
         }).then((results) => {
           if (!isMounted()) {
             return;
@@ -185,7 +189,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search]
+    [isMounted, search, timeRange]
   );
 
   useEffect(() => {
