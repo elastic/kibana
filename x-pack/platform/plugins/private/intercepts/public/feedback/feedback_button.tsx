@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { EuiButton, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,11 +18,23 @@ interface Props {
 }
 
 export const FeedbackButton = ({ core, isServerless }: Props) => {
+  let flyoutRef: OverlayRef | null = null;
+
   const openFlyout = () => {
-    core.overlays.openFlyout(toMountPoint(<FeedbackFlyout />, core.rendering), {
+    if (flyoutRef) {
+      flyoutRef.close();
+      flyoutRef = null;
+      return;
+    }
+
+    flyoutRef = core.overlays.openFlyout(toMountPoint(<FeedbackFlyout />, core.rendering), {
       'data-test-subj': 'feedbackFlyout',
       type: 'push',
       maxWidth: 400,
+    });
+
+    flyoutRef.onClose.finally(() => {
+      flyoutRef = null;
     });
   };
 
@@ -37,7 +49,7 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
         onClick={openFlyout}
         data-test-subj="serverlessFeedbackButton"
       >
-        {i18n.translate('xpack.intercept.giveFeedbackBtn.label', {
+        {i18n.translate('xpack.intercept.giveFeedbackButton.label', {
           defaultMessage: 'Give feedback',
         })}
       </EuiButton>
@@ -45,7 +57,15 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
   }
 
   return (
-    <EuiHeaderSectionItemButton onClick={openFlyout} data-test-subj="feedbackButton">
+    <EuiHeaderSectionItemButton
+      onClick={openFlyout}
+      data-test-subj="feedbackButton"
+      aria-controls="keyPadMenu"
+      aria-haspopup="true"
+      aria-label={i18n.translate('xpack.intercept.giveFeedbackButton.label', {
+        defaultMessage: 'Give feedback',
+      })}
+    >
       <EuiIcon type="comment" />
     </EuiHeaderSectionItemButton>
   );
