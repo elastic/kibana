@@ -18,14 +18,12 @@ const text = {
   title: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_TITLE,
   message: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE(MAX_BULK_FILL_RULE_GAPS_BULK_SIZE),
   closeButton: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_CLOSE_BUTTON,
-}
+};
 
 const BulkFillRuleGapsRuleLimitErrorModalComponent = ({
   onClose,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
-  return (
-    <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />
-  )
+  return <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />;
 };
 
 export const BulkFillRuleGapsRuleLimitErrorModal = React.memo(

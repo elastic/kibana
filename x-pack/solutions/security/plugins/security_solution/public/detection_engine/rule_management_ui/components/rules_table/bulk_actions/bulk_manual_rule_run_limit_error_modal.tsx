@@ -18,14 +18,12 @@ const text = {
   title: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE,
   message: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE),
   closeButton: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON,
-}
+};
 
 const BulkManualRuleRunLimitErrorModalComponent = ({
   onClose,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
-  return (
-    <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />
-  )
+  return <BulkActionRuleLimitErrorModal onClose={onClose} text={text} />;
 };
 
 export const BulkManualRuleRunLimitErrorModal = React.memo(

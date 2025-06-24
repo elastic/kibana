@@ -13,7 +13,10 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useCallback, useMemo } from 'react';
 import { BulkFillRuleGapsEventTypes } from '../../../../../common/lib/telemetry/events/bulk_fill_rule_gaps/types';
 import { ML_RULES_UNAVAILABLE } from './translations';
-import { MAX_BULK_FILL_RULE_GAPS_BULK_SIZE, MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import {
+  MAX_BULK_FILL_RULE_GAPS_BULK_SIZE,
+  MAX_MANUAL_RULE_RUN_BULK_SIZE,
+} from '../../../../../../common/constants';
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';

@@ -18,10 +18,10 @@ import {
 interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;
   text: {
-    title: string,
-    message: string
-    closeButton: string
-  }
+    title: string;
+    message: string;
+    closeButton: string;
+  };
 }
 
 const BulkActionRuleLimitErrorModalComponent = ({
@@ -33,9 +33,7 @@ const BulkActionRuleLimitErrorModalComponent = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle>{text.title}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody>
-        {text.message}
-      </EuiModalBody>
+      <EuiModalBody>{text.message}</EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill>
           {text.closeButton}
@@ -45,8 +43,6 @@ const BulkActionRuleLimitErrorModalComponent = ({
   );
 };
 
-export const BulkActionRuleLimitErrorModal = React.memo(
-  BulkActionRuleLimitErrorModalComponent
-);
+export const BulkActionRuleLimitErrorModal = React.memo(BulkActionRuleLimitErrorModalComponent);
 
 BulkActionRuleLimitErrorModal.displayName = 'BulkActionRuleLimitErrorModal';
