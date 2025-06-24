@@ -12,7 +12,7 @@ import type { FC } from 'react';
 import React, { Fragment, useMemo, useCallback } from 'react';
 
 import type { EuiSelectableOption, EuiSuperSelectProps } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
@@ -145,6 +145,7 @@ export const SelectSeverityUI: FC<
     onChange: (selectedSeverities: TableSeverity[]) => void;
   }
 > = ({ classNames = '', severity, onChange }) => {
+  const { euiTheme } = useEuiTheme();
   const allSeverityOptions = useSeverityOptions();
   const selectedSeverities = useMemo(
     () =>
@@ -176,38 +177,39 @@ export const SelectSeverityUI: FC<
     // For multiple selections, show "Multiple" with horizontally overlapping health icons
     return (
       <Fragment>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <div
-            style={{
-              marginRight: '8px',
+        <EuiFlexGroup gutterSize="none" alignItems="center" direction="row">
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="none"
+            css={{
+              marginRight: euiTheme.size.s,
               position: 'relative',
-              height: '10px',
-              display: 'flex',
-              alignItems: 'center',
             }}
           >
             {selectedSeverities.map((selectedSeverity, index) => (
-              <div
+              <EuiFlexItem
                 key={index}
-                style={{
+                css={{
                   position: 'relative',
                   marginLeft: index > 0 ? '-6px' : '0',
-                  width: '10px',
-                  height: '10px',
-                  borderRadius: '50%',
+                  width: euiTheme.size.s,
+                  height: euiTheme.size.s,
+                  borderRadius: euiTheme.border.radius.medium,
                   backgroundColor: selectedSeverity.color,
                   zIndex: index + 1,
                 }}
               />
             ))}
-          </div>
-          {i18n.translate('xpack.ml.controls.selectSeverity.multiple', {
-            defaultMessage: 'Multiple',
-          })}
-        </div>
+          </EuiFlexGroup>
+          <EuiFlexItem>
+            {i18n.translate('xpack.ml.controls.selectSeverity.multiple', {
+              defaultMessage: 'Multiple',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     );
-  }, [selectedSeverities, severity]);
+  }, [euiTheme.border.radius.medium, euiTheme.size.s, selectedSeverities, severity.length]);
 
   // Get the options for the multi-select component
   const multiSelectOptions = useFormattedSeverityOptions(selectedSeverities);
