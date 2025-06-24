@@ -101,6 +101,7 @@ const AllAssetsComponent = () => {
           isLoading={isLoadingChartData}
           isFetching={isFetchingChartData}
           assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
+          setQuery={setUrlQuery}
         />
         <EuiSpacer size="xl" />
         <AssetInventoryTableSection state={state} />
