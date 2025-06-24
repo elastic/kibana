@@ -85,7 +85,7 @@ export const CasesConnectorConfigSchema = schema.object({});
 export const CasesConnectorSecretsSchema = schema.object({});
 
 export const CasesConnectorRunParamsSchema = schema.object({
-  alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
+  alerts: schema.arrayOf(AlertSchema),
   groupedAlerts: schema.nullable(
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
