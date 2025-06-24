@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FileUploadManager } from '@kbn/file-upload';
-import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import { createFlyout } from '../components/create_flyout';
 import { IndexUpdateService } from '../index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
@@ -38,6 +37,8 @@ export function createEditLookupIndexContentAction(
 
       const { indexName, doesIndexExist } = context;
 
+      const existingIndexName = doesIndexExist ? indexName : null;
+
       const fileManager = new FileUploadManager(
         fileUpload,
         coreStart.http,
@@ -46,18 +47,12 @@ export function createEditLookupIndexContentAction(
         null,
         false,
         true,
-        // existingIndexName
-        doesIndexExist ? indexName : null,
+        existingIndexName,
         { index: { mode: 'lookup' } }
       );
 
-      const messageImporter = new MessageImporter({});
-
       try {
-        createFlyout(
-          { ...dependencies, indexUpdateService, fileManager, messageImporter },
-          context
-        );
+        createFlyout({ ...dependencies, indexUpdateService, fileManager }, context);
       } catch (e) {
         return Promise.reject(e);
       }

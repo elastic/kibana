@@ -26,8 +26,9 @@ import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discove
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import { memoize, noop } from 'lodash';
+import { noop } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { KibanaContextExtra } from '../types';
 
 interface FilePreviewItem {
@@ -50,27 +51,25 @@ export const FilesPreview: FC = () => {
   const { filesStatus, uploadStatus, fileClashes, deleteFile } = useFileUploadContext();
 
   const {
-    services: { data, messageImporter },
+    services: { data },
   } = useKibana<KibanaContextExtra>();
 
   const isMounted = useMountedState();
 
   const [filePreviewItems, setFilePreviewItems] = useState<FilePreviewItem[]>([]);
 
-  const previewDocsMemo = useMemo(
-    // memoize the previewDocs to avoid re-fetching the same preview
-    // TODO file manager needs to be optimized to preserve data and inject pipeline ref
-    // FIXME messageImporter preserves data from previous callsd
-    () => memoize(messageImporter.previewDocs.bind(messageImporter)),
-    [messageImporter]
-  );
+  const previewDocs = useCallback((...args: Parameters<MessageImporter['previewDocs']>) => {
+    // Due to MessageImporter state, need to create a new instance for each call
+    const messageImporter = new MessageImporter({});
+    return messageImporter.previewDocs(...args);
+  }, []);
 
   const fetchFilePreview = useCallback(async () => {
     try {
       const previewResults = await Promise.allSettled(
         filesStatus.map((fileStatus, index) => {
           if (fileStatus.data) {
-            return previewDocsMemo(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
+            return previewDocs(fileStatus.data, fileStatus.results?.ingest_pipeline!, 10);
           }
         })
       );
