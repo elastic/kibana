@@ -25,7 +25,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
-  EuiDataGridColumn,
   EuiDataGridProps,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
@@ -135,10 +134,6 @@ export interface TableProps {
    */
   dataView: DataView;
   /**
-   * Default table columns
-   */
-  defaultColumns?: EuiDataGridColumn[];
-  /**
    * Groups filters passed from the GroupedAlertsTable component via the renderChildComponent callback
    */
   groupingFilters: Filter[];
@@ -165,131 +160,126 @@ export interface TableProps {
  * Renders the table showing all the alerts. This component leverages the ResponseOps AlertsTable in a similar way that the alerts page does.
  * The table is used in combination with the GroupedAlertsTable component.
  */
-export const Table = memo(
-  ({ dataView, defaultColumns, groupingFilters, packages, ruleResponse }: TableProps) => {
-    const {
-      services: {
-        application,
-        cases,
-        data,
-        fieldFormats,
-        http,
-        licensing,
-        notifications,
-        uiSettings,
-        settings,
-      },
-    } = useKibana();
-    const services = useMemo(
-      () => ({
-        cases,
-        data,
-        http,
-        notifications,
-        fieldFormats,
-        application,
-        licensing,
-        settings,
-      }),
-      [application, cases, data, fieldFormats, http, licensing, notifications, settings]
-    );
+export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }: TableProps) => {
+  const {
+    services: {
+      application,
+      cases,
+      data,
+      fieldFormats,
+      http,
+      licensing,
+      notifications,
+      uiSettings,
+      settings,
+    },
+  } = useKibana();
+  const services = useMemo(
+    () => ({
+      cases,
+      data,
+      http,
+      notifications,
+      fieldFormats,
+      application,
+      licensing,
+      settings,
+    }),
+    [application, cases, data, fieldFormats, http, licensing, notifications, settings]
+  );
 
-    const getGlobalFiltersSelector = useMemo(
-      () => inputsSelectors.globalFiltersQuerySelector(),
-      []
-    );
-    const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
+  const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersSelector);
 
-    const { to, from } = useGlobalTime();
-    const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
+  const { to, from } = useGlobalTime();
+  const timeRangeFilter = useMemo(() => buildTimeRangeFilter(from, to), [from, to]);
 
-    const filters = useMemo(
-      () => [
-        ...globalFilters,
-        ...timeRangeFilter,
-        ...groupingFilters.filter((filter) => filter.meta.type !== 'custom'),
-      ],
-      [globalFilters, groupingFilters, timeRangeFilter]
-    );
+  const filters = useMemo(
+    () => [
+      ...globalFilters,
+      ...timeRangeFilter,
+      ...groupingFilters.filter((filter) => filter.meta.type !== 'custom'),
+    ],
+    [globalFilters, groupingFilters, timeRangeFilter]
+  );
 
-    const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
+  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
-    const { browserFields } = useMemo(
-      () => getDataViewStateFromIndexFields('', dataViewSpec.fields),
-      [dataViewSpec.fields]
-    );
+  const { browserFields } = useMemo(
+    () => getDataViewStateFromIndexFields('', dataViewSpec.fields),
+    [dataViewSpec.fields]
+  );
 
-    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-    const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
 
-    const query: AlertsTableProps['query'] = useMemo(() => {
-      const combinedQuery = combineQueries({
-        config: getEsQueryConfig(uiSettings),
-        dataProviders: [],
-        dataViewSpec,
-        browserFields,
-        filters,
-        kqlQuery: globalQuery,
-        kqlMode: globalQuery.language,
-      });
+  const query: AlertsTableProps['query'] = useMemo(() => {
+    const combinedQuery = combineQueries({
+      config: getEsQueryConfig(uiSettings),
+      dataProviders: [],
+      dataViewSpec,
+      browserFields,
+      filters,
+      kqlQuery: globalQuery,
+      kqlMode: globalQuery.language,
+    });
 
-      if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
-        return { bool: {} };
-      }
+    if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
+      return { bool: {} };
+    }
 
-      try {
-        const filter = JSON.parse(combinedQuery?.filterQuery);
-        return { bool: { filter } };
-      } catch {
-        return { bool: {} };
-      }
-    }, [browserFields, dataViewSpec, filters, globalQuery, uiSettings]);
+    try {
+      const filter = JSON.parse(combinedQuery?.filterQuery);
+      return { bool: { filter } };
+    } catch {
+      return { bool: {} };
+    }
+  }, [browserFields, dataViewSpec, filters, globalQuery, uiSettings]);
 
-    const renderAdditionalToolbarControls = useCallback(
-      () => <AdditionalToolbarControls dataView={dataView} />,
-      [dataView]
-    );
+  const renderAdditionalToolbarControls = useCallback(
+    () => <AdditionalToolbarControls dataView={dataView} />,
+    [dataView]
+  );
 
-    const additionalContext: AdditionalTableContext = useMemo(
-      () => ({
-        packages,
-        ruleResponse,
-      }),
-      [packages, ruleResponse]
-    );
+  const additionalContext: AdditionalTableContext = useMemo(
+    () => ({
+      packages,
+      ruleResponse,
+    }),
+    [packages, ruleResponse]
+  );
 
-    const refetchRef = useRef<AlertsTableImperativeApi>(null);
-    const refetch = useCallback(() => {
-      refetchRef.current?.refresh();
-    }, []);
+  const refetchRef = useRef<AlertsTableImperativeApi>(null);
+  const refetch = useCallback(() => {
+    refetchRef.current?.refresh();
+  }, []);
 
-    const bulkActions = useAdditionalBulkActions({ refetch });
+  const bulkActions = useAdditionalBulkActions({ refetch });
 
-    return (
-      <EuiDataGridStyleWrapper>
-        <AlertsTable
-          actionsColumnWidth={ACTION_COLUMN_WIDTH}
-          additionalBulkActions={bulkActions}
-          additionalContext={additionalContext}
-          browserFields={browserFields}
-          casesConfiguration={CASES_CONFIGURATION}
-          columns={defaultColumns ?? columns}
-          consumers={ALERT_TABLE_CONSUMERS}
-          gridStyle={GRID_STYLE}
-          id={TableId.alertsOnAlertSummaryPage}
-          query={query}
-          ref={refetchRef}
-          renderActionsCell={ActionsCell}
-          renderAdditionalToolbarControls={renderAdditionalToolbarControls}
-          renderCellValue={CellValue}
-          rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
-          ruleTypeIds={RULE_TYPE_IDS}
-          services={services}
-          toolbarVisibility={TOOLBAR_VISIBILITY}
-        />
-      </EuiDataGridStyleWrapper>
-    );
-  }
-);
+  return (
+    <EuiDataGridStyleWrapper>
+      <AlertsTable
+        actionsColumnWidth={ACTION_COLUMN_WIDTH}
+        additionalBulkActions={bulkActions}
+        additionalContext={additionalContext}
+        browserFields={browserFields}
+        casesConfiguration={CASES_CONFIGURATION}
+        columns={columns}
+        consumers={ALERT_TABLE_CONSUMERS}
+        gridStyle={GRID_STYLE}
+        id={TableId.alertsOnAlertSummaryPage}
+        query={query}
+        ref={refetchRef}
+        renderActionsCell={ActionsCell}
+        renderAdditionalToolbarControls={renderAdditionalToolbarControls}
+        renderCellValue={CellValue}
+        rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        ruleTypeIds={RULE_TYPE_IDS}
+        services={services}
+        toolbarVisibility={TOOLBAR_VISIBILITY}
+      />
+    </EuiDataGridStyleWrapper>
+  );
+});
 
 Table.displayName = 'Table';
