@@ -10,6 +10,22 @@ import { useCallback } from 'react';
 import type { DataViewManagerScopeName } from '../constants';
 import { selectDataViewAsync } from '../redux/actions';
 
+interface UseSelectDataViewParams {
+  /**
+   * Data view id, if empty - you have to specify fallbackPatterns instead
+   */
+  id?: string | null;
+  /**
+   * List of patterns that will be used to construct the adhoc data view when
+   * .id param is not provided or the data view does not exist
+   */
+  fallbackPatterns?: string[];
+  /**
+   * Data view selection will be applied to the scopes listed here
+   */
+  scope: DataViewManagerScopeName;
+}
+
 /**
  * This hook wraps the dispatch call that updates the redux store with new data view selection.
  * It is the recommended entry point for altering the data view selection.
@@ -20,21 +36,7 @@ export const useSelectDataView = () => {
   const dispatch = useDispatch();
 
   return useCallback(
-    (params: {
-      /**
-       * Data view id, if empty - you have to specify fallbackPatterns instead
-       */
-      id?: string | null;
-      /**
-       * List of patterns that will be used to construct the adhoc data view when
-       * .id param is not provided or the data view does not exist
-       */
-      fallbackPatterns?: string[];
-      /**
-       * Data view selection will be applied to the scopes listed here
-       */
-      scope: DataViewManagerScopeName;
-    }) => {
+    (params: UseSelectDataViewParams) => {
       if (!(params.id || params.fallbackPatterns?.length)) {
         return;
       }
