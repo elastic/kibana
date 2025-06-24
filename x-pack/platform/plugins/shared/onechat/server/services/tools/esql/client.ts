@@ -7,10 +7,14 @@
 
 import { createInternalError, esqlToolProviderId } from '@kbn/onechat-common';
 import { logger } from 'elastic-apm-node';
-import { EsqlToolCreateRequest, EsqlToolCreateResponse, EsqlToolUpdateRequest } from '../../../../common/tools';
+import { EsqlToolDefinition } from '@kbn/onechat-server';
+import {
+  EsqlToolCreateRequest,
+  EsqlToolCreateResponse,
+  EsqlToolUpdateRequest,
+} from '../../../../common/tools';
 import { esqlToolIndexName } from './storage';
 import { EsqlToolStorage } from './storage';
-import { EsqlToolDefinition } from '@kbn/onechat-server';
 
 export interface EsqlToolClient {
   get(toolId: string): Promise<EsqlToolDefinition>;
@@ -40,7 +44,7 @@ class EsqlToolClientImpl {
 
       return tool;
     } catch (error) {
-      const message = `Error retrieving ESQL tool with Id ${id}: ${error}`
+      const message = `Error retrieving ESQL tool with Id ${id}: ${error}`;
       logger.error(message);
       throw createInternalError(message);
     }
@@ -91,10 +95,7 @@ class EsqlToolClientImpl {
       throw createInternalError(message);
     }
   }
-  async update(
-    id: string,
-    updates: EsqlToolUpdateRequest
-  ): Promise<EsqlToolCreateResponse> {
+  async update(id: string, updates: EsqlToolUpdateRequest): Promise<EsqlToolCreateResponse> {
     try {
       const now = new Date();
       let tool: EsqlToolCreateResponse | null = null;
@@ -134,10 +135,10 @@ class EsqlToolClientImpl {
   }
   async delete(id: string): Promise<boolean> {
     try {
-      const response = await this.storage.getClient().delete({ id: id });
+      const response = await this.storage.getClient().delete({ id });
       if (response.result !== 'deleted') {
         throw createInternalError(`Failed to delete ESQL tool with id ${id}`);
-    }
+      }
       return true;
     } catch (error) {
       const message = `Error deleting ESQL tool with id ${id}: ${error}`;

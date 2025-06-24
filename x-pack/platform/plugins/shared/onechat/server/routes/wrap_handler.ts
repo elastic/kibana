@@ -24,8 +24,8 @@ export const getHandlerWrapper =
         } else {
           logger.error('Unexpected error in handler:', e);
           return res.customError({
-            body: { 
-              message: e instanceof Error ? e.message : 'An unexpected error occurred'
+            body: {
+              message: e instanceof Error ? e.message : 'An unexpected error occurred',
             },
             statusCode: 500,
           });
