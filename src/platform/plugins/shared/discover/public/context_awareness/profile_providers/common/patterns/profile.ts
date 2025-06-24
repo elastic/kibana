@@ -91,6 +91,10 @@ export const createPatternDataSourceProfileProvider = (
       return {
         ...prev(params),
         hideChart: true,
+        columns: [
+          { name: 'Count', width: 150 },
+          { name: 'Pattern', width: undefined },
+        ],
       };
     },
   },

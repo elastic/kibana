@@ -96,7 +96,7 @@ describe('ESQLMenuPopover', () => {
     await waitFor(() => {
       expect(screen.getByText('Count of logs')).toBeInTheDocument();
       expect(screen.getByText('Average bytes')).toBeInTheDocument();
-      expect(screen.getByText('Identify patterns in my logs')).toBeInTheDocument();
+      expect(screen.getByText('Identify patterns')).toBeInTheDocument();
     });
   });
 
@@ -148,7 +148,7 @@ describe('ESQLMenuPopover', () => {
     await waitFor(() => userEvent.click(screen.getByTestId('esql-recommended-queries')));
 
     await waitFor(() => {
-      expect(screen.getByText('Identify patterns in my logs')).toBeInTheDocument();
+      expect(screen.getByText('Identify patterns')).toBeInTheDocument();
     });
   });
 });

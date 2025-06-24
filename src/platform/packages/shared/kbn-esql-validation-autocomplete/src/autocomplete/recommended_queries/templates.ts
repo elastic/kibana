@@ -182,7 +182,7 @@ export const getRecommendedQueries = ({
             label: i18n.translate(
               'kbn-esql-validation-autocomplete.recommendedQueries.patternAnalysis.label',
               {
-                defaultMessage: 'Identify patterns in my logs',
+                defaultMessage: 'Identify patterns',
               }
             ),
             description: i18n.translate(
