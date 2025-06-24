@@ -31,18 +31,18 @@ import {
   getTelemetryFunction,
 } from './persistable_state';
 import { getAllMigrations } from './persistable_state/get_all_migrations';
-import { EmbeddableTransformsDefinition, EmbeddableTransforms } from '../common';
+import { EmbeddableTransforms } from '../common';
 import { getTransforms, registerTransforms } from './transforms_registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  registerTransforms: (type: string, definition: EmbeddableTransformsDefinition) => void;
+  registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
-  getTransforms: (type: string) => EmbeddableTransforms<object, object> | undefined;
+  getTransforms: (type: string) => EmbeddableTransforms | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {

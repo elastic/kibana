@@ -19,7 +19,7 @@ import type { registerAddFromLibraryType } from './add_from_library/registry';
 import type { registerReactEmbeddableFactory } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import { EnhancementRegistryDefinition } from './enhancements/types';
-import { EmbeddableTransforms, EmbeddableTransformsDefinition } from '../common';
+import { EmbeddableTransforms } from '../common';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -70,7 +70,7 @@ export interface EmbeddableSetup {
 
   registerTransforms: (
     type: string,
-    getDefinition: () => Promise<EmbeddableTransformsDefinition>
+    getTransforms: () => Promise<EmbeddableTransforms<any, any> | undefined>
   ) => void;
 
   /**
@@ -81,6 +81,6 @@ export interface EmbeddableSetup {
 
 export interface EmbeddableStart {
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
-  getTransforms: (type: string) => Promise<EmbeddableTransforms<object, object> | undefined>;
+  getTransforms: (type: string) => Promise<EmbeddableTransforms | undefined>;
   getEnhancement: (enhancementId: string) => PersistableState;
 }

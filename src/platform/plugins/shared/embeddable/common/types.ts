@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 
-export type EmbeddableTransforms<StoredState, State> = {
-  schema?: Type<State>;
+export type EmbeddableTransforms<
+  StoredState extends object = object,
+  State extends object = object
+> = {
   transformOut?: (state: StoredState, references?: Reference[]) => State;
   transformIn?: (state: State) => {
     state: StoredState;
     references?: Reference[];
   };
-};
-
-export type EmbeddableTransformsDefinition = {
-  type: string;
-  versions: { 1: EmbeddableTransforms<any, any> } & Record<number, EmbeddableTransforms<any, any>>;
-  latestVersion: number;
 };

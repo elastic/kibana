@@ -105,10 +105,10 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     );
 
     embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, async () => {
-      const { bookTransformsDefinitions } = await import(
-        '../common/book/content_management/cm_services'
+      const { bookTransforms } = await import(
+        '../common/book/content_management/schema/schema'
       );
-      return bookTransformsDefinitions;
+      return bookTransforms;
     });
 
     contentManagement.registry.register({

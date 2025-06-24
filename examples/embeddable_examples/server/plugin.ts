@@ -9,7 +9,7 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SetupDeps, StartDeps } from './types';
-import { bookTransformsDefinitions } from '../common/book/content_management/cm_services';
+import { bookTransforms } from '../common/book/content_management/schema/schema';
 import { SavedBookAttributes, createBookSavedObjectType } from './book/saved_object';
 import { SavedBookStorage } from './book/content_management';
 import {
@@ -37,7 +37,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       },
     });
 
-    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, bookTransformsDefinitions);
+    embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, bookTransforms);
 
     return {};
   }

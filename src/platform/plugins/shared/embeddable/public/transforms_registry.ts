@@ -7,22 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableTransformsDefinition } from '../common';
+import { EmbeddableTransforms } from '../common';
 
-const registry: { [key: string]: () => Promise<EmbeddableTransformsDefinition> } = {};
+const registry: { [key: string]: () => Promise<EmbeddableTransforms<any, any> | undefined> } = {};
 
 export function registerTransforms(
   type: string,
-  getDefinition: () => Promise<EmbeddableTransformsDefinition>
+  getTransformsCallback: () => Promise<EmbeddableTransforms<any, any> | undefined>
 ) {
   if (registry[type]) {
     throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
   }
 
-  registry[type] = getDefinition;
+  registry[type] = getTransformsCallback;
 }
 
 export async function getTransforms(type: string) {
-  const definition = await registry[type]?.();
-  return definition ? definition.versions[definition.latestVersion] : undefined;
+  return await registry[type]?.();
 }
