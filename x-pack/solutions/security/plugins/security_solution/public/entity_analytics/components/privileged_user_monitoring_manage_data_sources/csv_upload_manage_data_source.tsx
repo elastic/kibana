@@ -27,9 +27,7 @@ export const CsvUploadManageDataSource = ({
   setAddDataSourceResult: (result: AddDataSourceResult) => void;
   namespace: string;
 }) => {
-  const [isImportFileModalVisible, setShowImportFileModal] = useState(false);
-  const closeImportFileModal = () => setShowImportFileModal(false);
-  const showImportFileModal = () => setShowImportFileModal(true);
+  const [isImportFileModalVisible, { on: showImportFileModal, off: closeImportFileModal }] = useBoolean(false);
 
   const { latestTimestamp, isLoading, isError, refetch } =
     useGetLatestCSVPrivilegedUserUploadQuery(namespace);
