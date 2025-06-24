@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import { MAX_BULK_FILL_RULE_GAPS_BULK_SIZE } from '../../../../../../common/constants';
 import * as i18n from '../../../../common/translations';
 import { BulkActionRuleLimitErrorModal } from './bulk_action_rule_limit_error_modal';
 
@@ -15,12 +15,12 @@ interface BulkManualRuleRunRulesLimitErrorModalProps {
 }
 
 const text = {
-  title: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE,
-  message: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE),
-  closeButton: i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON,
+  title: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_TITLE,
+  message: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_MESSAGE(MAX_BULK_FILL_RULE_GAPS_BULK_SIZE),
+  closeButton: i18n.BULK_FILL_RULE_GAPS_LIMIT_ERROR_CLOSE_BUTTON,
 }
 
-const BulkManualRuleRunLimitErrorModalComponent = ({
+const BulkFillRuleGapsRuleLimitErrorModalComponent = ({
   onClose,
 }: BulkManualRuleRunRulesLimitErrorModalProps) => {
   return (
@@ -28,8 +28,8 @@ const BulkManualRuleRunLimitErrorModalComponent = ({
   )
 };
 
-export const BulkManualRuleRunLimitErrorModal = React.memo(
-  BulkManualRuleRunLimitErrorModalComponent
+export const BulkFillRuleGapsRuleLimitErrorModal = React.memo(
+  BulkFillRuleGapsRuleLimitErrorModalComponent
 );
 
-BulkManualRuleRunLimitErrorModal.displayName = 'BulkManualRuleRunLimitErrorModal';
+BulkFillRuleGapsRuleLimitErrorModal.displayName = 'BulkFillRuleGapsRuleLimitErrorModal';
