@@ -35,7 +35,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
       [require.resolve('@elastic/eui/es/components/drag_and_drop')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],

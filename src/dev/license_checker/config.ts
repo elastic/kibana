@@ -88,8 +88,8 @@ export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
-  '@elastic/eui@103.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
-  '@elastic/eui-amsterdam@103.0.0-amsterdam.0': [
+  '@elastic/eui@103.1.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui-amsterdam@103.1.0-amsterdam.0': [
     'Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0',
   ],
   '@elastic/eui-theme-borealis@2.0.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
