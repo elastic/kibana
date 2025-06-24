@@ -447,7 +447,7 @@ ROW
   describe('list tuple expressions', () => {
     test('numeric list literal, surrounded from three sides', () => {
       assertReprint(`FROM a | WHERE b IN ()`);
-      assertReprint(`FROM a | WHERE b IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a | WHERE b NOT IN (/* 1 */ 123456789 /* 2 */)`);
       assertReprint(`FROM a
   | WHERE
       b IN

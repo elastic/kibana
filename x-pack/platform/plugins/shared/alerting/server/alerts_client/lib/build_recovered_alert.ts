@@ -54,6 +54,7 @@ interface BuildRecoveredAlertOpts<
   payload?: DeepPartial<AlertData>;
   timestamp: string;
   kibanaVersion: string;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }
 
 /**
@@ -76,6 +77,7 @@ export const buildRecoveredAlert = <
   runTimestamp,
   recoveryActionGroup,
   kibanaVersion,
+  dangerouslyCreateAlertsInAllSpaces,
 }: BuildRecoveredAlertOpts<
   AlertData,
   LegacyState,
@@ -126,7 +128,7 @@ export const buildRecoveredAlert = <
         }
       : {}),
 
-    [SPACE_IDS]: rule[SPACE_IDS],
+    [SPACE_IDS]: dangerouslyCreateAlertsInAllSpaces === true ? ['*'] : rule[SPACE_IDS],
     // Set latest kibana version
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
