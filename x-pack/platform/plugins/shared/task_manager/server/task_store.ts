@@ -356,6 +356,13 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to schedule task ${result.id} with user scope but security is disabled. Task will run without user scope.`
+      );
+    }
+
     return this.taskValidator.getValidatedTaskInstanceFromReading(result);
   }
 
@@ -425,6 +432,14 @@ export class TaskStore {
     } catch (e) {
       this.errors$.next(e);
       throw e;
+    }
+
+    if (options?.request && !this.getIsSecurityEnabled()) {
+      this.logger.info(
+        `Trying to bulk schedule tasks ${JSON.stringify(
+          savedObjects.saved_objects.map((so) => so.id)
+        )} with user scope but security is disabled. Tasks will run without user scope.`
+      );
     }
 
     return savedObjects.saved_objects.map((so) => {
