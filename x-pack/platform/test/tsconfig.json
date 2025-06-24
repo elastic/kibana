@@ -95,5 +95,6 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/lens-plugin",
   ]
 }
