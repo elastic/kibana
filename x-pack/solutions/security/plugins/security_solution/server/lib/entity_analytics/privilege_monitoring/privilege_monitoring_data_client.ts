@@ -52,7 +52,7 @@ import {
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
-import type { PrivMonUserSource } from './types';
+import type { PrivMonBulkUser, PrivMonUserSource } from './types';
 import type { MonitoringEntitySourceDescriptor } from './saved_objects';
 import {
   PrivilegeMonitoringEngineDescriptorClient,
@@ -69,12 +69,6 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
-}
-
-interface PrivMonBulkUser {
-  username: string;
-  indexName: string;
-  existingUserId?: string;
 }
 
 export class PrivilegeMonitoringDataClient {
@@ -325,37 +319,32 @@ export class PrivilegeMonitoringDataClient {
 
   public async plainIndexSync() {
     // get all monitoring index source saved objects of type 'index'
-    this.log('info', 'Starting plain index sync for privilege monitoring users');
     const indexSources: MonitoringEntitySourceDescriptor[] =
       await this.monitoringIndexSourceClient.findByIndex();
-    this.log(
-      'info',
-      `Found index sources for privilege monitoring:\n${JSON.stringify(indexSources, null, 2)}`
-    );
-
-    const seenUserNames: string[] = [];
+    if (indexSources.length === 0) {
+      this.log('debug', 'No monitoring index sources found. Skipping sync.');
+      return;
+    }
     const allStaleUsers: PrivMonBulkUser[] = [];
 
     for (const source of indexSources) {
       // eslint-disable-next-line no-continue
       if (!source.indexPattern) continue; // if no index pattern, skip this source
       const index: string = source.indexPattern;
-      const kuery = typeof source.filter?.kuery === 'string' ? source.filter.kuery : undefined;
 
       try {
-        const batchUserNames = await this.getAllUsernamesFromIndex(index, kuery);
-        seenUserNames.push(...batchUserNames);
+        const batchUserNames = await this.getAllUsernamesFromIndex({
+          indexName: index,
+          kuery: source.filter?.kuery,
+        });
         // collect stale users
         const staleUsers = await this.findStaleUsersForIndex(index, batchUserNames);
         allStaleUsers.push(...staleUsers);
-        this.log(
-          'info',
-          `Found ${staleUsers.length} stale users for index source "${
-            source.name
-          }" (${index}): ${JSON.stringify(staleUsers.map((user) => user.username))}`
-        );
       } catch (error) {
-        if (this.isIndexNotFoundError(error)) {
+        if (
+          error?.meta?.body?.error?.type === 'index_not_found_exception' ||
+          error?.message?.includes('index_not_found_exception')
+        ) {
           this.log('warn', `Index "${index}" not found — skipping.`);
           // eslint-disable-next-line no-continue
           continue;
@@ -364,31 +353,30 @@ export class PrivilegeMonitoringDataClient {
       }
     }
     // Soft delete stale users
-    this.log(
-      'info',
-      `Found ${allStaleUsers.length} stale users across all index sources: ${JSON.stringify(
-        allStaleUsers.map((user) => user.username)
-      )}`
-    );
+    this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
       await this.esClient.bulk({ body: ops });
     }
   }
 
-  public async getAllUsernamesFromIndex(indexName: string, kuery?: string): Promise<string[]> {
+  public async getAllUsernamesFromIndex({
+    indexName,
+    kuery,
+  }: {
+    indexName: string;
+    kuery?: string | unknown;
+  }): Promise<string[]> {
     const batchUsernames: string[] = [];
     let searchAfter: SortResults | undefined;
     const batchSize = 100;
 
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     while (true) {
-      const response = await this.esClient.search<{ user?: { name?: string } }>({
-        index: indexName,
-        size: batchSize,
-        _source: ['user.name'],
-        sort: [{ 'user.name.keyword': 'asc' }],
-        search_after: searchAfter,
+      const response = await this.searchUsernamesInIndex({
+        indexName,
+        batchSize,
+        searchAfter,
         query,
       });
 
@@ -420,7 +408,7 @@ export class PrivilegeMonitoringDataClient {
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
         this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-        await this.esClient.bulk({ body: ops }); // TODO: change to helper method instead of direct call
+        await this.esClient.bulk({ body: ops });
       } catch (error) {
         this.log('error', `Error executing bulk operations: ${error}`);
       }
@@ -435,7 +423,7 @@ export class PrivilegeMonitoringDataClient {
   ): Promise<PrivMonBulkUser[]> {
     const response = await this.esClient.search<MonitoredUserDoc>({
       index: this.getIndex(),
-      size: 1000,
+      size: 10, // check this
       _source: ['user.name', 'labels.source_indices'],
       query: {
         bool: {
@@ -457,7 +445,7 @@ export class PrivilegeMonitoringDataClient {
     }));
   }
 
-  private async getMonitoredUsers(batchUsernames: string[]) {
+  public async getMonitoredUsers(batchUsernames: string[]) {
     return this.esClient.search<MonitoredUserDoc>({
       index: this.getIndex(),
       size: batchUsernames.length,
@@ -554,10 +542,24 @@ export class PrivilegeMonitoringDataClient {
     return ops;
   }
 
-  private isIndexNotFoundError(error): boolean {
-    return (
-      error?.meta?.body?.error?.type === 'index_not_found_exception' ||
-      error?.message?.includes('index_not_found_exception')
-    );
+  async searchUsernamesInIndex({
+    indexName,
+    batchSize,
+    searchAfter,
+    query,
+  }: {
+    indexName: string;
+    batchSize: number;
+    searchAfter?: SortResults;
+    query: object;
+  }) {
+    return this.esClient.search<{ user?: { name?: string } }>({
+      index: indexName,
+      size: batchSize,
+      _source: ['user.name'],
+      sort: [{ 'user.name.keyword': 'asc' }],
+      search_after: searchAfter,
+      query,
+    });
   }
 }
