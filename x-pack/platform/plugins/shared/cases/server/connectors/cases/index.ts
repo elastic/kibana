@@ -12,7 +12,7 @@ import {
 } from '@kbn/actions-plugin/common';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CasesConnector } from './cases_connector';
@@ -92,8 +92,10 @@ export const getCasesConnectorType = ({
 
 export const getCasesConnectorAdapter = ({
   isServerlessSecurity,
+  logger,
 }: {
   isServerlessSecurity?: boolean;
+  logger: Logger;
 }): ConnectorAdapter<CasesConnectorRuleActionParams, CasesConnectorParams> => {
   return {
     connectorTypeId: CASES_CONNECTOR_ID,
@@ -108,8 +110,14 @@ export const getCasesConnectorAdapter = ({
       let internallyManagedAlerts = false;
       let groupedAlerts: CasesGroupedAlerts[] | null = null;
       if (rule.ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID) {
-        groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
-        internallyManagedAlerts = true;
+        try {
+          groupedAlerts = groupAttackDiscoveryAlerts(caseAlerts);
+          internallyManagedAlerts = true;
+        } catch (error) {
+          logger.error(
+            `Could not setup grouped Attack Discovery alerts, because of error: ${error}`
+          );
+        }
       }
 
       const owner = getOwnerFromRuleConsumerProducer({
