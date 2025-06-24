@@ -337,7 +337,11 @@ paths:
                     required:
                       - status
                   status:
-                    $ref: '#/components/schemas/EngineStatus'
+                    oneOf:
+                      - $ref: '#/components/schemas/EngineStatus'
+                      - enum:
+                          - not_found
+                        type: string
                 required:
                   - status
           description: Successful response
