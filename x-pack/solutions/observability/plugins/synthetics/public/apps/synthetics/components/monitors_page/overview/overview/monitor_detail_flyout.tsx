@@ -11,7 +11,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -47,6 +46,7 @@ import {
 } from '../../../../state';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { ErrorCallout } from '../../../common/components/error_callout';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
@@ -287,7 +287,7 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <EuiErrorBoundary>{error?.body?.message}</EuiErrorBoundary>}
+      {error && !isLoading && <ErrorCallout {...error} />}
       {isLoading && <LoadingState />}
       {monitorObject && (
         <>
