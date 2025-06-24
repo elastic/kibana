@@ -336,3 +336,7 @@ export function isLocalModel(
 ): model is LocalInferenceServiceSettings {
   return ['elser', 'elasticsearch'].includes((model as LocalInferenceServiceSettings).service);
 }
+
+export interface IElasticModels {
+  getELSER(options?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse>;
+}

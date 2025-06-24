@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 import type { DependencyList } from 'react';
 
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
-import type { MlPluginSetup } from '@kbn/ml-common-types/plugin';
+import type { MlPluginSetup } from '@kbn/ml-plugin-contracts';
 
 /**
  * Provides a URL to ML plugin page
