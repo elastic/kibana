@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import { createInternalRegistry } from './utils';
-import { createDefaultAgentProvider } from './conversational';
+import { createDefaultAgentProvider } from './chat';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;

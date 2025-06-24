@@ -92,20 +92,20 @@ export const useEntityNodeExpandPopover = (
       return [
         {
           type: 'item',
-          iconType: 'users',
+          iconType: 'sortRight',
           testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
           label:
             actionsByEntityAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsByEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showThisEntitysActions',
                   {
-                    defaultMessage: 'Show actions by this entity',
+                    defaultMessage: "Show this entity's actions",
                   }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsByEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideThisEntitysActions',
                   {
-                    defaultMessage: 'Hide actions by this entity',
+                    defaultMessage: "Hide this entity's actions",
                   }
                 ),
           onClick: () => {
@@ -114,20 +114,20 @@ export const useEntityNodeExpandPopover = (
         },
         {
           type: 'item',
-          iconType: 'storage',
+          iconType: 'sortLeft',
           testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
           label:
             actionsOnEntityAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsOnEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showActionsDoneToThisEntity',
                   {
-                    defaultMessage: 'Show actions on this entity',
+                    defaultMessage: 'Show actions done to this entity',
                   }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsOnEntity',
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideActionsDoneToThisEntity',
                   {
-                    defaultMessage: 'Hide actions on this entity',
+                    defaultMessage: 'Hide actions done to this entity',
                   }
                 ),
           onClick: () => {
@@ -136,20 +136,20 @@ export const useEntityNodeExpandPopover = (
         },
         {
           type: 'item',
-          iconType: 'visTagCloud',
+          iconType: 'analyzeEvent',
           testSubject: GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
           label:
             relatedEntitiesAction === 'show'
               ? i18n.translate(
                   'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showRelatedEntities',
                   {
-                    defaultMessage: 'Show related entities',
+                    defaultMessage: 'Show related events',
                   }
                 )
               : i18n.translate(
                   'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideRelatedEntities',
                   {
-                    defaultMessage: 'Hide related entities',
+                    defaultMessage: 'Hide related events',
                   }
                 ),
           onClick: () => {

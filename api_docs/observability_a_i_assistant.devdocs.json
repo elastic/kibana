@@ -768,14 +768,15 @@
             "section": "def-server.ConnectorWithExtraFindData",
             "text": "ConnectorWithExtraFindData"
           },
-          "[] | undefined) => false | ",
+          "[] | undefined) => ",
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
             "section": "def-server.ConnectorWithExtraFindData",
             "text": "ConnectorWithExtraFindData"
-          }
+          },
+          " | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/get_elastic_managed_llm_connector.ts",
         "deprecated": false,
@@ -815,7 +816,7 @@
         "label": "MessageText",
         "description": [],
         "signature": [
-          "({ loading, content, onActionClick }: Props) => React.JSX.Element"
+          "({\n  loading,\n  content,\n  onActionClick,\n  anonymizedHighlightedContent,\n}: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/message_panel/message_text.tsx",
         "deprecated": false,
@@ -826,7 +827,7 @@
             "id": "def-public.MessageText.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ loading, content, onActionClick }",
+            "label": "{\n  loading,\n  content,\n  onActionClick,\n  anonymizedHighlightedContent,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -902,6 +903,109 @@
               "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/utils/navigate_to_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.redactEntities",
+        "type": "Function",
+        "tags": [],
+        "label": "redactEntities",
+        "description": [
+          "\nReplace each entity span in the original with its hash."
+        ],
+        "signature": [
+          "(original: string, entities: ",
+          "DetectedEntity",
+          "[]) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.redactEntities.$1",
+            "type": "string",
+            "tags": [],
+            "label": "original",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.redactEntities.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "entities",
+            "description": [],
+            "signature": [
+              "DetectedEntity",
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.unhashString",
+        "type": "Function",
+        "tags": [],
+        "label": "unhashString",
+        "description": [
+          "\nReplace every placeholder in a string with its real value\n(taken from `hashMap`)."
+        ],
+        "signature": [
+          "(contentWithHashes: string, hashMap: Map<string, { value: string; }>) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.unhashString.$1",
+            "type": "string",
+            "tags": [],
+            "label": "contentWithHashes",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.unhashString.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "hashMap",
+            "description": [],
+            "signature": [
+              "Map<string, { value: string; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1523,31 +1627,6 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.KnowledgeBaseEntry.confidence",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "confidence",
-            "description": [],
-            "signature": [
-              "\"medium\" | \"high\" | \"low\""
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-public.KnowledgeBaseEntry.is_correction",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_correction",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
             "id": "def-public.KnowledgeBaseEntry.type",
             "type": "CompoundType",
             "tags": [],
@@ -1618,6 +1697,34 @@
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.KnowledgeBaseEntry.confidence",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "confidence",
+            "description": [],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.KnowledgeBaseEntry.is_correction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_correction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1652,7 +1759,9 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; name?: string | undefined; role: ",
+              "{ content?: string | undefined; unredactions?: ",
+              "Unredaction",
+              "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -1977,7 +2086,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; persist: boolean; disableFunctions: boolean | { except: string[]; }; signal: AbortSignal; instructions?: (string | ",
+              "[]; persist: boolean; disableFunctions: boolean; signal: AbortSignal; instructions?: (string | ",
               "Instruction",
               ")[] | undefined; scopes: ",
               {
@@ -2106,13 +2215,10 @@
                   {
                     "parentPluginId": "observabilityAIAssistant",
                     "id": "def-public.ObservabilityAIAssistantChatService.complete.$1.disableFunctions",
-                    "type": "CompoundType",
+                    "type": "boolean",
                     "tags": [],
                     "label": "disableFunctions",
                     "description": [],
-                    "signature": [
-                      "boolean | { except: string[]; }"
-                    ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2646,17 +2752,7 @@
               },
               ">; }>, ",
               "PartialC",
-              "<{ confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              "<{ public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -2750,17 +2846,7 @@
               },
               ">; }>, ",
               "PartialC",
-              "<{ confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              "<{ public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -2988,17 +3074,7 @@
                 "section": "def-common.NonEmptyStringBrand",
                 "text": "NonEmptyStringBrand"
               },
-              ">; confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              ">; public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -3355,16 +3431,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -3455,16 +3523,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -3728,17 +3788,7 @@
               },
               ">; }>, ",
               "PartialC",
-              "<{ confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              "<{ public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -3832,17 +3882,7 @@
               },
               ">; }>, ",
               "PartialC",
-              "<{ confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              "<{ public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -4070,17 +4110,7 @@
                 "section": "def-common.NonEmptyStringBrand",
                 "text": "NonEmptyStringBrand"
               },
-              ">; confidence: ",
-              "UnionC",
-              "<[",
-              "LiteralC",
-              "<\"low\">, ",
-              "LiteralC",
-              "<\"medium\">, ",
-              "LiteralC",
-              "<\"high\">]>; is_correction: ",
-              "Type",
-              "<boolean, boolean, unknown>; public: ",
+              ">; public: ",
               "Type",
               "<boolean, boolean, unknown>; labels: ",
               "RecordC",
@@ -4437,16 +4467,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -4537,16 +4559,8 @@
               "; title: ",
               "StringC",
               "; disableFunctions: ",
-              "UnionC",
-              "<[",
               "Type",
-              "<boolean, boolean, unknown>, ",
-              "TypeC",
-              "<{ except: ",
-              "ArrayC",
-              "<",
-              "StringC",
-              ">; }>]>; instructions: ",
+              "<boolean, boolean, unknown>; instructions: ",
               "ArrayC",
               "<",
               "UnionC",
@@ -5440,6 +5454,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantAnonymizationRules",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantAnonymizationRules",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantAnonymizationRules\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.aiAssistantLogsIndexPattern",
         "type": "string",
         "tags": [],
@@ -5594,17 +5623,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -5698,17 +5717,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -5936,17 +5945,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -6303,16 +6302,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -6403,16 +6394,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -6893,6 +6876,23 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.ObservabilityAIAssistantAPIClientRequestParamsOf",
         "type": "Type",
         "tags": [],
@@ -6987,17 +6987,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -7091,17 +7081,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -7329,17 +7309,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -7696,16 +7666,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -7796,16 +7758,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -8932,6 +8886,20 @@
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.anonymizationService",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "anonymizationService",
+                    "description": [],
+                    "signature": [
+                      "AnonymizationService"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -9030,7 +8998,7 @@
               "ChatFunctionClient",
               "; persist: boolean; conversationId?: string | undefined; title?: string | undefined; isPublic?: boolean | undefined; kibanaPublicUrl?: string | undefined; userInstructions?: ",
               "Instruction",
-              "[] | undefined; simulateFunctionCalling?: boolean | undefined; disableFunctions?: boolean | { except: string[]; } | undefined; }) => ",
+              "[] | undefined; simulateFunctionCalling?: boolean | undefined; disableFunctions?: boolean | undefined; }) => ",
               "Observable",
               "<({ conversation: { id: string; title: string; last_updated: string; }; } & { type: ",
               {
@@ -9269,7 +9237,7 @@
                     "label": "disableFunctions",
                     "description": [],
                     "signature": [
-                      "boolean | { except: string[]; } | undefined"
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -9330,15 +9298,7 @@
                 "section": "def-common.ChatCompleteResponse",
                 "text": "ChatCompleteResponse"
               },
-              "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>>"
+              "<ChatCompleteResponseOptions>>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -10004,7 +9964,7 @@
                 "section": "def-common.KnowledgeBaseEntry",
                 "text": "KnowledgeBaseEntry"
               },
-              ", \"type\" | \"@timestamp\" | \"role\" | \"confidence\" | \"is_correction\">; }) => Promise<void>"
+              ", \"type\" | \"@timestamp\" | \"role\">; }) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -10029,7 +9989,7 @@
                     "label": "entry",
                     "description": [],
                     "signature": [
-                      "{ id: string; text: string; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; }"
+                      "{ id: string; text: string; title?: string | undefined; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -10089,7 +10049,7 @@
                         "section": "def-common.KnowledgeBaseEntryRole",
                         "text": "KnowledgeBaseEntryRole"
                       },
-                      "; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; confidence: \"medium\" | \"high\" | \"low\"; is_correction: boolean; }"
+                      "; labels?: Record<string, string> | undefined; public: boolean; user?: { name: string; } | undefined; confidence?: \"medium\" | \"high\" | \"low\" | undefined; is_correction?: boolean | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
@@ -10277,6 +10237,23 @@
               "() => Promise<(",
               "Instruction",
               " & { public?: boolean | undefined; })[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-server.ObservabilityAIAssistantClient.getAnonymizationService",
+            "type": "Function",
+            "tags": [],
+            "label": "getAnonymizationService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnonymizationService"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
             "deprecated": false,
@@ -10629,17 +10606,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -10733,17 +10700,7 @@
           },
           ">; }>, ",
           "PartialC",
-          "<{ confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          "<{ public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -10971,17 +10928,7 @@
             "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
-          ">; confidence: ",
-          "UnionC",
-          "<[",
-          "LiteralC",
-          "<\"low\">, ",
-          "LiteralC",
-          "<\"medium\">, ",
-          "LiteralC",
-          "<\"high\">]>; is_correction: ",
-          "Type",
-          "<boolean, boolean, unknown>; public: ",
+          ">; public: ",
           "Type",
           "<boolean, boolean, unknown>; labels: ",
           "RecordC",
@@ -11338,16 +11285,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -11438,16 +11377,8 @@
           "; title: ",
           "StringC",
           "; disableFunctions: ",
-          "UnionC",
-          "<[",
           "Type",
-          "<boolean, boolean, unknown>, ",
-          "TypeC",
-          "<{ except: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; instructions: ",
+          "<boolean, boolean, unknown>; instructions: ",
           "ArrayC",
           "<",
           "UnionC",
@@ -12536,31 +12467,6 @@
           },
           {
             "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.KnowledgeBaseEntry.confidence",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "confidence",
-            "description": [],
-            "signature": [
-              "\"medium\" | \"high\" | \"low\""
-            ],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
-            "id": "def-common.KnowledgeBaseEntry.is_correction",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_correction",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observabilityAIAssistant",
             "id": "def-common.KnowledgeBaseEntry.type",
             "type": "CompoundType",
             "tags": [],
@@ -12631,6 +12537,34 @@
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.KnowledgeBaseEntry.confidence",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "confidence",
+            "description": [],
+            "signature": [
+              "\"medium\" | \"high\" | \"low\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-common.KnowledgeBaseEntry.is_correction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "is_correction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12665,7 +12599,9 @@
             "label": "message",
             "description": [],
             "signature": [
-              "{ content?: string | undefined; name?: string | undefined; role: ",
+              "{ content?: string | undefined; unredactions?: ",
+              "Unredaction",
+              "[] | undefined; name?: string | undefined; role: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -12820,6 +12756,21 @@
     "misc": [
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantAnonymizationRules",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantAnonymizationRules",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantAnonymizationRules\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-common.aiAssistantLogsIndexPattern",
         "type": "string",
         "tags": [],
@@ -12859,6 +12810,23 @@
           "\"observability:aiAssistantSimulatedFunctionCalling\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.AnonymizationRule",
+        "type": "Type",
+        "tags": [],
+        "label": "AnonymizationRule",
+        "description": [],
+        "signature": [
+          "NerAnonymizationRule",
+          " | ",
+          "RegexAnonymizationRule"
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13223,6 +13191,23 @@
           ".MessageAdd; }"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/conversation_complete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.NER_MODEL_ID",
+        "type": "string",
+        "tags": [],
+        "label": "NER_MODEL_ID",
+        "description": [
+          "Default model ID for named entity recognition"
+        ],
+        "signature": [
+          "\"elastic__distilbert-base-uncased-finetuned-conll03-english\""
+        ],
+        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/utils/anonymization/redaction.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

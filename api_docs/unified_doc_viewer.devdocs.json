@@ -207,6 +207,40 @@
       },
       {
         "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityAttributesOverview",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityAttributesOverview",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "DocViewRenderProps",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityAttributesOverview.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
         "id": "def-public.UnifiedDocViewerObservabilityTracesSpanOverview",
         "type": "Function",
         "tags": [],
@@ -215,7 +249,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { transactionIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & { indexes: { apm: { traces: string; errors: string; }; logs: string; }; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_span_overview/lazy_doc_viewer_obs_traces_span_overview.tsx",
         "deprecated": false,
@@ -249,7 +283,7 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "DocViewRenderProps",
-          " & { tracesIndexPattern: string; } & React.RefAttributes<{}>>"
+          " & { indexes: { apm: { traces: string; errors: string; }; logs: string; }; showWaterfall?: boolean | undefined; showActions?: boolean | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview.tsx",
         "deprecated": false,

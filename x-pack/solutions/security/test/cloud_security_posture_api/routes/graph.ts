@@ -148,6 +148,13 @@ export default function (providerContext: FtrProviderContext) {
                     },
                   },
                 ],
+                must_not: [
+                  {
+                    match_phrase: {
+                      'event.action': 'google.iam.admin.v1.UpdateRole',
+                    },
+                  },
+                ],
               },
             },
           },
@@ -168,10 +175,10 @@ export default function (providerContext: FtrProviderContext) {
         response.body.edges.forEach((edge: any) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
-            'primary',
+            'subdued',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
-          expect(edge.type).equal('dashed');
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -191,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            'danger',
+            node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });
@@ -230,7 +237,7 @@ export default function (providerContext: FtrProviderContext) {
         response.body.edges.forEach((edge: any) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
-            'primary',
+            'subdued',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
           expect(edge.type).equal('solid');
@@ -253,7 +260,7 @@ export default function (providerContext: FtrProviderContext) {
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            'danger',
+            node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });
@@ -268,7 +275,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('color of event of failed event should be primary', async () => {
+      it('color of event of failed event should be subdued', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
@@ -304,14 +311,14 @@ export default function (providerContext: FtrProviderContext) {
         response.body.edges.forEach((edge: any) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
-            'warning',
+            'subdued',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
-          expect(edge.type).equal('dashed');
+          expect(edge.type).equal('solid');
         });
       });
 
-      it('2 grouped events, 1 failed, 1 success', async () => {
+      it('2 grouped events', async () => {
         const response = await postGraph(supertest, {
           query: {
             originEventIds: [],
@@ -322,7 +329,7 @@ export default function (providerContext: FtrProviderContext) {
                 filter: [
                   {
                     match_phrase: {
-                      'actor.entity.id': 'admin3@example.com',
+                      'actor.entity.id': 'admin@example.com',
                     },
                   },
                 ],
@@ -341,7 +348,7 @@ export default function (providerContext: FtrProviderContext) {
           if (node.shape !== 'group') {
             expect(node).to.have.property('color');
             expect(node.color).equal(
-              node.shape === 'label' && node.id.includes('outcome(failed)') ? 'warning' : 'primary',
+              'primary',
               `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
             );
           }
@@ -350,13 +357,10 @@ export default function (providerContext: FtrProviderContext) {
         response.body.edges.forEach((edge: any) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
-            edge.id.includes('outcome(failed)') ||
-              (edge.id.includes('grp(') && !edge.id.includes('outcome(success)'))
-              ? 'warning'
-              : 'primary',
+            'subdued',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
-          expect(edge.type).equal('dashed');
+          expect(edge.type).equal('solid');
         });
       });
 
@@ -379,7 +383,7 @@ export default function (providerContext: FtrProviderContext) {
         response.body.nodes.forEach((node: any) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            'danger',
+            node.shape === 'label' ? 'danger' : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
         });
@@ -421,10 +425,8 @@ export default function (providerContext: FtrProviderContext) {
         response.body.nodes.forEach((node: any, idx: number) => {
           expect(node).to.have.property('color');
           expect(node.color).equal(
-            idx <= 2 // First 3 nodes are expected to be colored as danger (ORDER MATTERS, alerts are expected to be first)
+            idx === 2 // Only the label should be marked as danger (ORDER MATTERS, alerts are expected to be first)
               ? 'danger'
-              : node.shape === 'label' && node.id.includes('outcome(failed)')
-              ? 'warning'
               : 'primary',
             `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
           );
@@ -433,10 +435,10 @@ export default function (providerContext: FtrProviderContext) {
         response.body.edges.forEach((edge: any, idx: number) => {
           expect(edge).to.have.property('color');
           expect(edge.color).equal(
-            idx <= 1 ? 'danger' : 'warning',
+            idx <= 1 ? 'danger' : 'subdued',
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
-          expect(edge.type).equal(idx <= 1 ? 'solid' : 'dashed');
+          expect(edge.type).equal('solid');
         });
       });
 

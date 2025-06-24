@@ -23,6 +23,7 @@ import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
+import { TRACES_PRODUCT_FEATURE_ID } from '../common/constants';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -59,6 +60,14 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+
+    core.pricing.registerProductFeatures([
+      {
+        id: TRACES_PRODUCT_FEATURE_ID,
+        description: 'APM traces in Discover',
+        products: [{ name: 'observability', tier: 'complete' }],
+      },
+    ]);
 
     return {};
   }

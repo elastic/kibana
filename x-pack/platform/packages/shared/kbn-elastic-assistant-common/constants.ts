@@ -76,6 +76,7 @@ export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
   'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
 export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
 export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
@@ -121,7 +122,13 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
 
 /**
- * The prefix for all ad hoc Attack discovery alerts index resources.
+ * This feature flag enables the InferenceChatModel feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.inferenceChatModelEnabled: true
+ * ```
  */
-export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
-  `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
+export const INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG =
+  'securitySolution.inferenceChatModelEnabled' as const;

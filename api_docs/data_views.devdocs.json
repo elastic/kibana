@@ -13743,6 +13743,22 @@
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
+              },
+              {
+                "plugin": "datasetQuality",
+                "path": "x-pack/platform/plugins/shared/dataset_quality/public/rule_types/degraded_docs/rule_form/rule_form.tsx"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.sagas.ts"
               },
@@ -13805,18 +13821,6 @@
               {
                 "plugin": "exploratoryView",
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/boundary_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-              },
-              {
-                "plugin": "stackAlerts",
-                "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/components/data_view_select_popover.tsx"
               },
               {
                 "plugin": "graph",
@@ -25718,26 +25722,6 @@
               {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock.ts"
               },
               {
                 "plugin": "fleet",
