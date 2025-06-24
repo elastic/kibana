@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { waitForAlertsToPopulate } from '@kbn/cypress-test-helper/src/services/alerting_services';
 import { disableNewFeaturesTours } from './navigation';
 import { getAdvancedButton } from '../screens/integrations';
