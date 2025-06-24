@@ -20,14 +20,14 @@ import type SuperTest from 'supertest';
  */
 export const getPrebuiltRuleBaseVersion = async (
   supertest: SuperTest.Agent,
-  body: GetPrebuiltRuleBaseVersionRequest
+  query: GetPrebuiltRuleBaseVersionRequest
 ): Promise<GetPrebuiltRuleBaseVersionResponseBody> => {
   const response = await supertest
-    .post(GET_PREBUILT_RULES_BASE_VERSION_URL)
+    .get(GET_PREBUILT_RULES_BASE_VERSION_URL)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'securitySolution')
-    .send(body)
+    .query(query)
     .expect(200);
 
   return response.body;

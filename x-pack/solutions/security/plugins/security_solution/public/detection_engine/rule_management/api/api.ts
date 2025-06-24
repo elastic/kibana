@@ -731,10 +731,10 @@ export const getPrebuiltRuleBaseVersion = async ({
   request: GetPrebuiltRuleBaseVersionRequest;
 }): Promise<GetPrebuiltRuleBaseVersionResponseBody> =>
   KibanaServices.get().http.fetch(GET_PREBUILT_RULES_BASE_VERSION_URL, {
-    method: 'POST',
+    method: 'GET',
     version: '1',
     signal,
-    body: JSON.stringify(request),
+    query: request,
   });
 
 export const revertPrebuiltRule = async (

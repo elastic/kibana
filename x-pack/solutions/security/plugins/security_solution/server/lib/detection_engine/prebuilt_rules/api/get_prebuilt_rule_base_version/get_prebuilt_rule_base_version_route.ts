@@ -15,7 +15,7 @@ import { getPrebuiltRuleBaseVersionHandler } from './get_prebuilt_rule_base_vers
 
 export const getPrebuiltRuleBaseVersion = (router: SecuritySolutionPluginRouter) => {
   router.versioned
-    .post({
+    .get({
       access: 'internal',
       path: GET_PREBUILT_RULES_BASE_VERSION_URL,
       security: {
@@ -29,7 +29,7 @@ export const getPrebuiltRuleBaseVersion = (router: SecuritySolutionPluginRouter)
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(GetPrebuiltRuleBaseVersionRequest),
+            query: buildRouteValidationWithZod(GetPrebuiltRuleBaseVersionRequest),
           },
         },
       },

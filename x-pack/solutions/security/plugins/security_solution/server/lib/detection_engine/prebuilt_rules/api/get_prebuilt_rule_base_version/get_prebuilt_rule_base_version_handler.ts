@@ -27,11 +27,11 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
 
 export const getPrebuiltRuleBaseVersionHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<undefined, undefined, GetPrebuiltRuleBaseVersionRequest>,
+  request: KibanaRequest<undefined, GetPrebuiltRuleBaseVersionRequest, undefined>,
   response: KibanaResponseFactory
 ) => {
   const siemResponse = buildSiemResponse(response);
-  const { id } = request.body;
+  const { id } = request.query;
 
   try {
     const ctx = await context.resolve(['core', 'alerting']);

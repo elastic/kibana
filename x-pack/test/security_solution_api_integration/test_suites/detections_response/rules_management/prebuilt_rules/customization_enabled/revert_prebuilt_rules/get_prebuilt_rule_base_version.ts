@@ -125,11 +125,11 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const { body } = await supertest
-            .post(GET_PREBUILT_RULES_BASE_VERSION_URL)
+            .get(GET_PREBUILT_RULES_BASE_VERSION_URL)
             .set('kbn-xsrf', 'true')
             .set('elastic-api-version', '1')
             .set('x-elastic-internal-origin', 'securitySolution')
-            .send({ id: prebuiltRule.id })
+            .query({ id: prebuiltRule.id })
             .expect(404);
 
           expect(body).toEqual({
