@@ -12,7 +12,7 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
   NodeShape,
-  Color as NodeColor,
+  NodeColor,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 

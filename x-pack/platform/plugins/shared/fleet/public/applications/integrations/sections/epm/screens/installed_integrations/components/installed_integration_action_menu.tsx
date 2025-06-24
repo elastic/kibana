@@ -6,7 +6,13 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
@@ -54,7 +60,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     );
 
     const hasUninstallableIntegrations = selectedItems.some(
-      (item) => (item.packagePoliciesInfo?.count ?? 0) === 0
+      (item) => (item.packagePoliciesInfo?.count ?? 0) > 0
     );
 
     return [
@@ -75,16 +81,38 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
       <EuiContextMenuItem
         key="uninstall"
         icon="trash"
-        disabled={!hasUninstallableIntegrations}
+        disabled={hasUninstallableIntegrations}
         onClick={openUninstallModal}
       >
-        <FormattedMessage
-          id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
-          defaultMessage={'Uninstall {count, plural, one {# integration} other {# integrations}}'}
-          values={{
-            count: selectedItems.length,
-          }}
-        />
+        {hasUninstallableIntegrations ? (
+          <EuiToolTip
+            position="right"
+            content={
+              <FormattedMessage
+                id="xpack.fleet.epmInstalledIntegrations.uninstallDisabledTooltip"
+                defaultMessage="Can't uninstall integrations that are attached to agent policies"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
+              defaultMessage={
+                'Uninstall {count, plural, one {# integration} other {# integrations}}'
+              }
+              values={{
+                count: selectedItems.length,
+              }}
+            />
+          </EuiToolTip>
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.epmInstalledIntegrations.bulkUninstallButton"
+            defaultMessage={'Uninstall {count, plural, one {# integration} other {# integrations}}'}
+            values={{
+              count: selectedItems.length,
+            }}
+          />
+        )}
       </EuiContextMenuItem>,
     ];
   }, [selectedItems, openUninstallModal, openUpgradeModal]);
