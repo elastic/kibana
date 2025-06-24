@@ -65,9 +65,7 @@ export const createPatternDataSourceProfileProvider = (
             }
 
             const pattern = extractCategorizeTokens(context.value as string).join(' ');
-            const categorizeField = context.query.esql.match(
-              /CATEGORIZE\(([a-zA-Z0-9\-_.]+)\)/
-            )?.[1];
+            const categorizeField = context.query.esql.match(/CATEGORIZE\((.+?)\)/)?.[1];
 
             if (!categorizeField || !pattern) {
               return;
