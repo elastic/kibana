@@ -350,29 +350,69 @@ export const getDatasetQualityTableColumns = ({
             ),
             field: 'failedDocs.percentage',
             sortable: true,
-            render: (_: any, dataStreamStat: DataStreamStat) => (
-              <PrivilegesWarningIconWrapper
-                title={`sizeBytes-${dataStreamStat.title}`}
-                hasPrivileges={dataStreamStat.userPrivileges?.canReadFailureStore ?? true}
-              >
-                <QualityStatPercentageLink
-                  isLoading={loadingFailedStats}
-                  dataStreamStat={dataStreamStat}
-                  timeRange={timeRange}
-                  accessor="failedDocs"
-                  selector={FAILURE_STORE_SELECTOR}
-                  fewDocStatsTooltip={(failedDocsCount: number) =>
-                    i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
-                      defaultMessage: '{failedDocsCount} failed docs in this data set.',
-                      values: {
-                        failedDocsCount,
-                      },
-                    })
-                  }
-                  dataTestSubj="datasetQualityFailedDocsPercentageLink"
-                />
-              </PrivilegesWarningIconWrapper>
-            ),
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              if (!dataStreamStat.hasFailureStore) {
+                const FailureStoreHoverLink = () => {
+                  const [hovered, setHovered] = React.useState(false);
+                  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
+                  const params = {
+                    page: 'data_streams_details',
+                    dataStreamName: dataStreamStat.rawName,
+                  } as const;
+
+                  return (
+                    <EuiToolTip
+                      content={i18n.translate('xpack.datasetQuality.failureStore.notEnabled', {
+                        defaultMessage:
+                          'Failure store is not enabled for this data stream. Enable failure store.',
+                      })}
+                    >
+                      <EuiLink
+                        href={locator?.getRedirectUrl(params)}
+                        target="_blank"
+                        external={false}
+                        data-test-subj="datasetQualitySetFailureStoreLink"
+                        onMouseEnter={() => setHovered(true)}
+                        onMouseLeave={() => setHovered(false)}
+                        css={{ fontWeight: 'normal' }}
+                      >
+                        {hovered
+                          ? i18n.translate('xpack.datasetQuality.failureStore.enable', {
+                              defaultMessage: 'Set failure store',
+                            })
+                          : i18n.translate('xpack.datasetQuality.failureStore.notAvailable', {
+                              defaultMessage: 'N/A',
+                            })}
+                      </EuiLink>
+                    </EuiToolTip>
+                  );
+                };
+                return <FailureStoreHoverLink />;
+              }
+              return (
+                <PrivilegesWarningIconWrapper
+                  title={`sizeBytes-${dataStreamStat.title}`}
+                  hasPrivileges={dataStreamStat.userPrivileges?.canReadFailureStore ?? true}
+                >
+                  <QualityStatPercentageLink
+                    isLoading={loadingFailedStats}
+                    dataStreamStat={dataStreamStat}
+                    timeRange={timeRange}
+                    accessor="failedDocs"
+                    selector={FAILURE_STORE_SELECTOR}
+                    fewDocStatsTooltip={(failedDocsCount: number) =>
+                      i18n.translate('xpack.datasetQuality.fewFailedDocsTooltip', {
+                        defaultMessage: '{failedDocsCount} failed docs in this data set.',
+                        values: {
+                          failedDocsCount,
+                        },
+                      })
+                    }
+                    dataTestSubj="datasetQualityFailedDocsPercentageLink"
+                  />
+                </PrivilegesWarningIconWrapper>
+              );
+            },
             width: '140px',
           },
         ]
