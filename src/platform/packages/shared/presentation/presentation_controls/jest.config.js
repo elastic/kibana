@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/private/kbn-controls-utils'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/presentation/presentation_controls'],
 };
