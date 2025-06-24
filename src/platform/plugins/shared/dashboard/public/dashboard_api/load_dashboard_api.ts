@@ -66,6 +66,9 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   const overrideState = await creationOptions?.getInitialInput?.();
 
+  // TODO transform panels after we merge into feature branch and update feature branch from main
+  // so that overrideState.panels is an array
+
   // Back up any view mode passed in explicitly.
   if (overrideState?.viewMode) {
     getDashboardBackupService().storeViewMode(overrideState?.viewMode);
