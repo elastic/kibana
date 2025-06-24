@@ -10,7 +10,7 @@ import React, { createContext, useContext } from 'react';
 import { ApiService } from '../../../../lib/api';
 import { useReindex, ReindexState } from './use_reindex';
 import { UpdateIndexState, useUpdateIndex } from './use_update_index';
-import { EnrichedDeprecationInfo, IndexAction } from '../../../../../../common/types';
+import { EnrichedDeprecationInfo, IndexAction, UpdateActions } from '../../../../../../common/types';
 
 export interface IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
@@ -18,7 +18,7 @@ export interface IndexStateContext {
   startReindex: () => Promise<void>;
   cancelReindex: () => Promise<void>;
   updateIndexState: UpdateIndexState;
-  updateIndex: () => Promise<void>;
+  updateIndex: (action: UpdateActions) => Promise<void>;
 }
 
 const IndexContext = createContext<IndexStateContext | undefined>(undefined);

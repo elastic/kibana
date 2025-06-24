@@ -7,13 +7,14 @@
 
 import { useCallback, useState } from 'react';
 import type { UpdateIndexOperation } from '../../../../../../common/update_index';
-import type { CorrectiveAction } from '../../../../../../common/types';
+import type { CorrectiveAction, UpdateActions } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
   failedBefore: boolean;
   status: 'incomplete' | 'inProgress' | 'complete' | 'failed';
   reason?: string;
+  updateAction?: UpdateActions;
 }
 
 export interface UseUpdateIndexParams {
@@ -29,12 +30,13 @@ export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIn
     status: 'incomplete',
   });
 
-  const updateIndex = useCallback(async () => {
-    const operations: UpdateIndexOperation[] =
-      correctiveAction?.type === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
 
-    setUpdateIndexState({ status: 'inProgress', failedBefore: failedState });
-    const res = await api.updateIndex(indexName, operations);
+  const updateIndex = useCallback(async (action: UpdateActions) => {
+    const operations: UpdateIndexOperation[] =
+      action === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
+
+    setUpdateIndexState({ status: 'inProgress', failedBefore: failedState, updateAction: action });
+    const res = action === "delete" ? await api.deleteIndex(indexName) : await api.updateIndex(indexName, operations);
     const status = res.error ? 'failed' : 'complete';
     const failedBefore = failedState || status === 'failed';
     setFailedState(failedBefore);
@@ -42,6 +44,7 @@ export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIn
       status,
       failedBefore,
       ...(res.error && { reason: res.error.message.toString() }),
+      updateAction: action,
     });
   }, [api, correctiveAction, failedState, indexName]);
 

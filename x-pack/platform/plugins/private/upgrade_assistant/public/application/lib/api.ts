@@ -286,6 +286,13 @@ export class ApiService {
     });
   }
 
+  public async deleteIndex(indexName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/delete_index/${indexName}`,
+      method: 'delete',
+    });
+  }
+
   public useLoadUpgradeStatus() {
     return this.useRequest<{
       readyForUpgrade: boolean;

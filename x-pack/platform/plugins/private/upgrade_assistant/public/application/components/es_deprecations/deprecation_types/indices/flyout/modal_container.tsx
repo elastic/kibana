@@ -8,11 +8,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { EuiModal } from '@elastic/eui';
+import {
+  EuiModal
+} from '@elastic/eui';
 import { IndicesResolutionType } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import {
+  UIM_REINDEX_DELETE_CLICK,
+  UIM_REINDEX_DELETE_RETRY_CLICK,
   UIM_REINDEX_READONLY_CLICK,
   UIM_REINDEX_READONLY_RETRY_CLICK,
   UIM_REINDEX_UNFREEZE_CLICK,
@@ -23,6 +27,7 @@ import { ModalStep } from './steps/types';
 import { InitializingStep } from '../../../common/initializing_step';
 import { UpdateIndexModalStep } from './steps/update/update_step';
 import { WarningModalStep } from './steps/warning/warning_step_modal';
+import { DeleteModal } from '../../../common/delete_step_modal';
 
 export interface IndexModalProps extends IndexStateContext {
   closeModal: () => void;
@@ -38,29 +43,40 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
   selectedResolutionType,
 }) => {
   const { status: reindexStatus, errorMessage } = reindexState;
-  const { status: updateIndexStatus } = updateIndexState;
+  const { status: updateIndexStatus, updateAction } = updateIndexState;
   const { correctiveAction } = deprecation;
 
   const [modalStep, setModalStep] = useState<ModalStep>('initializing');
 
+
   const onMakeReadonly = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_CLICK);
-    await updateIndex();
+    await updateIndex('readonly');
   }, [updateIndex]);
 
   const onMakeReadonlyRetry = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_READONLY_RETRY_CLICK);
-    await updateIndex();
+    await updateIndex('readonly');
   }, [updateIndex]);
 
   const onUnfreeze = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_CLICK);
-    await updateIndex();
+    await updateIndex('unfreeze');
   }, [updateIndex]);
 
   const onUnfreezeRetry = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_UNFREEZE_RETRY_CLICK);
-    await updateIndex();
+    await updateIndex('unfreeze');
+  }, [updateIndex]);
+
+  const onDeleteIndex = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_DELETE_CLICK);
+    await updateIndex('delete');
+  }, [updateIndex]);
+
+  const onDeleteRetry = useCallback(async () => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_DELETE_RETRY_CLICK);
+    await updateIndex('delete');
   }, [updateIndex]);
 
   useEffect(() => {
@@ -68,11 +84,15 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
       case 'inProgress':
       case 'complete':
       case 'failed': {
-        setModalStep(correctiveAction?.type === 'unfreeze' ? 'unfreeze' : 'makeReadonly');
+        setModalStep(updateAction === 'unfreeze' ? 'unfreeze' : updateAction === 'readonly' ? 'makeReadonly' : 'delete');
         break;
       }
       default: {
         switch (selectedResolutionType) {
+          case 'delete': {
+            setModalStep('confirmDelete');
+            break;
+          }
           case 'readonly': {
             setModalStep('confirmReadonly');
             break;
@@ -99,6 +119,8 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
     switch (modalStep) {
       case 'initializing':
         return <InitializingStep errorMessage={errorMessage} type="index" mode="modal" />;
+      case 'confirmDelete':
+        return <DeleteModal closeModal={closeModal} targetName={reindexState.meta.indexName} deleteIndex={onDeleteIndex} type='index' />;
       case 'confirmReadonly':
       case 'confirmUnfreeze':
         return (
@@ -106,8 +128,8 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
             warnings={
               modalStep === 'confirmReadonly'
                 ? reindexState.reindexWarnings?.filter(
-                    ({ flow: warningFlow }) => warningFlow === 'readonly'
-                  ) ?? []
+                  ({ flow: warningFlow }) => warningFlow === 'readonly'
+                ) ?? []
                 : []
             }
             meta={reindexState.meta}
@@ -146,6 +168,16 @@ export const IndexModal: React.FunctionComponent<IndexModalProps> = ({
             closeModal={closeModal}
           />
         );
+      case 'delete':
+        return (
+          <UpdateIndexModalStep
+            action={modalStep}
+            meta={reindexState.meta}
+            retry={onDeleteRetry}
+            updateIndexState={updateIndexState}
+            closeModal={closeModal}
+          />
+        )
     }
   }, [
     modalStep,

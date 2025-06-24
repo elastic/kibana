@@ -90,8 +90,7 @@ describe('ES deprecations table', () => {
       expect.anything()
     );
     expect(httpSetup.get).toHaveBeenCalledWith(
-      `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${
-        (mlDeprecation.correctiveAction as MlAction).snapshotId
+      `${API_BASE_PATH}/ml_snapshots/${(mlDeprecation.correctiveAction as MlAction).jobId}/${(mlDeprecation.correctiveAction as MlAction).snapshotId
       }`,
       expect.anything()
     );
@@ -340,15 +339,15 @@ describe('ES deprecations table', () => {
           (deprecation, idx) =>
             idx === deprecationIndex
               ? ({
-                  level: 'critical',
-                  resolveDuringUpgrade: false,
-                  type: 'index_settings',
-                  message: 'Index created before 7.0',
-                  details: 'deprecation details',
-                  url: 'doc_url',
-                  index: correctiveAction.index || 'reindex_index',
-                  correctiveAction,
-                } as EnrichedDeprecationInfo)
+                level: 'critical',
+                resolveDuringUpgrade: false,
+                type: 'index_settings',
+                message: 'Index created before 7.0',
+                details: 'deprecation details',
+                url: 'doc_url',
+                index: correctiveAction.index || 'reindex_index',
+                correctiveAction,
+              } as EnrichedDeprecationInfo)
               : deprecation
         ),
       } as ESUpgradeStatus);
@@ -555,22 +554,22 @@ describe('ES deprecations table', () => {
             (deprecation) =>
               deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
                 ? ({
-                    level: 'critical',
-                    resolveDuringUpgrade: false,
-                    type: 'index_settings',
-                    message: 'Index created before 7.0',
-                    details: 'deprecation details',
-                    url: 'doc_url',
-                    index: 'reindex_index',
-                    correctiveAction: {
-                      type: 'unfreeze',
-                      metadata: {
-                        isClosedIndex: false,
-                        isFrozenIndex: true,
-                        isInDataStream: false,
-                      },
-                    } as UnfreezeAction,
-                  } as EnrichedDeprecationInfo)
+                  level: 'critical',
+                  resolveDuringUpgrade: false,
+                  type: 'index_settings',
+                  message: 'Index created before 7.0',
+                  details: 'deprecation details',
+                  url: 'doc_url',
+                  index: 'reindex_index',
+                  correctiveAction: {
+                    type: 'unfreeze',
+                    metadata: {
+                      isClosedIndex: false,
+                      isFrozenIndex: true,
+                      isInDataStream: false,
+                    },
+                  } as UnfreezeAction,
+                } as EnrichedDeprecationInfo)
                 : deprecation
           ),
         } as ESUpgradeStatus);
@@ -585,13 +584,14 @@ describe('ES deprecations table', () => {
         });
         testBed.component.update();
       });
-      it('it displays reindexing and unfreeze button for frozen index', async () => {
+      it('it displays reindexing unfreeze and delete button for frozen index', async () => {
         const { find, exists } = testBed;
 
         expect(find('reindexTableCell-actions').length).toBe(1);
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
         expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+        expect(exists('deprecation-unfreeze-delete')).toBe(true);
       });
       it('it only displays reindexing button if reindex in progress', async () => {
         httpRequestsMockHelpers.setReindexStatusResponse(
@@ -625,6 +625,7 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(false);
         expect(exists('deprecation-unfreeze-reindex')).toBe(true);
+        expect(exists('deprecation-unfreeze-delete')).toBe(false);
       });
       it('it only displays unfreeze button if unfreezing in progress', async () => {
         const { find, exists, actions } = testBed;
@@ -640,6 +641,25 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-unfreeze-unfreeze')).toBe(true);
         expect(exists('deprecation-unfreeze-reindex')).toBe(false);
+        expect(exists('deprecation-unfreeze-delete')).toBe(false);
+      });
+      it('it only displays delete button if deleting in progress', async () => {
+        const { find, exists, actions } = testBed;
+
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'unfreeze',
+          index: 0,
+          action: 'delete',
+        });
+
+        await actions.reindexDeprecationFlyout.fillDeleteInputText();
+        await actions.reindexDeprecationFlyout.clickDeleteButton();
+
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-unfreeze-unfreeze')).toBe(false);
+        expect(exists('deprecation-unfreeze-reindex')).toBe(false);
+        expect(exists('deprecation-unfreeze-delete')).toBe(true);
       });
     });
     describe('reindexing indices', () => {
@@ -658,24 +678,24 @@ describe('ES deprecations table', () => {
             (deprecation) =>
               deprecation === esDeprecationsMockResponse.migrationsDeprecations[3]
                 ? ({
-                    level: 'critical',
-                    resolveDuringUpgrade: false,
-                    type: 'index_settings',
-                    message: 'Index created before 7.0',
-                    details: 'deprecation details',
-                    url: 'doc_url',
-                    index,
-                    correctiveAction: {
-                      type: 'reindex',
-                      excludedActions,
-                      metadata: {
-                        isClosedIndex: false,
-                        isFrozenIndex: false,
-                        isInDataStream: false,
-                        ...metaOverrides,
-                      },
-                    } as ReindexAction,
-                  } as EnrichedDeprecationInfo)
+                  level: 'critical',
+                  resolveDuringUpgrade: false,
+                  type: 'index_settings',
+                  message: 'Index created before 7.0',
+                  details: 'deprecation details',
+                  url: 'doc_url',
+                  index,
+                  correctiveAction: {
+                    type: 'reindex',
+                    excludedActions,
+                    metadata: {
+                      isClosedIndex: false,
+                      isFrozenIndex: false,
+                      isInDataStream: false,
+                      ...metaOverrides,
+                    },
+                  } as ReindexAction,
+                } as EnrichedDeprecationInfo)
                 : deprecation
           ),
         } as ESUpgradeStatus);
@@ -702,28 +722,31 @@ describe('ES deprecations table', () => {
         testBed.component.update();
       };
 
-      it('it displays reindexing and readonly for indices if both are valid', async () => {
+      it('it displays reindexing, readonly and delete for indices if all are valid', async () => {
         await setupReindexingTest();
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays read-only button if reindexing is excluded', async () => {
+      it('only displays read-only button and delete if reindexing is excluded', async () => {
         await setupReindexingTest({ excludedActions: ['readOnly'] });
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(false);
         expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays read-only button if index is a follower index', async () => {
+      it('only displays read-only button and delete if index is a follower index', async () => {
         await setupReindexingTest({ metaOverrides: { isFollowerIndex: true } });
         const { find, exists } = testBed;
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
-      it('only displays reindex button if read-only is excluded', async () => {
+      it('only displays reindex button and delete if read-only is excluded', async () => {
         await setupReindexingTest({
           excludedActions: ['reindex'],
           index: 'readonly_index',
@@ -732,6 +755,7 @@ describe('ES deprecations table', () => {
         expect(find('reindexTableCell-actions').length).toBe(1);
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
       it('it only displays readonly button if readonly in progress', async () => {
         const { exists, actions } = testBed;
@@ -744,6 +768,21 @@ describe('ES deprecations table', () => {
 
         expect(exists('deprecation-reindex-readonly')).toBe(true);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(false);
+      });
+      it('it only displays delete button if delete in progress', async () => {
+        const { exists, actions } = testBed;
+        await actions.table.clickDeprecationRowAt({
+          deprecationType: 'reindex',
+          index: 0,
+          action: 'delete',
+        });
+        await actions.reindexDeprecationFlyout.fillDeleteInputText();
+        await actions.reindexDeprecationFlyout.clickDeleteButton();
+
+        expect(exists('deprecation-reindex-readonly')).toBe(false);
+        expect(exists('deprecation-reindex-reindex')).toBe(false);
+        expect(exists('deprecation-reindex-delete')).toBe(true);
       });
     });
   });
