@@ -1252,69 +1252,6 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-        "id": "def-server.ClusterInfo",
-        "type": "Interface",
-        "tags": [
-          "private"
-        ],
-        "label": "ClusterInfo",
-        "description": [],
-        "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_name",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_name",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_uuid",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_uuid",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_version",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_version",
-            "description": [],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server-internal",
-            "id": "def-server.ClusterInfo.cluster_build_flavor",
-            "type": "string",
-            "tags": [],
-            "label": "cluster_build_flavor",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/elasticsearch/server-internal/src/get_cluster_info.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-elasticsearch-server-internal",
         "id": "def-server.NodeInfo",
         "type": "Interface",
         "tags": [],
@@ -2588,7 +2525,7 @@
         "label": "ElasticsearchConfigType",
         "description": [],
         "signature": [
-          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
+          "{ readonly username?: string | undefined; readonly password?: string | undefined; readonly serviceAccountToken?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"certificate\" | \"full\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; readonly healthCheck: Readonly<{} & { delay: moment.Duration; startupDelay: moment.Duration; }>; readonly hosts: string | string[]; readonly apiVersion: string; readonly sniffOnStart: boolean; readonly sniffInterval: false | moment.Duration; readonly sniffOnConnectionFault: boolean; readonly maxSockets: number; readonly maxIdleSockets: number; readonly maxResponseSize: false | ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -2790,7 +2727,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"none\" | \"full\" | \"certificate\">; certificateAuthorities: ",
+          "<\"none\" | \"certificate\" | \"full\">; certificateAuthorities: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

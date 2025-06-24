@@ -180,6 +180,7 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
+        "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -225,6 +226,7 @@
         "playwright",
         "playwright-chromium",
         "pngjs",
+        "qs",
         "react-test-renderer",
         "rxjs-marbles",
         "sharp",
@@ -295,6 +297,9 @@
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -456,6 +461,10 @@
       "reviewers": [
         "team:appex-sharedux"
       ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "matchBaseBranches": [
         "main"
       ],
@@ -499,13 +508,18 @@
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is"
+        "@types/react-is",
+        "csstype"
       ],
       "reviewers": [
         "team:appex-sharedux"
       ],
       "matchBaseBranches": [
         "main"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "labels": [
         "Team:SharedUX",
@@ -560,6 +574,10 @@
         "@types/react-router-dom",
         "history",
         "@types/history"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -689,10 +707,10 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
-        "@reduxjs/toolkit"
+        "@reduxjs/toolkit",
+        "immer"
       ],
       "reviewers": [
-        "team:ml-ui",
         "team:kibana-visualizations",
         "team:security-solution"
       ],
@@ -738,6 +756,8 @@
         "js-search",
         "openpgp",
         "remark-gfm",
+        "rehype-raw",
+        "rehype-sanitize",
         "yaml",
         "@types/js-search"
       ],
@@ -1026,9 +1046,7 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
-        "cronstrue",
-        "immer"
+        "cronstrue"
       ],
       "reviewers": [
         "team:kibana-management"
@@ -2210,7 +2228,7 @@
         "release_note:skip",
         "backport:prev-minor"
       ],
-      "recreateWhen": "never",
+      "dependencyDashboardApproval": true,
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -4320,7 +4338,10 @@
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/sdk-node",
-        "@opentelemetry/sdk-trace-node"
+        "@opentelemetry/sdk-trace-node",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
+        "@opentelemetry/instrumentation-undici"
       ],
       "reviewers": [
         "team:stack-monitoring",

@@ -51,7 +51,8 @@ export class RunnerManager {
     this.context = context ?? createEmptyRunContext();
   }
 
-  getRunner(): ScopedRunner {
+  // arrow function is required, risks of loosing context when passed down as handler.
+  getRunner = (): ScopedRunner => {
     return {
       runTool: <TParams = Record<string, unknown>, TResult = unknown>(
         toolExecutionParams: ScopedRunnerRunToolsParams<TParams>
@@ -80,7 +81,7 @@ export class RunnerManager {
         }
       },
     };
-  }
+  };
 
   createChild(childContext: RunContext): RunnerManager {
     return new RunnerManager(this.deps, childContext);

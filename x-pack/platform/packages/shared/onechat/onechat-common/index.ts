@@ -13,7 +13,7 @@ export {
   type SerializedToolIdentifier,
   type StructuredToolIdentifier,
   type ToolIdentifier,
-  ToolSourceType,
+  type ToolProviderId,
   isSerializedToolIdentifier,
   isStructuredToolIdentifier,
   isPlainToolIdentifier,
@@ -21,7 +21,10 @@ export {
   toSerializedToolIdentifier,
   toolDescriptorToIdentifier,
   createBuiltinToolId,
-  builtinSourceId,
+  builtinToolProviderId,
+  unknownToolProviderId,
+  BuiltinToolIds,
+  BuiltinTags,
 } from './tools';
 export {
   OnechatErrorCode,

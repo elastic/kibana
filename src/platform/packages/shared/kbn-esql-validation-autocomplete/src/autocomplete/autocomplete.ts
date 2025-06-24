@@ -18,6 +18,7 @@ import {
   Walker,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { isList } from '@kbn/esql-ast/src/ast/helpers';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -31,7 +32,6 @@ import {
   getAllFunctions,
   isSingleItem,
   getColumnExists,
-  correctQuerySyntax,
   getColumnByName,
   getAllCommands,
   getExpressionType,
@@ -46,6 +46,7 @@ import {
   allStarConstant,
   commaCompleteItem,
   getCommandAutocompleteDefinitions,
+  listCompleteItem,
 } from './complete_items';
 import {
   buildPoliciesDefinitions,
@@ -74,6 +75,7 @@ import {
   pushItUpInTheList,
   extractTypeFromASTArg,
   getSuggestionsToRightOfOperatorExpression,
+  correctQuerySyntax,
 } from './helper';
 import {
   FunctionParameter,
@@ -100,7 +102,7 @@ export async function suggest(
 ): Promise<SuggestionRawDefinition[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText, context);
+  const correctedQuery = correctQuerySyntax(innerText);
   const { ast, root } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
@@ -135,17 +137,21 @@ export async function suggest(
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
           fromCommand = 'FROM logs*';
-        } else fromCommand = `FROM ${visibleSources[0].name}`;
+        } else if (visibleSources.length) {
+          fromCommand = `FROM ${visibleSources[0].name}`;
+        }
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
           resourceRetriever,
           innerText
         );
-        const editorExtensions =
-          (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? [];
-        const recommendedQueriesSuggestionsFromExtensions =
-          mapRecommendedQueriesFromExtensions(editorExtensions);
+        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(fromCommand)) ?? {
+          recommendedQueries: [],
+        };
+        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+          editorExtensions.recommendedQueries
+        );
 
         const recommendedQueriesSuggestionsFromStaticTemplates =
           await getRecommendedQueriesSuggestionsFromStaticTemplates(
@@ -278,8 +284,18 @@ export function getFieldsByTypeRetriever(
         ...options,
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryForFields)) ?? {
+        recommendedQueries: [],
+        recommendedFields: [],
+      };
+      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
+      return buildFieldsDefinitionsWithMetadata(
+        fields,
+        recommendedFieldsFromExtensions,
+        updatedOptions,
+        getVariables
+      );
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -354,9 +370,12 @@ async function getSuggestionsWithinCommandExpression(
 
   // Function returning suggestions from static templates and editor extensions
   const getRecommendedQueries = async (queryString: string, prefix: string = '') => {
-    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? [];
-    const recommendedQueriesFromExtensions =
-      getRecommendedQueriesTemplatesFromExtensions(editorExtensions);
+    const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+      recommendedQueries: [],
+    };
+    const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
+      editorExtensions.recommendedQueries
+    );
 
     const recommendedQueriesFromTemplates =
       await getRecommendedQueriesSuggestionsFromStaticTemplates(getColumnsByType, prefix);
@@ -397,6 +416,7 @@ async function getSuggestionsWithinCommandExpression(
     supportsControls,
     getPolicies,
     getPolicyMetadata,
+    references,
   });
 }
 
@@ -540,7 +560,7 @@ async function getFunctionArgsSuggestions(
     // inherit that constraint: func1(func2(shouldBeConstantOnly)))
     //
     const constantOnlyParamDefs = typesToSuggestNext.filter(
-      (p) => p.constantOnly || /_literal/.test(p.type as string)
+      (p) => p.constantOnly || /_duration/.test(p.type as string)
     );
 
     const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) => {
@@ -571,6 +591,7 @@ async function getFunctionArgsSuggestions(
     };
 
     // Fields
+
     suggestions.push(
       ...pushItUpInTheList(
         await getFieldsByType(
@@ -682,9 +703,22 @@ async function getListArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const suggestions = [];
+
   // node is supposed to be the function who support a list argument (like the "in" operator)
   // so extract the type of the first argument and suggest fields of that type
   if (node && isFunctionItem(node)) {
+    const list = node?.args[1];
+
+    if (isList(list)) {
+      const noParens = list.location.min === 0 && list.location.max === 0;
+
+      if (noParens) {
+        suggestions.push(listCompleteItem);
+
+        return suggestions;
+      }
+    }
+
     const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMaps();
     const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, innerText);
     // extract the current node from the userDefinedColumns inferred
@@ -701,7 +735,9 @@ async function getListArgsSuggestions(
       });
       if (argType) {
         // do not propose existing columns again
-        const otherArgs = node.args.filter(Array.isArray).flat().filter(isColumnItem);
+        const otherArgs = isList(list)
+          ? list.values
+          : node.args.filter(Array.isArray).flat().filter(isColumnItem);
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],

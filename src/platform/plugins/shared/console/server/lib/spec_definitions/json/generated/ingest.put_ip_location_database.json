@@ -22,7 +22,7 @@
     "patterns": [
       "_ingest/ip_location/database/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-ip-location-database-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ingest-put-ip-location-database",
     "availability": {
       "stack": true,
       "serverless": false

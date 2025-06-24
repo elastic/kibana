@@ -3381,7 +3381,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }) => React.JSX.Element"
         ],
@@ -5667,7 +5667,7 @@
               "GridOnScrollProps",
               " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
               "EuiDataGridRowHeightsOptions",
-              " | undefined; ref?: React.LegacyRef<",
+              " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
               "AlertsTableImperativeApi",
               "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }, \"services\"> & { hideLazyLoader?: boolean | undefined; }"
             ],
@@ -11962,7 +11962,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey] extends null | undefined ? never : { id: string; columns?: ",
           "EuiDataGridColumn",
@@ -14234,7 +14234,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }[PropKey]"
         ],
@@ -16591,7 +16591,7 @@
           "GridOnScrollProps",
           " & { scrollHeight: number; scrollWidth: number; clientHeight: number; clientWidth: number; isScrolledToBlockStart: boolean; isScrolledToBlockEnd: boolean; isScrolledToInlineStart: boolean; isScrolledToInlineEnd: boolean; }) => void) | undefined; }) | undefined; rowHeightsOptions?: ",
           "EuiDataGridRowHeightsOptions",
-          " | undefined; ref?: React.LegacyRef<",
+          " | undefined; onFullScreenChange?: ((isFullScreen: boolean) => void) | undefined; ref?: React.LegacyRef<",
           "AlertsTableImperativeApi",
           "> | undefined; key?: React.Key | null | undefined; ruleTypeIds?: string[] | undefined; }"
         ],
@@ -20157,7 +20157,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -20315,7 +20315,7 @@
           },
           ", ",
           "IKibanaResponse",
-          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          "<any> | { suggestedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; linkedDashboards: { id: string; title: string; description: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; linked?: boolean | undefined; }; relevantPanelCount?: number | undefined; relevantPanels?: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[] | undefined; }[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -24622,6 +24622,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.casesDetailLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "casesDetailLocatorID",
+        "description": [],
+        "signature": [
+          "\"OBSERVABILITY_CASES_DETAIL_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.casesFeatureId",
         "type": "string",
         "tags": [
@@ -24662,6 +24677,21 @@
         "description": [],
         "signature": [
           "\"observabilityCasesV3\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.casesOverviewLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "casesOverviewLocatorID",
+        "description": [],
+        "signature": [
+          "\"OBSERVABILITY_CASES_OVERVIEW_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,
@@ -25183,7 +25213,7 @@
         "label": "observabilityPaths",
         "description": [],
         "signature": [
-          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; }"
+          "{ alerts: string; annotations: string; alertDetails: (alertId: string) => string; rules: string; ruleDetails: (ruleId: string) => string; createRule: (ruleTypeId: string) => string; editRule: (id: string) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

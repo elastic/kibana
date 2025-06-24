@@ -38,10 +38,12 @@ export interface OnechatStartDependencies {
 export interface ToolsSetup {
   /**
    * Register a built-in tool to be available in onechat.
-   *
-   * Refer to {@link ToolRegistration}
    */
   register: ToolsServiceSetup['register'];
+  /**
+   * Register a tool provider to be available in onechat.
+   */
+  registerProvider: ToolsServiceSetup['registerProvider'];
 }
 
 /**

@@ -32,7 +32,9 @@ export default ({ getService }: FtrProviderContext) => {
       const { body } = await migrationRulesRoutes.start({
         migrationId,
         payload: {
-          connector_id: 'preconfigured-bedrock',
+          settings: {
+            connector_id: 'preconfigured-bedrock',
+          },
         },
       });
       expect(body).to.eql({ started: true });
@@ -48,8 +50,8 @@ export default ({ getService }: FtrProviderContext) => {
       await pRetry(
         async () => {
           const currentStatsResponse = await migrationRulesRoutes.stats({ migrationId });
-          if (currentStatsResponse.body.status !== 'aborted') {
-            throw new Error('Retry until migration is aborted');
+          if (currentStatsResponse.body.status !== 'stopped') {
+            throw new Error('Retry until migration is stopped');
           }
           return currentStatsResponse;
         },
@@ -59,8 +61,8 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const migrationResponse = await migrationRulesRoutes.get({ migrationId });
-      expect(migrationResponse.body?.last_execution?.is_aborted).to.eql(true);
-      expect(migrationResponse.body?.last_execution?.ended_at).to.be.ok();
+      expect(migrationResponse.body?.last_execution?.is_stopped).to.eql(true);
+      expect(migrationResponse.body?.last_execution?.finished_at).to.be.ok();
     });
 
     describe('error scenarios', () => {
@@ -68,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
         await migrationRulesRoutes.start({
           migrationId: 'invalid_migration_id',
           expectStatusCode: 404,
-          payload: { connector_id: 'preconfigured-bedrock' },
+          payload: { settings: { connector_id: 'preconfigured-bedrock' } },
         });
       });
 

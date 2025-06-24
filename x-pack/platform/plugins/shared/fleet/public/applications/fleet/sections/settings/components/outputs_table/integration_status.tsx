@@ -202,34 +202,30 @@ export const IntegrationStatus: React.FunctionComponent<{
             </>
           )}
 
-          {integration.sync_status === 'warning' && (
+          {integration.sync_status === 'warning' && integration?.warning && (
             <>
               <EuiCallOut
                 title={
-                  syncUninstalledIntegrations ? (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
-                      defaultMessage="Integration was uninstalled, but removal from remote cluster failed."
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.fleet.integrationSyncStatus.integrationErrorTitle"
-                      defaultMessage="Warning"
-                    />
-                  )
+                  <FormattedMessage
+                    id="xpack.fleet.integrationSyncStatus.integrationWarningTitle"
+                    defaultMessage="{Warning}"
+                    values={{
+                      Warning: integration.warning?.title,
+                    }}
+                  />
                 }
                 color="warning"
                 iconType="warning"
                 size="s"
                 data-test-subj="integrationSyncIntegrationWarningCallout"
               >
-                {integration?.warning && (
+                {integration?.warning?.message && (
                   <EuiText size="s">
                     <FormattedMessage
                       id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
                       defaultMessage="{uninstallWarning}"
                       values={{
-                        uninstallWarning: integration?.warning,
+                        uninstallWarning: integration.warning.message,
                       }}
                     />
                   </EuiText>

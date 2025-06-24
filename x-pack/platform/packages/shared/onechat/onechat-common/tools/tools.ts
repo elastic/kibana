@@ -11,20 +11,7 @@ import { createInternalError } from '../base/errors';
  * Represents a plain toolId, without source information attached to it.
  */
 export type PlainIdToolIdentifier = string;
-
-/**
- * Represents the source type for a tool.
- */
-export enum ToolSourceType {
-  /**
-   * Source used for built-in tools
-   */
-  builtIn = 'builtIn',
-  /**
-   * Unknown source - used when converting plain ids to structured or serialized format.
-   */
-  unknown = 'unknown',
-}
+export type ToolProviderId = string;
 
 /**
  * Structured representation of a tool identifier.
@@ -33,21 +20,19 @@ export interface StructuredToolIdentifier {
   /** The unique ID of this tool, relative to the source **/
   toolId: string;
   /** The type of source the tool is being provided from, e.g. builtIn or MCP **/
-  sourceType: ToolSourceType;
-  /** Id of the source, e.g. for MCP server it will be the server/connector ID */
-  sourceId: string;
+  providerId: string;
 }
 
-export const serializedPartsSeparator = '||';
+export const serializedPartsSeparator = '::';
 
 /**
  * The singleton sourceId used for all builtIn tools.
  */
-export const builtinSourceId = 'builtIn';
+export const builtinToolProviderId = 'builtIn';
 /**
  * Unknown sourceId used from converting plain Ids to structured or serialized ids.
  */
-export const unknownSourceId = 'unknown';
+export const unknownToolProviderId = 'unknown';
 
 /**
  * Build a structured tool identifier for given builtin tool ID.
@@ -55,8 +40,7 @@ export const unknownSourceId = 'unknown';
 export const createBuiltinToolId = (plainId: PlainIdToolIdentifier): StructuredToolIdentifier => {
   return {
     toolId: plainId,
-    sourceType: ToolSourceType.builtIn,
-    sourceId: builtinSourceId,
+    providerId: builtinToolProviderId,
   };
 };
 
@@ -64,7 +48,7 @@ export const createBuiltinToolId = (plainId: PlainIdToolIdentifier): StructuredT
  * String representation of {@link StructuredToolIdentifier}
  * Follow a `{toolId}||{sourceType}||{sourceId}` format.
  */
-export type SerializedToolIdentifier = `${PlainIdToolIdentifier}||${ToolSourceType}||${string}`;
+export type SerializedToolIdentifier = `${ToolProviderId}::${PlainIdToolIdentifier}`;
 
 /**
  * Defines all possible shapes for a tool identifier.
@@ -80,7 +64,7 @@ export type ToolIdentifier =
 export const isSerializedToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is SerializedToolIdentifier => {
-  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 3;
+  return typeof identifier === 'string' && identifier.split(serializedPartsSeparator).length === 2;
 };
 
 /**
@@ -89,7 +73,7 @@ export const isSerializedToolIdentifier = (
 export const isStructuredToolIdentifier = (
   identifier: ToolIdentifier
 ): identifier is StructuredToolIdentifier => {
-  return typeof identifier === 'object' && 'toolId' in identifier && 'sourceType' in identifier;
+  return typeof identifier === 'object' && 'toolId' in identifier && 'providerId' in identifier;
 };
 
 /**
@@ -111,10 +95,10 @@ export const toSerializedToolIdentifier = (
     return identifier;
   }
   if (isStructuredToolIdentifier(identifier)) {
-    return `${identifier.toolId}||${identifier.sourceType}||${identifier.sourceId}`;
+    return `${identifier.providerId}::${identifier.toolId}`;
   }
   if (isPlainToolIdentifier(identifier)) {
-    return `${identifier}||${ToolSourceType.unknown}||${unknownSourceId}`;
+    return `${unknownToolProviderId}::${identifier}`;
   }
 
   throw createInternalError(`Malformed tool identifier: "${identifier}"`);
@@ -130,18 +114,16 @@ export const toStructuredToolIdentifier = (
     return identifier;
   }
   if (isSerializedToolIdentifier(identifier)) {
-    const [toolId, sourceType, sourceId] = identifier.split(serializedPartsSeparator);
+    const [providerId, toolId] = identifier.split(serializedPartsSeparator);
     return {
       toolId,
-      sourceType: sourceType as ToolSourceType,
-      sourceId,
+      providerId,
     };
   }
   if (isPlainToolIdentifier(identifier)) {
     return {
       toolId: identifier,
-      sourceType: ToolSourceType.unknown,
-      sourceId: unknownSourceId,
+      providerId: unknownToolProviderId,
     };
   }
 
@@ -158,10 +140,6 @@ export interface ToolDescriptor {
    * A unique id for this tool.
    */
   id: PlainIdToolIdentifier;
-  /**
-   * Name of the tool, which will be exposed to the LLM.
-   */
-  name: string;
   /**
    * The description for this tool, which will be exposed to the LLM.
    */
@@ -180,14 +158,9 @@ export interface ToolDescriptor {
  */
 export interface ToolDescriptorMeta {
   /**
-   * The type of the source this tool is provided by.
+   * ID of the provider this tool is exposed from.
    */
-  sourceType: ToolSourceType;
-  /**
-   * The id of the source this tool is provided by.
-   * E.g. for MCP source, this will be the ID of the MCP connector.
-   */
-  sourceId: string;
+  providerId: ToolProviderId;
   /**
    * Optional list of tags attached to this tool.
    * For built-in tools, this is specified during registration.
@@ -198,7 +171,6 @@ export interface ToolDescriptorMeta {
 export const toolDescriptorToIdentifier = (tool: ToolDescriptor): StructuredToolIdentifier => {
   return {
     toolId: tool.id,
-    sourceType: tool.meta.sourceType,
-    sourceId: tool.meta.sourceId,
+    providerId: tool.meta.providerId,
   };
 };

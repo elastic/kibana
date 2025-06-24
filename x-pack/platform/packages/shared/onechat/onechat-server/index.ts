@@ -6,7 +6,9 @@
  */
 
 export type {
+  RegisteredToolMeta,
   RegisteredTool,
+  RegisteredToolProvider,
   ToolHandlerFn,
   ToolHandlerContext,
   ToolProvider,

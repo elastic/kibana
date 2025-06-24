@@ -12,11 +12,12 @@ import { auditLoggerMock } from '@kbn/core-security-server-mocks';
 
 const mockCreateOrUpdateComponentTemplate = jest.fn();
 const mockCreateOrUpdateIndex = jest.fn();
-const mockUpdateUnderlyingMapping = jest.fn();
+const mockRolloverDataStream = jest.fn();
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: (...params: unknown[]) =>
     mockCreateOrUpdateComponentTemplate(...params),
+  createOrUpdateIndexTemplate: jest.fn(),
 }));
 
 jest.mock('../../utils/create_or_update_index', () => ({
@@ -24,7 +25,7 @@ jest.mock('../../utils/create_or_update_index', () => ({
 }));
 
 jest.mock('../../utils/create_datastream', () => ({
-  updateUnderlyingMapping: (...params: unknown[]) => mockUpdateUnderlyingMapping(...params),
+  rolloverDataStream: (...params: unknown[]) => mockRolloverDataStream(...params),
 }));
 
 const mockGetDefaultRiskEngineConfiguration = jest.fn();
@@ -102,8 +103,8 @@ describe('updateRiskScoreMappings', () => {
         template: expect.objectContaining({ name: '.risk-score-mappings-default' }),
       })
     );
-    expect(mockUpdateUnderlyingMapping).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'risk-score.risk-score-default' })
+    expect(mockRolloverDataStream).toHaveBeenCalledWith(
+      expect.objectContaining({ dataStreamName: 'risk-score.risk-score-default' })
     );
     expect(mockUpdateSavedObjectAttribute).toHaveBeenCalledWith(
       expect.objectContaining({ attributes: { _meta: { mappingsVersion: '2.0.0' } } })
@@ -129,7 +130,7 @@ describe('updateRiskScoreMappings', () => {
 
     expect(mockCreateOrUpdateIndex).not.toHaveBeenCalled();
     expect(mockCreateOrUpdateComponentTemplate).not.toHaveBeenCalled();
-    expect(mockUpdateUnderlyingMapping).not.toHaveBeenCalled();
+    expect(mockRolloverDataStream).not.toHaveBeenCalled();
     expect(mockUpdateSavedObjectAttribute).not.toHaveBeenCalled();
   });
 
@@ -158,7 +159,7 @@ describe('updateRiskScoreMappings', () => {
 
     expect(mockCreateOrUpdateIndex).toHaveBeenCalledTimes(4);
     expect(mockCreateOrUpdateComponentTemplate).toHaveBeenCalledTimes(4);
-    expect(mockUpdateUnderlyingMapping).toHaveBeenCalledTimes(4);
+    expect(mockRolloverDataStream).toHaveBeenCalledTimes(4);
     expect(mockUpdateSavedObjectAttribute).toHaveBeenCalledTimes(4);
   });
 });

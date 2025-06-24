@@ -1,0 +1,22 @@
+{
+  "indices.create_from": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_create_from/{source}/{dest}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-create-from",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
