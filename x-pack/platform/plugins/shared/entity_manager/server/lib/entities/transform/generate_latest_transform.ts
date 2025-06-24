@@ -23,6 +23,8 @@ import {
 } from '../helpers/generate_component_id';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 
+// TODO(kuba): You basically need either a copy or a modification of this to be
+// called from createAndInstallTransforms. This is it.
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
@@ -36,6 +38,8 @@ export function generateLatestTransform(
     filter.push({ exists: { field } });
   });
 
+  // TODO(kuba): Important for backfill transform - this will be a different
+  // setting, I think.
   filter.push({
     range: {
       [definition.latest.timestampField]: {
@@ -54,6 +58,7 @@ export function generateLatestTransform(
   });
 }
 
+// TODO(kuba): Remember this needs changes as well.
 const generateTransformPutRequest = ({
   definition,
   filter,
