@@ -26,6 +26,9 @@ export const rulesMetricsSchema: MakeSchemaFrom<RuleAdoption> = {
     },
   },
   detection_rule_usage: ruleTypeUsageSchema,
-  detection_rule_detail: ruleMetricsSchema,
+  detection_rule_detail: {
+    type: 'array',
+    items: ruleMetricsSchema,
+  },
   detection_rule_status: ruleStatusMetricsSchema,
 };

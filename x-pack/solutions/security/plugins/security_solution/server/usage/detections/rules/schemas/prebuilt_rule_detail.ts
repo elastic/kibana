@@ -6,9 +6,9 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { RuleAdoption } from '../types';
+import type { RuleMetric } from '../types';
 
-export const ruleMetricsSchema: MakeSchemaFrom<RuleAdoption>['detection_rule_detail'] = {
+export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
   rule_name: {
     type: 'keyword',
     _meta: { description: 'The name of the detection rule' },
@@ -53,5 +53,28 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleAdoption>['detection_rule_det
   has_notification: {
     type: 'boolean',
     _meta: { description: 'True if this rule has a notification' },
+  },
+  has_legacy_investigation_field: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has a legacy investigation field' },
+  },
+  has_alert_suppression_missing_fields_strategy_do_not_suppress: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True if this rule has alert suppression missing fields strategy do not suppress',
+    },
+  },
+  has_alert_suppression_per_rule_execution: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has alert suppression per rule execution' },
+  },
+  has_alert_suppression_per_time_period: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has alert suppression per time period' },
+  },
+  alert_suppression_fields_count: {
+    type: 'long',
+    _meta: { description: 'The number of alert suppression fields for this rule' },
   },
 };
