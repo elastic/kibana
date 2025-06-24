@@ -81,7 +81,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     sorting,
     error,
   } = usePaginatedAlerts(alertIds || []);
-  const { isPreview } = useDocumentDetailsContext();
+  const { isRulePreview } = useDocumentDetailsContext();
 
   const onTableChange = useCallback(
     ({ page, sort }: Criteria<Record<string, unknown>>) => {
@@ -174,7 +174,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
                 value={ruleName}
                 scopeId={scopeId}
                 ruleId={ruleId}
-                isPreview={isPreview}
+                isRulePreview={isRulePreview}
                 data-test-subj={`${dataTestSubj}RulePreview`}
               >
                 <span>{ruleName}</span>
@@ -218,7 +218,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
         },
       },
     ],
-    [scopeId, dataTestSubj, isPreview]
+    [scopeId, dataTestSubj, isRulePreview]
   );
 
   return (

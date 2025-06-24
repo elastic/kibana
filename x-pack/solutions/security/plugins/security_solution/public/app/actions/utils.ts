@@ -6,7 +6,6 @@
  */
 import type { Serializable } from '@kbn/utility-types';
 import { APP_UI_ID } from '../../../common/constants';
-
 // All cell actions are disabled for these fields in Security
 const FIELDS_WITHOUT_CELL_ACTIONS = [
   'signal.rule.risk_score',

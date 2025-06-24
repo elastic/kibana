@@ -34,7 +34,7 @@ export class DetectionsTestService extends FtrService {
    * when things fail.
    *
    * @param ignoredStatusCodes
-   * @private
+   * @internal
    *
    * @example
    *

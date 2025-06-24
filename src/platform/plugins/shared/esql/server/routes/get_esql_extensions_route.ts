@@ -8,7 +8,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import type { ResolveIndexResponse } from '@kbn/esql-types';
+import { type ResolveIndexResponse, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import type { ESQLExtensionsRegistry } from '../extensions_registry';
 
 type SolutionId = 'es' | 'oblt' | 'security';
@@ -37,7 +37,7 @@ export const registerESQLExtensionsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/esql_registry/extensions/{solutionId}/{query}',
+      path: `${REGISTRY_EXTENSIONS_ROUTE}{solutionId}/{query}`,
       security: {
         authz: {
           enabled: false,
@@ -84,14 +84,23 @@ export const registerESQLExtensionsRoute = (
 
         // Validate solutionId
         const validSolutionId = isSolutionId(solutionId) ? solutionId : 'oblt'; // No solutionId provided, or invalid
+
         const recommendedQueries = extensionsRegistry.getRecommendedQueries(
           query,
           sources,
           validSolutionId
         );
+
+        const recommendedFields = extensionsRegistry.getRecommendedFields(
+          query,
+          sources,
+          validSolutionId
+        );
+
         return response.ok({
           body: {
             recommendedQueries,
+            recommendedFields,
           },
         });
       } catch (error) {

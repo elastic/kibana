@@ -94,6 +94,7 @@ import {
   PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
   PREVIEW_LOGGED_REQUESTS_CHECKBOX,
   PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
+  PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON,
   QUERY_BAR,
   QUERY_BAR_ADD_FILTER,
   REFERENCE_URLS_INPUT,
@@ -1023,6 +1024,10 @@ export const checkEnableLoggedRequests = () => {
 
 export const submitRulePreview = () => {
   cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).click();
+};
+
+export const toggleLoggedRequestsPageAccordion = () => {
+  cy.get(PREVIEW_LOGGED_REQUESTS_PAGE_ACCORDION_BUTTON).first().click();
 };
 
 export const toggleLoggedRequestsAccordion = () => {

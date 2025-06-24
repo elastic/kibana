@@ -5,24 +5,22 @@
  * 2.0.
  */
 import React from 'react';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { DASHBOARDS_PATH, SecurityPageName } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { DashboardsContainer } from './pages';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const DashboardRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dashboards}>
-      <DashboardsContainer />
-    </TrackApplicationView>
+    <DashboardsContainer />
   </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: DASHBOARDS_PATH,
-    component: DashboardRoutes,
+    component: withSecurityRoutePageWrapper(DashboardRoutes, SecurityPageName.dashboards),
   },
 ];

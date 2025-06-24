@@ -66,7 +66,11 @@ export function CauseStacktrace({
   }
 
   return (
-    <Accordion buttonContent={<CausedBy message={message} />} id={id}>
+    <Accordion
+      buttonContent={<CausedBy message={message} />}
+      id={id}
+      data-test-subj="cause-stacktrace"
+    >
       <FramesContainer>
         <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
       </FramesContainer>

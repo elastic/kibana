@@ -129,7 +129,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await synthtrace.deleteCustomPipeline('synth.2@pipeline');
     });
 
-    describe('navigate to dataset details', () => {
+    describe('navigate to dataset details', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should navigate to right dataset', async () => {
         await PageObjects.datasetQuality.navigateToDetails({ dataStream: regularDataStreamName });
 
@@ -193,7 +198,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('overview summary panel', () => {
+    describe('overview summary panel', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
@@ -209,7 +219,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('failed docs', () => {
+    describe('failed docs', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should show it in summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: failedDataStreamName,
@@ -275,7 +290,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('overview integrations', () => {
+    describe('overview integrations', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it('should hide the integration section for non integrations', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
@@ -418,8 +438,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: regularDataStreamName,
         });
 
-        const logExplorerButton =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
+        await PageObjects.datasetQuality.openDatasetQualityDetailsActionsButton();
+
+        const logExplorerButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
 
         await logExplorerButton.click();
 
@@ -446,7 +467,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
-    describe('degraded fields table', () => {
+    describe('degraded fields table', function () {
+      // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+      // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
+      // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
+      this.onlyEsVersion('8.19 || >=9.1');
+
       it(' should show empty degraded fields table when no degraded fields are present', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
