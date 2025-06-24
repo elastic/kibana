@@ -16,13 +16,12 @@ import styled from '@emotion/styled';
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
 
 const Strong = styled.strong<{ showRealValues: boolean }>`
-  cursor: pointer;
   color: ${(props) =>
     props.showRealValues
       ? props.theme.euiTheme.colors.textPrimary
       : props.theme.euiTheme.colors.textAccent};
+  cursor: pointer;
 `;
-
 export interface Props {
   selectedPromptContext: SelectedPromptContext;
   showRealValues: boolean;

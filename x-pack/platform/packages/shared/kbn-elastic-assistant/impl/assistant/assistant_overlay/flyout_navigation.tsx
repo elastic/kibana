@@ -15,8 +15,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
