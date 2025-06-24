@@ -73,7 +73,7 @@ x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
-x-pack/platform/plugins/shared/cases @elastic/response-ops
+x-pack/platform/plugins/shared/cases @elastic/response-ops @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
@@ -2735,9 +2735,11 @@ packages/react @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/.spectral.yaml                       @elastic/platform-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
-oas_docs/kibana.info.yaml                     @elastic/platform-docs
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs 
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs 
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs 
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
