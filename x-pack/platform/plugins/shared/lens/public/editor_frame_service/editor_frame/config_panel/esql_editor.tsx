@@ -179,7 +179,12 @@ export function ESQLEditor({
   useEffect(() => {
     const abortController = new AbortController();
     const initializeChart = async () => {
-      if (isTextBasedLanguage && isOfAggregateQueryType(query) && !dataGridAttrs) {
+      if (
+        isTextBasedLanguage &&
+        isOfAggregateQueryType(query) &&
+        !dataGridAttrs &&
+        !errors.length
+      ) {
         try {
           await runQuery(query, abortController, Boolean(attributes?.state.needsRefresh));
         } catch (e) {
@@ -195,6 +200,7 @@ export function ESQLEditor({
     esqlVariables,
     query,
     data,
+    errors,
     dataGridAttrs,
     attributes?.state.needsRefresh,
     isTextBasedLanguage,
