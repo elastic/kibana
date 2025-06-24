@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { useSeverityOptions } from './use_severity_options';
 
@@ -15,8 +15,8 @@ import { useSeverityOptions } from './use_severity_options';
 export const useThresholdToSeverity = () => {
   const severityOptions = useSeverityOptions();
 
-  return useMemo(() => {
-    return (thresholds: SeverityThreshold[] | number) => {
+  return useCallback(
+    (thresholds: SeverityThreshold[] | number) => {
       // Handle legacy case where threshold is a single number
       if (typeof thresholds === 'number') {
         // Find all severity options with min value >= the provided threshold
@@ -46,6 +46,7 @@ export const useThresholdToSeverity = () => {
       }
 
       return matchingSeverities;
-    };
-  }, [severityOptions]);
+    },
+    [severityOptions]
+  );
 };
