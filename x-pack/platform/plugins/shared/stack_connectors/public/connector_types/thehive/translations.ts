@@ -109,13 +109,6 @@ export const SOURCE_REF_LABEL = i18n.translate(
   }
 );
 
-export const TEMPLATE_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.thehive.templateFieldLabel',
-  {
-    defaultMessage: 'Template',
-  }
-);
-
 export const BODY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.bodyFieldLabel',
   {
@@ -127,13 +120,6 @@ export const BODY_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.thehive.bodyFieldDescription',
   {
     defaultMessage: 'Code Editor',
-  }
-);
-
-export const SELECT_BODY_TEMPLATE_POPOVER_BUTTON = i18n.translate(
-  'xpack.stackConnectors.components.thehive.selectBodyTemplatePopoverButton',
-  {
-    defaultMessage: 'Select body template',
   }
 );
 
