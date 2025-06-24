@@ -11,6 +11,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import {
+  AssistantSpaceIdProvider,
   mergeBaseWithPersistedConversations,
   useAssistantContext,
   useFetchCurrentUserConversations,
@@ -23,6 +24,7 @@ import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/setting
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 
 import { useKibana } from '../../common/lib/kibana';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 
 const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
 
@@ -32,7 +34,7 @@ export const ManagementSettings = React.memo(() => {
     http,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
-
+  const spaceId = useSpaceId();
   const {
     application: {
       navigateToApp,
@@ -131,14 +133,16 @@ export const ManagementSettings = React.memo(() => {
   }
 
   if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-      />
-    );
+    return spaceId ? (
+      <AssistantSpaceIdProvider spaceId={spaceId}>
+        <AssistantSettingsManagement
+          selectedConversation={currentConversation}
+          dataViews={dataViews}
+          onTabChange={handleTabChange}
+          currentTab={currentTab}
+        />
+      </AssistantSpaceIdProvider>
+    ) : null;
   }
 
   return <></>;
