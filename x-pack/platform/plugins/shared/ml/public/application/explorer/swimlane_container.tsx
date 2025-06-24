@@ -38,11 +38,7 @@ import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
-import {
-  getFormattedSeverityScore,
-  getThemeResolvedSeverityColor,
-  ML_ANOMALY_THRESHOLD,
-} from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
@@ -75,6 +71,7 @@ const BORDER_WIDTH = 1;
 export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
+const MAX_ANOMALY_SCORE_LEGEND = 100;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && Object.hasOwn(arg, 'cardinality');
@@ -529,7 +526,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                               },
                               {
                                 start: ML_ANOMALY_THRESHOLD.CRITICAL,
-                                end: Infinity,
+                                end: MAX_ANOMALY_SCORE_LEGEND,
                                 color: getThemeResolvedSeverityColor(
                                   ML_ANOMALY_THRESHOLD.CRITICAL,
                                   euiTheme
@@ -542,7 +539,6 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                           yAccessor="laneLabel"
                           valueAccessor="value"
                           highlightedData={highlightedData}
-                          valueFormatter={getFormattedSeverityScore}
                           xScale={{
                             type: ScaleType.Time,
                             interval: {
