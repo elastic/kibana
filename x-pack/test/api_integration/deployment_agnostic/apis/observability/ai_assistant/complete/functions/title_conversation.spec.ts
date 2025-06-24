@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe('when calling the title_conversation function', function () {
+  describe('tool: title_conversation', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
