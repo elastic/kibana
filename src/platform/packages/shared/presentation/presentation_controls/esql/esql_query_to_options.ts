@@ -10,8 +10,11 @@
 import { getESQLResults } from '@kbn/esql-utils';
 import { ISearchGeneric } from '@kbn/search-types';
 
-export interface ESQLControlOptionsResult {
+interface ESQLControlOptionsSuccess {
   options: string[];
+}
+
+interface ESQLControlOptionsFailure {
   columns: string[];
   errors: Error[];
 }
@@ -19,7 +22,7 @@ export interface ESQLControlOptionsResult {
 export const esqlQueryToOptions = async (
   query: string,
   search: ISearchGeneric
-): Promise<ESQLControlOptionsResult> => {
+): Promise<ESQLControlOptionsSuccess | ESQLControlOptionsFailure> => {
   try {
     const results = await getESQLResults({
       esqlQuery: query,
@@ -35,11 +38,14 @@ export const esqlQueryToOptions = async (
         .map((value) => value[0])
         .filter(Boolean)
         .map((option) => String(option));
-      return { options, columns, errors: [] };
+      return { options };
     }
 
-    return { options: [], columns, errors: [] };
+    return { columns, errors: [] };
   } catch (e) {
-    return { options: [], columns: [], errors: [e] };
+    return { columns: [], errors: [e] };
   }
 };
+
+esqlQueryToOptions.isSuccess = (result: unknown): result is ESQLControlOptionsSuccess =>
+  'options' in (result as ESQLControlOptionsSuccess);

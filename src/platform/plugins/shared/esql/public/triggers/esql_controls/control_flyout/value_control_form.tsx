@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { esqlQueryToOptions } from '@kbn/presentation-controls';
@@ -147,20 +147,19 @@ export function ValueControlForm({
 
   const onValuesQuerySubmit = useCallback(
     async (query: string) => {
+      console.trace();
       setValuesQuery(query);
 
-      const { options, columns, errors } = await esqlQueryToOptions(query, search);
+      const result = await esqlQueryToOptions(query, search);
       if (!isMounted()) {
         return;
       }
-      if (errors.length) {
-        setEsqlQueryErrors(errors);
-        return;
-      }
-      setQueryColumns(columns);
-      setEsqlQueryErrors([]);
+      if (esqlQueryToOptions.isSuccess(result)) {
+        const { options } = result;
 
-      if (columns.length === 1) {
+        setEsqlQueryErrors([]);
+        setQueryColumns([]);
+
         const selectOptions = options.map((option) => ({
           label: String(option),
           key: String(option),
@@ -168,6 +167,12 @@ export function ValueControlForm({
         }));
         setSelectedValues(selectOptions);
         setAvailableValuesOptions(selectOptions);
+      } else {
+        const { errors, columns } = result;
+        setSelectedValues([]);
+        setAvailableValuesOptions([]);
+        setEsqlQueryErrors(errors);
+        setQueryColumns(columns);
       }
     },
     [isMounted, search]
@@ -234,6 +239,13 @@ export function ValueControlForm({
     [onValuesQuerySubmit, valuesQuery]
   );
 
+  const hasQueryExecutedSuccessfully = useMemo(
+    () =>
+      controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
+      (selectedValues.length > 0 || queryColumns.length > 0),
+    [controlFlyoutType, selectedValues, queryColumns]
+  );
+
   return (
     <>
       {controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY && (
@@ -264,14 +276,14 @@ export function ValueControlForm({
               hasOutline
             />
           </EuiFormRow>
-          {queryColumns.length > 0 && (
+          {hasQueryExecutedSuccessfully && (
             <EuiFormRow
               label={i18n.translate('esql.flyout.previewValues.placeholder', {
                 defaultMessage: 'Values preview',
               })}
               fullWidth
             >
-              {queryColumns.length === 1 ? (
+              {selectedValues.length ? (
                 <EuiPanel
                   paddingSize="s"
                   color="primary"

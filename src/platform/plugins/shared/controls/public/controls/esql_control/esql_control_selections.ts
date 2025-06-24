@@ -69,12 +69,9 @@ export function initializeESQLControlSelections(
   async function updateAvailableOptions() {
     const controlType = controlType$.getValue();
     if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
-    const { options, errors } = await esqlQueryToOptions(
-      esqlQuery$.getValue(),
-      dataService.search.search
-    );
-    if (!errors.length) {
-      availableOptions$.next(options);
+    const result = await esqlQueryToOptions(esqlQuery$.getValue(), dataService.search.search);
+    if (esqlQueryToOptions.isSuccess(result)) {
+      availableOptions$.next(result.options);
     }
   }
   const fetchSubscription = controlFetch$.subscribe(updateAvailableOptions);
