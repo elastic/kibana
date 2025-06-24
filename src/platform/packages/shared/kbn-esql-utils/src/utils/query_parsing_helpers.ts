@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { uniq } from 'lodash';
 import {
   parse,
   Walker,
@@ -13,7 +14,9 @@ import {
   BasicPrettyPrinter,
   isFunctionExpression,
   isColumn,
+  Parser,
 } from '@kbn/esql-ast';
+import { Visitor } from '@kbn/esql-ast/src/visitor';
 
 import type {
   ESQLSource,
@@ -22,6 +25,7 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
+  ESQLLiteral,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -342,6 +346,168 @@ export const getCategorizeColumns = (esql: string): string[] => {
   return columns;
 };
 
+function unquoteTemplate(inputString: string): string {
+  if (inputString.startsWith('"') && inputString.endsWith('"') && inputString.length >= 2) {
+    return inputString.substring(1, inputString.length - 1);
+  }
+  return inputString;
+}
+
+function extractSemanticsFromGrok(pattern: string): string[] {
+  const regex = /%\{\w+:(?<column>[\w@]+)\}/g;
+  const matches = pattern.matchAll(regex);
+  const columns: string[] = [];
+  for (const match of matches) {
+    if (match?.groups?.column) {
+      columns.push(match.groups.column);
+    }
+  }
+  return columns;
+}
+
+export function extractDissectColumnNames(pattern: string): string[] {
+  const regex = /%\{(?:[?+]?)?([^}]+?)(?:->)?\}/g;
+  const matches = pattern.matchAll(regex);
+  const columns: string[] = [];
+  for (const match of matches) {
+    if (match && match[1]) {
+      const columnName = match[1];
+      if (!columns.includes(columnName)) {
+        columns.push(columnName);
+      }
+    }
+  }
+  return columns;
+}
+
+/**
+ * Processes a single query to extract fields and user-defined columns.
+ * @param query The query string.
+ * @returns An object containing the extracted fields and user-defined columns for the given query.
+ */
+export function processSingleQuery(query: string): {
+  fields: Map<string, string[]>;
+  userDefinedColumns: Map<string, string[]>;
+} {
+  const fields: Map<string, string[]> = new Map();
+  const userDefinedColumns: Map<string, string[]> = new Map();
+
+  const { root } = Parser.parse(query);
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+  const columns = getQueryColumnsFromESQLQuery(query).filter((col) => col !== '*');
+
+  const existingFieldsInPattern = fields.get(indexPattern) || [];
+  fields.set(indexPattern, uniq([...existingFieldsInPattern, ...columns]));
+
+  const visitor = new Visitor()
+    .on('visitExpression', (_ctx) => {})
+    .on('visitGrokCommand', (ctx) => {
+      const [_, pattern] = ctx.node.args;
+      const dissectPattern = unquoteTemplate(String((pattern as ESQLLiteral).value));
+      const dissectColumns = extractSemanticsFromGrok(dissectPattern);
+      const existingColumns = userDefinedColumns.get(indexPattern) || [];
+      const updatedColumns = [...existingColumns, ...dissectColumns];
+      userDefinedColumns.set(indexPattern, updatedColumns);
+    })
+    .on('visitDissectCommand', (ctx) => {
+      const [_, pattern] = ctx.node.args;
+      const dissectPattern = unquoteTemplate(String((pattern as ESQLLiteral).value));
+      const dissectColumns = extractDissectColumnNames(dissectPattern);
+      const existingColumns = userDefinedColumns.get(indexPattern) || [];
+      const updatedColumns = [...existingColumns, ...dissectColumns];
+      userDefinedColumns.set(indexPattern, updatedColumns);
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      const node = ctx.node;
+
+      if (node.subtype === 'binary-expression' && node.name === 'where') {
+        ctx.visitArgument(0, undefined);
+        return;
+      }
+
+      if (node.name === '=') {
+        const args = node.args;
+        if (args.length === 2) {
+          const [leftArg, _] = args;
+          const existingColumns = userDefinedColumns.get(indexPattern) || [];
+          const updatedColumns = [
+            ...existingColumns,
+            (leftArg as ESQLColumn).text.replace(/`/g, ''),
+          ];
+          userDefinedColumns.set(indexPattern, updatedColumns);
+        }
+      }
+      if (node.name === 'as') {
+        const [_, newArg] = ctx.node.args;
+        const existingColumns = userDefinedColumns.get(indexPattern) || [];
+        const updatedColumns = [...existingColumns, (newArg as ESQLColumn).text];
+        userDefinedColumns.set(indexPattern, updatedColumns);
+      }
+    })
+    .on('visitCommandOption', (ctx) => {
+      if (ctx.node.name === 'by') {
+        return [...ctx.visitArguments()];
+      }
+    })
+    .on('visitCommand', (ctx) => {
+      const ret = [];
+      if (['row', 'eval', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
+        ret.push(...ctx.visitArgs());
+      }
+      if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
+        ret.push(...ctx.visitOptions());
+      }
+      if (ctx.node.name === 'fork') {
+        ret.push(...ctx.visitSubQueries());
+      }
+      return ret;
+    })
+    .on('visitQuery', (ctx) => [...ctx.visitCommands()]);
+
+  visitor.visitQuery(root.commands);
+
+  return { fields, userDefinedColumns };
+}
+
+/**
+ * Processes an array of queries to extract and consolidate fields.
+ * @param queries An array of query strings.
+ * @returns A Map where keys are index patterns and values are arrays of unique field names.
+ */
+export function getSourceFieldsFromQueries(queries: string[]): Map<string, string[]> {
+  const consolidatedFields: Map<string, string[]> = new Map();
+  const consolidatedUserDefinedColumns: Map<string, string[]> = new Map();
+
+  for (const query of queries) {
+    const { fields, userDefinedColumns } = processSingleQuery(query);
+
+    // Merge fields from the single query into the consolidated map
+    fields.forEach((value, key) => {
+      const existing = consolidatedFields.get(key) || [];
+      consolidatedFields.set(key, uniq([...existing, ...value]));
+    });
+
+    // Merge user-defined columns from the single query into the consolidated map
+    userDefinedColumns.forEach((value, key) => {
+      const existing = consolidatedUserDefinedColumns.get(key) || [];
+      consolidatedUserDefinedColumns.set(key, uniq([...existing, ...value]));
+    });
+  }
+
+  // Remove user-defined columns from the consolidated fields map
+  consolidatedUserDefinedColumns.forEach((value, key) => {
+    if (consolidatedFields.has(key)) {
+      let allColumnsInPattern = consolidatedFields.get(key) || [];
+
+      if (allColumnsInPattern.some((col) => value.includes(col))) {
+        allColumnsInPattern = allColumnsInPattern.filter((item) => !value.includes(item));
+        consolidatedFields.set(key, allColumnsInPattern);
+      }
+    }
+  });
+
+  return consolidatedFields;
+}
 /**
  * Extracts the original and renamed columns from a rename function.
  * RENAME original AS renamed Vs RENAME renamed = original

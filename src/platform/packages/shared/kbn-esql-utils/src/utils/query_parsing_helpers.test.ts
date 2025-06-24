@@ -22,6 +22,7 @@ import {
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
+  getSourceFieldsFromQueries,
   getArgsFromRenameFunction,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
@@ -786,6 +787,162 @@ describe('esql query helpers', () => {
     });
   });
 
+  describe('getSourceFieldsFromQueries', () => {
+    test('should return an array of unique fields from source queries', () => {
+      const queries: string[] = [
+        'FROM metrics-* | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC',
+        'FROM metrics-* | RENAME kubernetes.pod.cpu.usage.limit.pct AS cpu_limit_pct | STATS max_cpu_limit_pct = MAX(cpu_limit_pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC',
+        'FROM metrics-* | WHERE kubernetes.pod.memory.usage.limit.pct IS NOT NULL | STATS memory_limit_pct = MAX(kubernetes.pod.memory.usage.limit.pct) BY kubernetes.pod.name | SORT memory_limit_pct DESC',
+        'FROM metrics-* | RENAME kubernetes.pod.cpu.usage.limit.pct AS cpu_limit_pct | STATS max_cpu_limit_pct = MAX(cpu_limit_pct) BY kubernetes.pod.name | SORT cpu_limit_pct DESC',
+        'FROM logs-* | WHERE KQL("error") | STATS count = COUNT(*) BY host.name | SORT count DESC | LIMIT 50',
+        'FROM logs-* | EVAL col0 = ABS(bytes) | KEEP col0, host.name | SORT col0 DESC',
+        'FROM logs-* | DISSECT @message "%{firstWord}" | DROP log_level | STATS count = COUNT(*) BY host.name  | SORT count DESC',
+        'FROM logs-* | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | STATS count = COUNT(*) BY `Over time` = BUCKET(@timestamp, 50, ?_tstart, ?_tend)',
+        'FROM logs-* | STATS count = COUNT(*) BY buckets = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | CHANGE_POINT count ON buckets',
+        'FROM logs-* |  ENRICH  meow ON @message WITH col0 = docks_count',
+        'FROM logs-* |  FORK (LIMIT 10 ) (STATS metric = AVG(bytes))',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(
+        new Map([
+          [
+            'metrics-*',
+            [
+              'kubernetes.pod.memory.usage.limit.pct',
+              'kubernetes.pod.name',
+              'kubernetes.pod.cpu.usage.limit.pct',
+            ],
+          ],
+          ['logs-*', ['host.name', 'bytes', '@message', 'log_level', '@timestamp', 'docks_count']],
+        ])
+      );
+    });
+
+    // Test with an empty array of queries
+    test('should return an empty map for an empty array of queries', () => {
+      const queries: string[] = [];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map());
+    });
+
+    // Test with a single simple query
+    test('should correctly extract fields from a single simple query', () => {
+      const queries: string[] = ['FROM weblogs | STATS count() BY response.status_code'];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map([['weblogs', ['response.status_code']]]));
+    });
+
+    // Test with queries involving RENAME
+    test('should exclude renamed fields from the final list', () => {
+      const queries: string[] = [
+        'FROM logs-* | RENAME user.id AS uid',
+        'FROM logs-* | STATS count() BY log_level',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map([['logs-*', ['user.id', 'log_level']]])); // user.id should be kept, uid should be filtered out
+    });
+
+    // Test with queries involving EVAL
+    test('should correctly handle EVAL expressions', () => {
+      const queries: string[] = [
+        'FROM logs-* | EVAL latency_ms = (end_time - start_time) / 1000',
+        'FROM logs-* | STATS avg_latency = AVG(latency) BY client.ip',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(
+        new Map([['logs-*', ['end_time', 'start_time', 'latency', 'client.ip']]])
+      ); // latency_ms is user-defined
+    });
+
+    // Test with queries involving WHERE clause fields
+    test('should include fields from WHERE clauses', () => {
+      const queries: string[] = [
+        'FROM logs-* | WHERE event.duration > 1000',
+        'FROM logs-* | WHERE http.response.bytes < 500',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map([['logs-*', ['event.duration', 'http.response.bytes']]]));
+    });
+
+    // Test with queries involving different index patterns
+    test('should correctly group fields by different index patterns', () => {
+      const queries: string[] = [
+        'FROM metrics-* | STATS max(cpu.usage)',
+        'FROM logs-* | STATS count() BY host.name',
+        'FROM weblogs | STATS avg(response_time)',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(
+        new Map([
+          ['metrics-*', ['cpu.usage']],
+          ['logs-*', ['host.name']],
+          ['weblogs', ['response_time']],
+        ])
+      );
+    });
+
+    // Test with queries that have no explicit fields (e.g., just count(*))
+    test('should handle queries with no explicit fields (e.g., COUNT(*))', () => {
+      const queries: string[] = ['FROM logs-* | STATS count = COUNT(*)'];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map([['logs-*', []]])); // COUNT(*) means no source fields directly extracted
+    });
+
+    // Test with a mix of various commands and overlapping fields
+    test('should handle a complex mix of commands and overlapping fields', () => {
+      const queries: string[] = [
+        'FROM metrics-* | STATS max_mem = MAX(system.memory.usage) BY host.name',
+        'FROM logs-* | WHERE status_code == 500 | RENAME user.ip AS client_ip | STATS count() BY client_ip',
+        'FROM metrics-* | WHERE cpu.temp > 80 | EVAL high_temp = cpu.temp',
+        'FROM weblogs | KEEP path, method',
+        'FROM logs-* | DISSECT message "%{level}: %{text}" | KEEP level, text',
+        'FROM logs-* | GROK message "%{WORD:firstWord}" | KEEP firstWord',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(
+        new Map([
+          ['metrics-*', ['system.memory.usage', 'host.name', 'cpu.temp']],
+          ['logs-*', ['status_code', 'user.ip', 'message']], // client_ip, level, text should be filtered out
+          ['weblogs', ['path', 'method']],
+        ])
+      );
+    });
+
+    // Test with fields that contain special characters or are quoted
+    test('should handle fields with special characters or quotes', () => {
+      const queries: string[] = [
+        'FROM logs-* | WHERE `event.original` IS NOT NULL',
+        'FROM metrics-* | STATS avg(`my.field.with.dots`)',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(
+        new Map([
+          ['logs-*', ['event.original']],
+          ['metrics-*', ['my.field.with.dots']],
+        ])
+      );
+    });
+
+    test('should correctly filter out user-defined columns that are new EVAL fields', () => {
+      const queries = [
+        'FROM logs-* | EVAL total_bytes = bytes_in + bytes_out',
+        'FROM logs-* | STATS sum_bytes = SUM(total_bytes) BY client_ip',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      expect(result).toEqual(new Map([['logs-*', ['bytes_in', 'bytes_out', 'client_ip']]]));
+    });
+
+    test('should correctly filter out user-defined columns from ENRICH command', () => {
+      const queries = [
+        'FROM logs-* | ENRICH user_data ON user_id WITH user_name = user_name_another_source',
+      ];
+      const result = getSourceFieldsFromQueries(queries);
+      // Assuming 'user_id' is a source field and 'user_name' is the enriched (user-defined) field
+      expect(result).toEqual(
+        new Map([['logs-*', ['user_id', 'user_name', 'user_name_another_source']]])
+      );
+    });
+  });
   describe('getArgsFromRenameFunction', () => {
     it('should return the args from an = rename function', () => {
       const esql = 'FROM index | RENAME renamed = original';

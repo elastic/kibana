@@ -53,6 +53,7 @@ export {
   createParser,
   parse,
   parseErrors,
+  Parser,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
