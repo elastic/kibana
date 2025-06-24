@@ -4,12 +4,12 @@
 xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.observabilityAIAssistant.enabled: false
+xpack.aiops.ui.enabled: false
 xpack.apm.enabled: false
 
 xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
-# xpack.observabilityAIAssistant.enabled: false
 
 xpack.fleet.internal.registry.excludePackages: [
   # Oblt integrations

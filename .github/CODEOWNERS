@@ -441,6 +441,7 @@ src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-css-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
+src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
@@ -511,6 +512,7 @@ src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-restorable-state @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
@@ -1011,12 +1013,8 @@ x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
-x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
@@ -1962,11 +1960,12 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.*.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
-/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
 /config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
@@ -2395,6 +2394,9 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 /x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 
 x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
+
+/x-pack/test_serverless/functional/test_suites/security/ftr/discover @elastic/security-threat-hunting
+x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting
 
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
@@ -2829,11 +2831,14 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
+/x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/.spectral.yaml                       @elastic/platform-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
-oas_docs/kibana.info.yaml                     @elastic/platform-docs
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs 
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs 
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs 
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs
