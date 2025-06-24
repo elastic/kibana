@@ -88,7 +88,7 @@ describe('ClusterClient', () => {
     createInternalErrorHandlerMock.mockReset();
   });
 
-  it('creates a single internal and scoped client during initialization', () => {
+  it('does not create the internal and scoped client during initialization', () => {
     const config = createConfig();
     const getExecutionContextMock = jest.fn();
 
@@ -102,7 +102,27 @@ describe('ClusterClient', () => {
       kibanaVersion,
     });
 
-    expect(configureClientMock).toHaveBeenCalledTimes(2);
+    expect(configureClientMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('creates a single internal client on the first use', () => {
+    const config = createConfig();
+    const getExecutionContextMock = jest.fn();
+
+    const clusterClient = new ClusterClient({
+      config,
+      logger,
+      authHeaders,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
+
+    expect(configureClientMock).toHaveBeenCalledTimes(0);
+
+    const internalClient1 = clusterClient.asInternalUser;
+    expect(configureClientMock).toHaveBeenCalledTimes(1);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       agentFactoryProvider,
@@ -110,6 +130,37 @@ describe('ClusterClient', () => {
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
     });
+
+    // When asInternalUser is called again, it shouldn't create a new client
+    const internalClient2 = clusterClient.asInternalUser;
+    expect(configureClientMock).toHaveBeenCalledTimes(1);
+    expect(internalClient1).toEqual(internalClient2);
+  });
+
+  it('creates the scoped client on the first use', () => {
+    const config = createConfig();
+    const getExecutionContextMock = jest.fn();
+
+    const clusterClient = new ClusterClient({
+      config,
+      logger,
+      authHeaders,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      agentFactoryProvider,
+      kibanaVersion,
+    });
+
+    expect(configureClientMock).toHaveBeenCalledTimes(0);
+
+    const request = httpServerMock.createKibanaRequest();
+
+    const asScoped = clusterClient.asScoped(request);
+
+    // Still not created
+    expect(configureClientMock).toHaveBeenCalledTimes(0);
+    const scopedClient1 = asScoped.asCurrentUser;
+    expect(configureClientMock).toHaveBeenCalledTimes(1);
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       agentFactoryProvider,
@@ -118,6 +169,11 @@ describe('ClusterClient', () => {
       getExecutionContext: getExecutionContextMock,
       scoped: true,
     });
+
+    // When asScoped is called again, it shouldn't create a new client
+    const scopedClient2 = asScoped.asCurrentUser;
+    expect(configureClientMock).toHaveBeenCalledTimes(1);
+    expect(scopedClient1).toEqual(scopedClient2);
   });
 
   describe('#asInternalUser', () => {
@@ -1007,6 +1063,22 @@ describe('ClusterClient', () => {
   });
 
   describe('#close', () => {
+    it('does not close both underlying clients if they are never used before', async () => {
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        agentFactoryProvider,
+        kibanaVersion,
+      });
+
+      await clusterClient.close();
+
+      expect(internalClient.close).toHaveBeenCalledTimes(0);
+      expect(scopedClient.close).toHaveBeenCalledTimes(0);
+    });
+
     it('closes both underlying clients', async () => {
       const clusterClient = new ClusterClient({
         config: createConfig(),
@@ -1016,6 +1088,13 @@ describe('ClusterClient', () => {
         agentFactoryProvider,
         kibanaVersion,
       });
+
+      // Use them at least once to make sure that the clients are created
+      const internalClient1 = clusterClient.asInternalUser;
+      const asCurrentUser1 = clusterClient.asScoped(
+        httpServerMock.createKibanaRequest()
+      ).asCurrentUser;
+      expect(internalClient1).not.toEqual(asCurrentUser1);
 
       await clusterClient.close();
 
@@ -1080,6 +1159,10 @@ describe('ClusterClient', () => {
         kibanaVersion,
       });
 
+      // Use them at least once to make sure that the clients are created
+      const internalClient1 = clusterClient.asInternalUser;
+      expect(internalClient1).not.toEqual(null);
+
       internalClient.close.mockRejectedValue(new Error('error closing client'));
 
       expect(clusterClient.close()).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1096,6 +1179,13 @@ describe('ClusterClient', () => {
         agentFactoryProvider,
         kibanaVersion,
       });
+
+      // Use them at least once to make sure that the clients is created
+      const internalClient1 = clusterClient.asInternalUser;
+      const asCurrentUser1 = clusterClient.asScoped(
+        httpServerMock.createKibanaRequest()
+      ).asCurrentUser;
+      expect(internalClient1).not.toEqual(asCurrentUser1);
 
       await clusterClient.close();
 
