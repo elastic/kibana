@@ -217,6 +217,35 @@ export const installMockPrebuiltRulesPackage = (): void => {
 };
 
 /**
+ * Installs a prepared mock prebuilt rules package `security_detection_engine`.
+ * Installing it up front prevents installing the real package when making API requests.
+ */
+export const installMockPrebuiltRulesPackage = (): void => {
+  cy.fixture(
+    'security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip',
+    'binary'
+  )
+    .then(Cypress.Blob.binaryStringToBlob)
+    .then((blob) => {
+      rootRequest({
+        method: 'POST',
+        url: '/api/fleet/epm/packages',
+        headers: {
+          'Content-Type': 'application/zip',
+          'elastic-api-version': '2023-10-31',
+          'kbn-xsrf': 'xxxx',
+        },
+        body: blob,
+        encoding: 'binary',
+      });
+    });
+
+  if (!Cypress.env(IS_SERVERLESS)) {
+    refreshSavedObjectIndices();
+  }
+};
+
+/**
  * Install prebuilt rule assets. After installing these assets become available to be installed
  * as prebuilt rules. Prebuilt rule assets can be generated via `createRuleAssetSavedObject()` helper function.
  *
