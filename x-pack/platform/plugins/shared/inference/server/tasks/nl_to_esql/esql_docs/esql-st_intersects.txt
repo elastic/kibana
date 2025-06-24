@@ -18,7 +18,7 @@ An expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian
 
 ## Examples
 
-### Example 1: Checking if a location intersects with a polygon
+Checking if a location intersects with a polygon
 
 ```esql
 FROM airports

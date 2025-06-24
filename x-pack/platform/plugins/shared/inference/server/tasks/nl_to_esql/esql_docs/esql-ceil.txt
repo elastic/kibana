@@ -14,14 +14,14 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1: Rounding up a decimal number
+Rounding up a decimal number
 
 ```esql
 ROW a=1.8
 | EVAL a = CEIL(a)
 ```
 
-This example rounds the value `1.8` up to the nearest integer, resulting in `2`. 
+This example rounds the value `1.8` up to the nearest integer, resulting in `2`.
 
 ## Limitations
 

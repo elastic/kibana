@@ -12,8 +12,6 @@ This function does not take any parameters.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW TAU()
 ```

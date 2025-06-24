@@ -18,7 +18,7 @@ A date expression as a string. If `null` or an empty string, the function return
 
 ## Examples
 
-### Example 1: Parsing a date string
+Parsing a date string
 
 ```esql
 ROW date_string = "2022-05-06"

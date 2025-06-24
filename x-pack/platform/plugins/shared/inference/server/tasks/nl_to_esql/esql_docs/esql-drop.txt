@@ -14,8 +14,6 @@ A comma-separated list of columns to remove. Supports wildcards.
 
 ## Examples
 
-### Example 1
-
 Remove a specific column:
 
 ```esql
@@ -23,16 +21,12 @@ FROM employees
 | DROP height
 ```
 
-### Example 2
-
 This example shows how to drop columns that match a more complex pattern using wildcards.
 
 ```esql
 FROM employees
 | DROP emp_*
 ```
-
-### Example 3
 
 This example demonstrates how to use the `DROP` command in conjunction with other commands like `KEEP` and `SORT`.
 

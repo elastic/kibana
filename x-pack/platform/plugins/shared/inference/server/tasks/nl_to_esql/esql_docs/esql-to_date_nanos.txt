@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting a timestamp string to `date_nanos`
+Converting a timestamp string to `date_nanos`
 
 ```esql
 ROW timestamp = "2023-10-26T12:34:56.123456789Z"
@@ -23,7 +23,7 @@ ROW timestamp = "2023-10-26T12:34:56.123456789Z"
 
 This example converts a timestamp string into a `date_nanos` value.
 
-### Example 2: Handling values outside the `date_nanos` range
+Handling values outside the `date_nanos` range
 
 ```esql
 ROW timestamp = "2500-01-01T00:00:00.000000000Z"

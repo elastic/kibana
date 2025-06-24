@@ -12,7 +12,7 @@ This function does not take any parameters.
 
 ## Examples
 
-### Example 1: Returning the value of Pi
+Returning the value of Pi
 
 ```esql
 ROW PI()

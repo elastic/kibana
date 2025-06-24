@@ -14,7 +14,7 @@ The field for which the maximum value is calculated.
 
 ## Examples
 
-### Example 1: Basic Usage
+Basic Usage
 
 ```esql
 FROM employees
@@ -23,7 +23,7 @@ FROM employees
 
 Calculate the maximum value of the `languages` field.
 
-### Example 2: Using Inline Functions
+Using Inline Functions
 
 ```esql
 FROM employees

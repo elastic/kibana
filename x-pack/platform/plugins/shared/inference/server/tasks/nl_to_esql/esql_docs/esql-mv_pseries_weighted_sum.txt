@@ -18,7 +18,7 @@ A constant number representing the *p* parameter in the P-Series. It determines 
 
 ## Examples
 
-### Example 1: Calculating the weighted sum of a multivalued column
+Calculating the weighted sum of a multivalued column
 
 ```esql
 ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]

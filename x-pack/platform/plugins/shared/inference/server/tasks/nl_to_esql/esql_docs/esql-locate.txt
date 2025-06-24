@@ -22,7 +22,7 @@ The start index. This parameter is optional.
 
 ## Examples
 
-### Example 1: Locate a substring within a string
+Locate a substring within a string
 
 ```esql
 ROW a = "hello"

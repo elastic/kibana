@@ -14,8 +14,6 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW d = 5.0
 | EVAL s = EXP(d)

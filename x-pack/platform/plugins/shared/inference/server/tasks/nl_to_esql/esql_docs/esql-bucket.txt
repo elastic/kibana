@@ -36,7 +36,7 @@ When the bucket size is provided directly for time interval, it is expressed as 
 
 ## Examples
 
-### Example 1: Using a target number of buckets, a start of a range, and an end of a range
+Using a target number of buckets, a start of a range, and an end of a range
 
 ```esql
 FROM employees
@@ -47,7 +47,7 @@ FROM employees
 
 This example creates buckets for hire dates in 1985, aiming for 20 buckets. The actual number of buckets may vary depending on the range.
 
-### Example 2: Combine BUCKET with an aggregation to create a histogram
+Combine BUCKET with an aggregation to create a histogram
 
 ```esql
 FROM employees
@@ -58,7 +58,7 @@ FROM employees
 
 This example calculates the number of hires per month in 1985.
 
-### Example 3: Asking for more buckets can result in a smaller range
+Asking for more buckets can result in a smaller range
 
 ```esql
 FROM employees
@@ -69,7 +69,7 @@ FROM employees
 
 This example creates weekly buckets for hire dates in 1985, aiming for 100 buckets.
 
-### Example 4: Providing the bucket size directly
+Providing the bucket size directly
 
 ```esql
 FROM employees
@@ -80,7 +80,7 @@ FROM employees
 
 This example creates weekly buckets for hire dates in 1985 by directly specifying the bucket size.
 
-### Example 5: Creating a salary histogram
+Creating a salary histogram
 
 ```esql
 FROM employees
@@ -90,7 +90,7 @@ FROM employees
 
 This example creates a histogram of salaries, dividing the range into 20 buckets.
 
-### Example 6: Omitting the range when the bucket size is known
+Omitting the range when the bucket size is known
 
 ```esql
 FROM employees
@@ -101,7 +101,7 @@ FROM employees
 
 This example creates salary buckets with a fixed size of 5000.
 
-### Example 7: Create hourly buckets for the last 24 hours
+Create hourly buckets for the last 24 hours
 
 ```esql
 FROM sample_data
@@ -111,7 +111,7 @@ FROM sample_data
 
 This example creates hourly buckets for the last 24 hours.
 
-### Example 8: Create monthly buckets for the year 1985
+Create monthly buckets for the year 1985
 
 ```esql
 FROM employees
@@ -122,7 +122,7 @@ FROM employees
 
 This example calculates the average salary for each month in 1985.
 
-### Example 9: Using BUCKET in both aggregating and grouping parts of STATS
+Using BUCKET in both aggregating and grouping parts of STATS
 
 ```esql
 FROM employees
@@ -133,7 +133,7 @@ FROM employees
 
 This example demonstrates advanced usage of `BUCKET` in both aggregation and grouping.
 
-### Example 10: Adjusting bucket start value with an offset
+Adjusting bucket start value with an offset
 
 ```esql
 FROM employees

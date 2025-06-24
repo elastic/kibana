@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting WKT strings to `cartesian_shape`
+Converting WKT strings to `cartesian_shape`
 
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]

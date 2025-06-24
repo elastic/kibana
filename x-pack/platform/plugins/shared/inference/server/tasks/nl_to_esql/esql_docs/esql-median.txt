@@ -14,14 +14,14 @@ The input numeric value for which the median is calculated.
 
 ## Examples
 
-### Example 1: Calculating the median and 50th percentile of salaries
+Calculating the median and 50th percentile of salaries
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), PERCENTILE(salary, 50)
 ```
 
-### Example 2: Calculating the median of maximum values in a multivalued column
+Calculating the median of maximum values in a multivalued column
 
 To calculate the median of the maximum values of a multivalued column, first use `MV_MAX` to get the maximum value per row, and then use the result with the `MEDIAN` function:
 

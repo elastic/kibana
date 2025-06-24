@@ -24,7 +24,7 @@ The `MV_SLICE` function extracts a subset of a multivalued field based on specif
 
 ## Examples
 
-### Example 1: Extracting specific slices from a multivalued field
+Extracting specific slices from a multivalued field
 
 ```esql
 ROW a = [1, 2, 2, 3]
@@ -35,7 +35,7 @@ This example extracts:
 - `a1` as the value starting at index `1` (second value in the list).
 - `a2` as the values from index `2` to `3` (third and fourth values in the list).
 
-### Example 2: Using negative indices to slice from the end of the list
+Using negative indices to slice from the end of the list
 
 ```esql
 ROW a = [1, 2, 2, 3]

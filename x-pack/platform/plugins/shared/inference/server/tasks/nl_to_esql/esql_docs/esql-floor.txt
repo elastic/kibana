@@ -14,8 +14,6 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=1.8
 | EVAL a = FLOOR(a)
@@ -23,7 +21,6 @@ ROW a=1.8
 
 Rounds the value `1.8` down to `1`.
 
-### Example 2
 ```esql
 FROM employees
 | KEEP first_name, last_name, height

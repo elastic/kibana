@@ -16,7 +16,7 @@ A multivalue expression.
 
 ## Examples
 
-### Example 1: Extracting the last value from a multivalued column
+Extracting the last value from a multivalued column
 
 ```esql
 ROW a="foo;bar;baz"

@@ -14,16 +14,12 @@ Multivalue expression.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=[3, 5, 1]
 | EVAL median_a = MV_MEDIAN(a)
 ```
 
 Calculate the median value of the multivalued column `a`.
-
-### Example 2
 
 ```esql
 ROW a=[3, 7, 1, 6]

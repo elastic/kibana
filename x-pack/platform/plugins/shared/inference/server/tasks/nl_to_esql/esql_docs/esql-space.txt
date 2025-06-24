@@ -14,8 +14,6 @@ The number of spaces to include in the resulting string.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW message = CONCAT("Hello", SPACE(1), "World!");
 ```

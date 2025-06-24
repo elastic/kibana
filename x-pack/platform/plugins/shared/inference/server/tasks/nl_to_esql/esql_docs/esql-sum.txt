@@ -14,7 +14,7 @@ A numeric expression to be summed.
 
 ## Examples
 
-#### Example 1: Summing a field
+#Summing a field
 
 ```esql
 FROM employees
@@ -23,7 +23,7 @@ FROM employees
 
 Calculate the total number of languages across all employees.
 
-#### Example 2: Using inline functions
+#Using inline functions
 
 ```esql
 FROM employees

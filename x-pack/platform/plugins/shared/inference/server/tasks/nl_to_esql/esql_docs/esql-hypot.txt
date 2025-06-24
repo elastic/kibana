@@ -18,8 +18,6 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a = 3.0, b = 4.0
 | EVAL c = HYPOT(a, b)

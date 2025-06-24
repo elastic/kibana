@@ -18,7 +18,7 @@ One or more CIDR blocks to test the IP address against.
 
 ## Examples
 
-### Example 1: Filtering IP addresses
+Filtering IP addresses
 
 ```esql
 FROM hosts
@@ -26,7 +26,7 @@ FROM hosts
 | KEEP host, ip1
 ```
 
-### Example 2: Filtering IP addresses within specific CIDR blocks
+Filtering IP addresses within specific CIDR blocks
 
 
 ```esql

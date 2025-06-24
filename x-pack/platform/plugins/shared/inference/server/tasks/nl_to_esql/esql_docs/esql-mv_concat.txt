@@ -18,7 +18,7 @@ The delimiter used to separate the concatenated values.
 
 ## Examples
 
-### Example 1: Concatenating string values
+Concatenating string values
 
 ```esql
 ROW a=["foo", "zoo", "bar"]
@@ -27,7 +27,7 @@ ROW a=["foo", "zoo", "bar"]
 
 Concatenates the values in the array ["foo", "zoo", "bar"] with a comma and a space as the delimiter:
 
-### Example 2: Concatenating non-string values
+Concatenating non-string values
 
 ```esql
 ROW a=[10, 9, 8]

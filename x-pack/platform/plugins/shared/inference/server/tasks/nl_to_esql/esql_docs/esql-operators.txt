@@ -181,13 +181,13 @@ ROW a = 1, b = 4, c = 3
 ### LIKE
 Filters data based on string patterns using wildcards.
 
-#### Example 1: Basic usage
+#Basic usage
 ```esql
 FROM employees
 | WHERE first_name LIKE "J*"
 ```
 
-#### Example 2: Escaping special characters
+#Escaping special characters
 ```esql
 ROW message = "foo * bar"
 | WHERE message LIKE "foo \\* bar"

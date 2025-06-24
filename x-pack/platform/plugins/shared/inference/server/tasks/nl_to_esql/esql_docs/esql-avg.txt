@@ -14,7 +14,7 @@ A numeric field to calculate the average.
 
 ## Examples
 
-### Example 1: Basic Usage
+Basic Usage
 
 ```esql
 FROM employees
@@ -23,7 +23,7 @@ FROM employees
 
 Calculate the average height of employees.
 
-### Example 2: Using Inline Functions
+Using Inline Functions
 
 ```esql
 FROM employees

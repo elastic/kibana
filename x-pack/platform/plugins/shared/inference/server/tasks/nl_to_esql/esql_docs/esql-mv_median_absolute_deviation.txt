@@ -14,7 +14,7 @@ A multivalue expression.
 
 ## Examples
 
-### Example 1: Calculating the median absolute deviation and median
+Calculating the median absolute deviation and median
 
 ```esql
 ROW values = [0, 2, 5, 6]

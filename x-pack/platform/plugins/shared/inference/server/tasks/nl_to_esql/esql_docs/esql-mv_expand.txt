@@ -21,15 +21,11 @@ The output rows produced by `MV_EXPAND` can be in any order and may not respect 
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 ```
 Expand a multivalued column `a` into individual rows:
-
-### Example 2
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
@@ -37,8 +33,6 @@ ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND j
 ```
 Expand two multivalued columns `a` and `j` into individual rows:
-
-### Example 3
 
 ```esql
 ROW a=[1,2,3,4,5], b="b"

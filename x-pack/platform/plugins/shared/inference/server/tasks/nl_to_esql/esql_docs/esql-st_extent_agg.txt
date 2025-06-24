@@ -14,7 +14,7 @@ The field containing geometry data over which the spatial extent is calculated.
 
 ## Examples
 
-### Example 1: Calculate the spatial extent of airport locations in India
+Calculate the spatial extent of airport locations in India
 
 ```esql
 FROM airports

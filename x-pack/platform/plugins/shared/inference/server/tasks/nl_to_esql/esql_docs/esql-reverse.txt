@@ -14,7 +14,7 @@ String expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1: Reversing a simple string
+Reversing a simple string
 
 ```esql
 ROW message = "Some Text"
@@ -25,7 +25,7 @@ ROW message = "Some Text"
 |-----------|------------------|
 | Some Text | txeT emoS        |
 
-### Example 2: Reversing a string with emojis
+Reversing a string with emojis
 
 ```esql
 ROW bending_arts = "💧🪨🔥💨"

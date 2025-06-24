@@ -18,7 +18,7 @@ The remaining columns to evaluate.
 
 ## Examples
 
-### Example 1: Finding the maximum value between two columns
+Finding the maximum value between two columns
 
 ```esql
 ROW a = 10, b = 20

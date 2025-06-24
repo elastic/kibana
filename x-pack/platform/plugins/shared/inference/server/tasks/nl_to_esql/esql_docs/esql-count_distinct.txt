@@ -18,7 +18,7 @@ The column or literal for which to count the number of distinct values.
 
 ## Examples
 
-### Example 1: Counting distinct values in multiple columns
+Counting distinct values in multiple columns
 
 ```esql
 FROM hosts
@@ -27,7 +27,7 @@ FROM hosts
 
 This example calculates the approximate number of distinct values in the `ip0` and `ip1` columns.
 
-### Example 2: Configuring the precision threshold
+Configuring the precision threshold
 
 ```esql
 FROM hosts
@@ -36,7 +36,7 @@ FROM hosts
 
 This example demonstrates how to specify a precision threshold for each column. The `ip0` column uses a high precision threshold of 80,000, while the `ip1` column uses a low threshold of 5.
 
-### Example 3: Counting distinct values from a split string
+Counting distinct values from a split string
 
 ```esql
 ROW words="foo;bar;baz;qux;quux;foo"

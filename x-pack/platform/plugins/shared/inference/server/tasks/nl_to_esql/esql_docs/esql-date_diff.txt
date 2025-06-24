@@ -22,16 +22,12 @@ A string representing the ending timestamp.
 
 ## Examples
 
-### Example 1
-
 Calculate the difference in microseconds between two timestamps:
 
 ```esql
 ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
 | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
 ```
-
-### Example 2
 
 Calculate the difference in calendar units (e.g., years) between timestamps. Only fully elapsed units are counted. To include remainders, switch to a smaller unit and perform additional calculations:
 

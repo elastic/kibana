@@ -16,7 +16,7 @@ The input numeric field or expression.
 
 ## Examples
 
-### Example 1: Basic Usage
+Basic Usage
 
 ```esql
 FROM employees
@@ -25,7 +25,7 @@ FROM employees
 
 Calculate the median and the median absolute deviation of employee salaries.
 
-### Example 2: Using Inline Functions
+Using Inline Functions
 
 ```esql
 FROM employees

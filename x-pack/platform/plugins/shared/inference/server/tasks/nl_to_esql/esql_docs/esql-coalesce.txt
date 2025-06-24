@@ -18,7 +18,7 @@ Other expressions to evaluate.
 
 ## Examples
 
-### Example 1: Returning the first non-null value
+Returning the first non-null value
 
 ```esql
 ROW a=null, b="b"

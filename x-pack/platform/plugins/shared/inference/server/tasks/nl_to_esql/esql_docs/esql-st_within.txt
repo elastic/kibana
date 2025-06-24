@@ -18,7 +18,7 @@ Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_sh
 
 ## Examples
 
-### Example 1: Filtering rows where a city boundary is within a specified polygon
+Filtering rows where a city boundary is within a specified polygon
 
 ```esql
 FROM airport_city_boundaries

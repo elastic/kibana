@@ -14,16 +14,12 @@ Multivalue expression.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=[3, 5, 1]
 | EVAL max_a = MV_MAX(a)
 ```
 
 Finds the maximum value in the multivalued column `a`, resulting in `max_a = 5`.
-
-### Example 2
 
 ```esql
 FROM bag_of_numbers

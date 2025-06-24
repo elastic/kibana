@@ -14,8 +14,6 @@ The field containing spatial point geometry data.
 
 ## Examples
 
-### Example 1
-
 ```esql
 FROM airports
 | STATS centroid = ST_CENTROID_AGG(location)

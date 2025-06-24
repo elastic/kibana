@@ -14,7 +14,7 @@ Expression to categorize.
 
 ## Examples
 
-### Example 1: Categorizing server log messages
+Categorizing server log messages
 
 Categorizes server log messages into categories and aggregates their counts.
 

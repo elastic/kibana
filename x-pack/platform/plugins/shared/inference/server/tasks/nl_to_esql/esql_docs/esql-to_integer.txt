@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting long values to integers
+Converting long values to integers
 
 ```esql
 ROW long = [5013792, 2147483647, 501379200000]

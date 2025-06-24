@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting strings to long values
+Converting strings to long values
 
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"

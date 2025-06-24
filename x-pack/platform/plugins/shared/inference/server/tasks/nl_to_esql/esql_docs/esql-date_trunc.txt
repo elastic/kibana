@@ -18,7 +18,7 @@ The date expression to be truncated.
 
 ## Examples
 
-### Example 1: Truncate hire dates to the year
+Truncate hire dates to the year
 
 ```esql
 FROM employees
@@ -28,7 +28,7 @@ FROM employees
 
 This example truncates the `hire_date` field to the beginning of the year and stores the result in a new column named `year_hired`.
 
-### Example 2: Number of hires per year
+Number of hires per year
 
 ```esql
 FROM employees
@@ -39,7 +39,7 @@ FROM employees
 
 This example calculates the number of hires per year by truncating the `hire_date` field to the year and grouping the results.
 
-### Example 3: Hourly error rate
+Hourly error rate
 
 ```esql
 FROM sample_data

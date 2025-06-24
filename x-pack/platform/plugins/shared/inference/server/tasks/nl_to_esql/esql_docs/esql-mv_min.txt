@@ -18,18 +18,14 @@ This function can be used with any column type, including `keyword` columns. For
 
 ## Examples
 
-#### Example 1
-
-```esql
+#```esql
 ROW a=[2, 1]
 | EVAL min_a = MV_MIN(a)
 ```
 
 Extracts the minimum value from the multivalued column `a`, resulting in `min_a = 1`.
 
-#### Example 2
-
-```esql
+#```esql
 FROM bag_of_numbers
 | EVAL min = MV_MIN(numbers)
 ```

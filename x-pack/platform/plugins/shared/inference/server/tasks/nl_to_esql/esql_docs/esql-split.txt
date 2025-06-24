@@ -18,8 +18,6 @@ Delimiter used to split the string. Only single-byte delimiters are currently su
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW words="foo;bar;baz;qux;quux;corge"
 | EVAL word = SPLIT(words, ";")

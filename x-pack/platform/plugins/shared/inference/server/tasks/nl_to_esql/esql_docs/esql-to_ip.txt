@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting strings to IP values
+Converting strings to IP values
 
 ```esql
 ROW str1 = "1.1.1.1", str2 = "foo"

@@ -14,7 +14,7 @@ A numeric field for which the standard deviation is calculated.
 
 ## Examples
 
-### Example 1: Calculate the standard deviation of a field
+Calculate the standard deviation of a field
 
 ```esql
 FROM employees
@@ -23,7 +23,7 @@ FROM employees
 
 Calculate the standard deviation of the `height` field.
 
-### Example 2: Use inline functions with STD_DEV
+Use inline functions with STD_DEV
 
 ```esql
 FROM employees

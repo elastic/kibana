@@ -76,7 +76,7 @@ Timespan literals can be used in various commands and functions, such as `WHERE`
 
 Below are five example queries showcasing the use of timespan literals in combination with different commands and functions.
 
-### Example 1: Filtering Logs from the Last 24 Hours
+Filtering Logs from the Last 24 Hours
 This query retrieves logs from the last 24 hours and calculates the total number of logs per hour.
 
 ```esql
@@ -87,7 +87,7 @@ FROM logs-*
 | SORT hour
 ```
 
-### Example 2: Grouping by Weekly Buckets
+Grouping by Weekly Buckets
 This query groups employee hire dates into weekly buckets for the last 7 weeks and calculates the number of hires per week.
 
 ```esql
@@ -97,7 +97,7 @@ FROM employees
 | SORT week
 ```
 
-### Example 3: Calculating Monthly Averages
+Calculating Monthly Averages
 This query calculates the average salary of employees grouped by monthly buckets for the year 2023.
 
 ```esql
@@ -108,7 +108,7 @@ FROM employees
 | SORT month
 ```
 
-### Example 4: Creating Hourly Buckets for the Last Day
+Creating Hourly Buckets for the Last Day
 This query creates hourly buckets for the last 1 day and calculates the total number of events in each bucket.
 
 ```esql
@@ -118,7 +118,7 @@ FROM events
 | SORT hour
 ```
 
-### Example 5: Filtering and Aggregating by Custom Time Range
+Filtering and Aggregating by Custom Time Range
 This query filters logs within a custom time range and calculates the maximum response time for each 6-hour interval.
 
 ```esql

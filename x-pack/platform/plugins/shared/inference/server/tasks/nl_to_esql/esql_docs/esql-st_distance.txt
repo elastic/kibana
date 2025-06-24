@@ -10,18 +10,18 @@ Computes the distance between two points. For cartesian geometries, it calculate
 
 #### geomA
 
-- Expression of type `geo_point` or `cartesian_point`.  
+- Expression of type `geo_point` or `cartesian_point`.
 - If `null`, the function returns `null`.
 
 #### geomB
 
-- Expression of type `geo_point` or `cartesian_point`.  
-- If `null`, the function returns `null`.  
+- Expression of type `geo_point` or `cartesian_point`.
+- If `null`, the function returns `null`.
 - Must have the same coordinate system as `geomA`. Combining `geo_point` and `cartesian_point` parameters is not supported.
 
 ## Examples
 
-### Example 1: Calculating the distance between two points
+Calculating the distance between two points
 
 ```esql
 FROM airports

@@ -20,7 +20,7 @@ A grok pattern.
 
 ## Examples
 
-### Example 1: Parsing a string with multiple data types
+Parsing a string with multiple data types
 
 Parse a string containing a timestamp, an IP address, an email address, and a number:
 
@@ -30,7 +30,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-### Example 2: Type conversion for numeric fields
+Type conversion for numeric fields
 
 Convert numeric fields to specific types by appending `:type` to the semantics in the pattern. For example, `{NUMBER:num:int}` converts the `num` field to an integer:
 
@@ -40,7 +40,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | KEEP date, ip, email, num
 ```
 
-### Example 3: Using type conversion functions
+Using type conversion functions
 
 For other type conversions, use type conversion functions like `TO_DATETIME`:
 
@@ -51,7 +51,7 @@ ROW a = "2023-01-23T12:15:00.000Z 127.0.0.1 some.email@foo.com 42"
 | EVAL date = TO_DATETIME(date)
 ```
 
-### Example 4: Handling multi-valued columns
+Handling multi-valued columns
 
 When a field name is used more than once, `GROK` creates a multi-valued column:
 

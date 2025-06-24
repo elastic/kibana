@@ -14,7 +14,7 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting strings to datetime
+Converting strings to datetime
 
 ```esql
 ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
@@ -34,7 +34,7 @@ A subsequent header will include the failure reason and the problematic value:
 with format [yyyy-MM-dd'T'HH:mm:ss.SSS'Z']"
 ```
 
-### Example 2: Converting numeric values to datetime
+Converting numeric values to datetime
 
 If the input is numeric, the value is interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time). For example:
 

@@ -18,13 +18,19 @@ Expression of type `geo_point`, `cartesian_point`, `geo_shape`, or `cartesian_sh
 
 ## Examples
 
-### Example 1: Filtering disjoint geometries
+Filtering disjoint geometries
 
 The following query filters rows where the `city_boundary` geometry is disjoint from a specified polygon. It keeps only the specified columns in the result.
 
 ```esql
 FROM airport_city_boundaries
 | WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
+| KEEP abbrev, airport, region, city, city_location
+```
+
+```esql
+FROM airport_city_boundaries
+| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((30 10, 40 40, 20 40, 10 20, 30 10))"))
 | KEEP abbrev, airport, region, city, city_location
 ```
 

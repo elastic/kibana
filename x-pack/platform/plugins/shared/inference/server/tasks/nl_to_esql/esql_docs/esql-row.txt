@@ -10,7 +10,7 @@ The `ROW` command generates a single row with one or more columns, each assigned
 
 #### `columnX`
 
-The name of the column.  
+The name of the column.
 If duplicate column names are provided, only the rightmost duplicate creates a column.
 
 #### `valueX`
@@ -19,7 +19,7 @@ The value assigned to the column. This can be a literal, an expression, or a fun
 
 ## Examples
 
-### Example 1: Basic usage
+Basic usage
 
 Create a row with three columns, each assigned a specific value:
 
@@ -27,7 +27,7 @@ Create a row with three columns, each assigned a specific value:
 ROW a = 1, b = "two", c = null
 ```
 
-### Example 2: Multi-value columns
+Multi-value columns
 
 Use square brackets to assign multiple values to a single column:
 
@@ -35,7 +35,7 @@ Use square brackets to assign multiple values to a single column:
 ROW a = [2, 1]
 ```
 
-### Example 3: Using functions
+Using functions
 
 Generate a row where a column's value is calculated using a function:
 

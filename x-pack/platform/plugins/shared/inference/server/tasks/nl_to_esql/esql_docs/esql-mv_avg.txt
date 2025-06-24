@@ -14,16 +14,12 @@ A multivalued expression.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=[3, 5, 1, 6]
 | EVAL avg_a = MV_AVG(a)
 ```
 
 Calculate the average of the values in the multivalued column `a`.
-
-### Example 2
 
 ```esql
 FROM bag_of_numbers

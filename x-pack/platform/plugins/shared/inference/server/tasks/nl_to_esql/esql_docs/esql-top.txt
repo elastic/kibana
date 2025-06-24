@@ -22,7 +22,7 @@ The order in which to calculate the top values. Can be either `asc` (ascending) 
 
 ## Examples
 
-### Example 1: Collecting top salaries
+Collecting top salaries
 ```esql
 FROM employees
 | STATS top_salaries = TOP(salary, 3, "desc"), top_salary = MAX(salary)

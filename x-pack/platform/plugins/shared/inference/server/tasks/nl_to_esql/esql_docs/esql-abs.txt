@@ -14,16 +14,12 @@ A numeric expression. If the value is `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW number = -1.0
 | EVAL abs_number = ABS(number)
 ```
 
 Calculate the absolute value of a negative number.
-
-### Example 2
 
 ```esql
 FROM employees

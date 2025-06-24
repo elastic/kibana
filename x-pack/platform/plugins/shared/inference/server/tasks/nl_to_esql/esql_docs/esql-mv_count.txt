@@ -14,16 +14,12 @@ A multivalued expression.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=["foo", "zoo", "bar"]
 | EVAL count_a = MV_COUNT(a)
 ```
 
 Count the number of values in the multivalued column `a`.
-
-### Example 2
 
 ```esql
 FROM bag_of_numbers

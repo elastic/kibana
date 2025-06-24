@@ -14,14 +14,14 @@ The input value to be converted. This can be a single- or multi-valued column or
 
 ## Examples
 
-### Example 1: Converting a single value to a string
+Converting a single value to a string
 
 ```esql
 ROW a=10
 | EVAL j = TO_STRING(a)
 ```
 
-### Example 2: Converting a multivalued field to a string
+Converting a multivalued field to a string
 
 ```esql
 ROW a=[10, 9, 8]

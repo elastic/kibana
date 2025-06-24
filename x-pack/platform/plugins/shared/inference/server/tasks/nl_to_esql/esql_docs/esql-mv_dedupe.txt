@@ -16,8 +16,6 @@ A multivalue expression.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a=["foo", "foo", "bar", "foo"]
 | EVAL dedupe_a = MV_DEDUPE(a)

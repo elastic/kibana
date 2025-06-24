@@ -14,7 +14,7 @@ The input value. Must be a valid constant time duration expression.
 
 ## Examples
 
-### Example 1: Adding and subtracting time durations
+Adding and subtracting time durations
 
 ```esql
 ROW x = "2024-01-01"::datetime

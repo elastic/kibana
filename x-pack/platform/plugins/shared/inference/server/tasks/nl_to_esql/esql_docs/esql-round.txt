@@ -18,7 +18,7 @@ The number of decimal places to round to. Defaults to 0. If `null`, the function
 
 ## Examples
 
-### Example 1: Rounding a height value to one decimal place
+Rounding a height value to one decimal place
 ```esql
 FROM employees
 | KEEP first_name, last_name, height

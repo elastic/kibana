@@ -22,7 +22,7 @@ The length of the substring to extract, starting from the `start` position. If o
 
 ## Examples
 
-### Example 1: Extract the first three characters of every last name
+Extract the first three characters of every last name
 
 ```esql
 FROM employees
@@ -32,7 +32,7 @@ FROM employees
 
 This example extracts the first three characters from the `last_name` column.
 
-### Example 2: Extract the last three characters of every last name
+Extract the last three characters of every last name
 
 ```esql
 FROM employees
@@ -42,7 +42,7 @@ FROM employees
 
 This example extracts the last three characters from the `last_name` column by using a negative start position.
 
-### Example 3: Extract all characters except for the first
+Extract all characters except for the first
 
 ```esql
 FROM employees

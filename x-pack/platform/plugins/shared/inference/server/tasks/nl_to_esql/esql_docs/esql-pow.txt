@@ -18,7 +18,7 @@ Numeric expression for the exponent. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1: Basic usage
+Basic usage
 
 ```esql
 ROW base = 2.0, exponent = 2
@@ -27,7 +27,7 @@ ROW base = 2.0, exponent = 2
 
 Calculate `2.0` raised to the power of `2`.
 
-### Example 2: Fractional exponent (root calculation)
+Fractional exponent (root calculation)
 
 The exponent can be a fraction, which is similar to performing a root. For example, an exponent of `0.5` calculates the square root of the base:
 

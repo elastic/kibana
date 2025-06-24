@@ -14,7 +14,7 @@ A multivalued expression.
 
 ## Examples
 
-### Example 1: Extracting the first value from a multivalued column
+Extracting the first value from a multivalued column
 
 ```esql
 ROW a="foo;bar;baz"

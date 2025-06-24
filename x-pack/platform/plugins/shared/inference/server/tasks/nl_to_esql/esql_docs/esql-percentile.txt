@@ -18,7 +18,7 @@ The percentile value to calculate (e.g., 0 for the minimum, 50 for the median, 1
 
 ## Examples
 
-### Example 1: Basic Percentile Calculation
+Basic Percentile Calculation
 
 ```esql
 FROM employees
@@ -27,7 +27,7 @@ FROM employees
 
 This example calculates the 0th percentile (minimum), 50th percentile (median), and 99th percentile of the `salary` field.
 
-### Example 2: Using Inline Functions
+Using Inline Functions
 
 ```esql
 FROM employees

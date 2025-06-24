@@ -30,7 +30,7 @@ The name of the enrich policy. You must create and execute the enrich policy bef
 
 ## Examples
 
-### Example 1: Basic usage
+Basic usage
 
 Add a new column for each enrich field defined in the `languages_policy` enrich policy. The match is performed using the `match_field` defined in the policy, requiring the input table to have a column with the same name (`language_code` in this case).
 
@@ -39,7 +39,7 @@ ROW language_code = "1"
 | ENRICH languages_policy
 ```
 
-### Example 2: Using a different match field
+Using a different match field
 
 Use a column with a different name than the `match_field` defined in the policy as the match field.
 
@@ -48,7 +48,7 @@ ROW a = "1"
 | ENRICH languages_policy ON a
 ```
 
-### Example 3: Selecting specific enrich fields
+Selecting specific enrich fields
 
 Explicitly select the enrich fields to be added as columns.
 
@@ -57,7 +57,7 @@ ROW a = "1"
 | ENRICH languages_policy ON a WITH language_name
 ```
 
-### Example 4: Renaming added columns
+Renaming added columns
 
 Rename the columns added using the `WITH` clause.
 

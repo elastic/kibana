@@ -18,8 +18,6 @@ The number of times the string should be repeated.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW a = "Hello!"
 | EVAL triple_a = REPEAT(a, 3)

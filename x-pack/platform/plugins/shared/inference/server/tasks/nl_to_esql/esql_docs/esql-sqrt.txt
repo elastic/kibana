@@ -14,16 +14,12 @@ Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
-### Example 1
-
 ```esql
 ROW d = 100.0
 | EVAL s = SQRT(d)
 ```
 
 Calculate the square root of the value `100.0`.
-
-### Example 2
 
 ```esql
 FROM employees

@@ -18,7 +18,7 @@ Calculates the logarithm of a numeric value to a specified base. If the base is 
 
 ## Examples
 
-### Example 1: Logarithm with a specified base
+Logarithm with a specified base
 
 Calculate the logarithm of 8 to base 2:
 
@@ -27,7 +27,7 @@ ROW base = 2.0, value = 8.0
 | EVAL s = LOG(base, value)
 ```
 
-### Example 2: Natural logarithm (base e)
+Natural logarithm (base e)
 
 Calculate the natural logarithm of 100:
 
