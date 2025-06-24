@@ -93,9 +93,7 @@ export function ValueControlForm({
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
-  const [queryColumns, setQueryColumns] = useState<string[]>(
-    valuesRetrieval ? [valuesRetrieval] : []
-  );
+  const [queryColumns, setQueryColumns] = useState<string[]>([]);
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow, setGrow] = useState(initialState?.grow ?? false);
@@ -168,8 +166,6 @@ export function ValueControlForm({
         setAvailableValuesOptions(selectOptions);
       } else {
         const { errors, columns } = result;
-        setSelectedValues([]);
-        setAvailableValuesOptions([]);
         setEsqlQueryErrors(errors);
         setQueryColumns(columns);
       }
@@ -282,7 +278,7 @@ export function ValueControlForm({
               })}
               fullWidth
             >
-              {selectedValues.length ? (
+              {!queryColumns.length ? (
                 <EuiPanel
                   paddingSize="s"
                   color="primary"
@@ -308,7 +304,7 @@ export function ValueControlForm({
                   <p>
                     <FormattedMessage
                       id="esql.flyout.displayMultipleColsCallout.description"
-                      defaultMessage="Your query is currently returning {totalColumns} columns. Choose column {chooseColumnPopover} or use {boldText}."
+                      defaultMessage="Your query is currently returning {totalColumns} columns. {chooseColumnPopover} or use {boldText}."
                       values={{
                         totalColumns: queryColumns.length,
                         boldText: <strong>STATS BY</strong>,
