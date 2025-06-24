@@ -691,10 +691,12 @@ describe('single line query', () => {
       describe('tuple lists', () => {
         test('empty list', () => {
           expect(reprint('FROM a | WHERE b IN ()').text).toBe('FROM a | WHERE b IN ()');
+          expect(reprint('FROM a | WHERE b NOT IN ()').text).toBe('FROM a | WHERE b NOT IN ()');
         });
 
         test('one element list', () => {
           expect(reprint('FROM a | WHERE b IN (1)').text).toBe('FROM a | WHERE b IN (1)');
+          expect(reprint('FROM a | WHERE b NOT IN (1)').text).toBe('FROM a | WHERE b NOT IN (1)');
         });
 
         test('three element list', () => {
