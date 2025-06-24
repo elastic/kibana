@@ -978,7 +978,6 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
-x-pack/solutions/security/test/cases_api_integration @elastic/response-ops
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
