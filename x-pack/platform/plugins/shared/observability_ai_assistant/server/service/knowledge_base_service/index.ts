@@ -482,8 +482,8 @@ export class KnowledgeBaseService {
         },
         datasource: entries,
         refresh: 'wait_for',
-        concurrency: 5,
-        flushBytes: 500 * 1024,
+        concurrency: 3,
+        flushBytes: 100 * 1024,
         flushInterval: 1000,
         retries: 5,
       });
