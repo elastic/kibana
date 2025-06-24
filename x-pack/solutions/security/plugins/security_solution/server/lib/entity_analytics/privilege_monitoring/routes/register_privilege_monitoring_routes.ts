@@ -6,6 +6,7 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { createPrivilegeMonitoringIndicesRoute } from './create_index';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
 import { initPrivilegeMonitoringEngineRoute } from './init';
 import {
@@ -30,11 +31,12 @@ export const registerPrivilegeMonitoringRoutes = ({
   logger,
   config,
 }: EntityAnalyticsRoutesDeps) => {
-  initPrivilegeMonitoringEngineRoute(router, logger, config);
-  healthCheckPrivilegeMonitoringRoute(router, logger, config);
   padInstallRoute(router, logger, config);
   padGetStatusRoute(router, logger, config);
-  searchPrivilegeMonitoringIndicesRoute(router, logger, config);
+  initPrivilegeMonitoringEngineRoute(router, logger, config);
+  healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  searchPrivilegeMonitoringIndicesRoute(router, logger);
+  createPrivilegeMonitoringIndicesRoute(router, logger);
   monitoringEntitySourceRoute(router, logger, config);
   listMonitoringEntitySourceRoute(router, logger, config);
   createUserRoute(router, logger);
