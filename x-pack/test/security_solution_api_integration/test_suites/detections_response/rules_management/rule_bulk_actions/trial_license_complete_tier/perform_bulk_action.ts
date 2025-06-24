@@ -34,7 +34,11 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import {
+  createRule,
+  deleteAllRules,
+  waitFor,
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -2704,21 +2708,28 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         for (const ruleId of ruleIdsToBackfill) {
-          const fetchedGaps = await getGapsByRuleId(
-            supertest,
-            ruleId,
-            { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
-            100
+          waitFor(
+            async () => {
+              const fetchedGaps = await getGapsByRuleId(
+                supertest,
+                ruleId,
+                { start: backfillStart.toISOString(), end: backfillEnd.toISOString() },
+                100
+              );
+
+              const generatedGaps = generatedGapEvents[ruleId].gapEvents;
+
+              // Verify that every single gap is marked as in progress
+              generatedGaps.forEach((generatedGap) => {
+                const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
+                expect(fetchedGap?.unfilled_intervals).toEqual([]);
+                expect(fetchedGap?.in_progress_intervals).toEqual(generatedGap.unfilled_intervals);
+              });
+              return true;
+            },
+            'check that all gaps are in progress',
+            log
           );
-
-          const generatedGaps = generatedGapEvents[ruleId].gapEvents;
-
-          // Verify that every single gap is marked as in progress
-          generatedGaps.forEach((generatedGap) => {
-            const fetchedGap = fetchedGaps.find(({ _id }) => _id === generatedGap._id);
-            expect(fetchedGap?.unfilled_intervals).toEqual([]);
-            expect(fetchedGap?.in_progress_intervals).toEqual(generatedGap.unfilled_intervals);
-          });
         }
 
         // For the rules we didn't backfill, verify that their gaps are still unfilled
