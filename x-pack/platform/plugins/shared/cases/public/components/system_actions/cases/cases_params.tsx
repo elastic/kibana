@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiCallOut,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
@@ -282,6 +283,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
             templates={[defaultTemplate, ...currentConfiguration.templates]}
             onTemplateChange={onTemplateChange}
             initialTemplate={selectedTemplate}
+            isDisabled={isAttackDiscoveryRuleType}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -290,6 +292,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     currentConfiguration.id,
     currentConfiguration.templates,
     defaultTemplate,
+    isAttackDiscoveryRuleType,
     isLoadingCaseConfiguration,
     onTemplateChange,
     selectedTemplate,
@@ -314,7 +317,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   }, [editSubActionProperty, index, reopenClosedCases]);
 
   if (isAttackDiscoveryRuleType) {
-    return templateSelectorComponent;
+    return (
+      <EuiToolTip content={i18n.ATTACK_DISCOVERY_TEMPLATE_TOOLTIP}>
+        {templateSelectorComponent}
+      </EuiToolTip>
+    );
   }
 
   return (
