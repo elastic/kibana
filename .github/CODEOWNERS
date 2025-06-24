@@ -2132,6 +2132,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /docs/user/alerting/ @elastic/response-ops
 /docs/management/connectors/ @elastic/response-ops
 /x-pack/platform/test/cases_api_integration/ @elastic/response-ops
+/x-pack/solutions/security/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops @elastic/kibana-cases
 /x-pack/test/api_integration/apis/cases/ @elastic/response-ops @elastic/kibana-cases
