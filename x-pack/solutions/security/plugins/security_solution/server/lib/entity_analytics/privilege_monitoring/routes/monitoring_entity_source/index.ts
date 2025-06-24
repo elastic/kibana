@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
-
-export interface PrivMonBulkUser {
-  username: string;
-  indexName: string;
-  existingUserId?: string;
-}
+export * from './monitoring_entity_source';
+export * from './list';
