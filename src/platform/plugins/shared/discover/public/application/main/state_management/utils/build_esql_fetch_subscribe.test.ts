@@ -508,7 +508,7 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
         columns: true,
-        hideChart: false,
+        hideChart: true,
         rowHeight: true,
         breakdownField: true,
       })
@@ -554,7 +554,7 @@ describe('buildEsqlFetchSubscribe', () => {
         columns: true,
         rowHeight: true,
         breakdownField: true,
-        hideChart: false,
+        hideChart: true,
       })
     );
     documents$.next({

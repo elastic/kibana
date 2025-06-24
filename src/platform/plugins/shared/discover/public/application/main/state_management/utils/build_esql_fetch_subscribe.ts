@@ -98,7 +98,7 @@ export const buildEsqlFetchSubscribe = ({
                 columns: true,
                 rowHeight: true,
                 breakdownField: true,
-                hideChart: false,
+                hideChart: true,
               },
             })
           );

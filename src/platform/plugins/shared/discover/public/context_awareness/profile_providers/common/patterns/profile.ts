@@ -32,9 +32,7 @@ export const createPatternDataSourceProfileProvider = (
         const { rowHeight } = params;
         const { patternColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
-          return {
-            ...prev(params),
-          };
+          return prev(params);
         }
         const patternRenderers = patternColumns.reduce(
           (acc, column) =>
@@ -56,8 +54,8 @@ export const createPatternDataSourceProfileProvider = (
         {
           id: 'patterns-action-view-docs-in-discover',
           getDisplayName: () =>
-            i18n.translate('discover.docViews.patterns.cellAction.viewDocsInDiscover', {
-              defaultMessage: 'View docs in Discover',
+            i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
+              defaultMessage: 'View matching results',
             }),
           getIconType: () => 'discoverApp',
           execute: (context) => {
@@ -67,7 +65,9 @@ export const createPatternDataSourceProfileProvider = (
             }
 
             const pattern = extractCategorizeTokens(context.value as string).join(' ');
-            const categorizeField = context.query.esql.match(/CATEGORIZE\((.*)\)/)?.[1]?.trim();
+            const categorizeField = context.query.esql.match(
+              /CATEGORIZE\(([a-zA-Z0-9\-_.]+)\)/
+            )?.[1];
 
             if (!categorizeField || !pattern) {
               return;
@@ -77,10 +77,9 @@ export const createPatternDataSourceProfileProvider = (
               esql: `FROM ${index}\n  | WHERE MATCH(${categorizeField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
             };
 
-            const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-            const discoverLink = discoverLocator?.getRedirectUrl({
+            const discoverLink = services.locator.getRedirectUrl({
               query,
-              timeRange: services.data.query.timefilter.timefilter.getTime(),
+              timeRange: context.timeRange,
               hideChart: false,
             });
             window.open(discoverLink, '_blank');
