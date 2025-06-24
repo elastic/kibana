@@ -94,12 +94,13 @@ export function initializeUnifiedSearchManager(
     }
   }
 
-  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRestore$.value && initialState.timeFrom && initialState.timeTo
-    ? {
-      from: initialState.timeFrom,
-      to: initialState.timeTo,
-    }
-    : undefined
+  const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
+    timeRestore$.value && initialState.timeFrom && initialState.timeTo
+      ? {
+          from: initialState.timeFrom,
+          to: initialState.timeTo,
+        }
+      : undefined
   );
   function setTimeRange(timeRange: TimeRange) {
     if (!fastIsEqual(timeRange, timeRange$.value)) {

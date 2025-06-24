@@ -86,6 +86,9 @@ function getLocatorParams({
         'panels' | 'references'
       >)
     : undefined;
+  const timeRange = shouldRestoreSearchSession
+    ? dataService.query.timefilter.timefilter.getAbsoluteTime()
+    : dataService.query.timefilter.timefilter.getTime();
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -96,9 +99,8 @@ function getLocatorParams({
     searchSessionId: shouldRestoreSearchSession
       ? dataService.search.session.getSessionId()
       : undefined,
-    timeRange: shouldRestoreSearchSession
-      ? dataService.query.timefilter.timefilter.getAbsoluteTime()
-      : dataService.query.timefilter.timefilter.getTime(),
+    timeFrom: timeRange.from,
+    timeTo: timeRange.to,
     refreshInterval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TimeRange } from '@kbn/es-query';
 import { DashboardState } from '../../../../common';
 import { migrateLegacyQuery } from '../../../services/dashboard_content_management_service/lib/load_dashboard_state';
 
 type DashboardSearchState = Pick<
   DashboardState,
-  'filters' | 'query' | 'refreshInterval' | 'timeRange'
+  'filters' | 'query' | 'refreshInterval' | 'timeFrom' | 'timeTo'
 >;
 
 export function extractSearchState(state: {
@@ -33,7 +34,16 @@ export function extractSearchState(state: {
   }
 
   if (state.timeRange && typeof state.timeRange === 'object') {
-    searchState.timeRange = state.timeRange as DashboardState['timeRange'];
+    searchState.timeFrom = (state.timeRange as TimeRange).from;
+    searchState.timeTo = (state.timeRange as TimeRange).to;
+  } else if (
+    state.timeFrom &&
+    state.timeTo &&
+    typeof state.timeFrom === 'string' &&
+    typeof state.timeTo === 'string'
+  ) {
+    searchState.timeFrom = state.timeFrom;
+    searchState.timeTo = state.timeTo;
   }
 
   return searchState;

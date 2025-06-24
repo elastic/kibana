@@ -38,7 +38,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
     });
 
     expect(location).toMatchObject({
@@ -60,7 +61,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
       refreshInterval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [
@@ -139,7 +141,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
       refreshInterval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [],
@@ -193,7 +196,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
     });
 
     expect(location.path.indexOf('relative')).toBe(-1);
@@ -205,7 +209,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
       useHash: true,
     });
 
@@ -218,7 +223,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      timeTo: 'now',
+      timeFrom: 'now-15m',
       useHash: false,
     });
 
