@@ -20,6 +20,14 @@ import {
 } from './utils';
 import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS, getPackageInfoMock } from './mocks';
 
+jest.mock('../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: jest.fn().mockReturnValue({
+      cloudSecurityNamespaceSupportEnabled: true,
+    }),
+  },
+}));
+
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
     ['cloudbeat/cis_aws', getMockPolicyAWS, { 'aws.credentials.type': { value: 'assume_role' } }],
@@ -30,7 +38,8 @@ describe('getPosturePolicy', () => {
       const inputVars = getPostureInputHiddenVars(
         name,
         {} as PackageInfo,
-        SetupTechnology.AGENT_BASED
+        SetupTechnology.AGENT_BASED,
+        false
       );
       const policy = getPosturePolicy(getPolicy(), name, inputVars);
 
@@ -315,7 +324,7 @@ describe('getDefaultAwsCredentialsType', () => {
 
   it('should return "direct_access_key" for agentless', () => {
     const setupTechnology = SetupTechnology.AGENTLESS;
-    const result = getDefaultAwsCredentialsType(packageInfo, setupTechnology);
+    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
 
     expect(result).toBe('direct_access_keys');
   });
@@ -340,7 +349,7 @@ describe('getDefaultAwsCredentialsType', () => {
       ],
     } as PackageInfo;
 
-    const result = getDefaultAwsCredentialsType({} as PackageInfo, setupTechnology);
+    const result = getDefaultAwsCredentialsType({} as PackageInfo, false, setupTechnology);
 
     expect(result).toBe('assume_role');
   });
@@ -348,8 +357,7 @@ describe('getDefaultAwsCredentialsType', () => {
   it('should return "cloud_formation" for agent-based, when cloudformation is available', () => {
     const setupTechnology = SetupTechnology.AGENT_BASED;
 
-    const result = getDefaultAwsCredentialsType(packageInfo, setupTechnology);
-
+    const result = getDefaultAwsCredentialsType(packageInfo, false, setupTechnology);
     expect(result).toBe('cloud_formation');
   });
 });

@@ -43,6 +43,8 @@ export const useAgentless = () => {
 
   const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
   const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
+  const isAgentlessCustomIntegrationsEnabled =
+    isAgentlessEnabled && config.agentless?.customIntegrations?.enabled === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -51,6 +53,16 @@ export const useAgentless = () => {
 
   // When an integration has at least a policy template enabled for agentless
   const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+    const installSource =
+      packageInfo &&
+      'installationInfo' in packageInfo &&
+      packageInfo.installationInfo?.install_source;
+    const isCustomIntegration = installSource === 'custom' || installSource === 'upload';
+
+    if (isCustomIntegration && !isAgentlessCustomIntegrationsEnabled) {
+      return false;
+    }
+
     if (isAgentlessEnabled && isAgentlessIntegrationFn(packageInfo)) {
       return true;
     }
@@ -77,6 +89,7 @@ export function useSetupTechnology({
   isEditPage,
   agentPolicies,
   integrationToEnable,
+  hideAgentlessSelector,
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
@@ -87,6 +100,7 @@ export function useSetupTechnology({
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
   integrationToEnable?: string;
+  hideAgentlessSelector?: boolean;
 }) {
   const { isAgentlessEnabled, isAgentlessDefault, isServerless, isCloud } = useAgentless();
 
@@ -109,13 +123,20 @@ export function useSetupTechnology({
   useEffect(() => {
     const shouldBeDefault =
       isAgentlessEnabled &&
+      !hideAgentlessSelector &&
       (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
         isAgentlessSetupDefault(isAgentlessDefault, packageInfo, integrationToEnable))
         ? SetupTechnology.AGENTLESS
         : SetupTechnology.AGENT_BASED;
     setDefaultSetupTechnology(shouldBeDefault);
     setSelectedSetupTechnology(shouldBeDefault);
-  }, [isAgentlessEnabled, isAgentlessDefault, packageInfo, integrationToEnable]);
+  }, [
+    isAgentlessEnabled,
+    isAgentlessDefault,
+    packageInfo,
+    integrationToEnable,
+    hideAgentlessSelector,
+  ]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
   const [agentlessPolicyOutputId, setAgentlessPolicyOutputId] = useState<string | undefined>();
@@ -166,7 +187,6 @@ export function useSetupTechnology({
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
-
   if (
     isEditPage &&
     agentPolicies &&
@@ -233,20 +253,38 @@ export function useSetupTechnology({
   };
 }
 
-const isAgentlessSetupDefault = (
+export const isAgentlessSetupDefault = (
   isAgentlessDefault: boolean,
   packageInfo?: PackageInfo,
   integrationToEnable?: string
-) => {
-  if (
-    isAgentlessDefault ||
-    ((packageInfo?.policy_templates ?? []).length > 0 &&
-      ((integrationToEnable &&
-        packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
-          ?.agentless.is_default) ||
-        packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default)))
-  ) {
+): boolean => {
+  const policyTemplates = packageInfo?.policy_templates ?? [];
+  if (policyTemplates.length === 0) {
+    return false;
+  }
+
+  const hasDefaultAgentlessIntegration =
+    integrationToEnable &&
+    policyTemplates.find((p) => p.name === integrationToEnable)?.deployment_modes?.agentless
+      ?.is_default;
+  if (hasDefaultAgentlessIntegration) {
     return true;
+  }
+
+  const allPolicyTemplatesAreDefaultAgentless = policyTemplates.every(
+    (template) => template.deployment_modes?.agentless?.is_default
+  );
+  if (allPolicyTemplatesAreDefaultAgentless) {
+    return true;
+  }
+
+  if (isAgentlessDefault) {
+    const allPolicyTemplatesHaveAgentlessDefined = policyTemplates.every(
+      (template) => template.deployment_modes?.agentless
+    );
+    if (allPolicyTemplatesHaveAgentlessDefined) {
+      return true;
+    }
   }
 
   return false;

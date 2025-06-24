@@ -87,7 +87,8 @@ const getPreviewDataObservable = (runtimeStateManager: RuntimeStateManager, tabI
   selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
-        return of({ status: TabStatus.RUNNING, query: DEFAULT_PREVIEW_QUERY });
+        // TODO: show the real query for tabs which are not yet initialized
+        return of({ status: TabStatus.DEFAULT, query: DEFAULT_PREVIEW_QUERY });
       }
 
       const { appState } = tabStateContainer;

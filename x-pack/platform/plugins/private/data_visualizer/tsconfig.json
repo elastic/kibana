@@ -85,6 +85,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-ui-settings-browser",
     "@kbn/file-upload-common",
+    "@kbn/file-upload",
     "@kbn/charts-theme"
   ],
   "exclude": [

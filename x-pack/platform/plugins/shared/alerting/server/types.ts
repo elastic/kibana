@@ -11,6 +11,7 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -57,14 +58,23 @@ import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
+import type { AlertDeletionClient } from './alert_deletion';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
 export type { Artifacts };
+
+export interface HasRequiredPrivilegeGrantedInAllSpaces {
+  spaceIds: string[];
+  requiredPrivilege: string;
+  request: KibanaRequest;
+}
+
 /**
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
+  getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -264,6 +274,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   isSpaceAware?: boolean;
 
   /**
+   * Optional flag to indicate that these alerts should not be space aware. When set
+   * to true, alerts for this rule type will be created with the `*` space id.
+   */
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
+
+  /**
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
@@ -340,6 +356,11 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Indicates that the rule type is managed internally by a Kibana plugin.
+   * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.
+   */
+  internallyManaged?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
@@ -347,6 +368,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceState,
   AlertInstanceContext
 >;
+
+export type UntypedRuleTypeAlerts = IRuleTypeAlerts<RuleAlertData>;
 
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;

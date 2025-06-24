@@ -223,6 +223,17 @@ describe('Task Runner Cancel', () => {
       { tags: ['1', 'test'] }
     );
 
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      5,
+      `skipping persisting alerts for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      6,
+      `no scheduling of actions for rule test:1: 'rule-name': rule execution has been cancelled.`,
+      { tags: ['1', 'test'] }
+    );
+
     testAlertingEventLogCalls({ status: 'ok' });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);

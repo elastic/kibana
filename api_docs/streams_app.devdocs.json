@@ -318,10 +318,10 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.StreamDefinition",
-            "text": "StreamDefinition"
+            "section": "def-common.Streams",
+            "text": "Streams"
           },
-          "; }"
+          ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
         "deprecated": false,
@@ -341,10 +341,10 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.StreamDefinition",
-            "text": "StreamDefinition"
+            "section": "def-common.Streams",
+            "text": "Streams"
           },
-          "; }"
+          ".all.Definition; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams_app/common/index.ts",
         "deprecated": false,

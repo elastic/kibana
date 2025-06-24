@@ -205,6 +205,8 @@ export function createAlertingUsageCollector(
           count_rules_with_tags: 0,
           count_rules_snoozed: 0,
           count_rules_muted: 0,
+          count_rules_with_linked_dashboards: 0,
+          count_rules_with_investigation_guide: 0,
           count_mw_total: 0,
           count_mw_with_repeat_toggle_on: 0,
           count_mw_with_filter_alert_toggle_on: 0,
@@ -239,6 +241,9 @@ export function createAlertingUsageCollector(
           },
           count_alerts_total: 0,
           count_alerts_by_rule_type: {},
+          count_rules_snoozed_by_type: {},
+          count_rules_muted_by_type: {},
+          count_ignored_fields_by_rule_type: {},
         };
       }
     },
@@ -294,6 +299,8 @@ export function createAlertingUsageCollector(
       count_rules_by_notify_when: byNotifyWhenSchema,
       count_rules_snoozed: { type: 'long' },
       count_rules_muted: { type: 'long' },
+      count_rules_with_linked_dashboards: { type: 'long' },
+      count_rules_with_investigation_guide: { type: 'long' },
       count_mw_total: { type: 'long' },
       count_mw_with_repeat_toggle_on: { type: 'long' },
       count_mw_with_filter_alert_toggle_on: { type: 'long' },
@@ -312,6 +319,9 @@ export function createAlertingUsageCollector(
       percentile_num_alerts_by_type_per_day: byPercentileSchemaByType,
       count_alerts_total: { type: 'long' },
       count_alerts_by_rule_type: byTypeSchema,
+      count_rules_snoozed_by_type: byTypeSchema,
+      count_rules_muted_by_type: byTypeSchema,
+      count_ignored_fields_by_rule_type: byTypeSchema,
     },
   });
 }

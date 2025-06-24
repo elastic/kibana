@@ -11,6 +11,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiSpacer,
+  EuiButton,
   EuiDescribedFormGroup,
   EuiSwitch,
   EuiForm,
@@ -23,14 +24,17 @@ import { i18n } from '@kbn/i18n';
 
 import {
   useAuthz,
+  useFleetStatus,
   useGetSettings,
+  useMigrateSpaceAwarenessMutation,
   usePutSettingsMutation,
   useStartServices,
 } from '../../../../hooks';
 
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const authz = useAuthz();
-  const { docLinks, notifications } = useStartServices();
+  const fleetStatus = useFleetStatus();
+  const { docLinks, notifications, overlays } = useStartServices();
   const deleteUnenrolledAgents =
     useGetSettings().data?.item?.delete_unenrolled_agents?.enabled ?? false;
   const isPreconfigured =
@@ -38,6 +42,9 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const [deleteUnenrolledAgentsChecked, setDeleteUnenrolledAgentsChecked] =
     React.useState<boolean>(deleteUnenrolledAgents);
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
+
+  const { mutateAsync: mutateSpaceAwarenessAsync, isLoading: mutateSpaceAwarenessIsLoading } =
+    useMigrateSpaceAwarenessMutation();
 
   useEffect(() => {
     if (deleteUnenrolledAgents) {
@@ -71,6 +78,49 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
     [mutateSettingsAsync, notifications.toasts]
   );
 
+  const onClickEnableSpaceAwareness = useCallback(async () => {
+    const confirmRes = await overlays.openConfirm(
+      i18n.translate('xpack.fleet.confirmSpaceAwarenessMigrationMessage', {
+        defaultMessage:
+          'This migration will enable each space to have its own agent policy and agents. This is a one-way migration and can’t be reversed.',
+      }),
+      {
+        title: i18n.translate('xpack.fleet.confirmSpaceAwarenessMigrationTitle', {
+          defaultMessage: 'Migrate to Space-Aware Agent Policies?',
+        }),
+        buttonColor: 'warning',
+        confirmButtonText: i18n.translate(
+          'xpack.fleet.confirmSpaceAwarenessMigration.confirmButtonText',
+          {
+            defaultMessage: 'Confirm and migrate',
+          }
+        ),
+      }
+    );
+
+    if (!confirmRes) {
+      return;
+    }
+    try {
+      await mutateSpaceAwarenessAsync();
+
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.confirmSpaceAwarenessMigration.successToastTitle', {
+          defaultMessage: 'Migration complete',
+        }),
+        text: i18n.translate('xpack.fleet.confirmSpaceAwarenessMigration.successToastContent', {
+          defaultMessage: 'Your cluster now uses space-aware agent policies.',
+        }),
+      });
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.fleet.confirmSpaceAwarenessMigration.errorToastTitle', {
+          defaultMessage: 'Migration failed',
+        }),
+      });
+    }
+  }, [mutateSpaceAwarenessAsync, notifications.toasts, overlays]);
+
   return (
     <>
       <EuiTitle size="s">
@@ -81,6 +131,43 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
           />
         </h4>
       </EuiTitle>
+      {fleetStatus.isSpaceAwarenessEnabled ? null : (
+        <>
+          <EuiSpacer size="m" />
+          <EuiForm component="form">
+            <EuiDescribedFormGroup
+              title={
+                <h3>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.migrateSpaceAwarenessLabel"
+                    defaultMessage="Migrate to Space-Aware agent policies"
+                  />
+                </h3>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.settings.advancedSection.switchLabel"
+                    defaultMessage="Take advantage of improved isolation and management by enabling space-specific agent policies."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow label="">
+                <EuiButton
+                  onClick={onClickEnableSpaceAwareness}
+                  isLoading={mutateSpaceAwarenessIsLoading}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.settings.deleteUnenrolledAgentsLabel"
+                    defaultMessage="Start migration"
+                  />
+                </EuiButton>
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+          </EuiForm>
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiForm component="form">
         <EuiDescribedFormGroup

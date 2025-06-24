@@ -24,7 +24,7 @@ import {
 } from '../shared/helpers';
 import { FieldType, FunctionDefinitionTypes } from './types';
 import { getMessageFromId } from '../validation/errors';
-import { ESQLRealField } from '../validation/types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
   return (
@@ -112,7 +112,7 @@ export const ENRICH_MODES = [
 
 export const validateColumnForGrokDissect = (
   command: ESQLCommand,
-  { fields }: { fields: Map<string, ESQLRealField> }
+  { fields }: { fields: Map<string, ESQLFieldWithMetadata> }
 ) => {
   const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
   const astCol = command.args[0] as ESQLColumn;

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
@@ -26,13 +26,14 @@ import { useKibana } from '../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
 import { importContent, previewContent } from './content/requests';
 import { ContentPackMetadata } from './content_pack_manifest';
+import { getFormattedError } from '../../util/errors';
 
 export function ImportContentPackFlyout({
   definition,
   onImport,
   onClose,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {
@@ -93,6 +94,7 @@ export function ImportContentPackFlyout({
                   title: i18n.translate('xpack.streams.failedToPreviewContentError', {
                     defaultMessage: 'Failed to preview content pack',
                   }),
+                  toastMessage: getFormattedError(err).message,
                 });
               }
             } else {
@@ -154,6 +156,7 @@ export function ImportContentPackFlyout({
                     title: i18n.translate('xpack.streams.failedToImportContentError', {
                       defaultMessage: 'Failed to import content pack',
                     }),
+                    toastMessage: getFormattedError(err).message,
                   });
                 }
               }}

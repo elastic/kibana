@@ -11,20 +11,19 @@ import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/
 import {
   UpdateRuleMigrationRequestBody,
   UpdateRuleMigrationRequestParams,
-  type UpdateRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { authz } from './util/authz';
 import { SiemMigrationAuditLogger } from './util/audit';
-import { transformToInternalUpdateRuleMigrationData } from './util/update_rules';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
+import { withExistingMigration } from './util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsUpdateRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
-    .put({
+    .patch({
       path: SIEM_RULE_MIGRATION_PATH,
       access: 'internal',
       security: { authz },
@@ -40,34 +39,22 @@ export const registerSiemRuleMigrationsUpdateRoute = (
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<UpdateRuleMigrationResponse>> => {
-          const { migration_id: migrationId } = req.params;
-          const rulesToUpdate = req.body;
-
-          if (rulesToUpdate.length === 0) {
-            return res.noContent();
-          }
-          const ids = rulesToUpdate.map((rule) => rule.id);
-
+        withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const { migration_id: migrationId } = req.params;
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
+            await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
 
-            await siemMigrationAuditLogger.logUpdateRules({ migrationId, ids });
-
-            const transformedRuleToUpdate = rulesToUpdate.map(
-              transformToInternalUpdateRuleMigrationData
-            );
-            await ruleMigrationsClient.data.rules.update(transformedRuleToUpdate);
-
-            return res.ok({ body: { updated: true } });
+            return res.ok();
           } catch (error) {
             logger.error(error);
-            await siemMigrationAuditLogger.logUpdateRules({ migrationId, ids, error });
+            await siemMigrationAuditLogger.logUpdateMigration({ migrationId, error });
             return res.badRequest({ body: error.message });
           }
-        }
+        })
       )
     );
 };

@@ -63,7 +63,10 @@ describe('EnvironmentSelect', () => {
   });
 
   it('Should not call onSearchChange if item is already listed', async () => {
-    const { getByRole } = render(<EnvironmentSelect {...defaultProps} />);
+    const { getByRole } = render(<EnvironmentSelect {...defaultProps} />, {
+      // TODO: fails with concurrent mode
+      legacyRoot: true,
+    });
     const combobox = getByRole('combobox') as HTMLInputElement;
 
     expect(mockOnSearchChange.mock.calls.length).toBe(0);

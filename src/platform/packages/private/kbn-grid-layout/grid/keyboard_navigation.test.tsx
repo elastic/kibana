@@ -60,50 +60,36 @@ describe('Keyboard navigation', () => {
     renderGridLayout();
     const panelHandle = getPanelHandle('panel1');
     panelHandle.focus();
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel css-c5ixg-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     await pressEnter();
     await pressKey('[ArrowDown]');
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel kbnGridPanel--active css-c5ixg-initialStyles',
-      { exact: true }
+      'kbnGridPanel--active'
     );
     await pressEnter();
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel css-c5ixg-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
   });
   it('should show the panel active when during interaction for resize handle', async () => {
     renderGridLayout();
     const panelHandle = getPanelHandle('panel5', 'resize');
     panelHandle.focus();
-    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     await pressEnter();
     await pressKey('[ArrowDown]');
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
     expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles kbnGridPanel--active',
-      { exact: true }
+      'kbnGridPanel--active'
     );
     await pressKey('{Escape}');
-    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel css-1l7q1xe-initialStyles',
-      {
-        exact: true,
-      }
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).not.toHaveClass(
+      'kbnGridPanel--active'
     );
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
   });

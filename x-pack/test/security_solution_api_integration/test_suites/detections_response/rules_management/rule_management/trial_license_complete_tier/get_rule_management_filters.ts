@@ -116,7 +116,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(body.aggregated_fields.tags).to.eql(['test-tag-1', 'test-tag-2', 'test-tag-3']);
+        expect(body.aggregated_fields.tags).to.eql([
+          'test-tag',
+          'test-tag-1',
+          'test-tag-2',
+          'test-tag-3',
+        ]);
       });
     });
   });

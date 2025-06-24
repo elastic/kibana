@@ -138,7 +138,6 @@ const OverviewComponent = () => {
                       dataViewSpec={sourcererDataView}
                       query={query}
                       queryType="overview"
-                      setQuery={setQuery}
                       to={to}
                     />
                   </EuiFlexItem>

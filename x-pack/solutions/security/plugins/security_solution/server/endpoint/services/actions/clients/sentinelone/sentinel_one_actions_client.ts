@@ -163,6 +163,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
       index: await this.fetchSentinelOneAgentIndexNames(),
@@ -232,13 +242,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    return this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']).then((agentInfoList) => {
-      for (const agentInfo of agentInfoList) {
-        agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
-      }
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds);
 
-      return agentInfoList;
-    });
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   private async handleResponseActionCreation<
@@ -322,7 +333,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to SentinelOne directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,
@@ -363,7 +374,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentId: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentId);
+    const cacheKey = `getAgentDetails:${agentId}`;
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(cacheKey);
 
     if (cachedEntry) {
       this.log.debug(
@@ -383,7 +395,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
     }
 
-    this.cache.set(agentId, s1ApiResponse.data[0]);
+    this.cache.set(cacheKey, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
@@ -902,8 +914,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                processName: reqIndexOptions.parameters.process_name,
+                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName)
+                  .process_name,
               }),
             },
           });
@@ -1095,7 +1107,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * retrieve script info. for scripts that are used to handle Elastic response actions
    * @param scriptType
    * @param osType
-   * @private
+   * @internal
    */
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
@@ -1209,7 +1221,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
-        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
         404
       );
     }
@@ -1222,7 +1234,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
    * @param actionRequests
    * @param command
-   * @private
+   * @internal
    */
   private async checkPendingIsolateOrReleaseActions(
     actionRequests: Array<
@@ -1709,7 +1721,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Calculates the state of a SentinelOne Task using the response from their task status API. It
    * returns a normalized object with basic info derived from the task status value
    * @param taskStatusRecord
-   * @private
+   * @internal
    */
   private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
     isPending: boolean;

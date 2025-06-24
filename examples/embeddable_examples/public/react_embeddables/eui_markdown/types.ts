@@ -8,12 +8,20 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import { PublishesUnsavedChanges, SerializedTitles } from '@kbn/presentation-publishing';
 
-export type MarkdownEditorSerializedState = SerializedTitles & {
+/**
+ * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state
+ * supplied by other common managers.
+ */
+export interface MarkdownEditorState {
   content: string;
-};
+}
 
-export type MarkdownEditorRuntimeState = MarkdownEditorSerializedState;
+/**
+ * Markdown serialized state includes all state that the parent should provide to this embeddable.
+ */
+export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorState;
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState>;
+export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
+  PublishesUnsavedChanges;

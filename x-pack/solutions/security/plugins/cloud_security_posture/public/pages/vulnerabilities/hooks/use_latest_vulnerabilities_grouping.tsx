@@ -16,7 +16,7 @@ import {
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import { buildEsQuery, Filter } from '@kbn/es-query';
@@ -249,7 +249,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupByField: currentSelectedGroup,
     uniqueValue,
     timeRange: {
-      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      from: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
       to: 'now',
     },
     pageNumber: activePageIndex * pageSize,

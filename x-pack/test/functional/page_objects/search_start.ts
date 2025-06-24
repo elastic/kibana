@@ -15,8 +15,11 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
 
   return {
     async expectToBeOnStartPage() {
-      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/start');
       await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
+    },
+    async expectToBeOnCreateIndexPage() {
+      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/create');
+      await testSubjects.existOrFail('elasticsearchCreateIndexPage', { timeout: 2000 });
     },
     async expectToBeOnIndexDetailsPage() {
       await retry.tryForTime(60 * 1000, async () => {

@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { IngestDataCodeExamples } from '../types';
 
-import { JSIngestDataExample } from './javascript';
-import { PythonIngestDataExample } from './python';
-import { ConsoleIngestDataExample } from './sense';
+import { JSIngestDataExample, JSSemanticIngestDataExample } from './javascript';
+import { PythonIngestDataExample, PythonSemanticIngestDataExample } from './python';
+import { ConsoleIngestDataExample, ConsoleSemanticIngestDataExample } from './sense';
 import { CurlIngestDataExample } from './curl';
 import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
@@ -74,11 +74,10 @@ export const SemanticIngestDataCodeExamples: IngestDataCodeExamples = {
     }
   ),
   defaultMapping: {
-    // @ts-expect-error - our types don't understand yet that we can have semantic_text fields without inference ids
     text: { type: 'semantic_text' },
   },
-  sense: ConsoleIngestDataExample,
+  sense: ConsoleSemanticIngestDataExample,
   curl: CurlIngestDataExample,
-  python: PythonIngestDataExample,
-  javascript: JSIngestDataExample,
+  python: PythonSemanticIngestDataExample,
+  javascript: JSSemanticIngestDataExample,
 };

@@ -55,15 +55,16 @@ import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import type { ConfigSchema } from '../config_schema';
+import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config?: ConfigSchema
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router);
+  chatCompleteRoute(router, config);
 
   /** INTERNAL */
   // Capabilities
@@ -74,6 +75,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  deleteAllConversationsRoute(router);
   appendConversationMessageRoute(router);
 
   // User Conversations bulk CRUD
@@ -96,7 +98,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router);
+  postActionsConnectorExecuteRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);

@@ -628,7 +628,7 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ readOnly: any; placeholder: any; height: any; ariaLabelContent: any; markdownContent: any; openLinksInNewTab: any; }"
+          "{ readOnly: any; placeholder: any; height: any; openLinksInNewTab: any; ariaLabelContent: any; markdownContent: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
         "deprecated": false,

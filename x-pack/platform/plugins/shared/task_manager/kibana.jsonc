@@ -20,7 +20,6 @@
     "optionalPlugins": [
       "cloud",
       "usageCollection",
-      "spaces"
     ]
   }
 }

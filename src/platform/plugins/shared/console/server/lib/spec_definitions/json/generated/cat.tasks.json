@@ -4,9 +4,7 @@
       "format": [
         "text"
       ],
-      "h": [],
       "help": "__flag__",
-      "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
       "filter_path": [],
@@ -16,6 +14,8 @@
       "detailed": "__flag__",
       "nodes": "",
       "parent_task_id": "",
+      "h": [],
+      "s": [],
       "time": [
         "nanos",
         "micros",
@@ -38,7 +38,7 @@
     "patterns": [
       "_cat/tasks"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/tasks.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-tasks",
     "availability": {
       "stack": true,
       "serverless": false

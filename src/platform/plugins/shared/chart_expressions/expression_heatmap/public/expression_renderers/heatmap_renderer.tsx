@@ -17,6 +17,11 @@ import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expre
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
+import {
   ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
@@ -62,6 +67,13 @@ export const heatmapRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: EXPRESSION_HEATMAP_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -78,6 +90,8 @@ export const heatmapRenderer: (
     };
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -111,6 +125,8 @@ export const heatmapRenderer: (
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     render(
       <KibanaRenderContextProvider {...core}>

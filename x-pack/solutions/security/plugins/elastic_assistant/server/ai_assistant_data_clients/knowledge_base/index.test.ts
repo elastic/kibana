@@ -162,6 +162,20 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('isInferenceEndpointExists', () => {
     it('returns true when the model is fully allocated and started in ESS', async () => {
+      esClientMock.inference.get.mockResolvedValue({
+        endpoints: [
+          {
+            service_settings: {
+              model_id: 'elser-id',
+              deployment_id: ASSISTANT_ELSER_INFERENCE_ID,
+              allocation_status: { state: 'fully_allocated' },
+            },
+            inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+            task_type: 'sparse_embedding',
+            service: 'elasticsearch',
+          },
+        ],
+      });
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       trainedModelsProviderMock.getTrainedModelsStats.mockResolvedValueOnce({
         trained_model_stats: [

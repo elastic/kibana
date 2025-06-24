@@ -75,6 +75,22 @@ export function usePutSettingsMutation() {
   });
 }
 
+export function useMigrateSpaceAwarenessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      sendRequestForRq({
+        method: 'post',
+        path: settingsRoutesService.postSpaceAwarenessMigrationPath(),
+        version: API_VERSIONS.internal.v1,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['fleetStatus']);
+    },
+  });
+}
+
 export function sendPutSettings(body: PutSettingsRequest['body']) {
   return sendRequest<PutSettingsResponse>({
     method: 'put',

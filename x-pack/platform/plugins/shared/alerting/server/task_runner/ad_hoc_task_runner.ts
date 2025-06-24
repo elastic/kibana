@@ -128,7 +128,6 @@ export class AdHocTaskRunner implements CancellableTask {
       RuleAlertData
     >({
       context: this.context,
-      logger: this.logger,
       task: this.taskInstance,
       timer: this.timer,
     });
@@ -186,6 +185,7 @@ export class AdHocTaskRunner implements CancellableTask {
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       namespace: this.context.spaceIdToNamespace(adHocRunData.spaceId),
+      logger: this.logger,
       request: fakeRequest,
       ruleId: rule.id,
       ruleLogPrefix: ruleLabel,
@@ -625,17 +625,17 @@ export class AdHocTaskRunner implements CancellableTask {
   async cleanup() {
     if (!this.shouldDeleteTask) return;
 
-    await this.updateGapsAfterBackfillComplete();
-
     try {
       await this.internalSavedObjectsRepository.delete(
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
         this.taskInstance.params.adHocRunParamsId,
         {
-          refresh: false,
+          refresh: true,
           namespace: this.context.spaceIdToNamespace(this.taskInstance.params.spaceId),
         }
       );
+
+      await this.updateGapsAfterBackfillComplete();
     } catch (e) {
       // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
       this.logger.error(

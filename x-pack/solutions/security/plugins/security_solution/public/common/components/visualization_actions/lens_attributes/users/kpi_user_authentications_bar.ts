@@ -8,14 +8,14 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 import { FAIL_CHART_LABEL, SUCCESS_CHART_LABEL } from '../../translations';
 
-const columnEventOutcomeFailure = uuidv4();
-const columnEventOutcomeFailureFilter = uuidv4();
+const columnEventOutcomeFailure = `column-event-outcome-failure-id-${uuidv4()}`;
+const columnEventOutcomeFailureFilter = `column-event-outcome-failure-filter-id-${uuidv4()}`;
 
-const columnEventOutcomeSuccess = uuidv4();
-const columnEventOutcomeSuccessFilter = uuidv4();
+const columnEventOutcomeSuccess = `column-event-outcome-success-id-${uuidv4()}`;
+const columnEventOutcomeSuccessFilter = `column-event-outcome-success-filter-id-${uuidv4()}`;
 
-const layerEventOutcomeFailure = uuidv4();
-const layerEventOutcomeSuccess = uuidv4();
+const layerEventOutcomeFailure = `layer-event-outcome-failure-id-${uuidv4()}`;
+const layerEventOutcomeSuccess = `layer-event-outcome-success-id-${uuidv4()}`;
 
 export const getKpiUserAuthenticationsBarLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({

@@ -14,12 +14,10 @@ export class IntegrationRegistry {
 
   register(definition: WorkchatIntegrationDefinition) {
     if (!this.allowRegistration) {
-      throw new Error(`Tried to register integration but allowRegistration is false`);
+      throw new Error(`Tried to register tool but allowRegistration is false`);
     }
     if (this.has(definition.getType())) {
-      throw new Error(
-        `Tried to register Integration [${definition.getType()}], but alrrady registered`
-      );
+      throw new Error(`Tried to register Tool [${definition.getType()}], but already registered`);
     }
     this.integrationTypes.set(definition.getType(), definition);
   }
@@ -34,7 +32,7 @@ export class IntegrationRegistry {
 
   get(type: IntegrationType) {
     if (!this.has(type)) {
-      throw new Error(`Integration definition for type [${type}] not found`);
+      throw new Error(`Tool definition for type [${type}] not found`);
     }
     return this.integrationTypes.get(type)!;
   }

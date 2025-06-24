@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167073
   describe.skip('security', function () {
     this.tags('upgradeAssistant');
     before(async () => {
@@ -44,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sectionIds).to.contain('kibana');
 
         const dataSection = sections.find((section) => section.sectionId === 'data');
-        expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+        expect(dataSection?.sectionLinks).to.eql(['data_quality', 'content_connectors']);
       });
     });
 

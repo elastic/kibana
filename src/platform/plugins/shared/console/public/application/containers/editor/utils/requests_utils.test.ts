@@ -17,6 +17,9 @@ import {
   trackSentRequests,
   getRequestFromEditor,
   containsComments,
+  collapseTripleQuoteStrings,
+  expandTripleQuoteStrings,
+  TRIPLE_QUOTE_STRINGS_MARKER,
 } from './requests_utils';
 
 describe('requests_utils', () => {
@@ -203,6 +206,14 @@ describe('requests_utils', () => {
       '}                                   ', // line 30
       ' // some comment                    ', // line 31
       '                                    ', // line 32
+      'POST    _query                     ', // line 33
+      '{                                   ', // line 34
+      '  "query":     """', // line 35
+      '    FROM sample_data', // line 36
+      '    | WHERE message LIKE "Connected *"', // line 37
+      '    | SORT @timestamp DESC', // line 38
+      '  """                                 ', // line 39
+      '}                                   ', // line 40
     ];
 
     const TEST_REQUEST_1 = {
@@ -236,6 +247,18 @@ describe('requests_utils', () => {
       startOffset: 1,
       endOffset: 36,
     };
+
+    const TEST_REQUEST_5 = {
+      // Offsets are with respect to the sample editor text
+      startLineNumber: 33,
+      endLineNumber: 40,
+      startOffset: 1,
+      endOffset: 36,
+    };
+
+    afterEach(() => {
+      mockAddToastWarning.mockClear();
+    });
 
     it('correctly auto-indents a single request with data', () => {
       const formattedData = getAutoIndentedRequests(
@@ -359,6 +382,31 @@ describe('requests_utils', () => {
           'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.'
         )
       );
+      mockAddToastWarning.mockReset();
+    });
+
+    it('correctly auto-indents a single request that contains triple quotes', () => {
+      const formattedData = getAutoIndentedRequests(
+        [TEST_REQUEST_5],
+        sampleEditorTextLines
+          .slice(TEST_REQUEST_5.startLineNumber - 1, TEST_REQUEST_5.endLineNumber)
+          .join('\n'),
+        sampleEditorTextLines.join('\n'),
+        mockAddToastWarning
+      );
+      const expectedResultLines = [
+        'POST _query',
+        '{',
+        '  "query": """',
+        '    FROM sample_data',
+        '    | WHERE message LIKE "Connected *"',
+        '    | SORT @timestamp DESC',
+        '  """',
+        '}',
+      ];
+
+      expect(formattedData).toBe(expectedResultLines.join('\n'));
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
   });
 
@@ -554,6 +602,51 @@ describe('requests_utils', () => {
       "field": "value" // comment here
     }`;
       expect(containsComments(requestData)).toBe(true);
+    });
+  });
+
+  describe('collapseTripleQuoteStrings and expandTripleQuoteStrings', () => {
+    const input = `{
+  "query1": """FROM sample_data | LIMIT 3""",
+  "query2": """
+    FROM sample_data
+    | WHERE message LIKE "Connected*"
+    | SORT @timestamp DESC
+    """
+}`;
+
+    it('should collapse and re-expand both inline and multi-line triple-quote strings correctly', () => {
+      const { collapsedTripleQuotesData, tripleQuoteStrings } = collapseTripleQuoteStrings(input);
+
+      // Validate that both triple-quoted strings were replaced with the marker
+      expect(collapsedTripleQuotesData).toBe(`{
+  "query1": ${TRIPLE_QUOTE_STRINGS_MARKER},
+  "query2": ${TRIPLE_QUOTE_STRINGS_MARKER}
+}`);
+
+      // Validate extracted strings match expected format
+      expect(tripleQuoteStrings).toEqual([
+        `"""FROM sample_data | LIMIT 3"""`,
+        `"""
+    FROM sample_data
+    | WHERE message LIKE "Connected*"
+    | SORT @timestamp DESC
+    """`,
+      ]);
+
+      // Ensure re-expansion gives the original input back
+      const expanded = expandTripleQuoteStrings(collapsedTripleQuotesData, tripleQuoteStrings);
+      expect(expanded).toBe(input);
+    });
+
+    it('should be idempotent if run multiple times on collapsed data', () => {
+      const firstCollapse = collapseTripleQuoteStrings(input);
+      const secondCollapse = collapseTripleQuoteStrings(firstCollapse.collapsedTripleQuotesData);
+
+      expect(secondCollapse.tripleQuoteStrings).toEqual([]);
+      expect(secondCollapse.collapsedTripleQuotesData).toBe(
+        firstCollapse.collapsedTripleQuotesData
+      );
     });
   });
 });

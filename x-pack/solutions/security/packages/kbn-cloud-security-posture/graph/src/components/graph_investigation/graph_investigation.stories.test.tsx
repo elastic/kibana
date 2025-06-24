@@ -51,7 +51,11 @@ const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
       <Investigation {...args} />
-    </IntlProvider>
+    </IntlProvider>,
+    {
+      // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
   );
 };
 
@@ -83,7 +87,7 @@ const showActionsByNode = (container: HTMLElement, nodeId: string) => {
   expandNode(container, nodeId);
 
   const btn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(btn).toHaveTextContent('Show actions by this entity');
+  expect(btn).toHaveTextContent("Show this entity's actions");
   btn.click();
 };
 
@@ -91,7 +95,7 @@ const hideActionsByNode = (container: HTMLElement, nodeId: string) => {
   expandNode(container, nodeId);
 
   const hideBtn = screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
-  expect(hideBtn).toHaveTextContent('Hide actions by this entity');
+  expect(hideBtn).toHaveTextContent("Hide this entity's actions");
   hideBtn.click();
 };
 
@@ -112,8 +116,7 @@ const isSearchBarVisible = (container: HTMLElement) => {
   return searchBarContainer === null;
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/206646
-describe.skip('GraphInvestigation Component', () => {
+describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
       if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
@@ -251,7 +254,7 @@ describe.skip('GraphInvestigation Component', () => {
 
       expandNode(container, 'admin@example.com');
       expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        'Show actions by this entity'
+        "Show this entity's actions"
       );
     });
 
@@ -269,7 +272,7 @@ describe.skip('GraphInvestigation Component', () => {
 
       expandNode(container, 'admin@example.com');
       expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
-        'Show actions by this entity'
+        "Show this entity's actions"
       );
     });
   });

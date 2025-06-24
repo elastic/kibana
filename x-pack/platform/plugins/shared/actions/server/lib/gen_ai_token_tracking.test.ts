@@ -503,5 +503,8 @@ describe('getGenAiTokenTracking', () => {
     it('should be false with any other action', () => {
       expect(shouldTrackGenAiToken('.jira')).toEqual(false);
     });
+    it('should be false with OpenAI action and getDashboard', () => {
+      expect(shouldTrackGenAiToken('.gen-ai', 'getDashboard')).toEqual(false);
+    });
   });
 });

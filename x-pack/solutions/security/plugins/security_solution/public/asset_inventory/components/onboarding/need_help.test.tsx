@@ -17,7 +17,7 @@ describe('NeedHelp Component', () => {
 
     expect(screen.getByText(/read documentation/i).closest('a')).toHaveAttribute(
       'href',
-      'https://ela.st/asset-inventory'
+      'https://ela.st/cloud-asset-discovery'
     );
   });
 });

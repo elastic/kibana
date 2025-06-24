@@ -27,11 +27,9 @@ import { HttpSetup } from '@kbn/core/public';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
-import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
-import { VulnerabilityCloudSecurityDataTable } from '../../components/cloud_security_data_table/vulnerability_security_data_table';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
@@ -39,6 +37,7 @@ import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_tab
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { EMPTY_VALUE } from '../configurations/findings_flyout/findings_flyout';
 import { AddFieldFilterHandler } from './types';
+import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -80,14 +79,8 @@ const CspVulnerabilityFindingRenderer = ({
   return children({ finding });
 };
 
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  return (
-    <CspVulnerabilityFindingRenderer row={row}>
-      {({ finding }) => (
-        <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  );
+const onOpenFlyoutCallback = (): JSX.Element => {
+  return <></>;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowTypeLabel', {
@@ -106,7 +99,7 @@ export const LatestVulnerabilitiesTable = ({
     });
 
   const createVulnerabilityRuleFn = (rowIndex: number) => {
-    const vulnerabilityFinding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
+    const vulnerabilityFinding = getCspVulnerabilityFinding(rows[rowIndex]?.raw._source);
     if (!vulnerabilityFinding) return;
 
     return async (http: HttpSetup) =>
@@ -253,13 +246,13 @@ export const LatestVulnerabilitiesTable = ({
           <ErrorCallout error={error} />
         </>
       ) : (
-        <VulnerabilityCloudSecurityDataTable
+        <CloudSecurityDataTable
           data-test-subj={LATEST_VULNERABILITIES_TABLE}
           isLoading={isFetching}
           defaultColumns={defaultColumns}
           rows={rows}
           total={total}
-          flyoutComponent={flyoutComponent}
+          onOpenFlyoutCallback={onOpenFlyoutCallback}
           createRuleFn={createVulnerabilityRuleFn}
           cloudPostureDataTable={cloudPostureDataTable}
           loadMore={fetchNextPage}
@@ -269,6 +262,7 @@ export const LatestVulnerabilitiesTable = ({
           height={height}
           hasDistributionBar={false}
           columnHeaders={vulnerabilitiesTableFieldLabels}
+          flyoutType="vulnerability"
         />
       )}
     </>

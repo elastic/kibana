@@ -1,0 +1,59 @@
+env:
+  GITHUB_PR_TARGET_BRANCH: 'main' # common utils needs this value to be set
+
+steps:
+  - command: |
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+        --message "Linux headless chromium build started at: $BUILDKITE_BUILD_URL" \
+        --context "chromium-linux-build-job-start" \
+        --issue-number $GITHUB_ISSUE_NUMBER \
+        --repository $GITHUB_ISSUE_BASE_REPO \
+        --repository-owner $GITHUB_ISSUE_BASE_OWNER \
+        --clear-previous
+    label: Comment with job URL on issue
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
+  - command: |
+      .buildkite/scripts/pipelines/chromium_linux_build/chromium_version.sh
+    label: Infer chromium version for puppeteer version
+    key: infer_chromium_version
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+
+  - command: "PLATFORM_VARIANT={{matrix}} .buildkite/scripts/pipelines/chromium_linux_build/build.sh"
+    label: "Build {{matrix}} linux headless chromium"
+    depends_on: "infer_chromium_version"
+    key: build_chromium
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c2d-highcpu-112
+      diskSizeGb: 275
+    matrix:
+      - "x64"
+      - "arm64"
+
+  - command: node .buildkite/scripts/pipelines/chromium_linux_build/issue_feedback/entry.js
+    label: provided feedback to issue created to update puppeteer
+    depends_on: "build_chromium"
+    env:
+      KIBANA_MACHINE_USERNAME: kibanamachine
+      KIBANA_MACHINE_EMAIL: 42973632+kibanamachine@users.noreply.github.com
+    agents:
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      machineType: n2-standard-2
+    timeout_in_minutes: 30

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { BoolQuery, Filter } from '@kbn/es-query';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -86,7 +86,6 @@ function InternalAlertsPage() {
     },
     uiSettings,
   } = kibanaServices;
-  const { onPageReady } = usePerformanceContext();
   const { toasts } = notifications;
   const {
     query: {
@@ -119,20 +118,33 @@ function InternalAlertsPage() {
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
 
+  const [tableLoading, setTableLoading] = useState(true);
+  const [tableCount, setTableCount] = useState(0);
+
   const onUpdate: GetObservabilityAlertsTableProp<'onUpdate'> = ({ isLoading, alertsCount }) => {
-    if (!isLoading) {
-      onPageReady({
-        customMetrics: {
-          key1: 'total_alert_count',
-          value1: alertsCount,
-        },
-        meta: {
-          rangeFrom: alertSearchBarStateProps.rangeFrom,
-          rangeTo: alertSearchBarStateProps.rangeTo,
-        },
-      });
-    }
+    setTableLoading(isLoading);
+    setTableCount(alertsCount);
   };
+
+  usePageReady({
+    isRefreshing: tableLoading,
+    isReady: !tableLoading,
+    customMetrics: {
+      key1: 'total_alert_count',
+      value1: tableCount,
+    },
+    meta: {
+      rangeFrom: alertSearchBarStateProps.rangeFrom,
+      rangeTo: alertSearchBarStateProps.rangeTo,
+    },
+  });
+
+  const onGroupingsChange = useCallback(
+    ({ activeGroups }: { activeGroups: string[] }) => {
+      alertSearchBarStateProps.onGroupingsChange(activeGroups);
+    },
+    [alertSearchBarStateProps]
+  );
 
   useEffect(() => {
     return setScreenContext?.({
@@ -330,6 +342,12 @@ function InternalAlertsPage() {
                 globalQuery={globalQuery}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                initialGroupings={
+                  alertSearchBarStateProps?.groupings?.length
+                    ? alertSearchBarStateProps.groupings
+                    : undefined
+                }
+                onGroupingsChange={onGroupingsChange}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
                 renderGroupPanel={renderGroupPanel}
                 getGroupStats={getGroupStats}

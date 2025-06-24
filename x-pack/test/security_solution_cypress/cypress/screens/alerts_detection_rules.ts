@@ -41,6 +41,9 @@ export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExce
 export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
+export const CONFIRM_FILL_RULE_GAPS_WARNING_BTN =
+  '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -359,6 +362,8 @@ export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
 export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';
 
 export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffWrapper"]';
+export const FIELD_UPGRADE_WRAPPER = (fieldName: string) =>
+  `[data-test-subj="${fieldName}-upgradeWrapper"]`;
 export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
 
 export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';

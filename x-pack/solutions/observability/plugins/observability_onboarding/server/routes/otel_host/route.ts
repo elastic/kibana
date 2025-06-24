@@ -52,10 +52,9 @@ const setupFlowRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(esLegacyConfigService);
 
-    const timestamp = new Date().toISOString();
     const { encoded: apiKeyEncoded } = config.serverless.enabled
-      ? await createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-host-${timestamp}`)
-      : await createShipperApiKey(client.asCurrentUser, `otel-host-${timestamp}`);
+      ? await createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-host`)
+      : await createShipperApiKey(client.asCurrentUser, `otel-host`);
 
     return {
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',

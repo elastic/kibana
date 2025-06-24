@@ -125,9 +125,9 @@ const rollBackNewMonitorBulk = async (
     await deleteMonitorAPI.execute({
       monitorIds: monitorsToCreate.map(({ id }) => id),
     });
-  } catch (e) {
+  } catch (error) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to rollback new monitors, Error: ${error.message}`, { error });
   }
 };
 
@@ -169,6 +169,6 @@ export const deleteMonitorIfCreated = async ({
     }
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to delete monitor with id ${newMonitorId}`, { error: e });
   }
 };

@@ -101,6 +101,7 @@ describe('UPDATE remote clusters', () => {
                 max_connections_per_cluster: 3,
                 initial_connect_timeout: '30s',
                 skip_unavailable: true,
+                node_connections: 4,
               },
             },
           },
@@ -128,6 +129,7 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'sniff',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        nodeConnections: 4,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -201,6 +203,7 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'proxy',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        proxySocketConnections: 18,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -279,6 +282,7 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'proxy',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        proxySocketConnections: 18,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();

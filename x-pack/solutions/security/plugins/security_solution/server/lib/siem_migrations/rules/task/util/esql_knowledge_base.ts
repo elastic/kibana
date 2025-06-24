@@ -6,7 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { naturalLanguageToEsql, type InferenceClient } from '@kbn/inference-plugin/server';
+import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import type { InferenceClient } from '@kbn/inference-common';
 import { lastValueFrom } from 'rxjs';
 import { TELEMETRY_SIEM_MIGRATION_ID } from './constants';
 

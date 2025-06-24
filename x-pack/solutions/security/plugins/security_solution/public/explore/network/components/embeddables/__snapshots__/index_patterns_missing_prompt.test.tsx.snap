@@ -40,7 +40,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
           </a>
           ) and Kibana index patterns with matching glob patterns. When using 
           <a
-            href="https://www.elastic.co/guide/en/beats/libbeat/mocked-test-branch/getting-started.html"
+            href="https://www.elastic.co/docs/reference/beats"
             rel="noopener noreferrer"
             target="_blank"
           >

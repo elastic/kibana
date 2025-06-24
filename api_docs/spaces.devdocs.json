@@ -3058,7 +3058,7 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3074,7 +3074,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3091,7 +3091,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3108,7 +3108,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4465,7 +4465,7 @@
         "signature": [
           "(basePath: string, spaceId: string, requestedPath: string) => string"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4481,7 +4481,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4498,7 +4498,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4515,7 +4515,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4540,7 +4540,7 @@
         "signature": [
           "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
         ],
-        "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4556,7 +4556,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4573,7 +4573,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/lib/spaces_url_parser.ts",
+            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -4997,8 +4997,7 @@
         "label": "SolutionView",
         "description": [],
         "signature": [
-          "SolutionId",
-          " | \"classic\""
+          "\"security\" | \"oblt\" | \"es\" | \"chat\" | \"classic\""
         ],
         "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
         "deprecated": false,

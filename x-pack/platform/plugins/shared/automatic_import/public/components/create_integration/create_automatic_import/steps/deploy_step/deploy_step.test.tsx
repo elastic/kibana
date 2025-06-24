@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, act, type RenderResult, waitFor } from '@testing-library/react';
+import { render, type RenderResult, waitFor } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { DeployStep } from './deploy_step';
 import { ActionsProvider } from '../../state';
@@ -70,20 +70,18 @@ describe('DeployStep', () => {
   describe('when deploy is successful', () => {
     let result: RenderResult;
     beforeEach(async () => {
-      await act(async () => {
-        result = render(
-          <DeployStep
-            integrationSettings={integrationSettings}
-            connector={connector}
-            result={results}
-          />,
-          { wrapper }
-        );
-        await waitFor(() => expect(result.queryByTestId('deployStep-loading')).toBeInTheDocument());
-        await waitFor(() =>
-          expect(result.queryByTestId('deployStep-loading')).not.toBeInTheDocument()
-        );
-      });
+      result = render(
+        <DeployStep
+          integrationSettings={integrationSettings}
+          connector={connector}
+          result={results}
+        />,
+        { wrapper }
+      );
+      await waitFor(() => expect(result.queryByTestId('deployStep-loading')).toBeInTheDocument());
+      await waitFor(() =>
+        expect(result.queryByTestId('deployStep-loading')).not.toBeInTheDocument()
+      );
     });
 
     it('should call build integration api', () => {
@@ -136,17 +134,15 @@ describe('DeployStep', () => {
         mockRunBuildIntegration.mockImplementationOnce(() => {
           throw new Error(errorMessage);
         });
-        await act(async () => {
-          result = render(
-            <DeployStep
-              integrationSettings={integrationSettings}
-              connector={connector}
-              result={results}
-            />,
-            { wrapper }
-          );
-          await waitFor(() => expect(result.queryByTestId('deployStep-error')).toBeInTheDocument());
-        });
+        result = render(
+          <DeployStep
+            integrationSettings={integrationSettings}
+            connector={connector}
+            result={results}
+          />,
+          { wrapper }
+        );
+        await waitFor(() => expect(result.queryByTestId('deployStep-error')).toBeInTheDocument());
       });
 
       it('should not render success deploy message', () => {
@@ -185,17 +181,15 @@ describe('DeployStep', () => {
         mockRunInstallPackage.mockImplementationOnce(() => {
           throw new Error(errorMessage);
         });
-        await act(async () => {
-          result = render(
-            <DeployStep
-              integrationSettings={integrationSettings}
-              connector={connector}
-              result={results}
-            />,
-            { wrapper }
-          );
-          await waitFor(() => expect(result.queryByTestId('deployStep-error')).toBeInTheDocument());
-        });
+        result = render(
+          <DeployStep
+            integrationSettings={integrationSettings}
+            connector={connector}
+            result={results}
+          />,
+          { wrapper }
+        );
+        await waitFor(() => expect(result.queryByTestId('deployStep-error')).toBeInTheDocument());
       });
 
       it('should not render success deploy message', () => {

@@ -4,7 +4,7 @@ This library downloads, parses and re-generates data from [loghub](https://githu
 
 ## CLI
 
-Run `AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... node x-pack/scripts/loghub_parser.js` to generate and validate Loghub parsers. Every parser exports functions that extract and replace timestamps in log messages from Loghub systems. A parser is considered valid if the extracted timestamp is the same as the replaced timestamp. If a parser does not exist or is not valid,
+Run `AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=... node x-pack/scripts/sample_log_parser.js` to generate and validate Loghub parsers. Every parser exports functions that extract and replace timestamps in log messages from Loghub systems. A parser is considered valid if the extracted timestamp is the same as the replaced timestamp. If a parser does not exist or is not valid,
 the LLM is used to re-generate a new one.
 
 ## SampleParserClient

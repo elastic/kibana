@@ -42,7 +42,7 @@ components:
           type: string
         timestamp:
           description: The time the attack discovery was generated
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
     AttackDiscoveries:
       type: array
       description: Array of attack discoveries

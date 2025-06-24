@@ -42,6 +42,7 @@ export const AGENT_POLICY_MAPPINGS = {
     unenroll_timeout: { type: 'integer' },
     updated_at: { type: 'date' },
     updated_by: { type: 'keyword' },
+    supports_agentless: { type: 'boolean' },
   },
 } as const;
 

@@ -19,12 +19,14 @@ export const populateIndex = async ({
   manifestVersion,
   archive,
   log,
+  elserInferenceId,
 }: {
   esClient: ElasticsearchClient;
   indexName: string;
   manifestVersion: string;
   archive: ZipArchive;
   log: Logger;
+  elserInferenceId?: string;
 }) => {
   log.debug(`Starting populating index ${indexName}`);
 
@@ -36,7 +38,13 @@ export const populateIndex = async ({
     const entryPath = contentEntries[i];
     log.debug(`Indexing content for entry ${entryPath}`);
     const contentBuffer = await archive.getEntryContent(entryPath);
-    await indexContentFile({ indexName, esClient, contentBuffer, legacySemanticText });
+    await indexContentFile({
+      indexName,
+      esClient,
+      contentBuffer,
+      legacySemanticText,
+      elserInferenceId,
+    });
   }
 
   log.debug(`Done populating index ${indexName}`);

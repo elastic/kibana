@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-
 import { EuiPanel, EuiSpacer, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PrivilegedUserMonitoringSampleDashboard } from './components/sample_dashboard/sample_dashboard';
 
 export const PrivilegedUserMonitoringSampleDashboardsPanel = () => {
   const { euiTheme } = useEuiTheme();
@@ -23,50 +23,7 @@ export const PrivilegedUserMonitoringSampleDashboardsPanel = () => {
       `}
     >
       <DashboardsSectionHeader />
-      <EuiPanel hasShadow={false} hasBorder={false}>
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
+      <PrivilegedUserMonitoringSampleDashboard />
       <EuiSpacer size="s" />
     </EuiPanel>
   );
@@ -78,7 +35,7 @@ const DashboardsSectionHeader = () => {
       color="warning"
       hasBorder={false}
       hasShadow={false}
-      paddingSize="s"
+      paddingSize="none"
       css={css`
         position: sticky;
         top: 0;
@@ -86,6 +43,7 @@ const DashboardsSectionHeader = () => {
         top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
       `}
     >
+      <EuiSpacer size="s" />
       <EuiTitle size="xxs" className="eui-textCenter" textTransform="uppercase">
         <h3>
           <EuiTextColor color="warning">
@@ -96,6 +54,7 @@ const DashboardsSectionHeader = () => {
           </EuiTextColor>
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
     </EuiPanel>
   );
 };

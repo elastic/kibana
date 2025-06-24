@@ -26,8 +26,13 @@ interface Props {
   message: ClientMessage;
 }
 
-function getTextToCopy(content: string): string {
-  return removeContentReferences(content);
+/**
+ * Returns the content of the message compatible with a standard markdown renderer.
+ *
+ * Content references are removed as they can only be rendered by the assistant.
+ */
+function getSelfContainedContent(content: string): string {
+  return removeContentReferences(content).trim();
 }
 
 const CommentActionsComponent: React.FC<Props> = ({ message }) => {
@@ -53,14 +58,14 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const onAddNoteToTimeline = useCallback(() => {
     updateAndAssociateNode({
       associateNote,
-      newNote: content,
+      newNote: getSelfContainedContent(content),
       updateNewNote: () => {},
       updateNote,
       user: '', // TODO: attribute assistant messages
     });
 
     toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
-  }, [associateNote, content, toasts, updateNote]);
+  }, [associateNote, toasts, updateNote, content]);
 
   // Attach to case support
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -72,13 +77,13 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     selectCaseModal.open({
       getAttachments: () => [
         {
-          comment: content,
+          comment: getSelfContainedContent(content),
           type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
-  }, [content, selectCaseModal]);
+  }, [selectCaseModal, content]);
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
@@ -95,8 +100,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   //     message.traceData != null
   //         ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
   //         : undefined;
-
-  const textToCopy = getTextToCopy(content);
 
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
@@ -136,7 +139,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={textToCopy}>
+          <EuiCopy textToCopy={getSelfContainedContent(content)}>
             {(copy) => (
               <EuiButtonIcon
                 aria-label={i18n.COPY_TO_CLIPBOARD}

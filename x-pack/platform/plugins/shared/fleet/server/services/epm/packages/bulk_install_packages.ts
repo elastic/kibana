@@ -155,10 +155,13 @@ export async function bulkInstallPackages({
           installType: installResult.installType,
         };
       }
+
+      const { pkgName, ...restOfInstallResult } = installResult;
+
       return {
         name: packageName,
         version: pkgKeyProps.version,
-        result: installResult,
+        result: restOfInstallResult,
       };
     })
   );

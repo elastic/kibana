@@ -17,6 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
+  PublishesDescription,
   PublishesSavedObjectId,
   PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
@@ -32,8 +33,10 @@ import type {
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type {
+  DynamicActionsSerializedState,
+  HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
@@ -98,15 +101,13 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState
-> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritableTitle &
-  PublishesSavedSearch &
+  Required<PublishesWritableTitle> &
+  Required<PublishesDescription> &
+  PublishesWritableSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
   HasLibraryTransforms &
@@ -118,6 +119,10 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
+}
+
+export interface PublishesWritableSavedSearch extends PublishesSavedSearch {
+  setColumns: (columns: string[] | undefined) => void;
 }
 
 export const apiPublishesSavedSearch = (

@@ -9,6 +9,7 @@ import { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
+import { LeftPanelVisualizeTab } from '../../left';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsLeftPanelKey, DocumentDetailsRightPanelKey } from '../constants/panel_keys';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
@@ -74,7 +75,7 @@ export const useNavigateToGraphVisualization = ({
         scopeId,
       },
       path: {
-        tab: 'visualize',
+        tab: LeftPanelVisualizeTab,
         subTab: GRAPH_ID,
       },
     }),
@@ -87,7 +88,7 @@ export const useNavigateToGraphVisualization = ({
       telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
-        tabId: 'visualize',
+        tabId: LeftPanelVisualizeTab,
       });
     } else {
       openFlyout({

@@ -11,8 +11,9 @@ import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -40,17 +41,24 @@ export type TotalHitsRequest = RequestState<number>;
 export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
-  searchSessionId?: string;
+  timeRangeAbsolute: TimeRange | undefined;
+  timeRangeRelative: TimeRange | undefined;
+  searchSessionId: string | undefined;
+}
+
+export interface TabStateGlobalState {
+  timeRange?: TimeRange;
+  refreshInterval?: RefreshInterval;
+  filters?: Filter[];
 }
 
 export interface TabState extends TabItem {
-  lastPersistedGlobalState: {
-    timeRange?: TimeRange;
-    refreshInterval?: RefreshInterval;
-    filters?: Filter[];
-  };
+  // Initial app and global state for the tab (provided before the tab is initialized).
+  initialAppState?: DiscoverAppState;
+  initialGlobalState?: TabStateGlobalState;
+
+  // The following properties are used to manage the tab's state after it has been initialized.
+  lastPersistedGlobalState: TabStateGlobalState;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
@@ -66,15 +74,21 @@ export interface TabState extends TabItem {
   chartRequest: ChartRequest;
 }
 
+export interface RecentlyClosedTabState extends TabState {
+  closedAt: number;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
-    byId: Record<string, TabState>;
+    byId: Record<string, TabState | RecentlyClosedTabState>;
     allIds: string[];
+    recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,

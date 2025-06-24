@@ -14,14 +14,11 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
+import { useMemo } from 'react';
 import { useKibana } from '../../common/lib/kibana';
-import {
-  ASSET_FIELDS,
-  MAX_ASSETS_TO_LOAD,
-  ASSET_INVENTORY_INDEX_PATTERN,
-  QUERY_KEY_GRID_DATA,
-} from '../constants';
+import { ASSET_FIELDS, MAX_ASSETS_TO_LOAD, QUERY_KEY_GRID_DATA } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
+import { useDataViewContext } from './data_view_context';
 
 interface UseAssetsOptions extends BaseEsQuery {
   sort: string[][];
@@ -34,9 +31,16 @@ const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
   ASSET_FIELDS.ENTITY_NAME,
 ];
 
-const getAssetsQuery = ({ query, sort }: UseAssetsOptions, pageParam: unknown) => {
+const getAssetsQuery = (
+  { query, sort }: UseAssetsOptions,
+  pageParam: unknown,
+  indexPattern?: string
+) => {
+  if (!indexPattern) {
+    throw new Error('Index pattern is required');
+  }
   return {
-    index: ASSET_INVENTORY_INDEX_PATTERN,
+    index: indexPattern,
     sort: getMultiFieldsSort(sort),
     runtime_mappings: getRuntimeMappingsFromSort(
       ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS,
@@ -72,6 +76,13 @@ export function useFetchGridData(options: UseAssetsOptions) {
     data,
     notifications: { toasts },
   } = useKibana().services;
+
+  const { dataView } = useDataViewContext();
+
+  const dataViewIndexPattern = useMemo(() => {
+    return dataView?.getIndexPattern();
+  }, [dataView]);
+
   return useInfiniteQuery(
     [QUERY_KEY_GRID_DATA, { params: options }],
     async ({ pageParam }) => {
@@ -79,7 +90,11 @@ export function useFetchGridData(options: UseAssetsOptions) {
         rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestAssetsRequest, LatestAssetsResponse>({
-          params: getAssetsQuery(options, pageParam) as LatestAssetsRequest['params'],
+          params: getAssetsQuery(
+            options,
+            pageParam,
+            dataViewIndexPattern
+          ) as LatestAssetsRequest['params'],
         })
       );
 
@@ -89,7 +104,7 @@ export function useFetchGridData(options: UseAssetsOptions) {
       };
     },
     {
-      enabled: options.enabled,
+      enabled: options.enabled && !!dataViewIndexPattern,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
       getNextPageParam: (lastPage, allPages) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
+import { Streams, isIlmLifecycle } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -31,7 +31,7 @@ const lifecycleStatsRoute = createServerRoute({
     const name = params.path.name;
 
     const definition = await streamsClient.getStream(name);
-    if (!isIngestStreamDefinition(definition)) {
+    if (!Streams.ingest.all.Definition.is(definition)) {
       throw new StatusError('Lifecycle stats are only available for ingest streams', 400);
     }
 

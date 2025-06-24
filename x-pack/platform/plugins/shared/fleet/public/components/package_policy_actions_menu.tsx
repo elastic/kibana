@@ -147,6 +147,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         from={from}
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
+        packagePolicyPackage={packagePolicy.package}
       >
         {(deletePackagePoliciesPrompt) => {
           return (

@@ -55,7 +55,6 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
-    readonly serverlessGuide: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -173,6 +172,7 @@ export interface DocLinks {
   };
   readonly heartbeat: {
     readonly base: string;
+    readonly monitorTags: string;
   };
   readonly libbeat: {
     readonly getStarted: string;
@@ -256,7 +256,6 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
-    readonly dashboardImportExport: string;
     readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
@@ -266,6 +265,9 @@ export interface DocLinks {
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
+    readonly logsDatastream: string;
+    readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -278,11 +280,13 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly gapsTable: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
   };
   readonly server: {
     readonly protocol: string;
+    readonly publicBaseUrl: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -292,7 +296,9 @@ export interface DocLinks {
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
+    readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
     readonly blocklist: string;
@@ -325,8 +331,6 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
-    readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyRuleManagementBulkApiDeprecations: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
   };
@@ -394,6 +398,7 @@ export interface DocLinks {
     tlsCertificate: string;
     uptimeDurationAnomaly: string;
     monitorLogs: string;
+    logsStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -405,6 +410,8 @@ export interface DocLinks {
     slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
+    elasticManagedLlm: string;
+    elasticManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -463,7 +470,6 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
-    deprecatedV1Endpoints: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{
@@ -486,6 +492,7 @@ export interface DocLinks {
   readonly fleet: Readonly<{
     beatsAgentComparison: string;
     guide: string;
+    fingerprint: string;
     fleetServer: string;
     fleetServerAddFleetServer: string;
     esSettings: string;
@@ -528,6 +535,7 @@ export interface DocLinks {
     unprivilegedMode: string;
     httpMonitoring: string;
     agentLevelLogging: string;
+    remoteESOoutputTroubleshooting: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -644,9 +652,11 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
-
   readonly queryRules: {
     readonly queryRulesAPIDocumentation: string;
+  };
+  readonly datasetQuality: {
+    readonly failureStore: string;
   };
 }
 

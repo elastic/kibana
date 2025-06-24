@@ -9,13 +9,18 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import type { AxiosError } from 'axios';
+import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 
 import { AgentlessAgentConfigError } from '../../errors';
 import type { AgentPolicy, NewAgentPolicy } from '../../types';
+import {
+  type AgentlessApiDeploymentResponse,
+  AgentlessApiDeploymentResponseCode,
+} from '../../../common/types';
 
 import { appContextService } from '../app_context';
+import { agentPolicyService } from '../agent_policy';
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 
@@ -66,6 +71,13 @@ function getAgentPolicyCreateMock() {
 }
 let mockedLogger: jest.Mocked<Logger>;
 
+const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploymentResponse>> = {
+  data: {
+    code: AgentlessApiDeploymentResponseCode.Success,
+    error: null,
+  },
+};
+
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
   SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
@@ -81,6 +93,9 @@ describe('Agentless Agent service', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
     (axios as jest.MockedFunction<typeof axios>).mockReset();
+    jest.spyOn(agentPolicyService, 'getFullAgentPolicy').mockResolvedValue({
+      outputs: { agentless: {} as any },
+    } as any);
     jest.clearAllMocks();
   });
 
@@ -89,12 +104,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for ESS', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -108,6 +120,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -162,7 +178,7 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -177,6 +193,13 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
         }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
@@ -187,12 +210,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent for serverless', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -206,6 +226,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -262,10 +286,10 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -276,7 +300,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -286,12 +317,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent with resources', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -305,6 +333,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -369,10 +401,10 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -389,7 +421,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -399,12 +438,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent with cloud_connectors', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -418,6 +454,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -486,10 +526,10 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: {
+        data: expect.objectContaining({
           fleet_token: 'mocked-fleet-enrollment-api-key',
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
@@ -510,7 +550,14 @@ describe('Agentless Agent service', () => {
               team: 'fleet',
             },
           },
-        },
+          secrets: {
+            fleet_app_token: 'fleet-app-token',
+            elasticsearch_app_token: 'es-app-token',
+          },
+          policy_details: {
+            output_name: 'agentless',
+          },
+        }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
         method: 'POST',
@@ -520,12 +567,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should create agentless agent when no labels are given', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -539,6 +583,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -579,7 +627,7 @@ describe('Agentless Agent service', () => {
     );
 
     expect(axios).toHaveBeenCalledTimes(1);
-    expect(createAgentlessAgentReturnValue).toEqual(returnValue);
+    expect(createAgentlessAgentReturnValue).toEqual(mockAgentlessDeploymentResponse);
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -613,6 +661,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -634,11 +686,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should upgraded agentless agent for ESS', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: {
         enabled: true,
@@ -649,6 +699,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -689,6 +743,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest
@@ -712,12 +770,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should redact sensitive information from debug logs', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -731,6 +786,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -778,12 +837,9 @@ describe('Agentless Agent service', () => {
   });
 
   it('should log "undefined" on debug logs when tls configuration is missing', async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -852,6 +908,10 @@ describe('Agentless Agent service', () => {
             ca: '/path/to/ca',
           },
         },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
       },
     } as any);
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -899,12 +959,9 @@ describe('Agentless Agent service', () => {
   });
 
   it(`should have x-elastic-internal-origin in the headers when the request is internal`, async () => {
-    const returnValue = {
-      id: 'mocked',
-      regional_id: 'mocked',
-    };
-
-    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(
+      mockAgentlessDeploymentResponse
+    );
     const soClient = getAgentPolicyCreateMock();
     // ignore unrelated unique name constraint
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -918,6 +975,10 @@ describe('Agentless Agent service', () => {
             key: '/path/to/key',
             ca: '/path/to/ca',
           },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
         },
       },
     } as any);
@@ -979,6 +1040,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
 
@@ -1012,6 +1077,10 @@ describe('Agentless Agent service', () => {
               certificate: '/path/to/cert',
               key: '/path/to/key',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1062,6 +1131,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1099,6 +1172,10 @@ describe('Agentless Agent service', () => {
               certificate: '/path/to/cert',
               key: '/path/to/key',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1140,6 +1217,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1201,6 +1282,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1260,6 +1345,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1321,6 +1410,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1380,6 +1473,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);
@@ -1441,6 +1538,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1501,6 +1602,10 @@ describe('Agentless Agent service', () => {
               ca: '/path/to/ca',
             },
           },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
+          },
         },
       } as any);
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
@@ -1560,6 +1665,10 @@ describe('Agentless Agent service', () => {
               key: '/path/to/key',
               ca: '/path/to/ca',
             },
+          },
+          deploymentSecrets: {
+            fleetAppToken: 'fleet-app-token',
+            elasticsearchAppToken: 'es-app-token',
           },
         },
       } as any);

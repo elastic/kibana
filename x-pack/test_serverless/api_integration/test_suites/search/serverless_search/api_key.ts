@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { kibanaTestSuperuserServerless } from '@kbn/test';
 import { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';

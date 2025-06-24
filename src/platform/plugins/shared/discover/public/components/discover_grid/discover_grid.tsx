@@ -33,7 +33,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
   ...props
 }) => {
-  const { dataView } = props;
+  const { dataView, setExpandedDoc, renderDocumentView } = props;
   const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
   const getRowIndicator = useMemo(() => {
     return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -47,6 +47,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       dataView,
       query,
       updateESQLQuery: onUpdateESQLQuery,
+      setExpandedDoc,
+      isDocViewerEnabled: !!renderDocumentView,
     });
   }, [
     customRowAdditionalLeadingControls,
@@ -54,6 +56,8 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     getRowAdditionalLeadingControlsAccessor,
     onUpdateESQLQuery,
     query,
+    setExpandedDoc,
+    renderDocumentView,
   ]);
 
   const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');

@@ -23,25 +23,31 @@ import {
   PostEvaluateBody,
   PostEvaluateResponse,
   DefendInsightType,
+  INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
-import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts';
 import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
-import { fetchLangSmithDataset } from './utils';
+import {
+  createOrUpdateEvaluationResults,
+  EvaluationStatus,
+  fetchLangSmithDataset,
+  setupEvaluationIndex,
+} from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { evaluateAttackDiscovery } from '../../lib/attack_discovery/evaluation';
@@ -52,15 +58,19 @@ import {
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const postEvaluateRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  config?: ConfigSchema
+) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -154,10 +164,25 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
           // Setup graph params
           // Get a scoped esClient for esStore + writing results to the output index
           const esClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const esClientInternalUser = ctx.core.elasticsearch.client.asInternalUser;
+
+          // Create output index for writing results and write current eval as RUNNING
+          await setupEvaluationIndex({ esClientInternalUser, logger });
+          await createOrUpdateEvaluationResults({
+            evaluationResults: [{ id: evaluationId, status: EvaluationStatus.RUNNING }],
+            esClientInternalUser,
+            logger,
+          });
 
           const inference = ctx.elasticAssistant.inference;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
+
+          const { featureFlags } = await context.core;
+          const inferenceChatModelEnabled = await featureFlags.getBooleanValue(
+            INFERENCE_CHAT_MODEL_ENABLED_FEATURE_FLAG,
+            false
+          );
 
           // Data clients
           const anonymizationFieldsDataClient =
@@ -216,9 +241,10 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 actionsClient,
                 defendInsightsGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -260,9 +286,10 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
+                esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
                 langSmithApiKey,
@@ -293,23 +320,44 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType);
-              const createLlmInstance = () =>
-                new llmClass({
-                  actionsClient,
-                  connectorId: connector.id,
-                  llmType,
-                  logger,
-                  temperature: getDefaultArguments(llmType).temperature,
-                  signal: abortSignal,
-                  streaming: false,
-                  maxRetries: 0,
-                  convertSystemMessageToHumanContent: false,
-                  telemetryMetadata: {
-                    pluginId: 'security_ai_assistant',
-                  },
-                });
+              const createLlmInstance = async () =>
+                inferenceChatModelEnabled
+                  ? inference.getChatModel({
+                      request,
+                      connectorId: connector.id,
+                      chatModelOptions: {
+                        signal: abortSignal,
+                        temperature: getDefaultArguments(llmType).temperature,
+                        // prevents the agent from retrying on failure
+                        // failure could be due to bad connector, we should deliver that result to the client asap
+                        maxRetries: 0,
+                        metadata: {
+                          connectorTelemetry: {
+                            pluginId: 'security_ai_assistant',
+                          },
+                        },
+                        // TODO add timeout to inference once resolved https://github.com/elastic/kibana/issues/221318
+                        // timeout: ROUTE_HANDLER_TIMEOUT,
+                      },
+                    })
+                  : new llmClass({
+                      actionsClient,
+                      connectorId: connector.id,
+                      llmType,
+                      logger,
+                      model: connector.config?.defaultModel,
+                      temperature: getDefaultArguments(llmType).temperature,
+                      signal: abortSignal,
+                      streaming: false,
+                      maxRetries: 0,
+                      convertSystemMessageToHumanContent: false,
+                      telemetryMetadata: {
+                        pluginId: 'security_ai_assistant',
+                      },
+                      timeout: ROUTE_HANDLER_TIMEOUT,
+                    });
 
-              const llm = createLlmInstance();
+              const llm = await createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
                   {
@@ -388,9 +436,10 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                     } catch (e) {
                       logger.error(`Failed to get prompt for tool: ${tool.name}`);
                     }
+                    const chatModel = await createLlmInstance();
                     return tool.getTool({
                       ...assistantToolParams,
-                      llm: createLlmInstance(),
+                      llm: chatModel,
                       isOssModel,
                       description,
                     });
@@ -412,13 +461,14 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
               const chatPromptTemplate = formatPrompt({
                 prompt: defaultSystemPrompt,
                 llmType,
-                isOpenAI,
               });
+              const chatModel = await createLlmInstance();
 
-              const agentRunnable = await agentRunableFactory({
-                llm: createLlmInstance(),
-                isOpenAI,
+              const agentRunnable = await agentRunnableFactory({
+                llm: chatModel,
                 llmType,
+                inferenceChatModelEnabled,
+                isOpenAI,
                 tools,
                 isStream: false,
                 prompt: chatPromptTemplate,
@@ -434,12 +484,21 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 llmType,
                 isOssModel,
                 graph: getDefaultAssistantGraph({
+                  contentReferencesStore,
                   agentRunnable,
                   dataClients,
                   createLlmInstance,
                   logger,
                   actionsClient,
                   savedObjectsClient,
+                  telemetry: ctx.elasticAssistant.telemetry,
+                  telemetryParams: {
+                    assistantStreamingEnabled: false,
+                    actionTypeId: connector.actionTypeId,
+                    model: connector.config?.defaultModel,
+                    isEnabledKnowledgeBase,
+                    eventType: 'unused but required', // stub value
+                  },
                   tools,
                   replacements: {},
                   getFormattedTime: () =>
@@ -486,6 +545,11 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
               maxConcurrency: 3,
             })
               .then((output) => {
+                void createOrUpdateEvaluationResults({
+                  evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+                  esClientInternalUser,
+                  logger,
+                });
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
               })
               .catch((err) => {

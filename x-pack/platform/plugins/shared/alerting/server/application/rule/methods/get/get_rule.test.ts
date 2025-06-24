@@ -134,6 +134,9 @@ describe('get()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -232,6 +235,9 @@ describe('get()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -319,6 +325,9 @@ describe('get()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {
@@ -449,6 +458,9 @@ describe('get()', () => {
         "alertTypeId": "123",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "executionStatus": Object {

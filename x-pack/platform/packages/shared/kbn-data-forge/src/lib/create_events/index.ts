@@ -87,4 +87,5 @@ export async function createEvents(
     now += interval;
   }
   logger.info(`Indexing complete for ${schedule.template} events.`);
+  return queue.drain();
 }

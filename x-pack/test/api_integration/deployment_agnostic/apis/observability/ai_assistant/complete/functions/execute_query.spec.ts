@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { EsqlResponse } from '@elastic/elasticsearch/lib/helpers';
+import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import {
   LlmProxy,
   createLlmProxy,
@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
 
   describe('execute_query', function () {
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }),
         });
 
-        void llmProxy.interceptConversation('Hello from user');
+        void llmProxy.interceptWithResponse('Hello from user');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: 'Please retrieve the most recent Apache log messages',
@@ -190,7 +190,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('the `execute_query` tool call response', () => {
-          let toolCallResponse: { columns: EsqlResponse['columns']; rows: EsqlResponse['values'] };
+          let toolCallResponse: {
+            columns: EsqlToRecords<any>['columns'];
+            rows: EsqlToRecords<any>['records'];
+          };
           before(async () => {
             toolCallResponse = JSON.parse(last(fourthRequestBody.messages)?.content as string);
           });

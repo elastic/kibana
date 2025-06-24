@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
 import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
@@ -56,7 +56,7 @@ export const AttackDiscovery = z.object({
   /**
    * The time the attack discovery was generated
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
 });
 
 /**

@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { loadConnectorsFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
+import { getSecurityGenAIConfigFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
 import { getTinyElserServerArgs } from '../../../knowledge_base/entries/utils/helpers';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../config/ess/config.base.trial')
   );
 
-  const preconfiguredConnectors = loadConnectorsFromEnvVar();
+  const preconfiguredConnectors = getSecurityGenAIConfigFromEnvVar().connectors;
 
   return {
     ...functionalConfig.getAll(),
@@ -36,6 +36,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.actions.allowedHosts=["*"]`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,
         ...getTinyElserServerArgs(),
+        // Uncomment to enable debug logger to see full eval traces in kibana logs
+        // `--logging.loggers=${JSON.stringify([
+        //   {
+        //     name: 'plugins.elasticAssistant',
+        //     level: 'debug',
+        //   },
+        // ])}`,
       ],
     },
     testFiles: [require.resolve('..')],

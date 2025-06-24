@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -27,30 +27,46 @@ import {
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
-export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
-  if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
-  return [
-    {
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
-        {
-          defaultMessage: 'Passed findings',
-        }
-      ),
-      count: passedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
-    },
-    {
-      key: i18n.translate(
-        'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
-        {
-          defaultMessage: 'Failed findings',
-        }
-      ),
-      count: failedFindingsStats,
-      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
-    },
-  ];
+interface MisconfigurationPreviewDistributionBarProps {
+  key: string;
+  count: number;
+  color: string;
+}
+
+export const useGetFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+  const { getMisconfigurationStatusColor } = useGetMisconfigurationStatusColor();
+
+  return useMemo(() => {
+    const misconfigurationStats: MisconfigurationPreviewDistributionBarProps[] = [];
+    if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
+    if (passedFindingsStats > 0) {
+      misconfigurationStats.push({
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.passedFindingsText',
+          {
+            defaultMessage: '{count, plural, one {Passed finding} other {Passed findings}}',
+            values: { count: passedFindingsStats },
+          }
+        ),
+        count: passedFindingsStats,
+        color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
+      });
+    }
+    if (failedFindingsStats > 0) {
+      misconfigurationStats.push({
+        key: i18n.translate(
+          'xpack.securitySolution.flyout.right.insights.misconfigurations.failedFindingsText',
+          {
+            defaultMessage: '{count, plural, one {Failed finding} other {Failed findings}}',
+            values: { count: failedFindingsStats },
+          }
+        ),
+        count: failedFindingsStats,
+        color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
+      });
+    }
+    return misconfigurationStats;
+  }, [passedFindingsStats, failedFindingsStats, getMisconfigurationStatusColor]);
 };
 
 const MisconfigurationPreviewScore = ({
@@ -105,6 +121,7 @@ export const MisconfigurationsPreview = ({
     field,
     value
   );
+  const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
@@ -165,7 +182,7 @@ export const MisconfigurationsPreview = ({
             <EuiFlexItem />
             <EuiFlexItem>
               <EuiSpacer />
-              <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+              <DistributionBar stats={findingsStats} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

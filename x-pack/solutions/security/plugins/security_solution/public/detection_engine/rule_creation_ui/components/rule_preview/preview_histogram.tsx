@@ -97,11 +97,11 @@ const PreviewHistogramComponent = ({
   const previousPreviewId = usePrevious(previewId);
   const previewQueryId = `${ID}-${previewId}`;
   const previewEmbeddableId = `${previewQueryId}-embeddable`;
-  const { responses: visualizationResponses } = useVisualizationResponse({
+  const { tables } = useVisualizationResponse({
     visualizationId: previewEmbeddableId,
   });
 
-  const totalCount = visualizationResponses?.[0]?.hits?.total ?? 0;
+  const totalCount = (tables && tables.meta.statistics.totalCount) ?? 0;
 
   useEffect(() => {
     if (previousPreviewId !== previewId && totalCount > 0) {

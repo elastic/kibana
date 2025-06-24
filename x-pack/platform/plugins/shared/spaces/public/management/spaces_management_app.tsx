@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   PrivilegesAPIClientPublicContract,
   RolesAPIClient,
@@ -181,7 +180,7 @@ export const spacesManagementApp = Object.freeze({
         };
 
         render(
-          <KibanaRenderContextProvider {...coreStart}>
+          coreStart.rendering.addContext(
             <KibanaContextProvider services={coreStart}>
               <RedirectAppLinks coreStart={coreStart}>
                 <Router history={history}>
@@ -199,7 +198,7 @@ export const spacesManagementApp = Object.freeze({
                 </Router>
               </RedirectAppLinks>
             </KibanaContextProvider>
-          </KibanaRenderContextProvider>,
+          ),
           element
         );
 

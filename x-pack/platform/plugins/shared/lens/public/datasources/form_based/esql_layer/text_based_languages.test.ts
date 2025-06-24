@@ -143,6 +143,52 @@ describe('Textbased Data Source', () => {
     } as unknown as TextBasedPrivateState;
   });
 
+  describe('#isEqual', () => {
+    const mockState = {
+      layers: {
+        a: {
+          columns: [
+            {
+              columnId: 'a',
+              fieldName: 'Foo',
+              meta: {
+                type: 'number',
+              },
+            },
+            {
+              columnId: 'b',
+              fieldName: 'Foo',
+              meta: {
+                type: 'number',
+              },
+            },
+          ],
+          index: 'foo',
+        },
+      },
+    } as unknown as TextBasedPrivateState;
+
+    it('should return true comparing same state', () => {
+      const isEqual = TextBasedDatasource.isEqual(mockState, [], { ...mockState }, []);
+
+      expect(isEqual).toBe(true);
+    });
+
+    it('should ignore undefined initialContext property', () => {
+      const isEqual = TextBasedDatasource.isEqual(
+        mockState,
+        [],
+        {
+          ...mockState,
+          initialContext: undefined,
+        },
+        []
+      );
+
+      expect(isEqual).toBe(true);
+    });
+  });
+
   describe('uniqueLabels', () => {
     it('appends a suffix to duplicates', () => {
       const map = TextBasedDatasource.uniqueLabels(

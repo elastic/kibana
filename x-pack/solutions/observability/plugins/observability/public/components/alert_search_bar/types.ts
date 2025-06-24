@@ -75,6 +75,7 @@ export interface AlertSearchBarContainerState {
   filters?: Filter[];
   savedQueryId?: string;
   controlConfigs?: FilterControlConfig[];
+  groupings?: string[];
 }
 
 interface AlertSearchBarStateTransitions {

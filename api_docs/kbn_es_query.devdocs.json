@@ -2106,7 +2106,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; timeRangeFilter: ",
+          "[]; timeRangeFilter?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

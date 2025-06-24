@@ -29,7 +29,7 @@ import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   buildFieldsDefinitions,
-  getNewVariableSuggestion,
+  getNewUserDefinedColumnSuggestion,
   getOperatorSuggestions,
 } from '../../factories';
 
@@ -39,7 +39,7 @@ export async function suggest({
   getPolicies,
   getPolicyMetadata,
   getAllColumnNames,
-  getSuggestedVariableName,
+  getSuggestedUserDefinedColumnName,
 }: CommandSuggestParams<'enrich'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
@@ -123,7 +123,9 @@ export async function suggest({
 
       const suggestions: SuggestionRawDefinition[] = [];
       suggestions.push(
-        getNewVariableSuggestion(getSuggestedVariableName(policyMetadata.enrichFields))
+        getNewUserDefinedColumnSuggestion(
+          getSuggestedUserDefinedColumnName(policyMetadata.enrichFields)
+        )
       );
       suggestions.push(...(await getFieldSuggestionsForWithClause()));
       return suggestions;

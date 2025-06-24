@@ -22,16 +22,20 @@ interface Pipeline {
 }
 
 export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityFields> {
-  constructor(options: { client: Client; logger: Logger } & EntitiesSynthtraceEsClientOptions) {
+  constructor(
+    options: {
+      client: Client;
+      logger: Logger;
+      pipeline?: Pipeline;
+    } & EntitiesSynthtraceEsClientOptions
+  ) {
     super({
       ...options,
-      pipeline: entitiesPipeline(),
+      pipeline: entitiesPipeline({
+        includeSerialization: options.pipeline?.includeSerialization,
+      }),
     });
     this.indices = ['.entities.v1.latest.builtin*'];
-  }
-
-  getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
-    return entitiesPipeline({ includeSerialization });
   }
 }
 
@@ -40,8 +44,8 @@ function entitiesPipeline({ includeSerialization }: Pipeline = { includeSerializ
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       lastSeenTimestampTransform(),
       getRoutingTransform(),

@@ -14,6 +14,9 @@ export type {
   ToastInput,
   IToasts,
   ToastInputFields,
+  NotificationCoordinator,
+  NotificationCoordinatorState,
+  NotificationCoordinatorPublicApi,
 } from './src/types';
 export type {
   ToastsSetup,

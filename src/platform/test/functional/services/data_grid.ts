@@ -174,9 +174,13 @@ export class DataGridService extends FtrService {
     );
   }
 
+  private getCellElementByColumnNameSelector(rowIndex: number, columnName: string) {
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`;
+  }
+
   public async getCellElementByColumnName(rowIndex: number, columnName: string) {
     return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
     );
   }
 
@@ -317,6 +321,12 @@ export class DataGridService extends FtrService {
     return await this.find.allByCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  public async getAllCellElementsByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.allByCssSelector(
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
+    );
+  }
+
   public async getDocCount(): Promise<number> {
     const grid = await this.find.byCssSelector('[data-document-number]');
     return Number(await grid.getAttribute('data-document-number'));
@@ -422,6 +432,30 @@ export class DataGridService extends FtrService {
     selector: string = 'docTable'
   ): Promise<WebElementWrapper[]> {
     return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
+  }
+
+  public async clickQualityIssueLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableDegradedDocExist');
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find quality issue leading control for row index ${rowIndex}`);
+    }
+  }
+
+  public async clickStacktraceLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableStacktraceExist');
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find stacktrace leading control for row index ${rowIndex}`);
+    }
   }
 
   public async clickRowToggle(

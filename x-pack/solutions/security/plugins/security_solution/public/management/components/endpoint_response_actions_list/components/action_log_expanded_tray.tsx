@@ -224,7 +224,7 @@ const OutputContent = memo<{
               }
               textSize="xs"
               data-test-subj={getTestId('actionsLogTray')}
-              hideFile={true}
+              hideFile={action.agentType === 'crowdstrike'}
               hideContext={true}
             />
           </div>
@@ -304,11 +304,11 @@ export const ActionsLogExpandedTray = memo<{
         description:
           reduce(
             hosts,
-            (acc, host) => {
+            (acc, host, agentId) => {
               if (host.name.trim().length) {
                 acc.push(host.name);
               } else {
-                acc.push(emptyValue);
+                acc.push(agentId);
               }
               return acc;
             },

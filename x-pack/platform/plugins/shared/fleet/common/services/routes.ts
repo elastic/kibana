@@ -145,6 +145,12 @@ export const epmRouteService = {
   getUpdateCustomIntegrationsPath: (pkgName: string) => {
     return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
   },
+  getDeletePackageDatastreamAssets: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
@@ -304,6 +310,9 @@ export const agentRouteService = {
   getAgentFileDeletePath: (fileId: string) =>
     AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
+  postMigrateSingleAgent: (agentId: string) =>
+    AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
+  postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
 };
 
 export const outputRoutesService = {
@@ -348,6 +357,7 @@ export const settingsRoutesService = {
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
   getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
   getSpaceInfoPath: () => SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+  postSpaceAwarenessMigrationPath: () => APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
 };
 
 export const appRoutesService = {

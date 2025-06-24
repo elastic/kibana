@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '../../definitions/types';
+import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
+import { AVG_TYPES, EXPECTED_FOR_EMPTY_EXPRESSION } from './autocomplete.command.stats.test';
 import {
   EMPTY_WHERE_SUGGESTIONS,
   EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS,
 } from './autocomplete.command.where.test';
-import { AssertSuggestionsFn, SuggestFn, setup } from './helpers';
+import {
+  AssertSuggestionsFn,
+  SuggestFn,
+  attachTriggerCommand,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+  setup,
+  lookupIndexFields,
+} from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]', () => {
@@ -39,7 +50,23 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT '];
+        const FORK_SUBCOMMANDS = [
+          'WHERE ',
+          'SORT ',
+          'LIMIT ',
+          'DISSECT ',
+          'STATS ',
+          'EVAL ',
+          'GROK ',
+          'CHANGE_POINT ',
+          'COMPLETION ',
+          'MV_EXPAND ',
+          'DROP ',
+          'KEEP ',
+          'RENAME ',
+          'SAMPLE ',
+          'LOOKUP JOIN ',
+        ];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -78,6 +105,160 @@ describe('autocomplete.suggest', () => {
               'NULLS LAST',
             ]);
           });
+
+          test('dissect', async () => {
+            await assertSuggestions(
+              'FROM a | FORK (DISSECT /)',
+              getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+            );
+            await assertSuggestions('FROM a | FORK (DISSECT keywordField /)', ['"%{firstWord}" ']);
+            await assertSuggestions('FROM a | FORK (DISSECT keywordField "" /)', [
+              'APPEND_SEPARATOR = ',
+              '| ',
+            ]);
+          });
+
+          test('keep', async () => {
+            await assertSuggestions('FROM a | FORK (KEEP /)', getFieldNamesByType('any'));
+            await assertSuggestions('FROM a | FORK (KEEP integerField /)', [',', '| ']);
+          });
+
+          test('drop', async () => {
+            await assertSuggestions('FROM a | FORK (DROP /)', getFieldNamesByType('any'));
+            await assertSuggestions('FROM a | FORK (DROP integerField /)', [',', '| ']);
+          });
+
+          test('mv_expand', async () => {
+            await assertSuggestions(
+              'FROM a | FORK (MV_EXPAND /)',
+              getFieldNamesByType('any').map((name) => `${name} `)
+            );
+            await assertSuggestions('FROM a | FORK (MV_EXPAND integerField /)', ['| ']);
+          });
+
+          test('sample', async () => {
+            await assertSuggestions('FROM a | FORK (SAMPLE /)', ['.001 ', '.01 ', '.1 ']);
+            await assertSuggestions('FROM a | FORK (SAMPLE 0.01 /)', ['| ']);
+          });
+
+          test('rename', async () => {
+            await assertSuggestions('FROM a | FORK (RENAME /)', [
+              'col0 = ',
+              ...getFieldNamesByType('any').map((field) => field + ' '),
+            ]);
+            await assertSuggestions('FROM a | FORK (RENAME textField /)', ['AS ']);
+            await assertSuggestions('FROM a | FORK (RENAME field /)', ['= ']);
+          });
+
+          test('change_point', async () => {
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT /`,
+              getFieldNamesByType(ESQL_NUMBER_TYPES).map((v) => `${v} `)
+            );
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT value /)`,
+              ['ON ', 'AS ', '| '].map(attachTriggerCommand)
+            );
+            await assertSuggestions(
+              `FROM a | FORK (CHANGE_POINT value on /)`,
+              getFieldNamesByType('any').map((v) => `${v} `)
+            );
+          });
+
+          test('lookup join', async () => {
+            await assertSuggestions('FROM a | FORK (LOOKUP JOIN /)', [
+              'join_index ',
+              'join_index_with_alias ',
+              'lookup_index ',
+              'join_index_alias_1 $0',
+              'join_index_alias_2 $0',
+            ]);
+            const suggestions = await suggest('FROM a | FORK (LOOKUP JOIN join_index ON /)');
+            const labels = suggestions.map((s) => s.text.trim()).sort();
+            const expected = getFieldNamesByType('any')
+              .sort()
+              .map((field) => field.trim());
+
+            for (const { name } of lookupIndexFields) {
+              expected.push(name.trim());
+            }
+            expected.sort();
+
+            expect(labels).toEqual(expected);
+          });
+
+          describe('stats', () => {
+            it('suggests for empty expression', async () => {
+              await assertSuggestions('FROM a | FORK (STATS /)', EXPECTED_FOR_EMPTY_EXPRESSION);
+              await assertSuggestions(
+                'FROM a | FORK (STATS AVG(integerField), /)',
+                EXPECTED_FOR_EMPTY_EXPRESSION
+              );
+            });
+
+            it('suggest within a function', async () => {
+              await assertSuggestions('FROM a | FORK (STATS AVG(/))', [
+                ...getFieldNamesByType(AVG_TYPES),
+                ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, { scalar: true }),
+              ]);
+              await assertSuggestions('FROM a | FORK (STATS AVG(integerField) BY ACOS(/))', [
+                ...getFieldNamesByType([...AVG_TYPES, 'unsigned_long']),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  [...AVG_TYPES, 'unsigned_long'],
+                  {
+                    scalar: true,
+                  },
+                  undefined,
+                  ['acos']
+                ),
+              ]);
+            });
+
+            it('supports STATS ... WHERE', async () => {
+              await assertSuggestions(
+                'FROM a | FORK (STATS AVG(integerField) WHERE integerField /)',
+                [
+                  ...getFunctionSignaturesByReturnType(
+                    Location.STATS_WHERE,
+                    'any',
+                    { operators: true },
+                    ['integer']
+                  ),
+                ]
+              );
+            });
+          });
+
+          describe('eval', () => {
+            it('suggests for empty expression', async () => {
+              const emptyExpressionSuggestions = [
+                'col0 = ',
+                ...getFieldNamesByType('any').map((name) => `${name} `),
+                ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+              ];
+              await assertSuggestions('FROM a | FORK (EVAL /)', emptyExpressionSuggestions);
+              await assertSuggestions(
+                'FROM a | FORK (EVAL ACOS(integerField), /)',
+                emptyExpressionSuggestions
+              );
+            });
+
+            it('suggests within a function', async () => {
+              await assertSuggestions('FROM a | FORK (EVAL ACOS(/))', [
+                ...getFieldNamesByType(['integer', 'long', 'unsigned_long', 'double']),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  ['integer', 'long', 'unsigned_long', 'double'],
+                  {
+                    scalar: true,
+                  },
+                  undefined,
+                  ['acos']
+                ),
+              ]);
+            });
+          });
         });
 
         it('suggests pipe after complete subcommands', async () => {
@@ -89,6 +270,9 @@ describe('autocomplete.suggest', () => {
           await assertSuggestsPipe('FROM a | FORK (WHERE keywordField IS NOT NULL /)');
           await assertSuggestsPipe('FROM a | FORK (LIMIT 1234 /)');
           await assertSuggestsPipe('FROM a | FORK (SORT keywordField ASC /)');
+          await assertSuggestsPipe(
+            'FROM a | FORK (DISSECT keywordField "%{firstWord}" APPEND_SEPARATOR=":" /)'
+          );
         });
 
         it('suggests FORK subcommands after in-branch pipe', async () => {
@@ -101,6 +285,29 @@ describe('autocomplete.suggest', () => {
             'FROM a | FORK (SORT longField ASC NULLS LAST) (WHERE keywordField IS NULL | LIMIT 1234 | /)',
             FORK_SUBCOMMANDS
           );
+        });
+
+        describe('user-defined columns', () => {
+          it('suggests user-defined columns from earlier in this branch', async () => {
+            const suggestions = await suggest(
+              'FROM a | FORK (EVAL foo = 1 | EVAL bar = 2 | WHERE /)'
+            );
+            expect(suggestions.map(({ label }) => label)).toContain('foo');
+            expect(suggestions.map(({ label }) => label)).toContain('bar');
+          });
+
+          it('does NOT suggest user-defined columns from another branch', async () => {
+            const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE /)');
+            expect(suggestions.map(({ label }) => label)).not.toContain('foo');
+          });
+
+          it('suggests user-defined columns from all branches after FORK', async () => {
+            const suggestions = await suggest(
+              'FROM a | FORK (EVAL foo = 1) (EVAL bar = 2) | WHERE /'
+            );
+            expect(suggestions.map(({ label }) => label)).not.toContain('foo');
+            expect(suggestions.map(({ label }) => label)).not.toContain('bar');
+          });
         });
       });
     });

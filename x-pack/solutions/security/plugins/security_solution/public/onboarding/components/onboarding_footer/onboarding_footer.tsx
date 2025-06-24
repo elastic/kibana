@@ -53,12 +53,12 @@ interface FooterLinkItemProps {
 export const FooterLinkItem = React.memo<FooterLinkItemProps>(
   ({ id, title, icon, description, link }) => {
     const {
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useOnboardingContext();
 
     const onClickWithReport = useCallback<React.MouseEventHandler>(() => {
-      trackLinkClick?.(`${TELEMETRY_FOOTER_LINK}_${id}`);
-    }, [id, trackLinkClick]);
+      reportLinkClick?.(`${TELEMETRY_FOOTER_LINK}_${id}`);
+    }, [id, reportLinkClick]);
 
     return (
       <EuiFlexItem>

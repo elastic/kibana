@@ -20,12 +20,12 @@ export const EndpointCallout = React.memo(() => {
   const { euiTheme } = useEuiTheme();
   const { docLinks } = useKibana().services;
   const {
-    telemetry: { trackLinkClick },
+    telemetry: { reportLinkClick },
   } = useIntegrationContext();
 
   const onClick = useCallback(() => {
-    trackLinkClick?.(TELEMETRY_ENDPOINT_LEARN_MORE);
-  }, [trackLinkClick]);
+    reportLinkClick?.(TELEMETRY_ENDPOINT_LEARN_MORE);
+  }, [reportLinkClick]);
 
   return (
     <CardCallOut

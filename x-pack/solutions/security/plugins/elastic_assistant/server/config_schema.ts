@@ -13,4 +13,7 @@ export interface ConfigSchema {
 }
 export const configSchema = schema.object({
   elserInferenceId: schema.string({ defaultValue: ELASTICSEARCH_ELSER_INFERENCE_ID }),
+  responseTimeout: schema.number({
+    defaultValue: 10 * 60 * 1000, // 10 minutes
+  }),
 });

@@ -288,7 +288,15 @@
               "\n"
             ],
             "signature": [
-              "(jobId: string, payload: ",
+              "({ jobId, payload, request, taskInstanceFields, cancellationToken, stream, }: ",
+              {
+                "pluginId": "@kbn/reporting-server",
+                "scope": "server",
+                "docId": "kibKbnReportingServerPluginApi",
+                "section": "def-server.RunTaskOpts",
+                "text": "RunTaskOpts"
+              },
+              "<",
               {
                 "pluginId": "@kbn/reporting-export-types-png-common",
                 "scope": "common",
@@ -296,19 +304,7 @@
                 "section": "def-common.TaskPayloadPNGV2",
                 "text": "TaskPayloadPNGV2"
               },
-              ", taskInstanceFields: ",
-              "TaskInstanceFields",
-              ", cancellationToken: ",
-              {
-                "pluginId": "@kbn/reporting-common",
-                "scope": "common",
-                "docId": "kibKbnReportingCommonPluginApi",
-                "section": "def-common.CancellationToken",
-                "text": "CancellationToken"
-              },
-              ", stream: ",
-              "Writable",
-              ") => Promise<",
+              ">) => Promise<",
               "TaskRunResult",
               ">"
             ],
@@ -319,84 +315,27 @@
               {
                 "parentPluginId": "@kbn/reporting-export-types-png",
                 "id": "def-server.PngExportType.runTask.$1",
-                "type": "string",
-                "tags": [],
-                "label": "jobId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-png",
-                "id": "def-server.PngExportType.runTask.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "payload",
+                "label": "{\n    jobId,\n    payload,\n    request,\n    taskInstanceFields,\n    cancellationToken,\n    stream,\n  }",
                 "description": [],
                 "signature": [
+                  {
+                    "pluginId": "@kbn/reporting-server",
+                    "scope": "server",
+                    "docId": "kibKbnReportingServerPluginApi",
+                    "section": "def-server.RunTaskOpts",
+                    "text": "RunTaskOpts"
+                  },
+                  "<",
                   {
                     "pluginId": "@kbn/reporting-export-types-png-common",
                     "scope": "common",
                     "docId": "kibKbnReportingExportTypesPngCommonPluginApi",
                     "section": "def-common.TaskPayloadPNGV2",
                     "text": "TaskPayloadPNGV2"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-png",
-                "id": "def-server.PngExportType.runTask.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "taskInstanceFields",
-                "description": [],
-                "signature": [
-                  "TaskInstanceFields"
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-png",
-                "id": "def-server.PngExportType.runTask.$4",
-                "type": "Object",
-                "tags": [],
-                "label": "cancellationToken",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/reporting-common",
-                    "scope": "common",
-                    "docId": "kibKbnReportingCommonPluginApi",
-                    "section": "def-common.CancellationToken",
-                    "text": "CancellationToken"
-                  }
-                ],
-                "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/reporting-export-types-png",
-                "id": "def-server.PngExportType.runTask.$5",
-                "type": "Object",
-                "tags": [],
-                "label": "stream",
-                "description": [],
-                "signature": [
-                  "Writable"
+                  },
+                  ">"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/png/png_v2.ts",
                 "deprecated": false,

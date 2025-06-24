@@ -10,10 +10,11 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { noop, omit } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
+import type { HasSerializableState, SerializedPanelState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
-import { emptySerializer, isTextBasedLanguage } from '../helper';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { isTextBasedLanguage } from '../helper';
 import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
 import type { IntegrationCallbacks } from '../types';
 
@@ -33,6 +34,7 @@ function cleanupSerializedState({
 
 export function initializeIntegrations(
   getLatestState: GetStateType,
+  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
   { attributeService }: LensEmbeddableStartServices
 ): {
   api: Omit<
@@ -44,11 +46,9 @@ export function initializeIntegrations(
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
+    | 'mountInlineFlyout'
   > &
     HasSerializableState;
-  cleanup: () => void;
-  serialize: () => {};
-  comparators: {};
 } {
   return {
     api: {
@@ -61,8 +61,17 @@ export function initializeIntegrations(
         const cleanedState = cleanupSerializedState(
           attributeService.extractReferences(currentState)
         );
+        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
+          serializeDynamicActions?.() ?? {};
         if (cleanedState.rawState.savedObjectId) {
-          return { ...cleanedState, rawState: { ...cleanedState.rawState, attributes: undefined } };
+          return {
+            rawState: {
+              ...cleanedState.rawState,
+              ...dynamicActionsState,
+              attributes: undefined,
+            },
+            references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+          };
         }
         return cleanedState;
       },
@@ -79,8 +88,5 @@ export function initializeIntegrations(
         return getLanguageDisplayName(language).toUpperCase();
       },
     },
-    comparators: {},
-    serialize: emptySerializer,
-    cleanup: noop,
   };
 }

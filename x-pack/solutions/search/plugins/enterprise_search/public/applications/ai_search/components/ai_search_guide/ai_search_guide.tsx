@@ -35,6 +35,7 @@ export const AISearchGuide: React.FC = () => {
 
   return (
     <EnterpriseSearchAISearchPageTemplate
+      data-test-subj="aiSearchGuidePage"
       restrictWidth
       bottomBorder={false}
       pageHeader={{

@@ -23,7 +23,6 @@ import type {
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
@@ -99,7 +98,6 @@ export interface TaskManagerPluginsStart {
   licensing: LicensingPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -293,7 +291,7 @@ export class TaskManagerPlugin
 
   public start(
     { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
-    { cloud, spaces, licensing }: TaskManagerPluginsStart
+    { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
@@ -329,7 +327,6 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
-      spaces,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
     });
 

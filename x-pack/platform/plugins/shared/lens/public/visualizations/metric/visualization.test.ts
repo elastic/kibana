@@ -10,8 +10,14 @@ import { CUSTOM_PALETTE, CustomPaletteParams, PaletteOutput } from '@kbn/colorin
 import { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
 import {
+  FrameMock,
+  createMockDatasource,
+  createMockFramePublicAPI,
+  generateActiveData,
+} from '../../mocks';
+import {
+  DataType,
   DatasourceLayers,
   DatasourcePublicAPI,
   OperationDescriptor,
@@ -20,10 +26,11 @@ import {
 } from '../../types';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
-import { themeServiceMock } from '@kbn/core/public/mocks';
 import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { MetricVisualizationState } from './types';
+import { getDefaultConfigForMode } from './helpers';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
@@ -64,6 +71,7 @@ describe('metric visualization', () => {
       | 'trendlineSecondaryMetricAccessor'
       | 'trendlineTimeAccessor'
       | 'trendlineBreakdownByAccessor'
+      | 'secondaryColor'
     >
   > = {
     layerId: 'first',
@@ -85,21 +93,17 @@ describe('metric visualization', () => {
     valuesTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
+    secondaryTrend: { type: 'none' },
   };
 
-  const fullStateWTrend: Required<MetricVisualizationState> = {
+  const fullStateWTrend: Required<
+    Omit<MetricVisualizationState, 'secondaryTrend' | 'secondaryColor'>
+  > = {
     ...fullState,
     ...trendlineProps,
   };
 
-  const mockFrameApi = createMockFramePublicAPI({
-    activeData: generateActiveData([
-      {
-        id: 'first',
-        rows: Array(3).fill({ 'metric-col-id': 20, 'max-metric-col-id': 100 }),
-      },
-    ]),
-  });
+  const mockFrameApi = createMockFramePublicAPI({});
 
   describe('initialization', () => {
     test('returns a default state', () => {
@@ -116,13 +120,44 @@ describe('metric visualization', () => {
 
   describe('dimension groups configuration', () => {
     describe('primary layer', () => {
+      function getVisualizationConfiguration(
+        stateOverrides?: Partial<MetricVisualizationState>,
+        frameOverrides?: Partial<FrameMock>
+      ) {
+        return visualization.getConfiguration({
+          state: { ...fullState, ...stateOverrides },
+          layerId: fullState.layerId,
+          frame: { ...mockFrameApi, ...frameOverrides },
+        });
+      }
+
+      function getMetricFromConfiguration(
+        metric: 'metric' | 'secondaryMetric' | 'max' | 'breakdownBy',
+        stateOverrides?: Partial<MetricVisualizationState>,
+        frameOverrides?: Partial<FrameMock>
+      ) {
+        const groups = getVisualizationConfiguration(stateOverrides, frameOverrides).groups;
+        return groups.find(({ groupId }) => groupId === metric);
+      }
+
       test('generates configuration', () => {
         expect(
-          visualization.getConfiguration({
-            state: fullState,
-            layerId: fullState.layerId,
-            frame: mockFrameApi,
-          })
+          getVisualizationConfiguration(
+            undefined,
+            createMockFramePublicAPI({
+              datasourceLayers: {
+                [fullState.layerId]: createMockDatasource('formBased', {
+                  getOperationForColumnId: jest.fn(() => ({
+                    hasReducedTimeRange: false,
+                    dataType: 'number',
+                    hasTimeShift: false,
+                    label: 'myMockedOperation',
+                    isBucketed: false,
+                  })),
+                }).publicAPIMock,
+              },
+            })
+          )
         ).toMatchSnapshot();
       });
 
@@ -154,31 +189,18 @@ describe('metric visualization', () => {
       });
 
       test('color-by-value', () => {
-        expect(
-          visualization.getConfiguration({
-            state: fullState,
-            layerId: fullState.layerId,
-            frame: mockFrameApi,
-          }).groups[0].accessors
-        ).toMatchInlineSnapshot(`
+        expect(getMetricFromConfiguration('metric')?.accessors).toMatchInlineSnapshot(`
           Array [
             Object {
+              "color": "static-color",
               "columnId": "metric-col-id",
-              "palette": Array [
-                "blue",
-                "yellow",
-              ],
-              "triggerIconType": "colorBy",
+              "triggerIconType": "color",
             },
           ]
         `);
 
         expect(
-          visualization.getConfiguration({
-            state: { ...fullState, palette: undefined, color: undefined },
-            layerId: fullState.layerId,
-            frame: mockFrameApi,
-          }).groups[0].accessors
+          getMetricFromConfiguration('metric', { palette: undefined, color: undefined })?.accessors
         ).toMatchInlineSnapshot(`
           Array [
             Object {
@@ -191,13 +213,8 @@ describe('metric visualization', () => {
       });
 
       test('static coloring', () => {
-        expect(
-          visualization.getConfiguration({
-            state: { ...fullState, palette: undefined },
-            layerId: fullState.layerId,
-            frame: mockFrameApi,
-          }).groups[0].accessors
-        ).toMatchInlineSnapshot(`
+        expect(getMetricFromConfiguration('metric', { palette: undefined })?.accessors)
+          .toMatchInlineSnapshot(`
           Array [
             Object {
               "color": "static-color",
@@ -207,32 +224,88 @@ describe('metric visualization', () => {
           ]
         `);
 
-        expect(
-          visualization.getConfiguration({
-            state: { ...fullState, color: undefined },
-            layerId: fullState.layerId,
-            frame: mockFrameApi,
-          }).groups[0].accessors
-        ).toMatchInlineSnapshot(`
+        expect(getMetricFromConfiguration('metric', { color: undefined })?.accessors)
+          .toMatchInlineSnapshot(`
           Array [
             Object {
+              "color": "#ffffff",
               "columnId": "metric-col-id",
-              "palette": Array [
-                "blue",
-                "yellow",
-              ],
-              "triggerIconType": "colorBy",
+              "triggerIconType": "color",
             },
           ]
         `);
       });
 
+      describe('secondary metric', () => {
+        test('static coloring', () => {
+          expect(
+            getMetricFromConfiguration('secondaryMetric', {
+              secondaryTrend: getDefaultConfigForMode('static'),
+            })?.accessors[0]
+          ).toMatchInlineSnapshot(`
+            Object {
+              "color": "#E4E8F1",
+              "columnId": "secondary-metric-col-id",
+              "triggerIconType": "color",
+            }
+          `);
+        });
+
+        test('dynamic coloring', () => {
+          const frame = createMockFramePublicAPI({
+            datasourceLayers: {
+              [fullState.layerId]: createMockDatasource('formBased', {
+                getOperationForColumnId: jest.fn(() => ({
+                  hasReducedTimeRange: false,
+                  dataType: 'number',
+                  hasTimeShift: false,
+                  label: 'myMockedOperation',
+                  isBucketed: false,
+                })),
+              }).publicAPIMock,
+            },
+          });
+          expect(
+            getMetricFromConfiguration(
+              'secondaryMetric',
+              {
+                secondaryTrend: getDefaultConfigForMode('dynamic'),
+              },
+              frame
+            )?.accessors[0]
+          ).toMatchInlineSnapshot(`
+            Object {
+              "columnId": "secondary-metric-col-id",
+              "palette": Array [
+                "#F6726A",
+                "#ECF1F9",
+                "#24C292",
+              ],
+              "triggerIconType": "colorBy",
+            }
+          `);
+        });
+      });
+
       test('collapse function', () => {
+        const frame = createMockFramePublicAPI({
+          datasourceLayers: {
+            [fullState.layerId]: createMockDatasource('formBased', {
+              getOperationForColumnId: jest.fn(() => ({
+                hasReducedTimeRange: false,
+                dataType: 'number',
+                hasTimeShift: false,
+                label: 'myMockedOperation',
+                isBucketed: false,
+              })),
+            }).publicAPIMock,
+          },
+        });
         expect(
           visualization.getConfiguration({
             state: fullState,
             layerId: fullState.layerId,
-            frame: mockFrameApi,
+            frame,
           }).groups[3].accessors
         ).toMatchInlineSnapshot(`
           Array [
@@ -247,7 +320,7 @@ describe('metric visualization', () => {
           visualization.getConfiguration({
             state: { ...fullState, collapseFn: undefined },
             layerId: fullState.layerId,
-            frame: mockFrameApi,
+            frame,
           }).groups[3].accessors
         ).toMatchInlineSnapshot(`
           Array [
@@ -314,12 +387,13 @@ describe('metric visualization', () => {
     const maxPossibleNumValues = 7;
     let datasourceLayers: DatasourceLayers;
     beforeEach(() => {
-      const mockDatasource = createMockDatasource();
-      mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
-      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        isStaticValue: false,
-        dataType: 'number',
-      } as OperationDescriptor);
+      const mockDatasource = createMockDatasource('formBased', {
+        getMaxPossibleNumValues: jest.fn().mockReturnValue(maxPossibleNumValues),
+        getOperationForColumnId: jest.fn().mockReturnValue({
+          isStaticValue: false,
+          dataType: 'number',
+        }),
+      });
 
       datasourceLayers = {
         first: mockDatasource.publicAPIMock,
@@ -906,6 +980,80 @@ describe('metric visualization', () => {
       ) as ExpressionAstExpression;
       expect(AST.chain[1].arguments.progressDirection[0]).toBe(LayoutDirection.Vertical);
     });
+
+    describe('forward secondary trend parameters correctly', () => {
+      test('should use the static coloring if data type is not numeric', async () => {
+        datasourceLayers.first!.getOperationForColumnId = jest
+          .fn()
+          .mockReturnValue({ dataType: 'string' });
+        const AST = visualization.toExpression(
+          {
+            ...fullState,
+            progressDirection: undefined,
+            showBar: true,
+            secondaryTrend: getDefaultConfigForMode('dynamic'),
+          },
+          datasourceLayers
+        );
+
+        if (AST && typeof AST === 'object') {
+          const secondaryMetricAST = AST.chain[0].arguments;
+          // even if color mode is dynamic it should fallback to static color as dataType is not numeric
+          expect(secondaryMetricAST.secondaryColor[0]).toBe('#E4E8F1');
+          expect(secondaryMetricAST.secondaryTrendPalette).toEqual(undefined);
+        } else {
+          fail('AST is not an object');
+        }
+      });
+
+      test('should use 0 baseline if primary metric is not numeric', async () => {
+        datasourceLayers.first!.getOperationForColumnId = jest.fn((id: string) =>
+          id === fullState.metricAccessor
+            ? {
+                hasTimeShift: false,
+                hasReducedTimeRange: false,
+                label: 'MyPrimaryMetricOp',
+                isBucketed: false,
+                dataType: 'string',
+              }
+            : {
+                hasTimeShift: false,
+                hasReducedTimeRange: false,
+                label: 'MySecondaryMetricOp',
+                isBucketed: false,
+                dataType: 'number',
+              }
+        );
+        const AST = visualization.toExpression(
+          {
+            ...fullState,
+            progressDirection: undefined,
+            showBar: true,
+            secondaryTrend: {
+              type: 'dynamic',
+              reversed: false,
+              baselineValue: 'primary',
+              visuals: 'icon',
+              paletteId: 'compare_to',
+            },
+          },
+          datasourceLayers
+        );
+        if (AST && typeof AST === 'object') {
+          const secondaryMetricAST = AST.chain[0].arguments;
+          // even if color mode is dynamic it should fallback to static color as dataType is not numeric
+          expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
+          expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
+          expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
+            '#F6726A',
+            '#ECF1F9',
+            '#24C292',
+          ]);
+        } else {
+          fail('AST is not an object');
+        }
+      });
+    });
   });
 
   it('clears a layer', () => {
@@ -955,6 +1103,63 @@ describe('metric visualization', () => {
       fullStateWTrend.layerId,
       fullStateWTrend.trendlineLayerId,
     ]);
+  });
+
+  describe('getPersistedState', () => {
+    it('should return the state as is when there are no conflicts', () => {
+      expect(visualization.getPersistableState?.(fullState)).toEqual(
+        expect.objectContaining({ state: fullState })
+      );
+    });
+
+    it('should rewrite the secondary trend state when in conflict', () => {
+      function createOperationByType(type: DataType) {
+        return {
+          dataType: type,
+          hasTimeShift: false,
+          label: 'label',
+          isBucketed: false,
+          hasReducedTimeRange: false,
+        };
+      }
+
+      expect(
+        visualization.getPersistableState?.(
+          {
+            ...fullState,
+            secondaryTrend: {
+              type: 'dynamic',
+              reversed: false,
+              baselineValue: 'primary',
+              visuals: 'icon',
+              paletteId: 'compare_to',
+            },
+          },
+          createMockDatasource('formBased', {
+            getOperationForColumnId: jest.fn((id: string) =>
+              // make primary result in a string type
+              createOperationByType(id !== fullState.secondaryMetricAccessor ? 'string' : 'number')
+            ),
+          }),
+          // just need to pass a state to make it work
+          {
+            state: {
+              layers: {
+                first: {
+                  indexPatternId: '1',
+                  columnOrder: ['col1', 'col2'],
+                  columns: {},
+                },
+              },
+            },
+          }
+        )
+      ).toEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({ secondaryTrend: getDefaultConfigForMode('static') }),
+        })
+      );
+    });
   });
 
   test('getLayersToLinkTo', () => {
@@ -1211,7 +1416,10 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
       expect(removed).not.toHaveProperty('secondaryPrefix');
+      expect(removed).not.toHaveProperty('secondaryColorMode');
+      expect(removed).not.toHaveProperty('secondaryTrend');
     });
+
     it('removes max dimension', () => {
       const removed = visualization.removeDimension({
         ...removeDimensionParam,

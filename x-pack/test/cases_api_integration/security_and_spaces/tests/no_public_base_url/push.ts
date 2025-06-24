@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import type { RecordingServiceNowSimulator } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib/actions_simulations_utils';
+import { ObjectRemover as ActionsRemover } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
   postCommentUserReq,
@@ -18,7 +19,6 @@ import {
   persistableStateAttachment,
 } from '../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
 import {
   pushCase,
@@ -110,11 +110,12 @@ export default ({ getService }: FtrProviderContext): void => {
          * If the request contains the work_notes property then
          * it is a create comment request
          */
-        const allCommentRequests = serviceNowServer.allRequestData.filter((request) =>
-          Boolean(request.work_notes)
+        const allCommentRequests = serviceNowServer.allRequestData.filter(
+          (request): request is { work_notes: string } =>
+            typeof request.work_notes === 'string' && request.work_notes.length > 0
         );
 
-        const allWorkNotes = allCommentRequests.map((request) => request.work_notes);
+        const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
           'Isolated host host-name with comment: comment text\n\nAdded by elastic.',

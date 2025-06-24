@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -88,6 +88,7 @@ import {
   SECURITY_NUM_INDICES_MATCHING_PATTERN,
   SECURITY_QUERY_SPAN_S,
 } from './apm_field_names';
+import { buildTimeRangeFilter } from './build_events_query';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -188,6 +189,72 @@ export const hasTimestampFields = async (args: {
   }
 
   return { foundNoIndices: false, warningMessage: undefined };
+};
+
+/**
+ * Identifies frozen indices from the provided input indices.
+ * If any of the input indices resolve to frozen indices within the specified time range, they are returned by this function.
+ * @param {string[]} params.inputIndices - The list of input index patterns or indices to check.
+ * @param {ElasticsearchClient} params.internalEsClient - A client to be used to query the elasticsearch cluster on behalf of the internal Kibana user.
+ * @param {ElasticsearchClient} params.currentUserEsClient - A client to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server.
+ * @param {string} params.to - The end of the time range for the query (e.g., "now").
+ * @param {string} params.from - The start of the time range for the query (e.g., "now-1d").
+ * @param {string} params.primaryTimestamp - The primary timestamp field used for filtering.
+ * @param {string | undefined} params.secondaryTimestamp - The secondary timestamp field used for filtering, if applicable.
+ * @returns {Promise<string[]>} A promise that resolves to a list of frozen indices.
+ */
+export const checkForFrozenIndices = async ({
+  inputIndices,
+  internalEsClient,
+  currentUserEsClient,
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  inputIndices: string[];
+  internalEsClient: ElasticsearchClient;
+  currentUserEsClient: ElasticsearchClient;
+  to: string;
+  from: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
+}): Promise<string[]> => {
+  const fieldCapsResponse = await currentUserEsClient.fieldCaps({
+    index: inputIndices,
+    fields: ['_id'],
+    ignore_unavailable: true,
+    index_filter: buildTimeRangeFilter({
+      to,
+      from,
+      primaryTimestamp,
+      secondaryTimestamp,
+    }),
+  });
+
+  const resolvedQueryIndices = isArray(fieldCapsResponse.indices)
+    ? fieldCapsResponse.indices
+    : [fieldCapsResponse.indices];
+
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch information about the index using ilm explain to verify that they are actually frozen indices.
+  const partialIndices = resolvedQueryIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length <= 0) {
+    return [];
+  }
+
+  const explainResponse = await internalEsClient.ilm.explainLifecycle({
+    // Use the original index patterns again instead of just the concrete names of the indices:
+    // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
+    index: inputIndices.join(','),
+    filter_path: 'indices.*.phase,indices.*.managed',
+  });
+
+  return partialIndices.filter((index) => {
+    const indexResponse = explainResponse.indices[index];
+    return indexResponse !== undefined && indexResponse.managed && indexResponse.phase === 'frozen';
+  });
 };
 
 export const checkPrivilegesFromEsClient = async (

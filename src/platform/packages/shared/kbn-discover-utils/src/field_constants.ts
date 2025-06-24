@@ -21,6 +21,7 @@ export const INDEX_FIELD = '_index';
 export const TRACE_ID_FIELD = 'trace.id';
 export const PARENT_ID_FIELD = 'parent.id';
 export const TRANSACTION_ID_FIELD = 'transaction.id';
+export const TRANSACTION_TYPE_FIELD = 'transaction.type';
 export const TRANSACTION_NAME_FIELD = 'transaction.name';
 export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
 export const SPAN_NAME_FIELD = 'span.name';
@@ -31,6 +32,8 @@ export const SPAN_TYPE_FIELD = 'span.type';
 export const SPAN_SUBTYPE_FIELD = 'span.subtype';
 export const SPAN_DESTINATION_SERVICE_RESOURCE_FIELD = 'span.destination.service.resource';
 export const PROCESSOR_EVENT_FIELD = 'processor.event';
+export const OTEL_SPAN_KIND = 'kind';
+export const OTEL_DURATION = 'duration';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

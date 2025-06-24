@@ -391,6 +391,19 @@ const RESTRICTED_IMPORTS = [
   },
 ];
 
+/**
+ * Imports that are deprecated and should be phased out
+ * They are not restricted until fully removed,
+ * but will log a warning
+ **/
+const DEPRECATED_IMPORTS = [
+  {
+    name: 'enzyme',
+    message:
+      'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+];
+
 module.exports = {
   root: true,
 
@@ -765,9 +778,11 @@ module.exports = {
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/platform/test/*/*config.*ts',
+        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
+        'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
-        'x-pack/test/saved_object_api_integration/*/apis/**/*',
+        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
         'x-pack/test/upgrade_assistant_integration/**/*',
         'x-pack/test/performance/**/*.ts',
@@ -916,6 +931,7 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
         'no-restricted-modules': [
           'error',
           {
@@ -1789,7 +1805,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
         'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
-        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/platform/test/alerting_api_integration/**/*.{ts, tsx}',
         'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
         'x-pack/test/rule_registry/**/*.{ts, tsx}',
         'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
@@ -2087,7 +2103,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-user-profile-components/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
-        'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
@@ -2256,9 +2272,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
-        // FIXME @dmlemeshko
-        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
-        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times

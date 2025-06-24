@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiAccordion,
@@ -20,13 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject } from 'rxjs';
-import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
@@ -37,48 +36,33 @@ import {
   StreamEnrichmentContextProvider,
   useSimulatorSelector,
   useStreamEnrichmentEvents,
-  useStreamsEnrichmentSelector,
+  useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
   const { core, dependencies } = useKibana();
   const {
+    data,
     streams: { streamsRepositoryClient },
   } = dependencies.start;
 
-  const timefilterHook = useTimefilter();
-
-  const timeState$ = useMemo(() => {
-    const subject = new BehaviorSubject(timefilterHook.timeState);
-    return subject;
-    // No need to ever recreate this observable, as we subscribe to it in the
-    // useEffect below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const subscription = timefilterHook.timeState$.subscribe((value) =>
-      timeState$.next(value.timeState)
-    );
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [timeState$, timefilterHook.timeState$]);
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
       core={core}
+      data={data}
       streamsRepositoryClient={streamsRepositoryClient}
-      timeState$={timeState$}
+      urlStateStorageContainer={urlStateStorageContainer}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
@@ -90,11 +74,12 @@ export function StreamDetailEnrichmentContentImpl() {
 
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
-  const canManage = useStreamsEnrichmentSelector(
+  const isReady = useStreamEnrichmentSelector((state) => state.matches('ready'));
+  const hasChanges = useStreamEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
   );
-  const isSavingChanges = useStreamsEnrichmentSelector((state) =>
+  const isSavingChanges = useStreamEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
 
@@ -105,6 +90,10 @@ export function StreamDetailEnrichmentContentImpl() {
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
+
+  if (!isReady) {
+    return null;
+  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -158,9 +147,9 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
 
-  const processorsRefs = useStreamsEnrichmentSelector((state) =>
+  const processorsRefs = useStreamEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
       processorRef.getSnapshot().matches('configured')
     )

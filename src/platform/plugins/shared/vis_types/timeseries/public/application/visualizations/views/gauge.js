@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import { EuiResizeObserver, euiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { isBackgroundInverted, isBackgroundDark } from '../../lib/set_is_reversed';
@@ -18,8 +18,83 @@ import { getLastValue } from '../../../../common/last_value_utils';
 import { getValueBy } from '../lib/get_value_by';
 import { GaugeVis } from './gauge_vis';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
+import { getVisVariables } from './_variables';
 
-import './_gauge.scss';
+/**
+ * 1. Text is scaled using a matrix so all font sizes and related metrics
+ *    are being calcuated from a percentage of the base font size of 100% (14px).
+ */
+
+const containerStyle = css`
+  font-size: 100%; /* 1 */
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+`;
+
+const metricsBaseStyle = ({ euiTheme }) => css`
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  text-align: center;
+  padding: ${euiTheme.size.s};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const halfMetricsStyle = ({ euiTheme }) => css`
+  height: 70px;
+  padding: 0 ${euiTheme.size.m} ${euiTheme.size.s};
+  justify-content: flex-end;
+`;
+
+const labelStyle = ({ euiTheme }) => css`
+  color: ${getVisVariables({ euiTheme }).tvbTextColor};
+  font-size: 0.5em; /* 1 */
+  line-height: 1em; /* 1 */
+  text-align: center;
+  padding: 0 ${euiTheme.size.s} ${euiTheme.size.xs};
+
+  .tvbVisGauge--reversed & {
+    color: ${getVisVariables({ euiTheme }).tvbTextColorReversed};
+  }
+`;
+
+const valueStyle = ({ euiTheme }) => css`
+  color: ${getVisVariables({ euiTheme }).tvbValueColor};
+  font-size: 0.9em; /* 1 */
+  line-height: 1em; /* 1 */
+  text-align: center;
+  /* make gauge value the target for pointer-events */
+  pointer-events: all;
+
+  .tvbVisGauge--reversed & {
+    color: ${getVisVariables({ euiTheme }).tvbValueColorReversed};
+  }
+`;
+
+const additionalLabelStyle = ({ euiTheme }) => css`
+  font-size: 0.4em; /* 1 */
+  line-height: 1.2em; /* 1 */
+  width: 100%;
+  padding: 2px ${euiTheme.size.xs};
+  color: ${getVisVariables({ euiTheme }).tvbValueColor};
+
+  .tvbVisGauge--reversed & {
+    color: ${getVisVariables({ euiTheme }).tvbValueColorReversed};
+  }
+`;
+
+const resizeStyle = css`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  /* disable gauge container pointer-events as it shouldn't be event target */
+  pointer-events: none;
+`;
 
 export class Gauge extends Component {
   constructor(props) {
@@ -89,17 +164,32 @@ export class Gauge extends Component {
     let additionalLabel;
     if (this.props.additionalLabel) {
       additionalLabel = (
-        <div className="tvbVisGauge__additionalLabel">{this.props.additionalLabel}</div>
+        <div
+          className="tvbVisGauge__additionalLabel"
+          css={[euiTextTruncate(), additionalLabelStyle]}
+        >
+          {this.props.additionalLabel}
+        </div>
       );
     }
     if (type === 'half') {
       metrics = (
-        <div css={innerCSS} className="tvbVisHalfGauge__metrics" ref={(el) => (this.inner = el)}>
-          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
+        <div
+          css={[innerCSS, metricsBaseStyle, halfMetricsStyle]}
+          className="tvbVisHalfGauge__metrics"
+          ref={(el) => (this.inner = el)}
+        >
+          <div
+            className="tvbVisGauge__label"
+            css={labelStyle}
+            ref="title"
+            data-test-subj="gaugeLabel"
+          >
             {title}
           </div>
           <div
             className="tvbVisGauge__value"
+            css={valueStyle}
             style={this.props.valueColor ? { color: this.props.valueColor } : {}}
             ref="label"
             data-test-subj="gaugeValue"
@@ -112,7 +202,11 @@ export class Gauge extends Component {
       );
     } else {
       metrics = (
-        <div css={innerCSS} className="tvbVisCircleGauge__metrics" ref={(el) => (this.inner = el)}>
+        <div
+          css={[innerCSS, metricsBaseStyle]}
+          className="tvbVisCircleGauge__metrics"
+          ref={(el) => (this.inner = el)}
+        >
           <div
             className="tvbVisGauge__value"
             style={this.props.valueColor ? { color: this.props.valueColor } : {}}
@@ -122,7 +216,12 @@ export class Gauge extends Component {
             {/* eslint-disable-next-line react/no-danger */}
             <span dangerouslySetInnerHTML={{ __html: formatter(value) }} />
           </div>
-          <div className="tvbVisGauge__label" ref="title" data-test-subj="gaugeLabel">
+          <div
+            className="tvbVisGauge__label"
+            css={labelStyle}
+            ref="title"
+            data-test-subj="gaugeLabel"
+          >
             {title}
           </div>
           {additionalLabel}
@@ -139,10 +238,11 @@ export class Gauge extends Component {
     return (
       <EuiResizeObserver onResize={this.checkResizeThrottled}>
         {(resizeRef) => (
-          <div className={classes} ref={resizeRef}>
+          <div className={classes} css={[containerStyle]} ref={resizeRef}>
             <div
               ref={(el) => (this.resize = el)}
               className={`tvbVisGauge__resize`}
+              css={resizeStyle}
               data-test-subj="tvbVisGaugeContainer"
             >
               {metrics}

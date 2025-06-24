@@ -6,12 +6,27 @@
  */
 
 require('@kbn/babel-register').install();
+const { uploadConfigToVault } = require('./manage_secrets');
+const minimist = require('minimist');
 
-const { uploadConnectorConfigToVault, uploadLangsmithKeyToVault } = require('./manage_secrets');
+/**
+ * Uploads Security Gen AI secrets for testing from local `config.json` to vault. By default, the 'siem-team' accessible
+ * vault from secrets.elastic.co is used, but it can be overridden with the --vault parameter to use the 'ci-prod' vault.
+ *
+ * @returns {Promise<void>}
+ */
+async function uploadSecrets() {
+  const argv = minimist(process.argv.slice(2));
+  const vault = argv.vault || 'siem-team';
 
-async function uploadConfigs() {
-  await uploadConnectorConfigToVault();
-  await uploadLangsmithKeyToVault();
+  if (vault !== 'siem-team' && vault !== 'ci-prod') {
+    console.error('Error: vault parameter must be either "siem-team" or "ci-prod"');
+    process.exit(1);
+  }
+
+  console.log(`Using ${vault} vault...`);
+  await uploadConfigToVault(vault);
+  console.log(`Secret upload complete!`);
 }
 
-uploadConfigs();
+uploadSecrets();

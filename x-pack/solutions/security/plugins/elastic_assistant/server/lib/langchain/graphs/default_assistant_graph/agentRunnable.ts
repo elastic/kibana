@@ -19,18 +19,25 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 
-export const TOOL_CALLING_LLM_TYPES = new Set(['bedrock', 'gemini']);
+export const TOOL_CALLING_LLM_TYPES = new Set(['inference', 'openai', 'bedrock', 'gemini']);
 
-export const agentRunableFactory = async ({
+export const agentRunnableFactory = async ({
   llm,
-  isOpenAI,
   llmType,
   tools,
+  inferenceChatModelEnabled,
+  isOpenAI,
   isStream,
   prompt,
 }: {
-  llm: ActionsClientChatBedrockConverse | ActionsClientChatVertexAI | ActionsClientChatOpenAI;
+  llm:
+    | ActionsClientChatBedrockConverse
+    | ActionsClientChatVertexAI
+    | ActionsClientChatOpenAI
+    | InferenceChatModel;
+  inferenceChatModelEnabled: boolean;
   isOpenAI: boolean;
   llmType: string | undefined;
   tools: StructuredToolInterface[] | ToolDefinition[];
@@ -44,7 +51,7 @@ export const agentRunableFactory = async ({
     prompt,
   } as const;
 
-  if (isOpenAI || llmType === 'inference') {
+  if (!inferenceChatModelEnabled && (isOpenAI || llmType === 'inference')) {
     return createOpenAIToolsAgent(params);
   }
 

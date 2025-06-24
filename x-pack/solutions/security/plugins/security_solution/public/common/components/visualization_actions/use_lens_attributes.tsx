@@ -22,9 +22,11 @@ import {
   getIndexFilters,
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
+  getESQLGlobalFilters,
 } from './utils';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
@@ -35,6 +37,7 @@ export const useLensAttributes = ({
   scopeId = SourcererScopeName.default,
   stackByField,
   title,
+  esql,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -61,7 +64,7 @@ export const useLensAttributes = ({
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
-  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
@@ -90,14 +93,20 @@ export const useLensAttributes = ({
 
     return [];
   }, [detailName, pageName]);
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
 
   const attrs: LensAttributes = useMemo(
     () =>
       lensAttributes ??
       ((getLensAttributes &&
         stackByField !== null &&
-        getLensAttributes({ stackByField, euiTheme, extraOptions })) as LensAttributes),
-    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
+        getLensAttributes({
+          stackByField,
+          euiTheme,
+          extraOptions,
+          esql,
+        })) as LensAttributes),
+    [esql, euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
@@ -111,6 +120,18 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
+    const query = esql ? { esql } : globalQuery;
+
+    const queryFilters = (() => {
+      if (!applyGlobalQueriesAndFilters) return [];
+
+      if (esql) {
+        return getESQLGlobalFilters(globalFilterQuery);
+      }
+
+      return filters;
+    })();
+
     return {
       ...attrs,
       ...(title != null ? { title } : {}),
@@ -122,7 +143,7 @@ export const useLensAttributes = ({
           ...(applyPageAndTabsFilters ? pageFilters : []),
           ...(applyPageAndTabsFilters ? tabsFilters : []),
           ...indexFilters,
-          ...(applyGlobalQueriesAndFilters ? filters : []),
+          ...queryFilters,
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
@@ -131,20 +152,22 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
+    lensAttributes,
+    getLensAttributes,
+    stackByField,
+    hasAdHocDataViews,
+    selectedPatterns,
+    esql,
+    globalQuery,
+    globalFilterQuery,
+    attrs,
+    title,
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
-    attrs,
-    dataViewId,
-    filters,
-    getLensAttributes,
-    hasAdHocDataViews,
-    lensAttributes,
     pageFilters,
-    query,
-    selectedPatterns,
-    stackByField,
     tabsFilters,
-    title,
+    filters,
+    dataViewId,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData

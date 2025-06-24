@@ -195,17 +195,17 @@ export const AlertsByStatus = ({
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusAcknowledged = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusClosed = useCallback(
-    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level?.toLocaleLowerCase()),
     [navigateToAlertsWithStatus]
   );
 

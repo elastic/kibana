@@ -10,6 +10,7 @@
 import React from 'react';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import SummaryColumn, {
   AllSummaryColumnProps,
   SummaryCellPopover,
@@ -151,11 +152,13 @@ describe('SummaryColumn', () => {
       expect(screen.queryByText('+2')).not.toBeInTheDocument();
     });
 
-    it('should display a popover with details and actions upon a badge click', () => {
+    it('should display a popover with details and actions upon a badge click', async () => {
       const record = getBaseRecord();
       renderSummary(record);
       // Open badge popover
-      screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`).click();
+      await userEvent.click(
+        screen.getByTestId(`dataTableCellActionsPopover_${constants.SERVICE_NAME_FIELD}`)
+      );
 
       expect(screen.getByTestId('dataTableCellActionPopoverTitle')).toHaveTextContent(
         'service.name synth-service-2'

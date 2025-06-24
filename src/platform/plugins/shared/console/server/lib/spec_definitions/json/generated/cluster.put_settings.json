@@ -23,7 +23,7 @@
     "patterns": [
       "_cluster/settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-update-settings.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cluster-put-settings",
     "availability": {
       "stack": true,
       "serverless": false

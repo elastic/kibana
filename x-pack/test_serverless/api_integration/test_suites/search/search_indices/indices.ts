@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/search_indices';

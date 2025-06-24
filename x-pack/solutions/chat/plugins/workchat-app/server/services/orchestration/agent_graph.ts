@@ -15,7 +15,6 @@ import { InferenceChatModel } from '@kbn/inference-langchain';
 import { type McpGatewaySession, ToolsProvider } from './mcp_gateway';
 import type { Agent } from '../../../common/agents';
 import { withSystemPrompt } from './prompts';
-import { createSearchAgentTool } from './sub_agents';
 import { extractCitations } from './utils';
 
 export const createAgentGraph = async ({
@@ -48,14 +47,9 @@ export const createAgentGraph = async ({
 
   const toolsProvider = new ToolsProvider({ session, logger });
 
-  const searchTool = createSearchAgentTool({
-    toolsProvider,
-    chatModel,
-    logger,
-  });
-  const builtInTools = await toolsProvider.getBuiltInTools();
+  const allTools = await toolsProvider.getAllTools();
 
-  const tools = [...builtInTools, searchTool];
+  const tools = [...allTools];
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({

@@ -40,6 +40,30 @@ import { IndexClosedParagraph } from '../index_closed_paragraph';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
+const FollowerIndexCallout = () => (
+  <>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
+          defaultMessage="Termination of replication is recommended"
+        />
+      }
+      color="primary"
+      iconType="iInCircle"
+      data-test-subj="followerIndexCallout"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
+          defaultMessage="This index is a cross-cluster replication follower index, which should not be reindexed. You can mark it as read-only or terminate the replication and convert it to a standard index."
+        />
+      </p>
+    </EuiCallOut>
+    <EuiSpacer size="m" />
+  </>
+);
+
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
  */
@@ -67,7 +91,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status: reindexStatus, hasRequiredPrivileges, meta } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
-  const { indexName, isFrozen, isClosedIndex, isReadonly } = meta;
+  const { indexName, isFrozen, isClosedIndex, isReadonly, isFollowerIndex } = meta;
   const loading = loadingState === LoadingState.Loading;
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
@@ -75,9 +99,10 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
   const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
-  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
+  const { excludedActions = [], indexSizeInBytes = 0 } =
+    (deprecation.correctiveAction as ReindexAction) || {};
   const readOnlyExcluded = excludedActions.includes('readOnly');
-  const reindexExcluded = excludedActions.includes('reindex');
+  const reindexExcluded = excludedActions.includes('reindex') || isFollowerIndex;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -95,6 +120,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   } else {
     showDefaultGuidance = true;
   }
+
+  // Determine if the index is larger than 1GB
+  const isLargeIndex = indexSizeInBytes > 1073741824;
+
+  const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
+  const canShowReindexButton = canShowActionButtons && !reindexExcluded;
+  const canShowReadonlyButton = canShowActionButtons && !readOnlyExcluded && !isReadonly;
 
   return (
     <Fragment>
@@ -169,18 +201,21 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           {showMlAnomalyReindexingGuidance && <MlAnomalyGuidance />}
           {showReadOnlyGuidance && (
             <Fragment>
+              {isFollowerIndex && <FollowerIndexCallout />}
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
                   defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
                 />
               </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
-                  defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                />
-              </p>
+              {!isFollowerIndex && (
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
+                    defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                  />
+                </p>
+              )}
               {isClosedIndex && (
                 <p>
                   <IndexClosedParagraph />
@@ -190,6 +225,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           )}
           {showDefaultGuidance && (
             <Fragment>
+              {isFollowerIndex && <FollowerIndexCallout />}
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
@@ -206,6 +242,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
                   )}`,
                   indexBlockUrl: docLinks.links.upgradeAssistant.indexBlocks,
+                  isLargeIndex,
                 })}
               />
             </Fragment>
@@ -216,7 +253,12 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeReindexButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
                 defaultMessage="Close"
@@ -225,31 +267,26 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!isReadonly &&
-                !hasFetchFailed &&
-                !isCompleted &&
-                hasRequiredPrivileges &&
-                !isESTransformTarget &&
-                !readOnlyExcluded && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={startReadonly}
-                      disabled={loading}
-                      color={reindexExcluded ? 'primary' : 'accent'}
-                      fill={reindexExcluded}
-                      data-test-subj="startIndexReadonlyButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
-                        defaultMessage="Mark as read-only"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
+              {canShowReadonlyButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
+                    onClick={startReadonly}
+                    disabled={loading}
+                    color={'primary'}
+                    fill={isLargeIndex || reindexExcluded}
+                    data-test-subj="startIndexReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {canShowReindexButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={!isLargeIndex || readOnlyExcluded}
                     color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
                     iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}

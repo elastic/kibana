@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './styles/_index.scss';
 import { PainlessLabUIPlugin } from './plugin';
 
 export function plugin() {

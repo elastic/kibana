@@ -52,6 +52,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     url,
     toggleShareContextMenu: jest.fn(),
+    availableIntegrations: jest.fn(),
     navigate: jest.fn(),
   };
   return startContract;

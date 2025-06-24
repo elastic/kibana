@@ -16,7 +16,7 @@ import {
 
 export interface WorkChatAppPluginSetup {
   integrations: {
-    register: (integration: WorkchatIntegrationDefinition) => void;
+    register: (tool: WorkchatIntegrationDefinition) => void;
   };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

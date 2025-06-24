@@ -138,7 +138,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   /**
    * Initializes required subscriptions for fetching swim lanes data.
-   * @private
+   * @internal
    */
   protected _initSubscriptions(): Subscription {
     const subscription = new Subscription();
@@ -272,6 +272,7 @@ export class AnomalyTimelineStateService extends StateService {
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
         this._refreshSubject$,
+        this._swimLaneSeverity$,
       ]) as Observable<
         [
           ExplorerJob[],
@@ -282,7 +283,8 @@ export class AnomalyTimelineStateService extends StateService {
           AppStateSelectedCells,
           TimeBucketsInterval,
           TimeRangeBounds,
-          Refresh
+          Refresh,
+          number
         ]
       >
     )
@@ -296,6 +298,9 @@ export class AnomalyTimelineStateService extends StateService {
             swimLaneCardinality,
             selectedCells,
             swimLaneBucketInterval,
+            timeBounds,
+            refresh,
+            swimlaneSeverity,
           ]) => {
             if (!selectedCells?.showTopFieldValues) {
               return of([]);
@@ -319,7 +324,8 @@ export class AnomalyTimelineStateService extends StateService {
                 swimLanePagination.viewByFromPage,
                 swimLaneBucketInterval,
                 selectionInfluencers,
-                influencersFilterQuery
+                influencersFilterQuery,
+                swimlaneSeverity
               )
             );
           }
@@ -470,7 +476,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   /**
    * Obtain the list of 'View by' fields per job and viewBySwimlaneFieldName
-   * @private
+   * @internal
    *
    * TODO check for possible enhancements/refactoring. Has been moved from explorer_utils as-is.
    */

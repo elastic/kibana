@@ -71,7 +71,9 @@ export class DeleteMonitorAPI {
           error: `Monitor id ${monitorId} not found!`,
         });
       } else {
-        server.logger.error(`Failed to decrypt monitor to delete ${monitorId}${e}`);
+        server.logger.error(`Failed to decrypt monitor to delete, monitor id: ${monitorId}`, {
+          error: e,
+        });
         sendErrorTelemetryEvents(server.logger, server.telemetry, {
           reason: `Failed to decrypt monitor to delete ${monitorId}`,
           message: e?.message,
@@ -118,10 +120,11 @@ export class DeleteMonitorAPI {
       });
 
       return { errors, result: this.result };
-    } catch (e) {
-      server.logger.error(`Unable to delete Synthetics monitor with error ${e.message}`);
-      server.logger.error(e);
-      throw e;
+    } catch (error) {
+      server.logger.error(`Unable to delete Synthetics monitor with error ${error.message}`, {
+        error,
+      });
+      throw error;
     }
   }
 

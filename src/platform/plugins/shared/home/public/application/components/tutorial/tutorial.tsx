@@ -13,11 +13,6 @@ import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@ela
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-} from '@kbn/core-saved-objects-api-browser';
 import type {
   TutorialType,
   InstructionSetType,
@@ -29,7 +24,6 @@ import type { CustomStatusCheckCallback } from '../../../services/tutorials/tuto
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { SavedObjectsInstaller } from './saved_objects_installer';
 import * as StatusCheckStates from './status_check_states';
 import { getServices, HomeKibanaServices } from '../../kibana_services';
 
@@ -49,10 +43,6 @@ interface TutorialProps {
   getTutorial: (id: string) => Promise<TutorialType>;
   replaceTemplateStrings: (text: string) => string;
   tutorialId: string;
-  bulkCreate: (
-    objects: Array<SavedObjectsBulkCreateObject<unknown>>,
-    options?: SavedObjectsBulkCreateOptions | undefined
-  ) => Promise<SavedObjectsBatchResponse<unknown>>;
   intl: InjectedIntl;
 }
 
@@ -321,25 +311,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     });
   };
 
-  renderSavedObjectsInstaller = () => {
-    if (!this.state.tutorial?.savedObjects) {
-      return;
-    }
-
-    return (
-      <>
-        <EuiSpacer />
-        <EuiPanel paddingSize="l">
-          <SavedObjectsInstaller
-            bulkCreate={this.props.bulkCreate}
-            savedObjects={this.state.tutorial.savedObjects}
-            installMsg={this.state.tutorial.savedObjectsInstallMsg}
-          />
-        </EuiPanel>
-      </>
-    );
-  };
-
   renderFooter = () => {
     let label;
     let url;
@@ -451,7 +422,6 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
           <EuiSpacer />
           {instructions && this.renderInstructionSets(instructions)}
-          {this.renderSavedObjectsInstaller()}
           {this.renderFooter()}
         </div>
       );

@@ -53,6 +53,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
         id="metric"
         data={metric}
         xAccessor={timestampAccessor}
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yAccessors={valueAccessor}
         timeZone={timeZone}
