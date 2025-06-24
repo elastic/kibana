@@ -34,7 +34,10 @@ import type {
 } from '../../../common/types';
 import { SyncStatus } from '../../../common/types';
 
-import { canEnableSyncIntegrations } from '../../services/setup/fleet_synced_integrations';
+import {
+  FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+  canEnableSyncIntegrations,
+} from '../../services/setup/fleet_synced_integrations';
 
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
 import { getPipeline, getComponentTemplate, CUSTOM_ASSETS_PREFIX } from './custom_assets';
@@ -62,9 +65,20 @@ export const getFollowerIndexInfo = async (
     const resStats = await esClient.ccr.followStats({
       index,
     });
-    if (resStats?.indices[0]?.shards[0]?.fatal_exception) {
+    const fatalExceptionReason = resStats?.indices[0]?.shards[0]?.fatal_exception?.reason;
+    // TODO testing
+    // fatalExceptionReason = 'Existing retention leases [[RetentionLease';
+
+    if (fatalExceptionReason?.includes('RetentionLease')) {
+      const response = await recreateFollowerIndex(esClient, index, logger);
+      if (response) {
+        return { info: response };
+      }
+    }
+
+    if (fatalExceptionReason) {
       return {
-        error: `Follower index ${index} fatal exception: ${resStats.indices[0].shards[0].fatal_exception?.reason}`,
+        error: `Follower index ${index} fatal exception: ${fatalExceptionReason}`,
       };
     }
 
@@ -73,9 +87,40 @@ export const getFollowerIndexInfo = async (
     if (err?.body?.error?.type === 'index_not_found_exception') {
       throw new IndexNotFoundError(`Index not found`);
     }
-
-    logger.error('error', err?.message);
+    logger.error(err);
     throw err;
+  }
+};
+
+const recreateFollowerIndex = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  logger: Logger
+): Promise<CcrFollowInfoFollowerIndex | undefined> => {
+  logger.info(`Retention lease error on ${index}, deleting and recreating follower index...`);
+
+  const resp = await esClient.indices.delete({ index });
+  logger.info(`Follower index ${index} deleted: ${resp?.acknowledged}`);
+
+  const remoteInfo = await esClient.cluster.remoteInfo();
+  const remoteClusterNames = Object.keys(remoteInfo);
+  const remoteClusterName = remoteClusterNames.find((name) => index.includes(name));
+
+  if (remoteClusterName) {
+    const followResp = await esClient.ccr.follow({
+      index,
+      leader_index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+      remote_cluster: remoteClusterName,
+      wait_for_active_shards: 'all',
+    });
+    logger.info(`Follower index ${index} recreated: ${followResp?.follow_index_created}`);
+
+    const res = await esClient.ccr.followInfo({
+      index,
+    });
+    return res.follower_indices[0];
+  } else {
+    logger.debug(`Remote cluster matching ${index} suffix not found`);
   }
 };
 
