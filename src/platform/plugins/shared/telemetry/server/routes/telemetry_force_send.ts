@@ -9,7 +9,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { IRouter } from '@kbn/core/server';
-import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import type {
+  TelemetryCollectionManagerPluginSetup,
+  UsageStatsPayload,
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import fetch from 'node-fetch';
@@ -76,10 +79,11 @@ export function registerTelemetryForceSend({
             });
           }
 
-          const clusters = await telemetryCollectionManager.getStats({
-            unencrypted: true,
-            refreshCache: true,
-          });
+          const clusters: Array<{ clusterUuid: string; stats: UsageStatsPayload }> =
+            await telemetryCollectionManager.getStats({
+              unencrypted: true,
+              refreshCache: true,
+            });
           await esClient.bulk({
             index: localIndex,
             operations: clusters.flatMap(({ clusterUuid, stats }) => [
@@ -96,10 +100,11 @@ export function registerTelemetryForceSend({
           });
         } else {
           // TODO: Selective copy-paste from the fetcher.ts file. We should refactor this and use the common EBT Shipper to maintain only one client.
-          const payload = await telemetryCollectionManager.getStats({
-            unencrypted: false,
-            refreshCache: true,
-          });
+          const payload: Array<{ clusterUuid: string; stats: string }> =
+            await telemetryCollectionManager.getStats({
+              unencrypted: false,
+              refreshCache: true,
+            });
           const config = await firstValueFrom(config$);
           const telemetryUrl = getTelemetryChannelEndpoint({
             appendServerlessChannelsSuffix: config.appendServerlessChannelsSuffix,
