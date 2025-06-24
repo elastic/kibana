@@ -96,6 +96,7 @@ describe('syncEditedMonitor', () => {
   const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
   syntheticsService.editConfig = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
@@ -117,7 +118,9 @@ describe('syncEditedMonitor', () => {
         expect.objectContaining({
           configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
-      ])
+      ]),
+      true,
+      undefined
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
