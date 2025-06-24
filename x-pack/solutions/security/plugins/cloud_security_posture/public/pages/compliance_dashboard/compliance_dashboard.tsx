@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
-import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiSelectable,
+  EuiPopoverTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -240,6 +252,14 @@ const TabContent = ({
 }: {
   selectedPostureTypeTab: PosturePolicyTemplate;
 }) => {
+  const [selectedNamespace, setSelectedNamespace] = useState('default');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filterOptions, setFilterOptions] = useState<
+    Array<{ label: string; checked?: 'on' | undefined }>
+  >([]);
+  const [namespaceOptionsLoaded, setNamespaceOptionsLoaded] = useState(false);
+  const [rerenderKey, setRerenderKey] = useState(0);
+
   const { data: getSetupStatus } = useCspSetupStatusApi({
     refetchInterval: (data) => {
       if (data?.[selectedPostureTypeTab]?.status === 'indexed') {
@@ -250,14 +270,100 @@ const TabContent = ({
     },
   });
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
-  const getCspmDashboardData = useCspmStatsApi({
+
+  // Call the API with empty namespace first to get available namespaces
+  const { data: cspmData, refetch: refetchCspm } = useCspmStatsApi({
     enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_CSPM,
     refetchInterval: determineDashboardDataRefetchInterval,
   });
-  const getKspmDashboardData = useKspmStatsApi({
+
+  const { data: kspmData, refetch: refetchKspm } = useKspmStatsApi({
     enabled: isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_KSPM,
     refetchInterval: determineDashboardDataRefetchInterval,
   });
+
+  // Extract namespaces from the response and populate the filter options
+  useEffect(() => {
+    const currentData = selectedPostureTypeTab === POSTURE_TYPE_CSPM ? cspmData : kspmData;
+
+    if (currentData?.namespaces?.length && !namespaceOptionsLoaded) {
+      const availableNamespaces = currentData.namespaces;
+
+      // Format namespaces for the dropdown
+      const options = availableNamespaces.map((namespace) => ({
+        label: namespace,
+        checked: namespace === 'default' ? 'on' : undefined,
+      }));
+
+      // If default is not in the list, add it and select it
+      if (!availableNamespaces.includes('default')) {
+        options.unshift({ label: 'default', checked: 'on' });
+      }
+
+      setFilterOptions(options);
+      setSelectedNamespace(options.find((option) => option.checked === 'on')?.label || 'default');
+      setNamespaceOptionsLoaded(true);
+
+      // Now that we have namespaces, refetch with the selected namespace
+      if (selectedPostureTypeTab === POSTURE_TYPE_CSPM) {
+        refetchCspm();
+      } else {
+        refetchKspm();
+      }
+    }
+  }, [cspmData, kspmData, selectedPostureTypeTab, namespaceOptionsLoaded]);
+
+  // Reset namespace options when changing tabs
+  useEffect(() => {
+    setNamespaceOptionsLoaded(false);
+    setFilterOptions([]);
+  }, [selectedPostureTypeTab]);
+
+  const handleFilterChange = (newOptions: Array<{ label: string; checked?: 'on' | undefined }>) => {
+    const selectedOption = newOptions.find((option) => option.checked === 'on');
+    if (selectedOption) {
+      // Update all options to have only the selected one checked
+      const updatedOptions = newOptions.map((option) => ({
+        ...option,
+        checked: option.label === selectedOption.label ? 'on' : undefined,
+      }));
+
+      setFilterOptions(updatedOptions);
+      setIsFilterOpen(false);
+
+      // Only update and trigger refetch if namespace changed
+      if (selectedOption.label !== selectedNamespace) {
+        setSelectedNamespace(selectedOption.label);
+
+        // Now call the API with the selected namespace
+        if (selectedPostureTypeTab === POSTURE_TYPE_CSPM) {
+          useCspmStatsApi(
+            {
+              enabled:
+                isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_CSPM,
+              refetchInterval: determineDashboardDataRefetchInterval,
+            },
+            selectedOption.label
+          );
+          refetchCspm();
+        } else {
+          useKspmStatsApi(
+            {
+              enabled:
+                isCloudSecurityPostureInstalled && selectedPostureTypeTab === POSTURE_TYPE_KSPM,
+              refetchInterval: determineDashboardDataRefetchInterval,
+            },
+            selectedOption.label
+          );
+          refetchKspm();
+        }
+
+        // Force rerender by updating the key
+        setRerenderKey((prev) => prev + 1);
+      }
+    }
+  };
+
   const setupStatus = getSetupStatus?.[selectedPostureTypeTab]?.status;
   const isStatusManagedInDashboard = setupStatus === 'indexed' || setupStatus === 'not-installed';
   const shouldRenderNoFindings = !isCloudSecurityPostureInstalled || !isStatusManagedInDashboard;
@@ -273,13 +379,19 @@ const TabContent = ({
       integrationLink = cspmIntegrationLink;
       dataTestSubj = CLOUD_DASHBOARD_CONTAINER;
       policyTemplate = CSPM_POLICY_TEMPLATE;
-      getDashboardData = getCspmDashboardData;
+      getDashboardData = {
+        data: cspmData,
+        refetch: refetchCspm,
+      } as UseQueryResult<ComplianceDashboardDataV2>;
       break;
     case POSTURE_TYPE_KSPM:
       integrationLink = kspmIntegrationLink;
       dataTestSubj = KUBERNETES_DASHBOARD_CONTAINER;
       policyTemplate = KSPM_POLICY_TEMPLATE;
-      getDashboardData = getKspmDashboardData;
+      getDashboardData = {
+        data: kspmData,
+        refetch: refetchKspm,
+      } as UseQueryResult<ComplianceDashboardDataV2>;
       break;
   }
 
@@ -288,11 +400,72 @@ const TabContent = ({
   }
 
   return (
-    <CloudPosturePage query={getDashboardData}>
+    <CloudPosturePage
+      query={getDashboardData}
+      key={`${selectedPostureTypeTab}-${selectedNamespace}-${rerenderKey}`}
+    >
       <div data-test-subj={dataTestSubj}>
-        <Routes>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" style={{ marginBottom: '16px' }}>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  data-test-subj="cspDashboardNamespaceFilter"
+                  isLoading={!namespaceOptionsLoaded}
+                  isDisabled={!namespaceOptionsLoaded}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.integrationDashboard.filters.buttonLabel"
+                    defaultMessage="Namespace: {selectedNamespace}"
+                    values={{ selectedNamespace }}
+                  />
+                </EuiButtonEmpty>
+              }
+              isOpen={isFilterOpen}
+              closePopover={() => setIsFilterOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+            >
+              <EuiSelectable
+                searchable
+                options={filterOptions}
+                onChange={handleFilterChange}
+                singleSelection="always"
+                style={{ width: 300 }}
+                isLoading={!namespaceOptionsLoaded}
+                emptyMessage={
+                  namespaceOptionsLoaded
+                    ? i18n.translate('xpack.csp.integrationDashboard.filters.emptyMessage', {
+                        defaultMessage: 'No namespaces found',
+                      })
+                    : i18n.translate('xpack.csp.integrationDashboard.filters.loadingMessage', {
+                        defaultMessage: 'Loading namespaces...',
+                      })
+                }
+              >
+                {(list) => (
+                  <div>
+                    <EuiPopoverTitle paddingSize="s">
+                      <FormattedMessage
+                        id="xpack.csp.integrationDashboard.filters.popoverTitle"
+                        defaultMessage="Select namespace"
+                      />
+                    </EuiPopoverTitle>
+                    {list}
+                  </div>
+                )}
+              </EuiSelectable>
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <Routes key={`routes-${selectedNamespace}-${rerenderKey}`}>
           <Route path={cloudPosturePages.cspm_dashboard.path}>
             <IntegrationPostureDashboard
+              key={`cspm-${selectedNamespace}-${rerenderKey}`}
               dashboardType={policyTemplate}
               complianceData={getDashboardData.data}
               notInstalledConfig={getNotInstalledConfig(policyTemplate, integrationLink)}
@@ -302,6 +475,7 @@ const TabContent = ({
 
           <Route path={cloudPosturePages.kspm_dashboard.path}>
             <IntegrationPostureDashboard
+              key={`kspm-${selectedNamespace}-${rerenderKey}`}
               dashboardType={policyTemplate}
               complianceData={getDashboardData.data}
               notInstalledConfig={getNotInstalledConfig(policyTemplate, integrationLink)}
@@ -317,12 +491,19 @@ const TabContent = ({
 export const ComplianceDashboard = () => {
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
-  const getCspmDashboardData = useCspmStatsApi({
-    enabled: isCloudSecurityPostureInstalled,
-  });
-  const getKspmDashboardData = useKspmStatsApi({
-    enabled: isCloudSecurityPostureInstalled,
-  });
+  // Remove the namespace filter from here since we're handling it in TabContent
+  const getCspmDashboardData = useCspmStatsApi(
+    {
+      enabled: isCloudSecurityPostureInstalled,
+    },
+    'default'
+  );
+  const getKspmDashboardData = useKspmStatsApi(
+    {
+      enabled: isCloudSecurityPostureInstalled,
+    },
+    'default'
+  );
 
   const location = useLocation();
   const history = useHistory();
