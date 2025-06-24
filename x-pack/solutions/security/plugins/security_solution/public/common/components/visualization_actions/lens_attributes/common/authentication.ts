@@ -133,7 +133,6 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                     query: 'event.outcome : "success"',
                     language: 'kuery',
                   },
-                  customLabel: true,
                 },
               },
               columnOrder: [columnTimestampSuccess, columnEventOutcomeSuccess],
@@ -142,7 +141,6 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
             [layerAuthenticationFailure]: {
               columns: {
                 [columnTimestampFailure]: {
-                  label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
                   sourceField: '@timestamp',
@@ -163,7 +161,6 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
                     query: 'event.outcome : "failure"',
                     language: 'kuery',
                   },
-                  customLabel: true,
                 },
               },
               columnOrder: [columnTimestampFailure, columnEventOutcomeFailure],
