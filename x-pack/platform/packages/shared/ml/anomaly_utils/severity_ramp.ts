@@ -12,7 +12,6 @@ import { getThemeResolvedSeverityColor } from './use_severity_color';
 export interface ColorRampStop {
   stop: number;
   color: string;
-  [key: string]: any;
 }
 
 /**
