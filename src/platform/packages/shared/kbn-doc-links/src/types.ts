@@ -280,6 +280,7 @@ export interface DocLinks {
     readonly detectionsReq: string;
     readonly networkMap: string;
     readonly troubleshootGaps: string;
+    readonly gapsTable: string;
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
   };

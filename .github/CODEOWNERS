@@ -441,6 +441,7 @@ src/platform/packages/shared/kbn-crypto-browser @elastic/kibana-core
 src/platform/packages/shared/kbn-css-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-custom-icons @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-cypress-config @elastic/kibana-operations
+src/platform/packages/shared/kbn-cypress-test-helper @elastic/security-solution
 src/platform/packages/shared/kbn-data-grid-in-table-search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
@@ -1043,10 +1044,10 @@ x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
 x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
 x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kibana
+x-pack/solutions/search/plugins/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/plugins/search_query_rules @elastic/search-kibana
-x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/search/test @elastic/search-kibana
@@ -2396,6 +2397,9 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 
 x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 
+/x-pack/test_serverless/functional/test_suites/security/ftr/discover @elastic/security-threat-hunting
+x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting
+
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
 
 /x-pack/solutions/security/plugins/security_solution/common/api/tags @elastic/security-threat-hunting-investigations
@@ -2829,11 +2833,14 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
+/x-pack/test/api_integration/deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
-oas_docs/.spectral.yaml                       @elastic/platform-docs
-oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
-oas_docs/kibana.info.yaml                     @elastic/platform-docs
+oas_docs/linters                              @elastic/core-docs @elastic/experience-docs 
+oas_docs/overlays                             @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.serverless.yaml          @elastic/core-docs @elastic/experience-docs 
+oas_docs/kibana.info.yaml                     @elastic/core-docs @elastic/experience-docs 
+oas_docs/output                               @elastic/core-docs @elastic/experience-docs 
 
 # Documentation settings files
 docs/settings-gen                             @elastic/platform-docs @elastic/experience-docs

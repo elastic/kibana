@@ -127,9 +127,9 @@ export const binaryExpressionGroup = (node: ESQLAstNode): BinaryExpressionGroup 
       case '>=':
         return BinaryExpressionGroup.comparison;
       case 'like':
-      case 'not_like':
+      case 'not like':
       case 'rlike':
-      case 'not_rlike':
+      case 'not rlike':
         return BinaryExpressionGroup.regex;
     }
   }

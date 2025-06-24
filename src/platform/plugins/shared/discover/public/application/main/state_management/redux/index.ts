@@ -26,7 +26,12 @@ import {
   initializeTabs,
 } from './actions';
 
-export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
+export type {
+  DiscoverInternalState,
+  TabState,
+  TabStateGlobalState,
+  InternalStateDataRequestParams,
+} from './types';
 
 export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
