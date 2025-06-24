@@ -20,18 +20,26 @@ interface Props {
 export const FeedbackButton = ({ core, isServerless }: Props) => {
   let flyoutRef: OverlayRef | null = null;
 
-  const openFlyout = () => {
+  const closeFlyout = () => {
+    flyoutRef?.close();
+    flyoutRef = null;
+  };
+
+  const toogleFlyout = () => {
     if (flyoutRef) {
-      flyoutRef.close();
-      flyoutRef = null;
+      closeFlyout();
       return;
     }
 
-    flyoutRef = core.overlays.openFlyout(toMountPoint(<FeedbackFlyout />, core.rendering), {
-      'data-test-subj': 'feedbackFlyout',
-      type: 'push',
-      maxWidth: 400,
-    });
+    flyoutRef = core.overlays.openFlyout(
+      toMountPoint(<FeedbackFlyout closeFlyout={closeFlyout} />, core.rendering),
+      {
+        'data-test-subj': 'feedbackFlyout',
+        type: 'push',
+        maxWidth: 400,
+        hideCloseButton: true,
+      }
+    );
 
     flyoutRef.onClose.finally(() => {
       flyoutRef = null;
@@ -46,7 +54,7 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
         iconType="popout"
         iconSide="right"
         target="_blank"
-        onClick={openFlyout}
+        onClick={toogleFlyout}
         data-test-subj="serverlessFeedbackButton"
       >
         {i18n.translate('xpack.intercept.giveFeedbackButton.label', {
@@ -58,13 +66,13 @@ export const FeedbackButton = ({ core, isServerless }: Props) => {
 
   return (
     <EuiHeaderSectionItemButton
-      onClick={openFlyout}
       data-test-subj="feedbackButton"
       aria-controls="keyPadMenu"
       aria-haspopup="true"
       aria-label={i18n.translate('xpack.intercept.giveFeedbackButton.label', {
         defaultMessage: 'Give feedback',
       })}
+      onClick={toogleFlyout}
     >
       <EuiIcon type="comment" />
     </EuiHeaderSectionItemButton>
