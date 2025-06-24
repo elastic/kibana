@@ -39,7 +39,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
-        pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
@@ -60,7 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('goes to the start page if there exists no index', async () => {
-        pageObjects.common.navigateToApp('searchHomepage');
         await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
       });
 
