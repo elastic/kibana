@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -23,6 +24,7 @@ import { CsvUploadManageDataSource } from './csv_upload_manage_data_source';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { IndexSelectorModal } from '../privileged_user_monitoring_onboarding/components/select_index_modal';
+import { useFetchPrivilegedUserIndices } from '../privileged_user_monitoring_onboarding/hooks/use_fetch_privileged_user_indices';
 
 export interface AddDataSourceResult {
   successful: boolean;
@@ -39,6 +41,8 @@ export const PrivilegedUserMonitoringManageDataSources = ({
   const spaceId = useSpaceId();
   const [addDataSourceResult, setAddDataSourceResult] = useState<AddDataSourceResult | undefined>();
   const [isIndexModalOpen, { on: showIndexModal, off: hideIndexModal }] = useBoolean(false);
+
+  const { data: indices = [], isFetching } = useFetchPrivilegedUserIndices(undefined);
 
   return (
     <>
@@ -98,11 +102,22 @@ export const PrivilegedUserMonitoringManageDataSources = ({
               defaultMessage="One or more indices containing the user.name field. All user names in the indices, specified in the user.name field, will be defined as privileged users."
             />
           </p>
+
           <h4>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.noIndicesAdded"
-              defaultMessage="No indices added"
-            />
+            {isFetching && <EuiLoadingSpinner size="m" data-test-subj="loading-indices-spinner" />}
+            {indices.length === 0 && (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.noIndicesAdded"
+                defaultMessage="No indices added"
+              />
+            )}
+            {indices.length > 0 && (
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.numIndicesAdded"
+                defaultMessage="{indexCount, plural, one {# index} other {# indices}} added"
+                values={{ indexCount: indices.length }}
+              />
+            )}
           </h4>
         </EuiText>
         <EuiButton fullWidth={false} iconType={'plusInCircle'} onClick={showIndexModal}>
