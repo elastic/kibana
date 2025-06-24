@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { ISearchGeneric } from '@kbn/search-types';
 import {
   esqlQueryToOptions,
   ESQLQueryToOptionsSuccess,
@@ -18,7 +18,7 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLResults: () => mockGetESQLResults(),
 }));
 
-const searchMock = dataPluginMock.createStartContract().search.search;
+const searchMock = {} as ISearchGeneric;
 
 describe('esqlQueryToOptions', () => {
   beforeEach(() => {
