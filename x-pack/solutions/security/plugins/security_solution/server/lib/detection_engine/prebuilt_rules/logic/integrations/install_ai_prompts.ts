@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { findLatestPackageVersion } from '../../api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_package';
 import {
   PREBUILT_RULES_PACKAGE_NAME,
   SECURITY_AI_PROMPTS_PACKAGE_NAME,
