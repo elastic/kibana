@@ -35,7 +35,6 @@ const validation = {
   params: schema.object({ exportType: schema.string({ minLength: 2 }) }),
   body: schema.object({
     schedule: scheduleRruleSchemaV2,
-    startedAt: schema.maybe(schema.string()),
     notification: schema.maybe(rawNotificationSchema),
     jobParams: schema.string(),
   }),
