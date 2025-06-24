@@ -104,4 +104,9 @@ export interface AlertingUsage {
   count_rules_snoozed_by_type: Record<string, number>;
   count_rules_muted_by_type: Record<string, number>;
   count_ignored_fields_by_rule_type: Record<string, number>;
+  count_backfill_executions: number;
+  count_backfills_by_execution_status_per_day: Record<string, number>;
+  count_gaps: number;
+  total_unfilled_gap_duration_ms: number;
+  total_filled_gap_duration_ms: number;
 }
