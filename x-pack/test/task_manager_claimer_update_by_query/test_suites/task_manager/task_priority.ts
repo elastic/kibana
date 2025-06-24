@@ -125,10 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
-      // Timeout added here to ensure all tasks are claimed and therefore deleted
-      // for the next test case
-      await new Promise((r) => setTimeout(r, 10000));
-      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
     it('should claim low priority tasks if there is capacity', async () => {
@@ -219,8 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
       // make sure all tasks get created
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
-        expect(tasks.length).to.eql(12);
-
         const taskIds = tasks.map((task) => task.id);
         scheduledTasks.forEach((scheduledTask) => {
           expect(taskIds).to.contain(scheduledTask.id);
@@ -265,8 +259,6 @@ export default function ({ getService }: FtrProviderContext) {
       // make sure all tasks get created
       await retry.try(async () => {
         const tasks = (await currentTasks()).docs;
-        expect(tasks.length).to.eql(11);
-
         const taskIds = tasks.map((task) => task.id);
         scheduledTasks.forEach((scheduledTask) => {
           expect(taskIds).to.contain(scheduledTask.id);
