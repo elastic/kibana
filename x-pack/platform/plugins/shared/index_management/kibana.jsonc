@@ -18,7 +18,8 @@
       "home",
       "management",
       "features",
-      "share"
+      "share",
+      "triggersActionsUi"
     ],
     "optionalPlugins": [
       "security",

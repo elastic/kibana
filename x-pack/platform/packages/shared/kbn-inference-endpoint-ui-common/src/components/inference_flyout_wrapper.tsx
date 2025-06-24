@@ -21,11 +21,11 @@ import {
 import React, { useCallback } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getInferenceApiParams } from '@kbn/triggers-actions-ui-plugin/public';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
-import { getInferenceApiParams } from '../utils/helpers';
 
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;

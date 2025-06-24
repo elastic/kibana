@@ -30,8 +30,6 @@ export enum ServiceProviderKeys {
 }
 
 export const DEFAULT_TASK_TYPE = 'completion';
-export const MIN_ALLOCATIONS = 0;
-export const DEFAULT_NUM_THREADS = 1;
 export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
   ServiceProviderKeys.elasticsearch,
 ];

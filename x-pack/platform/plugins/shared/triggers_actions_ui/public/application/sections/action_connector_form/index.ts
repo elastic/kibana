@@ -28,3 +28,4 @@ export const AddConnectorInline = suspendedComponentWithProps(
 );
 
 export type { ConnectorFormSchema } from './types';
+export { getInferenceApiParams } from './helpers';

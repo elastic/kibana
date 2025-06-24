@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
-import { getInferenceApiParams } from '@kbn/inference-endpoint-ui-common';
+import { getInferenceApiParams } from '../helpers';
 import { CreateConnectorFilter } from './create_connector_filter';
 import {
   ActionConnector,
