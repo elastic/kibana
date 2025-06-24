@@ -513,7 +513,8 @@
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is"
+        "@types/react-is",
+        "csstype"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -711,10 +712,10 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
-        "@reduxjs/toolkit"
+        "@reduxjs/toolkit",
+        "immer"
       ],
       "reviewers": [
-        "team:ml-ui",
         "team:kibana-visualizations",
         "team:security-solution"
       ],
@@ -1048,9 +1049,7 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "csstype",
-        "cronstrue",
-        "immer"
+        "cronstrue"
       ],
       "reviewers": [
         "team:kibana-management"

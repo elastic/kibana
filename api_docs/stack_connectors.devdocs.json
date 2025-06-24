@@ -222,7 +222,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"resolve\" | \"trigger\" | \"acknowledge\" | undefined>; dedupKey: ",
+          "<\"resolve\" | \"acknowledge\" | \"trigger\" | undefined>; dedupKey: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",

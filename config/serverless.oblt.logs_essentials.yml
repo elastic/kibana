@@ -3,3 +3,4 @@
 ## Disable xpack plugins
 xpack.infra.enabled: false
 xpack.slo.enabled: false
+xpack.observabilityAIAssistant.enabled: false
