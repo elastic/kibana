@@ -12,6 +12,7 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 import { PrivilegedAccessDetectionsPanel } from './components/privileged_access_detection';
+import { PrivilegedUsersTable } from './components/privileged_users_table';
 
 export interface OnboardingCallout {
   userCount: number;
@@ -83,14 +84,10 @@ export const PrivilegedUserMonitoring = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {spaceId && <PrivilegedUsersTable spaceId={spaceId} />}
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
         <UserActivityPrivilegedUsersPanel />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          {'TODO: Privileged users'}
-        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
