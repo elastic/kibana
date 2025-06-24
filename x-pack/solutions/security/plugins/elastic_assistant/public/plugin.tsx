@@ -46,7 +46,6 @@ export class ElasticAssistantPublicPlugin
   }
 
   public start(coreStart: CoreStart, dependencies: ElasticAssistantPublicPluginStartDependencies) {
-
     const startServices = (): StartServices => {
       const { ...startPlugins } = coreStart.security;
       licenseService.start(dependencies.licensing.license$);
