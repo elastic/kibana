@@ -104,6 +104,8 @@ include::upgrade-notes.asciidoc[]
 
 The 8.18.3 release includes the following fixes.
 
+IMPORTANT: The 8.18.3 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory for more details].
+
 [float]
 [[known-issues-8.18.3]]
 === Known issues
