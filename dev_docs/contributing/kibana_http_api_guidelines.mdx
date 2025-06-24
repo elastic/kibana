@@ -19,7 +19,7 @@ Terraform can work with any API, but some APIs are easier to deal with than othe
 
 ### Think in terms of resources
 
-APIs that stick to a consistent set of arguments or parameters are much easier to map into Terraform. Terraform can describe the "thing" your API is managing. RPC-based APIs are harder to work with since they’re not declarative. Your HTTP APIs should describe REST-like actions (GET, POST, DELETE, etc.) against resources not remote procedures like: executeJob. 
+APIs that stick to a consistent set of arguments or parameters are much easier to map into Terraform. Terraform can describe the "thing" your API is managing. RPC-based APIs are harder to work with since they’re not declarative. Your HTTP APIs should describe REST-like actions (GET, POST, DELETE, etc.) against resources not remote procedures like: executeJob.
 
 APIs designed around resources are easier to support than those focused on action-oriented endpoints.
 
@@ -99,16 +99,127 @@ resource "elasticstack_elasticsearch_index_lifecycle" "my_ilm" {
 }
 ```
 
+### Implement complete CRUD operations
+
+For Terraform to properly manage resources, your API must implement a complete set of CRUD operations on each resource. This is essential for the Terraform lifecycle (create, read, update, delete) to work properly.
+
+#### Required endpoints for each resource
+
+For every resource type, implement these HTTP endpoints:
+
+```
+GET    /api/resource/{id}         # Read - retrieve an existing resource
+POST   /api/resource              # Create - create a new resource
+PUT    /api/resource/{id}         # Update - update an existing resource
+DELETE /api/resource/{id}         # Delete - remove an existing resource
+GET    /api/resource              # List - retrieve all resources (with pagination)
+```
+
+The List operation is critical for Terraform's data source and import functionality.
+
+#### Implementation considerations
+
+1. **Consistent response structures**: Ensure GET and POST/PUT responses return the same structure with identical fields.
+
+2. **Idempotent operations**: POST for creation and PUT for updates should be idempotent - running the same request multiple times should result in the same state.
+
+3. **Complete state**: After each operation, return the complete state of the resource, not just acknowledgment.
+
+   ```json
+   // Good - returns complete state
+   {
+     "id": "my-resource",
+     "name": "My Resource",
+     "config": { "setting1": "value1" },
+     "created_at": "2025-06-24T08:15:30Z",
+     "updated_at": "2025-06-24T08:15:30Z"
+   }
+
+   // Bad - returns only acknowledgment
+   {
+     "result": "success",
+     "message": "Resource created successfully"
+   }
+   ```
+
+4. **HTTP status codes**: Use appropriate HTTP status codes:
+   - `200/201` for successful operations
+   - `404` when a resource doesn't exist
+   - `409` for conflicts (e.g., resource already exists)
+   - `400` for validation errors
+
+5. **Validation**: Validate input at creation/update time and return comprehensive errors.
+
+#### Example: Complete API for a resource
+
+```typescript
+// Create, Retrieve, Update
+router.(get|post|put)(
+  {
+    path: '/api/resource',
+    validate: {
+      body: schema.object({
+        name: schema.string(),
+        config: schema.object({...}),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    // Implementation...
+    return response.ok({ body: completeResourceState });
+  }
+);
+
+// Delete (DELETE /api/resource/{id})
+router.delete(
+  {
+    path: '/api/resource/{id}',
+    validate: {
+      params: schema.object({
+        id: schema.string(),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    // Implementation...
+    return response.ok();
+  }
+);
+
+// List (GET /api/resource)
+router.get(
+  {
+    path: '/api/resource',
+    validate: {
+      query: schema.object({
+        page: schema.maybe(schema.number()),
+        perPage: schema.maybe(schema.number()),
+      }),
+    },
+  },
+  async (context, request, response) => {
+    // Implementation...
+    return response.ok({
+      body: {
+        items: resources,
+        total: totalCount,
+        page: currentPage,
+        perPage: itemsPerPage
+      }
+    });
+  }
+);
+```
 
 #### API imposed challenges
 
-API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (\`PUT /\{index\}/\_settings\`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront. 
+API design decisions can create real challenges for Terraform resource implementation. The Elasticsearch [Index Settings API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-put-settings) (\`PUT /\{index\}/\_settings\`) treats static settings (which require index recreation) and dynamic settings (which can be updated in place) identically. This creates a complex situation forcing the implementation to handle all settings together because the API doesn't offer a way to distinguish them upfront.
 
 ```bash
 {
   "error": {
     "reason": "Can't update non dynamic settings [[index.codec, index.number_of_shards]] for open indices"
-  
+
 }
 ```
 
@@ -152,8 +263,8 @@ mappings = jsonencode({
 })
 ```
 
-The hickup here is with validation. Terraform just isn't designed to do validation (or testing!) like we would with conventional languages. 
-It doesn’t validate what strings contain, only that they're parsable during terraform plan. 
+The hickup here is with validation. Terraform just isn't designed to do validation (or testing!) like we would with conventional languages.
+It doesn’t validate what strings contain, only that they're parsable during terraform plan.
 Resource developers often fall back to the API layer for validation checks, that can lead to plan/apply issues.
 
 ### Return errors early—and all at once
@@ -222,7 +333,7 @@ OpenAPI specifications make generating consistent Kibana and Fleet clients possi
 
 ```bash
 # From Makefile - generates standardized clients
-internal/clients/fleet/: 
+internal/clients/fleet/:
 	oapi-codegen -package fleet fleet-openapi.json
 ```
 
@@ -264,9 +375,9 @@ Terraform import brings existing resources under management by reading their cur
 
 ### Be predictable
 
-Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.  
+Terraform relies on the same input resulting in the same output.  Avoid using fields like "last modified time"—Terraform can’t compare those meaningfully. This can be tricky with sensitive fields or when your API relies on randomness.
 
-Constantly changing fields in API responses create a difficult situation for Terraform implementations because they cause constant drift. 
+Constantly changing fields in API responses create a difficult situation for Terraform implementations because they cause constant drift.
 
 Timestamps and other time-based fields aren’t predictable:
 
@@ -283,7 +394,7 @@ The [Alerting Rules API](https://www.elastic.co/docs/api/doc/kibana/operation/op
 
 ```
 "execution_status": {
-  "status": "active", 
+  "status": "active",
   "last_execution_date": "2023-12-07T22:36:41.358Z",  // Changes on every read
   "last_duration": 736
 }
@@ -291,7 +402,7 @@ The [Alerting Rules API](https://www.elastic.co/docs/api/doc/kibana/operation/op
 
 Users see Terraform detecting "changes" on every refresh, even when nothing in their configuration has actually changed\!
 
-An alternative is to separate volatile runtime data from stable configuration data in responses: 
+An alternative is to separate volatile runtime data from stable configuration data in responses:
 
 ```json
 {
@@ -307,7 +418,7 @@ An alternative is to separate volatile runtime data from stable configuration da
 }
 ```
 
-Volatile fields create a challenging choice: include them (causing constant configuration drift) or exclude them (losing valuable runtime information). 
+Volatile fields create a challenging choice: include them (causing constant configuration drift) or exclude them (losing valuable runtime information).
 
 Including and separating them makes it easier for the TF provider to specifically ignore sets of fields (marking them as [readonly](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/kibana_alerting_rule#read-only)) but needs to be built into the client generator.
 
@@ -325,13 +436,13 @@ resource "elasticstack_transform" "example" {
   group_by = "field_name"  # String type
 }
 
-# Version 2.0 - same field became an array  
+# Version 2.0 - same field became an array
 resource "elasticstack_transform" "example" {
   group_by = ["field_name"]  # Array type - BREAKING CHANGE!
 }
 ```
 
-Another example is when the Kibana SLO API changed `group_by` from `string` to `string | string[]`. 
+Another example is when the Kibana SLO API changed `group_by` from `string` to `string | string[]`.
 
 Changing a field to make it more lenient might look harmless on the surface but means that the API will return values clients don't expect.
 
@@ -363,7 +474,7 @@ resource "elasticstack_elasticsearch_index" "example" {
   # Structured fields for simple, predictable values
   number_of_shards   = 1
   number_of_replicas = 2
-  
+
   # JSON strings only for truly complex, variable structures
   mappings = jsonencode({
     properties = {
@@ -396,9 +507,9 @@ Consider the scenario:
 
 A user wants to create alerting rules with different configurations, depending on the space they are in.
 
-In Kibana’s UI, they’d create a space, change into that space and then create the rule.  
+In Kibana’s UI, they’d create a space, change into that space and then create the rule.
 
-Through curl, the flow would be similar, although they’d probably GET the space to make sure it exists before POSTing the rule. 
+Through curl, the flow would be similar, although they’d probably GET the space to make sure it exists before POSTing the rule.
 
 In terraform, it’s different. Both resources can (and often are) configured at the same time! In the scenario above, the client [needs the space ID](https://github.com/elastic/terraform-provider-elasticstack/blame/0826f4385a29fa58a79f785249f204e13ee3d47c/internal/clients/kibana/alerting.go#L192) to create the rule:
 
@@ -434,7 +545,7 @@ private async persistAlertsHelper() {
 
 ### Offer compare-and-swap
 
-Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins. 
+Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins.
 
 If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
 
@@ -442,7 +553,7 @@ If you have to consider concurrency control, support mechanisms like ETags and c
 
 The robustness principle says to accept input in various formats but return output in a consistent format, for example converting strings to lowercase, ordering elements in a list or changing whitespace in \`json\` strings.
 
-For Terraform, don’t do this. 
+For Terraform, don’t do this.
 
 Terraform does byte-for-byte comparisons, so normalized output forces provider developers to implement logic to handle different data formats, ordering, capitalization variations and other unnecessary complexity.
 
