@@ -594,7 +594,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForJoin,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'change_point',
     preview: true,
     description: i18n.translate(
@@ -681,7 +681,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
   },
   {
-    hidden: false,
+    hidden: true,
     name: 'fork',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
