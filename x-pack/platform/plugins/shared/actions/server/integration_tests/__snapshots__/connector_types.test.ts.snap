@@ -2547,6 +2547,14 @@ Object {
           "type": "record",
         },
       ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1000,
+          },
+          "name": "max",
+        },
+      ],
       "type": "array",
     },
     "groupedAlerts": Object {
@@ -2627,6 +2635,14 @@ Object {
                           },
                         ],
                         "type": "record",
+                      },
+                    ],
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "limit": 1000,
+                        },
+                        "name": "max",
                       },
                     ],
                     "type": "array",

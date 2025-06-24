@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
 import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
-import { CASES_CONNECTOR_TIME_WINDOW_REGEX } from '../../../common/constants';
+import { CASES_CONNECTOR_TIME_WINDOW_REGEX, MAX_ALERTS_PER_CASE } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
   validate: (value) => {
@@ -66,7 +66,7 @@ const TimeWindowSchema = schema.string({
 });
 
 export const CasesGroupedAlertsSchema = schema.object({
-  alerts: schema.arrayOf(AlertSchema),
+  alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
   comments: schema.maybe(schema.arrayOf(schema.string())),
   grouping: schema.recordOf(schema.string(), schema.any()),
   title: schema.maybe(schema.string()),
@@ -80,7 +80,7 @@ export const CasesConnectorConfigSchema = schema.object({});
 export const CasesConnectorSecretsSchema = schema.object({});
 
 export const CasesConnectorRunParamsSchema = schema.object({
-  alerts: schema.arrayOf(AlertSchema),
+  alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
   groupedAlerts: schema.nullable(
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
