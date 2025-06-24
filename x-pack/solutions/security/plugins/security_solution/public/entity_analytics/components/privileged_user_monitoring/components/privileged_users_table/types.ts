@@ -14,5 +14,4 @@ export interface TableItemType extends Record<string, string | string[] | number
   risk_score?: number;
   risk_level?: EntityRiskLevels;
   criticality_level?: CriticalityLevelWithUnassigned;
-  'labels.monitoring_label'?: string;
 }

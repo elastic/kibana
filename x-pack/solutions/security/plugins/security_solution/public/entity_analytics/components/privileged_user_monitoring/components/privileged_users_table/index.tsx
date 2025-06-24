@@ -232,7 +232,6 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.showing"
                   defaultMessage="Showing "
-                  values={{ count: visibleRecords.length }}
                 />
                 <span
                   css={css`

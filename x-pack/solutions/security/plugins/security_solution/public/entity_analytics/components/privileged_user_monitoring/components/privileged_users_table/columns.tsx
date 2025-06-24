@@ -183,11 +183,20 @@ const prettyDataSource = (dataSource: string) => {
   return (() => {
     switch (dataSource) {
       case 'csv':
-        return 'CSV File';
+        return i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.dataSource.csv',
+          { defaultMessage: 'CSV File' }
+        );
       case 'index':
-        return 'Index';
+        return i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.dataSource.index',
+          { defaultMessage: 'Index' }
+        );
       case 'api':
-        return 'API Request';
+        return i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.dataSource.api',
+          { defaultMessage: 'API request' }
+        );
       default:
         return dataSource;
     }
