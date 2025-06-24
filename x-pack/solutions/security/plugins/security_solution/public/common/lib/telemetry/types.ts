@@ -30,6 +30,10 @@ import type {
   ManualRuleRunEventTypes,
   ManualRuleRunTelemetryEventsMap,
 } from './events/manual_rule_run/types';
+import type {
+  BulkFillRuleGapsEventTypes,
+  BulkFillRuleGapsTelemetryEventsMap,
+} from './events/bulk_fill_rule_gaps/types';
 import type { EventLogEventTypes, EventLogTelemetryEventsMap } from './events/event_log/types';
 import type { NotesEventTypes, NotesTelemetryEventsMap } from './events/notes/types';
 import type {
@@ -72,6 +76,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? OnboardingHubTelemetryEventsMap[T]
   : T extends ManualRuleRunEventTypes
   ? ManualRuleRunTelemetryEventsMap[T]
+  : T extends BulkFillRuleGapsEventTypes
+  ? BulkFillRuleGapsTelemetryEventsMap[T]
   : T extends EventLogEventTypes
   ? EventLogTelemetryEventsMap[T]
   : T extends NotesEventTypes
@@ -90,6 +96,7 @@ export type TelemetryEventTypes =
   | DocumentEventTypes
   | OnboardingHubEventTypes
   | ManualRuleRunEventTypes
+  | BulkFillRuleGapsEventTypes
   | EventLogEventTypes
   | NotesEventTypes
   | AppEventTypes

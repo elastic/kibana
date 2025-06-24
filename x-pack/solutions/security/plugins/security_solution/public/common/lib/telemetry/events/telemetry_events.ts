@@ -10,6 +10,7 @@ import { dataQualityTelemetryEvents } from './data_quality';
 import { documentTelemetryEvents } from './document_details';
 import { entityTelemetryEvents } from './entity_analytics';
 import { eventLogTelemetryEvents } from './event_log';
+import { bulkFillRuleGapsTelemetryEvents } from './bulk_fill_rule_gaps';
 import { manualRuleRunTelemetryEvents } from './manual_rule_run';
 import { notesTelemetryEvents } from './notes';
 import { onboardingHubTelemetryEvents } from './onboarding';
@@ -24,6 +25,7 @@ export const telemetryEvents = [
   ...documentTelemetryEvents,
   ...onboardingHubTelemetryEvents,
   ...manualRuleRunTelemetryEvents,
+  ...bulkFillRuleGapsTelemetryEvents,
   ...eventLogTelemetryEvents,
   ...notesTelemetryEvents,
   ...appTelemetryEvents,

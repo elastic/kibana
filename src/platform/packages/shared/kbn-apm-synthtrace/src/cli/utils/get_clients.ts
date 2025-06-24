@@ -11,8 +11,6 @@ import { Required } from 'utility-types';
 import { Client } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
 import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
-import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtrace_es_client';
-import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
@@ -22,12 +20,10 @@ import { Logger } from '../../lib/utils/create_logger';
 
 export interface SynthtraceClients {
   apmEsClient: ApmSynthtraceEsClient;
-  entitiesEsClient: EntitiesSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   logsEsClient: LogsSynthtraceEsClient;
   streamsClient: StreamsSynthtraceClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
-  entitiesKibanaClient: EntitiesSynthtraceKibanaClient;
   esClient: Client;
 }
 
@@ -67,12 +63,6 @@ export async function getClients({
 
   const logsEsClient = new LogsSynthtraceEsClient(options);
   const infraEsClient = new InfraSynthtraceEsClient(options);
-  const entitiesEsClient = new EntitiesSynthtraceEsClient(options);
-
-  const entitiesKibanaClient = new EntitiesSynthtraceKibanaClient({
-    ...options,
-    kibanaClient: options.kibana,
-  });
 
   const syntheticsEsClient = new SyntheticsSynthtraceEsClient(options);
 
@@ -80,12 +70,10 @@ export async function getClients({
 
   return {
     apmEsClient,
-    entitiesEsClient,
     infraEsClient,
     logsEsClient,
     streamsClient,
     syntheticsEsClient,
-    entitiesKibanaClient,
     esClient: options.client,
   };
 }

@@ -84,7 +84,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/rule-registry-plugin",
     "@kbn/deeplinks-security",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/ai-security-labs-content",
+    "@kbn/inference-langchain"
   ],
   "exclude": [
     "target/**/*",
