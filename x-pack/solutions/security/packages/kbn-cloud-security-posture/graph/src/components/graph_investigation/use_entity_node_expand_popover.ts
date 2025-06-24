@@ -171,7 +171,7 @@ export const useEntityNodeExpandPopover = (
                 label: i18n.translate(
                   'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
                   {
-                    defaultMessage: 'Show event details',
+                    defaultMessage: 'Show entity details',
                   }
                 ),
                 onClick: () => {
