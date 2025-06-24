@@ -309,7 +309,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       docsBase: `${ELASTIC_DOCS}solutions/search`,
       asyncSearch: `${ELASTIC_DOCS}solutions/search/async-search-api`,
       dataStreams: `${ELASTIC_DOCS}manage-data/data-store/data-streams`,
-      dataStreamsFailureStore: `${ELASTIC_DOCS}manage-data/data-store/data-streams/failure-store`,
       deprecationLogging: `${ELASTIC_DOCS}deploy-manage/monitor/logging-configuration/update-elasticsearch-logging-levels#deprecation-logging`,
       createEnrichPolicy: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-enrich-put-policy`
@@ -419,6 +418,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-requirements`,
       networkMap: `${ELASTIC_DOCS}solutions/security/explore/configure-network-map-data`,
       troubleshootGaps: `${ELASTIC_DOCS}troubleshoot/security/detection-rules#troubleshoot-gaps`,
+      gapsTable: `${ELASTIC_DOCS}solutions/security/detect-and-alert/monitor-rule-executions#gaps-table`,
       ruleApiOverview: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,

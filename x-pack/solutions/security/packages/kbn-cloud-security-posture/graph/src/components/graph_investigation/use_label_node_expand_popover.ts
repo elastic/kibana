@@ -66,17 +66,17 @@ export const useLabelNodeExpandPopover = (
       return [
         {
           type: 'item',
-          iconType: 'users',
+          iconType: 'analyzeEvent',
           testSubject: GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
           label:
             eventsWithThisActionToggleAction === 'show'
               ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showEventsWithThisAction',
-                  { defaultMessage: 'Show events with this action' }
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.showRelatedEvents',
+                  { defaultMessage: 'Show related events' }
                 )
               : i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideEventsWithThisAction',
-                  { defaultMessage: 'Hide events with this action' }
+                  'securitySolutionPackages.csp.graph.graphLabelExpandPopover.hideRelatedEvents',
+                  { defaultMessage: 'Hide related events' }
                 ),
           onClick: () => {
             onShowEventsWithThisActionClick(node, eventsWithThisActionToggleAction);
