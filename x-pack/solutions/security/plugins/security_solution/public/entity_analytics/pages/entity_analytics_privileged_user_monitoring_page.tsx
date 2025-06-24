@@ -214,6 +214,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
             <PrivilegedUserMonitoring
               callout={state.onboardingCallout}
               onManageUserClicked={onManageUserClicked}
+              sourcererDataView={sourcererDataView}
             />
           </>
         )}
