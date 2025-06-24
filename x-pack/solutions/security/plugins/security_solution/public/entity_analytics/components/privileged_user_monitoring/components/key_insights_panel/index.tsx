@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { ActivePrivilegedUsersTile } from './active_privileged_users_tile';
 import { AlertsTriggeredTile } from './alerts_triggered_tile';
@@ -23,7 +24,10 @@ const tileStyles = css`
   height: 100%;
 `;
 
-export const KeyInsightsPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+  spaceId,
+  sourcerDataView,
+}) => {
   return (
     <EuiFlexGroup
       wrap
@@ -38,12 +42,12 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => 
     >
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <ActivePrivilegedUsersTile spaceId={spaceId} />
+          <ActivePrivilegedUsersTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AlertsTriggeredTile spaceId={spaceId} />
+          <AlertsTriggeredTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -53,17 +57,17 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string }> = ({ spaceId }) => 
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <GrantedRightsTile spaceId={spaceId} />
+          <GrantedRightsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AccountSwitchesTile spaceId={spaceId} />
+          <AccountSwitchesTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div css={tileStyles}>
-          <AuthenticationsTile spaceId={spaceId} />
+          <AuthenticationsTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getGrantedRightsEsqlSource } from '../../../queries/granted_rights_esql_query';
 
-export const getGrantedRightsEsqlCount = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
-    ${getPrivilegedMonitorUsersJoin(namespace)}
-    | WHERE (host.os.type == "linux"
-      AND event.type == "start"
-      AND event.action IN ("exec", "exec_event", "start", "ProcessRollup2", "executed", "process_started")
-      AND (
-        process.name IN ("usermod", "adduser") OR
-        (process.name == "gpasswd" AND process.args IN ("-a", "--add", "-M", "--members"))
-      )) OR (
-      host.os.type=="windows"
-      AND event.action=="added-member-to-group"
-    ) OR (
-      okta.event_type IN ("group.user_membership.add",  "user.account.privilege.grant")
-     )
+export const getGrantedRightsEsqlCount = (namespace: string, sourcerDataView: DataViewSpec) => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  const fields = sourcerDataView?.fields ?? {};
+  return `${getGrantedRightsEsqlSource(namespace, indexPattern, fields)}
     | STATS COUNT(*)`;
 };

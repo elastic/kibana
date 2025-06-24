@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
+import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
 
 export const getAnomaliesDetectedEsqlQuery = (namespace: string) => {
   return `FROM .ml-anomalies-shared

@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getAccountSwitchesEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const AccountSwitchesTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+export const AccountSwitchesTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+  spaceId,
+  sourcerDataView,
+}) => {
   return (
     <KeyInsightsTile
       title={
@@ -25,7 +29,7 @@ export const AccountSwitchesTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
           defaultMessage="Account Switches"
         />
       }
-      getEsqlQuery={getAccountSwitchesEsqlCount}
+      getEsqlQuery={(namespace) => getAccountSwitchesEsqlCount(namespace, sourcerDataView)}
       id="privileged-user-monitoring-account-switches"
       spaceId={spaceId}
       inspectTitle={

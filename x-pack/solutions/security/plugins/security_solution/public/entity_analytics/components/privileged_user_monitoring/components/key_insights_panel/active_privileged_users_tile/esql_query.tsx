@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../helpers';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
 
-export const getActivePrivilegedUsersEsqlCount = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
+export const getActivePrivilegedUsersEsqlCount = (
+  namespace: string,
+  sourcerDataView: DataViewSpec
+) => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  return `FROM ${indexPattern} METADATA _id, _index
       ${getPrivilegedMonitorUsersJoin(namespace)}
       | STATS \`COUNT(*)\` = COUNT_DISTINCT(user.name)`;
 };

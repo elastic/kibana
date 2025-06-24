@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getAuthenticationsEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const AuthenticationsTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
+export const AuthenticationsTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
+  spaceId,
+  sourcerDataView,
+}) => {
   return (
     <KeyInsightsTile
       title={
@@ -25,7 +29,7 @@ export const AuthenticationsTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
           defaultMessage="Authentications"
         />
       }
-      getEsqlQuery={getAuthenticationsEsqlCount}
+      getEsqlQuery={(namespace) => getAuthenticationsEsqlCount(namespace, sourcerDataView)}
       id="privileged-user-monitoring-authentications"
       spaceId={spaceId}
       inspectTitle={

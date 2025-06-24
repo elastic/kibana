@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { getPrivilegedMonitorUsersJoin } from '../../../queries/helpers';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getAccountSwitchesEsqlSource } from '../../../queries/account_switches_esql_query';
 
-export const getAccountSwitchesEsqlCount = (namespace: string) => {
-  return `FROM logs-* METADATA _id, _index
-    ${getPrivilegedMonitorUsersJoin(namespace)}
-    | WHERE to_lower(process.command_line) RLIKE "(su|sudo su|sudo -i|sudo -s|ssh [^@]+@[^\s]+)"
+export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: DataViewSpec) => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  const fields = sourcerDataView?.fields ?? {};
+  return `${getAccountSwitchesEsqlSource(namespace, indexPattern, fields)}
     | STATS COUNT(*)`;
 };

@@ -25,7 +25,7 @@ export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }
           defaultMessage="Anomalies Detected"
         />
       }
-      getEsqlQuery={getAnomaliesDetectedEsqlQuery}
+      getEsqlQuery={(namespace) => getAnomaliesDetectedEsqlQuery(namespace)}
       id="privileged-user-monitoring-anomalies-detected"
       spaceId={spaceId}
       inspectTitle={
