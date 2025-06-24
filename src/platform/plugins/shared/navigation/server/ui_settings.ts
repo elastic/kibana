@@ -42,7 +42,7 @@ export const getUiSettings = (
           const activeSpace = await spaces.spacesService.getActiveSpace(request);
           const serverlessProjectType = setupPlugins.cloud?.serverless?.projectType;
 
-          const solution = activeSpace?.solution ?? serverlessProjectType ?? 'classic';
+          const solution = serverlessProjectType ?? activeSpace?.solution ?? 'classic';
           return DEFAULT_ROUTES[solution] ?? DEFAULT_ROUTES.classic;
         } catch (e) {
           logger.error(`Failed to retrieve active space: ${e.message}`);
