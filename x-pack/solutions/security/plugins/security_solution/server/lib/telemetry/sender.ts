@@ -8,6 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { URL } from 'url';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
+import * as rx from 'rxjs';
 
 import type { EventTypeOpts, Logger, LogMeta } from '@kbn/core/server';
 import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
@@ -220,7 +221,9 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async isTelemetryOptedIn() {
-    this.isOptedIn = await this.telemetryStart?.getIsOptedIn();
+    this.isOptedIn = this.telemetryStart
+      ? await rx.firstValueFrom(this.telemetryStart?.isOptedIn$)
+      : false;
     return this.isOptedIn === true;
   }
 
@@ -381,7 +384,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
       this.logger.debug('Telemetry URL', {
         url: telemetryUrl,
-      });
+      } as LogMeta);
 
       await this.sendEvents(
         toSend,

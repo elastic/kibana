@@ -1065,7 +1065,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       } as LogMeta);
     }
 
-    this.logger.debug('Timeline alerts to return', { alerts: alertsToReturn.length });
+    this.logger.debug('Timeline alerts to return', { alerts: alertsToReturn.length } as LogMeta);
 
     return alertsToReturn || [];
   }
