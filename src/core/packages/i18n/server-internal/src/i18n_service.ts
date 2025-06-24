@@ -61,7 +61,7 @@ export class I18nService {
   public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
     const { locale, translationFiles, translationHash } = await this.initTranslations(pluginPaths);
 
-    const router = http.createRouter('');
+    const router = http.router.create('');
     const { dist: isDist } = this.coreContext.env.packageInfo;
     registerRoutes({ router, locale, isDist, translationHash });
 

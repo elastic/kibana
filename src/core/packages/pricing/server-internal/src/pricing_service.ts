@@ -64,7 +64,7 @@ export class PricingService {
       this.configService.atPath<PricingConfigType>('pricing')
     );
 
-    registerRoutes(http.createRouter(''), {
+    registerRoutes(http.router.create(''), {
       pricingConfig: this.pricingConfig,
       productFeaturesRegistry: this.productFeaturesRegistry,
     });

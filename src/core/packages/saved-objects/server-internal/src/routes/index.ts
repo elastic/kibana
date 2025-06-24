@@ -56,7 +56,7 @@ export function registerRoutes({
   docLinks: DocLinksServiceSetup;
 }) {
   const router =
-    http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+    http.router.create<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
   const internalOnServerless = isServerless ? 'internal' : 'public';
   const deprecationInfo: RouteDeprecationInfo = {
@@ -149,7 +149,7 @@ export function registerRoutes({
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
-  const internalRouter = http.createRouter<InternalSavedObjectsRequestHandlerContext>(
+  const internalRouter = http.router.create<InternalSavedObjectsRequestHandlerContext>(
     '/internal/saved_objects/'
   );
 

@@ -118,7 +118,10 @@ describe('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get(
@@ -156,7 +159,10 @@ describe('Cookie based SessionStorage', () => {
   describe('#get()', () => {
     it('reads from session storage', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
       const router = createRouter('');
 
       router.get(
@@ -196,7 +202,10 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for empty session', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
       router.get(
@@ -224,7 +233,10 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for invalid session (expired) & clean cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -274,7 +286,10 @@ describe('Cookie based SessionStorage', () => {
 
     it('returns null for invalid session (incorrect path) & clean cookies accurately', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -468,7 +483,10 @@ describe('Cookie based SessionStorage', () => {
   describe('#clear()', () => {
     it('clears session storage & remove cookies', async () => {
       await server.preboot(prebootDeps);
-      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const {
+        server: innerServer,
+        router: { create: createRouter },
+      } = await server.setup(setupDeps);
 
       const router = createRouter('');
 
@@ -534,7 +552,10 @@ describe('Cookie based SessionStorage', () => {
       for (const sameSite of ['Strict', 'Lax', 'None'] as const) {
         it(`sets and parses SameSite = ${sameSite} correctly`, async () => {
           await server.preboot(prebootDeps);
-          const { server: innerServer, createRouter } = await server.setup(setupDeps);
+          const {
+            server: innerServer,
+            router: { create: createRouter },
+          } = await server.setup(setupDeps);
           const router = createRouter('');
 
           router.get(

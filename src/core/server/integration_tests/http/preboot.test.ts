@@ -88,7 +88,10 @@ describe('Preboot HTTP server', () => {
       );
     });
 
-    const { createRouter, server: innerStandardServer } = await server.setup(setupDeps);
+    const {
+      router: { create: createRouter },
+      server: innerStandardServer,
+    } = await server.setup(setupDeps);
     const standardRouter = createRouter('');
     standardRouter.get(
       {
@@ -149,7 +152,10 @@ describe('Preboot HTTP server', () => {
       );
     });
 
-    const { createRouter, server: innerStandardServer } = await server.setup(setupDeps);
+    const {
+      router: { create: createRouter },
+      server: innerStandardServer,
+    } = await server.setup(setupDeps);
     const standardRouter = createRouter('');
     standardRouter.get(
       {

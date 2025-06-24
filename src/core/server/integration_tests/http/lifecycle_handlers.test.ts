@@ -66,7 +66,7 @@ describe('core lifecycle handlers', () => {
     server = createHttpService({ configService, logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
-    router = serverSetup.createRouter('/');
+    router = serverSetup.router.create('/');
     innerServer = serverSetup.server;
   });
 
@@ -273,7 +273,7 @@ describe('core lifecycle handlers', () => {
       server = createHttpService({ configService });
       await server.preboot({ context: contextServiceMock.createPrebootContract() });
       const serverSetup = await server.setup(setupDeps);
-      router = serverSetup.createRouter('/');
+      router = serverSetup.router.create('/');
       innerServer = serverSetup.server;
       router.get(
         {
@@ -352,7 +352,7 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
 
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
-    router = serverSetup.createRouter('/');
+    router = serverSetup.router.create('/');
     innerServer = serverSetup.server;
   });
 
@@ -430,7 +430,7 @@ describe('core lifecycle handlers with no strict client version check', () => {
     server = createHttpService({ configService, logger, buildNum: 1234 });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const serverSetup = await server.setup(setupDeps);
-    router = serverSetup.createRouter('/');
+    router = serverSetup.router.create('/');
     router.get(
       { path: testRouteGood, validate: false, security: { authz: { enabled: false, reason: '' } } },
       (context, req, res) => {

@@ -41,7 +41,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
     handlerContext.elasticsearch.client.asCurrentUser = elasticsearchClient.asCurrentUser;
     handlerContext.elasticsearch.client.asInternalUser = elasticsearchClient.asInternalUser;
 
-    const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>(
+    const router = httpSetup.router.create<InternalSavedObjectsRequestHandlerContext>(
       '/internal/saved_objects/'
     );
     registerDeleteUnknownTypesRoute(router, {

@@ -54,7 +54,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -98,7 +98,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -157,7 +157,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -183,7 +183,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').post(
+        http.router.create('/').post(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -216,7 +216,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/a',
             security: { authz: { enabled: false, reason: '' } },
@@ -240,7 +240,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -262,7 +262,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },
@@ -284,7 +284,7 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http.createRouter('/').get(
+          http.router.create('/').get(
             {
               path: '/ping',
               security: { authz: { enabled: false, reason: '' } },
@@ -306,7 +306,7 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http.createRouter('/').post(
+          http.router.create('/').post(
             {
               path: '/ping',
               security: { authz: { enabled: false, reason: '' } },
@@ -376,7 +376,7 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http.createRouter('/').post(
+          http.router.create('/').post(
             {
               path: '/ping',
               security: { authz: { enabled: false, reason: '' } },
@@ -410,7 +410,7 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http.createRouter('/').post(
+          http.router.create('/').post(
             {
               path: '/ping',
               security: { authz: { enabled: false, reason: '' } },
@@ -478,7 +478,7 @@ describe('request logging', () => {
           await root.preboot();
           const { http } = await root.setup();
 
-          http.createRouter('/').post(
+          http.router.create('/').post(
             {
               path: '/ping',
               security: { authz: { enabled: false, reason: '' } },
@@ -513,7 +513,7 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        http.createRouter('/').get(
+        http.router.create('/').get(
           {
             path: '/ping',
             security: { authz: { enabled: false, reason: '' } },

@@ -139,7 +139,7 @@ export class CoreAppsService {
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
+    const router = httpSetup.router.create<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get(
@@ -260,7 +260,7 @@ export class CoreAppsService {
       );
 
       // Register the HTTP route
-      const router = coreSetup.http.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
+      const router = coreSetup.http.router.create<InternalCoreAppsServiceRequestHandlerContext>('');
       this.registerInternalCoreSettingsRoute(router, savedObjectsClient$);
 
       let latestOverrideVersion: string | undefined; // Use the document version to avoid calling override on every poll

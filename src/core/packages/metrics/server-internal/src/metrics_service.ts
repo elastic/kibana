@@ -97,7 +97,7 @@ export class MetricsService
           ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);
-    registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
+    registerEluHistoryRoute(http.router.create(''), () => this.elu$.value);
 
     this.service = {
       collectionInterval,

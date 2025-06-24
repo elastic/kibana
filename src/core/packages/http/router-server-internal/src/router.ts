@@ -95,7 +95,6 @@ export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
   security?: RouteSecurityGetter;
 };
 
-/** @internal */
 type RouterEvents =
   /** Called after route validation, regardless of success or failure */
   'onPostValidate';
@@ -151,10 +150,18 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.patch = buildMethod('patch');
   }
 
+  /**
+   * @remark Router events should not be confused with Hapi's request lifecycle events. They are purely informational.
+   * @internal
+   */
   public static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
     Router.events.on(event, cb);
   }
 
+  /**
+   * @remark Router events should not be confused with Hapi's request lifecycle events. They are purely informational.
+   * @internal
+   */
   public static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
     Router.events.off(event, cb);
   }

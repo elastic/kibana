@@ -29,7 +29,7 @@ describe('CapabilitiesService', () => {
   beforeEach(() => {
     http = httpServiceMock.createInternalSetupContract();
     router = mockRouter.create();
-    http.createRouter.mockReturnValue(router);
+    http.router.create.mockReturnValue(router);
     service = new CapabilitiesService(mockCoreContext.create());
   });
 
@@ -72,7 +72,7 @@ describe('CapabilitiesService', () => {
     });
 
     it('registers the capabilities routes', async () => {
-      expect(http.createRouter).toHaveBeenCalledWith('');
+      expect(http.router.create).toHaveBeenCalledWith('');
       expect(router.post).toHaveBeenCalledTimes(1);
       expect(router.post).toHaveBeenCalledWith(expect.any(Object), expect.any(Function));
     });

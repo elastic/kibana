@@ -73,7 +73,7 @@ export class CapabilitiesService {
   public setup(setupDeps: SetupDeps): CapabilitiesSetup {
     this.logger.debug('Setting up capabilities service');
 
-    registerRoutes(setupDeps.http.createRouter(''), this.resolveCapabilities);
+    registerRoutes(setupDeps.http.router.create(''), this.resolveCapabilities);
 
     return {
       registerProvider: (provider: CapabilitiesProvider) => {
