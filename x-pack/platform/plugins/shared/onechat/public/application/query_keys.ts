@@ -14,20 +14,4 @@ export const queryKeys = {
     byAgent: (agentId: string) => ['conversations', 'list', { agentId }],
     byId: (conversationId: string) => ['conversations', conversationId],
   },
-  agents: {
-    all: ['agents'] as const,
-    list: ['agents', 'list'] as const,
-    details: (agentId: string) => ['agents', { id: agentId }],
-  },
-  connectors: {
-    all: ['connectors'] as const,
-    list: ['connectors', 'list'] as const,
-  },
-  integrations: {
-    all: ['integrations'] as const,
-    list: ['integrations', 'list'] as const,
-  },
-  users: {
-    current: ['users', 'current'] as const,
-  },
 };
