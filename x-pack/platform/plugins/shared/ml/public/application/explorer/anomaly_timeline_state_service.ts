@@ -25,6 +25,7 @@ import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '../../../common/types/anomalies';
+import { resolveSeverityFormat } from '../components/controls/select_severity/severity_format_resolver';
 import type { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -159,7 +160,10 @@ export class AnomalyTimelineStateService extends StateService {
     subscription.add(
       this._swimLaneUrlState$
         .pipe(
-          map((v) => v?.severity ?? []),
+          map((v) => {
+            // Use the resolver function to handle old format conversion
+            return v?.severity !== undefined ? resolveSeverityFormat(v.severity) : [];
+          }),
           distinctUntilChanged(isEqual)
         )
         .subscribe(this._swimLaneSeverity$)
