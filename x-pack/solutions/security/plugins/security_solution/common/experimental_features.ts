@@ -227,7 +227,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Privilege Monitoring
    */
-  privilegeMonitoringEnabled: false,
+  privilegedUserMonitoringDisabled: false,
 
   /**
    * Disables the siem migrations feature
