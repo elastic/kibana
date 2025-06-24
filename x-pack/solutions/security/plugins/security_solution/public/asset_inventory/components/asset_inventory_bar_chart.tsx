@@ -24,6 +24,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { AssetInventoryChartData } from '../hooks/use_fetch_chart_data/types';
 import { ASSET_FIELDS } from '../constants';
 import type { AssetsURLQuery } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
+import { useDataViewContext } from '../hooks/data_view_context';
 
 const chartTitle = i18n.translate(
   'xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle',
@@ -67,13 +68,13 @@ export interface AssetInventoryBarChartProps {
   setQuery(v: Partial<AssetsURLQuery>): void;
 }
 
-const createAssetFilter = (key: string, value: string) => {
+const createAssetFilter = (key: string, value: string, index?: string) => {
   return {
     $state: { store: FilterStateStore.APP_STATE },
     meta: {
       alias: null,
       disabled: false,
-      index: 'asset-inventory-default',
+      index,
       key,
       negate: false,
       params: { query: value },
@@ -89,7 +90,8 @@ const createAssetFilter = (key: string, value: string) => {
 
 export const handleElementClick = (
   elements: Array<[GeometryValue, SeriesIdentifier]>,
-  setQuery: (v: Partial<AssetsURLQuery>) => void
+  setQuery: (v: Partial<AssetsURLQuery>) => void,
+  index?: string
 ): void => {
   if (!elements.length) return;
 
@@ -100,8 +102,8 @@ export const handleElementClick = (
   const type = datum[ASSET_FIELDS.ENTITY_TYPE];
 
   const filters = [
-    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type),
-    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype),
+    createAssetFilter(ASSET_FIELDS.ENTITY_TYPE, type, index),
+    createAssetFilter(ASSET_FIELDS.ENTITY_SUB_TYPE, subtype, index),
   ];
 
   setQuery({ filters });
@@ -116,6 +118,7 @@ export const AssetInventoryBarChart = ({
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs');
   const baseTheme = useElasticChartsTheme();
+  const { dataView } = useDataViewContext();
 
   return (
     <div css={getChartStyles(euiTheme, xsFontSize)}>
@@ -163,7 +166,11 @@ export const AssetInventoryBarChart = ({
               return <span>{count}</span>;
             }}
             onElementClick={(elements) =>
-              handleElementClick(elements as Array<[GeometryValue, SeriesIdentifier]>, setQuery)
+              handleElementClick(
+                elements as Array<[GeometryValue, SeriesIdentifier]>,
+                setQuery,
+                dataView?.id
+              )
             }
           />
           <Axis

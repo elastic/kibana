@@ -30,7 +30,9 @@ describe('handleElementClick', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const elements: Array<[any, any]> = [[mockGeometryValue, mockSeriesIdentifier]];
 
-    handleElementClick(elements, setQuery);
+    const mockIndexId = 'mock-index-id';
+
+    handleElementClick(elements, setQuery, mockIndexId);
 
     expect(setQuery).toHaveBeenCalledWith({
       filters: [
