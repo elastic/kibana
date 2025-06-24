@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { HOMEPAGE_FEATURE_FLAG_ID } from '../common';
-
-export function isHomepageEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(HOMEPAGE_FEATURE_FLAG_ID, false);
-}
+export const GET_STATUS_ROUTE = '/internal/search_homepage/status';
+export const GET_USER_PRIVILEGES_ROUTE = '/internal/search_homepage/start_privileges/{indexName}';
+export const GET_API_KEYS_ROUTE = '/internal/search_homepage/api_keys';
