@@ -48,6 +48,7 @@ export function service(
     'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
+    'agent.version': agentName ?? undefined,
   });
 }
 
