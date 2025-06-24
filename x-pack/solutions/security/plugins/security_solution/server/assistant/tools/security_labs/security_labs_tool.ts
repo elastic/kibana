@@ -52,7 +52,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           kbResource: SECURITY_LABS_RESOURCE,
           query: input.question,
         });
-        // this value does not tell me if security labs exists
+
         const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
         if (docs.length === 0 && !isKnowledgeBaseInstalled) {
           // prompt to help user install knowledge base
