@@ -20,6 +20,7 @@ import { PromptItemArray } from '@kbn/elastic-assistant-common/impl/schemas/secu
 import { useAssistantContext, useFindPrompts } from '../../..';
 
 interface Props {
+  connectorId?: string;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const starterPromptClassName = css`
@@ -64,7 +65,7 @@ export const promptGroups = [
   },
 ];
 
-export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
+export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) => {
   const {
     assistantAvailability: { isAssistantEnabled },
     http,
@@ -79,6 +80,7 @@ export const StarterPrompts: React.FC<Props> = ({ setUserPrompt }) => {
       toasts,
     },
     params: {
+      connector_id: connectorId,
       prompt_group_id: 'aiAssistant',
       prompt_ids: getAllPromptIds(promptGroups),
     },

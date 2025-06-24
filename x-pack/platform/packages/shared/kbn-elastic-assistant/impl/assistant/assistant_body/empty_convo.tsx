@@ -17,6 +17,7 @@ import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_b
 import * as i18n from '../translations';
 
 interface Props {
+  connectorId?: string;
   currentSystemPromptId: string | undefined;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
@@ -30,6 +31,7 @@ const starterPromptWrapperClassName = css`
 
 export const EmptyConvo: React.FC<Props> = ({
   allSystemPrompts,
+  connectorId,
   currentSystemPromptId,
   isSettingsModalVisible,
   setCurrentSystemPromptId,
@@ -79,7 +81,7 @@ export const EmptyConvo: React.FC<Props> = ({
       </EuiFlexItem>
       {assistantAvailability.isStarterPromptsEnabled && (
         <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-          <StarterPrompts setUserPrompt={setUserPrompt} />
+          <StarterPrompts connectorId={connectorId} setUserPrompt={setUserPrompt} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

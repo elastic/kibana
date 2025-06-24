@@ -130,6 +130,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
             setCurrentSystemPromptId={setCurrentSystemPromptId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setUserPrompt={setUserPrompt}
+            connectorId={currentConversation?.apiConfig?.connectorId}
           />
         ) : (
           <EuiPanel
