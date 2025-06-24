@@ -37,7 +37,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    *
    * @param product - The product to check
    * @returns True if the product is active, false otherwise
-   * @private
+   * @internal
    */
   private isActiveProduct = (product: PricingProduct) => {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
@@ -47,7 +47,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * Checks if pricing tiers are enabled in the current configuration.
    *
    * @returns True if pricing tiers are enabled, false otherwise
-   * @private
+   * @internal
    */
   private isEnabled = () => {
     return this.tiers.enabled;
