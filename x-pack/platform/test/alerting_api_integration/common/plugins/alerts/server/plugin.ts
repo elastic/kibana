@@ -80,6 +80,8 @@ const testRuleTypes = [
   'test.waitingRule',
   'test.patternFiringAutoRecoverFalse',
   'test.severity',
+  'test.dangerouslyCreateAlertsInAllSpaces',
+  'test.persistenceDangerouslyCreateAlertsInAllSpaces',
 ];
 
 const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
