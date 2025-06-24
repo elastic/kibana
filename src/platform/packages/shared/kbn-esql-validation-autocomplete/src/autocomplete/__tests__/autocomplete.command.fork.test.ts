@@ -54,6 +54,7 @@ describe('autocomplete.suggest', () => {
           'WHERE ',
           'SORT ',
           'LIMIT ',
+          'CHANGE_POINT ',
           'DISSECT ',
           'STATS ',
           'EVAL ',
