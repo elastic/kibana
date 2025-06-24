@@ -14,11 +14,7 @@ import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  type MlEntityField,
-  type MlEntityFieldOperation,
-  ML_ANOMALY_THRESHOLD,
-} from '@kbn/ml-anomaly-utils';
+import { type MlEntityField, type MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
@@ -39,6 +35,7 @@ import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explo
 import { useMlJobService } from '../../application/services/job_service';
 import { useThresholdToSeverity } from '../../application/explorer/hooks/use_threshold_to_severity';
 import { resolveSeverityFormat } from '../../application/components/controls/select_severity/severity_format_resolver';
+import { useDefaultSeverity } from '../../application/components/controls/select_severity/select_severity';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -80,10 +77,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   const thresholdsToSeverity = useThresholdToSeverity();
 
   // Define a default threshold to use when severityThreshold is undefined (embeddable creation)
-  const defaultThreshold = useMemo(
-    () => [{ min: ML_ANOMALY_THRESHOLD.LOW, max: ML_ANOMALY_THRESHOLD.WARNING }],
-    []
-  );
+  const { val: defaultThreshold } = useDefaultSeverity();
 
   // Initialize severity state from props or default
   const [severity, setSeverity] = useState(

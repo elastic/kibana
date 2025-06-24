@@ -41,7 +41,7 @@ export interface TableSeverityState {
 /**
  * React hook that returns the default table severity state
  */
-const useTableSeverityDefault = () => {
+export const useDefaultSeverity = () => {
   const severityOptions = useSeverityOptions();
   return useMemo(
     () => ({
@@ -55,7 +55,7 @@ const useTableSeverityDefault = () => {
  * React hook that provides table severity url state management
  */
 export const useTableSeverity = () => {
-  const defaultSeverity = useTableSeverityDefault();
+  const defaultSeverity = useDefaultSeverity();
 
   const [rawUrlState, setUrlState, urlStateService] = usePageUrlState<TableSeverityPageUrlState>(
     'mlSelectSeverity',
