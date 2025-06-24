@@ -31,7 +31,7 @@ import type { SeverityThreshold } from '../../../common/types/anomalies';
 import type { MlJobService } from '../services/job_service';
 import type { MlApi } from '../services/ml_api_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
-import type { TableSeverityState } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity';
 import type { TableInterval } from '../components/controls/select_interval/select_interval';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
 import type { AnomaliesTableData, AppStateSelectedCells, ExplorerJob } from './explorer_utils';

@@ -56,7 +56,7 @@ import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { GroupObj } from '../components/job_selector/job_selector';
-import type { TableSeverityState } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity';
 
 export interface ExplorerJob {
   id: string;

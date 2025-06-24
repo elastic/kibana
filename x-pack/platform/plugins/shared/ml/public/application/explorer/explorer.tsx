@@ -44,7 +44,7 @@ import { InfluencersList } from '../components/influencers_list';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
-import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { SelectSeverity } from '../components/controls/select_severity';
 import {
   ExplorerQueryBar,
   getKqlQueryValues,

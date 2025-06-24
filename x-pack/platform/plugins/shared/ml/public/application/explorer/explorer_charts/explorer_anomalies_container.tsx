@@ -16,7 +16,7 @@ import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
+import { SelectSeverityUI } from '../../components/controls/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
 import type { AnomaliesTableData } from '../explorer_utils';

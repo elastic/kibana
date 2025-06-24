@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { TableSeverityState } from '../components/controls/select_severity/select_severity';
+import type { TableSeverityState } from '../components/controls/select_severity';
 
 interface TimeSeriesExplorerProps {
   appStateHandler: (action: string, payload: any) => void;
