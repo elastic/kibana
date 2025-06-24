@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function AceEditorProvider({ getService }) {
+export function AceEditorProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
@@ -16,7 +17,7 @@ export function AceEditorProvider({ getService }) {
   const BKSP_KEY = '\uE003';
 
   return new (class AceEditorService {
-    async setValue(testSubjectSelector, value) {
+    async setValue(testSubjectSelector: string, value: string | string[]) {
       await retry.try(async () => {
         const container = await testSubjects.find(testSubjectSelector);
         await container.click();
@@ -29,7 +30,7 @@ export function AceEditorProvider({ getService }) {
       });
     }
 
-    async getValue(testSubjectSelector) {
+    async getValue(testSubjectSelector: string) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const lines = await editor.findAllByClassName('ace_line');
@@ -38,7 +39,7 @@ export function AceEditorProvider({ getService }) {
       });
     }
 
-    async hasParseErrors(testSubjectSelector) {
+    async hasParseErrors(testSubjectSelector: string) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const errors = await editor.findAllByClassName('ace_error');

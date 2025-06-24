@@ -20,6 +20,7 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
@@ -226,6 +227,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       getExternalReferenceAttachmentEndpointRegular()
     );
 
+    this.registerDiscoverSharedFeatures(plugins);
+
     return this.contract.getSetupContract();
   }
 
@@ -238,6 +241,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public stop() {
     this.services.stop();
+  }
+
+  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
+    const { discoverShared } = plugins;
+    const discoverFeatureRegistry = discoverShared.features.registry;
+    const cellRendererFeature: SecuritySolutionCellRendererFeature = {
+      id: 'security-solution-cell-renderer',
+      getRenderer: async () => {
+        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
+        return getCellRendererForGivenRecord;
+      },
+    };
+
+    discoverFeatureRegistry.register(cellRendererFeature);
+  }
+
+  public async getLazyDiscoverSharedDeps() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "one_discover_shared_deps" */
+      './one_discover'
+    );
   }
 
   /**
