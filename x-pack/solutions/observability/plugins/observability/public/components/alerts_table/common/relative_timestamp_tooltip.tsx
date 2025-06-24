@@ -26,7 +26,6 @@ interface Props {
 
 export function getRelativeTimeText(duration: moment.Duration) {
   const [day, hour, minute] = [duration.days(), duration.hours(), duration.minutes()];
-  // keeping days for flexibility, but it is not used in the current implementation. If day is detected, it will be displayed without hours or minutes
   if (day > 0) {
     return i18n.translate('xpack.observability.alertsTable.highFidelityDurationWithDays', {
       defaultMessage: '{day, plural, one {# day} other {# days}} ago',
