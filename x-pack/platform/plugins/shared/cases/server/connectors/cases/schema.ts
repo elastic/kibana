@@ -93,7 +93,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
     max: MAX_OPEN_CASES,
   }),
   templateId: schema.nullable(schema.string()),
-  internallyManagedAlerts: schema.boolean({ defaultValue: false }),
+  internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
 export const CasesConnectorRuleActionParamsSchema = schema.object({
