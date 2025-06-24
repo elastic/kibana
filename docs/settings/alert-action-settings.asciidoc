@@ -143,6 +143,9 @@ WARNING: This setting alone is insufficient for overriding system defaults for t
 [[actions-config-email-services-ses-port]] `xpack.actions.email.services.ses.port`  {ess-icon}::
 The port number for an Amazon Simple Email Service (SES) service provider that can be used by email connectors.
 
+[[xpack.actions.email.services.enabled]] `xpack.actions.email.services.enabled`  {ess-icon}::
+An array of strings indicating all email services that are enabled. Available options are `elastic-cloud`, `google-mail`, `microsoft-outlook`, `amazon-ses`, `microsoft-exchange`, and `other`. If the array is empty, no email services are enabled. The default value is `["*"]`, which enables all email services.
+
 `xpack.actions.enableFooterInEmail` {ess-icon}::
 A boolean value indicating that a footer with a relevant link should be added to emails sent as alerting actions. Default: true.
 
@@ -604,6 +607,9 @@ deprecated:[8.8.0]
 Sets the number of actions that will run ephemerally. To use this, enable
 ephemeral tasks in task manager first with
 <<task-manager-settings,`xpack.task_manager.ephemeral_tasks.enabled`>>
+
+`xpack.actions.webhook.ssl.pfx.enabled` {ess-icon}::
+Disable PFX file support for SSL client authentication. When set to `false`, the application will not accept PFX certificate files and will require separate certificate and private key files instead. Only applies to the [Webhook connector](/reference/connectors-kibana/webhook-action-type.md).
 
 `xpack.alerting.cancelAlertsOnRuleTimeout` {ess-icon}::
 Specifies whether to skip writing alerts and scheduling actions if rule

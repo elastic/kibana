@@ -126,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
             'inventory',
             'logs',
             'maintenanceWindow',
+            'manageReporting',
             'maps',
             'osquery',
             'rulesSettings',
@@ -208,6 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
           'fleet',
           'fleetv2',
           'entityManager',
+          'manageReporting',
         ];
 
         const features = body.filter(

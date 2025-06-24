@@ -418,8 +418,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: regularDataStreamName,
         });
 
-        const logExplorerButton =
-          await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
+        await PageObjects.datasetQuality.openDatasetQualityDetailsActionsButton();
+
+        const logExplorerButton = await PageObjects.datasetQuality.getOpenInDiscoverButton();
 
         await logExplorerButton.click();
 

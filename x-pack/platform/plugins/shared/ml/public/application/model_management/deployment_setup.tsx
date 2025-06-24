@@ -818,7 +818,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           errors={errors}
           isUpdate={isUpdate}
           disableAdaptiveResourcesControl={
-            showNodeInfo ? false : !nlpSettings.modelDeployment.allowStaticAllocations
+            !showNodeInfo || !nlpSettings.modelDeployment.allowStaticAllocations
           }
           deploymentsParams={
             isModelNotDownloaded || !isNLPModelItem(model)

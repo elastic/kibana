@@ -84,6 +84,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       this.url
     );
 
+    const isHttps = (this.configurationUtilities.getProxySettings()?.proxyUrl ?? this.url)
+      .toLowerCase()
+      .startsWith('https');
+
     this.openAI =
       this.config.apiProvider === OpenAiProviderType.AzureAi
         ? new OpenAI({
@@ -94,7 +98,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
               ...this.headers,
               'api-key': this.key,
             },
-            httpAgent: httpsAgent ?? httpAgent,
+            httpAgent: isHttps ? httpsAgent : httpAgent,
           })
         : new OpenAI({
             baseURL: removeEndpointFromUrl(this.config.apiUrl),
@@ -102,7 +106,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             defaultHeaders: {
               ...this.headers,
             },
-            httpAgent: httpsAgent ?? httpAgent,
+            httpAgent: isHttps ? httpsAgent : httpAgent,
           });
 
     this.registerSubActions();

@@ -15,6 +15,7 @@ import {
   CoreTheme,
   DocLinksStart,
   CoreStart,
+  ApplicationStart,
 } from '@kbn/core/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
@@ -65,6 +66,7 @@ interface ConsoleDependencies extends ConsoleStartServices {
   storage: Storage;
   theme$: Observable<CoreTheme>;
   trackUiMetric: MetricsTracker;
+  application: ApplicationStart;
 }
 
 const loadDependencies = async (
@@ -118,7 +120,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -167,6 +169,10 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             objectStorageClient,
             http,
             autocompleteInfo,
+            application: startServices.application,
+            dataViews,
+            data,
+            licensing,
           },
           config: {
             isDevMode,

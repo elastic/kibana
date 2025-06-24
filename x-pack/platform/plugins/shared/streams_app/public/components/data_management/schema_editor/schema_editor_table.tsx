@@ -13,6 +13,8 @@ import {
   EuiDataGrid,
   EuiDataGridCellProps,
   EuiDataGridControlColumn,
+  EuiIconTip,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
@@ -32,6 +34,7 @@ export function FieldsTable({
   fields,
   stream,
   withTableActions,
+  withToolbar,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -39,6 +42,7 @@ export function FieldsTable({
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
+  withToolbar: boolean;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -82,7 +86,7 @@ export function FieldsTable({
         canDragAndDropColumns: false,
       }}
       sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
-      toolbarVisibility={true}
+      toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
       trailingControlColumns={trailingColumns}
@@ -107,7 +111,26 @@ const createCellRenderer =
     const { parent, status } = field;
 
     if (columnId === 'type') {
-      if (!field.type) return EMPTY_CONTENT;
+      if (!field.type) {
+        if (field.status === 'unmapped' && field.esType) {
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              {field.esType}
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
+                  {
+                    defaultMessage:
+                      'This field is not managed by Streams, but is defined in Elasticsearch. It can be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                  }
+                )}
+                position="right"
+              />
+            </EuiFlexGroup>
+          );
+        }
+        return EMPTY_CONTENT;
+      }
       return <FieldType type={field.type} aliasFor={field.alias_for} />;
     }
 

@@ -106,6 +106,7 @@ export class MlServerPlugin
     nlp: true,
   };
   private compatibleModuleType: CompatibleModule | null = null;
+  private isServerless: boolean;
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
@@ -114,6 +115,7 @@ export class MlServerPlugin
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
 
     const config = ctx.config.get();
+    this.isServerless = ctx.env.packageInfo.buildFlavor === 'serverless';
     initEnabledFeatures(this.enabledFeatures, config);
     this.compatibleModuleType = config.compatibleModuleType ?? null;
     this.enabledFeatures = Object.freeze(this.enabledFeatures);
@@ -284,6 +286,7 @@ export class MlServerPlugin
       getSpaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
+      isServerless: this.isServerless,
     });
     notificationsRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);

@@ -29,11 +29,31 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
+export interface DetectedEntity {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  hash: string;
+  type: 'ner' | 'regex';
+}
+
+export type DetectedEntityType = DetectedEntity['type'];
+export interface Unredaction {
+  entity: string;
+  class_name: string;
+  start_pos: number;
+  end_pos: number;
+  type: 'ner' | 'regex';
+}
+
+export type UnredactionType = Unredaction['type'];
 
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    unredactions?: Unredaction[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -160,3 +180,23 @@ export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
 }
+
+export interface InferenceChunk {
+  chunkText: string;
+  charStartOffset: number;
+}
+
+export interface NerAnonymizationRule {
+  type: 'ner';
+  enabled: boolean;
+  modelId?: string;
+}
+
+export interface RegexAnonymizationRule {
+  type: 'regex';
+  entityClass: string;
+  pattern: string;
+  enabled: boolean;
+}
+
+export type AnonymizationRule = NerAnonymizationRule | RegexAnonymizationRule;

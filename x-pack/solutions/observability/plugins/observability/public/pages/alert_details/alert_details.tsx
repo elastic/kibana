@@ -7,10 +7,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FindDashboardsByIdResponse } from '@kbn/dashboard-plugin/public';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -35,9 +33,9 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
-import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
+import { usePageReady } from '@kbn/ebt-tools';
 import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
@@ -61,6 +59,7 @@ import StaleAlert from './components/stale_alert';
 import { RelatedDashboards } from './components/related_dashboards';
 import { getAlertTitle } from '../../utils/format_alert_title';
 import { AlertSubtitle } from './components/alert_subtitle';
+import { useRelatedDashboards } from './hooks/use_related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -74,18 +73,21 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
-
-const OVERVIEW_TAB_ID = 'overview';
-const METADATA_TAB_ID = 'metadata';
-const RELATED_ALERTS_TAB_ID = 'related_alerts';
-const INVESTIGATION_GUIDE_TAB_ID = 'investigation_guide';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
-const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
-type TabId =
-  | typeof OVERVIEW_TAB_ID
-  | typeof METADATA_TAB_ID
-  | typeof RELATED_ALERTS_TAB_ID
-  | typeof INVESTIGATION_GUIDE_TAB_ID;
+
+const TAB_IDS = [
+  'overview',
+  'metadata',
+  'related_alerts',
+  'investigation_guide',
+  'related_dashboards',
+] as const;
+
+type TabId = (typeof TAB_IDS)[number];
+
+const isTabId = (value: string): value is TabId => {
+  return Object.values<string>(TAB_IDS).includes(value);
+};
 
 export function AlertDetails() {
   const {
@@ -98,14 +100,19 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
-    contentManagement,
   } = useKibana().services;
-  const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
   const history = useHistory();
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
+  const {
+    isLoadingRelatedDashboards,
+    suggestedDashboards,
+    linkedDashboards,
+    refetchRelatedDashboards,
+  } = useRelatedDashboards(alertId);
+
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
@@ -114,30 +121,20 @@ export function AlertDetails() {
   const { rule, refetch } = useFetchRule({
     ruleId,
   });
+
+  const onSuccessAddSuggestedDashboard = useCallback(async () => {
+    await Promise.all([refetchRelatedDashboards(), refetch()]);
+  }, [refetch, refetchRelatedDashboards]);
+
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();
-  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
-    const searchParams = new URLSearchParams(search);
-    const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
-
-    return urlTabId &&
-      [
-        OVERVIEW_TAB_ID,
-        METADATA_TAB_ID,
-        RELATED_ALERTS_TAB_ID,
-        INVESTIGATION_GUIDE_TAB_ID,
-      ].includes(urlTabId)
-      ? (urlTabId as TabId)
-      : OVERVIEW_TAB_ID;
-  });
-  const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
-  const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
+  const [activeTabId, setActiveTabId] = useState<TabId>();
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
     let searchParams = new URLSearchParams(search);
-    if (tabId === RELATED_ALERTS_TAB_ID) {
+    if (tabId === 'related_alerts') {
       searchParams.set(ALERT_DETAILS_TAB_URL_STORAGE_KEY, tabId);
     } else {
       searchParams = new URLSearchParams();
@@ -169,9 +166,11 @@ export function AlertDetails() {
     if (alertDetail) {
       setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
       setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
-      setActiveTabId(OVERVIEW_TAB_ID);
+      const searchParams = new URLSearchParams(search);
+      const urlTabId = searchParams.get(ALERT_DETAILS_TAB_URL_STORAGE_KEY);
+      setActiveTabId(urlTabId && isTabId(urlTabId) ? urlTabId : 'overview');
     }
-  }, [alertDetail, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry, search]);
 
   useBreadcrumbs(
     [
@@ -195,23 +194,10 @@ export function AlertDetails() {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
-      onPageReady();
-    }
-  }, [onPageReady, alertDetail, isLoading, activeTabId]);
-
-  useEffect(() => {
-    const fetchValidDashboards = async () => {
-      const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
-      const findDashboardsService = dashboardServiceProvider(contentManagement);
-      const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
-
-      setValidDashboards(existingDashboards.length ? existingDashboards : []);
-    };
-
-    fetchValidDashboards();
-  }, [rule, contentManagement, linkedDashboards]);
+  usePageReady({
+    isRefreshing: isLoading,
+    isReady: !isLoading && !!alertDetail && activeTabId === 'overview',
+  });
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -299,15 +285,22 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
-  const relatedDashboardsTab = alertDetail ? (
-    <RelatedDashboards relatedDashboards={validDashboards || []} alert={alertDetail.formatted} />
-  ) : (
-    <EuiLoadingSpinner />
-  );
+  const relatedDashboardsTab =
+    alertDetail && rule ? (
+      <RelatedDashboards
+        suggestedDashboards={suggestedDashboards}
+        linkedDashboards={linkedDashboards}
+        isLoadingRelatedDashboards={isLoadingRelatedDashboards}
+        rule={rule}
+        onSuccessAddSuggestedDashboard={onSuccessAddSuggestedDashboard}
+      />
+    ) : (
+      <EuiLoadingSpinner />
+    );
 
-  const tabs: EuiTabbedContentTab[] = [
+  const tabs: Array<Omit<EuiTabbedContentTab, 'id'> & { id: TabId }> = [
     {
-      id: OVERVIEW_TAB_ID,
+      id: 'overview',
       name: i18n.translate('xpack.observability.alertDetails.tab.overviewLabel', {
         defaultMessage: 'Overview',
       }),
@@ -315,7 +308,7 @@ export function AlertDetails() {
       content: overviewTab,
     },
     {
-      id: METADATA_TAB_ID,
+      id: 'metadata',
       name: i18n.translate('xpack.observability.alertDetails.tab.metadataLabel', {
         defaultMessage: 'Metadata',
       }),
@@ -346,7 +339,7 @@ export function AlertDetails() {
       ),
     },
     {
-      id: RELATED_ALERTS_TAB_ID,
+      id: 'related_alerts',
       name: (
         <>
           <FormattedMessage
@@ -358,26 +351,26 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alertData={alertDetail} />,
     },
-    ...(validDashboards?.length
-      ? [
-          {
-            id: RELATED_DASHBOARDS_TAB_ID,
-            name: (
-              <>
-                <FormattedMessage
-                  id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
-                  defaultMessage="Related dashboards"
-                />{' '}
-                <EuiNotificationBadge color="success">
-                  {validDashboards?.length}
-                </EuiNotificationBadge>
-              </>
-            ),
-            'data-test-subj': 'relatedDashboardsTab',
-            content: relatedDashboardsTab,
-          },
-        ]
-      : []),
+    {
+      id: 'related_dashboards',
+      name: (
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
+            defaultMessage="Related dashboards"
+          />
+          {isLoadingRelatedDashboards ? (
+            <EuiLoadingSpinner css={{ marginLeft: '5px' }} />
+          ) : (
+            <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
+              {(linkedDashboards?.length || 0) + (suggestedDashboards?.length || 0)}
+            </EuiNotificationBadge>
+          )}
+        </>
+      ),
+      'data-test-subj': 'relatedDashboardsTab',
+      content: relatedDashboardsTab,
+    },
   ];
 
   return (

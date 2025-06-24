@@ -681,7 +681,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'fork',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
@@ -728,7 +728,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     fieldsSuggestionsAfter: fieldsSuggestionsAfterCompletion,
   },
   {
-    hidden: true,
+    hidden: false,
     name: 'sample',
     preview: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.sampleDoc', {

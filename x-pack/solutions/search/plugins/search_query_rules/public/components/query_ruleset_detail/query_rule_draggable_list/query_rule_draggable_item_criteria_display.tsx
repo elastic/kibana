@@ -15,8 +15,18 @@ export const QueryRuleDraggableItemCriteriaDisplay: React.FC<{
   const { euiTheme } = useEuiTheme();
   return (
     <EuiText size="s">
-      <EuiBadge>{criteria.metadata}</EuiBadge>&nbsp;
-      <EuiTextColor color={euiTheme.colors.textPrimary}>{criteria.type}</EuiTextColor>&nbsp;
+      {Boolean(criteria.metadata) && (
+        <>
+          <EuiBadge>{criteria.metadata}</EuiBadge>&nbsp;
+        </>
+      )}
+      {criteria.type === 'always' ? (
+        <EuiBadge> {criteria.type}</EuiBadge>
+      ) : (
+        <>
+          <EuiTextColor color={euiTheme.colors.textPrimary}>{criteria.type}</EuiTextColor>&nbsp;
+        </>
+      )}
       {criteria.values?.join(', ')}
     </EuiText>
   );
