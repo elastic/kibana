@@ -42,7 +42,7 @@ export const getLegacySyntheticsMonitorSavedObjectType = (
     },
     mappings: monitorConfigMappings,
     management: {
-      importableAndExportable: true,
+      importableAndExportable: false,
       icon: 'uptimeApp',
       getTitle: (savedObject) =>
         i18n.translate('xpack.synthetics.syntheticsMonitors.label.name', {
