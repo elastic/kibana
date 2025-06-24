@@ -8,7 +8,15 @@
  */
 
 import { filter, map as lodashMap, max } from 'lodash';
-import { BehaviorSubject, Observable, combineLatestWith, debounceTime, map, merge } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatestWith,
+  debounceTime,
+  map,
+  merge,
+  tap,
+} from 'rxjs';
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -29,30 +37,29 @@ import {
   apiPublishesUnsavedChanges,
   getTitle,
   logStateDiff,
-  shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
-import type { DashboardSectionMap, DashboardState } from '../../common';
-import { DashboardPanelMap } from '../../common';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
-import { prefixReferencesFromPanel } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
-import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
-import { getPanelPlacementSetting } from '../panel_placement/get_panel_placement_settings';
-import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
-import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
-import { PanelPlacementStrategy } from '../plugin_constants';
-import { coreServices, usageCollectionService } from '../services/kibana_services';
-import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
+import type { DashboardPanel } from '../../../server';
+import type { DashboardState } from '../../../common';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
+import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { getPanelPlacementSetting } from '../../panel_placement/get_panel_placement_settings';
+import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
+import { PanelPlacementStrategy } from '../../plugin_constants';
+import { coreServices, usageCollectionService } from '../../services/kibana_services';
+import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import { areLayoutsEqual } from './are_layouts_equal';
-import type { initializeTrackPanel } from './track_panel';
-import { DashboardChildState, DashboardChildren, DashboardLayout, DashboardPanel } from './types';
+import type { initializeTrackPanel } from '../track_panel';
+import { deserializeLayout } from './deserialize_layout';
+import { serializeLayout } from './serialize_layout';
+import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
 
 export function initializeLayoutManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
-  initialPanels: DashboardPanelMap, // SERIALIZED STATE ONLY TODO Remove the DashboardPanelMap layer. We could take the Saved Dashboard Panels array here directly.
-  initialSections: DashboardSectionMap,
+  initialPanels: DashboardState['panels'],
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferences: (id: string) => Reference[]
 ) {
@@ -62,76 +69,16 @@ export function initializeLayoutManager(
   const children$ = new BehaviorSubject<DashboardChildren>({});
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
-    initialSections
+    getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
-  function deserializeLayout(panelMap: DashboardPanelMap, sectionMap: DashboardSectionMap) {
-    const layout: DashboardLayout = {
-      panels: {},
-      sections: {},
-    };
-    const childState: DashboardChildState = {};
-    Object.keys(sectionMap).forEach((sectionId) => {
-      layout.sections[sectionId] = { collapsed: false, ...sectionMap[sectionId] };
-    });
-    Object.keys(panelMap).forEach((panelId) => {
-      const { gridData, explicitInput, type } = panelMap[panelId];
-      layout.panels[panelId] = { type, gridData } as DashboardPanel;
-      childState[panelId] = {
-        rawState: explicitInput,
-        references: getReferences(panelId),
-      };
-    });
-    return { layout, childState };
-  }
-
-  const serializeLayout = (): {
-    references: Reference[];
-    panels: DashboardPanelMap;
-    sections: DashboardSectionMap;
-  } => {
-    const references: Reference[] = [];
-    const layout = layout$.value;
-    const panels: DashboardPanelMap = {};
-
-    for (const panelId of Object.keys(layout.panels)) {
-      references.push(
-        ...prefixReferencesFromPanel(panelId, currentChildState[panelId]?.references ?? [])
-      );
-      panels[panelId] = {
-        ...layout.panels[panelId],
-        explicitInput: currentChildState[panelId]?.rawState ?? {},
-      };
-
-      // TODO move savedObjectRef extraction into embeddable implemenations
-      const savedObjectId = (panels[panelId].explicitInput as { savedObjectId?: string })
-        .savedObjectId;
-      if (savedObjectId) {
-        panels[panelId].panelRefName = `panel_${panelId}`;
-
-        references.push({
-          name: `${panelId}:panel_${panelId}`,
-          type: panels[panelId].type,
-          id: savedObjectId,
-        });
-      }
-    }
-    return { panels, sections: { ...layout.sections }, references };
-  };
-
-  const resetLayout = ({
-    panels: lastSavedPanels,
-    sections: lastSavedSections,
-  }: DashboardState) => {
-    const { layout: lastSavedLayout, childState: lastSavedChildState } = deserializeLayout(
-      lastSavedPanels,
-      lastSavedSections
-    );
-
-    layout$.next(lastSavedLayout);
-    currentChildState = lastSavedChildState;
+  let lastSavedLayout = initialLayout;
+  let lastSavedChildState = initialChildState;
+  const resetLayout = () => {
+    layout$.next({ ...lastSavedLayout });
+    currentChildState = { ...lastSavedChildState };
     let childrenModified = false;
     const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
@@ -174,7 +121,7 @@ export function initializeLayoutManager(
         ...layout$.value,
         panels: {
           ...layout$.value.panels,
-          [uuid]: { gridData: { ...gridData, i: uuid }, type } as DashboardPanel,
+          [uuid]: { gridData: { ...gridData, i: uuid }, type },
         },
       };
     }
@@ -191,7 +138,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...otherPanels,
-        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type } as DashboardPanel,
+        [uuid]: { gridData: { ...newPanelPlacement, i: uuid }, type },
       },
     };
   };
@@ -202,7 +149,7 @@ export function initializeLayoutManager(
   if (incomingEmbeddable) {
     const { serializedState, size, type } = incomingEmbeddable;
     const uuid = incomingEmbeddable.embeddableId ?? v4();
-    const existingPanel: DashboardPanel | undefined = layout$.value.panels[uuid];
+    const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
     const sameType = existingPanel?.type === type;
 
     const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
@@ -218,7 +165,7 @@ export function initializeLayoutManager(
       ...layout$.value,
       panels: {
         ...layout$.value.panels,
-        [uuid]: { gridData, type } as DashboardPanel,
+        [uuid]: { gridData, type },
       },
     });
     trackPanel.setScrollToPanelId(uuid);
@@ -368,36 +315,29 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
-      getSerializedStateForPanel: (uuid: string) => currentChildState[uuid],
+      getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
+      getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
       reset: resetLayout,
-      serializeLayout,
+      serializeLayout: () => serializeLayout(layout$.value, currentChildState),
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{ panels?: DashboardPanelMap; sections?: DashboardSectionMap }> => {
+      ): Observable<{ panels?: DashboardState['panels'] }> => {
         return layout$.pipe(
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(
-              map((lastSaved) => ({ panels: lastSaved.panels, sections: lastSaved.sections }))
+              map((lastSaved) => deserializeLayout(lastSaved.panels, getReferences)),
+              tap(({ layout, childState }) => {
+                lastSavedChildState = childState;
+                lastSavedLayout = layout;
+              })
             )
           ),
-          map(([, { panels: lastSavedPanels, sections: lastSavedSections }]) => {
-            const { panels, sections } = serializeLayout();
-            if (
-              !areLayoutsEqual(
-                { panels: lastSavedPanels, sections: lastSavedSections },
-                { panels, sections }
-              )
-            ) {
-              if (shouldLogStateDiff()) {
-                logStateDiff(
-                  'dashboard layout',
-                  deserializeLayout(lastSavedPanels, lastSavedSections).layout,
-                  deserializeLayout(panels, sections).layout
-                );
-              }
-              return { panels, sections };
+          map(([currentLayout]) => {
+            if (!areLayoutsEqual(lastSavedLayout, currentLayout)) {
+              logStateDiff('dashboard layout', lastSavedLayout, currentLayout);
+              return { panels: serializeLayout(currentLayout, currentChildState).panels };
             }
             return {};
           })
@@ -446,7 +386,6 @@ export function initializeLayoutManager(
         const sections = { ...currentLayout.sections };
         const newId = v4();
         sections[newId] = {
-          id: newId,
           gridData: { i: newId, y: maxY },
           title: i18n.translate('dashboard.defaultSectionTitle', {
             defaultMessage: 'New collapsible section',
