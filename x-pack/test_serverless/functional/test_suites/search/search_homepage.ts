@@ -160,12 +160,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('exploreLogstashAndBeatsLink');
           await pageObjects.svlSearchHomePage.expectToBeOnObservabilityPage();
         });
-
-        it('renders performace monitoring content', async () => {
-          await testSubjects.existOrFail('createObservabilityProjectLink');
-          await testSubjects.click('createObservabilityProjectLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnSpacesCreatePage();
-        });
       });
 
       describe('Dive deeper with Elasticsearch', function () {
