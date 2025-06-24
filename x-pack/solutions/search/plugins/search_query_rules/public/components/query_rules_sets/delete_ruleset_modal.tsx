@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 export interface DeleteRulesetModalProps {
   rulesetId: string;
@@ -30,9 +32,11 @@ export const DeleteRulesetModal = ({
 }: DeleteRulesetModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const useTracker = useUsageTracker();
   const onSuccess = () => {
     setIsLoading(false);
     closeDeleteModal();
+    useTracker?.load(AnalyticsEvents.rulesetDeleted);
     if (onSuccessAction) {
       onSuccessAction();
     }

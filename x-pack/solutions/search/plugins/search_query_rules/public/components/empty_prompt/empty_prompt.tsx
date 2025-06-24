@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiButton,
@@ -34,13 +34,21 @@ import { useKibana } from '../../hooks/use_kibana';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
+  const usageTracker = useUsageTracker();
   const { application, share, console: consolePlugin } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.emptyPromptLoaded);
+  }, [usageTracker]);
+
   const gradientOverlay = css({
     background: `linear-gradient(180deg, ${transparentize(
       euiTheme.colors.backgroundBasePlain,
@@ -99,7 +107,10 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                     data-test-subj="searchQueryRulesEmptyPromptGetStartedButton"
                     color="primary"
                     fill
-                    onClick={getStartedAction}
+                    onClick={() => {
+                      usageTracker?.click(AnalyticsEvents.gettingStartedButtonClicked);
+                      getStartedAction();
+                    }}
                   >
                     <FormattedMessage
                       id="xpack.queryRules.emptyPrompt.getStartedButton"
@@ -234,6 +245,9 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                       defaultMessage: 'Create in Console',
                     })}
                     showIcon
+                    onClick={() => {
+                      usageTracker?.click(AnalyticsEvents.createInConsoleClicked);
+                    }}
                   />
                 </EuiFlexItem>
               </EuiHideFor>

@@ -40,6 +40,8 @@ import { DeleteRulesetModal } from '../query_rules_sets/delete_ruleset_modal';
 import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 import { useQueryRulesetDetailState } from './use_query_ruleset_detail_state';
 import { useFetchQueryRulesetExist } from '../../hooks/use_fetch_ruleset_exists';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 export interface QueryRulesetDetailProps {
   createMode?: boolean;
@@ -55,6 +57,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   }>();
   const { data: rulesetExists, isLoading: isFailsafeLoading } =
     useFetchQueryRulesetExist(rulesetId);
+  const useTracker = useUsageTracker();
 
   useEffect(() => {
     // This is a failsafe in case user navigates to an existing ruleset via URL directly
@@ -62,6 +65,10 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
       application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${rulesetId}`));
     }
   }, [createMode, rulesetExists, application, http.basePath, rulesetId]);
+
+  useEffect(() => {
+    useTracker?.load?.(AnalyticsEvents.rulesetDetailPageLoaded);
+  }, [useTracker]);
 
   const blockRender = (createMode && rulesetExists) || isFailsafeLoading;
 
@@ -186,6 +193,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
 
   const handleSave = () => {
     setIsFormDirty(false);
+    useTracker?.click(createMode ? AnalyticsEvents.rulesetCreated : AnalyticsEvents.rulesetUpdated);
     createRuleset({
       rulesetId,
       forceWrite: true,
@@ -232,8 +240,10 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               ),
               color: 'primary',
               'aria-current': false,
-              onClick: () =>
-                application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`)),
+              onClick: () => {
+                useTracker?.click(AnalyticsEvents.backToRulesetListClicked);
+                application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}`));
+              },
             },
           ]}
           restrictWidth
@@ -331,7 +341,10 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     content={i18n.translate('xpack.queryRules.queryRulesetDetail.testButton', {
                       defaultMessage: 'Test in Console',
                     })}
-                    onClick={finishTour}
+                    onClick={() => {
+                      useTracker?.click(AnalyticsEvents.testInConsoleClicked);
+                      finishTour();
+                    }}
                   />
                 </EuiTourStep>
               </EuiFlexItem>
