@@ -324,10 +324,7 @@ export function initializeLayoutManager(
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{
-        panels?: DashboardState['panels'];
-        references?: DashboardState['references'];
-      }> => {
+      ): Observable<{ panels?: DashboardState['panels'] }> => {
         return layout$.pipe(
           debounceTime(100),
           combineLatestWith(
