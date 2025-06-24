@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { KeyInsightsPanel } from './components/key_insights_panel';
 import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 import { PrivilegedAccessDetectionsPanel } from './components/privileged_access_detection';
 import { PrivilegedUsersTable } from './components/privileged_users_table';
@@ -31,6 +32,7 @@ export const PrivilegedUserMonitoring = ({
   sourcererDataView: DataViewSpec;
 }) => {
   const spaceId = useSpaceId();
+
   const [dismissCallout, setDismissCallout] = useState(false);
   const handleDismiss = useCallback(() => {
     setDismissCallout(true);
@@ -97,9 +99,7 @@ export const PrivilegedUserMonitoring = ({
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasShadow={false} hasBorder={true}>
-              <span>{'TODO: Top risky privileged users'}</span>
-            </EuiPanel>
+            {spaceId && <KeyInsightsPanel spaceId={spaceId} sourcerDataView={sourcererDataView} />}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
