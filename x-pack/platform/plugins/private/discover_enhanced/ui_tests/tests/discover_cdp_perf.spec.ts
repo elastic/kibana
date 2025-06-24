@@ -73,6 +73,7 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
+        'securitySolution',
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes
