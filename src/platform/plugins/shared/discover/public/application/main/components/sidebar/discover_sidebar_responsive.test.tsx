@@ -523,9 +523,9 @@ describe('discover responsive sidebar', function () {
     );
 
     await act(async () => {
-      findTestSubject(comp, 'fieldListFiltersFieldSearch').simulate('change', {
-        target: { value: 'bytes' },
-      });
+      const input = findTestSubject(comp, 'fieldListFiltersFieldSearch').find('input');
+      input.getDOMNode().setAttribute('value', 'byte');
+      input.simulate('change');
     });
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
