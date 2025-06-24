@@ -1015,12 +1015,8 @@ x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/entities_data_access @elastic/obs-entities
-x-pack/solutions/observability/plugins/entity_manager_app @elastic/obs-entities
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
