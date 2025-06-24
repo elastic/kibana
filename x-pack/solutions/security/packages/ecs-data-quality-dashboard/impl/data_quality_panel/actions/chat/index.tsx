@@ -41,7 +41,8 @@ interface Props {
 
 const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, checkedAt }) => {
   const chatTitle = useMemo(() => {
-    return `${indexName} - ${getFormattedCheckTime(checkedAt)}`;
+    const checkedAtFormatted = getFormattedCheckTime(checkedAt);
+    return checkedAt && indexName ? `${indexName} - ${checkedAtFormatted}` : checkedAtFormatted;
   }, [checkedAt, indexName]);
 
   const styles = useStyles();

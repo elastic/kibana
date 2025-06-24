@@ -512,6 +512,7 @@ src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 src/platform/packages/shared/kbn-repo-info @elastic/kibana-operations
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-restorable-state @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
 src/platform/packages/shared/kbn-router-utils @elastic/obs-ux-logs-team
@@ -844,6 +845,7 @@ x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-progra
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/obs-entities
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
@@ -1081,6 +1083,7 @@ x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-in
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
+x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
@@ -1959,11 +1962,12 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts @elastic/kibana-core
 /config/ @elastic/kibana-core
 /config/serverless.yml @elastic/kibana-core @elastic/kibana-security
+/config/serverless.*.yml @elastic/kibana-core @elastic/kibana-security
 /config/serverless.chat.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.es.yml @elastic/kibana-core @elastic/kibana-security @elastic/search-kibana
 /config/serverless.oblt.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
-/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/observability-ui
-/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/observability-ui
+/config/serverless.oblt.complete.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
+/config/serverless.oblt.logs_essentials.yml @elastic/kibana-core @elastic/kibana-security @elastic/observability-ui
 /config/serverless.security.yml @elastic/kibana-core @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.search_ai_lake.yml @elastic/security-solution @elastic/kibana-security
 /config/serverless.security.essentials.yml @elastic/security-solution @elastic/kibana-security
