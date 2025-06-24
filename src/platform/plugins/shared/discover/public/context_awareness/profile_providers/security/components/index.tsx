@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SECURITY_PROFILE_ID = {
-  root: 'security-root-profile',
-  document: 'security-document-profile',
-};
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { lazy } from 'react';
 
-export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
+export const AlertEventOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./alert_event_overview').then((module) => ({
+      default: module.AlertEventOverview,
+    }))
+  )
+);

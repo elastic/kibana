@@ -11,44 +11,61 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getDiscoverESQLState } from './utils';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
+const defaultEventColumns = [
+  '@timestamp',
+  'kibana.alert.workflow_status',
+  'message',
+  'event.category',
+  'event.action',
+  'host.name',
+  'source.ip',
+  'destination.ip',
+  'user.name',
+];
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
-  const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const retry = getService('retry');
 
-  describe('cell renderer', () => {
+  describe('default State', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+      // creates security data view if it does not exist
       await PageObjects.common.navigateToApp('security', {
         path: 'alerts',
       });
     });
 
     describe('ES|QL mode', () => {
-      it('should render alert workflow status badge', async () => {
-        const state = getDiscoverESQLState(
-          `from ${SECURITY_SOLUTION_DATA_VIEW} | WHERE host.name == "siem-kibana" and event.kind != "signal"`
-        );
+      it('should have correct list of columns', async () => {
+        const state = getDiscoverESQLState();
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        const alertWorkflowStatus = await testSubjects.findAll('rule-status-badge', 2500);
-        expect(alertWorkflowStatus).to.have.length(1);
+
+        await retry.try(async () => {
+          expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+            defaultEventColumns.join(', ')
+          );
+        });
       });
     });
 
     describe('DataView mode', () => {
-      it('should render alert workflow status badge', async () => {
+      it('should have correct list of columns', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
+
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
-        await queryBar.setQuery('host.name: "siem-kibana" AND event.kind: "signal"');
+
         await queryBar.clickQuerySubmitButton();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        const alertWorkflowStatus = await testSubjects.findAll('rule-status-badge', 2500);
-        expect(alertWorkflowStatus).to.have.length(1);
+        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
+          defaultEventColumns.join(', ')
+        );
       });
     });
   });

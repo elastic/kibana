@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SECURITY_PROFILE_ID = {
-  root: 'security-root-profile',
-  document: 'security-document-profile',
-};
-
-export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
+export { createSecurityDocumentProfileProvider } from './profile';
