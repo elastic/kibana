@@ -36,17 +36,9 @@ export const AttributesEmptyPrompt = () => (
           <ul>
             <li>
               {i18n.translate(
-                'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.extendTimeBullet',
-                {
-                  defaultMessage: 'Extending the time range',
-                }
-              )}
-            </li>
-            <li>
-              {i18n.translate(
                 'unifiedDocViewer.docView.attributes.accordion.noFieldsMessage.fieldTypeFilterBullet',
                 {
-                  defaultMessage: 'Using different field filters',
+                  defaultMessage: 'Using different field filters if applicable.',
                 }
               )}
             </li>

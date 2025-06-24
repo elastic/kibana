@@ -18,13 +18,14 @@ import {
 } from '../../../doc_viewer_table/table_cell_actions';
 import { FieldRow } from '../../../doc_viewer_table/field_row';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { AttributeField } from './attributes_overview';
 
 interface AttributesTableProps
   extends Pick<
     DocViewRenderProps,
     'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
-  fields: string[];
+  fields: AttributeField[];
   searchTerm: string;
   isEsqlMode: boolean;
 }
@@ -58,7 +59,8 @@ export const AttributesTable = ({
   }, [onRemoveColumn, onAddColumn, columns]);
 
   const displayedFields = useMemo(
-    () => fields.filter((field) => field.toLowerCase().includes(searchTerm.toLowerCase())),
+    () =>
+      fields.filter((field) => field.displayName.toLowerCase().includes(searchTerm.toLowerCase())),
     [fields, searchTerm]
   );
 
@@ -67,8 +69,9 @@ export const AttributesTable = ({
       displayedFields.map(
         (field) =>
           new FieldRow({
-            name: field,
-            flattenedValue: flattened[field],
+            name: field.name,
+            displayName: field.displayName,
+            flattenedValue: flattened[field.name],
             hit,
             dataView,
             fieldFormats,

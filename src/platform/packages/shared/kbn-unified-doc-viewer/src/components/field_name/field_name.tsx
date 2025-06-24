@@ -19,6 +19,7 @@ import { getFieldTypeName } from '@kbn/field-utils';
 
 interface Props {
   fieldName: string;
+  displayName?: string;
   fieldType?: string;
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
@@ -31,13 +32,17 @@ export function FieldName({
   fieldMapping,
   fieldType,
   fieldIconProps,
+  displayName,
   scripted = false,
   highlight = '',
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
-  const displayName =
-    fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
-  const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
+  const fieldDisplayName = displayName
+    ? displayName
+    : fieldMapping && fieldMapping.displayName
+    ? fieldMapping.displayName
+    : fieldName;
+  const tooltip = fieldDisplayName !== fieldName ? `${fieldDisplayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 
@@ -71,7 +76,7 @@ export function FieldName({
               delay="long"
               anchorClassName="eui-textBreakAll"
             >
-              <EuiHighlight search={highlight}>{displayName}</EuiHighlight>
+              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 

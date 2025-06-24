@@ -13,13 +13,14 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AttributesTable } from './attributes_table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+import { AttributeField } from './attributes_overview';
 
 interface AttributesAccordionProps {
   id: string;
   title: string;
   ariaLabel: string;
   tooltipMessage: string;
-  fields: string[];
+  fields: AttributeField[];
   hit: DataTableRecord;
   dataView: DataView;
   columns?: string[];

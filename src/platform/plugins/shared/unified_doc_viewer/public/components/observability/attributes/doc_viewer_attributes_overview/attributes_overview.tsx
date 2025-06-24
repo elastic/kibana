@@ -31,8 +31,14 @@ import {
 } from '../../../doc_viewer_source/get_height';
 import { AttributesAccordion } from './attributes_accordion';
 import { getAttributesTitle } from './get_attributes_title';
+import { getAttributeDisplayName } from './get_attribute_display_name';
 import { HIDE_NULL_VALUES } from '../../../doc_viewer_table/table';
 import { AttributesEmptyPrompt } from './attributes_empty_prompt';
+
+export interface AttributeField {
+  name: string; // full field name for filtering/actions
+  displayName: string; // stripped prefix for UI display
+}
 
 export function AttributesOverview({
   columns,
@@ -67,9 +73,9 @@ export function AttributesOverview({
   const allFields = Object.keys(flattened);
 
   const groupedFields = useMemo(() => {
-    const attributesFields: string[] = [];
-    const resourceAttributesFields: string[] = [];
-    const scopeAttributesFields: string[] = [];
+    const attributesFields: AttributeField[] = [];
+    const resourceAttributesFields: AttributeField[] = [];
+    const scopeAttributesFields: AttributeField[] = [];
     const lowerSearchTerm = searchTerm.toLowerCase();
 
     allFields.reduce((acc, fieldName) => {
@@ -89,11 +95,20 @@ export function AttributesOverview({
       }
 
       if (lowerFieldName.startsWith('resource.attributes.')) {
-        resourceAttributesFields.push(fieldName);
+        resourceAttributesFields.push({
+          name: fieldName,
+          displayName: getAttributeDisplayName(fieldName),
+        });
       } else if (lowerFieldName.startsWith('scope.attributes.')) {
-        scopeAttributesFields.push(fieldName);
+        scopeAttributesFields.push({
+          name: fieldName,
+          displayName: getAttributeDisplayName(fieldName),
+        });
       } else if (lowerFieldName.startsWith('attributes.')) {
-        attributesFields.push(fieldName);
+        attributesFields.push({
+          name: fieldName, // full name for filtering/actions
+          displayName: getAttributeDisplayName(fieldName), // for UI
+        });
       }
 
       return acc;
