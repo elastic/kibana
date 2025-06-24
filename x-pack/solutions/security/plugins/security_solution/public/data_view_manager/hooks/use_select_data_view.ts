@@ -14,6 +14,7 @@ import { selectDataViewAsync } from '../redux/actions';
  * This hook wraps the dispatch call that updates the redux store with new data view selection.
  * It is the recommended entry point for altering the data view selection.
  * Manual action dispatches are not required and should be avoided outside of the data view manager scope.
+ * Note: it will not select anything if neither params.id or params.fallbackPatterns are set.
  */
 export const useSelectDataView = () => {
   const dispatch = useDispatch();
