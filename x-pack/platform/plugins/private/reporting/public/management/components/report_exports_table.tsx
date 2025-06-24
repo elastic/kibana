@@ -9,6 +9,7 @@ import { Component, Fragment, default as React } from 'react';
 import { Subscription } from 'rxjs';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -24,11 +25,13 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
 import { checkLicense, Job } from '@kbn/reporting-public';
-import { ListingPropsInternal } from '.';
-import { prettyPrintJobType } from '../../common/job_utils';
-import { Poller } from '../../common/poller';
-import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from './components';
-import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from './utils';
+import { ListingPropsInternal } from '..';
+import { prettyPrintJobType } from '../../../common/job_utils';
+import { Poller } from '../../../common/poller';
+import { ReportDeleteButton, ReportInfoFlyout, ReportStatusIndicator } from '.';
+import { guessAppIconTypeFromObjectType, getDisplayNameFromObjectType } from '../utils';
+import { NO_CREATED_REPORTS_DESCRIPTION } from '../../translations';
+import { TruncatedTitle } from './truncated_title';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -44,7 +47,7 @@ interface State {
   selectedJob: undefined | Job;
 }
 
-export class ReportListingTable extends Component<ListingPropsInternal, State> {
+export class ReportExportsTable extends Component<ListingPropsInternal, State> {
   private isInitialJobsFetch: boolean;
   private licenseSubscription?: Subscription;
   private mounted?: boolean;
@@ -128,7 +131,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           await this.props.apiClient.deleteReport(job.id);
           this.removeJob(job);
           this.props.toasts.addSuccess(
-            i18n.translate('xpack.reporting.listing.table.deleteConfim', {
+            i18n.translate('xpack.reporting.exports.table.deleteConfirm', {
               defaultMessage: `The {reportTitle} report was deleted`,
               values: {
                 reportTitle: job.title,
@@ -137,7 +140,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           );
         } catch (error) {
           this.props.toasts.addDanger(
-            i18n.translate('xpack.reporting.listing.table.deleteFailedErrorMessage', {
+            i18n.translate('xpack.reporting.exports.table.deleteFailedErrorMessage', {
               defaultMessage: `The report was not deleted: {error}`,
               values: { error },
             })
@@ -172,6 +175,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     try {
       jobs = await this.props.apiClient.list(this.state.page);
       total = await this.props.apiClient.total();
+
       this.isInitialJobsFetch = false;
     } catch (fetchError) {
       if (!this.licenseAllowsToShowThisPage()) {
@@ -183,7 +187,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       if (fetchError.message === 'Failed to fetch') {
         this.props.toasts.addDanger(
           fetchError.message ||
-            i18n.translate('xpack.reporting.listing.table.requestFailedErrorMessage', {
+            i18n.translate('xpack.reporting.exports.table.requestFailedErrorMessage', {
               defaultMessage: 'Request failed',
             })
         );
@@ -214,10 +218,11 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
    */
   private readonly tableColumnWidths = {
     type: '5%',
-    title: '30%',
+    title: '25%',
     status: '20%',
-    createdAt: '25%',
-    content: '10%',
+    createdAt: '21%',
+    content: '7%',
+    exportType: '12%',
     actions: '10%',
   };
 
@@ -227,7 +232,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       {
         field: 'type',
         width: tableColumnWidths.type,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.typeTitle', {
+        name: i18n.translate('xpack.reporting.exports.tableColumns.typeTitle', {
           defaultMessage: 'Type',
         }),
         render: (_type: string, job) => {
@@ -251,8 +256,8 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       },
       {
         field: 'title',
-        name: i18n.translate('xpack.reporting.listing.tableColumns.reportTitle', {
-          defaultMessage: 'Title',
+        name: i18n.translate('xpack.reporting.exports.tableColumns.reportTitle', {
+          defaultMessage: 'Name',
         }),
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
@@ -262,10 +267,14 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
                 data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
               >
-                {objectTitle ||
-                  i18n.translate('xpack.reporting.listing.table.noTitleLabel', {
-                    defaultMessage: 'Untitled',
-                  })}
+                <TruncatedTitle
+                  text={
+                    objectTitle ||
+                    i18n.translate('xpack.reporting.exports.table.noTitleLabel', {
+                      defaultMessage: 'Untitled',
+                    })
+                  }
+                />
               </EuiLink>
             </div>
           );
@@ -278,7 +287,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       {
         field: 'status',
         width: tableColumnWidths.status,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.statusTitle', {
+        name: i18n.translate('xpack.reporting.exports.tableColumns.statusTitle', {
           defaultMessage: 'Status',
         }),
         render: (_status: string, job) => {
@@ -300,7 +309,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       {
         field: 'created_at',
         width: tableColumnWidths.createdAt,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.createdAtTitle', {
+        name: i18n.translate('xpack.reporting.exports.tableColumns.createdAtTitle', {
           defaultMessage: 'Created at',
         }),
         render: (_createdAt: string, job) => (
@@ -313,16 +322,48 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       {
         field: 'content',
         width: tableColumnWidths.content,
-        name: i18n.translate('xpack.reporting.listing.tableColumns.content', {
+        name: i18n.translate('xpack.reporting.exports.tableColumns.content', {
           defaultMessage: 'Content',
         }),
-        render: (_status: string, job) => prettyPrintJobType(job.jobtype),
+        render: (_status: string, job) => (
+          <div data-test-subj="reportJobContent">{prettyPrintJobType(job.jobtype)}</div>
+        ),
         mobileOptions: {
           show: false,
         },
       },
       {
-        name: i18n.translate('xpack.reporting.listing.tableColumns.actionsTitle', {
+        field: 'scheduled_report_id',
+        width: tableColumnWidths.exportType,
+        name: i18n.translate('xpack.reporting.exports.tableColumns.exportType', {
+          defaultMessage: 'Export type',
+        }),
+        render: (_scheduledReportId: string) => {
+          const exportType = _scheduledReportId
+            ? i18n.translate('xpack.reporting.exports.exportType.scheduled', {
+                defaultMessage: 'Scheduled',
+              })
+            : i18n.translate('xpack.reporting.exports.exportType.single', {
+                defaultMessage: 'Single',
+              });
+
+          return (
+            <EuiBadge data-test-subj={`reportExportType-${exportType}`} color="hollow">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip type={_scheduledReportId ? 'calendar' : 'download'} size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{exportType}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBadge>
+          );
+        },
+        mobileOptions: {
+          show: false,
+        },
+      },
+      {
+        name: i18n.translate('xpack.reporting.exports.tableColumns.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         width: tableColumnWidths.actions,
@@ -332,10 +373,10 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
             'data-test-subj': (job) => `reportDownloadLink-${job.id}`,
             type: 'icon',
             icon: 'download',
-            name: i18n.translate('xpack.reporting.listing.table.downloadReportButtonLabel', {
+            name: i18n.translate('xpack.reporting.exports.table.downloadReportButtonLabel', {
               defaultMessage: 'Download report',
             }),
-            description: i18n.translate('xpack.reporting.listing.table.downloadReportDescription', {
+            description: i18n.translate('xpack.reporting.exports.table.downloadReportDescription', {
               defaultMessage: 'Download this report in a new tab.',
             }),
             onClick: (job) => this.props.apiClient.downloadReport(job.id),
@@ -343,28 +384,29 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           },
           {
             name: i18n.translate(
-              'xpack.reporting.listing.table.viewReportingInfoActionButtonLabel',
+              'xpack.reporting.exports.table.viewReportingInfoActionButtonLabel',
               {
                 defaultMessage: 'View report info',
               }
             ),
             description: i18n.translate(
-              'xpack.reporting.listing.table.viewReportingInfoActionButtonDescription',
+              'xpack.reporting.exports.table.viewReportingInfoActionButtonDescription',
               {
                 defaultMessage: 'View additional information about this report.',
               }
             ),
+            'data-test-subj': 'reportViewInfoLink',
             type: 'icon',
             icon: 'iInCircle',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
-            name: i18n.translate('xpack.reporting.listing.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open in Kibana',
+            name: i18n.translate('xpack.reporting.exports.table.openInKibanaAppLabel', {
+              defaultMessage: 'Open Dashboard',
             }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
-              'xpack.reporting.listing.table.openInKibanaAppDescription',
+              'xpack.reporting.exports.table.openInKibanaAppDescription',
               {
                 defaultMessage: 'Open the Kibana app where this report was generated.',
               }
@@ -386,7 +428,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
       pageIndex: this.state.page,
       pageSize: 10,
       totalItemCount: this.state.total,
-      showPerPageOptions: false,
+      showPerPageOptions: true,
     };
 
     const selection = {
@@ -396,6 +438,7 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
 
     return (
       <Fragment>
+        <EuiSpacer size={'l'} />
         {this.state.selectedJobs.length > 0 && (
           <div>
             <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
@@ -405,22 +448,14 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
           </div>
         )}
         <EuiBasicTable
-          tableCaption={i18n.translate('xpack.reporting.listing.table.captionDescription', {
+          tableCaption={i18n.translate('xpack.reporting.exports.table.captionDescription', {
             defaultMessage: 'Reports generated in Kibana applications',
           })}
           itemId="id"
           items={this.state.jobs}
           loading={this.state.isLoading}
           columns={tableColumns}
-          noItemsMessage={
-            this.state.isLoading
-              ? i18n.translate('xpack.reporting.listing.table.loadingReportsDescription', {
-                  defaultMessage: 'Loading reports',
-                })
-              : i18n.translate('xpack.reporting.listing.table.noCreatedReportsDescription', {
-                  defaultMessage: 'No reports have been created',
-                })
-          }
+          noItemsMessage={NO_CREATED_REPORTS_DESCRIPTION}
           pagination={pagination}
           selection={selection}
           onChange={this.onTableChange}
@@ -438,3 +473,6 @@ export class ReportListingTable extends Component<ListingPropsInternal, State> {
     );
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export { ReportExportsTable as default };

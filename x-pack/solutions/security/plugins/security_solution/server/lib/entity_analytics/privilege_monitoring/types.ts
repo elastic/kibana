@@ -6,3 +6,9 @@
  */
 
 export type PrivMonUserSource = 'csv' | 'api' | 'index_sync';
+
+export interface PrivMonBulkUser {
+  username: string;
+  indexName: string;
+  existingUserId?: string;
+}
