@@ -8,8 +8,6 @@
 import React, { useEffect } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
-import { isPending } from '../../../hooks/use_fetcher';
 import { SYSTEM_INTEGRATION } from '../../../../common/constants';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
@@ -25,9 +23,6 @@ import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
-import { useEntitySummary } from '../hooks/use_entity_summary';
-import { isLogsSignal, isMetricsSignal } from '../utils/get_data_stream_types';
-import { useDatePickerContext } from '../hooks/use_date_picker';
 
 const DATA_AVAILABILITY_PER_TYPE: Partial<Record<InventoryItemType, string[]>> = {
   host: [SYSTEM_INTEGRATION],
@@ -38,15 +33,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { getDateRangeInTimestamp } = useDatePickerContext();
   const trackOnlyOnce = React.useRef(false);
-  const { dataStreams, status: entitySummaryStatus } = useEntitySummary({
-    entityType: asset.type,
-    entityId: asset.id,
-    from: new Date(getDateRangeInTimestamp().from).toISOString(),
-    to: new Date(getDateRangeInTimestamp().to).toISOString(),
-  });
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
@@ -88,24 +75,14 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     }
   }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
-  const showPageTitleWithPopover = asset.type === 'host' && !isMetricsSignal(dataStreams);
-  const shouldBypassOnboarding =
-    isEntityCentricExperienceEnabled && (isLogsSignal(dataStreams) || isMetricsSignal(dataStreams));
-
   return (
     <InfraPageTemplate
-      onboardingFlow={
-        isPending(entitySummaryStatus) || shouldBypassOnboarding
-          ? undefined
-          : asset.type === 'host'
-          ? OnboardingFlow.Hosts
-          : OnboardingFlow.Infra
-      }
+      onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
       dataAvailabilityModules={DATA_AVAILABILITY_PER_TYPE[asset.type] || undefined}
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
-        ) : showPageTitleWithPopover ? (
+        ) : asset.type === 'host' ? (
           <PageTitleWithPopover name={asset.name} />
         ) : (
           asset.name

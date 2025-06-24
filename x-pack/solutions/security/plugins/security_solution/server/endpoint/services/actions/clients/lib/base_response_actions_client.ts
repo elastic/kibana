@@ -223,7 +223,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   /**
    * Ensures that the Action Request Index is setup correctly (ex. has required mappings)
-   * @private
+   * @internal
    */
   private async ensureActionRequestsIndexIsConfigured(): Promise<void> {
     this.log.debug(`checking index [${ENDPOINT_ACTIONS_INDEX}] is configured as expected`);
