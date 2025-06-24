@@ -2675,6 +2675,14 @@ Object {
                         "x-oas-optional": true,
                       },
                     ],
+                    "rules": Array [
+                      Object {
+                        "args": Object {
+                          "limit": 5000,
+                        },
+                        "name": "max",
+                      },
+                    ],
                     "type": "array",
                   },
                   "grouping": Object {
