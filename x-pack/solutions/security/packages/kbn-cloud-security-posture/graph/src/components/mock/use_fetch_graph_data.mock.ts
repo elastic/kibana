@@ -35,6 +35,12 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             color: 'primary',
             shape: 'hexagon',
             icon: 'questionInCircle',
+            documentsData: [
+              {
+                id: '1',
+                type: 'entity',
+              },
+            ],
           },
           {
             id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
@@ -43,6 +49,12 @@ export const useFetchGraphData = (params: UseFetchGraphDataParams) => {
             target: 'projects/your-project-id/roles/customRole',
             color: 'primary',
             shape: 'label',
+            documentsData: [
+              {
+                id: '1',
+                type: 'event',
+              },
+            ],
           },
         ],
         edges: [

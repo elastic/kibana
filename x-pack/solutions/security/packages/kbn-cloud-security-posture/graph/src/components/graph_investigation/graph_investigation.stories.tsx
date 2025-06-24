@@ -41,6 +41,7 @@ const defaultProps: GraphInvestigationProps = {
       to: `${hourAgo.toISOString()}||+15m`,
     },
   },
+  onOpenEventPreview: action('onOpenEventPreview'),
   onInvestigateInTimeline: action('onInvestigateInTimeline'),
   showToggleSearch: false,
   showInvestigateInTimeline: false,

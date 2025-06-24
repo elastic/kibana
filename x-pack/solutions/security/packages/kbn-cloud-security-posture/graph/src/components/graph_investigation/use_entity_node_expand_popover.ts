@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
-import type { NodeProps } from '../../..';
+import { getNodeDocumentMode, type NodeProps } from '../../..';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
@@ -40,7 +40,7 @@ export const useEntityNodeExpandPopover = (
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   dataViewId: string,
   searchFilters: Filter[],
-  onShowEntityDetailsClick: (node: NodeProps) => void
+  onShowEntityDetailsClick?: (node: NodeProps) => void
 ) => {
   const onToggleExploreRelatedEntitiesClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
@@ -88,6 +88,9 @@ export const useEntityNodeExpandPopover = (
       const relatedEntitiesAction = containsFilter(searchFilters, RELATED_ENTITY, node.id)
         ? 'hide'
         : 'show';
+
+      const shouldShowEntityDetailsListItem =
+        onShowEntityDetailsClick && getNodeDocumentMode(node.data) === 'single-entity';
 
       return [
         {
@@ -156,23 +159,27 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
-        {
-          type: 'separator',
-        },
-        {
-          type: 'item',
-          iconType: 'expand',
-          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-          label: i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
-            {
-              defaultMessage: 'Show event details',
-            }
-          ),
-          onClick: () => {
-            onShowEntityDetailsClick(node);
-          },
-        },
+        ...(shouldShowEntityDetailsListItem
+          ? ([
+              {
+                type: 'separator',
+              },
+              {
+                type: 'item',
+                iconType: 'expand',
+                testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+                label: i18n.translate(
+                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+                  {
+                    defaultMessage: 'Show event details',
+                  }
+                ),
+                onClick: () => {
+                  onShowEntityDetailsClick(node);
+                },
+              },
+            ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>)
+          : []),
       ];
     },
     [

@@ -26,6 +26,7 @@ import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
 import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import { NodeViewModel } from '../types';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -36,7 +37,7 @@ const useGraphPopovers = ({
   dataViewId: string;
   searchFilters: Filter[];
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  nodeDetailsClickHandler: (node: NodeProps) => void;
+  nodeDetailsClickHandler?: (node: NodeProps) => void;
 }) => {
   const nodeExpandPopover = useEntityNodeExpandPopover(
     setSearchFilters,
@@ -111,9 +112,9 @@ export interface GraphInvestigationProps {
   };
 
   /**
-   * Callback when an event details preview is requested.
+   * Callback when show event preview is clicked.
    */
-  openEventPreview?: (eventId: string) => void;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
 
   /**
    * Whether to show investigate in timeline action button. Defaults value is false.
@@ -147,7 +148,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
-    openEventPreview,
+    onOpenEventPreview,
   }: GraphInvestigationProps) => {
     const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
@@ -223,28 +224,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const nodeDetailsClickHandler = useCallback(
       (node: NodeProps) => {
-        if (
-          node.data?.shape === 'label' &&
-          node.data?.id &&
-          data?.nodeIdentifiers?.[node.data.id]
-        ) {
-          const evtIds = data?.nodeIdentifiers?.[node.data.id];
-
-          if (Array.isArray(evtIds) && evtIds.length > 0) {
-            openEventPreview?.(evtIds[0]);
-          } else if (!Array.isArray(evtIds)) {
-            openEventPreview?.(evtIds);
-          }
-        }
+        onOpenEventPreview?.(node.data);
       },
-      [data?.nodeIdentifiers, openEventPreview]
+      [onOpenEventPreview]
     );
 
     const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers({
       dataViewId: dataView?.id ?? '',
       searchFilters,
       setSearchFilters,
-      nodeDetailsClickHandler,
+      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>

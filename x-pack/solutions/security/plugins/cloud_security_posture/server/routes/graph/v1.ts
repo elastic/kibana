@@ -101,7 +101,6 @@ interface ParseContext {
   readonly edgesMap: Record<string, EdgeDataModel>;
   readonly edgeLabelsNodes: Record<string, string[]>;
   readonly labelEdges: Record<string, LabelEdges>;
-  readonly nodeDocumentData: Record<string, NodeDocumentDataModel[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -110,11 +109,10 @@ const parseRecords = (
   logger: Logger,
   records: GraphEdge[],
   nodesLimit?: number
-): Pick<GraphResponse, 'nodes' | 'edges' | 'nodeDocumentData' | 'messages'> => {
+): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
     nodesLimit,
     logger,
-    nodeDocumentData: {},
     nodesMap: {},
     edgeLabelsNodes: {},
     edgesMap: {},
@@ -139,7 +137,6 @@ const parseRecords = (
   return {
     nodes,
     edges: Object.values(ctx.edgesMap),
-    nodeDocumentData: ctx.nodeDocumentData,
     messages: ctx.messages.length > 0 ? ctx.messages : undefined,
   };
 };
@@ -188,11 +185,11 @@ const fetchGraph = async ({
   ips = VALUES(related.ip),
   // hosts = VALUES(related.hosts),
   users = VALUES(related.user)
-  BY actorIds = actor.entity.id,
-    action = event.action,
-    targetIds = target.entity.id,
-    isOrigin,
-    isOriginAlert
+    BY actorIds = actor.entity.id,
+      action = event.action,
+      targetIds = target.entity.id,
+      isOrigin,
+      isOriginAlert
 | LIMIT 1000
 | SORT isOrigin DESC, action`;
 
@@ -264,7 +261,7 @@ const buildDslFilter = (
 });
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges, nodeDocumentData } = context;
+  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
 
   for (const record of records) {
     if (context.nodesLimit !== undefined && Object.keys(nodesMap).length >= context.nodesLimit) {
@@ -321,10 +318,10 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           label: action,
           color: isOriginAlert ? 'danger' : 'primary',
           shape: 'label',
+          documentsData: parseDocumentsData(docs),
         };
 
         nodesMap[labelNode.id] = labelNode;
-        nodeDocumentData[labelNode.id] = parseDocumentsData(docs);
         edgeLabelsNodes[edgeId].push(labelNode.id);
         labelEdges[labelNode.id] = {
           source: actorId,

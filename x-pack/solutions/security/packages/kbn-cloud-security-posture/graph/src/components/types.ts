@@ -13,6 +13,7 @@ import type {
   EdgeDataModel,
   NodeShape,
   NodeColor,
+  NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
@@ -46,10 +47,14 @@ export interface GroupNodeViewModel
     GroupNodeDataModel,
     BaseNodeDataViewModel {}
 
+export type NodeDocumentDataViewModel = NodeDocumentDataModel;
+
 export interface LabelNodeViewModel
   extends Record<string, unknown>,
-    LabelNodeDataModel,
+    Omit<LabelNodeDataModel, 'documentsData'>,
     BaseNodeDataViewModel {
+  // We force it to be optional here to avoid breaking changes, but it should be required in the future.
+  documentsData?: NodeDocumentDataViewModel[];
   expandButtonClick?: ExpandButtonClickCallback;
   nodeClick?: NodeClickCallback;
 }

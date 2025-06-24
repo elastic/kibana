@@ -10,7 +10,13 @@ import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  getNodeDocumentMode,
+  hasNodeDocumentsData,
+  type NodeViewModel,
+} from '@kbn/cloud-security-posture-graph';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -22,6 +28,7 @@ import { normalizeTimeRange } from '../../../../common/utils/normalize_time_rang
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { EVENT_PREVIEW_BANNER } from '../../preview/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -35,6 +42,9 @@ export const GRAPH_ID = 'graph-visualization' as const;
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
+  const {
+    services: { notifications },
+  } = useKibana();
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.default,
   });
@@ -57,20 +67,31 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
-  const openEventPreview = useCallback(
-    (evtId: string) => {
-      openPreviewPanel({
-        id: DocumentDetailsPreviewPanelKey,
-        params: {
-          id: evtId,
-          indexName: 'logs-*',
-          scopeId,
-          banner: EVENT_PREVIEW_BANNER,
-          isPreviewMode: true,
-        },
-      });
+  const onOpenEventPreview = useCallback(
+    (node: NodeViewModel) => {
+      if (getNodeDocumentMode(node) === 'single-event' && hasNodeDocumentsData(node)) {
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: node.documentsData[0].id,
+            indexName: 'logs-*',
+            scopeId,
+            banner: EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      } else {
+        notifications?.toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
+            {
+              defaultMessage: 'Cannot open preview for this node',
+            }
+          ),
+        });
+      }
     },
-    [openPreviewPanel, scopeId]
+    [notifications?.toasts, openPreviewPanel, scopeId]
   );
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
@@ -128,7 +149,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showInvestigateInTimeline={true}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
-            openEventPreview={openEventPreview}
+            onOpenEventPreview={onOpenEventPreview}
           />
         </React.Suspense>
       )}
