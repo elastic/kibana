@@ -73,7 +73,7 @@ export class InterceptPublicPlugin implements Plugin {
     );
 
     core.chrome.navControls.registerRight({
-      order: 1002,
+      order: isServerless ? 1 : 1002,
       mount: toMountPoint(isServerless ? <ServerlessButton /> : <HostedButton />, core.rendering),
     });
 
