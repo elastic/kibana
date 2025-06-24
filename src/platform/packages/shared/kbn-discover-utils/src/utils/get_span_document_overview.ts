@@ -34,6 +34,8 @@ const fields: Array<keyof SpanDocumentOverview> = [
   fieldConstants.USER_AGENT_NAME_FIELD,
   fieldConstants.USER_AGENT_VERSION_FIELD,
   fieldConstants.PROCESSOR_EVENT_FIELD,
+  fieldConstants.OTEL_DURATION,
+  fieldConstants.OTEL_SPAN_KIND,
 ];
 
 export function getSpanDocumentOverview(

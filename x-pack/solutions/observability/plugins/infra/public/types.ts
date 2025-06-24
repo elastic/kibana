@@ -91,7 +91,7 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   dashboard: DashboardStart;
-  embeddable?: EmbeddableStart;
+  embeddable: EmbeddableStart;
   observabilityNavigation?: ObservabilityNavigationPluginStart;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;

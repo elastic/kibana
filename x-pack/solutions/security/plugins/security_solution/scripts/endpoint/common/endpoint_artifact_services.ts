@@ -87,7 +87,7 @@ export const ensureArtifactListExists = memoize(
  * Creates an exception list item.
  * NOTE: this method does NOT create the list itself.
  *
- * @private
+ * @internal
  *
  * @param kbnClient
  * @param data
