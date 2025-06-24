@@ -64,15 +64,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({
           deepLinkId: 'enterpriseSearch',
         });
+        // Redirected to Onboarding Page to Create Index
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Data',
+          text: 'Build',
         });
 
         await expectNoPageReload();
