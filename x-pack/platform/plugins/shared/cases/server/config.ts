@@ -23,7 +23,7 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  incrementalIdService: schema.object({
+  incrementalId: schema.object({
     /**
      * Whether the incremental id service should be enabled
      */

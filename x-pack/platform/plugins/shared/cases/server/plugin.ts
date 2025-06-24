@@ -14,14 +14,12 @@ import type {
   CoreStart,
   Plugin,
 } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { APP_ID, CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID } from '../common/constants';
+import { APP_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -55,6 +53,7 @@ import {
   registerCasesAnalyticsIndexesTasks,
   scheduleCasesAnalyticsSyncTasks,
 } from './cases_analytics';
+import { registerUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -136,28 +135,15 @@ export class CasePlugin
       })
     );
 
-    if (this.caseConfig.incrementalIdService.enabled) {
-      core.uiSettings.register({
-        [CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID]: {
-          description: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.description', {
-            defaultMessage: 'Display the incremental id of a case in the relevant pages',
-          }),
-          name: i18n.translate('xpack.cases.uiSettings.displayIncrementalId.name', {
-            defaultMessage: 'Show incremental id',
-          }),
-          schema: schema.boolean(),
-          value: false,
-          readonly: false,
-          category: ['cases'],
-        },
-      });
+    if (this.caseConfig.incrementalId.enabled) {
+      registerUiSettings(core);
     }
 
     if (plugins.taskManager) {
-      if (this.caseConfig.incrementalIdService.enabled) {
+      if (this.caseConfig.incrementalId.enabled) {
         this.incrementalIdTaskManager = new IncrementalIdTaskManager(
           plugins.taskManager,
-          this.caseConfig.incrementalIdService,
+          this.caseConfig.incrementalId,
           this.logger
         );
       }
@@ -234,8 +220,8 @@ export class CasePlugin
 
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
-      if (this.caseConfig.incrementalIdService.enabled) {
-        this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
+      if (this.caseConfig.incrementalId.enabled) {
+        void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
       if (this.caseConfig.analytics.index?.enabled) {
         scheduleCasesAnalyticsSyncTasks({ taskManager: plugins.taskManager, logger: this.logger });

@@ -15,19 +15,19 @@ import { CasesIncrementalIdService } from '../../services/incremental_id';
 import type { ConfigType } from '../../config';
 
 export const CASES_INCREMENTAL_ID_SYNC_TASK_TYPE = 'cases_incremental_id_assignment';
-export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `Cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
+export const CASES_INCREMENTAL_ID_SYNC_TASK_ID = `cases:${CASES_INCREMENTAL_ID_SYNC_TASK_TYPE}`;
 
 export const CasesIncrementIdTaskVersion = '1.0.0';
 
 export class IncrementalIdTaskManager {
-  private config: ConfigType['incrementalIdService'];
+  private config: ConfigType['incrementalId'];
   private logger: Logger;
   private internalSavedObjectsClient?: SavedObjectsClient;
   private taskManager?: TaskManagerStartContract;
 
   constructor(
     taskManager: TaskManagerSetupContract,
-    config: ConfigType['incrementalIdService'],
+    config: ConfigType['incrementalId'],
     logger: Logger
   ) {
     this.config = config;

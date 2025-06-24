@@ -96,7 +96,7 @@ export const CasesProvider: FC<
 
   // UI setting enablement is behind the configuration flag, so will error without this wrapper
   let displayIncrementalCaseId = false;
-  if (KibanaServices.getConfig()?.incrementalIdService?.enabled) {
+  if (KibanaServices.getConfig()?.incrementalId?.enabled) {
     displayIncrementalCaseId = client.get(CASES_UI_SETTING_ID_DISPLAY_INCREMENTAL_ID);
   }
 

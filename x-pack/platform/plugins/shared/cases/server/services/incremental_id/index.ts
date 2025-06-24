@@ -12,6 +12,8 @@ import type {
 } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
+import { buildNode as buildWildcardNode } from '@kbn/es-query/src/kuery/node_types/wildcard';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT, CASE_ID_INCREMENTER_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type {
@@ -25,8 +27,13 @@ type GetCasesParameters = Pick<
 >;
 
 export class CasesIncrementalIdService {
-  static incrementalIdExistsFilter = 'cases.attributes.incremental_id: *';
-  static incrementalIdMissingFilter = 'not cases.attributes.incremental_id: *';
+  static incrementalIdExistsFilter = nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.incremental_id`,
+    buildWildcardNode('*')
+  );
+  static incrementalIdMissingFilter = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.incremental_id: *`
+  );
   private isStopped = false;
 
   constructor(

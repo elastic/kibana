@@ -104,8 +104,8 @@ describe('config validation', () => {
               "application/pdf",
             ],
           },
-          "incrementalIdService": Object {
-            "enabled": true,
+          "incrementalId": Object {
+            "enabled": false,
             "taskInterValMinutes": 10,
             "taskStartDelayMinutes": 10,
           },

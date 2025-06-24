@@ -72,7 +72,7 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
-  incrementalIdService: {
+  incrementalId: {
     enabled: boolean;
   };
 }
