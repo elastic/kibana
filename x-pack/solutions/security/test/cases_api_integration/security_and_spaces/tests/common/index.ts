@@ -12,10 +12,10 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     /**
      * Public routes
      */
-    loadTestFile(require.resolve('./comments/delete_comments'));
-    loadTestFile(require.resolve('./comments/delete_comment'));
-    loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./client/update_alert_status'));
+    loadTestFile(require.resolve('./comments/delete_comment'));
+    loadTestFile(require.resolve('./comments/delete_comments'));
+    loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./cases/delete_cases'));
     loadTestFile(require.resolve('./cases/patch_cases'));
 
