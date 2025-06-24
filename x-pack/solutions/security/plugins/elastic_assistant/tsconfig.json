@@ -85,6 +85,7 @@
     "@kbn/deeplinks-security",
     "@kbn/core-application-browser",
     "@kbn/ui-theme"
+    "@kbn/ai-security-labs-content"
   ],
   "exclude": [
     "target/**/*",
