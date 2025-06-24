@@ -98,7 +98,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.infoText"
               defaultMessage="One or more indices containing the user.name field. All user names in the indices, specified in the user.name field, will be defined as privileged users."
             />
           </p>
@@ -122,7 +122,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
         </EuiText>
         <EuiButton fullWidth={false} iconType={'plusInCircle'} onClick={showIndexModal}>
           <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.text"
+            id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.btnText"
             defaultMessage="Select index"
           />
         </EuiButton>
