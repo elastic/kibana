@@ -2736,10 +2736,19 @@ Object {
                     },
                     "metas": Array [
                       Object {
+                        "x-oas-max-length": 160,
+                      },
+                      Object {
                         "x-oas-optional": true,
                       },
                     ],
                     "rules": Array [
+                      Object {
+                        "args": Object {
+                          "method": [Function],
+                        },
+                        "name": "custom",
+                      },
                       Object {
                         "args": Object {
                           "method": [Function],

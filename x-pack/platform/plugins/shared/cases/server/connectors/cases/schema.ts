@@ -12,6 +12,7 @@ import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
+  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -73,7 +74,7 @@ export const CasesGroupedAlertsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema, { maxSize: MAX_ALERTS_PER_CASE }),
   comments: schema.maybe(schema.arrayOf(schema.string(), { maxSize: MAX_DOCS_PER_PAGE / 2 })),
   grouping: schema.recordOf(schema.string(), schema.any()),
-  title: schema.maybe(schema.string()),
+  title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
 });
 
 /**
