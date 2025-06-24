@@ -10,29 +10,14 @@ import type { SeverityThreshold } from '../../../../common/types/anomalies';
 import { useSeverityOptions } from './use_severity_options';
 
 /**
- * React hook that returns a function to find a severity option by value
+ * React hook that returns a function to find severity options by threshold values
+ * @returns A function that converts threshold objects to severity options
  */
 export const useThresholdToSeverity = () => {
   const severityOptions = useSeverityOptions();
 
   return useCallback(
-    (thresholds: SeverityThreshold[] | number) => {
-      // Handle legacy case where threshold is a single number
-      if (typeof thresholds === 'number') {
-        // Find all severity options with min value >= the provided threshold
-        const matchingSeverities = severityOptions.filter(
-          (severity) => severity.threshold.min >= thresholds
-        );
-
-        // Default to lowest severity if no matches found
-        if (matchingSeverities.length === 0) {
-          return [severityOptions[0]];
-        }
-
-        return matchingSeverities;
-      }
-
-      // Handle the new format with threshold objects
+    (thresholds: SeverityThreshold[]) => {
       // Get corresponding severity objects that match the thresholds
       const matchingSeverities = severityOptions.filter((severity) =>
         thresholds.some(
@@ -40,6 +25,7 @@ export const useThresholdToSeverity = () => {
             threshold.min === severity.threshold.min && threshold.max === severity.threshold.max
         )
       );
+
       // Default to lowest severity if no matches found
       if (matchingSeverities.length === 0) {
         return [severityOptions[0]];
