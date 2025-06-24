@@ -40,7 +40,6 @@ const mockLensAttrs = {
             columnOrder: ['b00c65ea-32be-4163-bfc8-f795b1ef9d06'],
             columns: {
               'b00c65ea-32be-4163-bfc8-f795b1ef9d06': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: ' ',

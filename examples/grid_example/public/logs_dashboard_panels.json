@@ -286,8 +286,7 @@
                           }
                         },
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": ["3016ca70-b4ae-408d-859d-3de50b22b528"],
@@ -420,8 +419,7 @@
                           }
                         },
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": ["3016ca70-b4ae-408d-859d-3de50b22b528"],
@@ -643,8 +641,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "569e4272-0188-4023-9b8c-e8611d2c7e0eX1": {
                       "label": "Part of % of visits",
@@ -655,8 +652,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "569e4272-0188-4023-9b8c-e8611d2c7e0eX2": {
                       "label": "Part of % of visits",
@@ -664,8 +660,7 @@
                       "operationType": "overall_sum",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "references": ["569e4272-0188-4023-9b8c-e8611d2c7e0eX1"],
-                      "customLabel": true
+                      "references": ["569e4272-0188-4023-9b8c-e8611d2c7e0eX1"]
                     },
                     "569e4272-0188-4023-9b8c-e8611d2c7e0eX3": {
                       "label": "Part of % of visits",
@@ -691,8 +686,7 @@
                       "references": [
                         "569e4272-0188-4023-9b8c-e8611d2c7e0eX0",
                         "569e4272-0188-4023-9b8c-e8611d2c7e0eX2"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "569e4272-0188-4023-9b8c-e8611d2c7e0e": {
                       "label": "% of visits",
@@ -704,8 +698,7 @@
                         "formula": "count() / overall_sum(count())",
                         "isFormulaBroken": false
                       },
-                      "references": ["569e4272-0188-4023-9b8c-e8611d2c7e0eX3"],
-                      "customLabel": true
+                      "references": ["569e4272-0188-4023-9b8c-e8611d2c7e0eX3"]
                     }
                   },
                   "columnOrder": [
@@ -908,8 +901,7 @@
                         "exclude": [],
                         "includeIsRegex": false,
                         "excludeIsRegex": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "fb9a848d-76f3-4005-a067-4259a50b5621": {
                       "label": "Bytes (Total)",
@@ -926,8 +918,7 @@
                             "decimals": 2
                           }
                         }
-                      },
-                      "customLabel": true
+                      }
                     },
                     "a2760bc2-9a6e-46a1-8595-86f61573c7cf": {
                       "label": "Bytes (Last Hour)",
@@ -945,8 +936,7 @@
                             "decimals": 2
                           }
                         }
-                      },
-                      "customLabel": true
+                      }
                     },
                     "2c8bd8d5-35ff-4386-8d27-3ba882b13e43": {
                       "label": "Unique Visits (Total)",
@@ -957,8 +947,7 @@
                       "isBucketed": false,
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     },
                     "defa6f97-b874-4556-8438-056fb437787b": {
                       "label": "Unique count of clientip",
@@ -1330,8 +1319,7 @@
                       "sourceField": "clientip",
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": ["0e1418b8-3896-416c-8f78-9e832e5c42c8"],
@@ -1363,8 +1351,7 @@
                       "sourceField": "clientip",
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": [
@@ -1487,8 +1474,7 @@
                       "isBucketed": false,
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": ["0e1418b8-3896-416c-8f78-9e832e5c42c8"],
@@ -1607,8 +1593,7 @@
                       "isBucketed": false,
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": ["0e1418b8-3896-416c-8f78-9e832e5c42c8"],
@@ -1847,8 +1832,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": [
@@ -2030,8 +2014,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX1": {
                       "label": "Part of HTTP 2xx",
@@ -2042,8 +2025,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX2": {
                       "label": "Part of HTTP 2xx",
@@ -2069,8 +2051,7 @@
                       "references": [
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX0",
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08b": {
                       "label": "HTTP 2xx",
@@ -2089,8 +2070,7 @@
                           }
                         }
                       },
-                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"],
-                      "customLabel": true
+                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"]
                     }
                   },
                   "columnOrder": [
@@ -2225,8 +2205,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX1": {
                       "label": "Part of HTTP 4xx",
@@ -2237,8 +2216,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX2": {
                       "label": "Part of HTTP 4xx",
@@ -2264,8 +2242,7 @@
                       "references": [
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX0",
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08b": {
                       "label": "HTTP 4xx",
@@ -2284,8 +2261,7 @@
                           }
                         }
                       },
-                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"],
-                      "customLabel": true
+                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"]
                     }
                   },
                   "columnOrder": [
@@ -2420,8 +2396,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX1": {
                       "label": "Part of HTTP 5xx",
@@ -2432,8 +2407,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08bX2": {
                       "label": "Part of HTTP 5xx",
@@ -2459,8 +2433,7 @@
                       "references": [
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX0",
                         "71c076a6-e782-4866-b8df-5fd85a41f08bX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "71c076a6-e782-4866-b8df-5fd85a41f08b": {
                       "label": "HTTP 5xx",
@@ -2479,8 +2452,7 @@
                           }
                         }
                       },
-                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"],
-                      "customLabel": true
+                      "references": ["71c076a6-e782-4866-b8df-5fd85a41f08bX2"]
                     }
                   },
                   "columnOrder": [
@@ -2660,8 +2632,7 @@
                         "orderDirection": "desc",
                         "otherBucket": true,
                         "missingBucket": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "f7835375-4d5b-4839-95ea-41928192a319": {
                       "label": "Visits",
@@ -2669,8 +2640,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "07fc84ca-4147-4ba9-879e-d1b4e086e1daX0": {
                       "label": "Part of HTTP 4xx",
@@ -2685,8 +2655,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "07fc84ca-4147-4ba9-879e-d1b4e086e1daX1": {
                       "label": "Part of HTTP 4xx",
@@ -2697,8 +2666,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "07fc84ca-4147-4ba9-879e-d1b4e086e1daX2": {
                       "label": "Part of HTTP 4xx",
@@ -2724,8 +2692,7 @@
                       "references": [
                         "07fc84ca-4147-4ba9-879e-d1b4e086e1daX0",
                         "07fc84ca-4147-4ba9-879e-d1b4e086e1daX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "07fc84ca-4147-4ba9-879e-d1b4e086e1da": {
                       "label": "HTTP 4xx",
@@ -2743,8 +2710,7 @@
                           }
                         }
                       },
-                      "references": ["07fc84ca-4147-4ba9-879e-d1b4e086e1daX2"],
-                      "customLabel": true
+                      "references": ["07fc84ca-4147-4ba9-879e-d1b4e086e1daX2"]
                     },
                     "791d5a5b-a7ba-4e9e-b533-51b33c7d7747": {
                       "label": "Unique",
@@ -2752,8 +2718,7 @@
                       "operationType": "unique_count",
                       "scale": "ratio",
                       "sourceField": "clientip",
-                      "isBucketed": false,
-                      "customLabel": true
+                      "isBucketed": false
                     },
                     "611e3509-e834-4fdd-b573-44e959e95d27": {
                       "label": "95th percentile of bytes",
@@ -2801,8 +2766,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "491285fd-0196-402c-9b7f-4660fdc1c22aX1": {
                       "label": "Part of HTTP 5xx",
@@ -2813,8 +2777,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "491285fd-0196-402c-9b7f-4660fdc1c22aX2": {
                       "label": "Part of HTTP 5xx",
@@ -2840,8 +2803,7 @@
                       "references": [
                         "491285fd-0196-402c-9b7f-4660fdc1c22aX0",
                         "491285fd-0196-402c-9b7f-4660fdc1c22aX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "491285fd-0196-402c-9b7f-4660fdc1c22a": {
                       "label": "HTTP 5xx",
@@ -2859,8 +2821,7 @@
                           }
                         }
                       },
-                      "references": ["491285fd-0196-402c-9b7f-4660fdc1c22aX2"],
-                      "customLabel": true
+                      "references": ["491285fd-0196-402c-9b7f-4660fdc1c22aX2"]
                     }
                   },
                   "columnOrder": [
@@ -3066,8 +3027,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX1": {
                       "label": "Part of count(lucene='FlightDelay:true') / count(kql='*')",
@@ -3082,8 +3042,7 @@
                       },
                       "params": {
                         "emptyAsNull": false
-                      },
-                      "customLabel": true
+                      }
                     },
                     "b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX2": {
                       "label": "Part of count(lucene='FlightDelay:true') / count(kql='*')",
@@ -3109,8 +3068,7 @@
                       "references": [
                         "b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX0",
                         "b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "b9d6187b-8a7e-4c49-bffd-7a60cc075a4a": {
                       "label": "Percent Delays",
@@ -3125,8 +3083,7 @@
                         "formula": "count(lucene='FlightDelay:true') / count(kql='*')",
                         "isFormulaBroken": false
                       },
-                      "references": ["b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX2"],
-                      "customLabel": true
+                      "references": ["b9d6187b-8a7e-4c49-bffd-7a60cc075a4aX2"]
                     }
                   },
                   "columnOrder": [
@@ -3301,8 +3258,7 @@
                           }
                         ],
                         "maxBars": "auto"
-                      },
-                      "customLabel": true
+                      }
                     },
                     "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": {
                       "label": "Count",
@@ -3313,8 +3269,7 @@
                       "sourceField": "___records___",
                       "params": {
                         "emptyAsNull": true
-                      },
-                      "customLabel": true
+                      }
                     }
                   },
                   "columnOrder": [
@@ -3459,8 +3414,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     }
                   },
                   "columnOrder": ["81124c45-6ab6-42f4-8859-495d55eb8065"],
@@ -3533,8 +3487,7 @@
                           }
                         }
                       },
-                      "references": ["7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2"],
-                      "customLabel": true
+                      "references": ["7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2"]
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX0": {
                       "label": "Part of count(kql='FlightDelay : true') / count()",
@@ -3546,8 +3499,7 @@
                       "filter": {
                         "query": "FlightDelay : true",
                         "language": "kuery"
-                      },
-                      "customLabel": true
+                      }
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX1": {
                       "label": "Part of count(kql='FlightDelay : true') / count()",
@@ -3555,8 +3507,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2": {
                       "label": "Part of count(kql='FlightDelay : true') / count()",
@@ -3582,8 +3533,7 @@
                       "references": [
                         "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX0",
                         "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX1"
-                      ],
-                      "customLabel": true
+                      ]
                     }
                   },
                   "columnOrder": [
@@ -3688,8 +3638,7 @@
                           }
                         }
                       },
-                      "references": ["c7851241-5526-499a-960b-357af8c2ce5bX2"],
-                      "customLabel": true
+                      "references": ["c7851241-5526-499a-960b-357af8c2ce5bX2"]
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX2": {
                       "label": "Part of Delayed",
@@ -3727,8 +3676,7 @@
                       "references": [
                         "c7851241-5526-499a-960b-357af8c2ce5bX0",
                         "c7851241-5526-499a-960b-357af8c2ce5bX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX0": {
                       "label": "Part of Delayed",
@@ -3736,8 +3684,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX1": {
                       "label": "Part of Delayed",
@@ -3746,8 +3693,7 @@
                       "isBucketed": false,
                       "scale": "ratio",
                       "sourceField": "___records___",
-                      "timeShift": "1w",
-                      "customLabel": true
+                      "timeShift": "1w"
                     }
                   },
                   "columnOrder": [
@@ -3825,8 +3771,7 @@
                           }
                         }
                       },
-                      "references": ["7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2"],
-                      "customLabel": true
+                      "references": ["7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2"]
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX0": {
                       "label": "Part of Cancelled",
@@ -3838,8 +3783,7 @@
                       "filter": {
                         "query": "Cancelled : true",
                         "language": "kuery"
-                      },
-                      "customLabel": true
+                      }
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX1": {
                       "label": "Part of Cancelled",
@@ -3847,8 +3791,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX2": {
                       "label": "Part of Cancelled",
@@ -3874,8 +3817,7 @@
                       "references": [
                         "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX0",
                         "7e8fe9b1-f45c-4f3d-9561-30febcd357ecX1"
-                      ],
-                      "customLabel": true
+                      ]
                     }
                   },
                   "columnOrder": [
@@ -3980,8 +3922,7 @@
                           }
                         }
                       },
-                      "references": ["c7851241-5526-499a-960b-357af8c2ce5bX2"],
-                      "customLabel": true
+                      "references": ["c7851241-5526-499a-960b-357af8c2ce5bX2"]
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX2": {
                       "label": "Part of Delayed vs 1 week earlier",
@@ -4019,8 +3960,7 @@
                       "references": [
                         "c7851241-5526-499a-960b-357af8c2ce5bX0",
                         "c7851241-5526-499a-960b-357af8c2ce5bX1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX0": {
                       "label": "Part of Delayed vs 1 week earlier",
@@ -4028,8 +3968,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "c7851241-5526-499a-960b-357af8c2ce5bX1": {
                       "label": "Part of Delayed vs 1 week earlier",
@@ -4038,8 +3977,7 @@
                       "isBucketed": false,
                       "scale": "ratio",
                       "sourceField": "___records___",
-                      "timeShift": "1w",
-                      "customLabel": true
+                      "timeShift": "1w"
                     }
                   },
                   "columnOrder": [
@@ -4233,8 +4171,7 @@
                       "filter": {
                         "query": "FlightDelay : true ",
                         "language": "kuery"
-                      },
-                      "customLabel": true
+                      }
                     },
                     "52f6f2e9-6242-4c44-be63-b799150e7e60X1": {
                       "label": "Part of Delay %",
@@ -4242,8 +4179,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "52f6f2e9-6242-4c44-be63-b799150e7e60X2": {
                       "label": "Part of Delay %",
@@ -4269,8 +4205,7 @@
                       "references": [
                         "52f6f2e9-6242-4c44-be63-b799150e7e60X0",
                         "52f6f2e9-6242-4c44-be63-b799150e7e60X1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "52f6f2e9-6242-4c44-be63-b799150e7e60": {
                       "label": "Delay %",
@@ -4288,8 +4223,7 @@
                           }
                         }
                       },
-                      "references": ["52f6f2e9-6242-4c44-be63-b799150e7e60X2"],
-                      "customLabel": true
+                      "references": ["52f6f2e9-6242-4c44-be63-b799150e7e60X2"]
                     },
                     "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X0": {
                       "label": "Part of Cancel %",
@@ -4301,8 +4235,7 @@
                       "filter": {
                         "query": "Cancelled: true",
                         "language": "kuery"
-                      },
-                      "customLabel": true
+                      }
                     },
                     "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X1": {
                       "label": "Part of Cancel %",
@@ -4310,8 +4243,7 @@
                       "operationType": "count",
                       "isBucketed": false,
                       "scale": "ratio",
-                      "sourceField": "___records___",
-                      "customLabel": true
+                      "sourceField": "___records___"
                     },
                     "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X2": {
                       "label": "Part of Cancel %",
@@ -4337,8 +4269,7 @@
                       "references": [
                         "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X0",
                         "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X1"
-                      ],
-                      "customLabel": true
+                      ]
                     },
                     "7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6": {
                       "label": "Cancel %",
@@ -4356,8 +4287,7 @@
                           }
                         }
                       },
-                      "references": ["7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X2"],
-                      "customLabel": true
+                      "references": ["7b9f3ece-9da3-4c27-b582-d3f8e8cc31d6X2"]
                     }
                   },
                   "columnOrder": [

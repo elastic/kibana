@@ -62,7 +62,6 @@ export const sampleAttributeWithReferenceLines = {
                 sourceField: 'transaction.duration.us',
               },
               'y-axis-column-layer0-0': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -86,7 +85,6 @@ export const sampleAttributeWithReferenceLines = {
                 references: ['y-axis-column-layer0X3'],
               },
               'y-axis-column-layer0X0': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -105,7 +103,6 @@ export const sampleAttributeWithReferenceLines = {
                 timeShift: undefined,
               },
               'y-axis-column-layer0X1': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -124,7 +121,6 @@ export const sampleAttributeWithReferenceLines = {
                 timeShift: undefined,
               },
               'y-axis-column-layer0X2': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Part of Pages loaded',
@@ -134,7 +130,6 @@ export const sampleAttributeWithReferenceLines = {
                 scale: 'ratio',
               },
               'y-axis-column-layer0X3': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Part of Pages loaded',
@@ -167,7 +162,6 @@ export const sampleAttributeWithReferenceLines = {
             ],
             columns: {
               '50th-percentile-reference-line-layer0-reference-lines': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: '50th',
@@ -179,7 +173,6 @@ export const sampleAttributeWithReferenceLines = {
                 sourceField: 'transaction.duration.us',
               },
               '75th-percentile-reference-line-layer0-reference-lines': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: '75th',
@@ -191,7 +184,6 @@ export const sampleAttributeWithReferenceLines = {
                 sourceField: 'transaction.duration.us',
               },
               '90th-percentile-reference-line-layer0-reference-lines': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: '90th',
@@ -203,7 +195,6 @@ export const sampleAttributeWithReferenceLines = {
                 sourceField: 'transaction.duration.us',
               },
               '95th-percentile-reference-line-layer0-reference-lines': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: '95th',
@@ -215,7 +206,6 @@ export const sampleAttributeWithReferenceLines = {
                 sourceField: 'transaction.duration.us',
               },
               '99th-percentile-reference-line-layer0-reference-lines': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: '99th',

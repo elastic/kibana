@@ -33,7 +33,6 @@ export class StaticColumn implements StaticChartColumn {
           scale: 'ratio',
           params,
           references: [],
-          customLabel: true,
         } as ReferenceBasedIndexPatternColumn,
       },
       sampling: 1,

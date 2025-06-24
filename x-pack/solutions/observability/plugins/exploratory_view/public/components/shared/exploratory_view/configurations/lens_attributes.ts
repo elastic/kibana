@@ -428,7 +428,6 @@ export class LensAttributes {
             operationType: capitalize(operationType),
           },
         }),
-      customLabel: true,
       filter: columnFilter,
       operationType,
       params:
@@ -483,7 +482,6 @@ export class LensAttributes {
         }),
       operationType: 'percentile',
       params: getPercentileParam(percentileValue),
-      customLabel: true,
     };
   }
 
@@ -862,7 +860,6 @@ export class LensAttributes {
       dataType: 'number',
       isBucketed: false,
       label: label || 'Count of records',
-      customLabel: true,
       operationType: 'count',
       scale: 'ratio',
       sourceField: RECORDS_FIELD,

@@ -37,7 +37,6 @@ export const sampleMetricFormulaAttribute = {
             ],
             columns: {
               'layer-0-column-1': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -59,7 +58,6 @@ export const sampleMetricFormulaAttribute = {
                 references: ['layer-0-column-1X2'],
               },
               'layer-0-column-1X0': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -75,7 +73,6 @@ export const sampleMetricFormulaAttribute = {
                 sourceField: '___records___',
               },
               'layer-0-column-1X1': {
-                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -91,7 +88,6 @@ export const sampleMetricFormulaAttribute = {
                 sourceField: '___records___',
               },
               'layer-0-column-1X2': {
-                customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Part of Availability',

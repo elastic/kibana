@@ -35,7 +35,6 @@ export function getStaticColumn(
         scale: 'ratio',
         params,
         references: [],
-        customLabel: true,
       } as ReferenceBasedIndexPatternColumn,
     },
     sampling: 1,

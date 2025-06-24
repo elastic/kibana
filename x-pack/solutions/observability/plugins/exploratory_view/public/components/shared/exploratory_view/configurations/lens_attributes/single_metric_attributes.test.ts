@@ -81,7 +81,6 @@ describe('SingleMetricAttributes', () => {
                 columnOrder: ['layer-0-column-1'],
                 columns: {
                   'layer-0-column-1': {
-                    customLabel: true,
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Page load time',
@@ -149,7 +148,6 @@ describe('SingleMetricAttributes', () => {
                 columnOrder: ['layer-0-column-1'],
                 columns: {
                   'layer-0-column-1': {
-                    customLabel: true,
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Page load time',
