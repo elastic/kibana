@@ -1227,6 +1227,42 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.RecommendedField",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecommendedField",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.RecommendedField.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.RecommendedQuery",
         "type": "Interface",
         "tags": [],
