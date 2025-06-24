@@ -8,7 +8,8 @@
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { InterceptPrompter } from './prompter';
 import type { ServerConfigSchema } from '../common/config';
 
@@ -48,15 +49,32 @@ export class InterceptPublicPlugin implements Plugin {
       core.overlays.openFlyout(toMountPoint(<div>Feedback flyout</div>, core));
     };
 
-    // TODO: Add serverless check - remove the button as serverless has seperate button
+    const isServerless = false; // TODO: Implement actual logic
+
+    const ServerlessButton = () => (
+      <EuiButton
+        size="s"
+        color="warning"
+        iconType="popout"
+        iconSide="right"
+        target="_blank"
+        onClick={openFlyout}
+      >
+        {i18n.translate('xpack.intercept.giveFeedbackBtn.label', {
+          defaultMessage: 'Give feedback',
+        })}
+      </EuiButton>
+    );
+
+    const HostedButton = () => (
+      <EuiHeaderSectionItemButton onClick={openFlyout}>
+        <EuiIcon type="comment" />
+      </EuiHeaderSectionItemButton>
+    );
+
     core.chrome.navControls.registerRight({
       order: 1002,
-      mount: toMountPoint(
-        <EuiHeaderSectionItemButton onClick={openFlyout}>
-          <EuiIcon type="comment" />
-        </EuiHeaderSectionItemButton>,
-        core.rendering
-      ),
+      mount: toMountPoint(isServerless ? <ServerlessButton /> : <HostedButton />, core.rendering),
     });
 
     return {
