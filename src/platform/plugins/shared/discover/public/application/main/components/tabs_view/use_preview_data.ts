@@ -31,13 +31,10 @@ export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
     () =>
       combineLatest(
         allTabs.reduce<Record<string, Observable<TabPreviewData>>>((acc, tabState) => {
+          const tabId = tabState.id;
           return {
             ...acc,
-            [tabState.id]: getPreviewDataObservable(
-              runtimeStateManager,
-              tabState.id,
-              tabState.initialAppState
-            ),
+            [tabId]: getPreviewDataObservable(runtimeStateManager, tabId, tabState.initialAppState),
           };
         }, {})
       ),
