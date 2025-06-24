@@ -127,12 +127,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('uploadFileButton');
           await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
         });
-
-        it('renders the Customer Engineer Request Form link', async () => {
-          await testSubjects.existOrFail('customerEngineerRequestFormLink');
-          await testSubjects.click('customerEngineerRequestFormLink');
-          await pageObjects.svlSearchHomePage.expectToBeOnCustomerEngineerPage();
-        });
       });
 
       describe('AI search capabilities', function () {
