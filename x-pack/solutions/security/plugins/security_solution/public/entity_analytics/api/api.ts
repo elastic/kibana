@@ -6,6 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import type { CreatePrivilegesImportIndexResponse } from '../../../common/api/entity_analytics/monitoring/create_index.gen';
+import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import {
   PRIVMON_PUBLIC_INIT,
@@ -210,6 +212,44 @@ export const useEntityAnalyticsRoutes = () => {
       );
 
     /**
+     * Create an index for privilege monitoring import
+     */
+    const createPrivMonImportIndex = async (params: {
+      name: string;
+      mode: 'standard' | 'lookup';
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<CreatePrivilegesImportIndexResponse>(
+        '/api/entity_analytics/monitoring/privileges/indices',
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'PUT',
+          body: JSON.stringify({
+            name: params.name,
+            mode: params.mode,
+          }),
+          signal: params.signal,
+        }
+      );
+    /**
+     * Register a data source for privilege monitoring engine
+     */
+    const registerPrivMonMonitoredIndices = async (indexPattern: string | undefined) =>
+      http.fetch<SearchPrivilegesIndicesResponse>(
+        '/api/entity_analytics/monitoring/entity_source',
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+
+          body: JSON.stringify({
+            type: 'index',
+            name: 'User Monitored Indices',
+            indexPattern,
+          }),
+        }
+      );
+
+    /**
      * Create asset criticality
      */
     const createAssetCriticality = async (
@@ -309,6 +349,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'POST',
       });
 
+    const fetchPrivilegeMonitoringEngineStatus = async (): Promise<PrivMonHealthResponse> =>
+      http.fetch<PrivMonHealthResponse>('/api/entity_analytics/monitoring/privileges/health', {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
     /**
      * Fetches risk engine settings
      */
@@ -347,12 +393,15 @@ export const useEntityAnalyticsRoutes = () => {
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
       searchPrivMonIndices,
+      createPrivMonImportIndex,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
       uploadAssetCriticalityFile,
       uploadPrivilegedUserMonitoringFile,
       initPrivilegedMonitoringEngine,
+      registerPrivMonMonitoredIndices,
+      fetchPrivilegeMonitoringEngineStatus,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,
       cleanUpRiskEngine,

@@ -27,6 +27,7 @@ import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-so
 import { CopyTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/copy_timeline/copy_timeline_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
+import { CreatePrivilegesImportIndexRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/create_index.gen';
 import { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
 import { CreateRuleMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -327,6 +328,17 @@ If a record already exists for the specified entity, that record is overwritten 
     ) {
       return supertest
         .post(routeWithNamespace('/api/asset_criticality', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    createPrivilegesImportIndex(
+      props: CreatePrivilegesImportIndexProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .put(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -1907,6 +1919,9 @@ export interface CreateAlertsMigrationProps {
 }
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
+}
+export interface CreatePrivilegesImportIndexProps {
+  body: CreatePrivilegesImportIndexRequestBodyInput;
 }
 export interface CreatePrivMonUserProps {
   body: CreatePrivMonUserRequestBodyInput;

@@ -74,7 +74,9 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             }
             onClick={showIndexModal}
           />
-          <IndexSelectorModal isOpen={isIndexModalOpen} onClose={hideIndexModal} />
+          {isIndexModalOpen && (
+            <IndexSelectorModal onClose={hideIndexModal} onImport={onComplete} />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiCard

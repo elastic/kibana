@@ -19,7 +19,7 @@ import type { RiskLevelsTableItem, RiskLevelsPrivilegedUsersQueryResult } from '
 import { RiskScoreLevel } from '../../../severity/common';
 import type { RiskSeverity } from '../../../../../../common/search_strategy';
 import { esqlResponseToRecords } from '../../../../../common/utils/esql';
-import { getRiskLevelsPrivilegedUsersQueryBody } from './esql_query';
+import { getRiskLevelsPrivilegedUsersQueryBody } from '../../queries/risk_level_esql_query';
 
 export const useRiskLevelsPrivilegedUserQuery = ({
   skip,
