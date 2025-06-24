@@ -34,6 +34,14 @@ import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
+const INVESTIGATION_GUIDE_TOOLTIP_INFO = i18n.translate(
+  'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
+  {
+    defaultMessage:
+      'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
+  }
+);
+
 export const RuleDetails = () => {
   const { formData, baseErrors, plugins } = useRuleFormState();
   const { contentManagement } = plugins;
@@ -148,17 +156,8 @@ export const RuleDetails = () => {
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 type="questionInCircle"
-                content={
-                  <p>
-                    {i18n.translate(
-                      'responseOpsRuleForm.ruleDetails.investigationGuideFormRow.toolTip.content',
-                      {
-                        defaultMessage:
-                          'These details will be included in a new tab on the alert details page for every alert triggered by this rule.',
-                      }
-                    )}
-                  </p>
-                }
+                content={<p>{INVESTIGATION_GUIDE_TOOLTIP_INFO}</p>}
+                aria-label={INVESTIGATION_GUIDE_TOOLTIP_INFO}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

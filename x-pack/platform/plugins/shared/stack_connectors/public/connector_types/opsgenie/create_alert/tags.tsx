@@ -85,6 +85,7 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values, executionMode })
       label={i18n.TAGS_FIELD_LABEL}
       labelAppend={OptionalFieldLabel}
       helpText={i18n.TAGS_HELP}
+      aria-label={i18n.TAGS_FIELD_LABEL}
     >
       <EuiComboBox
         rowHeight={50}

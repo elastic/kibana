@@ -49,7 +49,7 @@ export interface RuleCommonExpressionsProps extends CommonRuleParams {
   onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
 }
 
-const sizeValueTooltipContent = i18n.translate(
+const SIZE_VALUE_TOOLTIP_CONTENT = i18n.translate(
   'xpack.stackAlerts.esQuery.ui.selectSizePrompt.toolTip',
   {
     defaultMessage:
@@ -172,8 +172,8 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             position="right"
             color="subdued"
             type="questionInCircle"
-            content={sizeValueTooltipContent}
-            aria-label={sizeValueTooltipContent}
+            content={SIZE_VALUE_TOOLTIP_CONTENT}
+            aria-label={SIZE_VALUE_TOOLTIP_CONTENT}
           />,
         ]}
       >

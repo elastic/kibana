@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Alert } from '@kbn/alerting-types';
+import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
+
 import { DefaultAlertsFlyoutBody, DefaultAlertsFlyoutHeader } from './default_alerts_flyout';
 import {
   AdditionalContext,
@@ -59,6 +61,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
   } = renderContext;
   const Footer: FlyoutSectionRenderer<AC> | undefined = renderFlyoutFooter;
   const prevAlert = usePrevious(alert);
+
   const props = useMemo(
     () =>
       ({
@@ -101,7 +104,13 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="m" data-test-subj="alertsFlyout" ownFocus={flyoutOwnsFocus}>
+    <EuiFlyout
+      onClose={onClose}
+      size="m"
+      data-test-subj="alertsFlyout"
+      ownFocus={flyoutOwnsFocus}
+      aria-label={alert?.[ALERT_RULE_CATEGORY]}
+    >
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
         <FlyoutHeader />
