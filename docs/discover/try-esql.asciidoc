@@ -29,7 +29,7 @@ TIP: If you've entered a KQL or Lucene query in the default mode of Discover, it
 Let's say we want to find out what operating system users have and how much RAM is on their machine.  
 
 . Set the time range to **Last 7 days**.
-. Copy the query below:
+. Copy the following query. To make queries more readable, you can put each processing command on a new line.
 +
 [source,esql]
 ----
@@ -39,17 +39,15 @@ FROM kibana_sample_data_logs <1>
 <1> We're specifically looking for data from the sample web logs we just installed.
 <2> We're only keeping the `machine.os` and `machine.ram` fields in the results table.
 +
-TIP: Put each processing command on a new line for better readability.
+[NOTE]
+====
+{esql} keywords are not case sensitive. 
+====
 +
 . Click **▶Run**.
 +
 [role="screenshot"]
 image:images/esql-machine-os-ram.png[An image of the query result]
-+
-[NOTE]
-====
-{esql} keywords are not case sensitive. 
-====
 
 Let's add `geo.dest` to our query, to find out the geographical destination of the visits, and limit the results. 
 
