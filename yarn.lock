@@ -5503,19 +5503,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/entities-data-access-plugin@link:x-pack/solutions/observability/plugins/entities_data_access":
-  version "0.0.0"
-  uid ""
-
 "@kbn/entities-schema@link:x-pack/platform/packages/shared/kbn-entities-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/entityManager-app-plugin@link:x-pack/solutions/observability/plugins/entity_manager_app":
   version "0.0.0"
   uid ""
 
@@ -6036,14 +6028,6 @@
   uid ""
 
 "@kbn/interpreter@link:src/platform/packages/shared/kbn-interpreter":
-  version "0.0.0"
-  uid ""
-
-"@kbn/inventory-e2e@link:x-pack/solutions/observability/plugins/inventory/e2e":
-  version "0.0.0"
-  uid ""
-
-"@kbn/inventory-plugin@link:x-pack/solutions/observability/plugins/inventory":
   version "0.0.0"
   uid ""
 
