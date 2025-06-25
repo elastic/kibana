@@ -20,14 +20,15 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
   require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
 } else {
   run(
-    ({ flags }) => {
+    ({ flags, log }) => {
+      flags._ = flags._ || [];
+
+      // verbose is only a flag for our CLI runner, not for ESLint
       if (process.argv.includes('--verbose')) {
         process.argv.splice(process.argv.indexOf('--verbose'), 1);
+      } else {
+        process.argv.push('--quiet');
       }
-      flags._ = flags._ || [];
-      const quiet = !!flags._.quiet;
-
-      console.log({ quiet, flags });
 
       if (!flags._.cache) {
         process.argv.push('--cache');
@@ -41,13 +42,11 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
       // requiring the module is still going to pass along all flags
       require(eslintBinPath); // eslint-disable-line import/no-dynamic-require
 
-      if (!quiet) {
-        process.on('exit', (code) => {
-          if (!code) {
-            console.log('✅ no eslint errors found');
-          }
-        });
-      }
+      process.on('exit', (code) => {
+        if (!code) {
+          log.info('✅ no eslint errors found');
+        }
+      });
     },
     {
       flags: {
