@@ -220,6 +220,7 @@ describe('Detections Usage and Metrics', () => {
               notifications_disabled: 0,
               legacy_investigation_fields: 0,
               alert_suppression: initialAlertSuppression,
+              response_actions: initialResponseActionsUsage,
             },
           },
         },

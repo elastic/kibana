@@ -77,4 +77,16 @@ export const ruleMetricsSchema: MakeSchemaFrom<RuleMetric> = {
     type: 'long',
     _meta: { description: 'The number of alert suppression fields for this rule' },
   },
+  has_response_actions: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has response actions' },
+  },
+  has_response_actions_endpoint: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has endpoint response actions' },
+  },
+  has_response_actions_osquery: {
+    type: 'boolean',
+    _meta: { description: 'True if this rule has osquery response actions' },
+  },
 };

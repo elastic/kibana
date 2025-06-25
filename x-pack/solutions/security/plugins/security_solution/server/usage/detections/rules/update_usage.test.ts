@@ -404,6 +404,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_time_period: 1,
             suppresses_missing_fields: 0,
           },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
+          },
         },
         query: {
           alerts: 10,
@@ -459,6 +467,14 @@ describe('Detections Usage and Metrics', () => {
             suppressed_per_rule_execution: 0,
             suppressed_per_time_period: 1,
             suppresses_missing_fields: 0,
+          },
+          response_actions: {
+            enabled: 0,
+            disabled: 0,
+            response_actions: {
+              endpoint: 0,
+              osquery: 0,
+            },
           },
         },
       });
