@@ -21,7 +21,7 @@ interface UserIdContext {
  * @param analytics Core's Analytics service. The Setup contract.
  * @param authc {@link AuthenticationServiceSetup} used to get the current user's information
  * @param cloudId The Cloud Org ID.
- * @private
+ * @internal
  */
 export function registerUserContext(
   analytics: AnalyticsServiceSetup,
