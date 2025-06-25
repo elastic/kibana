@@ -20,14 +20,16 @@ import {
 } from '@elastic/eui';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
 import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { TabsRt } from '../config';
 import { useAppContext } from '../../hooks/use_app_context';
 import { SettingsTab } from './settings_tab/settings_tab';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
+import { useKibana } from '../../hooks/use_kibana';
+import { SearchConnectorTab } from './search_connector_tab';
+import { getSolutionSpecificLogos } from '../../helpers/get_solution_specific_logos';
+import { getSolutionSpecificLabels } from '../../helpers/get_solution_specific_labels';
 import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/use_observability_management_params';
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
-import type { TabsRt } from '../config';
-import { SearchConnectorTab } from './search_connector_tab';
-import { useKibana } from '../../hooks/use_kibana';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
@@ -46,12 +48,14 @@ export function SettingsPage() {
 
   const [currentSpaceSolution, setCurrentSpaceSolution] = useState<SolutionView>();
 
-  // Determine the current solution. For serverless projects, derive it from cloud.serverless.projectType
-  const currentSolution: SolutionView | undefined = serverless
-    ? cloud?.serverless?.projectType === 'observability'
-      ? 'oblt'
-      : 'es'
-    : currentSpaceSolution;
+  // Determine the current solution.
+  let currentSolution: SolutionView | undefined;
+  if (serverless) {
+    const projectType = cloud?.serverless?.projectType;
+    currentSolution = projectType === 'observability' ? 'oblt' : 'es';
+  } else {
+    currentSolution = currentSpaceSolution;
+  }
 
   const {
     query: { tab },
@@ -68,45 +72,12 @@ export function SettingsPage() {
     getCurrentSpace();
   }, [spaces]);
 
-  let breadcrumbText: string;
-  let title: string;
-  if (currentSolution === 'oblt') {
-    breadcrumbText = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.breadcrumb.observability',
-      {
-        defaultMessage: 'Observability',
-      }
-    );
+  const { breadcrumbText, title } = getSolutionSpecificLabels({
+    solution: currentSolution,
+    isServerless: !!serverless,
+  });
 
-    title = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.title.observability',
-      {
-        defaultMessage: 'AI Assistant for Observability',
-      }
-    );
-  } else if (currentSolution === 'es') {
-    breadcrumbText = i18n.translate('xpack.observabilityAiAssistantManagement.breadcrumb.search', {
-      defaultMessage: 'Search',
-    });
-
-    title = i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.title.search', {
-      defaultMessage: 'AI Assistant for Search',
-    });
-  } else {
-    breadcrumbText = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.breadcrumb.observabilityAndSearch',
-      {
-        defaultMessage: 'Observability and Search',
-      }
-    );
-
-    title = i18n.translate(
-      'xpack.observabilityAiAssistantManagement.settingsPage.title.observabilityAndSearch',
-      {
-        defaultMessage: 'AI Assistant for Observability and Search',
-      }
-    );
-  }
+  const logos = getSolutionSpecificLogos(currentSolution);
 
   useEffect(() => {
     if (serverless) {
@@ -164,13 +135,6 @@ export function SettingsPage() {
       disabled: !isAppRegistered('enterpriseSearch'),
     },
   ];
-
-  const logos =
-    currentSolution === 'oblt'
-      ? ['logoObservability']
-      : currentSolution === 'es'
-      ? ['logoEnterpriseSearch']
-      : ['logoObservability', 'logoEnterpriseSearch'];
 
   const selectedTabId = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
   const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
