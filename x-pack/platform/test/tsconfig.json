@@ -16,6 +16,7 @@
     "allowJs": false
   },
   "include": [
+    "index.d.ts",
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
