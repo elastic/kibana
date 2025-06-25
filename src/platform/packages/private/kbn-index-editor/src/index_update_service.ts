@@ -83,8 +83,8 @@ export class IndexUpdateService {
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
 
-  private readonly _isFetching$ = new BehaviorSubject<boolean>(false);
-  public readonly isFetching$: Observable<boolean> = this._isSaving$.asObservable();
+  private readonly _isFetching$ = new BehaviorSubject<boolean>(true);
+  public readonly isFetching$: Observable<boolean> = this._isFetching$.asObservable();
 
   /** ES Documents */
   private readonly _rows$ = new BehaviorSubject<DataTableRecord[]>([]);
@@ -337,6 +337,10 @@ export class IndexUpdateService {
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
+  }
+
+  public setIsFetching(isFetching: boolean) {
+    this._isFetching$.next(isFetching);
   }
 
   public setIndexName(indexName: string) {

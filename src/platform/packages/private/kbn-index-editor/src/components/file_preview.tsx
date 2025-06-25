@@ -149,6 +149,11 @@ export const FilesPreview: FC = () => {
   }, [data.dataViews, filesStatus, isMounted, previewDocs]);
 
   useEffect(() => {
+    // don't fetch preview if importing is in progress
+    if (uploadStatus.overallImportStatus === STATUS.STARTED) {
+      return;
+    }
+
     // wait for all files to be analyzed before fetching previews
     if (filesStatus.length > 0 && filesStatus.every((f) => f.analysisStatus === STATUS.COMPLETED)) {
       fetchFilePreview();
