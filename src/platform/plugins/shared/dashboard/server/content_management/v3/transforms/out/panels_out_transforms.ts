@@ -117,13 +117,22 @@ function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObject
 
   const { panelRefName, ...injectedPanel } = panel;
 
+  const storedSavedObjectId = id ?? embeddableConfig.savedObjectId;
+  const savedObjectId = matchingReference ? matchingReference.id : storedSavedObjectId;
+
   return {
     ...injectedPanel,
-    type: matchingReference.type,
+    gridData: rest,
     panelConfig: {
-      ...panel.panelConfig,
-      savedObjectId: matchingReference.id,
+      ...embeddableConfig,
+      // <8.19 savedObjectId and title stored as siblings to embeddableConfig
+      ...(savedObjectId !== undefined && { savedObjectId }),
+      ...(title !== undefined && { title }),
     },
+    panelIndex,
+    panelRefName,
+    type: matchingReference ? matchingReference.type : type,
+    version,
   };
 }
 

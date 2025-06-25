@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type {
+import { isDashboardSection } from '../../../../../common';
+import {
   DashboardSavedObjectAttributes,
   SavedDashboardSection,
 } from '../../../../dashboard_saved_object';

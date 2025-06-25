@@ -17,9 +17,9 @@ disabled:
   # Cypress configs, for now these are still run manually
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
-  - x-pack/test/osquery_cypress/cli_config.ts
-  - x-pack/test/osquery_cypress/config.ts
-  - x-pack/test/osquery_cypress/visual_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/cli_config.ts
+  - x-pack/solutions/security/test/osquery_cypress/config.ts
+  - x-pack/solutions/security/test/osquery_cypress/visual_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
   - x-pack/test/security_solution_cypress/config.ts
 
@@ -60,6 +60,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_patch/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_update/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/ess_basic_license.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/common/configs/ess_air_gapped.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_disabled/configs/ess_basic_license.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/prebuilt_rules/customization_enabled/upgrade_prebuilt_rules/diffable_rule_fields/common_fields/configs/ess.config.ts

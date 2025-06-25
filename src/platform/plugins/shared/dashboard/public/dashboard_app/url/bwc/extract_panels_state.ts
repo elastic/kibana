@@ -8,14 +8,9 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SavedObject } from '@kbn/core/server';
-import { convertPanelsArrayToPanelSectionMaps } from '../../../../common/lib/dashboard_panel_converters';
 import { DashboardState } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
-
-type PanelState = Pick<DashboardState, 'panels' | 'sections'>;
 
 /**
  * We no longer support loading panels from a version older than 7.3 in the URL.
@@ -39,10 +34,9 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
   return false;
 };
 
-export async function extractPanelsState(
-  state: { [key: string]: unknown },
-  embeddableService: EmbeddableStart
-): Promise<Partial<PanelState>> {
+export function extractPanelsState(state: { [key: string]: unknown }): {
+  panels?: DashboardState['panels'];
+} {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (panels.length === 0) {
@@ -54,26 +48,29 @@ export async function extractPanelsState(
     return {};
   }
 
-  const standardizedPanels = await Promise.all(
-    panels.map(async (panel) => {
-      if (typeof panel === 'object') {
-        // < 8.17 panels state stored panelConfig as embeddableConfig
-        const panelConfig = panel.panelConfig ?? panel.embeddableConfig;
-        const { type } = panel;
+  const standardizedPanels = panels.map((legacyPanel) => {
+    const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
-        const embeddableCmDefintions =
-          await embeddableService.getEmbeddableContentManagementDefinition(type);
-        if (!embeddableCmDefintions) return { ...panel, panelConfig };
-        const { savedObjectToItem } =
-          embeddableCmDefintions.versions[embeddableCmDefintions.latestVersion];
-        return {
-          ...panel,
-          panelConfig: savedObjectToItem?.(panelConfig as unknown as SavedObject) ?? panelConfig,
-        };
-      }
-      return panel;
-    })
-  );
+    // < 8.17 panels state stored panelConfig as embeddableConfig
+    if (panel?.embeddableConfig) {
+      panel.panelConfig = panel.embeddableConfig;
+      delete panel.embeddableConfig;
+    }
 
-  return convertPanelsArrayToPanelSectionMaps(standardizedPanels);
+    // <8.19 'id' (saved object id) stored as siblings to panelConfig
+    if (panel.id && panel.panelConfig && typeof panel.panelConfig === 'object') {
+      panel.panelConfig.savedObjectId = panel.id;
+      delete panel.id;
+    }
+
+    // <8.19 'title' stored as siblings to panelConfig
+    if (panel.title && panel.panelConfig && typeof panel.panelConfig === 'object') {
+      panel.panelConfig.title = panel.title;
+      delete panel.title;
+    }
+
+    return panel;
+  });
+
+  return { panels: standardizedPanels };
 }

@@ -12,8 +12,6 @@ import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboar
 import { extractDashboardState } from './extract_dashboard_state';
 import { embeddableService } from '../../../services/kibana_services';
 
-const DASHBOARD_STATE = omit(DEFAULT_DASHBOARD_STATE, ['panels', 'sections']);
-
 describe('extractDashboardState', () => {
   test('should extract all DashboardState fields', async () => {
     const optionalState = {
@@ -30,13 +28,13 @@ describe('extractDashboardState', () => {
     expect(
       await extractDashboardState({
         state: {
-          ...DASHBOARD_STATE,
+          ...DEFAULT_DASHBOARD_STATE,
           ...optionalState,
         },
         embeddableService,
       })
     ).toEqual({
-      ...DASHBOARD_STATE,
+      ...omit(DEFAULT_DASHBOARD_STATE, 'panels'),
       ...optionalState,
     });
   });
