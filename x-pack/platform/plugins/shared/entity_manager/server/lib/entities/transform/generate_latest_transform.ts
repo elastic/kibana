@@ -18,6 +18,7 @@ import {
 } from '../../../../common/constants_entities';
 import {
   generateLatestTransformId,
+  generateLatestBackfillTransformId,
   generateLatestIngestPipelineId,
   generateLatestIndexName,
 } from '../helpers/generate_component_id';
@@ -46,6 +47,7 @@ export function generateLatestTransform(
 
   // TODO(kuba) NOTE: Since we have backfill transform that is separate, the
   // syncDelay should be equal to frequency so that the two do not overlap.
+  console.log(`KUBA DEBUG: params for regular ${definition.id} transform: ${JSON.stringify(definition.latest.settings)} and ${ENTITY_DEFAULT_LATEST_SYNC_DELAY}`);
   return generateTransformPutRequest({
     definition,
     filter,
@@ -59,15 +61,17 @@ export function generateLatestTransform(
   });
 }
 
-export function generateLatestTransformBackfill(
+export function generateLatestBackfillTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
-  definition.id = definition.id + '_backfill';
+  console.log("KUBA DEBUG: calling generateLatestTransformBackfill()");
   // Set the filter to correct time, i.e. `now-backfillPeriod`
   definition.latest.lookbackPeriod = definition.latest.backfillPeriod;
+  console.log(`KUBA DEBUG: using backfillPeriod of ${definition.latest.backfillPeriod}`);
   const putRequest: TransformPutTransformRequest = generateLatestTransform(definition);
-  putRequest.sync = {};
-  putRequest.frequency = 0;
+  putRequest.transform_id = generateLatestBackfillTransformId(putRequest.transform_id);
+  delete putRequest.sync;
+  delete putRequest.frequency;
   return putRequest;
 }
 

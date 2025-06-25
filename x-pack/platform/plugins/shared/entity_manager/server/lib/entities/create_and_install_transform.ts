@@ -8,20 +8,21 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestTransform } from './transform/generate_latest_transform';
+import { generateLatestTransform, generateLatestBackfillTransform } from './transform/generate_latest_transform';
 
 export async function createAndInstallTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'transform'; id: string }>> {
+  let output: Array<{ type: 'transform'; id: string }> = [];
   // Latest transform
   try {
     const latestTransform = generateLatestTransform(definition);
     await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
       logger,
     });
-    return [{ type: 'transform', id: latestTransform.transform_id }];
+    output.push({ type: 'transform', id: latestTransform.transform_id });
   } catch (e) {
     logger.error(
       `Cannot create entity history transform for [${definition.id}] entity definition`,
@@ -33,11 +34,12 @@ export async function createAndInstallTransforms(
   // TODO(kuba): add backfill transform deletion as well
   // Backfill transform
   try {
-    const backfillTransform = generateLatestTransformBackfill(definition);
+    const backfillTransform = generateLatestBackfillTransform(definition);
     await retryTransientEsErrors(() => esClient.transform.putTransform(backfillTransform), {
       logger,
     });
-    return [{ type: 'transform', id: backfillTransform.transform_id }];
+    console.log("KUBA DEBUG: created a Backfill transform");
+    output.push({ type: 'transform', id: backfillTransform.transform_id });
   } catch (e) {
     logger.error(
       `Cannot create backfill transform for [${definition.id}] entity definition`,
@@ -45,4 +47,5 @@ export async function createAndInstallTransforms(
     );
     throw e;
   }
+  return output;
 }
