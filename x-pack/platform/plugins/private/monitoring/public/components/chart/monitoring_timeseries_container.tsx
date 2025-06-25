@@ -148,7 +148,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }: Pro
                 <Fragment>
                   <EuiIconTip
                     anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
-                    type="iInCircle"
+                    type="info"
                     position="right"
                     content={<InfoTooltip series={seriesMetrics} bucketSize={bucketSize} />}
                   />

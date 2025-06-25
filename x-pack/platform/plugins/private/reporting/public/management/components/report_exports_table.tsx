@@ -395,7 +395,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             ),
             'data-test-subj': 'reportViewInfoLink',
             type: 'icon',
-            icon: 'iInCircle',
+            icon: 'info',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
