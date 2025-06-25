@@ -273,7 +273,8 @@ describe('cleanUpKibanaAssetsStep', () => {
     expect(mockedDeleteKibanaAssets).toBeCalledWith({
       installedObjects: installedKibana,
       spaceId: 'default',
-      packageInfo: packageInstallContext.packageInfo,
+      packageSpecConditions: { kibana: { version: 'x.y.z' } },
+      logger: expect.anything(),
     });
   });
 
@@ -453,7 +454,8 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
     expect(mockedDeleteKibanaAssets).toBeCalledWith({
       installedObjects: [installedAssets[1]],
       spaceId: 'default',
-      packageInfo: packageInstallContext.packageInfo,
+      packageSpecConditions: { kibana: { version: 'x.y.z' } },
+      logger: expect.anything(),
     });
   });
 });
