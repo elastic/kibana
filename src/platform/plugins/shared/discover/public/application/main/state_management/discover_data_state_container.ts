@@ -35,7 +35,7 @@ import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
 import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
-import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
+import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
@@ -161,7 +161,7 @@ export function getDataStateContainer({
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications, profilesManager } = services;
+  const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<void>(1);
@@ -249,19 +249,26 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+          const { scopedProfilesManager$, currentDataView$ } = selectTabRuntimeState(
+            runtimeStateManager,
+            currentTabId
+          );
+          const scopedProfilesManager = scopedProfilesManager$.getValue();
 
           const searchSessionId =
             (options.fetchMore && dataRequestParams.searchSessionId) ||
             searchSessionManager.getNextSearchSessionId();
 
-          const commonFetchDeps = {
+          const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
+            dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
             searchSessionId,
             services,
-            getAppState: appStateContainer.getState,
+            appStateContainer,
             internalState,
             savedSearch: savedSearchContainer.getState(),
+            scopedProfilesManager,
           };
 
           abortController?.abort();
@@ -271,9 +278,9 @@ export function getDataStateContainer({
             abortControllerFetchMore = new AbortController();
             const fetchMoreStartTime = window.performance.now();
 
-            await fetchMoreDocuments(dataSubjects, {
+            await fetchMoreDocuments({
+              ...commonFetchParams,
               abortController: abortControllerFetchMore,
-              ...commonFetchDeps,
             });
 
             const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
@@ -295,16 +302,15 @@ export function getDataStateContainer({
             })
           );
 
-          await profilesManager.resolveDataSourceProfile({
+          await scopedProfilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: savedSearchContainer.getState().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
-          const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
-            ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
+            ? getDefaultProfileState({ scopedProfilesManager, resetDefaultProfileState, dataView })
             : undefined;
           const preFetchStateUpdate = defaultProfileState?.getPreFetchState();
 
@@ -322,15 +328,12 @@ export function getDataStateContainer({
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllStartTime = window.performance.now();
 
-          await fetchAll(
-            dataSubjects,
-            options.reset,
-            {
-              abortController,
-              ...commonFetchDeps,
-            },
+          await fetchAll({
+            ...commonFetchParams,
+            reset: options.reset,
+            abortController,
             getCurrentTab,
-            async () => {
+            onFetchRecordsComplete: async () => {
               const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
@@ -356,11 +359,12 @@ export function getDataStateContainer({
                     columns: false,
                     rowHeight: false,
                     breakdownField: false,
+                    hideChart: false,
                   },
                 })
               );
-            }
-          );
+            },
+          });
 
           const fetchAllDuration = window.performance.now() - fetchAllStartTime;
           reportPerformanceMetricEvent(services.analytics, {

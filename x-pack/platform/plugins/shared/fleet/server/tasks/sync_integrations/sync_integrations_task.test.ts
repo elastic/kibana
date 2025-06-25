@@ -111,6 +111,9 @@ describe('SyncIntegrationsTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      config: {
+        taskInterval: '1m',
+      },
     });
   });
 

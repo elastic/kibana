@@ -30,7 +30,7 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
+  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isRulePreview } =
     useDocumentDetailsContext();
 
   const statusData = useMemo(() => {
@@ -61,7 +61,7 @@ export const DocumentStatus: FC = () => {
       }
       data-test-subj={STATUS_TITLE_TEST_ID}
     >
-      {!statusData || !hasData(statusData) || isPreview ? (
+      {!statusData || !hasData(statusData) || isRulePreview ? (
         getEmptyTagValue()
       ) : (
         <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>

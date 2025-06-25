@@ -32,19 +32,27 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     kibanaSubFeatureIds: T[],
     productFeaturesConfigs: ProductFeatureKibanaConfig[]
   ): KibanaFeatureConfig {
-    const mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
+    let mergedKibanaFeatureConfig = cloneDeep(kibanaFeatureConfig) as KibanaFeatureConfig;
     const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
     const enabledSubFeaturesIndexed = Object.fromEntries(
       kibanaSubFeatureIds.map((id) => [id, true])
     );
 
     productFeaturesConfigs.forEach((productFeatureConfig) => {
-      const { subFeaturesPrivileges, subFeatureIds, ...productFeatureConfigToMerge } =
-        cloneDeep(productFeatureConfig);
+      const {
+        subFeaturesPrivileges,
+        subFeatureIds,
+        baseFeatureConfigModifier,
+        ...productFeatureConfigToMerge
+      } = cloneDeep(productFeatureConfig);
 
       subFeatureIds?.forEach((subFeatureId) => {
         enabledSubFeaturesIndexed[subFeatureId] = true;
       });
+
+      if (baseFeatureConfigModifier) {
+        mergedKibanaFeatureConfig = baseFeatureConfigModifier(mergedKibanaFeatureConfig);
+      }
 
       if (subFeaturesPrivileges) {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
