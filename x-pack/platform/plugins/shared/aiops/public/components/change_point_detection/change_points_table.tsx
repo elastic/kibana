@@ -8,9 +8,7 @@
 import {
   EuiBadge,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiInMemoryTable,
-  EuiToolTip,
   type DefaultItemAction,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
