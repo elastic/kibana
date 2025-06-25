@@ -15,8 +15,7 @@ export async function createAndInstallTransforms(
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'transform'; id: string }>> {
-  // TODO(kuba): Here's where you use the definition to create TWO transforms
-  // now - the regular one and a backfill one
+  // Latest transform
   try {
     const latestTransform = generateLatestTransform(definition);
     await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
@@ -30,7 +29,20 @@ export async function createAndInstallTransforms(
     );
     throw e;
   }
-  // TODO(kuba): Add creation of backfill transform here, change ID, for sure.
-  // Find out where the transforms are deleted and make sure the ID is used to
-  // clean it up as well. hint: utils... generateLatestTransformId() func.
+
+  // TODO(kuba): add backfill transform deletion as well
+  // Backfill transform
+  try {
+    const backfillTransform = generateLatestTransformBackfill(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(backfillTransform), {
+      logger,
+    });
+    return [{ type: 'transform', id: backfillTransform.transform_id }];
+  } catch (e) {
+    logger.error(
+      `Cannot create backfill transform for [${definition.id}] entity definition`,
+      { error: e }
+    );
+    throw e;
+  }
 }

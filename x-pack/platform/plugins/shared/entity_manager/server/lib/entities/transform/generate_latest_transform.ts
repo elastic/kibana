@@ -23,8 +23,6 @@ import {
 } from '../helpers/generate_component_id';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 
-// TODO(kuba): You basically need either a copy or a modification of this to be
-// called from createAndInstallTransforms. This is it.
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
@@ -38,8 +36,6 @@ export function generateLatestTransform(
     filter.push({ exists: { field } });
   });
 
-  // TODO(kuba): Important for backfill transform - this will be a different
-  // setting, I think.
   filter.push({
     range: {
       [definition.latest.timestampField]: {
@@ -48,17 +44,33 @@ export function generateLatestTransform(
     },
   });
 
+  // TODO(kuba) NOTE: Since we have backfill transform that is separate, the
+  // syncDelay should be equal to frequency so that the two do not overlap.
   return generateTransformPutRequest({
     definition,
     filter,
     transformId: generateLatestTransformId(definition),
     frequency: definition.latest.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
-    syncDelay: definition.latest.settings?.syncDelay ?? ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+    syncDelay:
+      definition.latest.settings?.syncDelay ??
+      definition.latest.settings?.frequency ??
+      ENTITY_DEFAULT_LATEST_SYNC_DELAY,
     docsPerSecond: definition.latest.settings?.docsPerSecond,
   });
 }
 
-// TODO(kuba): Remember this needs changes as well.
+export function generateLatestTransformBackfill(
+  definition: EntityDefinition
+): TransformPutTransformRequest {
+  definition.id = definition.id + '_backfill';
+  // Set the filter to correct time, i.e. `now-backfillPeriod`
+  definition.latest.lookbackPeriod = definition.latest.backfillPeriod;
+  const putRequest: TransformPutTransformRequest = generateLatestTransform(definition);
+  putRequest.sync = {};
+  putRequest.frequency = 0;
+  return putRequest;
+}
+
 const generateTransformPutRequest = ({
   definition,
   filter,
