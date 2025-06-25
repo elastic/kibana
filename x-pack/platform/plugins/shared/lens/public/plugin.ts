@@ -68,8 +68,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { VisualizationType } from '@kbn/visualizations-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -109,7 +110,6 @@ import {
 import type { FormatFactory } from '../common/types';
 import type {
   Visualization,
-  VisualizationType,
   EditorFrameSetup,
   LensTopNavMenuEntryGenerator,
   VisualizeEditorContext,
@@ -135,7 +135,7 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
   LATEST_VERSION,

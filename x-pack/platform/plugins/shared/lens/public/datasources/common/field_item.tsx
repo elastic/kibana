@@ -25,10 +25,14 @@ import {
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
+import {
+  IndexPattern,
+  IndexPatternField,
+  LENS_DOCUMENT_FIELD_NAME,
+} from '@kbn/visualizations-plugin/common';
 import { DatasourceDataPanelProps } from '../../types';
-import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
-import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
+import { APP_ID } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
 
@@ -151,7 +155,7 @@ export function InnerFieldItem(props: FieldItemProps) {
 
   const editFieldAndClose = useMemo(
     () =>
-      editField && dataViewField.name !== DOCUMENT_FIELD_NAME
+      editField && dataViewField.name !== LENS_DOCUMENT_FIELD_NAME
         ? (name: string) => {
             closePopover();
             editField(name);

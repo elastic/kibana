@@ -25,20 +25,13 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
+import { IndexPattern, LENS_DOCUMENT_FIELD_NAME } from '@kbn/visualizations-plugin/common';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
   DatasourceLayerPanelProps,
-  PublicAPIProps,
-  OperationDescriptor,
   FramePublicAPI,
-  IndexPatternField,
-  IndexPattern,
-  IndexPatternRef,
-  DataSourceInfo,
-  UserMessage,
   StateSetter,
-  IndexPatternMap,
   DatasourceDataPanelProps,
 } from '../../types';
 import {
@@ -95,7 +88,6 @@ import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
-import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
@@ -701,7 +693,7 @@ export function getFormBasedDatasource({
                 ...[column.sourceField].concat(column.params.secondaryFields ?? [])
               );
             }
-            if ('sourceField' in column && column.sourceField !== DOCUMENT_FIELD_NAME) {
+            if ('sourceField' in column && column.sourceField !== LENS_DOCUMENT_FIELD_NAME) {
               fieldsPerColumn[visibleColumnId].push(column.sourceField);
             }
           });

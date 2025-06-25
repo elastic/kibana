@@ -8,4 +8,4 @@
  */
 
 export const INDEX_PATTERN_TYPE = 'index-pattern';
-export const DOCUMENT_FIELD_NAME = '___records___';
+export const LENS_DOCUMENT_FIELD_NAME = '___records___';

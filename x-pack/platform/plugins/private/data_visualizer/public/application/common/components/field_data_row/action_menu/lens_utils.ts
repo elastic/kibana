@@ -16,7 +16,7 @@ import type {
   TypedLensByValueInput,
   XYLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import { LENS_DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/visualizations-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import type { FieldVisConfig } from '../../stats_table/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';

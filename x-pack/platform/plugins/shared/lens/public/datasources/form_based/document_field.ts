@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import type { IndexPatternField } from '../../types';
+import {
+  type IndexPatternField,
+  LENS_DOCUMENT_FIELD_NAME,
+} from '@kbn/visualizations-plugin/common';
 
 const customLabel = i18n.translate('xpack.lens.indexPattern.records', {
   defaultMessage: 'Records',
@@ -20,7 +22,7 @@ const customLabel = i18n.translate('xpack.lens.indexPattern.records', {
 export const documentField: IndexPatternField = {
   displayName: customLabel,
   customLabel,
-  name: DOCUMENT_FIELD_NAME,
+  name: LENS_DOCUMENT_FIELD_NAME,
   type: 'document',
   aggregatable: true,
   searchable: true,

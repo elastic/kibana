@@ -43,9 +43,7 @@ export type {
 export { range, visDimension } from './expression_functions';
 export type {
   AggBasedColumn,
-  DataType,
   TimeScaleUnit,
-  SortingHint,
   FilterQuery,
   Filter,
   Range,
@@ -79,7 +77,6 @@ export type {
   FormulaParams,
   StaticValueParams,
   TimeScaleParams,
-  Operation,
   OperationWithSourceField,
   OperationWithReferences,
   BaseColumn,
@@ -115,18 +112,18 @@ export type {
   NavigateToLensContext,
   // ChartShapes,
   FillType,
-  SeriesType,
-  YAxisMode,
+  // SeriesType,
+  // YAxisMode,
   XYCurveType,
   AxisExtentConfig,
-  YConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
+  // YConfig,
+  // XYDataLayerConfig,
+  // XYReferenceLineLayerConfig,
   EventAnnotationConfig,
   XYAnnotationsLayerConfig,
-  XYLayerConfig,
+  // XYLayerConfig,
   AxesSettingsConfig,
-  LabelsOrientationConfig,
+  // LabelsOrientationConfig,
   LegendConfig,
   XYConfiguration,
   SortingState,
@@ -150,8 +147,6 @@ export {
   OperationsWithReferences,
   Operations,
   XYCurveTypes,
-  YAxisModes,
-  SeriesTypes,
   FillTypes,
   RANGE_MODES,
   isAnnotationsLayer,
@@ -287,7 +282,7 @@ export { defaultSeriesType } from './lens/visualizations/xy/lens_types';
  * Constants are used by both the expression language and the lens code
  */
 export { ROW_HEIGHT_MODE } from './lens/constants';
-export { INDEX_PATTERN_TYPE, DOCUMENT_FIELD_NAME } from './lens/datasources/constants';
+export { INDEX_PATTERN_TYPE, LENS_DOCUMENT_FIELD_NAME } from './lens/datasources/constants';
 export {
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
@@ -311,9 +306,9 @@ export {
   LENS_HEATMAP_CHART_SHAPES,
   LENS_HEATMAP_CHART_NAMES,
   LENS_HEATMAP_GROUP_ID,
-  EXPRESSION_HEATMAP_NAME,
-  EXPRESSION_HEATMAP_LEGEND_NAME,
-  EXPRESSION_HEATMAP_GRID_NAME,
+  HEATMAP_NAME,
+  HEATMAP_LEGEND_NAME,
+  HEATMAP_GRID_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_NAME,
   LENS_HEATMAP_DEFAULT_PALETTE_PARAMS,
 } from './lens/visualizations/heatmap/constants';
@@ -329,7 +324,7 @@ export {
   LENS_METRIC_STATE_DEFAULTS,
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
   LENS_METRIC_DEFAULT_TRENDLINE_NAME,
-  EXPRESSION_METRIC_TRENDLINE_NAME,
+  METRIC_TRENDLINE_NAME,
   LENS_METRIC_LABEL_POSITION,
   LENS_METRIC_SECONDARY_BASELINE_DEFAULT_VALUE,
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
@@ -343,7 +338,7 @@ export {
   LENS_PARTITION_DEFAULT_PERCENT_DECIMALS,
 } from './lens/visualizations/partition/constants';
 export * from './lens/visualizations/tagcloud/constants';
-export {
+export type {
   YAxisModes,
   SeriesTypes,
   visualizationSubtypes,

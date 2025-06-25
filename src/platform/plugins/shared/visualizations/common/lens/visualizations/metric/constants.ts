@@ -40,7 +40,7 @@ export const LENS_METRIC_STATE_DEFAULTS: Required<
 export const LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';
 
 export const LENS_METRIC_DEFAULT_TRENDLINE_NAME = 'default';
-export const EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';
+export const METRIC_TRENDLINE_NAME = 'metricTrendline';
 
 export const LENS_METRIC_LABEL_POSITION = {
   BOTTOM: 'bottom',
