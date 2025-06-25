@@ -6,14 +6,11 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DataViewManagerScopeName } from '../../constants';
 import { selectDataViewAsync } from '../actions';
-import { createDefaultDataView } from '../../utils/create_default_data_view';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
@@ -33,11 +30,8 @@ import { createDefaultDataView } from '../../utils/create_default_data_view';
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
 export const createInitListener = (dependencies: {
-  http: CoreStart['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
   dataViews: DataViewsServicePublic;
-  spaces: SpacesPluginStart;
+  defaultDataView: DataView;
 }) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -46,17 +40,6 @@ export const createInitListener = (dependencies: {
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
-        // Initialize default security data view first
-        // Note: this is subject to change, as we might want to add specific data view just for alerts
-
-        const { defaultDataView } = await createDefaultDataView({
-          dataViewService: dependencies.dataViews,
-          uiSettings: dependencies.uiSettings,
-          spaces: dependencies.spaces,
-          application: dependencies.application,
-          http: dependencies.http,
-        });
-
         // NOTE: This is later used in the data view manager drop-down selector
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
@@ -66,7 +49,9 @@ export const createInitListener = (dependencies: {
         // NOTE: save default dataview id for the given space in the store.
         // this is used to identify the default selection in pickers across Kibana Space
         listenerApi.dispatch(
-          sharedDataViewManagerSlice.actions.setDefaultDataViewId(defaultDataView.id)
+          sharedDataViewManagerSlice.actions.setDefaultDataViewId(
+            dependencies.defaultDataView.id as string
+          )
         );
 
         // Preload the default data view for all the scopes
@@ -84,7 +69,7 @@ export const createInitListener = (dependencies: {
           .forEach((scope) => {
             listenerApi.dispatch(
               selectDataViewAsync({
-                id: defaultDataView.id,
+                id: dependencies.defaultDataView.id,
                 scope,
               })
             );
