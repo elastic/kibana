@@ -29,56 +29,33 @@ import {
 } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
-const chatCompleteBaseRt = t.type({
-  body: t.intersection([
-    t.type({
-      messages: t.array(messageRt),
-      connectorId: t.string,
-      persist: toBooleanRt,
-    }),
-    t.partial({
-      conversationId: t.string,
-      title: t.string,
-      disableFunctions: toBooleanRt,
-      instructions: t.array(
-        t.union([
-          t.string,
-          t.type({
-            id: t.string,
-            text: t.string,
-          }),
-        ])
-      ),
-    }),
-  ]),
-});
-
-const chatCompletePublicBaseRt = t.type({
-  body: t.intersection([
-    t.type({
-      messages: t.array(publicMessageRt),
-      connectorId: t.string,
-      persist: toBooleanRt,
-    }),
-    t.partial({
-      conversationId: t.string,
-      title: t.string,
-      disableFunctions: toBooleanRt,
-      instructions: t.array(
-        t.union([
-          t.string,
-          t.type({
-            id: t.string,
-            text: t.string,
-          }),
-        ])
-      ),
-    }),
-  ]),
-});
+const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
+  t.type({
+    body: t.intersection([
+      t.type({
+        messages: t.array(apiType === 'public' ? publicMessageRt : messageRt),
+        connectorId: t.string,
+        persist: toBooleanRt,
+      }),
+      t.partial({
+        conversationId: t.string,
+        title: t.string,
+        disableFunctions: toBooleanRt,
+        instructions: t.array(
+          t.union([
+            t.string,
+            t.type({
+              id: t.string,
+              text: t.string,
+            }),
+          ])
+        ),
+      }),
+    ]),
+  });
 
 const chatCompleteInternalRt = t.intersection([
-  chatCompleteBaseRt,
+  chatCompleteBaseRt('internal'),
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
@@ -88,7 +65,7 @@ const chatCompleteInternalRt = t.intersection([
 ]);
 
 const chatCompletePublicRt = t.intersection([
-  chatCompletePublicBaseRt,
+  chatCompleteBaseRt('public'),
   t.partial({
     body: t.partial({
       actions: t.array(functionRt),
