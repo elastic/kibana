@@ -25,7 +25,6 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
@@ -85,7 +84,6 @@ export interface PluginsStart {
   contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;

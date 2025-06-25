@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { GuideConfig, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 
 export const databaseSearchGuideId = 'databaseSearch';

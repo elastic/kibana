@@ -9,11 +9,9 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../../../typings/**/*",
+    "../../../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
@@ -52,7 +50,6 @@
     "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/discover-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",

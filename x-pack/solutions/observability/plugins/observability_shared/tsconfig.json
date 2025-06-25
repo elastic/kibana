@@ -16,7 +16,6 @@
     "@kbn/core",
     "@kbn/kibana-react-plugin",
     "@kbn/cases-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/i18n-react",

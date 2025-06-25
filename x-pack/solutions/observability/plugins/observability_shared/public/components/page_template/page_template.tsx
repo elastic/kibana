@@ -23,7 +23,6 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
@@ -87,7 +86,6 @@ export interface ObservabilityPageTemplateDependencies {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
-  guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
   isSidebarEnabled$: BehaviorSubject<boolean>;
 }
 
@@ -109,7 +107,6 @@ export function ObservabilityPageTemplate({
   bottomBar,
   bottomBarProps,
   pageSectionProps,
-  guidedOnboardingApi,
   topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
@@ -140,6 +137,7 @@ export function ObservabilityPageTemplate({
                 }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           const navId = entry.label.toLowerCase().split(' ').join('_');
+          console.log('navId', navId);
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isBetaFeature ? (
@@ -196,7 +194,6 @@ export function ObservabilityPageTemplate({
       <ObservabilityTour
         navigateToApp={navigateToApp}
         prependBasePath={services?.http?.basePath.prepend}
-        guidedOnboardingApi={guidedOnboardingApi}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
         showTour={showSolutionNav}
