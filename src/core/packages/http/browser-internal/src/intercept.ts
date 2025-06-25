@@ -15,6 +15,24 @@ import type {
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 
+export function interceptFetch(
+  fetch: (fetchOptions: HttpFetchOptionsWithPath) => Promise<HttpResponse>,
+  options: HttpFetchOptionsWithPath,
+  interceptors: ReadonlySet<HttpInterceptor>,
+  controller: HttpInterceptController
+): Promise<HttpResponse> {
+  return [...interceptors].reduceRight(
+    (next, { fetch: current }) =>
+      current
+        ? (fetchOptions) => {
+            checkHalt(controller);
+            return current(next, fetchOptions, controller);
+          }
+        : next,
+    fetch
+  )(options);
+}
+
 export async function interceptRequest(
   options: HttpFetchOptionsWithPath,
   interceptors: ReadonlySet<HttpInterceptor>,
