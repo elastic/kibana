@@ -122,9 +122,10 @@
     "@kbn/object-utils",
     "@kbn/task-manager-plugin",
     "@kbn/core-saved-objects-server",
-    "@kbn/esql",
     "@kbn/core-pricing-common",
     "@kbn/logs-data-access-plugin"
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/esql",
   ],
   "exclude": ["target/**/*"]
 }
