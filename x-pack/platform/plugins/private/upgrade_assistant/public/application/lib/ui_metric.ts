@@ -17,6 +17,8 @@ export const UIM_ES_DEPRECATION_LOGS_PAGE_LOAD = 'es_deprecation_logs_page_load'
 // Reindexing
 export const UIM_REINDEX_OPEN_FLYOUT_CLICK = 'reindex_open_flyout_click';
 export const UIM_REINDEX_CLOSE_FLYOUT_CLICK = 'reindex_close_flyout_click';
+export const UIM_REINDEX_OPEN_MODAL_CLICK = 'reindex_open_modal_click';
+export const UIM_REINDEX_CLOSE_MODAL_CLICK = 'reindex_close_modal_click';
 export const UIM_REINDEX_START_CLICK = 'reindex_start_click';
 export const UIM_REINDEX_STOP_CLICK = 'reindex_stop_click';
 export const UIM_REINDEX_READONLY_CLICK = 'reindex_readonly_click';
@@ -27,6 +29,8 @@ export const UIM_REINDEX_UNFREEZE_RETRY_CLICK = 'reindex_unfreeze_retry_click';
 // Data Streams Reindexing
 export const UIM_DATA_STREAM_REINDEX_OPEN_FLYOUT_CLICK = 'data_stream_reindex_open_flyout_click';
 export const UIM_DATA_STREAM_REINDEX_CLOSE_FLYOUT_CLICK = 'data_stream_reindex_close_flyout_click';
+export const UIM_DATA_STREAM_REINDEX_OPEN_MODAL_CLICK = 'data_stream_reindex_open_modal_click';
+export const UIM_DATA_STREAM_REINDEX_CLOSE_MODAL_CLICK = 'data_stream_reindex_close_modal_click';
 export const UIM_DATA_STREAM_REINDEX_START_CLICK = 'data_stream_reindex_start_click';
 export const UIM_DATA_STREAM_REINDEX_STOP_CLICK = 'data_stream_reindex_stop_click';
 export const UIM_DATA_STREAM_START_READONLY_CLICK = 'data_stream_readonly_start_click';
