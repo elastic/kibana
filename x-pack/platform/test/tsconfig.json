@@ -94,5 +94,9 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/dev-proc-runner",
+    "@kbn/repo-info",
+    "@kbn/dev-cli-errors",
+    "@kbn/journeys",
   ]
 }
