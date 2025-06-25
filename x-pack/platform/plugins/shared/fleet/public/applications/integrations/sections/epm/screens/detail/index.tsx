@@ -50,12 +50,7 @@ import {
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import {
-  useGetPackageInfoByKeyQuery,
-  useLink,
-  useAgentPolicyContext,
-  useIsGuidedOnboardingActive,
-} from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
@@ -262,7 +257,6 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -430,7 +424,6 @@ export function Detail() {
         integration,
         isCloud,
         isFirstTimeAgentUser,
-        isGuidedOnboardingActive,
         pkgkey,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
         isAgentlessDefault,
@@ -466,7 +459,6 @@ export function Detail() {
       isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
-      isGuidedOnboardingActive,
       returnAppId,
       returnPath,
       packageInfo,
@@ -574,7 +566,7 @@ export function Detail() {
                         <WithGuidedOnboardingTour
                           packageKey={pkgkey}
                           tourType={'addIntegrationButton'}
-                          isTourVisible={isOverviewPage && isGuidedOnboardingActive}
+                          isTourVisible={isOverviewPage}
                           tourOffset={10}
                         >
                           <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
@@ -628,7 +620,6 @@ export function Detail() {
       isInstalled,
       pkgkey,
       isOverviewPage,
-      isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
       integration,

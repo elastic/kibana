@@ -33,7 +33,7 @@ import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
-import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
+import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 
 import {
@@ -177,7 +177,6 @@ export function PackageCard({
   }
 
   const { application } = useStartServices();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(name);
 
   const onCardClick = () => {
     if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
@@ -196,7 +195,7 @@ export function PackageCard({
   return (
     <WithGuidedOnboardingTour
       packageKey={name}
-      isTourVisible={isGuidedOnboardingActive}
+      isTourVisible={true} // fix here
       tourType={'integrationCard'}
       tourOffset={10}
     >

@@ -25,8 +25,7 @@ jest.mock('../../../hooks', () => {
         navigateToApp: jest.fn(),
         navigateToUrl: jest.fn(),
       },
-    }),
-    useIsGuidedOnboardingActive: jest.fn().mockReturnValue(false),
+    });
   };
 });
 

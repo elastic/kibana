@@ -19,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WithGuidedOnboardingTour } from '../../../../../../../components';
-import { useIsGuidedOnboardingActive } from '../../../../../../../hooks';
 import type { PackageInfo } from '../../../../../types';
 
 const toTitleCase = (str: string) => str.charAt(0).toUpperCase() + str.substr(1);
@@ -29,8 +28,6 @@ export const PostInstallAddAgentModal: React.FunctionComponent<{
   onCancel: () => void;
   packageInfo: PackageInfo;
 }> = ({ onConfirm, onCancel, packageInfo }) => {
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo.name);
-
   return (
     <EuiModal data-test-subj="postInstallAddAgentModal" onClose={onCancel}>
       <EuiModalHeader>
