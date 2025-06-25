@@ -13,7 +13,7 @@ import {
   bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
 
-import { once } from 'lodash/fp';
+import { once, isEmpty } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/lib/kibana';
@@ -21,6 +21,7 @@ import { useKibana } from '../common/lib/kibana';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { licenseService } from '../common/hooks/use_license';
+import { useFindPromptContexts } from './content/prompt_contexts/use_find_prompt_contexts';
 import { CommentActionsPortal } from './comment_actions/comment_actions_portal';
 import { AugmentMessageCodeBlocksPortal } from './use_augment_message_code_blocks/augment_message_code_blocks_portal';
 import { useElasticAssistantSharedStateSignalIndex } from './use_elastic_assistant_shared_state_signal_index/use_elastic_assistant_shared_state_signal_index';
@@ -87,13 +88,29 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     notifications,
   ]);
 
+  const PROMPT_CONTEXTS = useFindPromptContexts({
+    context: {
+      isAssistantEnabled:
+        hasEnterpriseLicence &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege,
+      httpFetch: http.fetch,
+      toasts: notifications.toasts,
+    },
+    params: {
+      prompt_group_id: 'aiAssistant',
+      prompt_ids: ['alertEvaluation', 'dataQualityAnalysis', 'ruleAnalysis'],
+    },
+  });
+  const promptContext = useObservable(
+    elasticAssistantSharedState.promptContexts.getPromptContext$(),
+    {}
+  );
   useEffect(() => {
-    const unmountPromptContext =
+    if (isEmpty(promptContext)) {
       elasticAssistantSharedState.promptContexts.setPromptContext(PROMPT_CONTEXTS);
-    return () => {
-      unmountPromptContext();
-    };
-  }, [elasticAssistantSharedState.promptContexts]);
+    }
+  }, [elasticAssistantSharedState.promptContexts, promptContext, PROMPT_CONTEXTS]);
 
   if (!assistantContextValue) {
     return null;
