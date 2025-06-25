@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   useFormContext,
   useFieldArray,
   UseFormRegisterReturn,
   FieldError,
   FieldErrorsImpl,
-  useWatch,
   UseFormSetValue,
   FieldArrayWithId,
   FieldValues,
@@ -27,7 +26,6 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiFlexItem,
-  EuiSpacer,
   EuiButtonEmptyProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -36,17 +34,15 @@ import { Expression } from '@kbn/grok-ui';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 import { SortableList } from '../../sortable_list';
-import { GrokPatternSuggestion } from './grok_pattern_suggestion';
-import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
-import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
-import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
-import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
-import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
-import { GrokFormState, ProcessorFormState } from '../../types';
-import { useAIFeatures } from './use_ai_features';
+import { GrokFormState } from '../../types';
+
+const GrokPatternAISuggestions = dynamic(() =>
+  import('./grok_pattern_suggestion').then((mod) => ({ default: mod.GrokPatternAISuggestions }))
+);
 
 export const GrokPatternsEditor = () => {
   const { core } = useKibana();
@@ -125,94 +121,6 @@ export const GrokPatternsEditor = () => {
       ) : (
         <AddPatternButton onClick={handleAddPattern} />
       )}
-    </>
-  );
-};
-
-const GrokPatternAISuggestions = ({
-  grokCollection,
-  setValue,
-  onAddPattern,
-}: {
-  grokCollection: GrokCollection;
-  setValue: UseFormSetValue<FieldValues>;
-  onAddPattern: () => void;
-}): React.ReactElement => {
-  const {
-    definition: { stream },
-  } = useStreamDetail();
-
-  const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
-
-  const aiFeatures = useAIFeatures();
-  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
-
-  const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
-  const isValidField = useMemo(() => {
-    return Boolean(
-      fieldValue &&
-        previewDocuments.some(
-          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
-        )
-    );
-  }, [previewDocuments, fieldValue]);
-
-  if (suggestionsState.value && suggestionsState.value[0]) {
-    return (
-      <GrokPatternSuggestion
-        suggestion={suggestionsState.value[0]}
-        onAccept={() => {
-          const [suggestion] = suggestionsState.value ?? [];
-          if (suggestion) {
-            setValue(
-              'patterns',
-              suggestion.grokProcessor.patterns.map(
-                (value) => new DraftGrokExpression(grokCollection, value)
-              )
-            );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
-          }
-          refreshSuggestions(null);
-        }}
-        onDismiss={() => refreshSuggestions(null)}
-      />
-    );
-  }
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="l" alignItems="center">
-        {aiFeatures && (
-          <EuiFlexItem grow={false}>
-            <GeneratePatternButton
-              aiFeatures={aiFeatures}
-              onClick={(connectorId) =>
-                refreshSuggestions({
-                  connectorId,
-                  streamName: stream.name,
-                  samples: previewDocuments,
-                  fieldName: fieldValue,
-                })
-              }
-              isLoading={suggestionsState.loading}
-              isDisabled={!isValidField}
-            />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <AddPatternButton onClick={onAddPattern} isDisabled={suggestionsState.loading} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {aiFeatures &&
-        aiFeatures.isManagedAIConnector &&
-        !aiFeatures.hasAcknowledgedAdditionalCharges && (
-          <>
-            <EuiSpacer size="s" />
-            <AdditionalChargesCallout aiFeatures={aiFeatures} />
-          </>
-        )}
     </>
   );
 };
