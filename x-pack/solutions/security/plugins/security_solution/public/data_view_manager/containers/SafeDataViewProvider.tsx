@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import React, { createContext, type ReactNode, type FC, type PropsWithChildren } from 'react';
+import React, {
+  createContext,
+  type ReactNode,
+  type FC,
+  type PropsWithChildren,
+  useMemo,
+} from 'react';
 
 import { type DataViewManagerScopeName } from '../constants';
 import { useDataView } from '../hooks/use_data_view';
@@ -32,17 +38,21 @@ export const SafeDataViewProvider: FC<PropsWithChildren<SafeDataViewProviderProp
   scopes,
   fallback = fallbackElement,
 }) => {
-  const value: DataViewContextValue = {
-    results: {},
-  };
+  const results = scopes.map(useDataView);
+  const allReady = Object.values(results).every((result) => result.status === 'ready');
+  const dataViews = Object.values(results).map((result) => result.dataView);
 
-  scopes.forEach((scope) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const result = useDataView(scope);
-    value.results[scope] = result;
-  });
-
-  const allReady = Object.values(value.results).every((result) => result.status === 'ready');
+  const value = useMemo(() => {
+    return results.reduce(
+      (acc, result) => {
+        acc.results[result.scope] = result;
+        return acc;
+      },
+      { results: {} } as DataViewContextValue
+    );
+    // NOTE: below is done on purpose to cache based on the data view instance
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...dataViews]);
 
   return (
     <DataViewContext.Provider value={value}>

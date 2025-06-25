@@ -21,7 +21,11 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  */
 export const useDataView = (
   dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
-): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
+): {
+  dataView: DataView | undefined;
+  status: SharedDataViewSelectionState['status'];
+  scope: DataViewManagerScopeName;
+} => {
   const {
     services: { dataViews },
     notifications,
@@ -58,9 +62,13 @@ export const useDataView = (
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
-      return { dataView: undefined, status: internalStatus };
+      return { dataView: undefined, status: internalStatus, scope: dataViewManagerScope };
     }
 
-    return { dataView: retrievedDataView, status: retrievedDataView ? internalStatus : 'loading' };
-  }, [newDataViewPickerEnabled, retrievedDataView, internalStatus]);
+    return {
+      dataView: retrievedDataView,
+      status: retrievedDataView ? internalStatus : 'loading',
+      scope: dataViewManagerScope,
+    };
+  }, [newDataViewPickerEnabled, retrievedDataView, internalStatus, dataViewManagerScope]);
 };
