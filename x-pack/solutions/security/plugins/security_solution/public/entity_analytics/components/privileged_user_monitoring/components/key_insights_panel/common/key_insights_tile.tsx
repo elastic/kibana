@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactElement } from 'react';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -31,6 +31,8 @@ interface KeyInsightsTileProps {
   inspectTitle: ReactElement;
   /** Optional override for space ID (if not provided, will use useSpaceId hook) */
   spaceId?: string;
+  /** Optional flag to force showing N/A state for testing */
+  showNAState?: boolean;
 }
 
 export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
@@ -40,11 +42,13 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   id,
   inspectTitle,
   spaceId: propSpaceId,
+  showNAState = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
   const hookSpaceId = useSpaceId();
+  const [isDataUnavailable, setIsDataUnavailable] = useState(showNAState);
 
   // Use prop spaceId if provided, otherwise use hook spaceId, fallback to 'default'
   const effectiveSpaceId = propSpaceId || hookSpaceId || 'default';
@@ -52,6 +56,75 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // Extract the defaultMessage from FormattedMessage elements
   const titleString = title.props.defaultMessage;
   const labelString = label.props.defaultMessage;
+
+  // Check if data is available by testing the query
+  useEffect(() => {
+    if (showNAState) {
+      setIsDataUnavailable(true);
+      return;
+    }
+
+    try {
+      const query = getEsqlQuery(effectiveSpaceId);
+      // Basic validation - if query is empty or contains only whitespace
+      if (!query || query.trim().length === 0) {
+        setIsDataUnavailable(true);
+        return;
+      }
+
+      // Check for common error patterns in queries
+      if (query.includes('ERROR') || query.includes('INVALID')) {
+        setIsDataUnavailable(true);
+        return;
+      }
+
+      setIsDataUnavailable(false);
+    } catch (error) {
+      setIsDataUnavailable(true);
+    }
+  }, [getEsqlQuery, effectiveSpaceId, showNAState]);
+
+  // Show N/A state when data is unavailable
+  if (isDataUnavailable) {
+    return (
+      <EuiFlexItem grow={false}>
+        <div
+          css={css`
+            height: ${LENS_VISUALIZATION_HEIGHT}px;
+            min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
+            width: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: ${euiTheme.colors.lightestShade};
+            border-radius: ${euiTheme.border.radius.medium};
+            padding: ${euiTheme.size.m};
+            text-align: center;
+          `}
+          data-test-subj={`key-insights-tile-na-${id}`}
+        >
+          <EuiTitle size="xs">
+            <h4>{titleString}</h4>
+          </EuiTitle>
+          <EuiText
+            size="s"
+            color="subdued"
+            css={css`
+              margin-top: ${euiTheme.size.s};
+              font-weight: 600;
+              font-size: 24px;
+            `}
+          >
+            {'N/A'}
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {'Data not available'}
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+    );
+  }
 
   const lensAttributes = createKeyInsightsPanelLensAttributes({
     title: titleString,
@@ -72,6 +145,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
           background: ${euiTheme.colors.lightestShade};
           border-radius: ${euiTheme.border.radius.medium};
         `}
+        data-test-subj={`key-insights-tile-${id}`}
       >
         <VisualizationEmbeddable
           applyGlobalQueriesAndFilters={true}
