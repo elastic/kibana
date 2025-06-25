@@ -65,5 +65,9 @@ const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
 const isSpanDocument = (record: DataTableRecord) => {
   const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'span';
+
+  const isApmSpan = processorEvent === 'span';
+  const isOtelSpan = processorEvent == null;
+
+  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
 };

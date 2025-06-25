@@ -622,6 +622,7 @@ export default function (providerContext: FtrProviderContext) {
         latest_install_failed_attempts: [],
         verification_status: 'unknown',
         verification_key_id: null,
+        previous_version: '0.1.0',
       });
     });
   });

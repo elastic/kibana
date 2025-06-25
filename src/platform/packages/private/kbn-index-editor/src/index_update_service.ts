@@ -147,7 +147,7 @@ export class IndexUpdateService {
     this.runtimeFields$,
   ]).pipe(
     skipWhile(([indexName, indexCreated]) => {
-      return indexCreated === false || !indexName;
+      return !indexName;
     }),
     switchMap(async ([indexName, , runtimeFields]) => {
       const dataView = await this.getDataView(indexName!);
@@ -209,7 +209,12 @@ export class IndexUpdateService {
       return dataView;
     }
 
-    return await this.data.dataViews.create({ title: indexName, name: indexName });
+    return await this.data.dataViews.create({
+      title: indexName,
+      name: indexName,
+      // The index might not exist yet
+      allowNoIndex: true,
+    });
   }
 
   private listenForUpdates() {
@@ -233,7 +238,6 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ({ updates, response, rows, dataView }) => {
-            console.log('API response:', response);
             // Clear the buffer after successful update
             this.actions$.next({ type: 'saved', payload: response });
 
@@ -272,7 +276,6 @@ export class IndexUpdateService {
           },
           error: (err) => {
             // TODO handle API errors
-            console.error('API error:', err);
 
             this._isSaving$.next(false);
           },
@@ -316,7 +319,7 @@ export class IndexUpdateService {
         )
         .subscribe({
           next: ([response, dataView]) => {
-            const { hits, total } = response.rawResponse.hits;
+            const { hits } = response.rawResponse.hits;
 
             const resultRows: DataTableRecord[] = hits.map((hit) => {
               return buildDataTableRecord(hit, dataView);

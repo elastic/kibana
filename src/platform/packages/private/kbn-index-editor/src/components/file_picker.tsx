@@ -7,38 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFilePicker, type EuiFilePickerProps } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { useFileSelectorContext } from './file_drop_zone';
 
 export const FilePicker = () => {
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
-
-  const onFilePickerChange = useCallback(
-    async (files: FileList | null) => {
-      if (files && files.length > 0) {
-        // await fileUploadManager.addFiles(files);
-        // Clear the file picker after adding files
-        filePickerRef.current?.removeFiles();
-      }
-    },
-    []
-    // [fileUploadManager]
-  );
+  const { onFileSelectorClick } = useFileSelectorContext();
 
   return (
-    <EuiFilePicker
-      ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
-      id={'csvFilePicker'}
-      multiple
-      compressed
-      initialPromptText={i18n.translate('indexEditor.filePicker.initialPromptText', {
-        defaultMessage: 'Upload CSV',
+    <EuiButtonIcon
+      display="fill"
+      size={'s'}
+      color={'text'}
+      onClick={() => {
+        onFileSelectorClick();
+      }}
+      iconType="export"
+      aria-label={i18n.translate('indexEditor.filePicker.uploadButtonAriaLabel', {
+        defaultMessage: 'Upload file button',
       })}
-      onChange={(files) => onFilePickerChange(files)}
-      display="default"
-      aria-label="Use aria labels when no actual label is in use"
     />
   );
 };

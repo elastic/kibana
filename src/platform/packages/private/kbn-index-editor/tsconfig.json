@@ -17,7 +17,6 @@
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
     "@kbn/data-views-plugin",
-    "@kbn/discover-plugin",
     "@kbn/discover-utils",
     "@kbn/es-query",
     "@kbn/expressions-plugin",
@@ -27,8 +26,6 @@
     "@kbn/unified-data-table",
     "@kbn/cell-actions",
     "@kbn/shared-ux-utility",
-    "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core-notifications-browser",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/share-plugin",
@@ -38,6 +35,5 @@
     "@kbn/file-upload",
     "@kbn/file-upload-plugin",
     "@kbn/react-kibana-context-common",
-    "@kbn/unified-search-plugin",
   ]
 }

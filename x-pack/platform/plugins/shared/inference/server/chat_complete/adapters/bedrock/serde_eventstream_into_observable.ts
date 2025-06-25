@@ -10,8 +10,8 @@ import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { identity } from 'lodash';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
-import { Message } from '@smithy/types';
 import { createInferenceInternalError } from '@kbn/inference-common';
+import type { ConverseBedrockChunkMember } from './converse_type';
 
 interface ModelStreamErrorException {
   name: 'ModelStreamErrorException';
@@ -19,15 +19,14 @@ interface ModelStreamErrorException {
   originalMessage?: string;
 }
 
-export interface BedrockChunkMember {
-  chunk: Message;
-}
-
 export interface ModelStreamErrorExceptionMember {
   modelStreamErrorException: ModelStreamErrorException;
 }
+export interface BedrockStreamChunkMember {
+  chunk: ConverseBedrockChunkMember;
+}
 
-export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorExceptionMember;
+export type BedrockStreamMember = BedrockStreamChunkMember | ModelStreamErrorExceptionMember;
 
 // AWS uses SerDe to send over serialized data, so we use their
 // @smithy library to parse the stream data

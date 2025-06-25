@@ -23,6 +23,13 @@ export const ConfigSchema = schema.object({
   stack: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  analytics: schema.object({
+    index: schema.maybe(
+      schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+      })
+    ),
+  }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
