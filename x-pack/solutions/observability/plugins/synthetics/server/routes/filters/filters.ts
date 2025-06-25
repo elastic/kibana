@@ -11,7 +11,6 @@ import {
   syntheticsMonitorAttributes,
   syntheticsMonitorSavedObjectType,
 } from '../../../common/types/saved_objects';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 

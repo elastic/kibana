@@ -16,7 +16,7 @@ import {
   QuerySchema,
   SEARCH_FIELDS,
 } from '../common';
-import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
+import { isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({

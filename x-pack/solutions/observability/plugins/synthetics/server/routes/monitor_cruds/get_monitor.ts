@@ -12,7 +12,6 @@ import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { getSyntheticsMonitor } from '../../queries/get_monitor';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -32,12 +31,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
     },
   },
-  handler: async ({
-    request,
-    response,
-    server: { coreStart },
-    spaceId,
-  }): Promise<any> => {
+  handler: async ({ request, response, server: { coreStart }, spaceId }): Promise<any> => {
     const { monitorId } = request.params;
     try {
       const { internal } = request.query;

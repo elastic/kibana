@@ -14,7 +14,6 @@ import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { syntheticsMonitorType } from '../../common/types/saved_objects';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(

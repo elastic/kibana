@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../../types';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { getSavedObjectKqlFilter } from '../../common';

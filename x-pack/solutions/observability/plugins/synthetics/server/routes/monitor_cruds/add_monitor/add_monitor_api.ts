@@ -19,7 +19,7 @@ import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
