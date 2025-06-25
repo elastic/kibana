@@ -196,6 +196,34 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.enabledEmailServices",
+          "type": "Array",
+          "tags": [],
+          "label": "enabledEmailServices",
+          "description": [],
+          "signature": [
+            "string[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-public.ActionsPublicPluginSetup.isWebhookSslWithPfxEnabled",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "isWebhookSslWithPfxEnabled",
+          "description": [],
+          "signature": [
+            "boolean | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -650,6 +678,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SubActionConnector.configurationUtilities",
+            "type": "Object",
+            "tags": [],
+            "label": "configurationUtilities",
+            "description": [],
+            "signature": [
+              "ActionsConfigurationUtilities"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/sub_action_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "actions",
             "id": "def-server.SubActionConnector.kibanaRequest",
@@ -3445,6 +3487,104 @@
               "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/actions/server/sub_action_framework/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-server.SSLSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "SSLSettings",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.verificationMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verificationMode",
+            "description": [],
+            "signature": [
+              "\"none\" | \"certificate\" | \"full\" | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.pfx",
+            "type": "Object",
+            "tags": [],
+            "label": "pfx",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.cert",
+            "type": "Object",
+            "tags": [],
+            "label": "cert",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.key",
+            "type": "Object",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.passphrase",
+            "type": "string",
+            "tags": [],
+            "label": "passphrase",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.SSLSettings.ca",
+            "type": "Object",
+            "tags": [],
+            "label": "ca",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

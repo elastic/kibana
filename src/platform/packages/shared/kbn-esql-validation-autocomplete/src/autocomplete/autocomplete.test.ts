@@ -28,18 +28,25 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
+import { editorExtensions } from '../__tests__/helpers';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
 import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { getRecommendedQueries } from './recommended_queries/templates';
+import { mapRecommendedQueriesFromExtensions } from './recommended_queries/suggestions';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(
   ({ name, hidden }) => !hidden && name !== 'rrf'
 );
 
-const getRecommendedQueriesSuggestions = (fromCommand: string, timeField?: string) =>
+const getRecommendedQueriesSuggestionsFromTemplates = (
+  fromCommand: string,
+  timeField?: string,
+  categorizationField?: string
+) =>
   getRecommendedQueries({
     fromCommand,
     timeField,
+    categorizationField,
   });
 
 describe('autocomplete', () => {
@@ -87,9 +94,14 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
-    const recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      'FROM logs*',
+      'dateField',
+      'textField'
+    );
     testSuggestions('/', [
       ...sourceCommands.map((name) => name.toUpperCase() + ' '),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -243,9 +255,14 @@ describe('autocomplete', () => {
    */
   describe('Invoke trigger kind (all commands)', () => {
     // source command
-    let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    let recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      'FROM logs*',
+      'dateField',
+      'textField'
+    );
     testSuggestions('f/', [
       ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -309,7 +326,7 @@ describe('autocomplete', () => {
     ]);
 
     // FROM source METADATA
-    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates('', 'dateField');
     testSuggestions('FROM index1 M/', ['METADATA ']);
 
     // FROM source METADATA field
@@ -391,10 +408,10 @@ describe('autocomplete', () => {
     );
 
     // RENAME field
-    testSuggestions(
-      'FROM index1 | RENAME f/',
-      getFieldNamesByType('any').map((name) => `${name} `)
-    );
+    testSuggestions('FROM index1 | RENAME f/', [
+      'col0 = ',
+      ...getFieldNamesByType('any').map((name) => `${name} `),
+    ]);
 
     // RENAME field AS
     testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
@@ -465,10 +482,15 @@ describe('autocomplete', () => {
       ...s,
       asSnippet: true,
     });
-    let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
+    let recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      'FROM logs*',
+      'dateField',
+      'textField'
+    );
     // Source command
     testSuggestions('F/', [
       ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
+      ...mapRecommendedQueriesFromExtensions(editorExtensions.recommendedQueries),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -555,7 +577,11 @@ describe('autocomplete', () => {
       );
     });
 
-    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      '',
+      'dateField',
+      'textField'
+    );
 
     // PIPE (|)
     testSuggestions('FROM a /', [
@@ -604,7 +630,11 @@ describe('autocomplete', () => {
           ],
         ]
       );
-      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('index1', 'dateField');
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+        'index1',
+        'dateField',
+        'textField'
+      );
 
       testSuggestions(
         'FROM index1/',
@@ -624,7 +654,11 @@ describe('autocomplete', () => {
         ]
       );
 
-      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('index2', 'dateField');
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+        'index2',
+        'dateField',
+        'textField'
+      );
       testSuggestions(
         'FROM index1, index2/',
         [
@@ -647,7 +681,11 @@ describe('autocomplete', () => {
       // meaning that Monaco by default will only set the replacement
       // range to cover "bar" and not "foo$bar". We have to make sure
       // we're setting it ourselves.
-      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('foo$bar', 'dateField');
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+        'foo$bar',
+        'dateField',
+        'textField'
+      );
       testSuggestions(
         'FROM foo$bar/',
         [
@@ -676,7 +714,11 @@ describe('autocomplete', () => {
       );
 
       // This is an identifier that matches multiple sources
-      recommendedQuerySuggestions = getRecommendedQueriesSuggestions('i*', 'dateField');
+      recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+        'i*',
+        'dateField',
+        'textField'
+      );
       testSuggestions(
         'FROM i*/',
         [
@@ -696,7 +738,11 @@ describe('autocomplete', () => {
       );
     });
 
-    recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
+    recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
+      '',
+      'dateField',
+      'textField'
+    );
     // FROM source METADATA
     testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
@@ -996,6 +1042,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
@@ -1006,6 +1053,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
@@ -1016,6 +1064,7 @@ describe('autocomplete', () => {
       'IN $0',
       'AND $0',
       'NOT',
+      'NOT IN $0',
       'OR $0',
     ]);
 

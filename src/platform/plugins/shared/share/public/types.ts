@@ -9,10 +9,15 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  type EuiCodeProps,
+  type EuiIconProps,
+  type EuiFlyoutProps,
+} from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { Capabilities, ToastsSetup } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -167,11 +172,29 @@ export interface ExportShare
   groupId: 'export';
 }
 
+/**
+ * @description Share integration implementation definition that build off exports within kibana,
+ * reach out to the shared ux team before settling on using this interface
+ */
+export interface ExportShareDerivatives
+  extends ShareIntegration<{
+    label: React.FC<{ openFlyout: () => void }>;
+    toolTipContent?: ReactNode;
+    flyoutContent: React.FC<{
+      closeFlyout: () => void;
+      flyoutRef: React.RefObject<HTMLDivElement>;
+    }>;
+    flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  }> {
+  groupId: 'exportDerivatives';
+}
+
 export type ShareActionIntents = LinkShare | EmbedShare | ShareLegacy | ShareIntegration;
 
 export type LinkShareConfig = ShareImplementation<LinkShare>;
 export type EmbedShareConfig = ShareImplementation<EmbedShare>;
 export type ExportShareConfig = ShareImplementation<ExportShare>;
+export type ExportShareDerivativesConfig = ShareImplementation<ExportShareDerivatives>;
 export type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
 
 export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
@@ -181,9 +204,10 @@ export type LegacyIntegrationConfig = Omit<ShareLegacy, 'config'> & {
 export type ShareConfigs =
   | LinkShareConfig
   | EmbedShareConfig
+  | ShareIntegrationConfig
   | ExportShareConfig
-  | LegacyIntegrationConfig
-  | ShareIntegrationConfig;
+  | ExportShareDerivativesConfig
+  | LegacyIntegrationConfig;
 
 export type LinkShareUIConfig = ShareActionUserInputBase<{
   /**
@@ -302,7 +326,6 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  toasts: ToastsSetup;
 }
 
 /**

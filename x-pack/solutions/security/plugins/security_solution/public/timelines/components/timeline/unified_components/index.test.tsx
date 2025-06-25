@@ -9,7 +9,7 @@ import type { ComponentProps, FC, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import type QueryTabContent from '.';
 import { UnifiedTimeline } from '.';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -20,7 +20,7 @@ import {
   TestProviders,
 } from '../../../../common/mock';
 import { createMockStore } from '../../../../common/mock/create_store';
-import { render, screen, fireEvent, cleanup, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,7 +29,6 @@ import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { TimelineTabs } from '@kbn/securitysolution-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { getColumnHeaders } from '../body/column_headers/helpers';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';

@@ -156,7 +156,7 @@ export interface PackagePolicyClient {
 
   listIds(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: PackagePolicyClientListIdsOptions
   ): Promise<ListResult<string>>;
 
   update(
@@ -309,3 +309,5 @@ export interface PackagePolicyClientGetOptions {
    */
   spaceId?: string;
 }
+
+export type PackagePolicyClientListIdsOptions = ListWithKuery & WithSpaceIdsOption;

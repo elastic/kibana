@@ -10,10 +10,8 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
-
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
@@ -22,7 +20,6 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -42,16 +39,16 @@ import { NetworkRouteType } from './navigation/types';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
-  showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -66,10 +63,6 @@ const ID = 'NetworkQueryId';
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
-    const graphEventId = useShallowEqualSelector(
-      (state) => (getTable(state, TableId.networkPageEvents) ?? tableDefaults).graphEventId
-    );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
       []
@@ -157,7 +150,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
         {indicesExist ? (
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
-            <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+            <FiltersGlobal>
               <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
             </FiltersGlobal>
 

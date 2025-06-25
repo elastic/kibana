@@ -325,9 +325,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$observability-apm-labs$$$`observability:apmLabsButton`
-:   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
-
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
 :   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
@@ -491,13 +488,6 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 
 ### Visualization [kibana-visualization-settings]
-
-$$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
-:   :::{admonition} Deprecated in 8.10.0
-    This setting was deprecated in 8.10.0.
-    :::
-
-    Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 $$$visualization-heatmap-maxbuckets$$$`visualization:heatmap:maxBuckets`
 :   The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.

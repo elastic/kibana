@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly,
+  type EuiDataGridControlColumn,
   EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
+  RenderCellValue,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
@@ -67,21 +68,6 @@ const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
 
-const openDetails = {
-  id: OPEN_DETAILS,
-  width: DEFAULT_CONTROL_COLUMN_WIDTH,
-  headerCellRender: () => (
-    <EuiScreenReaderOnly>
-      <span>
-        {i18n.translate('unifiedDataTable.controlColumnHeader', {
-          defaultMessage: 'Control column',
-        })}
-      </span>
-    </EuiScreenReaderOnly>
-  ),
-  rowCellRender: ExpandButton,
-};
-
 const getSelect = (rows: DataTableRecord[]) => ({
   id: SELECT_ROW,
   width: DEFAULT_CONTROL_COLUMN_WIDTH,
@@ -95,11 +81,14 @@ export function getLeadControlColumns({
 }: {
   rows: DataTableRecord[];
   canSetExpandedDoc: boolean;
-}) {
-  if (!canSetExpandedDoc) {
-    return [getSelect(rows)];
-  }
-  return [openDetails, getSelect(rows)];
+}): {
+  leadColumns: EuiDataGridControlColumn[];
+  leadColumnsExtraContent: RenderCellValue[];
+} {
+  return {
+    leadColumns: [getSelect(rows)],
+    leadColumnsExtraContent: canSetExpandedDoc ? [ExpandButton] : [],
+  };
 }
 
 function buildEuiGridColumn({

@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
@@ -133,6 +134,11 @@ import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrati
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
+import {
+  CASE_ATTACHMENT_TYPE_ID,
+  THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
+} from '../common/threat_intelligence/constants';
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
@@ -181,7 +187,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
-    this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.telemetryEventsSender = new TelemetryEventsSender(
+      this.logger,
+      this.config.experimentalFeatures
+    );
     this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
@@ -516,6 +525,19 @@ export class Plugin implements ISecuritySolutionPlugin {
           endpointSearchStrategy
         );
 
+        const threatIntelligenceSearchStrategy = threatIntelligenceSearchStrategyProvider(
+          depsStart.data
+        );
+
+        plugins.data.search.registerSearchStrategy(
+          THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
+          threatIntelligenceSearchStrategy
+        );
+
+        plugins.cases.attachmentFramework.registerExternalReference({
+          id: CASE_ATTACHMENT_TYPE_ID,
+        });
+
         /**
          * Register a config for the security guide
          */
@@ -677,6 +699,12 @@ export class Plugin implements ISecuritySolutionPlugin {
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
           ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
+
+          // Migrate endpoint data if space awareness is enabled
+          // (We don't need to `await` this. It can run in the background)
+          migrateEndpointDataToSupportSpaces(this.endpointAppContextService).catch((e) => {
+            logger.error(e);
+          });
         })
         .catch(() => {});
 

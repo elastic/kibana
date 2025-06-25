@@ -22,6 +22,8 @@ export interface FieldNameSearchProps {
   nameFilter: string;
   screenReaderDescriptionId?: string;
   onChange: (nameFilter: string) => unknown;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 /**
@@ -41,16 +43,21 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
   nameFilter,
   screenReaderDescriptionId,
   onChange,
+  onFocus,
+  onBlur,
 }) => {
   const searchPlaceholder = i18n.translate('unifiedFieldList.fieldNameSearch.filterByNameLabel', {
     defaultMessage: 'Search field names',
     description: 'Search the list of fields in the data view for the provided text',
   });
 
-  const { inputValue, handleInputChange } = useDebouncedValue({
-    onChange,
-    value: nameFilter,
-  });
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    {
+      onChange,
+      value: nameFilter,
+    },
+    { allowFalsyValue: true }
+  );
 
   return (
     <EuiFieldSearch
@@ -59,8 +66,10 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
       data-test-subj={`${dataTestSubject}FieldSearch`}
       fullWidth
       onChange={(e) => {
-        handleInputChange(e.target.value);
+        handleInputChange(e.currentTarget.value);
       }}
+      onFocus={onFocus}
+      onBlur={onBlur}
       placeholder={searchPlaceholder}
       value={inputValue}
       append={append}

@@ -21,11 +21,11 @@ import {
 } from '../constants';
 import type { TopCalloutRenderer } from '../types';
 import { IntegrationTabId } from '../types';
-import { useSelectedTab } from '../hooks/use_selected_tab';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
 import type { AvailablePackages } from './with_available_packages';
 import { useCreateAutoImportCard } from '../hooks/use_create_auto_import_card';
+import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
 export interface SecurityIntegrationsGridTabsProps {
   activeIntegrationsCount: number;
@@ -36,6 +36,8 @@ export interface SecurityIntegrationsGridTabsProps {
   packageListGridOptions?: {
     showCardLabels?: boolean;
   };
+  selectedTab: UseSelectedTabReturn['selectedTab'];
+  setSelectedTabId?: UseSelectedTabReturn['setSelectedTabId'];
 }
 
 const emptyStateStyles = { paddingTop: '16px' };
@@ -55,14 +57,16 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     integrationList,
     availablePackages,
     packageListGridOptions,
+    setSelectedTabId,
+    selectedTab,
   }) => {
     const {
       spaceId,
       telemetry: { reportLinkClick },
+      integrationTabs,
     } = useIntegrationContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { selectedTab, toggleIdSelected, setSelectedTabIdToStorage, integrationTabs } =
-      useSelectedTab();
+
     const createAutoImportCard = useCreateAutoImportCard();
 
     const integrationTabOptions = useMemo<EuiButtonGroupOptionProps[]>(
@@ -84,19 +88,20 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     }, [integrationList, createAutoImportCard, selectedTab.appendAutoImportCard]);
 
     const [searchTermFromStorage, setSearchTermToStorage] = useStoredIntegrationSearchTerm(spaceId);
+
+    const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =
+      availablePackages;
+
     const onTabChange = useCallback(
       (stringId: string) => {
         const id = stringId as IntegrationTabId;
         const trackId = `${TELEMETRY_INTEGRATION_TAB}_${id}`;
         scrollElement.current?.scrollTo?.(0, 0);
-        setSelectedTabIdToStorage(id);
+        setSelectedTabId?.(id);
         reportLinkClick?.(trackId);
       },
-      [setSelectedTabIdToStorage, reportLinkClick]
+      [setSelectedTabId, reportLinkClick]
     );
-
-    const { isLoading, searchTerm, setCategory, setSearchTerm, setSelectedSubCategory } =
-      availablePackages;
 
     const buttonGroupStyles = useIntegrationCardGridTabsStyles();
 
@@ -123,7 +128,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       if (
         selectedTab.showSearchTools &&
         searchTermFromStorage &&
-        toggleIdSelected !== IntegrationTabId.recommended
+        selectedTab.id !== IntegrationTabId.recommended
       ) {
         setSearchTerm(searchTermFromStorage);
       }
@@ -136,7 +141,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
       setCategory,
       setSearchTerm,
       setSelectedSubCategory,
-      toggleIdSelected,
+      selectedTab.id,
     ]);
 
     if (isLoading) {
@@ -163,7 +168,7 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
               css={buttonGroupStyles}
               buttonSize="compressed"
               color="primary"
-              idSelected={toggleIdSelected}
+              idSelected={selectedTab.id}
               isFullWidth
               legend="Categories"
               onChange={onTabChange}

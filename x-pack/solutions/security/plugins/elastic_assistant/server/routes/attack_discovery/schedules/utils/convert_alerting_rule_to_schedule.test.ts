@@ -6,6 +6,7 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { RuleSystemAction, SanitizedRuleAction } from '@kbn/alerting-types';
 
 import { convertAlertingRuleToSchedule } from './convert_alerting_rule_to_schedule';
 import { getInternalAttackDiscoveryScheduleMock } from '../../../../__mocks__/attack_discovery_schedules.mock';
@@ -70,6 +71,30 @@ describe('convertAlertingRuleToSchedule', () => {
       createdAt: createdAt.toISOString(),
       updatedAt: updatedAt.toISOString(),
       ...basicAttackDiscoveryScheduleMock,
+    });
+  });
+
+  it('should combine `actions` and `systemActions` into one array', async () => {
+    const internalRule = getInternalAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock, {
+      actions: [{ name: 'Action 1' } as unknown as SanitizedRuleAction],
+      systemActions: [{ name: 'System Action 2' } as unknown as RuleSystemAction],
+    });
+    const { createdBy: _, updatedBy: __, ...restInternalRule } = internalRule;
+    const { id, createdAt, updatedAt } = internalRule;
+    const schedule = convertAlertingRuleToSchedule({
+      ...restInternalRule,
+      createdBy: null,
+      updatedBy: null,
+    });
+
+    expect(schedule).toEqual({
+      id,
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      createdAt: createdAt.toISOString(),
+      updatedAt: updatedAt.toISOString(),
+      ...basicAttackDiscoveryScheduleMock,
+      actions: [{ name: 'Action 1' }, { name: 'System Action 2' }],
     });
   });
 });

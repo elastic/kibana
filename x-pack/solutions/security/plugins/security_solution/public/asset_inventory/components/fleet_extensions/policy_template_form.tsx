@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+import semverGte from 'semver/functions/gte';
 import {
   getAssetInputHiddenVars,
   getAssetPolicy,
@@ -92,6 +93,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
+      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
@@ -122,7 +124,9 @@ export const CloudAssetInventoryPolicyTemplateForm =
       });
 
       const showCloudConnectors =
-        cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+        cloudConnectorsEnabled &&
+        !!cloudConnectorRemoteRoleTemplate &&
+        semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
       // /**
       //  * - Updates policy inputs by user selection
@@ -133,15 +137,13 @@ export const CloudAssetInventoryPolicyTemplateForm =
           const inputVars = getAssetInputHiddenVars(
             inputType,
             packageInfo,
-            inputType === CLOUDBEAT_AWS && isAgentlessAvailable
-              ? SetupTechnology.AGENTLESS
-              : SetupTechnology.AGENT_BASED,
+            setupTechnology,
             showCloudConnectors
           );
           const policy = getAssetPolicy(newPolicy, inputType, inputVars);
           updatePolicy(policy);
         },
-        [packageInfo, isAgentlessAvailable, showCloudConnectors, newPolicy, updatePolicy]
+        [packageInfo, setupTechnology, showCloudConnectors, newPolicy, updatePolicy]
       );
 
       // // search for non null fields of the validation?.vars object

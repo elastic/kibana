@@ -1343,7 +1343,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
-        isLegacy ? 'uncheck' : 'check'
+        isLegacy ? 'check' : 'uncheck'
       );
 
       await common.sleep(200);
@@ -1922,7 +1922,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async clickShareModal() {
+    async clickShareButton() {
       return await testSubjects.click('lnsApp_shareButton');
     },
 
@@ -1941,19 +1941,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async isShareActionEnabled(action: 'link') {
       switch (action) {
         case 'link':
-          return await testSubjects.isEnabled('link');
+          return await testSubjects.isEnabled('tabbedModal-link-content');
         default:
-          return await testSubjects.isEnabled(action);
+          return await testSubjects.isEnabled(`tabbedModal-${action}-content`);
       }
     },
 
     async ensureShareMenuIsOpen(action: 'link') {
-      await this.clickShareModal();
-
-      if (!(await testSubjects.exists('shareContextModal'))) {
-        await this.clickShareModal();
-      }
-      if (!(await this.isShareActionEnabled(action))) {
+      if (
+        (await testSubjects.exists('shareContextModal')) &&
+        !(await this.isShareActionEnabled(action))
+      ) {
         throw Error(`${action} sharing feature is disabled`);
       }
       return await testSubjects.click(action);
@@ -1993,7 +1991,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getUrl() {
-      await this.ensureShareMenuIsOpen('link');
+      await this.clickShareButton();
+
+      await this.isShareActionEnabled('link');
       const url = await share.getSharedUrl();
 
       if (!url) {
@@ -2005,9 +2005,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return url;
     },
 
-    async openCSVDownloadExport() {
+    async triggerCSVDownloadExport() {
       await this.clickExportButton();
-      await exports.clickPopoverItem('CSV');
+      // simply clicking the export button is enough, to trigger the CSV download in lens
+      await exports.clickPopoverItem('CSV', this.clickExportButton);
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -2022,7 +2023,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getCSVContent() {
-      await testSubjects.click('generateReportButton');
       return await browser.execute<
         [void],
         Record<string, { content: string; type: string }> | undefined

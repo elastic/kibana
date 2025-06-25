@@ -66,6 +66,8 @@ webpackstats.json
 !/config/serverless.es.yml
 !/config/serverless.chat.yml
 !/config/serverless.oblt.yml
+!/config/serverless.oblt.complete.yml
+!/config/serverless.oblt.logs_essentials.yml
 !/config/serverless.security.yml
 !/config/serverless.security.essentials.yml
 !/config/serverless.security.complete.yml
@@ -104,6 +106,8 @@ npm-debug.log*
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts

@@ -73,8 +73,11 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
             grow={false}
             key={migrationStats.id}
           >
-            {(migrationStats.status === SiemMigrationTaskStatus.READY ||
-              migrationStats.status === SiemMigrationTaskStatus.STOPPED) && (
+            {[
+              SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
+              SiemMigrationTaskStatus.STOPPED,
+            ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (

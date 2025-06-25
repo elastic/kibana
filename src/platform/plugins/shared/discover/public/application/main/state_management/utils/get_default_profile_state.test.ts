@@ -18,19 +18,21 @@ const emptyDataView = buildDataViewMock({
   fields: fieldList(),
 });
 const { profilesManagerMock } = createContextAwarenessMocks();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
 
-profilesManagerMock.resolveDataSourceProfile({});
+scopedProfilesManager.resolveDataSourceProfile({});
 
 describe('getDefaultProfileState', () => {
   describe('getPreFetchState', () => {
     it('should return expected breakdownField', () => {
       let appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: true,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -38,12 +40,13 @@ describe('getDefaultProfileState', () => {
         breakdownField: 'extension',
       });
       appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: true,
+          hideChart: false,
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -54,12 +57,13 @@ describe('getDefaultProfileState', () => {
   describe('getPostFetchState', () => {
     it('should return expected columns', () => {
       let appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: true,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -80,12 +84,13 @@ describe('getDefaultProfileState', () => {
         },
       });
       appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: true,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -109,12 +114,13 @@ describe('getDefaultProfileState', () => {
 
     it('should return expected rowHeight', () => {
       const appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
           rowHeight: true,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -128,12 +134,13 @@ describe('getDefaultProfileState', () => {
 
     it('should return undefined', () => {
       const appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({

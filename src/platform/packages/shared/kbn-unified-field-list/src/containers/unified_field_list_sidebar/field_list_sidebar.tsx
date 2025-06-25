@@ -181,6 +181,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   const [multiFieldsMap, setMultiFieldsMap] = useState<
     Map<string, Array<{ field: DataViewField; isSelected: boolean }>> | undefined
   >(undefined);
+  const [isFieldNameSearchFocused, setIsFieldNameSearchFocused] = useState(false);
 
   useEffect(() => {
     const result = getSelectedFields({
@@ -393,7 +394,12 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                   <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
+                  <FieldListFilters
+                    {...fieldListFiltersProps}
+                    compressed={compressed}
+                    onFieldNameSearchBlur={() => setIsFieldNameSearchFocused(false)}
+                    onFieldNameSearchFocus={() => setIsFieldNameSearchFocused(true)}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -404,6 +410,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
+                muteScreenReader={!isFieldNameSearchFocused}
               />
             ) : (
               <EuiFlexItem grow />

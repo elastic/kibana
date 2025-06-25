@@ -7,7 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { MAX_FILE_SIZE_BYTES, MAX_TIKA_FILE_SIZE_BYTES } from '../common/constants';
+import {
+  MAX_FILE_SIZE_BYTES,
+  MAX_TIKA_FILE_SIZE_BYTES,
+} from '@kbn/file-upload-common/src/constants';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
@@ -162,13 +165,19 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       },
       async (context, request, response) => {
         try {
-          const { index, settings, mappings, ingestPipelines } = request.body;
+          const { index, settings, mappings, ingestPipelines, existingIndex } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           await updateTelemetry();
 
           const { initializeImport } = importDataProvider(esClient);
-          const result = await initializeImport(index, settings, mappings, ingestPipelines);
+          const result = await initializeImport(
+            index,
+            settings,
+            mappings,
+            ingestPipelines,
+            existingIndex
+          );
 
           return response.ok({ body: result });
         } catch (e) {

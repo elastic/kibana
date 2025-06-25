@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { InstallSource } from '../../types';
+
 export interface IntegrationsData {
   package_name: string;
   package_version: string;
   updated_at: string;
   install_status: string;
+  install_source?: InstallSource;
 }
 
 export interface BaseCustomAssetsData {

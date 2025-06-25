@@ -214,4 +214,4 @@ POST .kibana/_update/alert:933ca720-1be1-11ec-a722-83da1c22a481
 ```
 
 ## End to end tests
-See `test/alerting_api_integration/spaces_only/tests/alerting/migrations.ts` for tests around migrations
+See `x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/migrations.ts` for tests around migrations
