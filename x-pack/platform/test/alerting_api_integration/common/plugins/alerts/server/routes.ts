@@ -836,6 +836,7 @@ export function defineRoutes(
   router.post(
     {
       path: '/_test/event_log/refresh',
+      validate: {},
       security: {
         authz: {
           enabled: false,

@@ -211,7 +211,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         await supertest
           .post(`${getUrlPrefix(space.id)}/_test/event_log/refresh`)
           .set('kbn-xsrf', 'foo')
-          .send();
+          .send({});
 
         const finalGapResponse = await supertest
           .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
