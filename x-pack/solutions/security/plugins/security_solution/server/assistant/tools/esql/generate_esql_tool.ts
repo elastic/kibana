@@ -52,7 +52,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
 
     if (inference == null || connectorId == null) return null;
 
-    const selfHealingGraph = getGenerateEsqlGraph({
+    const selfHealingGraph = await getGenerateEsqlGraph({
       esClient,
       connectorId,
       inference,

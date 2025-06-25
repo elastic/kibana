@@ -14,6 +14,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { AIMessage } from '@langchain/core/messages';
 import type { ToolCall } from '@langchain/core/dist/messages/tool';
 import { toolDetails } from '../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
+import { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 
 export const getPromptSuffixForOssModel = (toolName: string) => `
   When using ${toolName} tool ALWAYS pass the user's questions directly as input into the tool.
@@ -30,10 +31,7 @@ export const messageContainsToolCalls = (message: BaseMessage): message is AIMes
   );
 };
 
-export type CreateLlmInstance = () =>
-  | ActionsClientChatBedrockConverse
-  | ActionsClientChatVertexAI
-  | ActionsClientChatOpenAI;
+export type CreateLlmInstance = Exclude<AssistantToolParams["createLlmInstance"], undefined>
 
 export const requireFirstInspectIndexMappingCallWithEmptyKey = (
   newMessage: AIMessage,
