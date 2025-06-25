@@ -373,7 +373,7 @@ class AnnotationsTableUI extends Component {
               defaultMessage="No annotations created for this job"
             />
           }
-          iconType="iInCircle"
+          iconType="info"
           role="alert"
         >
           {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) && (
