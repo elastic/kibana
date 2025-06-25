@@ -18,6 +18,5 @@
     "@kbn/ml-trained-models-utils",
     "@kbn/ml-common-types",
     "@kbn/ml-services",
-    "@kbn/ml-shared-components",
   ]
 }
