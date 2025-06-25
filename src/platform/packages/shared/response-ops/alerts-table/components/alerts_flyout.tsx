@@ -103,13 +103,26 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
     [Footer, props]
   );
 
+  const ALERT_FLYOUT_ARIA_LABEL =
+    alert && alert[ALERT_RULE_CATEGORY]
+      ? i18n.translate('xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.ariaLabel', {
+          defaultMessage: '{alertCategory}',
+          values: { alertCategory: String(alert[ALERT_RULE_CATEGORY]) },
+        })
+      : i18n.translate(
+          'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.ariaLabelDefault',
+          {
+            defaultMessage: '',
+          }
+        );
+
   return (
     <EuiFlyout
       onClose={onClose}
       size="m"
       data-test-subj="alertsFlyout"
       ownFocus={flyoutOwnsFocus}
-      aria-label={alert?.[ALERT_RULE_CATEGORY]}
+      aria-label={ALERT_FLYOUT_ARIA_LABEL}
     >
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
       <EuiFlyoutHeader hasBorder>
