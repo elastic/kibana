@@ -1090,7 +1090,7 @@
     "@langchain/langgraph": "^0.2.45",
     "@langchain/openai": "^0.4.4",
     "@langtrase/trace-attributes": "^7.5.0",
-    "@launchdarkly/node-server-sdk": "^9.9.2",
+    "@launchdarkly/node-server-sdk": "^9.10.0",
     "@launchdarkly/openfeature-node-server": "^1.1.0",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
@@ -1383,7 +1383,7 @@
     "zod-to-json-schema": "^3.23.0"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.1.1",
+    "@apidevtools/swagger-parser": "^12.0.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
