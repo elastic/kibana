@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useEffect } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { PartialRuleDiff, RuleResponse } from '../../../../../../common/api/detection_engine';
 import { PerFieldRuleDiffTab } from '../per_field_rule_diff_tab';
 import { RuleDetailsFlyout, TabContentPadding } from '../rule_details_flyout';
@@ -14,9 +15,16 @@ import * as ruleDetailsI18n from '../translations';
 import * as i18n from './translations';
 import { RuleDiffTab } from '../rule_diff_tab';
 import { BaseVersionDiffFlyoutSubheader } from './base_version_flyout_subheader';
-import { useRevertPrebuiltRule } from '../../../logic/prebuilt_rules/use_revert_prebuilt_rule';
+import {
+  getRevertRuleErrorStatusCode,
+  useRevertPrebuiltRule,
+} from '../../../logic/prebuilt_rules/use_revert_prebuilt_rule';
 
 export const PREBUILT_RULE_BASE_VERSION_FLYOUT_ANCHOR = 'baseVersionPrebuiltRulePreview';
+
+interface PrebuiltRuleConcurrencyControl {
+  revision: number;
+}
 
 interface PrebuiltRulesBaseVersionFlyoutComponentProps {
   currentRule: RuleResponse;
@@ -35,6 +43,7 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
   isReverting,
   onRevert,
 }: PrebuiltRulesBaseVersionFlyoutComponentProps): JSX.Element {
+  useConcurrecyControl(currentRule);
   const { mutateAsync: revertPrebuiltRule, isLoading } = useRevertPrebuiltRule();
   const subHeader = useMemo(
     () => <BaseVersionDiffFlyoutSubheader currentRule={currentRule} diff={diff} />,
@@ -48,10 +57,14 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
         version: currentRule.version,
         revision: currentRule.revision,
       });
-    } catch {
-      // Error is handled by the mutation's onError callback, so no need to do anything here
-    } finally {
       closeFlyout();
+    } catch (error) {
+      const statusCode = getRevertRuleErrorStatusCode(error);
+      // Don't close flyout on concurrency errors
+      if (statusCode !== 409) {
+        closeFlyout();
+      }
+    } finally {
       if (onRevert) {
         onRevert();
       }
@@ -141,3 +154,23 @@ export const PrebuiltRulesBaseVersionFlyout = memo(function PrebuiltRulesBaseVer
     />
   );
 });
+
+const useConcurrecyControl = (currentRule: RuleResponse) => {
+  const concurrencyControl = useRef<PrebuiltRuleConcurrencyControl>();
+  const { addWarning } = useAppToasts();
+
+  useEffect(() => {
+    const concurrency = concurrencyControl.current;
+
+    if (concurrency != null && concurrency.revision !== currentRule.revision) {
+      addWarning({
+        title: i18n.NEW_REVISION_DETECTED_WARNING,
+        text: i18n.NEW_REVISION_DETECTED_WARNING_MESSAGE,
+      });
+    }
+
+    concurrencyControl.current = {
+      revision: currentRule.revision,
+    };
+  }, [addWarning, currentRule.revision]);
+};

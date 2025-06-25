@@ -37,14 +37,15 @@ const populateErrorStack = (error: HTTPError): HTTPError => {
 };
 
 const getErrorToastMessage = (error: HTTPError): string => {
-  const statusCode = (error.body as RevertPrebuiltRulesResponseBody)?.attributes.errors?.at(
-    0
-  )?.status_code;
+  const statusCode = getRevertRuleErrorStatusCode(error);
   if (statusCode === 409) {
     return i18n.RULE_REVERT_FAILED_CONCURRENCY_MESSAGE;
   }
   return (error.body as RevertPrebuiltRulesResponseBody)?.attributes.errors?.at(0)?.message ?? '';
 };
+
+export const getRevertRuleErrorStatusCode = (error: HTTPError) =>
+  (error.body as RevertPrebuiltRulesResponseBody)?.attributes.errors?.at(0)?.status_code;
 
 const getSuccessToastMessage = (result: {
   summary: {

@@ -87,3 +87,18 @@ export const BASE_VERSION_LABEL = i18n.translate(
     defaultMessage: 'Original Elastic rule',
   }
 );
+
+export const NEW_REVISION_DETECTED_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.ruleNewRevisionDetectedWarning',
+  {
+    defaultMessage: 'Installed rule changed',
+  }
+);
+
+export const NEW_REVISION_DETECTED_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.baseVersionFlyout.ruleNewRevisionDetectedWarningMessage',
+  {
+    defaultMessage:
+      'The installed rule was changed, the rule modifications diff flyout has been updated.',
+  }
+);

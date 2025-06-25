@@ -29,9 +29,10 @@ export const usePrebuiltRulesViewBaseDiff = ({
 }: UsePrebuiltRulesViewBaseDiffProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isReverting, setIsReverting] = useState(false);
+  const enabled = useMemo(() => rule != null && isCustomizedPrebuiltRule(rule), [rule]);
   const { data, isLoading, error } = useFetchPrebuiltRuleBaseVersionQuery({
     id: rule?.id,
-    enabled: rule != null && isCustomizedPrebuiltRule(rule),
+    enabled,
   });
 
   // Handle when we receive an error when the base_version doesn't exist
