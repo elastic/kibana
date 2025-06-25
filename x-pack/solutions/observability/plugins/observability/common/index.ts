@@ -29,7 +29,6 @@ export {
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
-  entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   syntheticsThrottlingEnabled,
