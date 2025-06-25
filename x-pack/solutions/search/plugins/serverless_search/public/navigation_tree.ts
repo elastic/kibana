@@ -51,7 +51,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 renderAs: 'accordion',
                 children: [
                   {
-                    link: 'onechat:conversation',
+                    link: 'onechat:conversations',
                   },
                   {
                     link: 'onechat:tools',

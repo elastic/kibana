@@ -7,6 +7,6 @@
 
 import React from 'react';
 
-export const OnechatConversationPage = () => {
-  return <div>OnechatConversationPage</div>;
+export const OnechatConversationsPage = () => {
+  return <div>OnechatConversationsPage</div>;
 };
