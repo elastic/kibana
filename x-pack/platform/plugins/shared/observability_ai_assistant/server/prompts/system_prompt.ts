@@ -130,6 +130,8 @@ export function getObservabilitySystemPrompt({
                 )} return no results, but the user asks for a query, *still* call the \`query\` function to generate an *example* query based on the request.`
               : ''
           }
+      5. When a user requests paginated results using ES|QL (e.g., asking for a specific page or part of the results), you must inform them that ES|QL does not support pagination or offset. Clearly explain that only limiting the number of results (using LIMIT) is possible, and provide an example query that returns the first N results. Do not attempt to simulate pagination or suggest unsupported features. Always clarify this limitation in your response.
+      6. When converting queries from another language (e.g SPL, LogQL, DQL) to ES|QL, generate functionally equivalent ES|QL query using the available index and field information. Infer the indices and fields from the user's query and always call \`query\` function to provide a **valid and functionally equivalent** example ES|QL query.  Always clarify any field name assumptions and prompt the user for clarification if necessary.
     `)
     );
   }
@@ -158,20 +160,26 @@ export function getObservabilitySystemPrompt({
         `2.  **Prerequisites for \`query\`:** Before calling the \`query\` function, you **MUST** first call ${datasetFunctions.join(
           ' or '
         )} to understand the available data streams, indices, and fields. Use the index information returned by these functions when calling \`query\`.
-        Exception: If the user provides a full, valid query including the \`FROM\` clause specifying the index/data stream, you might proceed directly, but obtaining dataset info first is safer.`
+        Exception: If the user provides a full, valid query including the \`FROM\` clause specifying the index/data stream, you might proceed directly, but obtaining dataset info first is safer.
+        3. If a user asks for an "example query" and the dataset search functions do not find a matching index or fields, you must follow these steps:
+
+          3.1  **Infer Intent:** Analyze the user's message to determine the likely search criteria they had in mind.
+          3.2  **Generate Example:** Use the inferred criteria to call the \`query\` function and generate a valid example query.
+          3.3  **Present the Query:** Show the user the generated example.
+          3.4  **Add Clarification:** Explain that since no direct match was found, you have generated an example based on your interpretation of their request.`
       );
     }
 
     if (isFunctionAvailable('visualize_query') || isFunctionAvailable('execute_query')) {
       usage.push(
-        `3.  **Handling Visualization/Execution Results:** If a function call results in a visualization being shown by the application, acknowledge it. If a function returns data directly ${
+        `4.  **Handling Visualization/Execution Results:** If a function call results in a visualization being shown by the application, acknowledge it. If a function returns data directly ${
           isFunctionAvailable('execute_query') ? `(like \`execute_query\` might) ` : ''
         }, summarize the key findings for the user.`
       );
     }
 
     usage.push(
-      `4.  **Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
+      `5.  **Elastic Stack Questions:** For general questions about Elastic Stack products or features, ${
         isFunctionAvailable('retrieve_elastic_doc')
           ? ` ideally use a dedicated 'retrieve_elastic_doc' function. If not,`
           : ' answer based on your knowledge but state that the official Elastic documentation is the definitive source.'
@@ -180,25 +188,25 @@ export function getObservabilitySystemPrompt({
 
     if (isFunctionAvailable('summarize') && isKnowledgeBaseReady) {
       usage.push(
-        `5.  **Summarization:** Use the \`summarize\` function **only** when explicitly asked by the user to store information. Summaries **MUST** be in English.`
+        `6.  **Summarization:** Use the \`summarize\` function **only** when explicitly asked by the user to store information. Summaries **MUST** be in English.`
       );
     }
 
     if (isFunctionAvailable('context')) {
       usage.push(
-        `6.  **Context Retrieval:** Use the \`context\` function proactively or when needed to understand the user's environment or retrieve prior knowledge.`
+        `7.  **Context Retrieval:** Use the \`context\` function proactively or when needed to understand the user's environment or retrieve prior knowledge.`
       );
     }
 
     if (isFunctionAvailable('get_alerts_dataset_info') && isFunctionAvailable('alerts')) {
       usage.push(
-        `7.  **Alerts:** Use \`get_alerts_dataset_info\` first if needed to find fields, then \`alerts\` (using general time range handling) to fetch details.`
+        `8.  **Alerts:** Use \`get_alerts_dataset_info\` first if needed to find fields, then \`alerts\` (using general time range handling) to fetch details.`
       );
     }
 
     if (isFunctionAvailable('elasticsearch')) {
       usage.push(
-        `8.  **Elasticsearch API:** Use the \`elasticsearch\` function to call Elasticsearch APIs on behalf of the user\n
+        `9.  **Elasticsearch API:** Use the \`elasticsearch\` function to call Elasticsearch APIs on behalf of the user\n
            * **When to use:** Whenever the user asks for information or an action that maps directly to an Elasticsearch REST API **(e.g. cluster health, license, index statistics, index creation, adding documents, etc.)** you **MUST** call the \`elasticsearch\` function. You have to derive which endpoint to call without explicitly asking the user. **NEVER** ask for permission to proceed with GET requests. You **MUST** call the \`elasticsearch\` function with the appropriate method and path. Only call the \`elasticsearch\` function with the DELETE method when the user specifically asks to do a delete operation. Don't call the API for any destructive action if the user has not asked you to do so.
            * **Path parameter tips:** When requesting index stats, append the **specific path paramater** to the API endpoint if the user mentions it (example: \`{index}/_stats/store\` for *store stats*) instead of the generic \`{index}/_stats\`. Always populate the path with the index name if the user is referring to a specific index.
            * **Follow-up requests:** If the user subsequently asks for more information about an index **without explicitly repeating the index name**, assume they mean the **same index you just used** in the prior Elasticsearch call and build the path accordingly. Do **not** ask the user to re-state the index name in such follow-up questions.`
@@ -207,20 +215,20 @@ export function getObservabilitySystemPrompt({
 
     if (isFunctionAvailable('get_apm_downstream_dependencies')) {
       usage.push(
-        `9.  **APM Dependencies:** Use \`get_apm_downstream_dependencies\`. Extract the \`service.name\` correctly from the user query. **Important Exception:** For this function, if the user does not explicitly provide a time range in their request, you **MUST** ask them for the desired start and end times before calling the function. Do not rely on the \`context\` function or default time ranges (\`now-15m\` to \`now\`) for this specific function unless the user provides the time range.`
+        `10.  **APM Dependencies:** Use \`get_apm_downstream_dependencies\`. Extract the \`service.name\` correctly from the user query. **Important Exception:** For this function, if the user does not explicitly provide a time range in their request, you **MUST** ask them for the desired start and end times before calling the function. Do not rely on the \`context\` function or default time ranges (\`now-15m\` to \`now\`) for this specific function unless the user provides the time range.`
       );
     }
 
     if (isFunctionAvailable('get_dataset_info')) {
       usage.push(
-        `10. **Get Dataset Info:** Use the \`get_dataset_info\` function to get information about indices/datasets available and the fields available on them. Providing an empty string as index name will retrieve all indices,
+        `11. **Get Dataset Info:** Use the \`get_dataset_info\` function to get information about indices/datasets available and the fields available on them. Providing an empty string as index name will retrieve all indices,
         else list of all fields for the given index will be given. If no fields are returned this means no indices were matched by provided index pattern. Wildcards can be part of index name.`
       );
     }
 
     if (isFunctionAvailable('get_dataset_info') && isFunctionAvailable('elasticsearch')) {
       usage.push(
-        `11. Always use the \`get_dataset_info\` function to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.`
+        `12. Always use the \`get_dataset_info\` function to get information about indices/datasets available and the fields and field types available on them instead of using Elasticsearch APIs directly.`
       );
     }
 
