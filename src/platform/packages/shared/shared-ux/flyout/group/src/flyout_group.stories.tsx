@@ -369,17 +369,16 @@ export const FlyoutSimple: StoryObj = {
 };
 
 const SimpleFlyoutGroupAppControls: React.FC = () => {
-  const { openFlyout, openChildFlyout, isFlyoutOpen } = useEuiFlyoutSession();
+  const { openFlyoutGroup, isFlyoutOpen } = useEuiFlyoutSession();
 
   const handleOpenSimpleFlyoutGroup = () => {
-    // FIXME: need to open main flyout and child flyout in a single action: "openFlyoutGroup"
-    openFlyout({
-      size: 's',
-      meta: {},
-    });
-    openChildFlyout({
-      size: 's',
-      meta: {},
+    openFlyoutGroup({
+      main: {
+        size: 's',
+      },
+      child: {
+        size: 's',
+      },
     });
   };
 
