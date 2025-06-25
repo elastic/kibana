@@ -15,7 +15,6 @@
     "@kbn/config-schema",
     "@kbn/core-analytics-server",
     "@kbn/core-analytics-browser",
-    "@kbn/core-pricing-server-internal",
   ],
   "exclude": [
     "target/**/*",
