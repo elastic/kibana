@@ -6,9 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import {
+  runActivityBackfillTask,
   runAttachmentsBackfillTask,
   runCasesBackfillTask,
   runCommentsBackfillTask,
@@ -23,6 +28,9 @@ import {
   deleteAllFiles,
   getAuthWithSuperUser,
   getConfigurationRequest,
+  updateCase,
+  deleteCases,
+  deleteAllCaseAnalyticsItems,
 } from '../../../../../common/lib/api';
 import {
   getPostCaseRequest,
@@ -41,7 +49,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const authSpace1 = getAuthWithSuperUser();
 
   describe('analytics indexes backfill task', () => {
-    afterEach(async () => {
+    beforeEach(async () => {
+      await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
       await deleteAllFiles({
         supertest,
@@ -200,6 +209,70 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expectSnapshot(analyticsFields).toMatch();
       });
+    });
+
+    it('should backfill the activity index', async () => {
+      const postedCase = await createCase(supertest, postCaseReq, 200);
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              tags: ['other'],
+              severity: CaseSeverity.MEDIUM,
+              category: 'categoryValue',
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+        },
+      });
+
+      const caseToDelete = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
+      await deleteCases({
+        supertest: supertest,
+        caseIDs: [caseToDelete.id],
+        auth: authSpace1,
+      });
+
+      await runActivityBackfillTask(supertest);
+
+      let activityArray: Array<any> = [];
+      await retry.try(async () => {
+        const activityAnalytics = await esClient.search({
+          index: '.internal.cases-activity',
+        });
+
+        // @ts-ignore
+        expect(activityAnalytics.hits.total?.value).to.be(5);
+        activityArray = activityAnalytics.hits.hits as unknown as Array<any>;
+      });
+
+      const tagsActivity = activityArray.filter((activity) => activity._source.type === 'tags');
+      expect(tagsActivity.length).to.be(2);
+
+      const categoryActivity = activityArray.find(
+        (activity) => activity._source.type === 'category'
+      );
+      expect(categoryActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(categoryActivity?._source.action).to.be('update');
+      expect(categoryActivity?._source.case_id).to.be(postedCase.id);
+      expect(categoryActivity?._source.payload?.category).to.be('categoryValue');
+
+      const severityActivity = activityArray.find(
+        (activity) => activity._source.type === 'severity'
+      );
+      expect(severityActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(severityActivity?._source.action).to.be('update');
+      expect(severityActivity?._source.case_id).to.be(postedCase.id);
+      expect(severityActivity?._source.payload?.severity).to.be('medium');
+
+      const statusActivity = activityArray.find((activity) => activity._source.type === 'status');
+      expect(statusActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(statusActivity?._source.action).to.be('update');
+      expect(statusActivity?._source.case_id).to.be(postedCase.id);
+      expect(statusActivity?._source.payload?.status).to.be('in-progress');
     });
   });
 };
