@@ -192,7 +192,7 @@ export const useLookupIndexCommand = (
         const isExistingIndex = existingIndices.some((index) => index.name === lookupIndex);
 
         const matches =
-          editorModel.current?.findMatches(lookupIndex, true, false, true, null, true) || [];
+          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
 
         matches.forEach((match) => {
           const range = new monaco.Range(
