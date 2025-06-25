@@ -23,7 +23,6 @@
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
     "@kbn/expect",
-    "@kbn/test-suites-src",
     "@kbn/search-playground",
     "@kbn/tooling-log",
     "@kbn/test-suites-xpack",

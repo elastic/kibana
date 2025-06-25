@@ -1,9 +1,13 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
-  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
+  "exclude": [
+    "cypress.config.ts",
+    "cypress.config.space_awareness.ts",
+    "target/**/*",
+  ],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -119,6 +123,6 @@
     "@kbn/lock-manager",
     "@kbn/saved-search-component",
     "@kbn/logs-data-access-plugin",
-    "@kbn/embeddable-plugin"
+    "@kbn/embeddable-plugin",
   ]
 }

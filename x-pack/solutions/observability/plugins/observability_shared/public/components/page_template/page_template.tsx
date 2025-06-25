@@ -137,7 +137,6 @@ export function ObservabilityPageTemplate({
                 }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           const navId = entry.label.toLowerCase().split(' ').join('_');
-          console.log('navId', navId);
           return {
             id: `${sectionIndex}.${entryIndex}`,
             name: entry.isBetaFeature ? (

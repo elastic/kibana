@@ -4,13 +4,7 @@
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    ".storybook/**/*",
-    "../../../../../typings/emotion.d.ts"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "../../../../../typings/emotion.d.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",
@@ -38,9 +32,10 @@
     "@kbn/core-http-common",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser",
-    "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-theme",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }
