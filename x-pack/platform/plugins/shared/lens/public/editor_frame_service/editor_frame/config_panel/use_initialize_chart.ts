@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, type MutableRefObject } from 'react';
+import { useEffect, useCallback, type MutableRefObject } from 'react';
 import { type AggregateQuery, isOfAggregateQueryType, type Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -137,13 +137,65 @@ export const createInitializeChartFunction = ({
   };
 };
 
-export function useInitializeChart(args: InitializeChartLogicArgs) {
+export function useInitializeChart({
+  isTextBasedLanguage,
+  query,
+  dataGridAttrs,
+  isInitialized,
+  data,
+  datasourceMap,
+  visualizationMap,
+  adHocDataViews,
+  setDataGridAttrs,
+  esqlVariables,
+  currentAttributes,
+  successCallback,
+  prevQueryRef,
+  setErrors,
+  setIsInitialized,
+}: InitializeChartLogicArgs) {
+  const initializeChartFunc = useCallback(
+    (abortController: AbortController) => {
+      const func = createInitializeChartFunction({
+        isTextBasedLanguage,
+        query,
+        dataGridAttrs,
+        isInitialized,
+        data,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        currentAttributes,
+        successCallback,
+        prevQueryRef,
+        setErrors,
+        setIsInitialized,
+        setDataGridAttrs,
+        esqlVariables,
+      });
+      func(abortController);
+    },
+    [
+      isTextBasedLanguage,
+      query,
+      dataGridAttrs,
+      isInitialized,
+      data,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      currentAttributes,
+      successCallback,
+      prevQueryRef,
+      setErrors,
+      setIsInitialized,
+      setDataGridAttrs,
+      esqlVariables,
+    ]
+  );
   useEffect(() => {
     const abortController = new AbortController();
-    const initializeChartFunc = createInitializeChartFunction({
-      ...args,
-    });
 
     initializeChartFunc(abortController);
-  }, [args]);
+  }, [initializeChartFunc]);
 }
