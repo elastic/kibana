@@ -205,6 +205,7 @@ export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/elasticsearch/elasticse
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
 export const PLAYGROUND_URL = '/playground';
+export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 
