@@ -21,6 +21,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -43,12 +44,15 @@ interface ValueControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
   valuesRetrieval?: string;
+  timeRange?: TimeRange;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
 To get the agent field values use: 
-FROM logs-* | STATS BY agent
+FROM logs-* 
+|  WHERE @timestamp <=?_tend and @timestamp >?_tstart
+| STATS BY agent
 */`;
 
 export function ValueControlForm({
@@ -60,6 +64,7 @@ export function ValueControlForm({
   search,
   setControlState,
   valuesRetrieval,
+  timeRange,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
 
@@ -147,7 +152,7 @@ export function ValueControlForm({
     async (query: string) => {
       setValuesQuery(query);
 
-      const result = await esqlQueryToOptions(query, search);
+      const result = await esqlQueryToOptions(query, search, timeRange);
       if (!isMounted()) {
         return;
       }
@@ -170,7 +175,7 @@ export function ValueControlForm({
         setQueryColumns(columns);
       }
     },
-    [isMounted, search]
+    [isMounted, search, timeRange]
   );
 
   useEffect(() => {

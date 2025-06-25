@@ -13,7 +13,11 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
 import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
-import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  apiHasParentApi,
+  apiPublishesTimeRange,
+} from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi } from './types';
@@ -39,7 +43,10 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const defaultControlManager = initializeDefaultControlManager(initialState);
       const selections = initializeESQLControlSelections(
         initialState,
-        controlGroupApi.controlFetch$(uuid)
+        controlGroupApi.controlFetch$(uuid),
+        apiPublishesTimeRange(controlGroupApi.parentApi)
+          ? controlGroupApi.parentApi.timeRange$
+          : null
       );
 
       const closeOverlay = () => {

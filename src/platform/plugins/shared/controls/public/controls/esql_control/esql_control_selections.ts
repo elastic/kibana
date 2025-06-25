@@ -18,6 +18,7 @@ import { PublishingSubject, StateComparators } from '@kbn/presentation-publishin
 import { esqlQueryToOptions } from '@kbn/presentation-controls';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
+import { TimeRange } from '@kbn/es-query';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -46,7 +47,8 @@ export const selectionComparators: StateComparators<
 
 export function initializeESQLControlSelections(
   initialState: ESQLControlState,
-  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
+  timeRange$?: PublishingSubject<TimeRange | undefined>
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -69,7 +71,11 @@ export function initializeESQLControlSelections(
   async function updateAvailableOptions() {
     const controlType = controlType$.getValue();
     if (controlType !== EsqlControlType.VALUES_FROM_QUERY) return;
-    const result = await esqlQueryToOptions(esqlQuery$.getValue(), dataService.search.search);
+    const result = await esqlQueryToOptions(
+      esqlQuery$.getValue(),
+      dataService.search.search,
+      timeRange$?.getValue()
+    );
     if (esqlQueryToOptions.isSuccess(result)) {
       availableOptions$.next(result.options);
     }

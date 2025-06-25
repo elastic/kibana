@@ -16,6 +16,7 @@ export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';
 export const EVENT_OUTCOME_FIELD = 'event.outcome';
 export const INDEX_FIELD = '_index';
+export const EVENT_CATEGORY_FIELD = 'event.category';
 
 // Trace fields
 export const TRACE_ID_FIELD = 'trace.id';

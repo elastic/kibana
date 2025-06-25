@@ -8,7 +8,8 @@
  */
 
 import { getESQLResults } from '@kbn/esql-utils';
-import { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { TimeRange } from '@kbn/es-query';
 
 export interface ESQLQueryToOptionsSuccess {
   options: string[];
@@ -21,7 +22,8 @@ export interface ESQLQueryToOptionsFailure {
 
 export const esqlQueryToOptions = async (
   query: string,
-  search: ISearchGeneric
+  search: ISearchGeneric,
+  timeRange?: TimeRange
 ): Promise<ESQLQueryToOptionsSuccess | ESQLQueryToOptionsFailure> => {
   try {
     const results = await getESQLResults({
@@ -30,6 +32,7 @@ export const esqlQueryToOptions = async (
       signal: undefined,
       filter: undefined,
       dropNullColumns: true,
+      timeRange,
     });
     const columns = results.response.columns.map((col) => col.name);
 
