@@ -22,11 +22,11 @@ describe('NER output', () => {
     });
 
     test('returns the correct icon for class MISC', () => {
-      expect(getClassIcon('MISC')).toBe('questionInCircle');
+      expect(getClassIcon('MISC')).toBe('question');
     });
 
     test('returns the default icon for an unknown class', () => {
-      expect(getClassIcon('UNKNOWN')).toBe('questionInCircle');
+      expect(getClassIcon('UNKNOWN')).toBe('question');
     });
   });
 

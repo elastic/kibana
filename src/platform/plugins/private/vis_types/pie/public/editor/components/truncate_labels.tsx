@@ -34,7 +34,7 @@ function TruncateLabelsOption({ disabled, value = null, setValue }: TruncateLabe
             defaultMessage: 'Number of characters for labels positioned outside the chart.',
           })}
           position="top"
-          type="iInCircle"
+          type="info"
           color="subdued"
         />
       }
