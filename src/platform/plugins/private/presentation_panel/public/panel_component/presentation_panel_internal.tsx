@@ -13,6 +13,7 @@ import { PanelLoader } from '@kbn/panel-loader';
 import {
   PublishesTitle,
   apiHasParentApi,
+  apiPublishesSavedObjectId,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -128,6 +129,9 @@ export const PresentationPanelInternal = <
         hasShadow={showShadow}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
+        data-preview-screenshot={
+          apiPublishesSavedObjectId(api) ? api.savedObjectId$.getValue() : undefined
+        }
         {...contentAttrs}
         css={styles.embPanel}
       >

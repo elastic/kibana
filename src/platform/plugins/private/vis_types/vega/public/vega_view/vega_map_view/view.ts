@@ -150,6 +150,9 @@ export class VegaMapView extends VegaBaseView {
         style,
         attributionControl: { customAttribution },
         container: this._container,
+        canvasContextAttributes: {
+          preserveDrawingBuffer: true,
+        },
         ...this.getMapParams({ ...zoomSettings }),
       });
 
