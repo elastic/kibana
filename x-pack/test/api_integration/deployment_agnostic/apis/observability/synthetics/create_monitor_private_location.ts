@@ -30,7 +30,7 @@ import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_mo
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('PrivateLocationAddMonitor', function () {
+  describe('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertestWithAuth = getService('supertest');
@@ -330,6 +330,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [spaceScopedPrivateLocation],
+        spaces: [SPACE_ID],
       };
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
@@ -560,6 +561,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         omitMonitorKeys({
           ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
           ...newMonitor,
+          spaces: ['default'],
         })
       );
     });
@@ -641,6 +643,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...httpMonitorJson,
         [ConfigKey.NAMESPACE]: 'default',
         locations: [privateLocation],
+        spaces: [],
       };
       let monitorId = '';
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
@@ -667,6 +670,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitor = {
         ...httpMonitorJson,
         locations: [privateLocation],
+        spaces: [],
       };
       let monitorId = '';
 

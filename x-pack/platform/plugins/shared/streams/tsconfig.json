@@ -56,6 +56,7 @@
     "@kbn/inference-common",
     "@kbn/lock-manager",
     "@kbn/core-pricing-common",
+    "@kbn/core-ui-settings-common",
     "@kbn/management-settings-ids"
   ]
 }

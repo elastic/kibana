@@ -25,7 +25,7 @@ import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginsSystem } from './plugins_system';
+import { findCircularDependencies, normalizeCycle, PluginsSystem } from './plugins_system';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 function createPlugin(
@@ -165,9 +165,11 @@ test('getPluginDependencies returns dependency tree with keys topologically sort
 test('`setupPlugins` throws plugin has missing required dependency', async () => {
   pluginsSystem.addPlugin(createPlugin('some-id', { required: ['missing-dep'] }));
 
-  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["some-id"]]`
-  );
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(`
+    [Error: Topological ordering of plugins did not complete due to circular dependencies:
+
+    Plugins with cyclic or missing dependencies: ["some-id"]]
+  `);
 });
 
 test('`setupPlugins` throws if plugins have circular required dependency', async () => {
@@ -175,9 +177,14 @@ test('`setupPlugins` throws if plugins have circular required dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { required: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { required: ['depends-on-1'] }));
 
-  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
-  );
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(`
+    [Error: Topological ordering of plugins did not complete due to circular dependencies:
+
+    Detected circular dependencies:
+      depends-on-1 -> depends-on-2 -> depends-on-1
+
+    Plugins with cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]
+  `);
 });
 
 test('`setupPlugins` throws if plugins have circular optional dependency', async () => {
@@ -185,9 +192,14 @@ test('`setupPlugins` throws if plugins have circular optional dependency', async
   pluginsSystem.addPlugin(createPlugin('depends-on-1', { optional: ['depends-on-2'] }));
   pluginsSystem.addPlugin(createPlugin('depends-on-2', { optional: ['depends-on-1'] }));
 
-  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(
-    `[Error: Topological ordering of plugins did not complete, these plugins have cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]`
-  );
+  await expect(pluginsSystem.setupPlugins(setupDeps)).rejects.toMatchInlineSnapshot(`
+    [Error: Topological ordering of plugins did not complete due to circular dependencies:
+
+    Detected circular dependencies:
+      depends-on-1 -> depends-on-2 -> depends-on-1
+
+    Plugins with cyclic or missing dependencies: ["depends-on-1","depends-on-2"]]
+  `);
 });
 
 test('`setupPlugins` ignores missing optional dependency', async () => {
@@ -814,6 +826,128 @@ describe('asynchronous plugins', () => {
       ]
     `);
   });
+});
+
+describe('normalizeCycle', () => {
+  it.each([
+    [[], []],
+    [['a'], ['a']],
+    [
+      ['a', 'b'],
+      ['a', 'b'],
+    ],
+    [
+      ['b', 'a'],
+      ['a', 'b'],
+    ],
+    [
+      ['a', 'b', 'c'],
+      ['a', 'b', 'c'],
+    ],
+    [
+      ['c', 'a', 'b'],
+      ['a', 'b', 'c'],
+    ],
+    [
+      ['a', 'c', 'b'],
+      ['a', 'c', 'b'],
+    ],
+  ])("normalizes cycle '%s'", (plugins: PluginName[], expected: PluginName[]) => {
+    expect(normalizeCycle(plugins)).toEqual(expected);
+  });
+
+  it.each([
+    [['a', 'b', 'a']],
+    [['b', 'a', 'b']],
+    [['a', 'b', 'c', 'a']],
+    [['c', 'a', 'b', 'c']],
+    [['a', 'c', 'b', 'a']],
+  ])("throws error for invalid cycle format '%s'", (plugins: PluginName[]) => {
+    expect(() => normalizeCycle(plugins)).toThrowError();
+  });
+});
+
+describe('findCircularDependencies', () => {
+  it.each([
+    [new Map([]) as Map<PluginName, Set<PluginName>>, []],
+    [new Map([['a', new Set(['b'])]]), []],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['e'])],
+      ]),
+      [],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+      ]),
+      [['a', 'b']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['a'])],
+      ]),
+      [['a', 'b', 'c']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['c'])],
+      ]),
+      [
+        ['a', 'b'],
+        ['c', 'd'],
+      ],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['c'])],
+      ]),
+      [['c', 'd']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['d'])],
+        ['d', new Set(['a'])],
+      ]),
+      [['a', 'b', 'c', 'd']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['a'])],
+        ['b', new Set(['a'])],
+      ]),
+      [['a', 'b']],
+    ],
+    [
+      new Map([
+        ['a', new Set(['b'])],
+        ['b', new Set(['c'])],
+        ['c', new Set(['a'])],
+        ['d', new Set(['e'])],
+      ]),
+      [['a', 'b', 'c']],
+    ],
+  ])(
+    "returns correct circular dependencies for '%s'",
+    (dependencyGraph: Map<PluginName, Set<PluginName>>, expected: PluginName[][]) => {
+      expect(findCircularDependencies(dependencyGraph)).toEqual(expected);
+    }
+  );
 });
 
 describe('stop', () => {
