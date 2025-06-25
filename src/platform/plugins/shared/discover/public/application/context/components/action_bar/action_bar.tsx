@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { useMemoizedStyles } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { ActionBarWarning } from './action_bar_warning';
 import { SurrDocType } from '../../services/context';
@@ -72,7 +72,7 @@ export function ActionBar({
   onChangeCount,
   type,
 }: ActionBarProps) {
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   const showWarning = !isDisabled && !isLoading && docCountAvailable < docCount;
   const isSuccessor = type === SurrDocType.SUCCESSORS;
