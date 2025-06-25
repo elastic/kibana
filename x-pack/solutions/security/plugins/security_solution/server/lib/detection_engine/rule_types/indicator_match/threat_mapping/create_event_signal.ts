@@ -25,6 +25,7 @@ import {
   MANY_NESTED_CLAUSES_ERR,
 } from './utils';
 import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
+import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 export const createEventSignal = async ({
   sharedParams,
@@ -109,7 +110,18 @@ export const createEventSignal = async ({
       }
     }
 
-    const ids = Array.from(signalsQueryMap.keys());
+    const { validEvents, invalidIds } = validateCompleteThreatMatches(
+      signalsQueryMap,
+      threatMapping
+    );
+
+    if (invalidIds.length > 0) {
+      ruleExecutionLogger.debug(
+        `Invalid signals: ${invalidIds.join(', ')} - skipping these signals`
+      );
+    }
+
+    const ids = Array.from(validEvents.keys());
     const indexFilter = {
       query: {
         bool: {

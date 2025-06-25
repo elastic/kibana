@@ -1947,5 +1947,104 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
       });
     });
+
+    describe('false positive prevention with AND conditions', () => {
+      const timestamp = new Date().toISOString();
+
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should prevent false positive alerts when event has partial matches in AND conditions', async () => {
+        const id = uuidv4();
+
+        // Create events: one that should match completely, one that should not match
+        await indexListOfDocuments([
+          // Event 1: Should match completely (user.name="user1" AND host.name="server")
+          {
+            ...eventDoc(uuidv4(), timestamp),
+            user: { name: 'user1' },
+            host: { name: 'server' },
+          },
+          // Event 2: Should NOT match (user.name="user2" AND host.name="server")
+          // This would have caused false positive before the fix
+          {
+            ...eventDoc(uuidv4(), timestamp),
+            user: { name: 'user2' },
+            host: { name: 'server' },
+          },
+        ]);
+
+        // Create threat indicators: one that matches Event 1 completely
+        // we need to create 3 threats to ensure we have more threats than events
+        await indexListOfDocuments([
+          {
+            ...threatDoc(uuidv4(), timestamp),
+            user: { name: 'user1' },
+            host: { name: 'server' },
+          },
+          // Additional threats to ensure we have more threats than events
+          {
+            ...threatDoc(uuidv4(), timestamp),
+            user: { name: 'user3' },
+            host: { name: 'server' },
+          },
+          {
+            ...threatDoc(uuidv4(), timestamp),
+            user: { name: 'user4' },
+            host: { name: 'server' },
+          },
+        ]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          query: '* and NOT agent.type:threat',
+          threat_query: '* and agent.type:threat',
+          threat_mapping: [
+            {
+              entries: [
+                {
+                  field: 'user.name',
+                  value: 'user.name',
+                  type: 'mapping',
+                },
+                {
+                  field: 'host.name',
+                  value: 'host.name',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+        };
+
+        const { previewId, logs } = await previewRule({
+          supertest,
+          rule,
+          invocationCount: 1,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          sort: ['user.name', ALERT_ORIGINAL_TIME],
+        });
+
+        // Should only generate 1 alert for the event that matches completely
+        expect(previewAlerts.length).to.eql(1);
+        expect(logs[0].errors).to.have.length(0);
+
+        // Verify the alert is for the correct event (user1)
+        const alert = previewAlerts[0]._source;
+        expect(alert?.user?.name).to.eql('user1');
+        expect(alert?.host?.name).to.eql('server');
+      });
+    });
   });
 };
