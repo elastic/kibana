@@ -227,6 +227,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
         'xpack.cases.unsafe.enableCaseSummary (boolean?)',
+        'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
         'xpack.cloud.cname (string?)',

@@ -49,7 +49,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, getAttachments }) => {
-    const { owner, permissions } = useCasesContext();
+    const { owner, permissions, settings } = useCasesContext();
 
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
@@ -150,6 +150,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
+      settings,
     });
 
     const pagination = useMemo(
