@@ -378,6 +378,7 @@ enabled:
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/platform/test/api_integration/apis/maps/config.ts
+  - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
