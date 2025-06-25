@@ -246,6 +246,7 @@ export const BulkCreateCasesResponseRt = rt.strict({
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
+  incremental_id: null,
 });
 
 export const CasesFindRequestSortFieldsRt = rt.keyof({
