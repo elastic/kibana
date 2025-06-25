@@ -374,7 +374,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       data-fetch-counter={fetchCounter.current}
       direction="column"
       css={[
-        styles.DscPage,
+        styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
             ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
