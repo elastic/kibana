@@ -60,7 +60,7 @@ describe('Edit agent policy', () => {
     cy.get('.euiButton').contains('Save changes').click();
 
     cy.wait('@updateAgentPolicy').then((interception) => {
-      expect(interception.request.body.description).to.equal('abc');
+      expect(interception.request.body.description).to.equal('desc');
     });
   });
 
