@@ -19,14 +19,17 @@ import {
   SavedObjectSanitizedDoc,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
-import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import {
+  ALL_NAMESPACES_STRING,
+  SavedObjectsUtils,
+  DEFAULT_NAMESPACE_STRING,
+} from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import {
   type Either,
@@ -308,7 +311,7 @@ export const performBulkUpdate = async <T>(
         id,
         type,
         ...(savedObjectNamespace &&
-          savedObjectNamespace !== DEFAULT_SPACE_ID && { namespace: savedObjectNamespace }),
+          savedObjectNamespace !== DEFAULT_NAMESPACE_STRING && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         attributes: updatedAttributes,
         updated_at: time,
