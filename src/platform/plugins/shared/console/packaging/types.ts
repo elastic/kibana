@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const esConfigMock = {
-  host: 'https://ttt-f2a30e.es.eu-west-1.aws.qa.elastic.cloud:443',
-};
+// Standalone type definitions - no imports to avoid compiling dependencies
+
+export interface OneConsoleProps {
+  lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
+  getEsConfig?: () => Promise<any>;
+  getAutocompleteEntities?: () => Promise<any>;
+}

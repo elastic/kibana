@@ -10,12 +10,6 @@
 import React from 'react';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 
-// Configure Monaco Environment for packaged use
-(window as any).MonacoEnvironment = {
-  getWorkerUrl: () => '',
-  getWorker: () => new Worker('data:application/javascript;charset=utf-8,'),
-};
-
 // Create a provider factory for packaging environment
 const createPackagingParsedRequestsProvider = () => {
   return (model: any) => {
@@ -42,7 +36,7 @@ setTimeout(() => {
   }
 }, 100);
 
-import { IntlProvider } from '@kbn/i18n-react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 // import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -68,14 +62,8 @@ import {
   RequestContextProvider,
 } from '../public/application/contexts';
 import { createApi, createEsHostService } from '../public/application/lib';
-import { ConsoleStartServices } from '../public/types';
 import { AutocompleteInfo } from '../public/services';
-
-export interface BootDependencies extends ConsoleStartServices {
-  lang?: 'en' | 'fr-FR' | 'ja-JP' | 'zh-CN';
-  getEsConfig?: () => Promise<any>;
-  getAutocompleteEntities?: () => Promise<any>;
-}
+import type { OneConsoleProps } from './types';
 
 const trackUiMetricMock = { count: () => {}, load: () => {} };
 const injectedMetadata = {
@@ -159,7 +147,7 @@ export const OneConsole = ({
   lang = 'en',
   getEsConfig,
   getAutocompleteEntities,
-}: BootDependencies) => {
+}: OneConsoleProps) => {
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
 
@@ -210,7 +198,7 @@ export const OneConsole = ({
     injectedMetadata,
     fatalErrors,
     executionContext,
-  }) as HttpSetup;
+  });
 
   // Create a mock HTTP service that intercepts specific API calls
   const http = {
@@ -227,7 +215,7 @@ export const OneConsole = ({
       // For all other requests, use the original HTTP service
       return originalHttp.get(path, options);
     },
-  };
+  } as HttpSetup;
 
   // await loadActiveApi(http);
 
@@ -252,9 +240,9 @@ export const OneConsole = ({
     <IntlProvider
       locale={lang}
       messages={selectedTranslations.messages}
-      formats={selectedTranslations.formats}
     >
       <ServicesContextProvider
+        // @ts-ignore
         value={{
           // ...coreStart,
           docLinkVersion: docLinks.DOC_LINK_VERSION,
@@ -280,7 +268,9 @@ export const OneConsole = ({
             settings={settings.toJSON()}
             customParsedRequestsProvider={createPackagingParsedRequestsProvider()}
           >
-            <Main />
+            <div className="kbnConsole">
+              <Main />
+            </div>
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

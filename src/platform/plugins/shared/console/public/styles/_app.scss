@@ -18,11 +18,11 @@
   }
 }
 
-.consoleTabs {
+.consoleTabs.consoleTabs {
   padding: 0 $euiSizeS;
 }
 
-.consoleEditorPanel {
+.consoleEditorPanel.consoleEditorPanel {
   display: flex;
   flex: 1 1 auto;
   position: absolute;
