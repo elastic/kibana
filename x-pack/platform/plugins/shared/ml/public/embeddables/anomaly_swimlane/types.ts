@@ -18,15 +18,19 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
 import type { SwimlaneType } from '@kbn/ml-common-constants/explorer_constants';
+import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
 
 import type {
   anomalySwimLaneEmbeddableStateSchema,
   anomalySwimlaneEmbeddableStateViewBySchema,
 } from '../../../server/embeddable/schemas';
+
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 
-import type { AnomalySwimlaneEmbeddableUserInput, MlEmbeddableBaseApi } from '../types';
+import type { MlEmbeddableBaseApi } from '../types';
 
+// Local definition to avoid circular dependencies
+type SwimlaneType = 'overall' | 'viewBy';
 export interface AnomalySwimLaneComponentApi {
   jobIds: PublishingSubject<JobId[]>;
   swimlaneType: PublishingSubject<SwimlaneType>;

@@ -39,11 +39,6 @@ import type {
   anomalyChartsEmbeddableOverridableStateSchema,
   anomalyChartsEmbeddableRuntimeStateSchema,
   anomalyChartsEmbeddableStateSchema,
-  anomalySwimlaneEmbeddableCustomInputOverallSchema,
-  anomalySwimlaneEmbeddableCustomInputSchema,
-  anomalySwimlaneEmbeddableCustomInputViewBySchema,
-  anomalySwimlaneEmbeddableUserInputSchema,
-  anomalySwimlaneInitialInputSchema,
 } from '../../server/embeddable/schemas';
 
 import type { MlDependencies } from '../application/app';
@@ -56,7 +51,6 @@ import type { TimeSeriesExplorerService } from '../application/util/time_series_
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
 
 import type {
-  MlEntity,
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
 } from './single_metric_viewer/types';
@@ -67,7 +61,6 @@ export type {
 } from './anomaly_swimlane/types';
 
 export type {
-  MlEntity,
   SingleMetricViewerEmbeddableUserInput,
   SingleMetricViewerEmbeddableState,
 } from './single_metric_viewer/types';
@@ -79,24 +72,7 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
   extends DefaultEmbeddableApi<StateType>,
     PublishesTimeRange {}
 
-/** Manual input by the user */
-export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableUserInputSchema
->;
-
-export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
-
-export type AnomalySwimlaneEmbeddableCustomInputViewBy = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputViewBySchema
->;
-
-export type AnomalySwimlaneEmbeddableCustomInputOverall = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputOverallSchema
->;
-
-export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
-  typeof anomalySwimlaneEmbeddableCustomInputSchema
->;
+export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;

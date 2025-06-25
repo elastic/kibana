@@ -13,22 +13,13 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
-import type { TypeOf } from '@kbn/config-schema';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
-
-import type { anomalySwimlanePropsSchema } from '../../server/embeddable/schemas';
+import type { AnomalySwimLaneProps } from '@kbn/ml-common-types/anomaly_swim_lane';
 
 import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimLaneEmbeddableState,
 } from '../embeddables/types';
-
-type AnomalySwimlaneEmbeddableCustomInputProps = TypeOf<typeof anomalySwimlanePropsSchema>;
-
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInputProps {
-  id?: string;
-  executionContext: KibanaExecutionContext;
-}
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
