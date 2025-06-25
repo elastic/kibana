@@ -14,6 +14,7 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
+x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
 x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_components @elastic/ml-ui
@@ -422,6 +423,8 @@ src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-generative-ai
+x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
