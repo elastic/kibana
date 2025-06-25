@@ -17,6 +17,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     files: { maxSize: true, allowedMimeTypes: true },
     stack: { enabled: true },
     unsafe: { enableCaseSummary: true },
+    incrementalId: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),

@@ -78,6 +78,9 @@ export interface CasesUiConfigType {
   unsafe?: {
     enableCaseSummary: boolean;
   };
+  incrementalId: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;
@@ -359,3 +362,6 @@ export type CaseViewAlertsTableProps = Pick<
   services?: AlertsTableProps['services'];
   caseData: CaseUI;
 };
+export interface CasesSettings {
+  displayIncrementalCaseId: boolean;
+}
