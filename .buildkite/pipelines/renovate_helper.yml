@@ -10,7 +10,7 @@ steps:
 
     steps:
       - command: .buildkite/scripts/steps/renovate/renovate_helper.sh
-        label: 'Run Renovate helper on PR opened or comment'
+        label: 'Run Renovate helper'
         key: renovate_helper
         timeout_in_minutes: 20
         retry:
@@ -21,7 +21,7 @@ steps:
       - wait: ~
 
       - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
-        label: 'Trigger Kibana PR pipeline on PR opened or comment'
+        label: 'Trigger Kibana PR pipeline'
         key: trigger_pr_opened
         timeout_in_minutes: 10
         retry:
@@ -34,7 +34,7 @@ steps:
     if: "build.env('GITHUB_PR_USER') == 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_TRIGGER_USER') != 'elastic-renovate-prod[bot]' && build.env('GITHUB_PR_EVENT_TYPE') == 'pull_request' && build.env('GITHUB_PR_EVENT_ACTION') == 'synchronize'"
     steps:
       - command: .buildkite/scripts/steps/renovate/trigger_pr.sh
-        label: 'Trigger Kibana PR pipeline on PR updated'
+        label: 'Trigger Kibana PR pipeline'
         key: trigger_pr_updated
         timeout_in_minutes: 10
         retry:
