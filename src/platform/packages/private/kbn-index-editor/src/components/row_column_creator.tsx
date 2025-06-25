@@ -63,15 +63,16 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
     () =>
       columns.map((column, index) => {
         return (
-          <ValueInput
-            key={column.id}
-            columnName={column.name}
-            onChange={updateRow(column.id)}
-            autoFocus={index === 0}
-            css={css`
-              min-width: ${230}px;
-            `}
-          />
+          <EuiFlexItem key={column.id} grow={false}>
+            <ValueInput
+              columnName={column.name}
+              onChange={updateRow(column.id)}
+              autoFocus={index === 0}
+              css={css`
+                min-width: ${230}px;
+              `}
+            />
+          </EuiFlexItem>
         );
       }),
     [columns, updateRow]
@@ -158,38 +159,48 @@ export const RowColumnCreator = ({ columns }: { columns: DatatableColumn[] }) =>
           }}
         >
           <EuiForm component="form" onSubmit={saveNewRow}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexGroup
-                gutterSize="s"
-                tabIndex={0}
-                className="eui-xScrollWithShadows hide-scrollbar"
-                css={css`
-                  &.hide-scrollbar {
-                    scrollbar-width: none;
-                    padding: 0 ${euiTheme.size.xxs};
-                  }
-                `}
-              >
-                {inputs}
-              </EuiFlexGroup>
-              <EuiButtonIcon
-                type="submit"
-                iconType="check"
-                display="base"
-                color="success"
-                aria-label={i18n.translate('indexEditor.addRow.save', {
-                  defaultMessage: 'Save',
-                })}
-              />
-              <EuiButtonIcon
-                onClick={cancelAction}
-                iconType="cross"
-                display="base"
-                color="danger"
-                aria-label={i18n.translate('indexEditor.addRow.cancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              />
+            <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem css={{ overflow: 'hidden' }}>
+                <EuiFlexGroup
+                  gutterSize="s"
+                  tabIndex={0}
+                  className="eui-xScrollWithShadows hide-scrollbar"
+                  css={css`
+                    &.hide-scrollbar {
+                      scrollbar-width: none;
+                      padding: 0 ${euiTheme.size.xxs};
+                    }
+                  `}
+                >
+                  {inputs}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiButtonIcon
+                      type="submit"
+                      iconType="check"
+                      display="base"
+                      color="success"
+                      aria-label={i18n.translate('indexEditor.addRow.save', {
+                        defaultMessage: 'Save',
+                      })}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonIcon
+                      onClick={cancelAction}
+                      iconType="cross"
+                      display="base"
+                      color="danger"
+                      aria-label={i18n.translate('indexEditor.addRow.cancel', {
+                        defaultMessage: 'Cancel',
+                      })}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiForm>
         </EuiPanel>
