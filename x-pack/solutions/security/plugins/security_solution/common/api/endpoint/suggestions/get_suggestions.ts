@@ -17,7 +17,7 @@ export const EndpointSuggestionsSchema = {
   }),
   params: schema.object({
     // Ready to be used with other suggestion types like endpoints
-    suggestion_type: schema.oneOf([schema.literal('eventFilters')]),
+    suggestion_type: schema.oneOf([schema.literal('eventFilters'), schema.literal('trustedApps')]),
   }),
 };
 

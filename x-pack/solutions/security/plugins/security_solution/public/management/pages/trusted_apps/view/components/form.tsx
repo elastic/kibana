@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
@@ -24,7 +24,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -283,20 +282,25 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const [basicFormConditions, setBasicFormConditions] =
-      useState<ArtifactFormComponentProps['item']>(item);
+      useState<ArtifactFormComponentProps['item']['entries']>(item.entries);
     const [advancedFormConditions, setAdvancedFormConditions] =
-      useState<ArtifactFormComponentProps['item']>(item);
-    const [areConditionsValid, setAreConditionsValid] = useState(!!item.entries.length);
+      useState<ArtifactFormComponentProps['item']['entries']>(item.entries);
+
+    // Combine related state into a single object to reduce re-renders
+    const [conditionsState, setConditionsState] = useState({
+      areValid: !!item.entries.length,
+      hasDuplicateFields: false,
+      hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard([item]),
+      hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry([item]),
+    });
+
     const [validationResult, setValidationResult] = useState<ValidationResult>(() =>
       validateValues(item)
     );
-    const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
-    const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
-      hasWrongOperatorWithWildcard([item])
-    );
-    const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
-      hasPartialCodeSignatureEntry([item])
-    );
+
+    // Use ref to prevent unnecessary re-renders in callbacks
+    const itemRef = useRef(item);
+    itemRef.current = item;
 
     const { http } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
@@ -316,7 +320,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       undefined,
       ENDPOINT_FIELDS_SEARCH_STRATEGY
     );
-
+    
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy } = useGetUpdatedTags(item);
 
@@ -324,39 +328,44 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       return isFormAdvancedMode ? 'advancedMode' : 'basicMode';
     }, [isFormAdvancedMode]);
 
-    const advancedModeToggle = [
-      {
-        id: 'basicMode',
-        label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.basicMode', {
-          defaultMessage: 'Basic',
-        }),
-        iconType: selectedFormType === 'basicMode' ? 'checkInCircleFilled' : 'empty',
-        'data-test-subj': 'basicModeButton',
-      },
-      {
-        id: 'advancedMode',
-        label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.advancedMode', {
-          defaultMessage: 'Advanced',
-        }),
-        iconType: selectedFormType === 'advancedMode' ? 'checkInCircleFilled' : 'empty',
-        'data-test-subj': 'advancedModeButton',
-      },
-    ];
+    const advancedModeToggle = useMemo(
+      () => [
+        {
+          id: 'basicMode',
+          label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.basicMode', {
+            defaultMessage: 'Basic',
+          }),
+          iconType: selectedFormType === 'basicMode' ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': 'basicModeButton',
+        },
+        {
+          id: 'advancedMode',
+          label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.advancedMode', {
+            defaultMessage: 'Advanced',
+          }),
+          iconType: selectedFormType === 'advancedMode' ? 'checkInCircleFilled' : 'empty',
+          'data-test-subj': 'advancedModeButton',
+        },
+      ],
+      [selectedFormType]
+    );
 
+    // Stabilized processChanged callback with minimal dependencies
     const processChanged = useCallback(
       (updatedFormValues: ArtifactFormComponentProps['item']) => {
         const updatedValidationResult: ValidationResult = validateValues(updatedFormValues);
         setValidationResult(updatedValidationResult);
 
-        if (isFormAdvancedMode) {
-          setAdvancedFormConditions(updatedFormValues);
+        // this check is not correct yet --- its late
+        if (isAdvancedModeEnabled(updatedFormValues)) {
+          setAdvancedFormConditions(updatedFormValues.entries);
         } else {
-          setBasicFormConditions(updatedFormValues);
+          setBasicFormConditions(updatedFormValues.entries);
         }
 
         onChange({
           item: updatedFormValues,
-          isValid: updatedValidationResult.isValid && areConditionsValid && hasFormChanged,
+          isValid: updatedValidationResult.isValid && conditionsState.areValid,
           confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS(
                 i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
@@ -366,7 +375,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             : undefined,
         });
       },
-      [isFormAdvancedMode, areConditionsValid, hasFormChanged, onChange]
+      [isAdvancedModeEnabled, conditionsState.areValid, onChange]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -412,7 +421,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleAdvancedModeChange = useCallback(
       (selectedId: string) => {
         const nextItem: ArtifactFormComponentProps['item'] = {
-          ...(selectedId === 'advancedMode' ? advancedFormConditions : basicFormConditions),
+          ...item,
+          entries: selectedId === 'advancedMode' ? advancedFormConditions : basicFormConditions,
           tags: getTagsUpdatedBy(
             'advancedMode',
             selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : []
@@ -422,7 +432,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         processChanged(nextItem);
         setHasFormChanged(true);
       },
-      [advancedFormConditions, basicFormConditions, getTagsUpdatedBy, processChanged]
+      [advancedFormConditions, basicFormConditions, getTagsUpdatedBy, item, processChanged]
     );
 
     const handleOnOsChange = useCallback(
@@ -555,58 +565,74 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         ? (item.entries as TrustedAppConditionEntry[])
         : [defaultConditionEntry()];
 
-      setAreConditionsValid(!!ta.entries.length);
+      setConditionsState((prev) => ({ ...prev, areValid: !!ta.entries.length }));
       return ta;
     }, [item]);
 
-    // Advanced mode conditions handler
-    // this function is called so many times - why
+    // Stabilized advanced mode conditions handler with proper change detection
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
-        const isCalledWithoutChanges =
-          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
-          isEqual(arg.exceptionItems[0]?.entries, trustedApp?.entries);
-
-        console.log('is called without change', !hasFormChanged, arg.exceptionItems[0]?.entries === undefined)
-        if (isCalledWithoutChanges) {
-          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
-
-          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+        // Early return for unnecessary calls to prevent infinite loops
+        if (!arg.exceptionItems?.[0] && !hasFormChanged) {
           return;
-        } else {
-          setHasDuplicateFields(false);
         }
 
-        setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
-        setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
+        const currentItem = itemRef.current;
+        const newEntries = arg.exceptionItems[0]?.entries;
+
+        // More robust change detection
+        const hasActualChanges =
+          newEntries && (!currentItem.entries || !isEqual(newEntries, currentItem.entries));
+
+        if (!hasActualChanges && hasFormChanged) {
+          // Only handle duplicate field detection for unchanged forms
+          if (newEntries) {
+            const addedFields = newEntries.map((e) => e.field) || [''];
+            setConditionsState((prev) => ({
+              ...prev,
+              hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
+            }));
+          }
+          return;
+        }
+
+        // Batch all condition state updates
+        setConditionsState((prev) => ({
+          ...prev,
+          hasDuplicateFields: false,
+          hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
+          hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
+          areValid:
+            arg.exceptionItems[0] !== undefined
+              ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
+              : false,
+        }));
 
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
                 ...arg.exceptionItems[0],
-                name: trustedApp?.name ?? '',
-                description: trustedApp?.description ?? '',
-                comments: trustedApp?.comments ?? [],
-                os_types: trustedApp?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: trustedApp?.tags ?? [],
-                meta: trustedApp.meta,
+                name: currentItem?.name ?? '',
+                description: currentItem?.description ?? '',
+                comments: currentItem?.comments ?? [],
+                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: currentItem?.tags ?? [],
+                meta: currentItem.meta,
               } as ArtifactFormComponentProps['item'])
             : {
-                ...trustedApp,
+                ...currentItem,
                 entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
               };
-        const hasValidConditions =
-          arg.exceptionItems[0] !== undefined
-            ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
-            : false;
 
-        setAreConditionsValid(hasValidConditions);
         processChanged(updatedItem);
-        if (!hasFormChanged) setHasFormChanged(true);
+        if (!hasFormChanged) {
+          setHasFormChanged(true);
+        }
       },
-      [trustedApp, hasFormChanged, processChanged]
+      [hasFormChanged, processChanged]
     );
 
+    // Stabilized memoization with minimal dependencies
     const exceptionBuilderComponentMemo = useMemo(
       () =>
         getExceptionBuilderComponentLazy({
@@ -629,7 +655,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           osTypes: trustedApp.os_types,
           showValueListModal: ShowValueListModal,
         }),
-      [autocompleteSuggestions, handleOnBuilderChange, http, indexPatterns, trustedApp]
+      [http, indexPatterns, trustedApp.entries, trustedApp.os_types, handleOnBuilderChange]
     );
 
     if (isIndexPatternLoading || !trustedApp) {
@@ -773,6 +799,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFormRow>
           </>
         ) : null}
+        <>
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule />
+          <EuiSpacer size="l" />
+          {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </>
       </EuiForm>
     );
   }
