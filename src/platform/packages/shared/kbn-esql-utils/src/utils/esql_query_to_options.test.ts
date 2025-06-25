@@ -14,7 +14,7 @@ import {
 } from './esql_query_to_options';
 
 const mockGetESQLResults = jest.fn();
-jest.mock('@kbn/esql-utils', () => ({
+jest.mock('./run_query', () => ({
   getESQLResults: () => mockGetESQLResults(),
 }));
 
@@ -31,10 +31,10 @@ describe('esqlQueryToOptions', () => {
         values: [['option1'], ['option2']],
       },
     });
-    const result = (await esqlQueryToOptions(
-      'FROM index | STATS BY column',
-      searchMock
-    )) as ESQLQueryToOptionsSuccess;
+    const result = (await esqlQueryToOptions({
+      query: 'FROM index | STATS BY column',
+      search: searchMock,
+    })) as ESQLQueryToOptionsSuccess;
     expect(esqlQueryToOptions.isSuccess(result)).toBe(true);
     expect('columns' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
@@ -53,10 +53,10 @@ describe('esqlQueryToOptions', () => {
         values: [['option1'], ['option2']],
       },
     });
-    const result = (await esqlQueryToOptions(
-      'FROM index',
-      searchMock
-    )) as ESQLQueryToOptionsFailure;
+    const result = (await esqlQueryToOptions({
+      query: 'FROM index',
+      search: searchMock,
+    })) as ESQLQueryToOptionsFailure;
     expect(esqlQueryToOptions.isSuccess(result)).toBe(false);
     expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
@@ -71,10 +71,11 @@ describe('esqlQueryToOptions', () => {
   });
   it('returns an error on a failed query', async () => {
     mockGetESQLResults.mockRejectedValueOnce('Invalid ES|QL query');
-    const result = (await esqlQueryToOptions(
-      "now this is the story all about how my life got flipped-turned upside down and i'd like to take a minute just sit right there i'll tell you how i became the prince of a town called bel air",
-      searchMock
-    )) as ESQLQueryToOptionsFailure;
+    const result = (await esqlQueryToOptions({
+      query:
+        "now this is the story all about how my life got flipped-turned upside down and i'd like to take a minute just sit right there i'll tell you how i became the prince of a town called bel air",
+      search: searchMock,
+    })) as ESQLQueryToOptionsFailure;
     expect(esqlQueryToOptions.isSuccess(result)).toBe(false);
     expect('options' in result).toBe(false);
     expect(result).toMatchInlineSnapshot(`
