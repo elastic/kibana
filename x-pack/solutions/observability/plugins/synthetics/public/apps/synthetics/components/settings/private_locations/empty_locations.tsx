@@ -12,19 +12,19 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { PRIVATE_LOCATIONS_ROUTE } from '../../../../../../common/constants';
+import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
 import {
-  setIsPrivateLocationFlyoutVisible,
+  setIsCreatePrivateLocationFlyoutVisible,
   setManageFlyoutOpen,
 } from '../../../state/private_locations/actions';
 
 export const EmptyLocations = ({
   inFlyout = true,
-  setIsFlyoutOpen,
+  setIsAddingNew,
   redirectToSettings,
 }: {
   inFlyout?: boolean;
-  setIsFlyoutOpen?: (val: boolean) => void;
+  setIsAddingNew?: (val: boolean) => void;
   redirectToSettings?: boolean;
 }) => {
   const dispatch = useDispatch();
@@ -52,7 +52,7 @@ export const EmptyLocations = ({
               fill
               isDisabled={!canSave}
               href={history.createHref({
-                pathname: PRIVATE_LOCATIONS_ROUTE,
+                pathname: PRIVATE_LOCATIOSN_ROUTE,
               })}
             >
               {ADD_LOCATION}
@@ -65,9 +65,9 @@ export const EmptyLocations = ({
               color="primary"
               fill
               onClick={() => {
-                setIsFlyoutOpen?.(true);
+                setIsAddingNew?.(true);
                 dispatch(setManageFlyoutOpen(true));
-                dispatch(setIsPrivateLocationFlyoutVisible(true));
+                dispatch(setIsCreatePrivateLocationFlyoutVisible(true));
               }}
             >
               {ADD_LOCATION}

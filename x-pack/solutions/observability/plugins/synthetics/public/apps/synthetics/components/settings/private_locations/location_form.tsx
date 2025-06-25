@@ -18,13 +18,7 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { AgentPolicyNeeded } from './agent_policy_needed';
 import { PolicyHostsField } from './policy_hosts';
 
-export const LocationForm = ({
-  privateLocations,
-  privateLocationToEdit,
-}: {
-  privateLocations: PrivateLocation[];
-  privateLocationToEdit?: PrivateLocation;
-}) => {
+export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLocation[] }) => {
   const { data } = useSelector(selectAgentPolicies);
   const { control, register } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
@@ -33,8 +27,6 @@ export const LocationForm = ({
     const tags = item.tags || [];
     return [...acc, ...tags];
   }, [] as string[]);
-
-  const isEditingLocation = privateLocationToEdit !== undefined;
 
   return (
     <>
@@ -56,8 +48,7 @@ export const LocationForm = ({
                 message: NAME_REQUIRED,
               },
               validate: (val: string) => {
-                return privateLocations.some((loc) => loc.label === val) &&
-                  val !== privateLocationToEdit?.label
+                return privateLocations.some((loc) => loc.label === val)
                   ? NAME_ALREADY_EXISTS
                   : undefined;
               },
@@ -65,13 +56,13 @@ export const LocationForm = ({
           />
         </EuiFormRow>
         <EuiSpacer />
-        <PolicyHostsField privateLocations={privateLocations} isDisabled={isEditingLocation} />
+        <PolicyHostsField privateLocations={privateLocations} />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector helpText={LOCATION_HELP_TEXT} isDisabled={isEditingLocation} />
+        <SpaceSelector helpText={LOCATION_HELP_TEXT} />
       </EuiForm>
     </>
   );

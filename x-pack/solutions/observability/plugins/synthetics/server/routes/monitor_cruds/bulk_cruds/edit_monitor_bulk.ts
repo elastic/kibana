@@ -83,10 +83,7 @@ export const syncEditedMonitorBulk = async ({
       } as unknown as MonitorFields,
     }));
     const [editedMonitorSavedObjects, editSyncResponse] = await Promise.all([
-      monitorConfigRepository.bulkUpdate({
-        monitors: data,
-        namespace: spaceId !== routeContext.spaceId ? spaceId : undefined,
-      }),
+      monitorConfigRepository.bulkUpdate({ monitors: data }),
       syncUpdatedMonitors({ monitorsToUpdate, routeContext, spaceId, privateLocations }),
     ]);
 
