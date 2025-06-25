@@ -21,7 +21,7 @@ import { SecurityRoutePageWrapper } from '../../common/components/security_route
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { SafeDataViewProvider } from '../../data_view_manager/containers/SafeDataViewProvider';
+import { DataViewProvider } from '../../data_view_manager/containers/SafeDataViewProvider';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const DEFAULT_SEARCH_RESULTS_PER_PAGE = 10;
@@ -88,12 +88,12 @@ const TimelinesPageContent = () => {
 export const TimelinesPage = React.memo(() => {
   return (
     <SecurityRoutePageWrapper pageName={SecurityPageName.timelines}>
-      <SafeDataViewProvider
+      <DataViewProvider
         scopes={[DataViewManagerScopeName.default, DataViewManagerScopeName.timeline]}
         fallback={null}
       >
         <TimelinesPageContent />
-      </SafeDataViewProvider>
+      </DataViewProvider>
     </SecurityRoutePageWrapper>
   );
 });

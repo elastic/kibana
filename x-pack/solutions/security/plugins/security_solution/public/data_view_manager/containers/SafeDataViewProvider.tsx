@@ -22,7 +22,7 @@ export interface DataViewContextValue {
 
 export const DataViewContext = createContext<DataViewContextValue | undefined>(undefined);
 
-export interface SafeDataViewProviderProps {
+export interface DataViewProviderProps {
   /**
    * Specify scopes that are required by the wrapped component
    * Only these scopes will be available through useDataViewSafe.
@@ -40,7 +40,7 @@ const fallbackElement = <div>{`WIP Loading`}</div>;
  * Data view provider. We call it safe, because obtaining data view instance (for specified scopes) inside of it
  * does not require addtional checks for nullish value or loading state.
  */
-export const SafeDataViewProvider: FC<PropsWithChildren<SafeDataViewProviderProps>> = ({
+export const DataViewProvider: FC<PropsWithChildren<DataViewProviderProps>> = ({
   children,
   scopes,
   fallback = fallbackElement,

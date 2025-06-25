@@ -80,7 +80,7 @@ export const useDataView = <IsSync extends boolean = false>(
   }, [dataViews, dataViewId, internalStatus, notifications, isSync]);
 
   // TODO: naming, maybe extract this into separate function or hook
-  const dataViewsPerScope = useContext(DataViewContext);
+  const syncDataViewsContext = useContext(DataViewContext);
 
   return useMemo(() => {
     if (!isSync) {
@@ -100,24 +100,25 @@ export const useDataView = <IsSync extends boolean = false>(
     }
 
     if (!newDataViewPickerEnabled) {
+      // TODO: remove this with when compatibility flag is no longer needed. This is for compatibility reasons only
       return {} as ConditionalReturn<IsSync>;
     }
 
-    if (!dataViewsPerScope) {
+    if (!syncDataViewsContext) {
       throw new Error('You can only use useDataViewSafe inside DataViewProvider');
     }
 
-    if (!(dataViewManagerScope in dataViewsPerScope.results)) {
+    if (!(dataViewManagerScope in syncDataViewsContext.results)) {
       throw new Error(
         'No safeguards exist for requested scope, make sure it is included in `scopes` property of the wrapping DataViewProvider'
       );
     }
 
-    const dataView = dataViewsPerScope.results[dataViewManagerScope].dataView;
+    const dataView = syncDataViewsContext.results[dataViewManagerScope].dataView;
 
     if (!dataView) {
       throw new Error(
-        'Missing data view. This error should not occur (earlier conditions should fire or the fallback should be still rendered instead)'
+        'Missing data view. This error should not occur (earlier conditions should fire or the fallback should be rendered instead in the provider)'
       );
     }
 
@@ -125,7 +126,7 @@ export const useDataView = <IsSync extends boolean = false>(
   }, [
     isSync,
     newDataViewPickerEnabled,
-    dataViewsPerScope,
+    syncDataViewsContext,
     dataViewManagerScope,
     retrievedDataView,
     internalStatus,
