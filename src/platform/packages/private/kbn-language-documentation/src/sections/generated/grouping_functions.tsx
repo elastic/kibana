@@ -65,7 +65,7 @@ export const functions = {
       label: i18n.translate('languageDocumentation.documentationESQL.categorize', {
         defaultMessage: 'CATEGORIZE',
       }),
-      preview: true,
+      preview: false,
       description: (
         <Markdown
           openLinksInNewTab

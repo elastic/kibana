@@ -157,7 +157,7 @@ describe('SessionPreviewContainer', () => {
 
     const { getByTestId, queryByTestId } = renderSessionPreview({
       ...mockContextValue,
-      isPreview: true,
+      isRulePreview: true,
     });
 
     expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('SessionPreviewContainer', () => {
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
         ...mockContextValue,
-        isPreview: true,
+        isRulePreview: true,
       });
 
       expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -272,7 +272,7 @@ describe('SessionPreviewContainer', () => {
       it('should not render link to session viewer if flyout is open in rule preview', () => {
         const { getByTestId, queryByTestId } = renderSessionPreview({
           ...mockContextValue,
-          isPreview: true,
+          isRulePreview: true,
         });
 
         expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -323,7 +323,7 @@ describe('SessionPreviewContainer', () => {
       it('should not render link to session viewer if flyout is open in rule preview', () => {
         const { getByTestId, queryByTestId } = renderSessionPreview({
           ...mockContextValue,
-          isPreview: true,
+          isRulePreview: true,
         });
 
         expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();

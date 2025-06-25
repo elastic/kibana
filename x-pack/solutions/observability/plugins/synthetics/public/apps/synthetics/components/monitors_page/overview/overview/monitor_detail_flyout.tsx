@@ -11,7 +11,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
-  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -32,11 +31,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { FlyoutParamProps } from './types';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
-import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ActionsPopover } from './actions_popover';
 import {
   getMonitorAction,
@@ -48,10 +45,13 @@ import {
   selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
+import { ErrorCallout } from '../../../common/components/error_callout';
+import { MonitorStatus } from '../../../common/components/monitor_status';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
@@ -287,7 +287,7 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <EuiErrorBoundary>{error?.body?.message}</EuiErrorBoundary>}
+      {error && !isLoading && <ErrorCallout {...error} />}
       {isLoading && <LoadingState />}
       {monitorObject && (
         <>

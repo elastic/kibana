@@ -8,7 +8,10 @@
 import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import {
+  shouldCreateAlertsInAllSpaces,
+  type RuleExecutorOptions,
+} from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -28,6 +31,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
 
+import type { UntypedRuleTypeAlerts } from '@kbn/alerting-plugin/server/types';
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
@@ -56,13 +60,15 @@ const augmentAlerts = async <T>({
   options,
   kibanaVersion,
   currentTimeOverride,
+  dangerouslyCreateAlertsInAllSpaces,
 }: {
   alerts: Array<{ _id: string; _source: T }>;
   options: RuleExecutorOptions<any, any, any, any, any>;
   kibanaVersion: string;
   currentTimeOverride: Date | undefined;
+  dangerouslyCreateAlertsInAllSpaces?: boolean;
 }) => {
-  const commonRuleFields = getCommonAlertFields(options);
+  const commonRuleFields = getCommonAlertFields(options, dangerouslyCreateAlertsInAllSpaces);
   const maintenanceWindowIds: string[] =
     alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
 
@@ -248,6 +254,11 @@ export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
+    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
+      ruleTypeId: type.id,
+      ruleTypeAlertDef: type.alerts as unknown as UntypedRuleTypeAlerts,
+      logger,
+    });
     return {
       ...type,
       executor: async (options) => {
@@ -309,6 +320,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride: undefined,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const response = await ruleDataClientWriter.bulk({
@@ -577,6 +589,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
                   currentTimeOverride,
+                  dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
                 });
 
                 const bulkResponse = await ruleDataClientWriter.bulk({

@@ -90,7 +90,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.issueColumnTitle', {
       defaultMessage: 'Issue',
     }),
-    width: '30px',
+    width: '28px',
     sortable: true,
     align: 'left',
   },
@@ -106,7 +106,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
-    width: '24px',
+    width: '20px',
     sortable: true,
     align: 'left',
   },
@@ -114,7 +114,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.resolutionColumnTitle', {
       defaultMessage: 'Resolution',
     }),
-    width: '24px',
+    width: '20px',
     sortable: true,
     align: 'left',
   },
@@ -122,7 +122,7 @@ const cellToLabelMap: Record<
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.actionsColumnTitle', {
       defaultMessage: 'Actions',
     }),
-    width: '30px',
+    width: '8px',
     sortable: false,
     align: 'right',
   },

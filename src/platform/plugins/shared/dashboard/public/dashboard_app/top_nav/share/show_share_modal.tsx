@@ -21,7 +21,6 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { DashboardLocatorParams } from '../../../../common';
-import { convertPanelSectionMapsToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -111,13 +110,10 @@ export function ShowShareModal({
     );
   };
 
-  const {
-    panels: allUnsavedPanelsMap,
-    sections: allUnsavedSectionsMap,
-    ...unsavedDashboardState
-  } = getDashboardBackupService().getState(savedObjectId) ?? {};
+  const unsavedDashboardState =
+    getDashboardBackupService().getState(savedObjectId) ?? ({} as DashboardLocatorParams);
 
-  const hasPanelChanges = allUnsavedPanelsMap !== undefined;
+  const hasPanelChanges = unsavedDashboardState.panels !== undefined;
 
   const unsavedDashboardStateForLocator: DashboardLocatorParams = {
     ...unsavedDashboardState,
@@ -125,12 +121,6 @@ export function ShowShareModal({
       unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
     references: unsavedDashboardState.references as DashboardLocatorParams['references'],
   };
-  if (allUnsavedPanelsMap || allUnsavedSectionsMap) {
-    unsavedDashboardStateForLocator.panels = convertPanelSectionMapsToPanelsArray(
-      allUnsavedPanelsMap ?? {},
-      allUnsavedSectionsMap ?? {}
-    );
-  }
 
   const locatorParams: DashboardLocatorParams = {
     dashboardId: savedObjectId,
@@ -160,7 +150,6 @@ export function ShowShareModal({
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
-    allowEmbed: true,
     allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,
@@ -182,8 +171,10 @@ export function ShowShareModal({
                 />
               }
             >
-              {hasPanelChanges
-                ? shareModalStrings.getDraftSharePanelChangesWarning()
+              {Boolean(unsavedDashboardState?.panels)
+                ? allowShortUrl
+                  ? shareModalStrings.getDraftSharePanelChangesWarning()
+                  : shareModalStrings.getSnapshotShareWarning()
                 : shareModalStrings.getDraftShareWarning('link')}
             </EuiCallOut>
           ),
@@ -205,6 +196,12 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
           computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
@@ -221,13 +218,6 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    embedUrlParamExtensions: [
-      {
-        paramName: 'embed',
-        component: EmbedUrlParamExtension,
-      },
-    ],
-    snapshotShareWarning: hasPanelChanges ? shareModalStrings.getSnapshotShareWarning() : undefined,
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR

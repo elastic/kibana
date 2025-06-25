@@ -26,8 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
-    // code that lives in multiple routes. This code is also tested in each of the routes it lives in
-    // but not in as much detail and relying on mocks. This test loads an es_archive containing rules
+    // code that lives in multiple routes. This test loads an es_archive containing rules
     // created in 7.15 with legacy actions.
     // For new routes that do any updates on a rule, please ensure that you are including the legacy
     // action migration code. We are monitoring legacy action telemetry to clean up once we see their

@@ -402,7 +402,6 @@ export const getTopNavConfig = (
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
             anchorElement,
-            allowEmbed: true,
             allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,

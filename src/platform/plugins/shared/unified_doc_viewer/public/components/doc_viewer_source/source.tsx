@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './source.scss';
-
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { isLegacyTableEnabled, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { omit } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks';
 import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
@@ -102,8 +102,8 @@ export const DocViewerSource = ({
   }, [editor, jsonValue, useDocExplorer, setEditorHeight, decreaseAvailableHeightBy]);
 
   const loadingState = (
-    <div className="sourceViewer__loading">
-      <EuiLoadingSpinner className="sourceViewer__loadingSpinner" />
+    <div css={styles.loading}>
+      <EuiLoadingSpinner css={styles.loadingSpinner} />
       <EuiText size="xs" color="subdued">
         <FormattedMessage id="unifiedDocViewer.loadingJSON" defaultMessage="Loading JSON" />
       </EuiText>
@@ -152,4 +152,20 @@ export const DocViewerSource = ({
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />
   );
+};
+
+const styles = {
+  loading: css({
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'left',
+    flex: '1 0 100%',
+    textAlign: 'center',
+    height: '100%',
+    width: '100%',
+    marginTop: euiThemeVars.euiSizeS,
+  }),
+  loadingSpinner: css({
+    marginRight: euiThemeVars.euiSizeS,
+  }),
 };

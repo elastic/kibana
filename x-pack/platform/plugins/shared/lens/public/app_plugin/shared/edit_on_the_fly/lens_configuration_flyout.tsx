@@ -363,7 +363,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          <div ref={editorContainer} style={{ zIndex: 0 }} />
+          <div ref={editorContainer} />
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`

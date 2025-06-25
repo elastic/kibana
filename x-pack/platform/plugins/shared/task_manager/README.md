@@ -57,7 +57,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
-A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/sample_task_plugin/](../../../../../x-pack/test/plugin_api_integration/plugins/sample_task_plugin/server/plugin.ts) folder.
+A sample task can be found in the [x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/](../../../../../x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/plugin.ts) folder.
 
 ```js
 export class Plugin {
@@ -678,8 +678,8 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 - Integration tests:
   ```
-  node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
-  node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
+  node scripts/functional_tests_server.js --config x-pack/platform/test/plugin_api_integration/config.ts
+  node scripts/functional_test_runner --config x-pack/platform/test/plugin_api_integration/config.ts
   ```
 
 ## Monitoring

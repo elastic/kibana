@@ -205,7 +205,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
   /**
    * Sends actions to SentinelOne directly (via Connector)
-   * @private
+   * @internal
    */
   private async sendAction<
     TResponse = unknown,
@@ -785,8 +785,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: terminateScriptInfo.buildScriptArgs({
-                // @ts-expect-error TS2339: Property 'process_name' does not exist (`.validateRequest()` has already validated that `process_name` exists)
-                processName: reqIndexOptions.parameters.process_name,
+                processName: (reqIndexOptions.parameters as ResponseActionParametersWithProcessName)
+                  .process_name,
               }),
             },
           });
@@ -978,7 +978,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * retrieve script info. for scripts that are used to handle Elastic response actions
    * @param scriptType
    * @param osType
-   * @private
+   * @internal
    */
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
@@ -1092,7 +1092,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!agentResponse) {
       throw new ResponseActionAgentResponseEsDocNotFound(
-        `Action ID [${actionId}] for agent ID [${actionId}] is still pending`,
+        `Action ID [${actionId}] for agent ID [${agentId}] is still pending`,
         404
       );
     }
@@ -1105,7 +1105,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * document for them and returns it. (NOTE: the response is NOT written to ES - only returned)
    * @param actionRequests
    * @param command
-   * @private
+   * @internal
    */
   private async checkPendingIsolateOrReleaseActions(
     actionRequests: Array<
@@ -1592,7 +1592,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
    * Calculates the state of a SentinelOne Task using the response from their task status API. It
    * returns a normalized object with basic info derived from the task status value
    * @param taskStatusRecord
-   * @private
+   * @internal
    */
   private calculateTaskState(taskStatusRecord: SentinelOneRemoteScriptExecutionStatus): {
     isPending: boolean;

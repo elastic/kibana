@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { waitForDocumentInIndex } from '../../../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+import { waitForDocumentInIndex } from '@kbn/test-suites-xpack-observability/alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -30,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/202337
+  // Failing: See https://github.com/elastic/kibana/issues/224683
   describe.skip('SyntheticsCustomStatusRule', function () {
     // Test failing on MKI and ECH
     this.tags(['skipCloud']);
@@ -616,21 +616,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
         });
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: http://localhost:5620/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
+        expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
       let downDocs: any[] = [];
