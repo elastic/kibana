@@ -11,3 +11,4 @@ export { ProductFeaturesRegistry } from './src/product_features_registry';
 export type { IPricingTiersClient, PricingProductFeature } from './src/types';
 export type { PricingProduct, TiersConfig } from './src/pricing_tiers_config';
 export { PricingTiersClient } from './src/pricing_tiers_client';
+export { registerAnalyticsContextProvider } from './src/register_analytics_context';

@@ -16,6 +16,7 @@ const createStartContractMock = (): jest.Mocked<PricingServiceStart> => ({
 });
 
 const createMock = (): jest.Mocked<PublicMethodsOf<PricingService>> => ({
+  setup: jest.fn(),
   start: jest.fn().mockImplementation(createStartContractMock),
 });
 

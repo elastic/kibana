@@ -9,13 +9,14 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import type { ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import type { Observable } from 'rxjs';
 import { registerPricingRoutes } from './pricing';
 import type { PricingConfigType } from '../pricing_config';
 
 export function registerRoutes(
   router: IRouter,
   params: {
-    pricingConfig: PricingConfigType;
+    pricingConfig$: Observable<PricingConfigType>;
     productFeaturesRegistry: ProductFeaturesRegistry;
   }
 ) {

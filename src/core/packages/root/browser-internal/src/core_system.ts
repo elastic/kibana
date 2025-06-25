@@ -267,6 +267,7 @@ export class CoreSystem {
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const featureFlags = this.featureFlags.setup({ injectedMetadata });
+      this.pricing.setup({ analytics });
 
       const core: InternalCoreSetup = {
         analytics,

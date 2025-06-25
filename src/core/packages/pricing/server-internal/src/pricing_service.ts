@@ -9,17 +9,19 @@
 
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import type { IConfigService } from '@kbn/config';
 import {
   type PricingProductFeature,
   ProductFeaturesRegistry,
   PricingTiersClient,
+  registerAnalyticsContextProvider,
 } from '@kbn/core-pricing-common';
 import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { PricingConfigType } from './pricing_config';
 import { registerRoutes } from './routes';
 
@@ -28,6 +30,7 @@ interface PrebootDeps {
 }
 
 interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
   http: InternalHttpServiceSetup;
 }
 
@@ -36,13 +39,15 @@ export class PricingService {
   private readonly configService: IConfigService;
   private readonly logger: Logger;
   private readonly productFeaturesRegistry: ProductFeaturesRegistry;
-  private pricingConfig: PricingConfigType;
+  private readonly pricingConfig$: BehaviorSubject<PricingConfigType>;
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('pricing-service');
     this.configService = core.configService;
     this.productFeaturesRegistry = new ProductFeaturesRegistry();
-    this.pricingConfig = { tiers: { enabled: false, products: [] } };
+    this.pricingConfig$ = new BehaviorSubject<PricingConfigType>({
+      tiers: { enabled: false, products: [] },
+    });
   }
 
   public preboot({ http }: PrebootDeps) {
@@ -51,23 +56,22 @@ export class PricingService {
     // The preboot server has no need for real pricing.
     http.registerRoutes('', (router) => {
       registerRoutes(router, {
-        pricingConfig: this.pricingConfig,
+        pricingConfig$: this.pricingConfig$,
         productFeaturesRegistry: this.productFeaturesRegistry,
       });
     });
   }
 
-  public async setup({ http }: SetupDeps) {
+  public async setup({ analytics, http }: SetupDeps) {
     this.logger.debug('Setting up pricing service');
 
-    this.pricingConfig = await firstValueFrom(
-      this.configService.atPath<PricingConfigType>('pricing')
-    );
+    this.configService.atPath<PricingConfigType>('pricing').subscribe(this.pricingConfig$);
 
     registerRoutes(http.createRouter(''), {
-      pricingConfig: this.pricingConfig,
+      pricingConfig$: this.pricingConfig$,
       productFeaturesRegistry: this.productFeaturesRegistry,
     });
+    registerAnalyticsContextProvider(analytics, this.pricingConfig$);
 
     return {
       registerProductFeatures: (features: PricingProductFeature[]) => {
@@ -79,10 +83,8 @@ export class PricingService {
   }
 
   public start() {
-    const tiersClient = new PricingTiersClient(
-      this.pricingConfig.tiers,
-      this.productFeaturesRegistry
-    );
+    const tiers$ = this.pricingConfig$.pipe(map(({ tiers }) => tiers));
+    const tiersClient = new PricingTiersClient(tiers$, this.productFeaturesRegistry);
 
     return {
       isFeatureAvailable: tiersClient.isFeatureAvailable,

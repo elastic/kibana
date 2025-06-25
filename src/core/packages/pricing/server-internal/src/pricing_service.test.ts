@@ -14,10 +14,13 @@ import {
   InternalHttpServicePrebootMock,
   InternalHttpServiceSetupMock,
 } from '@kbn/core-http-server-mocks';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { PricingService } from './pricing_service';
 import type { PricingConfigType } from './pricing_config';
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AsyncReturnType } from 'type-fest';
 
 describe('PricingService', () => {
   let prebootHttp: InternalHttpServicePrebootMock;
@@ -55,7 +58,7 @@ describe('PricingService', () => {
 
       // Preboot uses default config, not the loaded config
       const expectedDefaultConfig = { tiers: { enabled: false, products: [] } };
-      expect((service as any).pricingConfig).toEqual(expectedDefaultConfig);
+      expect((service as any).pricingConfig$.value).toEqual(expectedDefaultConfig);
 
       // Verify that routes are registered on the preboot HTTP service
       expect(prebootHttp.registerRoutes).toHaveBeenCalledWith('', expect.any(Function));
@@ -63,9 +66,47 @@ describe('PricingService', () => {
   });
 
   describe('#setup()', () => {
+    let analyticsSetupMock: jest.Mocked<AnalyticsServiceSetup>;
+
+    beforeEach(() => {
+      service.preboot({ http: prebootHttp });
+      analyticsSetupMock = analyticsServiceMock.createAnalyticsServiceSetup();
+    });
+
+    it('registers the analytics context provider', async () => {
+      await service.setup({ analytics: analyticsSetupMock, http: setupHttp });
+
+      expect(analyticsSetupMock.registerContextProvider).toHaveBeenCalledTimes(1);
+      expect(analyticsSetupMock.registerContextProvider.mock.calls[0][0]).toMatchInlineSnapshot(
+        {
+          context$: expect.any(Observable),
+        },
+        `
+        Object {
+          "context$": Any<Observable>,
+          "name": "pricing",
+          "schema": Object {
+            "pricing_tiers": Object {
+              "_meta": Object {
+                "description": "List of active pricing tiers for products",
+                "optional": true,
+              },
+              "items": Object {
+                "_meta": Object {
+                  "description": "Active pricing tier joined as \`product_name-tier_name\`",
+                },
+                "type": "keyword",
+              },
+              "type": "array",
+            },
+          },
+        }
+      `
+      );
+    });
+
     it('registers the pricing routes', async () => {
-      await service.preboot({ http: prebootHttp });
-      await service.setup({ http: setupHttp });
+      await service.setup({ analytics: analyticsSetupMock, http: setupHttp });
 
       expect(setupHttp.createRouter).toHaveBeenCalledWith('');
       expect(router.get).toHaveBeenCalledTimes(1);
@@ -83,8 +124,7 @@ describe('PricingService', () => {
     });
 
     it('allows registering product features', async () => {
-      await service.preboot({ http: prebootHttp });
-      const setup = await service.setup({ http: setupHttp });
+      const setup = await service.setup({ analytics: analyticsSetupMock, http: setupHttp });
 
       const mockFeatures: PricingProductFeature[] = [
         {
@@ -109,18 +149,21 @@ describe('PricingService', () => {
   });
 
   describe('#start()', () => {
+    let setup: AsyncReturnType<PricingService['setup']>;
+
+    beforeEach(async () => {
+      service.preboot({ http: prebootHttp });
+      const analyticsSetupMock = analyticsServiceMock.createAnalyticsServiceSetup();
+      setup = await service.setup({ analytics: analyticsSetupMock, http: setupHttp });
+    });
+
     it('returns a PricingTiersClient with the configured tiers', async () => {
-      await service.preboot({ http: prebootHttp });
-      await service.setup({ http: setupHttp });
       const start = service.start();
 
       expect(start).toHaveProperty('isFeatureAvailable');
     });
 
     it('returns a PricingTiersClient that can check feature availability', async () => {
-      await service.preboot({ http: prebootHttp });
-      const setup = await service.setup({ http: setupHttp });
-
       const mockFeatures: PricingProductFeature[] = [
         {
           id: 'feature1',

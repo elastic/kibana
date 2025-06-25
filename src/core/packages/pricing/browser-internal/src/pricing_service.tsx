@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject, of } from 'rxjs';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { GetPricingResponse, PricingServiceStart } from '@kbn/core-pricing-browser';
-import { PricingTiersClient, ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import {
+  PricingTiersClient,
+  ProductFeaturesRegistry,
+  registerAnalyticsContextProvider,
+} from '@kbn/core-pricing-common';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 
+interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
 interface StartDeps {
   http: InternalHttpStart;
 }
@@ -28,14 +37,23 @@ const defaultPricingResponse: GetPricingResponse = {
  * @internal
  */
 export class PricingService {
+  private readonly pricingResponse$ = new Subject<GetPricingResponse>();
+
+  public setup({ analytics }: SetupDeps): void {
+    registerAnalyticsContextProvider(analytics, this.pricingResponse$);
+  }
+
   public async start({ http }: StartDeps): Promise<PricingServiceStart> {
     const isAnonymous = http.anonymousPaths.isAnonymous(window.location.pathname);
     const pricingResponse = isAnonymous
       ? defaultPricingResponse
       : await http.get<GetPricingResponse>('/internal/core/pricing');
 
+    this.pricingResponse$.next(pricingResponse);
+    this.pricingResponse$.complete(); // complete the subject after fetching the pricing response as we know that we won't refresh it later
+
     const tiersClient = new PricingTiersClient(
-      pricingResponse.tiers,
+      of(pricingResponse.tiers),
       new ProductFeaturesRegistry(pricingResponse.product_features)
     );
 

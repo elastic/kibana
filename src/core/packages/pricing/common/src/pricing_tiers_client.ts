@@ -8,6 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
+import type { Observable } from 'rxjs';
 import { IPricingTiersClient } from './types';
 import { PricingProduct, TiersConfig } from './pricing_tiers_config';
 import { ProductFeaturesRegistry } from './product_features_registry';
@@ -21,16 +22,22 @@ import { ProductFeaturesRegistry } from './product_features_registry';
  * @public
  */
 export class PricingTiersClient implements IPricingTiersClient {
+  private tiers?: TiersConfig;
+
   /**
    * Creates a new PricingTiersClient instance.
    *
-   * @param tiers - The current pricing tiers configuration
+   * @param tiers$ - Observable with the current pricing tiers configuration
    * @param productFeaturesRegistry - Registry containing the available product features
    */
   constructor(
-    private readonly tiers: TiersConfig,
+    tiers$: Observable<TiersConfig>,
     private readonly productFeaturesRegistry: ProductFeaturesRegistry
-  ) {}
+  ) {
+    tiers$.subscribe((tiers) => {
+      this.tiers = tiers;
+    });
+  }
 
   /**
    * Checks if a product is active in the current pricing tier configuration.
@@ -40,7 +47,9 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @internal
    */
   private isActiveProduct = (product: PricingProduct) => {
-    return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
+    return Boolean(
+      this.tiers?.products?.some((currentProduct) => isEqual(currentProduct, product))
+    );
   };
 
   /**
@@ -50,7 +59,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @internal
    */
   private isEnabled = () => {
-    return this.tiers.enabled;
+    return this.tiers?.enabled ?? false;
   };
 
   /**

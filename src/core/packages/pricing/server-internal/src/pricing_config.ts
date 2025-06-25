@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { tiersConfigSchema } from '@kbn/core-pricing-common/src/pricing_tiers_config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
-export const pricingConfig = {
+const configSchema = schema.object({
+  tiers: tiersConfigSchema,
+});
+
+export const pricingConfig: ServiceConfigDescriptor<PricingConfigType> = {
   path: 'pricing',
-  schema: schema.object({
-    tiers: tiersConfigSchema,
-  }),
+  schema: configSchema,
 };
 
-export type PricingConfigType = TypeOf<typeof pricingConfig.schema>;
+export type PricingConfigType = TypeOf<typeof configSchema>;

@@ -11,10 +11,11 @@ import { PricingTiersClient } from './pricing_tiers_client';
 import { ProductFeaturesRegistry } from './product_features_registry';
 import type { PricingProductFeature } from './types';
 import type { TiersConfig } from './pricing_tiers_config';
+import { type Observable, of } from 'rxjs';
 
 describe('PricingTiersClient', () => {
   let productFeaturesRegistry: ProductFeaturesRegistry;
-  let tiersConfig: TiersConfig;
+  let tiersConfig: Observable<TiersConfig>;
   let client: PricingTiersClient;
 
   beforeEach(() => {
@@ -24,10 +25,10 @@ describe('PricingTiersClient', () => {
   describe('isFeatureAvailable', () => {
     describe('when tiers are disabled', () => {
       beforeEach(() => {
-        tiersConfig = {
+        tiersConfig = of({
           enabled: false,
           products: undefined,
-        };
+        });
         client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
       });
 
@@ -49,13 +50,13 @@ describe('PricingTiersClient', () => {
 
     describe('when tiers are enabled', () => {
       beforeEach(() => {
-        tiersConfig = {
+        tiersConfig = of({
           enabled: true,
           products: [
             { name: 'observability', tier: 'complete' },
             { name: 'security', tier: 'essentials' },
           ],
-        };
+        });
         client = new PricingTiersClient(tiersConfig, productFeaturesRegistry);
       });
 

@@ -9,12 +9,13 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import type { ProductFeaturesRegistry } from '@kbn/core-pricing-common';
+import { firstValueFrom, type Observable } from 'rxjs';
 import type { PricingConfigType } from '../pricing_config';
 
 export function registerPricingRoutes(
   router: IRouter,
   params: {
-    pricingConfig: PricingConfigType;
+    pricingConfig$: Observable<PricingConfigType>;
     productFeaturesRegistry: ProductFeaturesRegistry;
   }
 ) {
@@ -32,9 +33,10 @@ export function registerPricingRoutes(
       validate: false,
     },
     async (_context, _req, res) => {
+      const pricingConfig = await firstValueFrom(params.pricingConfig$);
       return res.ok({
         body: {
-          tiers: params.pricingConfig.tiers,
+          tiers: pricingConfig.tiers,
           product_features: params.productFeaturesRegistry.asObject(),
         },
       });
