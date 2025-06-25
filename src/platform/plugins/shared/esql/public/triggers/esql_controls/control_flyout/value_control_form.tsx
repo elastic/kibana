@@ -53,7 +53,9 @@ interface ValueControlFormProps {
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
 To get the agent field values use: 
-FROM logs-* | STATS BY agent
+FROM logs-* 
+|  WHERE @timestamp <=?_tend and @timestamp >?_tstart
+| STATS BY agent
 */`;
 
 export function ValueControlForm({
@@ -200,7 +202,10 @@ export function ValueControlForm({
     ) {
       const queryForValues =
         variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
+          ? `FROM ${getIndexPatternFromESQLQuery(
+              queryString
+            )}  /* | WHERE @timestamp <=?_tend and @timestamp >?_tstart */
+ | STATS BY ${valuesRetrieval}`
           : '';
       onValuesQuerySubmit(queryForValues);
     }
