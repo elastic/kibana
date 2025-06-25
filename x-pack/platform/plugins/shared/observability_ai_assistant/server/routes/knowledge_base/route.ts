@@ -12,7 +12,6 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import pRetry from 'p-retry';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -296,7 +295,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       ...entry,
     }));
 
-    await pRetry(() => client.addKnowledgeBaseBulkEntries({ entries }), { retries: 10 });
+    await client.addKnowledgeBaseBulkEntries({ entries });
 
     resources.logger.info(`Imported ${entries.length} knowledge base entries`);
   },

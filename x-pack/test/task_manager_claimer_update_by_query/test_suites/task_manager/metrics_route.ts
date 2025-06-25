@@ -46,7 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  describe('task manager metrics', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/225112
+  describe.skip('task manager metrics', () => {
     describe('task claim', () => {
       it('should increment task claim success/total counters', async () => {
         // counters are reset every 30 seconds, so wait until the start of a
