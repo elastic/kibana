@@ -173,6 +173,5 @@
     "@kbn/management-settings-ids",
     "@kbn/apm-sources-access-plugin",
     "@kbn/event-log-plugin",
-    "@kbn/intercepts-plugin",
   ]
 }
