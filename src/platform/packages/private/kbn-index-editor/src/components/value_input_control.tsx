@@ -45,15 +45,11 @@ export const getCellValueRenderer =
       cellValue = row.flattened[columnId];
     }
 
-    if (cellValue == null) {
-      return null;
-    }
-
     const isEditing = editingCell.row === rowIndex && editingCell.col === columnId;
 
     if (isEditing) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        <div style={{ display: 'flex', height: '100%' }}>
           <ValueInput
             onBlur={() => {
               onEditStart({ row: null, col: null });
@@ -71,12 +67,14 @@ export const getCellValueRenderer =
     }
 
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <span
+      <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
+        <EuiFlexItem>
+          <div
             tabIndex={0}
             style={{
               cursor: 'pointer',
+              height: '100%',
+              width: '100%',
             }}
             onClick={() => onEditStart({ row: rowIndex, col: columnId })}
             onKeyDown={(e) => {
@@ -84,7 +82,7 @@ export const getCellValueRenderer =
             }}
           >
             {cellValue}
-          </span>
+          </div>
         </EuiFlexItem>
         {isSaving ? (
           <EuiFlexItem grow={false}>
