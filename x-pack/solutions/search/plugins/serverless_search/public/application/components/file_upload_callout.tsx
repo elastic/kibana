@@ -23,7 +23,7 @@ export const FileUploadCallout = () => {
         defaultMessage: 'Upload your data from a file',
       })}
       size="s"
-      iconType="iInCircle"
+      iconType="info"
     >
       <p>
         <FormattedMessage

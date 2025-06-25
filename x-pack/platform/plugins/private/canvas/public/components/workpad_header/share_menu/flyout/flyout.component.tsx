@@ -203,7 +203,7 @@ export const ShareWebsiteFlyout: FC<Props> = ({
           <p>{strings.getStepsDescription()}</p>
         </EuiText>
         <EuiSpacer />
-        <EuiCallOut size="s" title={title} iconType="iInCircle" />
+        <EuiCallOut size="s" title={title} iconType="info" />
         <EuiSpacer />
         {warningText}
         <EuiSteps steps={steps(onDownload, onCopy)} />
