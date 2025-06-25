@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/presentation-controls",
-  "owner": "@elastic/kibana-presentation",
-  "group": "platform",
-  "visibility": "shared"
-}

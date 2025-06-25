@@ -18,7 +18,7 @@ import { ControlFetchContext } from '../../control_group/control_fetch';
 const mockEsqlQueryToOptions = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
 
-jest.mock('@kbn/presentation-controls', () => {
+jest.mock('@kbn/esql-utils', () => {
   const esqlQueryToOptions = () => mockEsqlQueryToOptions();
   esqlQueryToOptions.isSuccess = () => mockIsSuccess();
   return {

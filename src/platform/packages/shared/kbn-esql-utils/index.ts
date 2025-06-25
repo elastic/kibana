@@ -45,6 +45,7 @@ export {
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,
+  esqlQueryToOptions,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

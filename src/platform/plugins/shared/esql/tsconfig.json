@@ -36,7 +36,7 @@
     "@kbn/esql-types",
     "@kbn/licensing-plugin",
     "@kbn/projects-solutions-groups",
-    "@kbn/presentation-controls"
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

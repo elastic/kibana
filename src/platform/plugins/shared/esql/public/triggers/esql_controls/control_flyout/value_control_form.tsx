@@ -10,7 +10,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { esqlQueryToOptions } from '@kbn/presentation-controls';
+import { esqlQueryToOptions } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import {
   EuiComboBox,

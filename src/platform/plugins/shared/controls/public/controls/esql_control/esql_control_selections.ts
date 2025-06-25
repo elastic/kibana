@@ -15,7 +15,7 @@ import {
   ESQLVariableType,
 } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { esqlQueryToOptions } from '@kbn/presentation-controls';
+import { esqlQueryToOptions } from '@kbn/esql-utils';
 import { TimeRange } from '@kbn/es-query';
 import { dataService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
