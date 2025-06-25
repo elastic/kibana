@@ -9,22 +9,36 @@
 import type { RecommendedQuery } from '@kbn/esql-types';
 import type { SuggestionRawDefinition, GetColumnsByTypeFn } from '../types';
 import { getRecommendedQueries } from './templates';
+import { METADATA_FIELDS } from '../../shared/constants';
 
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<SuggestionRawDefinition[]> => {
-  const fieldSuggestions = await getFieldsByType('date', [], {
-    openSuggestions: true,
-  });
+  const [fieldSuggestions, textFieldSuggestions] = await Promise.all([
+    getFieldsByType(['date'], [], { openSuggestions: true }),
+    // get text fields separately to avoid mixing them with date fields
+    getFieldsByType(['text'], [], { openSuggestions: true }),
+  ]);
+
   let timeField = '';
+  let categorizationField: string | undefined = '';
+
   if (fieldSuggestions.length) {
     timeField =
       fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
       fieldSuggestions[0].label;
   }
 
-  const recommendedQueries = getRecommendedQueries({ fromCommand, timeField });
+  if (textFieldSuggestions.length) {
+    categorizationField = getCategorizationField(textFieldSuggestions.map((field) => field.label));
+  }
+
+  const recommendedQueries = getRecommendedQueries({
+    fromCommand,
+    timeField,
+    categorizationField,
+  });
 
   const suggestions: SuggestionRawDefinition[] = recommendedQueries.map((query) => {
     return {
@@ -51,7 +65,8 @@ export const mapRecommendedQueriesFromExtensions = (
     return {
       label: extension.name,
       text: extension.query,
-      detail: extension.description ?? '',
+      detail: extension.name ?? '',
+      ...(extension.description ? { documentation: { value: extension.description } } : {}),
       kind: 'Issue',
       sortText: 'D',
     };
@@ -82,7 +97,10 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
       return {
         label: recommendedQuery.name,
         text: `|${queryParts.slice(1).join('|')}`,
-        detail: recommendedQuery.description ?? '',
+        detail: recommendedQuery.name ?? '',
+        ...(recommendedQuery.description
+          ? { documentation: { value: recommendedQuery.description } }
+          : {}),
         kind: 'Issue',
         sortText: 'D',
       };
@@ -91,3 +109,32 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
 
   return recommendedQueriesTemplates;
 };
+
+/**
+ * This function returns the categorization field from the list of fields.
+ * It checks for the presence of 'message', 'error.message', or 'event.original' in that order.
+ * If none of these fields are present, it returns the first field from the list,
+ * Assumes text fields have been passed in the `fields` array.
+ *
+ * This function is a duplicate of the one in src/platform/packages/shared/kbn-aiops-utils.
+ * It is included here to avoid build errors due to bazel
+ *
+ * TODO: Remove this function once the bazel issue is resolved.
+ *
+ * @param fields, the list of fields to check
+ * @returns string | undefined, the categorization field if found, otherwise undefined
+ */
+
+export function getCategorizationField(fields: string[]): string | undefined {
+  const fieldPriority = ['message', 'error.message', 'event.original'];
+  const fieldSet = new Set(fields);
+  for (const field of fieldPriority) {
+    if (fieldSet.has(field)) {
+      return field;
+    }
+  }
+
+  // Filter out metadata fields
+  const filteredFields = fields.filter((field) => !METADATA_FIELDS.includes(field));
+  return filteredFields[0] ?? undefined;
+}

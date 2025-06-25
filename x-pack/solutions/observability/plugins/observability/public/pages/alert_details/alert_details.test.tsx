@@ -80,6 +80,17 @@ const useKibanaMock = useKibana as jest.Mock;
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
+const spacesUnsubscribeMock = jest.fn();
+const spacesSubscribeMock = jest.fn().mockReturnValue({ unsubscribe: spacesUnsubscribeMock });
+const mockSpaces = {
+  getActiveSpace$: jest.fn().mockReturnValue({
+    subscribe: spacesSubscribeMock,
+    pipe: () => ({
+      subscribe: spacesSubscribeMock,
+    }),
+  }),
+};
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -95,6 +106,7 @@ const mockKibana = () => {
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
       dashboard: {},
+      spaces: mockSpaces,
     },
   });
 };
@@ -192,6 +204,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeFalsy();
     expect(alertDetails.queryByTestId('overviewTab')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTab')).toBeTruthy();
+    expect(alertDetails.queryByTestId('relatedAlertsTab')).toBeTruthy();
   });
 
   it('should show Metadata tab', async () => {

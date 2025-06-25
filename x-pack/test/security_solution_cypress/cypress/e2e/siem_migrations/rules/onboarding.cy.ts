@@ -107,7 +107,13 @@ describe(
         selectMigrationConnector();
         openUploadRulesFlyout();
         uploadRules(SPLUNK_TEST_RULES);
+        cy.intercept({
+          url: '**/start',
+        }).as('startMigration');
         startMigrationFromFlyout();
+        cy.wait('@startMigration')
+          .its('request.body.settings')
+          .should('have.property', 'skip_prebuilt_rules_matching', false);
         cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
           cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
           cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);

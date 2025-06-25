@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -14,13 +16,33 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const supertest = getService('supertest');
 
+  function testExpectedTask(
+    id: string,
+    jobtype: string,
+    task: SearchHit<{ task: SerializedConcreteTaskInstance }>
+  ) {
+    expect(task._source?.task.taskType).to.eql('report:execute-scheduled');
+
+    const params = JSON.parse(task._source?.task.params ?? '');
+    expect(params.id).to.eql(id);
+    expect(params.jobtype).to.eql(jobtype);
+
+    expect(task._source?.task.apiKey).not.to.be(undefined);
+    expect(task._source?.task.schedule?.rrule).not.to.be(undefined);
+
+    expect(task._source?.task.schedule?.interval).to.be(undefined);
+  }
   describe('Security Roles and Privileges for Applications', () => {
+    const scheduledReportIds: string[] = [];
+    const scheduledReportTaskIds: string[] = [];
     before(async () => {
       await reportingAPI.initEcommerce();
     });
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
+      await reportingAPI.deleteScheduledReports(scheduledReportIds);
+      await reportingAPI.deleteTasks(scheduledReportTaskIds);
     });
 
     describe('Dashboard: Generate PDF report', () => {
@@ -159,6 +181,185 @@ export default function ({ getService }: FtrProviderContext) {
           reportingAPI.REPORTING_USER_PASSWORD
         );
         expect(res.status).to.eql(200);
+      });
+    });
+
+    describe('Dashboard: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'dashboard',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'dashboard',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
+      });
+    });
+
+    describe('Visualize: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
+      });
+    });
+
+    describe('Canvas: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'canvas',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'canvas',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'printable_pdf_v2', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
+      });
+    });
+
+    describe('Discover: Schedule CSV report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.scheduleCsv(
+          {
+            browserTimezone: 'UTC',
+            searchSource: {} as SerializedSearchSourceFields,
+            objectType: 'search',
+            title: 'test disallowed',
+            version: '7.14.0',
+          },
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.scheduleCsv(
+          {
+            browserTimezone: 'UTC',
+            title: 'allowed search',
+            objectType: 'search',
+            searchSource: {
+              version: true,
+              fields: [{ field: '*', include_unmapped: true }],
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            } as unknown as SerializedSearchSourceFields,
+            columns: [],
+            version: '7.13.0',
+          },
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReports(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
+        scheduledReportIds.push(res.body.job.id);
+
+        const taskResult = await reportingAPI.getTask(res.body.job.id);
+        expect(taskResult.status).to.eql(200);
+        testExpectedTask(res.body.job.id, 'csv_searchsource', taskResult.body);
+        scheduledReportTaskIds.push(res.body.job.id);
       });
     });
 

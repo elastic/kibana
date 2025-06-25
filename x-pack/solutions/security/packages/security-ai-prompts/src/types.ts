@@ -24,9 +24,9 @@ export interface Prompt {
 export type PromptArray = Array<{ promptId: string; prompt: string }>;
 
 export interface GetPromptArgs {
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   connector?: Connector;
-  connectorId: string;
+  connectorId?: string;
   localPrompts: Prompt[];
   model?: string;
   promptId: string;

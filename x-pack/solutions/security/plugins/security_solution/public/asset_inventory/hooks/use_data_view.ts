@@ -33,6 +33,7 @@ export const useDataView = (indexPattern?: string) => {
       return dataView;
     },
     {
+      retry: false,
       enabled: !!indexPattern,
     }
   );

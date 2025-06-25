@@ -324,6 +324,21 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date_range",
       },
+      "kibana.alert.updated_at": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
+      "kibana.alert.updated_by.user.id": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.alert.updated_by.user.name": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.url": Object {
         "array": false,
         "ignore_above": 2048,
