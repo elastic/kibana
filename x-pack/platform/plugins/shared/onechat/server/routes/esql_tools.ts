@@ -6,7 +6,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import { esqlToolProviderId } from '@kbn/onechat-common';
-import { v4 as uuidv4 } from 'uuid';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { EsqlToolCreateRequest, EsqlToolUpdateRequest } from '../../common/tools';
@@ -150,8 +149,8 @@ export function registerESQLToolsRoutes({
         validate: {
           request: {
             body: schema.object({
-              id: schema.maybe(schema.string()),
-              name: schema.string(),
+              id: schema.string(),
+              name: schema.maybe(schema.string()),
               description: schema.string(),
               query: schema.string(),
               params: schema.recordOf(
@@ -177,12 +176,11 @@ export function registerESQLToolsRoutes({
         }
         const { esql: esqlToolService } = getInternalServices();
         const client = await esqlToolService.getScopedClient({ request });
-        const toolid = request.body.id || uuidv4();
         const now = new Date();
 
         const tool: EsqlToolCreateRequest = {
-          id: toolid,
-          name: request.body.name,
+          id: request.body.id,
+          name: request.body.name || request.body.id,
           description: request.body.description,
           query: request.body.query,
           params: request.body.params || {},
