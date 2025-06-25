@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './related_dashboards/latest';
-export * from './page_attachment/latest';
-export * from './page_attachment/constants';
+export const PAGE_ATTACHMENT_TYPE = '.page';
