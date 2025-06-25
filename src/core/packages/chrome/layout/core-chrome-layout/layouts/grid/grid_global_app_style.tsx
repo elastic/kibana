@@ -23,9 +23,6 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     // height of the header banner
     --kbnHeaderBannerHeight: var(--kbn-layout--banner-height, 0px);
 
-    // height of the action menu in the header in serverless projects
-    --kbnProjectHeaderAppActionMenuHeight: ${euiTheme.base * 3}px;
-
     // the total height of all app-area headers
     --kbnAppHeadersOffset: 0px;
   }
@@ -62,12 +59,6 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   #kibana-body .euiDataGrid--fullScreen {
     height: calc(100vh - var(--kbnHeaderBannerHeight));
     top: var(--kbnHeaderBannerHeight);
-  }
-
-  // Set a body CSS variable for the app container to use - calculates the total
-  // height of all fixed headers + the sticky action menu toolbar
-  .kbnBody--hasProjectActionMenu {
-    --kbnAppHeadersOffset: var(--kbnProjectHeaderAppActionMenuHeight);
   }
 `;
 
