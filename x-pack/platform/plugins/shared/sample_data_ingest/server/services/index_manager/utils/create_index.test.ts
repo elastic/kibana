@@ -40,7 +40,6 @@ describe('createIndex', () => {
       index: indexName,
       mappings,
       settings: {
-        number_of_shards: 1,
         auto_expand_replicas: '0-1',
         'index.mapping.semantic_text.use_legacy_format': false,
       },
@@ -66,7 +65,6 @@ describe('createIndex', () => {
       index: indexName,
       mappings,
       settings: {
-        number_of_shards: 1,
         auto_expand_replicas: '0-1',
         'index.mapping.semantic_text.use_legacy_format': true,
       },

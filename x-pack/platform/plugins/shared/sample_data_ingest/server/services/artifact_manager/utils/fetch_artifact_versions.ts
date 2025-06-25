@@ -39,7 +39,7 @@ export const fetchArtifactVersions = async ({
 
       // 6 artifacts per minor stack version means we have a few decades before facing this problem
       if (result.ListBucketResult.IsTruncated?.includes('true')) {
-        return reject('bucket content is truncated, cannot retrieve all versions');
+        return reject(new Error('bucket content is truncated, cannot retrieve all versions'));
       }
 
       const record: ArtifactAvailableVersions = Object.values(DocumentationProduct).reduce(

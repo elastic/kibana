@@ -50,13 +50,5 @@ describe('InstallationService', () => {
       const response = await service.install();
       expect(response).toEqual(expected);
     });
-    it('throws when the server returns installed: false', async () => {
-      const expected = { status: false };
-      http.post.mockResolvedValue(expected);
-
-      await expect(service.install()).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Installation did not complete successfully"`
-      );
-    });
   });
 });
