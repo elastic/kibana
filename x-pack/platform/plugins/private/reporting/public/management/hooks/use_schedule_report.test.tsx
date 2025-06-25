@@ -40,7 +40,10 @@ describe('useScheduleReport', () => {
       result.current.mutate({ reportTypeId: 'printablePdfV2', jobParams: '' });
     });
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeTruthy();
+      expect(result.current.data).toBeDefined();
+    });
 
     expect(scheduleReportApi.scheduleReport).toHaveBeenCalledWith({
       http: mockHttp,

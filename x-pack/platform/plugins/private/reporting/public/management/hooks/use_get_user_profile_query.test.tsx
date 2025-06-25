@@ -42,7 +42,10 @@ describe('useGetUserProfileQuery', () => {
       { wrapper }
     );
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeTruthy();
+      expect(result.current.data).toBeDefined();
+    });
 
     expect(mockUserProfileService.getCurrent).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockProfile);

@@ -37,7 +37,10 @@ describe('useGetReportingHealthQuery', () => {
       wrapper,
     });
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBeTruthy();
+      expect(result.current.data).toBeDefined();
+    });
 
     expect(getReportingHealthModule.getReportingHealth).toHaveBeenCalledWith({
       http: mockHttpService,
