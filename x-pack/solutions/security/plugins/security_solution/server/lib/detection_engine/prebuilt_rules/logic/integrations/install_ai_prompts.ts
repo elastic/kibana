@@ -11,8 +11,9 @@ import {
 } from '../../../../../../common/detection_engine/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { findLatestPackageVersion } from './find_latest_package_version';
-
+import type { ConfigType } from '../../../../../config';
 export async function installSecurityAiPromptsPackage(
+  config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
   try {
