@@ -75,6 +75,7 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
+        'unifiedHistogram',
         ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);
