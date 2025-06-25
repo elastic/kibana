@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './group_alerts';
-export * from './types';
+export const ATTACK_DISCOVERY_MAX_OPEN_CASES = 20;
