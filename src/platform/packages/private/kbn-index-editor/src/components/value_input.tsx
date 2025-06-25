@@ -12,6 +12,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { validateCellValue } from '../validations';
 import { KibanaContextExtra } from '../types';
 
 interface ValueInputProps {
@@ -50,26 +51,8 @@ export const ValueInput = ({
   const validateValue = (val: string): string | undefined => {
     if (!columnType) return undefined;
 
-    let validation;
-    switch (columnType) {
-      case 'number':
-        validation = isNaN(Number(val))
-          ? i18n.translate('indexEditor.cellValueInput.validation.number', {
-              defaultMessage: 'Value must be a number',
-            })
-          : undefined;
-        break;
-      case 'boolean':
-        validation =
-          val !== 'true' && val !== 'false'
-            ? i18n.translate('indexEditor.cellValueInput.validation.boolean', {
-                defaultMessage: 'Value must be true or false',
-              })
-            : undefined;
-        break;
-      default:
-        validation = undefined;
-    }
+    const validation = validateCellValue(val, columnType);
+
     if (validation) {
       notifications.toasts.addDanger({
         title: validation,
