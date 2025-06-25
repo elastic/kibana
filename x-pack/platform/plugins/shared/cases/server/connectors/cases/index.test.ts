@@ -12,9 +12,10 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { attackDiscoveryAlerts } from './attack_discovery/index.mock';
-import { ATTACK_DISCOVERY_MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
-import type { AttackDiscoveryExpandedAlert } from './attack_discovery/types';
+import { attackDiscoveryAlerts } from './attack_discovery/group_alerts.mock';
+import { DEFAULT_MAX_OPEN_CASES } from './constants';
+import type { AttackDiscoveryExpandedAlert } from './attack_discovery';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES } from './attack_discovery';
 
 describe('getCasesConnectorType', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;

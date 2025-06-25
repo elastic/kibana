@@ -16,7 +16,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { CasesConnector } from './cases_connector';
-import { ATTACK_DISCOVERY_MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
+import { DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
@@ -38,7 +38,7 @@ import {
 } from './schema';
 import type { CasesClient } from '../../client';
 import { constructRequiredKibanaPrivileges } from './utils';
-import { groupAttackDiscoveryAlerts } from './attack_discovery';
+import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './attack_discovery';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
