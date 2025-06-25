@@ -72,23 +72,25 @@ export const recurringSummary = ({
     if (bymonth) {
       if (bymonth === 'weekday') {
         const nthWeekday = startDate ? getNthByWeekday(startDate) : schedule.bymonthweekday;
-      if (nthWeekday) {
-        const nth = nthWeekday.startsWith('-1') ? 0 : Number(nthWeekday[1]);
-        monthlySummary = RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT(toWeekdayName(nthWeekday))[nth];
-        monthlySummary = monthlySummary[0].toLocaleLowerCase() + monthlySummary.slice(1);
-      }} else if (bymonth === 'day') {
+        if (nthWeekday) {
+          const nth = nthWeekday.startsWith('-1') ? 0 : Number(nthWeekday[1]);
+          monthlySummary = RECURRING_SCHEDULE_FORM_WEEKDAY_SHORT(toWeekdayName(nthWeekday))[nth];
+          monthlySummary = monthlySummary[0].toLocaleLowerCase() + monthlySummary.slice(1);
+        }
+      } else if (bymonth === 'day') {
         const monthDay = startDate?.date() ?? schedule.bymonthday;
-      if (monthDay) {
-        monthlySummary = RECURRING_SCHEDULE_FORM_MONTHLY_BY_DAY_SUMMARY(monthDay);
-      }
+        if (monthDay) {
+          monthlySummary = RECURRING_SCHEDULE_FORM_MONTHLY_BY_DAY_SUMMARY(monthDay);
+        }
       }
     }
 
     // yearly
     const yearlyByMonthSummary = startDate
-    ?RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY(
-      monthDayDate(moment().month(startDate.month()).date(startDate.date()))
-    ): null;
+      ? RECURRING_SCHEDULE_FORM_YEARLY_BY_MONTH_SUMMARY(
+          monthDayDate(moment().month(startDate.month()).date(startDate.date()))
+        )
+      : null;
 
     const onSummary = dailyWithWeekdays
       ? dailyWeekdaySummary
@@ -107,20 +109,21 @@ export const recurringSummary = ({
       : null;
 
     let time: string | null = null;
-  if (showTime) {
-    const date =
-      startDate ??
-      (schedule.byhour && schedule.byminute
-        ? moment().hour(schedule.byhour).minute(schedule.byminute)
-        : null);
-    if (date) {
-      time = RECURRING_SCHEDULE_FORM_TIME_SUMMARY(date.format('HH:mm'));
+    if (showTime) {
+      const date =
+        startDate ??
+        (schedule.byhour && schedule.byminute
+          ? moment().hour(schedule.byhour).minute(schedule.byminute)
+          : null);
+      if (date) {
+        time = RECURRING_SCHEDULE_FORM_TIME_SUMMARY(date.format('HH:mm'));
+      }
     }
-  }const every = RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY(
+    const every = RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY(
       !dailyWithWeekdays ? frequencySummary : null,
       onSummary,
       untilSummary,
-    time
+      time
     ).trim();
 
     return every;
