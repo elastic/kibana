@@ -92,11 +92,7 @@ update_step_progress() {
   local PAYLOAD=${4:-}
   local data=""
 
-  MESSAGE=$(echo "$MESSAGE" | sed \
-    -e ':a;N;$!ba' \
-    -e 's/\\/\\\\/g' \
-    -e 's/"/\\"/g' \
-    -e 's/\n/\\n/g')
+  MESSAGE=$(printf "%s" "$MESSAGE" | base64 --wrap=0)
 
   if [ -z "$PAYLOAD" ]; then
     data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
