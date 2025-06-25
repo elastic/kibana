@@ -52,7 +52,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ conversationId }) => {
             <EuiTitle>
               <EuiSkeletonTitle size="m" isLoading={conversationId !== undefined && isConvLoading}>
                 <h3 className={conversationTitleClass}>
-                  {conversation?.title || chatCommonLabels.newConversationLabel}
+                  {conversation?.title || chatCommonLabels.chat.conversations.newConversationLabel}
                 </h3>
               </EuiSkeletonTitle>
             </EuiTitle>
