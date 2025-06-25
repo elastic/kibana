@@ -10,25 +10,23 @@ import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import { useUrlQuery } from './use_url_query';
-import { decodeMultipleRisonParams, encodeRisonParam } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import {
+  FLYOUT_PARAM_KEY,
+  QUERY_PARAM_KEY,
+  decodeMultipleRisonParams,
+} from '@kbn/cloud-security-posture/src/utils/query_utils';
 
-// Mock the query utils
 jest.mock('@kbn/cloud-security-posture/src/utils/query_utils', () => ({
-  encodeRisonParam: jest.fn(() => 'flyout=mocked-flyout-string'),
   decodeMultipleRisonParams: jest.fn(() => ({})),
 }));
 
 jest.mock('@kbn/cloud-security-posture', () => ({
-  encodeQuery: jest.fn(() => 'cspq=mocked-cspq-string'),
+  encodeQuery: jest.fn(() => `${QUERY_PARAM_KEY}=mocked-cspq-string`),
 }));
 
-const mockEncodeRisonParam = encodeRisonParam as jest.MockedFunction<typeof encodeRisonParam>;
-const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as jest.MockedFunction<typeof decodeMultipleRisonParams>;
-
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const history = createMemoryHistory({ initialEntries: ['/'] });
-  return <Router history={history}>{children}</Router>;
-};
+const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as jest.MockedFunction<
+  typeof decodeMultipleRisonParams
+>;
 
 const createWrapper = (initialEntries: string[] = ['/']) => {
   const history = createMemoryHistory({ initialEntries });
@@ -64,7 +62,10 @@ describe('useUrlQuery', () => {
     const wrapper = createWrapper(['/test?search=something']);
     renderHook(() => useUrlQuery(defaultQuery), { wrapper });
 
-    expect(mockDecodeMultipleRisonParams).toHaveBeenCalledWith('?search=something', ['cspq', 'flyout']);
+    expect(mockDecodeMultipleRisonParams).toHaveBeenCalledWith('?search=something', [
+      QUERY_PARAM_KEY,
+      FLYOUT_PARAM_KEY,
+    ]);
   });
 
   it('should have setUrlQuery function available', () => {
@@ -85,7 +86,7 @@ describe('useUrlQuery', () => {
     const wrapper = createWrapper(['/']);
     const { result } = renderHook(() => useUrlQuery(defaultQuery), { wrapper });
 
-    // The implementation should use encodeQuery for cspq and encodeRisonParam for flyout
+    // The implementation should use encodeQuery for query param key and encodeRisonParam for flyout param key
     // This ensures proper rison format instead of URL-encoded format
     expect(result.current.setUrlQuery).toBeDefined();
   });

@@ -8,9 +8,13 @@ import { useEffect, useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { encodeQuery } from '@kbn/cloud-security-posture';
 import {
+  QUERY_PARAM_KEY,
+  FLYOUT_PARAM_KEY,
   decodeMultipleRisonParams,
   encodeRisonParam,
 } from '@kbn/cloud-security-posture/src/utils/query_utils';
+
+const URL_PARAM_KEYS = [QUERY_PARAM_KEY, FLYOUT_PARAM_KEY];
 
 /**
  * @description uses 'rison' to encode/decode a url query
@@ -22,21 +26,21 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
   const { search, key } = useLocation();
 
   const urlQuery = useMemo(() => {
-    const decodedParams = decodeMultipleRisonParams<Record<string, unknown>>(search, [
-      'cspq',
-      'flyout',
-    ]);
+    const decodedParams = decodeMultipleRisonParams<Record<string, unknown>>(
+      search,
+      URL_PARAM_KEYS
+    );
 
-    // Extract cspq parameters (the main query parameters)
-    const cspqParams = (decodedParams.cspq as Partial<T>) || {};
+    // Extract query parameters (the main query parameters)
+    const queryParams = (decodedParams[QUERY_PARAM_KEY] as Partial<T>) || {};
 
     // Extract flyout parameters
-    const flyoutParams = (decodedParams.flyout as Record<string, unknown>) || {};
+    const flyoutParams = (decodedParams[FLYOUT_PARAM_KEY] as Record<string, unknown>) || {};
 
     // Keep parameters separate to avoid conflicts
     return {
       ...getDefaultQuery(),
-      ...cspqParams,
+      ...queryParams,
       // Keep flyout parameters in a separate namespace
       flyout: flyoutParams,
     };
@@ -46,30 +50,14 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
     (query: Partial<T>) => {
       const mergedQuery = { ...getDefaultQuery(), ...urlQuery, ...query };
 
-      // Separate flyout parameters from the flyout namespace and direct flyout params
-      const { flyout, flyoutId, entityId, entityType, entityName, ...cspqParams } = mergedQuery;
-      
-      // Combine flyout parameters from both sources
-      const allFlyoutParams = {
-        ...(flyout as Record<string, unknown> || {}),
-        ...(flyoutId && { flyoutId }),
-        ...(entityId && { entityId }),
-        ...(entityType && { entityType }),
-        ...(entityName && { entityName }),
-      };
+      const { flyout, ...queryParams } = mergedQuery;
 
-      // Encode cspq parameters using the original encodeQuery function
-      const cspqSearch = encodeQuery(cspqParams);
+      // Build search string components
+      const queryParamsSearch = encodeQuery(queryParams);
+      const flyoutSearch = buildFlyoutSearchString(flyout);
 
-      // Build flyout parameters if they exist
-      let flyoutSearch = '';
-      if (Object.keys(allFlyoutParams).length > 0) {
-        flyoutSearch = encodeRisonParam('flyout', allFlyoutParams) || '';
-      }
-
-      // Combine search parameters
-      const searchParts = [cspqSearch, flyoutSearch].filter(Boolean);
-      const finalSearch = searchParts.join('&');
+      // Combine and set final search string
+      const finalSearch = combineSearchParts([queryParamsSearch, flyoutSearch]);
 
       push({
         search: finalSearch,
@@ -91,3 +79,17 @@ export const useUrlQuery = <T extends Record<string, unknown>>(getDefaultQuery: 
     setUrlQuery,
   };
 };
+
+// Helper function to build flyout search string
+function buildFlyoutSearchString(flyoutParams: Record<string, unknown>): string {
+  if (Object.keys(flyoutParams).length === 0) {
+    return '';
+  }
+
+  return encodeRisonParam(FLYOUT_PARAM_KEY, flyoutParams) || '';
+}
+
+// Helper function to combine search parts
+function combineSearchParts(searchParts: Array<string | undefined>): string {
+  return searchParts.filter(Boolean).join('&');
+}
