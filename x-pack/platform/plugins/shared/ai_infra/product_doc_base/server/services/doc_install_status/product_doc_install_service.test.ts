@@ -11,6 +11,7 @@ import type { ProductDocInstallStatusAttributes as TypeAttributes } from '../../
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ProductDocInstallClient } from './product_doc_install_service';
 
+const inferenceId = 'inferenceId';
 const createObj = (attrs: TypeAttributes): SavedObjectsFindResult<TypeAttributes> => {
   return {
     id: attrs.product_name,
@@ -50,7 +51,7 @@ describe('ProductDocInstallClient', () => {
         page: 1,
       });
 
-      const installStatus = await service.getInstallationStatus();
+      const installStatus = await service.getInstallationStatus({ inferenceId });
 
       expect(Object.keys(installStatus).sort()).toEqual(Object.keys(DocumentationProduct).sort());
       expect(installStatus.kibana).toEqual({

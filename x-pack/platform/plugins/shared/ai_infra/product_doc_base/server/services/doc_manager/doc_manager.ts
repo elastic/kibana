@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { CoreAuditService } from '@kbn/core/server';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { InstallationStatus } from '../../../common/install_status';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
@@ -27,6 +28,8 @@ import type {
   DocUninstallOptions,
   DocUpdateOptions,
 } from './types';
+import { INSTALL_ALL_TASK_ID_E5 } from '../../tasks/install_all';
+import { isDefaultElserInferenceId } from '../../tasks/utils';
 
 const TEN_MIN_IN_MS = 10 * 60 * 1000;
 
@@ -63,9 +66,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async install(options: DocInstallOptions = {}): Promise<void> {
-    const { request, force = false, wait = false, inferenceId } = options;
+    const { request, force = false, wait = false, inferenceId: inferenceIdParam } = options;
+    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 
-    const { status } = await this.getStatus();
+    const { status } = await this.getStatus({ inferenceId });
     if (!force && status === 'installed') {
       return;
     }
@@ -105,7 +109,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async update(options: DocUpdateOptions = {}): Promise<void> {
-    const { request, wait = false, inferenceId } = options;
+    const { request, wait = false, inferenceId: inferenceIdParam } = options;
+    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 
     const taskId = await scheduleEnsureUpToDateTask({
       taskManager: this.taskManager,
@@ -137,7 +142,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
   }
 
   async uninstall(options: DocUninstallOptions = {}): Promise<void> {
-    const { request, wait = false, inferenceId } = options;
+    const { request, wait = false, inferenceId: inferenceIdParam } = options;
+    const inferenceId = inferenceIdParam ?? defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL;
 
     const taskId = await scheduleUninstallAllTask({
       taskManager: this.taskManager,
@@ -166,9 +172,10 @@ export class DocumentationManager implements DocumentationManagerAPI {
     }
   }
 
-  async getStatus({ inferenceId }: { inferenceId?: string } = {}): Promise<DocGetStatusResponse> {
-    const taskId =
-      inferenceId === defaultInferenceEndpoints.ELSER ? INSTALL_ALL_TASK_ID : INSTALL_ALL_TASK_ID;
+  async getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse> {
+    const taskId = isDefaultElserInferenceId(inferenceId)
+      ? INSTALL_ALL_TASK_ID
+      : INSTALL_ALL_TASK_ID_E5;
     const taskStatus = await getTaskStatus({
       taskManager: this.taskManager,
       taskId,
@@ -180,7 +187,7 @@ export class DocumentationManager implements DocumentationManagerAPI {
       }
     }
 
-    const installStatus = await this.docInstallClient.getInstallationStatus();
+    const installStatus = await this.docInstallClient.getInstallationStatus({ inferenceId });
     const overallStatus = getOverallStatus(Object.values(installStatus).map((v) => v.status));
     return { status: overallStatus, installStatus };
   }

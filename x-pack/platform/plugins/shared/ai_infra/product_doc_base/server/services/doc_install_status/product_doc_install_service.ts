@@ -19,7 +19,11 @@ export class ProductDocInstallClient {
     this.soClient = soClient;
   }
 
-  async getInstallationStatus(): Promise<Record<ProductName, ProductInstallState>> {
+  async getInstallationStatus({
+    inferenceId,
+  }: {
+    inferenceId?: string;
+  }): Promise<Record<ProductName, ProductInstallState>> {
     const response = await this.soClient.find<TypeAttributes>({
       type: typeName,
       perPage: 100,

@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
@@ -45,11 +46,12 @@ export const registerInstallationRoutes = ({
     },
     async (ctx, req, res) => {
       const { installClient, documentationManager } = getServices();
+      const inferenceId = req.body?.inferenceId ?? defaultInferenceEndpoints.ELSER;
       const installStatus = await installClient.getInstallationStatus({
-        inferenceId: req.body?.inferenceId,
+        inferenceId,
       });
       const { status: overallStatus } = await documentationManager.getStatus({
-        inferenceId: req.body?.inferenceId,
+        inferenceId,
       });
 
       return res.ok<InstallationStatusResponse>({
@@ -82,15 +84,19 @@ export const registerInstallationRoutes = ({
     async (ctx, req, res) => {
       const { documentationManager } = getServices();
 
+      const inferenceId = req.body?.inferenceId ?? defaultInferenceEndpoints.ELSER;
+
       await documentationManager.install({
         request: req,
         force: false,
         wait: true,
-        inferenceId: req.body?.inferenceId,
+        inferenceId,
       });
 
       // check status after installation in case of failure
-      const { status, installStatus } = await documentationManager.getStatus();
+      const { status, installStatus } = await documentationManager.getStatus({
+        inferenceId,
+      });
 
       let failureReason = null;
       if (status === 'error' && installStatus) {

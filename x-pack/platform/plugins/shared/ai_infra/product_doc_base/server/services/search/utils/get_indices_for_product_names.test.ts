@@ -19,4 +19,10 @@ describe('getIndicesForProductNames', () => {
       getProductDocIndexName('elasticsearch'),
     ]);
   });
+  it('returns the index pattern when inferenceId is specified', () => {
+    expect(getIndicesForProductNames(['kibana', 'elasticsearch'], 'inferenceId')).toEqual([
+      getProductDocIndexName('kibana', 'inferenceId'),
+      getProductDocIndexName('elasticsearch', 'inferenceId'),
+    ]);
+  });
 });

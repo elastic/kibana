@@ -30,8 +30,9 @@ export interface DocumentationManagerAPI {
   uninstall(options?: DocUninstallOptions): Promise<void>;
   /**
    * Returns the overall installation status of the documentation.
+   * @param inferenceId - The inference ID to get the status for.
    */
-  getStatus(): Promise<DocGetStatusResponse>;
+  getStatus({ inferenceId }: { inferenceId: string }): Promise<DocGetStatusResponse>;
 }
 
 /**

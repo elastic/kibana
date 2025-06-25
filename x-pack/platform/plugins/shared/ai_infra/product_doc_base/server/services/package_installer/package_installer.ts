@@ -89,7 +89,7 @@ export class PackageInstaller {
       fetchArtifactVersions({
         artifactRepositoryUrl: this.artifactRepositoryUrl,
       }),
-      this.productDocClient.getInstallationStatus(),
+      this.productDocClient.getInstallationStatus({ inferenceId }),
     ]);
 
     const toUpdate: Array<{
