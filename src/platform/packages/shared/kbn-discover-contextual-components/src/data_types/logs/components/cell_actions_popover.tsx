@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -58,6 +59,13 @@ interface CellActionsPopoverProps {
   }) => ReactElement;
 }
 
+const infraRoutes = {
+  overview: {
+    href: 'metrics/entity/Kubernetes/Overview?dashboardId=kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+    label: 'Kubernetes Overview',
+  },
+};
+
 export function CellActionsPopover({
   onFilter,
   property,
@@ -80,6 +88,11 @@ export function CellActionsPopover({
     onClickAriaLabel: openCellActionPopoverAriaText,
     'data-test-subj': `dataTableCellActionsPopover_${property}`,
   };
+
+  const infraProps =
+    property in infraRoutes
+      ? infraRoutes[property as keyof typeof infraRoutes]
+      : infraRoutes.overview;
 
   return (
     <EuiPopover
@@ -145,6 +158,9 @@ export function CellActionsPopover({
               {filterOutText}
             </EuiButtonEmpty>
           </EuiFlexGroup>
+          <EuiButton href={infraProps.href} size="s" fill>
+            Go to {infraProps.label} dashboard
+          </EuiButton>
         </EuiPopoverFooter>
       ) : null}
       <EuiPopoverFooter>

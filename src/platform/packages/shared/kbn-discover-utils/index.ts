@@ -32,6 +32,7 @@ export {
   convertValueToString,
   createLogsContextService,
   createTracesContextService,
+  createMetricsContextService,
   createApmErrorsContextService,
   createDegradedDocsControl,
   createStacktraceControl,
@@ -62,7 +63,12 @@ export {
   LogLevelBadge,
 } from './src';
 
-export type { LogsContextService, TracesContextService, ApmErrorsContextService } from './src';
+export type {
+  LogsContextService,
+  TracesContextService,
+  ApmErrorsContextService,
+  MetricsContextService,
+} from './src';
 
 export * from './src/types';
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MetricsContextService } from '@kbn/discover-utils';
 import {
   createLogsContextService,
   type LogsContextService,
@@ -14,6 +15,7 @@ import {
   type TracesContextService,
   createApmErrorsContextService,
   type ApmErrorsContextService,
+  createMetricsContextService,
 } from '@kbn/discover-utils';
 
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -38,6 +40,7 @@ export interface ProfileProviderServices extends DiscoverServices {
   logsContextService: LogsContextService;
   tracesContextService: TracesContextService;
   apmErrorsContextService: ApmErrorsContextService;
+  metricsContextService: MetricsContextService;
 }
 
 /**
@@ -57,6 +60,9 @@ export const createProfileProviderServices = async (
       apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
     apmErrorsContextService: await createApmErrorsContextService({
+      apmSourcesAccess: discoverServices.apmSourcesAccess,
+    }),
+    metricsContextService: await createMetricsContextService({
       apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
   };
