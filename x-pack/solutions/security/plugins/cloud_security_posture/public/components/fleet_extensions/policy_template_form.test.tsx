@@ -1640,6 +1640,8 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1687,6 +1689,8 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1733,6 +1737,8 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId:
+              'cloud_connector_cspm:dXMtZWFzdC0xLmF3cy5zdGFnaW5nLmZvdW5kaXQubm86NDQzJDYyMjExNzI5MDhjZTQ0YmE5YWNkOGFmN2NlYmUyYmVjJGZmYmUyNDc2NGFkNTQwODJhZTkyYjU1NDQ0ZDI3NzA5',
             deploymentUrl: 'https://cloud.elastic.co/deployments/bfdad4ef99a24212a06d387593686d63',
             isCloudEnabled: true,
             isServerlessEnabled: false,
@@ -1780,6 +1786,7 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             deploymentUrl: undefined,
             isCloudEnabled: true,
             isServerlessEnabled: true,
@@ -1831,6 +1838,7 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             deploymentUrl: undefined,
             isCloudEnabled: true,
             isServerlessEnabled: true,
@@ -1882,6 +1890,7 @@ describe('<CspPolicyTemplateForm />', () => {
       jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
         services: {
           cloud: {
+            cloudId: undefined,
             deploymentUrl: undefined,
             isCloudEnabled: true,
             isServerlessEnabled: true,

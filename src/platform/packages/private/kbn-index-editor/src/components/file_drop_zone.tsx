@@ -10,12 +10,34 @@
 import { EuiLoadingSpinner, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
-import React, { PropsWithChildren, useCallback, type FC } from 'react';
+import React, { type FC, PropsWithChildren, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
 
-export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
+const acceptedFiles = ['.csv'];
+
+export interface FileSelectorContextType {
+  onFileSelectorClick: () => void;
+}
+
+export const FileSelectorContext = React.createContext<FileSelectorContextType>({
+  onFileSelectorClick: () => null,
+});
+
+export const useFileSelectorContext = (): FileSelectorContextType => {
+  const context = React.useContext(FileSelectorContext);
+  if (!context) {
+    throw new Error('useFileSelectorContext must be used within a FileSelectorProvider');
+  }
+  return context;
+};
+
+export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
+  children,
+  noResults,
+}) => {
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
   const isAnalyzing =
@@ -33,15 +55,21 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     [fileUploadManager]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: (acceptedFiles) => {
-      onFilesSelected(acceptedFiles);
-    },
-    accept: ['.csv'],
+  const { getRootProps, getInputProps, isDragActive, inputRef } = useDropzone({
+    onDrop: onFilesSelected,
+    accept: acceptedFiles,
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
   });
+
+  const onFileSelectorClick = useCallback(() => {
+    // Clear the input value to allow re-selecting the same file
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+    inputRef.current?.click();
+  }, [inputRef]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -75,7 +103,7 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
         }}
       >
         <EuiLoadingSpinner size="xl" />
-        <p>
+        <div>
           {isAnalyzing ? (
             <FormattedMessage
               id="indexEditor.fileUpload.analyzingIndicator"
@@ -88,7 +116,7 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
               defaultMessage={'Uploading...'}
             />
           ) : null}
-        </p>
+        </div>
       </div>
     </div>
   );
@@ -98,20 +126,22 @@ export const FileDropzone: FC<PropsWithChildren> = ({ children }) => {
     filesStatus.length > 0 &&
     uploadStatus.overallImportStatus !== STATUS.COMPLETED;
 
-  const content = showFilePreview ? (
-    <div css={overlayBase}>
-      <FilesPreview />
-    </div>
-  ) : (
-    children
-  );
+  let content: React.ReactNode = children;
+
+  if (noResults && !showFilePreview) {
+    content = <EmptyPrompt />;
+  } else if (showFilePreview) {
+    content = <FilesPreview />;
+  }
 
   return (
-    <div {...getRootProps()}>
-      {isDragActive ? <div css={overlayDraggingFile} /> : null}
-      {isUploading || isAnalyzing ? loadingIndicator : null}
-      <input {...getInputProps()} />
-      {content}
-    </div>
+    <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
+      <div {...getRootProps({ css: { height: '100%' } })}>
+        {isDragActive ? <div css={overlayDraggingFile} /> : null}
+        {isUploading || isAnalyzing ? loadingIndicator : null}
+        <input {...getInputProps()} />
+        {content}
+      </div>
+    </FileSelectorContext.Provider>
   );
 };

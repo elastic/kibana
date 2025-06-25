@@ -19,28 +19,7 @@ export const PRIVILEGED_MONITOR_USERS_INDEX_MAPPING: MappingProperties = {
   'user.name': {
     type: 'keyword',
   },
-  'labels.is_privileged': {
-    type: 'boolean',
-  },
-};
-
-export const PRIVILEGED_MONITOR_GROUPS_INDEX_MAPPING: MappingProperties = {
-  'event.ingested': {
-    type: 'date',
-  },
-  '@timestamp': {
-    type: 'date',
-  },
-  'group.name': {
-    type: 'keyword',
-  },
-  indexPattern: {
-    type: 'keyword',
-  },
-  nameMatcher: {
-    type: 'keyword',
-  },
-  'labels.is_privileged': {
+  'user.is_privileged': {
     type: 'boolean',
   },
 };

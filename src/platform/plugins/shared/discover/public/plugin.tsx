@@ -26,7 +26,6 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { registerIndexEditorActions } from '@kbn/index-editor';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -43,6 +42,7 @@ import { defaultCustomizationContext } from './customizations/defaults';
 import {
   SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
   ACTION_VIEW_SAVED_SEARCH,
+  LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
@@ -244,18 +244,6 @@ export class DiscoverPlugin
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
-    /** Async register the index editor UI actions */
-    if (plugins.share && plugins.fileUpload) {
-      registerIndexEditorActions({
-        data: plugins.data,
-        coreStart: core,
-        share: plugins.share,
-        uiActions: plugins.uiActions,
-        fieldFormats: plugins.fieldFormats,
-        fileUpload: plugins.fileUpload,
-      });
-    }
-
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
@@ -437,6 +425,21 @@ export class DiscoverPlugin
       ]);
 
       return getSearchEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
+
+    // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
+    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
+      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+        await Promise.all([
+          getStartServices(),
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+      return getLegacyLogStreamEmbeddableFactory({
         startServices,
         discoverServices,
       });
