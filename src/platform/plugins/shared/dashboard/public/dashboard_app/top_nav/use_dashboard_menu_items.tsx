@@ -116,6 +116,7 @@ export const useDashboardMenuItems = ({
   /**
    * Register all of the top nav configs that can be used by dashboard.
    */
+
   const menuItems = useMemo(() => {
     return {
       fullScreen: {
