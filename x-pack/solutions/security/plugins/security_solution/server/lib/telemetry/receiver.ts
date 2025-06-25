@@ -54,6 +54,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
@@ -217,6 +219,13 @@ export interface ITelemetryReceiver {
       SearchResponse<RuleSearchResult, Record<string, AggregationsAggregate>>,
       unknown
     >
+  >;
+
+  fetchResponseActionsRules(
+    executeFrom: string,
+    executeTo: string
+  ): Promise<
+    TransportResult<SearchResponse<unknown, Record<string, AggregationsAggregate>>, unknown>
   >;
 
   fetchDetectionExceptionList(
@@ -747,6 +756,78 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       },
     };
     return this.esClient().search<RuleSearchResult>(query, { meta: true });
+  }
+
+  /**
+   * Find elastic rules SOs which are the rules that have immutable set to true and are of a particular rule type
+   * @returns custom elastic rules SOs with response actions enabled
+   */
+  public async fetchResponseActionsRules(executeFrom: string, executeTo: string) {
+    const query: SearchRequest = {
+      index: `${this.getIndexForType?.(RULE_SAVED_OBJECT_TYPE)}`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      from: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                type: 'alert',
+              },
+            },
+            {
+              term: {
+                'alert.params.immutable': {
+                  value: false,
+                },
+              },
+            },
+            {
+              term: {
+                'alert.enabled': {
+                  value: true,
+                },
+              },
+            },
+            {
+              terms: {
+                'alert.consumer': ['siem', 'securitySolution'],
+              },
+            },
+            {
+              terms: {
+                'alert.params.responseActions.actionTypeId': ['.endpoint', '.osquery'],
+              },
+            },
+            {
+              range: {
+                'alert.updatedAt': {
+                  gte: executeFrom,
+                  lte: executeTo,
+                },
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        {
+          'alert.updatedAt': {
+            order: 'desc',
+          },
+        },
+      ],
+      aggs: {
+        actionTypes: {
+          terms: {
+            field: 'alert.params.responseActions.actionTypeId',
+          },
+        },
+      },
+    };
+
+    return this.esClient().search<unknown>(query, { meta: true });
   }
 
   public async fetchDetectionExceptionList(listId: string, ruleVersion: number) {

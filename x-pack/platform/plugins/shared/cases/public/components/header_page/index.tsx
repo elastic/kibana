@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 
 import { Title } from './title';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { IncrementalIdText } from '../incremental_id';
 
 interface HeaderProps {
   border?: boolean;
@@ -22,6 +23,7 @@ export interface HeaderPageProps extends HeaderProps {
   children?: React.ReactNode;
   title: string | React.ReactNode;
   titleNode?: React.ReactElement;
+  incrementalId?: number | null;
   'data-test-subj'?: string;
 }
 
@@ -43,14 +45,18 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   isLoading,
   title,
   titleNode,
+  incrementalId,
   'data-test-subj': dataTestSubj,
 }) => {
-  const { releasePhase } = useCasesContext();
+  const { releasePhase, settings } = useCasesContext();
   const { euiTheme } = useEuiTheme();
 
   return (
     <header css={getHeaderCss(euiTheme, border)} data-test-subj={dataTestSubj}>
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        {settings.displayIncrementalCaseId && incrementalId && (
+          <IncrementalIdText incrementalId={incrementalId} />
+        )}
         <EuiFlexItem
           css={css`
             overflow: hidden;

@@ -20,6 +20,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
+import type { ExperimentalFeatures } from '../../../common';
 import type { ITelemetryReceiver } from './receiver';
 import { copyAllowlistedFields, filterList } from './filterlists';
 import { createTelemetryTaskConfigs } from './tasks';
@@ -100,6 +101,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
   private readonly logger: TelemetryLogger;
+  private readonly experimentalFeatures: ExperimentalFeatures;
   private readonly stop$ = new Subject<void>();
   private maxQueueSize = telemetryConfiguration.telemetry_max_buffer_size;
   private telemetryStart?: TelemetryPluginStart;
@@ -117,7 +119,8 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   private asyncTelemetrySender?: IAsyncTelemetryEventsSender;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, experimentalFeatures: ExperimentalFeatures) {
+    this.experimentalFeatures = experimentalFeatures;
     this.logger = newTelemetryLogger(logger.get('telemetry_events.sender'));
   }
 
@@ -132,7 +135,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     this.telemetryUsageCounter = telemetryUsageCounter;
     if (taskManager) {
       const taskMetricsService = new TaskMetricsService(this.logger, this);
-      this.telemetryTasks = createTelemetryTaskConfigs().map(
+      this.telemetryTasks = createTelemetryTaskConfigs(this.experimentalFeatures).map(
         (config: SecurityTelemetryTaskConfig) => {
           const task = new SecurityTelemetryTask(
             config,
