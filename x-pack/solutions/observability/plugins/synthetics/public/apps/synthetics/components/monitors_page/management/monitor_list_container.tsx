@@ -40,7 +40,7 @@ export const MonitorListContainer = ({
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
   useSyntheticsPageReady({
-    meta: { description: '[ttfmp_services] Synthetics monitor list has loaded' },
+    meta: { description: '[ttfmp_synthetics] Synthetics monitor list has loaded' },
   });
 
   // TODO: Display inline errors in the management table

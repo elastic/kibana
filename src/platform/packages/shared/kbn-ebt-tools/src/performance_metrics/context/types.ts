@@ -10,7 +10,16 @@
 type ApmPageId = 'services' | 'traces' | 'dependencies';
 type InfraPageId = 'hosts';
 type OnboardingPageId = 'onboarding';
+type AlertingPageId = 'alerts';
+type SloPageId = 'slos';
+type SyntheticsPageId = 'synthetics';
 
-export type Key = `${ApmPageId}` | `${InfraPageId}` | `${OnboardingPageId}`;
+export type Key =
+  | `${ApmPageId}`
+  | `${InfraPageId}`
+  | `${OnboardingPageId}`
+  | `${AlertingPageId}`
+  | `${SloPageId}`
+  | `${SyntheticsPageId}`;
 
 export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;

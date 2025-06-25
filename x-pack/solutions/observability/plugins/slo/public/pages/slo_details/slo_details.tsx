@@ -109,7 +109,7 @@ export function SloDetailsPage() {
     isReady: !isLoading && slo !== undefined,
     isRefreshing: isRefetching,
     meta: {
-      description: '[ttfmp_services] The SLO details page has loaded and SLO data is present',
+      description: '[ttfmp_slos] The SLO details page has loaded and SLO data is present',
     },
   });
 
